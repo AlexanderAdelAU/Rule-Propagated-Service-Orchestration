@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings>
+	<ReactorSettings>
+		<maxQueue>50</maxQueue>
+		<poolSize>4</poolSize>
+	</ReactorSettings>
+	<MonitorSettings>
+		<monitorIncomingEvents>true</monitorIncomingEvents>
+		 <!-- 
+            enableCompletedJoinPriority:
+            - true (default): OPTIMIZED mode - Process any complete join immediately 
+                             to prevent head-of-line blocking
+            - false: SEQUENTIAL mode - Process joins strictly in sequence ID order
+                    (original behavior, may cause blocking)
+        -->
+        <enableCompletedJoinPriority>true</enableCompletedJoinPriority>
+        <autoInitializeDatabase>false</autoInitializeDatabase>
+   
+	</MonitorSettings>
+</settings>

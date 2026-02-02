@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<payload xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="payload.xsd">
+	<header>
+		<type>process</type>
+		<ruleBaseVersion>0</ruleBaseVersion>
+		<ruleBaseCommitment>0</ruleBaseCommitment>
+		<sequenceId>0</sequenceId>
+		<priortiseSID>0</priortiseSID>
+		<monitorIncomingEvents>true</monitorIncomingEvents>
+		<activityCount>0</activityCount>
+		<status>0</status>
+	</header>
+
+	<service>
+		<serviceName>null</serviceName>
+		<operation>null</operation>
+	</service>
+	
+	<joinAttribute>
+		<attributeName>0</attributeName>
+		<attributeValue>0</attributeValue>
+		<notBefore>0</notBefore>
+		<notAfter>0</notAfter>
+	</joinAttribute>
+	
+	<monitorData>
+		<callingService>0</callingService>
+		<eventArrivalTime>0</eventArrivalTime>
+		<taskArrivalTime>0</taskArrivalTime>
+		<processStartTime>0</processStartTime>
+		<processElapsedTime>0</processElapsedTime>
+		<lostEvents>0</lostEvents>
+	</monitorData>
+</payload>

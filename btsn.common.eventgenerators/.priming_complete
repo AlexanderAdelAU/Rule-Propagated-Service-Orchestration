@@ -1,0 +1,10 @@
+PRIMING_COMPLETE
+Completed: 2025-10-23 21:39:05.771
+Duration: 6829ms
+Service: TriageService:processTriageAssessment
+Channel: 192.168.1.152:1070
+Tokens: 6
+Delay: 1000ms
+PID: 8484
+Expected_Duration: 6000ms
+Actual_Duration: 6829ms

@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Triage_Monitor_Collector_Project" default="load-services" basedir=".">
+	<description>
+        Triage and Monitor Collector Services - Performance Collection Workflow for Healthcare
+    </description>
+
+	<!-- =================================== -->
+	<!-- PROPERTIES SECTION                 -->
+	<!-- =================================== -->
+
+	<!-- EVENT GENERATOR PARAMETERS -->
+	<property name="rule.version" value="v001" />
+	<property name="process.name" value="healthcare/Triage_Collector" />
+	<property name="service.operation" value="collectAllData" />
+	<property name="collection.delay.seconds" value="3" />
+	
+	<!-- Single version or comma-separated multiple versions -->
+	<property name="query.version" value="v001,v002,v003" />
+	
+	<!-- Sequence IDs for collectors -->
+	<property name="sequence.id.triage" value="100000" />
+	
+	<property name="no.exit" value="false" />
+
+	<!-- Base directories -->
+	<property name="build.file.dir" location="." />
+	<property name="healthcare.root.dir" location="../" />
+	
+	<echo message="Root directory ${healthcare.root.dir}"/>
+
+	<!-- Common project directories -->
+	<property name="common.project.dir" location="${healthcare.root.dir}/btsn.common" />
+	<property name="lib.dir" location="${common.project.dir}/lib" />
+	<property name="class.dir" location="${common.project.dir}/bin" />
+	<property name="common.src.dir" location="${common.project.dir}/src" />
+
+	<!-- Event Generators project (sibling to btsn.common - required for relative path resolution) -->
+	<property name="generator.project.dir" location="${healthcare.root.dir}/btsn.common.eventgenerators" />
+	<property name="generator.src.dir" location="${generator.project.dir}/src" />
+	<property name="generator.bin.dir" location="${generator.project.dir}/bin" />
+
+	<!-- Output directory (current directory) -->
+	<property name="output.dir" location="${build.file.dir}" />
+
+	<!-- Triage Collector Service -->
+	<property name="triage.project.dir" location="${healthcare.root.dir}/btsn.healthcare.places.Triage" />
+	<property name="triage.bin.dir" location="${triage.project.dir}/bin" />
+	<property name="triage.src.dir" location="${triage.project.dir}/src" />
+	<property name="triage.output.file" location="${output.dir}/Triage_CollectorService.out.txt" />
+
+	<!-- Monitor Service -->
+	<property name="monitor.project.dir" location="${healthcare.root.dir}/btsn.common.Monitor" />
+	<property name="monitor.bin.dir" location="${monitor.project.dir}/bin" />
+	<property name="monitor.src.dir" location="${monitor.project.dir}/src" />
+	<property name="monitor.output.file" location="${output.dir}/MonitorService.out.txt" />
+
+	<!-- Java Classes -->
+	<property name="service.loader.class" value="org.btsn.handlers.ServiceLoader" />
+	<property name="event.generator.class" value="org.btsn.common.eventgenerators.Common_Collector_EventGenerator" />
+
+	<!-- =================================== -->
+	<!-- CLASSPATH SECTION                  -->
+	<!-- =================================== -->
+
+	<path id="common.classpath">
+		<fileset dir="${lib.dir}" erroronmissingdir="false">
+			<include name="*.jar" />
+		</fileset>
+		<pathelement location="${class.dir}" />
+	</path>
+
+	<path id="triage.classpath">
+		<path refid="common.classpath" />
+		<pathelement location="${triage.bin.dir}" />
+	</path>
+
+	<path id="monitor.classpath">
+		<path refid="common.classpath" />
+		<pathelement location="${monitor.bin.dir}" />
+	</path>
+
+	<path id="generator.classpath">
+		<path refid="common.classpath" />
+		<pathelement location="${generator.bin.dir}" />
+	</path>
+
+	<!-- =================================== -->
+	<!-- UTILITY TARGETS                    -->
+	<!-- =================================== -->
+
+	<target name="create-output-directory" description="Create output directory if it doesn't exist">
+		<mkdir dir="${output.dir}" />
+		<echo message="Output directory created/verified: ${output.dir}" />
+	</target>
+
+	<target name="clean-output" description="Clean previous output files">
+		<delete file="${triage.output.file}" quiet="true" />
+		<delete file="${monitor.output.file}" quiet="true" />
+		<echo message="Previous output files cleaned" />
+	</target>
+
+	<target name="kill-java" description="Kill all Java processes (clears stale UDP listeners)">
+		<echo message="Killing all Java processes..." />
+		<exec executable="taskkill" osfamily="windows" failonerror="false">
+			<arg value="/F" />
+			<arg value="/IM" />
+			<arg value="java.exe" />
+		</exec>
+		<exec executable="pkill" osfamily="unix" failonerror="false">
+			<arg value="-9" />
+			<arg value="java" />
+		</exec>
+		<sleep seconds="2" />
+		<echo message="Java processes killed. Stale UDP listeners cleared." />
+	</target>
+
+	<target name="fresh-start" depends="kill-java,load-services" 
+	        description="Kill all Java, then load services and trigger collection">
+		<echo message="Fresh start complete." />
+	</target>
+
+	<!-- =================================== -->
+	<!-- COMPILATION TARGETS                -->
+	<!-- =================================== -->
+
+	<target name="compile-common" description="Compile common classes including ServiceLoader and RuleController">
+		<echo message="Compiling common classes..." />
+		<echo message="Source directory: ${common.src.dir}" />
+		<echo message="Destination directory: ${class.dir}" />
+		
+		<mkdir dir="${class.dir}" />
+		
+		<javac srcdir="${common.src.dir}" 
+		       destdir="${class.dir}" 
+		       classpathref="common.classpath"
+		       includeantruntime="false"
+		       fork="true"
+		       source="15"
+		       target="15"
+		       failonerror="true"
+		       verbose="false"
+		       listfiles="false">
+			<compilerarg value="-Xlint:unchecked" />
+		</javac>
+		<echo message="Common classes compiled successfully (includes RuleController)" />
+	</target>
+
+	<target name="compile-generator" depends="compile-common" description="Compile event generator classes">
+		<echo message="Compiling event generator classes..." />
+		<mkdir dir="${generator.bin.dir}" />
+		<javac srcdir="${generator.src.dir}" 
+		       destdir="${generator.bin.dir}" 
+		       classpathref="common.classpath"
+		       includeantruntime="false"
+		       fork="true"
+		       source="15"
+		       target="15"
+		       failonerror="true">
+			<compilerarg value="-Xlint:unchecked" />
+		</javac>
+		<echo message="Event generator classes compiled successfully" />
+	</target>
+
+	<target name="compile-triage" depends="compile-common" description="Compile Triage service classes">
+		<echo message="Compiling Triage service classes..." />
+		<mkdir dir="${triage.bin.dir}" />
+		<javac srcdir="${triage.src.dir}" 
+		       destdir="${triage.bin.dir}" 
+		       classpathref="common.classpath"
+		       includeantruntime="false"
+		       fork="true"
+		       source="15"
+		       target="15"
+		       failonerror="true">
+			<compilerarg value="-Xlint:unchecked" />
+		</javac>
+		<echo message="Triage service classes compiled successfully" />
+	</target>
+
+	<target name="compile-monitor" depends="compile-common" description="Compile Monitor service classes">
+		<echo message="Compiling Monitor service classes..." />
+		<mkdir dir="${monitor.bin.dir}" />
+		<javac srcdir="${monitor.src.dir}" 
+		       destdir="${monitor.bin.dir}" 
+		       classpathref="common.classpath"
+		       includeantruntime="false"
+		       fork="true"
+		       source="15"
+		       target="15"
+		       failonerror="true">
+			<compilerarg value="-Xlint:unchecked" />
+		</javac>
+		<echo message="Monitor service classes compiled successfully" />
+	</target>
+
+	<target name="compile-all" 
+	        depends="compile-common,compile-generator,compile-triage,compile-monitor" 
+	        description="Compile all classes">
+		<echo message="All classes compiled successfully" />
+	</target>
+
+	<!-- =================================== -->
+	<!-- RULE BASE BUILD TARGET             -->
+	<!-- =================================== -->
+
+	<target name="rebuild-service-ruleml" depends="compile-all" 
+	        description="Build master Service.ruleml">
+		<echo message="Building master Service.ruleml for version ${rule.version}..." />
+		<java classname="org.btsn.utils.BuildMasterServiceRuleBase" 
+		      classpathref="common.classpath"
+		      dir="${common.project.dir}"
+		      fork="true"
+		      failonerror="true">
+			<arg value="${rule.version}" />
+			<arg value="ALL" />
+		</java>
+		<echo message="Master Service.ruleml built successfully" />
+	</target>
+
+	<!-- =================================== -->
+	<!-- VALIDATION TARGET                  -->
+	<!-- =================================== -->
+
+	<target name="validate-environment" depends="compile-all" 
+	        description="Validate all required directories and dependencies">
+		<echo message="Validating environment..." />
+		
+		<fail message="Common project directory does not exist: ${common.project.dir}">
+			<condition>
+				<not>
+					<available file="${common.project.dir}" type="dir" />
+				</not>
+			</condition>
+		</fail>
+
+		<fail message="Triage project directory does not exist: ${triage.project.dir}">
+			<condition>
+				<not>
+					<available file="${triage.project.dir}" type="dir" />
+				</not>
+			</condition>
+		</fail>
+
+		<fail message="Monitor project directory does not exist: ${monitor.project.dir}">
+			<condition>
+				<not>
+					<available file="${monitor.project.dir}" type="dir" />
+				</not>
+			</condition>
+		</fail>
+
+		<fail message="Event generator project directory does not exist: ${generator.project.dir}">
+			<condition>
+				<not>
+					<available file="${generator.project.dir}" type="dir" />
+				</not>
+			</condition>
+		</fail>
+
+		<echo message="Environment validation passed!" />
+	</target>
+
+	<!-- =================================== -->
+	<!-- SERVICE LOADING TARGETS            -->
+	<!-- =================================== -->
+
+	<target name="load-triage-service" depends="validate-environment,create-output-directory" 
+	        description="Load the Triage Service">
+		<echo message="Starting Triage Service with version ${rule.version}..." />
+		<java classname="${service.loader.class}" fork="true" 
+		      dir="${triage.project.dir}" output="${triage.output.file}">
+			<classpath refid="triage.classpath" />
+			<arg value="${triage.project.dir}" />
+			<arg value="-version" />
+			<arg value="${rule.version}" />
+		</java>
+		<echo message="Triage Service started - output: ${triage.output.file}" />
+	</target>
+
+	<target name="load-monitor-service" depends="validate-environment,create-output-directory" 
+	        description="Load the Monitor Service">
+		<echo message="Starting Monitor Service with version ${rule.version}..." />
+		<java classname="${service.loader.class}" fork="true" 
+		      dir="${monitor.project.dir}" output="${monitor.output.file}">
+			<classpath refid="monitor.classpath" />
+			<arg value="${monitor.project.dir}" />
+			<arg value="-version" />
+			<arg value="${rule.version}" />
+		</java>
+		<echo message="Monitor Service started - output: ${monitor.output.file}" />
+	</target>
+
+	<target name="performance-collector-trigger" depends="validate-environment,rebuild-service-ruleml" 
+	        description="Trigger Performance Data Collection for Triage">
+		<echo message="=== Initializing Performance Collector ===" />
+		<echo message="  Rule Version: ${rule.version}" />
+		<echo message="  Process: ${process.name}" />
+		<echo message="  Query Versions: ${query.version}" />
+		<sleep seconds="1" />
+
+		<!-- Trigger Triage Collection (with deployment) -->
+		<echo message="=== Collecting from TriageCollectorService (deploying rules) ===" />
+		<java classname="${event.generator.class}" 
+		      fork="true" 
+		      dir="${generator.project.dir}"
+		      failonerror="true">
+			<classpath refid="generator.classpath" />
+			
+			<arg value="-service" />
+			<arg value="Triage_CollectorService" />
+			
+			<arg value="-operation" />
+			<arg value="${service.operation}" />
+			
+			<arg value="-version" />
+			<arg value="${rule.version}" />
+			
+			<arg value="-process" />
+			<arg value="${process.name}" />
+			
+			<arg value="-queryVersion" />
+			<arg value="${query.version}" />
+			
+			<arg value="-sequenceId" />
+			<arg value="${sequence.id.triage}" />
+		</java>
+		<echo message="Triage Collection finished." />
+		
+		<echo message="=== Performance Collector finished ===" />
+	</target>
+
+	<!-- =================================== -->
+	<!-- MAIN TARGETS                       -->
+	<!-- =================================== -->
+
+	<target name="load-services" depends="clean-output,rebuild-service-ruleml" 
+	        description="Load Triage and Monitor services then trigger performance collection (DEFAULT)">
+		<echo message="=== LOADING TRIAGE AND MONITOR SERVICES ===" />
+		<echo message="Using rule version: ${rule.version}" />
+		<echo message="Will collect versions: ${query.version}" />
+
+		<parallel>
+			<antcall target="load-triage-service" />
+			<antcall target="load-monitor-service" />
+			<sequential>
+				<echo message="Waiting for services to initialize..." />
+				<sleep seconds="3" />
+				<antcall target="performance-collector-trigger" />
+			</sequential>
+		</parallel>
+
+		<echo message="=== SERVICES LOADED AND PERFORMANCE COLLECTION TRIGGERED ===" />
+	</target>
+
+	<target name="load-services-sequential" depends="clean-output,rebuild-service-ruleml" 
+	        description="Load services sequentially then trigger collection">
+		<echo message="=== LOADING SERVICES SEQUENTIALLY ===" />
+		<echo message="Using rule version: ${rule.version}" />
+		<echo message="Will collect versions: ${query.version}" />
+		
+		<antcall target="load-triage-service" />
+		<echo message="Waiting for Triage service to initialize..." />
+		<sleep seconds="2" />
+		
+		<antcall target="load-monitor-service" />
+		<echo message="Waiting for Monitor service to initialize..." />
+		<sleep seconds="2" />
+		
+		<antcall target="performance-collector-trigger" />
+		
+		<echo message="=== ALL SERVICES LOADED SEQUENTIALLY ===" />
+	</target>
+
+	<!-- =================================== -->
+	<!-- HELP TARGET                        -->
+	<!-- =================================== -->
+
+	<target name="help" description="Display available targets">
+		<echo message="=== TRIAGE MONITOR COLLECTOR WORKFLOW ===" />
+		<echo message="" />
+		<echo message="MAIN TARGETS:" />
+		<echo message="  load-services            - Load services in parallel then trigger performance collection (DEFAULT)" />
+		<echo message="  load-services-sequential - Load services sequentially then trigger performance collection" />
+		<echo message="  fresh-start              - Kill all Java processes, then load services and trigger collection" />
+		<echo message="" />
+		<echo message="SERVICE TARGETS:" />
+		<echo message="  load-triage-service             - Load only Triage Service" />
+		<echo message="  load-monitor-service            - Load only Monitor Service" />
+		<echo message="  performance-collector-trigger   - Trigger performance data collection from Triage" />
+		<echo message="" />
+		<echo message="COMPILATION TARGETS:" />
+		<echo message="  compile-common           - Compile btsn.common classes" />
+		<echo message="  compile-generator        - Compile event generator classes" />
+		<echo message="  compile-triage           - Compile Triage service classes" />
+		<echo message="  compile-monitor          - Compile Monitor service classes" />
+		<echo message="  compile-all              - Compile all classes" />
+		<echo message="" />
+		<echo message="UTILITY TARGETS:" />
+		<echo message="  kill-java                - Kill all Java processes (clears stale UDP listeners)" />
+		<echo message="  clean-output             - Clean previous output files" />
+		<echo message="  create-output-directory  - Create output directory" />
+		<echo message="  rebuild-service-ruleml   - Build master Service.ruleml" />
+		<echo message="  validate-environment     - Validate all required directories" />
+		<echo message="  help                     - Show this help" />
+		<echo message="" />
+		<echo message="CONFIGURABLE PARAMETERS:" />
+		<echo message="  rule.version      = ${rule.version}     (Rule base version to use)" />
+		<echo message="  query.version     = ${query.version}    (Version(s) to collect data from)" />
+		<echo message="  sequence.id.triage = ${sequence.id.triage}   (Triage sequence ID)" />
+		<echo message="  collection.delay.seconds = ${collection.delay.seconds} (Delay between collectors)" />
+		<echo message="" />
+		<echo message="USAGE EXAMPLES:" />
+		<echo message="  ant                                      - Collect performance data for v001,v002,v003" />
+		<echo message="  ant -Dquery.version=v001                 - Collect only v001 data" />
+		<echo message="  ant -Dquery.version=v002,v003            - Collect v002 and v003 data" />
+		<echo message="  ant -Dquery.version=v001,v002,v003,v004  - Collect four versions of data" />
+		<echo message="" />
+		<echo message="WORKFLOW:" />
+		<echo message="  1. Services capture timing and marking data to database during workflow execution" />
+		<echo message="  2. Run this build file to trigger collection of that captured data" />
+		<echo message="  3. PerformanceCollector queries database and returns data to Monitor" />
+		<echo message="  4. Monitor analyzes and reports performance metrics" />
+		<echo message="" />
+	</target>
+
+</project>

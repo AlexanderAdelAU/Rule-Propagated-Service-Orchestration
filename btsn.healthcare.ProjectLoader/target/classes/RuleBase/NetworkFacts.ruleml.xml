@@ -1,0 +1,87 @@
+<!-- Begin with null channel -->
+<!-- Rule Channel is 224.0.1.N -->
+<Atom>
+	<Rel>boundChannel</Rel>
+	<Ind>null</Ind>			<!--does not exist - null -->
+	<Ind>null</Ind>
+</Atom>
+<Atom>
+	<Rel>boundChannel</Rel>
+	<Ind>a1</Ind>
+	<Ind>224.0.1.1</Ind>
+</Atom>
+<Atom>
+	<Rel>boundChannel</Rel>
+	<Ind>a2</Ind>
+	<Ind>224.0.1.2</Ind>
+</Atom>
+<Atom>
+	<Rel>boundChannel</Rel>
+	<Ind>a3</Ind>
+	<Ind>224.0.1.3</Ind>
+</Atom>
+<Atom>
+	<Rel>boundChannel</Rel>
+	<Ind>a4</Ind>
+	<Ind>224.0.1.4</Ind>
+</Atom>
+<Atom>
+	<Rel>boundChannel</Rel>
+	<Ind>a5</Ind>
+	<Ind>224.0.1.5</Ind>
+</Atom>
+<Atom>
+	<Rel>boundChannel</Rel>
+	<Ind>a6</Ind>
+	<Ind>224.0.1.6</Ind>
+</Atom>
+<Atom>
+	<Rel>boundChannel</Rel>
+	<Ind>a7</Ind>
+	<Ind>224.0.1.7</Ind>
+</Atom>
+<Atom>
+	<Rel>boundChannel</Rel>
+	<Ind>a8</Ind>
+	<Ind>224.0.1.8</Ind>
+</Atom>
+<Atom>
+	<Rel>boundChannel</Rel>
+	<Ind>a9</Ind>
+	<Ind>224.0.1.9</Ind>
+</Atom>
+<Atom>
+	<Rel>boundChannel</Rel>
+	<Ind>a10</Ind>
+	<Ind>224.0.1.10</Ind>
+</Atom>
+<Atom>
+	<Rel>boundChannel</Rel>
+	<Ind>a11</Ind>
+	<Ind>224.0.1.11</Ind>
+</Atom>
+<Atom>
+	<Rel>boundChannel</Rel>
+	<Ind>a12</Ind>
+	<Ind>224.0.1.12</Ind>
+</Atom>
+<Atom>
+	<Rel>boundChannel</Rel>
+	<Ind>a13</Ind>
+	<Ind>224.0.1.13</Ind>
+</Atom>
+<Atom>
+	<Rel>boundChannel</Rel>
+	<Ind>a14</Ind>
+	<Ind>224.0.1.14</Ind>
+</Atom>
+<Atom>
+	<Rel>boundChannel</Rel>
+	<Ind>a15</Ind>
+	<Ind>224.0.1.15</Ind>
+</Atom>
+<Atom>
+	<Rel>boundChannel</Rel>
+	<Ind>a16</Ind>
+	<Ind>224.0.1.16</Ind>
+</Atom>

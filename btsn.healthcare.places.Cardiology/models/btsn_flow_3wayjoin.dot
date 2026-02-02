@@ -1,0 +1,137 @@
+digraph BTSN_3Way_Join_Model {
+  rankdir=TB;
+  node [fontname="Arial", fontsize=10];
+  edge [fontsize=8, color="darkblue", penwidth=2];
+
+  // Title
+  labelloc="t";
+  label="BTSN 3-Way Join Network Model\nStatic Network Structure";
+
+  // Input Layer
+  P1_InputPlace [label="P1(InputPlace)\nParsing", shape=circle, fillcolor="lightblue", style=filled];
+
+  // Triple Fork Transition
+  T2_TripleForkTransition [label="T2(TripleForkTransition)\n1→3 Fork", shape=box, fillcolor="orange", style=filled];
+
+  // Three Parallel Processing Paths
+  P2_ValidationPlace [label="P2(ValidationPlace)\nFAST: 10ms", shape=circle, fillcolor="lightgreen", style=filled];
+  P3_TransformPlace [label="P3(TransformPlace)\nMEDIUM: 25ms", shape=circle, fillcolor="yellow", style=filled];
+  P4_EnrichmentPlace [label="P4(EnrichmentPlace)\nSLOW: 50ms\n(BOTTLENECK)", shape=circle, fillcolor="orange", style=filled];
+
+  // Triple Join Transition (THE KEY TEST!)
+  T1_TripleJoinTransition [label="T1(TripleJoinTransition)\n3→1 SYNC\nWaits for ALL 3 paths!", shape=box, fillcolor="red", style=filled];
+
+  // Continue with existing routing
+  P5_OutputPlace [label="P5(OutputPlace)\nTriple-Joined Result", shape=circle, fillcolor="lightblue", style=filled];
+  T3_RoutingTransition [label="T3(RoutingTransition)\nEven/Odd Routing", shape=box, fillcolor="lightgreen", style=filled];
+
+  // Routing paths
+  P6_LoggingPlace [label="P6(LoggingPlace)\nEven IDs", shape=circle, fillcolor="lightcyan", style=filled];
+  P7_ArchivePlace [label="P7(ArchivePlace)\nOdd IDs", shape=circle, fillcolor="lavender", style=filled];
+
+  // Final transitions
+  T4_FinalTransition [label="T4(FinalTransition)\nLogging Path", shape=box, fillcolor="lightgreen", style=filled];
+  T5_ArchiveFinalTransition [label="T5(ArchiveFinalTransition)\nArchive Path", shape=box, fillcolor="lightgreen", style=filled];
+
+  // Terminal places
+  P8_TerminalPlace [label="P8(TerminalPlace)\nLogging Final", shape=circle, fillcolor="lightblue", style=filled];
+  P9_ArchiveTerminalPlace [label="P9(ArchiveTerminalPlace)\nArchive Final", shape=circle, fillcolor="lightblue", style=filled];
+
+  // Network Flow Connections
+  P1_InputPlace -> T2_TripleForkTransition [label="Parsed tokens"];
+
+  // Triple Fork (1→3)
+  T2_TripleForkTransition -> P2_ValidationPlace [label="Path 1: Fast", color="green"];
+  T2_TripleForkTransition -> P3_TransformPlace [label="Path 2: Medium", color="orange"];
+  T2_TripleForkTransition -> P4_EnrichmentPlace [label="Path 3: Slow", color="red"];
+
+  // Triple Join (3→1) - THE CRITICAL SYNCHRONIZATION POINT
+  P2_ValidationPlace -> T1_TripleJoinTransition [label="Fast path\n(arrives first)", color="green"];
+  P3_TransformPlace -> T1_TripleJoinTransition [label="Medium path\n(arrives second)", color="orange"];
+  P4_EnrichmentPlace -> T1_TripleJoinTransition [label="Slow path\n(triggers sync)", color="red"];
+
+  // Continue downstream
+  T1_TripleJoinTransition -> P5_OutputPlace [label="Synchronized result"];
+  P5_OutputPlace -> T3_RoutingTransition [label="For routing"];
+
+  // Routing split
+  T3_RoutingTransition -> P6_LoggingPlace [label="Even IDs", style=dashed];
+  T3_RoutingTransition -> P7_ArchivePlace [label="Odd IDs", style=dashed];
+
+  // Final processing
+  P6_LoggingPlace -> T4_FinalTransition [label="Logged"];
+  P7_ArchivePlace -> T5_ArchiveFinalTransition [label="Archived"];
+
+  // Terminal outputs
+  T4_FinalTransition -> P8_TerminalPlace [label="Logging complete"];
+  T5_ArchiveFinalTransition -> P9_ArchiveTerminalPlace [label="Archive complete"];
+
+  // Timing Analysis Box
+  subgraph cluster_timing {
+    label="Timing Analysis";
+    style=filled;
+    fillcolor=lightyellow;
+    
+    timing_info [shape=plaintext, label=<
+    <table border="0">
+    <tr><td><b>Expected Token Journey Timing:</b></td></tr>
+    <tr><td>1. Fork: Instant (0ms)</td></tr>
+    <tr><td>2. Validation: 10ms → arrives first</td></tr>
+    <tr><td>3. Transform: 25ms → arrives second</td></tr>
+    <tr><td>4. Enrichment: 50ms → arrives last (triggers sync)</td></tr>
+    <tr><td>5. Sync fires when ALL 3 complete</td></tr>
+    <tr><td><b>Total per token: ~50ms + sync overhead</b></td></tr>
+    </table>
+    >];
+  }
+
+  // Buffer State Analysis
+  subgraph cluster_buffer {
+    label="Expected Buffer States";
+    style=filled;
+    fillcolor=lightgray;
+    
+    buffer_info [shape=plaintext, label=<
+    <table border="0">
+    <tr><td><b>TripleJoinTransition Buffer:</b></td></tr>
+    <tr><td>@ 10ms: [█░░] (validation arrives)</td></tr>
+    <tr><td>@ 25ms: [██░] (transform arrives)</td></tr>
+    <tr><td>@ 50ms: [███] (enrichment arrives → FIRE!)</td></tr>
+    <tr><td><b>Bottleneck: Enrichment path (50ms)</b></td></tr>
+    </table>
+    >];
+  }
+
+  // Test Scenarios
+  subgraph cluster_test {
+    label="Test Scenarios";
+    style=filled;
+    fillcolor=lightcyan;
+    
+    test_info [shape=plaintext, label=<
+    <table border="0">
+    <tr><td><b>5 Token Rapid Fire Test:</b></td></tr>
+    <tr><td>Token 1 (odd) → Archive path</td></tr>
+    <tr><td>Token 2 (even) → Logging path</td></tr>
+    <tr><td>Token 3 (odd) → Archive path</td></tr>
+    <tr><td>Token 1 (repeat) → Archive path</td></tr>
+    <tr><td>Token 4 (even) → Logging path</td></tr>
+    <tr><td><b>Challenge: Multiple tokens in different sync stages</b></td></tr>
+    </table>
+    >];
+  }
+
+  // Legend
+  subgraph cluster_legend {
+    label="Legend";
+    style=filled;
+    fillcolor=white;
+    
+    legend_place [label="Place\n(Processing)", shape=circle, fillcolor=lightblue, style=filled];
+    legend_transition [label="Transition\n(Logic)", shape=box, fillcolor=lightgreen, style=filled];
+    legend_critical [label="Critical Path\n(3-Way Sync)", shape=box, fillcolor=red, style=filled];
+    
+    legend_place -> legend_transition [style=invisible];
+    legend_transition -> legend_critical [style=invisible];
+  }
+}

@@ -1,0 +1,52 @@
+
+<!-- ================================================================ -->
+<!-- PERFORMANCE COLLECTION SERVICES                                  -->
+<!-- ================================================================ -->
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Triage_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2200</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Radiology_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2201</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Cardiology_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2202</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Diagnosis_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2203</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Laboratory_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2204</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Treatment_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2205</Ind>
+</Atom>

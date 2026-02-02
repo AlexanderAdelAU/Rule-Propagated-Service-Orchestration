@@ -1,0 +1,119 @@
+<!-- Common Rules to all services -->
+<!-- 
+This is the rule determines the operational parameters associated with
+the destination service.
+ -->
+<Implies>
+	<then>
+		<Atom>
+			<Rel>publishes</Rel>
+			<Var>service</Var>
+			<Var>condition</Var>
+			<Var>operation</Var>
+			<Var>channel</Var>
+			<Var>link</Var>
+			<Var>port</Var>
+		</Atom>
+	</then>
+	<if>
+		<And>
+			<Atom>
+				<Rel>meetsCondition</Rel>
+				<Var>service</Var>
+				<Var>operation</Var>
+				<Var>condition</Var>
+			</Atom>
+			<Atom>
+				<Rel>hasOperation</Rel>
+				<Var>service</Var>
+				<Var>operation</Var>
+				<Var>link</Var>
+				<Var>port</Var>
+			</Atom>
+			<Atom>
+				<Rel>boundChannel</Rel>
+				<Var>link</Var>
+				<Var>channel</Var>
+			</Atom>
+		</And>
+	</if>
+</Implies>
+
+<!-- 
+This is the rule that governs the service operation. The operation Var is specified twice so 
+that the name will is returned and thus avoids the need to parse a list of operations.
+ -->
+<Implies>
+	<then>
+		<Atom>
+			<Rel>serviceName</Rel>
+			<Var>service</Var>
+			<Var>operation</Var>
+			<Var>operation</Var>
+			<Var>attribute</Var>
+			<Var>input</Var>
+			<Var>channel</Var>
+			<Var>port</Var>
+		</Atom>
+	</then>
+	<if>
+		<And>
+			<Atom>
+				<Rel>localDefined</Rel>
+				<Var>service</Var>
+			</Atom>
+			<Atom>
+				<Rel>canonicalBinding</Rel>
+				<Var>operation</Var>
+				<Var>attribute</Var>  <!-- Attribute owned and returned (can be null) -->
+				<Var>input</Var>
+
+			</Atom>
+			<Atom>
+				<Rel>hasOperation</Rel>
+				<Var>service</Var>
+				<Var>operation</Var>
+				<Var>link</Var>
+				<Var>port</Var>
+			</Atom>
+			<Atom>
+				<Rel>boundChannel</Rel>
+				<Var>link</Var>
+				<Var>channel</Var>
+			</Atom>
+
+		</And>
+	</if>
+</Implies>
+<!-- 
+This is the rule that governs the list of all services. 
+ -->
+<Implies>
+	<then>
+		<Atom>
+			<Rel>serviceList</Rel>
+			<Var>service</Var>
+			<Var>service</Var>
+			<Var>operation</Var>
+			<Var>channel</Var>
+			<Var>port</Var>
+		</Atom>
+	</then>
+	<if>
+		<And>
+
+			<Atom>
+				<Rel>hasOperation</Rel>
+				<Var>service</Var>
+				<Var>operation</Var>
+				<Var>link</Var>
+				<Var>port</Var>
+			</Atom>
+			<Atom>
+				<Rel>boundChannel</Rel>
+				<Var>link</Var>
+				<Var>channel</Var>
+			</Atom>
+		</And>
+	</if>
+</Implies>

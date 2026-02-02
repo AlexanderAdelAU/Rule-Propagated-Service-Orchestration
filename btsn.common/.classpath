@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/antlr.jar"/>
+	<classpathentry kind="lib" path="lib/derby.jar"/>
+	<classpathentry kind="lib" path="lib/jaxb-xjc-3.0.2.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-1.2.16.jar"/>
+	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.18-bin.jar"/>
+	<classpathentry kind="lib" path="lib/opencsv-2.3.jar"/>
+	<classpathentry kind="lib" path="lib/ptolemy.jar"/>
+	<classpathentry kind="lib" path="lib/xom-1.3.7.jar"/>
+	<classpathentry kind="lib" path="lib/json-simple-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/derbyclient.jar"/>
+	<classpathentry kind="lib" path="lib/jfreechart-1.5.3.jar"/>
+	<classpathentry kind="lib" path="lib/jlatexmath-1.0.7.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-api-2.23.1.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-core-2.23.1.jar"/>
+	<classpathentry kind="lib" path="lib/oojdrew-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-databind-2.17.1.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-core-2.17.1.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-module-jaxb-annotations-2.17.1.jar"/>
+	<classpathentry kind="lib" path="lib/pdfbox-app-3.0.5.jar"/>
+	<classpathentry kind="lib" path="C:/Development-Thesis/java libraries/itextpdf-5.5.13.4.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

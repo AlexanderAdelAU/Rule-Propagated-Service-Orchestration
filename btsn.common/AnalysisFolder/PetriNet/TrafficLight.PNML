@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pnml xmlns="http://www.pnml.org/version-2009/grammar/pnml">
+  <net id="traffic_light_classical_pt" type="http://www.pnml.org/version-2009/grammar/ptnet">
+    <name><text>Traffic Light Intersection - Classical PT Net</text></name>
+
+    <page id="page1">
+      <!-- ===== PLACES (execution states) ===== -->
+      <place id="NS_G">
+        <name><text>NS_Green</text></name>
+        <initialMarking><text>1</text></initialMarking>
+      </place>
+      <place id="NS_Y">
+        <name><text>NS_Yellow</text></name>
+      </place>
+      <place id="NS_R">
+        <name><text>NS_Red</text></name>
+      </place>
+
+      <place id="EW_G">
+        <name><text>EW_Green</text></name>
+      </place>
+      <place id="EW_Y">
+        <name><text>EW_Yellow</text></name>
+      </place>
+      <place id="EW_R">
+        <name><text>EW_Red</text></name>
+        <initialMarking><text>1</text></initialMarking>
+      </place>
+
+      <!-- ===== TRANSITIONS ===== -->
+      <transition id="t_NS_G_to_Y">
+        <name><text>NS_G_to_Y</text></name>
+      </transition>
+      <transition id="t_NS_Y_to_R">
+        <name><text>NS_Y_to_R</text></name>
+      </transition>
+
+      <transition id="t_EW_G_to_Y">
+        <name><text>EW_G_to_Y</text></name>
+      </transition>
+      <transition id="t_EW_Y_to_R">
+        <name><text>EW_Y_to_R</text></name>
+      </transition>
+
+      <!-- Switch transitions (synchronization / mutual exclusion) -->
+      <transition id="t_switch_to_EW_G">
+        <name><text>Switch_to_EW_Green</text></name>
+      </transition>
+      <transition id="t_switch_to_NS_G">
+        <name><text>Switch_to_NS_Green</text></name>
+      </transition>
+
+      <!-- ===== ARCS: NS cycle ===== -->
+      <arc id="a1" source="NS_G" target="t_NS_G_to_Y"><inscription><text>1</text></inscription></arc>
+      <arc id="a2" source="t_NS_G_to_Y" target="NS_Y"><inscription><text>1</text></inscription></arc>
+
+      <arc id="a3" source="NS_Y" target="t_NS_Y_to_R"><inscription><text>1</text></inscription></arc>
+      <arc id="a4" source="t_NS_Y_to_R" target="NS_R"><inscription><text>1</text></inscription></arc>
+
+      <!-- ===== ARCS: EW cycle ===== -->
+      <arc id="a5" source="EW_G" target="t_EW_G_to_Y"><inscription><text>1</text></inscription></arc>
+      <arc id="a6" source="t_EW_G_to_Y" target="EW_Y"><inscription><text>1</text></inscription></arc>
+
+      <arc id="a7" source="EW_Y" target="t_EW_Y_to_R"><inscription><text>1</text></inscription></arc>
+      <arc id="a8" source="t_EW_Y_to_R" target="EW_R"><inscription><text>1</text></inscription></arc>
+
+      <!-- ===== SWITCHING LOGIC =====
+           To turn EW green, BOTH must be red (NS_R and EW_R marked).
+           After switching, EW becomes green and NS remains red.
+      -->
+      <arc id="a9"  source="NS_R" target="t_switch_to_EW_G"><inscription><text>1</text></inscription></arc>
+      <arc id="a10" source="EW_R" target="t_switch_to_EW_G"><inscription><text>1</text></inscription></arc>
+      <arc id="a11" source="t_switch_to_EW_G" target="NS_R"><inscription><text>1</text></inscription></arc>
+      <arc id="a12" source="t_switch_to_EW_G" target="EW_G"><inscription><text>1</text></inscription></arc>
+
+      <!-- To turn NS green, BOTH must be red (NS_R and EW_R marked).
+           After switching, NS becomes green and EW remains red.
+      -->
+      <arc id="a13" source="NS_R" target="t_switch_to_NS_G"><inscription><text>1</text></inscription></arc>
+      <arc id="a14" source="EW_R" target="t_switch_to_NS_G"><inscription><text>1</text></inscription></arc>
+      <arc id="a15" source="t_switch_to_NS_G" target="NS_G"><inscription><text>1</text></inscription></arc>
+      <arc id="a16" source="t_switch_to_NS_G" target="EW_R"><inscription><text>1</text></inscription></arc>
+
+    </page>
+  </net>
+</pnml>

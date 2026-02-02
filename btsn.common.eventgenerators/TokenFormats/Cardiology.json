@@ -1,0 +1,50 @@
+{
+	"service": "CardiologyService",
+	"operation": "processCardiacAssessment",
+	"description": "Token format for Cardiology assessment workflow",
+	
+	"tokenStructure": {
+	  "tokenId": "${sequenceId}",
+	  "version": "${version}",
+	  "notAfter": "${notAfter}",
+	  "currentPlace": "${targetPlace}",
+	  "workflow_start_time": "${workflowStartTime}",
+	  
+	  "data": {
+		"patientId": "P_Cardiac_${sequenceId}",
+		"providerId": "DR_CARD_001",
+		"indication": "chest",
+		"referralSource": "TRIAGE",
+		"urgency": "STAT"
+	  }
+	},
+	
+	"dataVariants": {
+	  "chest_pain": {
+		"indication": "chest",
+		"chiefComplaint": "chest pain",
+		"urgency": "STAT"
+	  },
+	  "shortness_of_breath": {
+		"indication": "sob",
+		"chiefComplaint": "shortness of breath",
+		"urgency": "URGENT"
+	  },
+	  "palpitations": {
+		"indication": "palpitations",
+		"chiefComplaint": "heart racing",
+		"urgency": "ROUTINE"
+	  },
+	  "syncope": {
+		"indication": "syncope",
+		"chiefComplaint": "fainting episode",
+		"urgency": "STAT"
+	  }
+	},
+	
+	"notes": [
+	  "indication field drives cardiac protocol selection",
+	  "chest -> Acute Coronary Syndrome protocol",
+	  "sob -> Heart Failure protocol"
+	]
+  }

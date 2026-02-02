@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><rulepayload xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="rulepayload.xsd">
+	<header>
+		<timestamp>2012-01-02T20:05:05.491+10:30</timestamp>
+		<ruleFileName>ThisServiceControlNode</ruleFileName>
+		<ruleBaseVersion>v003</ruleBaseVersion>
+		<ruleBaseCommitment>8</ruleBaseCommitment>
+	</header>
+	<targetservice>
+		<serviceName>CardiologyService</serviceName>
+		<operationName>processCardiacAssessment</operationName>
+	</targetservice>
+	<rulefiledata><data><![CDATA[<Atom><Rel>NodeType</Rel><Ind>EdgeNode</Ind></Atom><Atom><Rel>meetsCondition</Rel><Ind>DiagnosisService</Ind><Ind>processClinicalDecision</Ind><Ind>EDGE_NODE</Ind><Ind></Ind></Atom>]]></data>
+	</rulefiledata>
+</rulepayload>

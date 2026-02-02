@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- This project file has been saved by the New GreatSPN Editor, v.100 --><project name="New project" version="121">
+  <gspn name="PT" show-color-cmd="false" show-fluid-cmd="false" show-timed-cmd="false" view-rates="false">
+    <nodes/>
+    <edges/>
+  </gspn>
+  <measures gspn-name="PT" name="Measures" simplified-UI="false">
+    <assignments/>
+    <greatspn/>
+    <formulas>
+      <formula comment="Basic statistics of the toolchain execution." language="STAT"/>
+    </formulas>
+  </measures>
+  <gspn name="Dual Traffic Light Controller" view-rates="false">
+    <nodes>
+      <place marking="1" name="NS_G" x="26.0" y="16.0"/>
+      <place name="NS_Y" x="14.0" y="17.0"/>
+      <place name="NS_R" x="2.0" y="11.0"/>
+      <place name="EW_G" x="2.0" y="2.0"/>
+      <place name="EW_Y" x="28.0" y="2.0"/>
+      <place marking="1" name="EW_R" x="20.0" y="6.0"/>
+      <transition name="NS_G_to_Y" nservers-x="0.5" type="EXP" x="20.55" y="17.0"/>
+      <transition name="NS_Y_to_R" nservers-x="0.5" type="EXP" x="2.55" y="16.0"/>
+      <transition name="switch_to_EW_G" nservers-x="0.5" type="EXP" x="2.55" y="6.0"/>
+      <transition name="EW_G_to_Y" nservers-x="0.5" type="EXP" x="13.55" y="2.0"/>
+      <transition name="EW_Y_to_R" nservers-x="0.5" type="EXP" x="25.55" y="6.0"/>
+      <transition name="switch_to_NS_G" nservers-x="0.5" type="EXP" x="13.55" y="6.0"/>
+    </nodes>
+    <edges>
+      <arc head="NS_G_to_Y" head-magnet="0" kind="INPUT" tail="NS_G" tail-magnet="0"/>
+      <arc head="NS_Y" head-magnet="0" kind="OUTPUT" tail="NS_G_to_Y" tail-magnet="0"/>
+      <arc head="NS_Y_to_R" head-magnet="0" kind="INPUT" tail="NS_Y" tail-magnet="0"/>
+      <arc head="NS_R" head-magnet="0" kind="OUTPUT" tail="NS_Y_to_R" tail-magnet="0"/>
+      <arc head="EW_G_to_Y" head-magnet="0" kind="INPUT" tail="EW_G" tail-magnet="0"/>
+      <arc head="EW_Y" head-magnet="0" kind="OUTPUT" tail="EW_G_to_Y" tail-magnet="0"/>
+      <arc head="EW_Y_to_R" head-magnet="0" kind="INPUT" tail="EW_Y" tail-magnet="0"/>
+      <arc head="EW_R" head-magnet="0" kind="OUTPUT" tail="EW_Y_to_R" tail-magnet="0"/>
+      <arc head="switch_to_EW_G" head-magnet="0" kind="INPUT" tail="NS_R" tail-magnet="0"/>
+      <arc head="switch_to_EW_G" head-magnet="0" kind="INPUT" tail="EW_R" tail-magnet="0"/>
+      <arc head="NS_R" head-magnet="0" kind="OUTPUT" tail="switch_to_EW_G" tail-magnet="0"/>
+      <arc head="EW_G" head-magnet="0" kind="OUTPUT" tail="switch_to_EW_G" tail-magnet="0"/>
+      <arc head="switch_to_NS_G" head-magnet="0" kind="INPUT" tail="NS_R" tail-magnet="0"/>
+      <arc head="switch_to_NS_G" head-magnet="0" kind="INPUT" tail="EW_R" tail-magnet="0"/>
+      <arc head="NS_G" head-magnet="0" kind="OUTPUT" tail="switch_to_NS_G" tail-magnet="0"/>
+      <arc head="EW_R" head-magnet="0" kind="OUTPUT" tail="switch_to_NS_G" tail-magnet="0"/>
+    </edges>
+  </gspn>
+  <gspn name="Traffic Light Intersection - Classical PT Net" view-rates="false">
+    <nodes>
+      <place marking="1" name="NS_Green" x="2.0" y="12.0"/>
+      <place name="NS_Yellow" x="9.0" y="12.0"/>
+      <place name="NS_Red" x="16.0" y="12.0"/>
+      <place name="EW_Green" x="40.0" y="4.0"/>
+      <place name="EW_Yellow" x="29.0" y="4.0"/>
+      <place marking="1" name="EW_Red" x="17.0" y="4.0"/>
+      <transition name="NS_G_to_Y" nservers-x="0.5" type="EXP" x="6.55" y="12.0"/>
+      <transition name="NS_Y_to_R" nservers-x="0.5" type="EXP" x="18.55" y="18.0"/>
+      <transition name="EW_G_to_Y" nservers-x="0.5" type="EXP" x="33.55" y="4.0"/>
+      <transition name="EW_Y_to_R" nservers-x="0.5" type="EXP" x="22.55" y="4.0"/>
+      <transition name="Switch_to_EW_Green" nservers-x="0.5" type="EXP" x="25.55" y="12.0"/>
+      <transition name="Switch_to_NS_Green" nservers-x="0.5" type="EXP" x="8.55" y="3.0"/>
+    </nodes>
+    <edges>
+      <arc head="NS_G_to_Y" head-magnet="0" kind="INPUT" tail="NS_Green" tail-magnet="0"/>
+      <arc head="NS_Yellow" head-magnet="0" kind="OUTPUT" tail="NS_G_to_Y" tail-magnet="0"/>
+      <arc head="NS_Y_to_R" head-magnet="0" kind="INPUT" tail="NS_Yellow" tail-magnet="0"/>
+      <arc head="NS_Red" head-magnet="0" kind="OUTPUT" tail="NS_Y_to_R" tail-magnet="0"/>
+      <arc head="EW_G_to_Y" head-magnet="0" kind="INPUT" tail="EW_Green" tail-magnet="0"/>
+      <arc head="EW_Yellow" head-magnet="0" kind="OUTPUT" tail="EW_G_to_Y" tail-magnet="0"/>
+      <arc head="EW_Y_to_R" head-magnet="0" kind="INPUT" tail="EW_Yellow" tail-magnet="0"/>
+      <arc head="EW_Red" head-magnet="0" kind="OUTPUT" tail="EW_Y_to_R" tail-magnet="0"/>
+      <arc head="Switch_to_EW_Green" head-magnet="0" kind="INPUT" tail="NS_Red" tail-magnet="0"/>
+      <arc head="Switch_to_EW_Green" head-magnet="0" kind="INPUT" tail="EW_Red" tail-magnet="0"/>
+      <arc head="NS_Red" head-magnet="0" kind="OUTPUT" tail="Switch_to_EW_Green" tail-magnet="0"/>
+      <arc head="EW_Green" head-magnet="0" kind="OUTPUT" tail="Switch_to_EW_Green" tail-magnet="0"/>
+      <arc head="Switch_to_NS_Green" head-magnet="0" kind="INPUT" tail="NS_Red" tail-magnet="0"/>
+      <arc head="Switch_to_NS_Green" head-magnet="0" kind="INPUT" tail="EW_Red" tail-magnet="0"/>
+      <arc head="NS_Green" head-magnet="0" kind="OUTPUT" tail="Switch_to_NS_Green" tail-magnet="0"/>
+      <arc head="EW_Red" head-magnet="0" kind="OUTPUT" tail="Switch_to_NS_Green" tail-magnet="0"/>
+    </edges>
+  </gspn>
+</project>

@@ -1,0 +1,10 @@
+<Query>
+    <Atom>
+        <Rel>serviceList</Rel>
+        <Ind>RadiologyTriageService</Ind>
+        <Var>serviceName</Var>
+        <Var>operation</Var>
+        <Var>channel</Var>
+        <Var>port</Var>
+    </Atom>
+</Query>

@@ -1,0 +1,349 @@
+\documentclass{article}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\title{Enhanced Buffered Token Synchronization Nets (BTSN) Mathematical Model}
+\author{Mathematical Framework with Synchronization ID Semantics}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Core Mathematical Model}
+
+\subsection{Enhanced Definition}
+
+A \textbf{Buffered Token Synchronization Net} is defined as a 9-tuple:
+
+\begin{equation}
+N = (P, T_{in}, T_{out}, F, \tau, \beta, \sigma, \theta, \rho)
+\end{equation}
+
+where:
+\begin{itemize}
+\item $P$ = finite set of places (service execution nodes)
+\item $T_{in}$ = finite set of input transitions (synchronization coordinators)
+\item $T_{out}$ = finite set of output transitions (distribution coordinators)
+\item $F \subseteq (T_{out} \times T_{in}) \cup (T_{in} \times P) \cup (P \times T_{out})$ = flow relation
+\item $\tau: T_{in} \rightarrow 2^{T_{out}}$ = synchronization requirements
+\item $\beta: (T_{in} \cup T_{out}) \rightarrow \mathbb{N}$ = buffer capacity function
+\item $\sigma: P \rightarrow (Token \rightarrow Token)$ = service execution function
+\item $\theta: (T_{in} \cup T_{out}) \rightarrow \mathbb{N}$ = timeout function
+\item $\rho: T_{in} \rightarrow SchedulingPolicy$ = scheduling policy function
+\end{itemize}
+
+\subsection{Enhanced Token Model with Correlation Semantics}
+
+A token is defined as a 7-tuple:
+\begin{equation}
+tok = (id, correlationId, tokenNumber, data, timestamp, pathHistory, notAfter)
+\end{equation}
+
+where:
+\begin{itemize}
+\item $id \in TokenId$ = unique token identifier
+\item $correlationId \in CorrelationId$ = synchronization group identifier
+\item $tokenNumber \in \mathbb{N}$ = sequence number within workflow
+\item $data$ = payload data
+\item $timestamp \in \mathbb{R}^+$ = creation timestamp
+\item $pathHistory \in T_{out}^*$ = sequence of transitions visited
+\item $notAfter \in \mathbb{R}^+$ = expiration timestamp
+\end{itemize}
+
+\section{Token Identity and Correlation Management}
+
+\subsection{Correlation ID Extraction Function}
+
+The correlation ID extraction function maps any token ID to its synchronization group:
+\begin{equation}
+extractCorrelationId: TokenId \rightarrow CorrelationId
+\end{equation}
+
+For token IDs following the pattern \texttt{BASE-NNN-FFF}:
+\begin{equation}
+extractCorrelationId(id) = \begin{cases}
+id & \text{if } id \text{ contains no fork suffix} \\
+id[0:\text{lastIndexOf}("-")] & \text{if } id \text{ contains fork suffix}
+\end{cases}
+\end{equation}
+
+\textbf{Example:} $extractCorrelationId(\text{"TOK-001-101"}) = \text{"TOK-001"}$
+
+\subsection{Fork Generation Semantics}
+
+For a base token with correlation ID $c$ and token number $n$, fork generation follows:
+\begin{equation}
+forkId(c, n, i) = c \parallel "-" \parallel (n \times 100 + i)
+\end{equation}
+
+where $i \in \{1, 2, ..., k\}$ for $k$ target transitions, and $\parallel$ denotes string concatenation.
+
+\textbf{Example:} Base token \texttt{"TOK-001"} with $tokenNumber = 1$ generates:
+\begin{itemize}
+\item Fork 1: \texttt{"TOK-001-101"}
+\item Fork 2: \texttt{"TOK-001-102"}
+\item Fork 3: \texttt{"TOK-001-103"}
+\end{itemize}
+
+\subsection{Token State Transitions}
+
+The fundamental token transformation patterns are:
+\begin{align}
+BaseToken &\xrightarrow{fork} \{ForkToken_1, ForkToken_2, ..., ForkToken_k\} \\
+\{ForkToken_1, ..., ForkToken_k\} &\xrightarrow{join} BaseToken \\
+ForkToken_i &\xrightarrow{no-join} BaseToken
+\end{align}
+
+\section{Synchronization Semantics}
+
+\subsection{Synchronization Group Formation}
+
+For input transition $t_{in}$ and correlation ID $c$:
+\begin{equation}
+SyncGroup(t_{in}, c) = \{tok \in Buffer(t_{in}) : extractCorrelationId(tok.id) = c\}
+\end{equation}
+
+\subsection{Source Tracking Function}
+
+The immediate source of a token is determined by its path history:
+\begin{equation}
+source(tok) = \begin{cases}
+\text{"START"} & \text{if } |tok.pathHistory| = 0 \\
+\text{last}(tok.pathHistory) & \text{otherwise}
+\end{cases}
+\end{equation}
+
+\subsection{Synchronization Readiness Predicate}
+
+An input transition $t_{in}$ can synchronize tokens with correlation ID $c$ when:
+\begin{equation}
+canSync(t_{in}, c) \iff \forall s \in \tau(t_{in}) : \exists tok \in SyncGroup(t_{in}, c) : source(tok) = s \land \neg expired(tok)
+\end{equation}
+
+\section{Join vs No-Join Transition Semantics}
+
+\subsection{Transition Classification}
+
+Input transitions are classified based on their synchronization requirements:
+\begin{equation}
+TransitionType(t_{in}) = \begin{cases}
+\text{NoJoin} & \text{if } |\tau(t_{in})| \leq 1 \\
+\text{JoinRequired} & \text{if } |\tau(t_{in})| > 1
+\end{cases}
+\end{equation}
+
+\subsection{No-Join Conversion}
+
+For no-join transitions, fork tokens are immediately converted to base tokens:
+\begin{equation}
+convertToBase(forkToken) = baseToken
+\end{equation}
+where:
+\begin{itemize}
+\item $baseToken.id = forkToken.correlationId$
+\item $baseToken.correlationId = forkToken.correlationId$
+\item All other fields preserved
+\end{itemize}
+
+\subsection{Join Synchronization}
+
+For join-required transitions, multiple fork tokens are combined:
+\begin{equation}
+join(\{tok_1, tok_2, ..., tok_k\}) = joinedToken
+\end{equation}
+where:
+\begin{itemize}
+\item $joinedToken.id = \text{common correlation ID}$
+\item $joinedToken.data = \bigcup_{i=1}^k tok_i.data$
+\item $joinedToken.timestamp = \min_{i=1}^k tok_i.timestamp$
+\end{itemize}
+
+\section{Scheduling and Fairness}
+
+\subsection{Priority-Based Scheduling}
+
+The scheduling policy function $\rho$ defines token processing order:
+\begin{equation}
+\rho(t_{in}) : CorrelationId^* \rightarrow CorrelationId^*
+\end{equation}
+
+\textbf{Lowest-ID-First Policy:}
+\begin{equation}
+\rho_{LIF}(correlationIds) = \text{sort}(correlationIds, \text{lexicographic})
+\end{equation}
+
+\subsection{Fairness Guarantee}
+
+Under the lowest-ID-first policy, starvation is prevented by ensuring that for any correlation ID $c$:
+\begin{equation}
+\forall c' < c : \text{if } canSync(t_{in}, c') \text{ then } c' \text{ processes before } c
+\end{equation}
+
+\section{Buffer Management Strategy}
+
+\subsection{Adaptive Buffer Sizing}
+
+Buffer capacity is determined by synchronization complexity:
+\begin{equation}
+\beta_{adaptive}(t_{in}) = \begin{cases}
+150 & \text{if } |\tau(t_{in})| \geq 3 \text{ (complex synchronization)} \\
+50 & \text{if } |\tau(t_{in})| = 2 \text{ (pair synchronization)} \\
+20 & \text{if } |\tau(t_{in})| \leq 1 \text{ (no synchronization)}
+\end{cases}
+\end{equation}
+
+\subsection{Buffer Overflow Handling}
+
+When $|Buffer(t_{in})| = \beta(t_{in})$:
+\begin{equation}
+handleOverflow(t_{in}, newToken) = \begin{cases}
+\text{discard}(newToken) & \text{if FIFO policy} \\
+\text{discard}(\text{oldest expired}) & \text{if cleanup possible} \\
+\text{reject}(newToken) & \text{otherwise}
+\end{cases}
+\end{equation}
+
+\section{Temporal Semantics}
+
+\subsection{Wait Time Calculation}
+
+For correlation ID $c$ at transition $t_{in}$:
+\begin{itemize}
+\item $firstArrival(t_{in}, c)$ = timestamp of first token in correlation group
+\item $syncCompletion(t_{in}, c)$ = timestamp when synchronization completes
+\end{itemize}
+
+\begin{equation}
+waitTime(t_{in}, c) = syncCompletion(t_{in}, c) - firstArrival(t_{in}, c)
+\end{equation}
+
+\subsection{Processing vs Wait Time Distinction}
+
+\begin{itemize}
+\item \textbf{Processing Time}: Time spent in place $p$ executing service function $\sigma(p)$
+\item \textbf{Wait Time}: Time spent in $Buffer(t_{in})$ awaiting synchronization
+\end{itemize}
+
+\begin{equation}
+totalLatency(tok) = \sum_{t_{in} \in path(tok)} waitTime(t_{in}) + \sum_{p \in path(tok)} processingTime(p)
+\end{equation}
+
+\section{Formal Firing Rules}
+
+\subsection{Input Transition Firing Rule}
+
+An input transition $t_{in}$ fires for correlation group $c$ when:
+\begin{equation}
+Fire(t_{in}, c) \iff canSync(t_{in}, c) \land outputPlace(t_{in}).isAvailable() \land c = \min(\text{readyCorrelations}(t_{in}))
+\end{equation}
+
+\subsection{Output Transition Firing Rule}
+
+An output transition $t_{out}$ fires when:
+\begin{equation}
+Fire(t_{out}) \iff \exists tok \in Buffer(t_{out}) : \neg expired(tok)
+\end{equation}
+
+\section{Correctness Properties}
+
+\subsection{Token Conservation with Fork/Join}
+
+\begin{theorem}[Token Conservation]
+For any correlation ID $c$, the number of active tokens satisfies:
+\begin{equation}
+\sum_{t \in T_{in} \cup T_{out}} |SyncGroup(t, c)| + |ServiceTokens(c)| = \text{constant modulo completion/timeout}
+\end{equation}
+\end{theorem}
+
+\subsection{Synchronization Completeness}
+
+\begin{theorem}[Synchronization Completeness]
+Under proper buffer sizing and timeout configuration:
+\begin{equation}
+\forall c \in CorrelationId : \forall t_{in} \in T_{in} : canSync(t_{in}, c) \Rightarrow \Diamond Fire(t_{in}, c)
+\end{equation}
+\end{theorem}
+
+\subsection{Starvation Freedom}
+
+\begin{theorem}[Starvation Freedom]
+Under lowest-ID-first scheduling:
+\begin{equation}
+\forall c \in CorrelationId : \Diamond (\text{complete}(c) \lor \text{timeout}(c))
+\end{equation}
+\end{theorem}
+
+\section{Implementation Mapping}
+
+\subsection{Buffer Data Structure}
+
+\begin{equation}
+Buffer(t_{in}) = \{(tok, arrivalTime) : tok \in Token \land arrivalTime \in \mathbb{R}^+\}
+\end{equation}
+
+\subsection{Correlation Tracking}
+
+\begin{equation}
+CorrelationMap(t_{in}) : CorrelationId \rightarrow \{sourceId \rightarrow timestamp\}
+\end{equation}
+
+\subsection{Synchronization Check Algorithm}
+
+\begin{algorithm}
+\caption{Synchronization Check}
+\begin{algorithmic}
+\REQUIRE Input transition $t_{in}$
+\STATE $correlationGroups \leftarrow groupBy(Buffer(t_{in}), extractCorrelationId)$
+\STATE $sortedIds \leftarrow sort(correlationGroups.keys(), lexicographic)$
+\FOR{each $c$ in $sortedIds$}
+    \IF{$canSync(t_{in}, c)$ AND $outputPlace(t_{in}).isAvailable()$}
+        \STATE $tokens \leftarrow correlationGroups[c]$
+        \STATE $resultToken \leftarrow processTokens(t_{in}, c, tokens)$
+        \STATE $outputPlace(t_{in}).accept(resultToken)$
+        \RETURN \COMMENT{Process only one group per cycle}
+    \ENDIF
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
+\section{Architectural Constraints (Preserved)}
+
+The enhanced model maintains all original BTSN constraints:
+
+\begin{align}
+\forall p \in P: |^{\bullet}p| &= 1 \land |p^{\bullet}| = 1 \tag{service isolation}\\
+\forall t_{in} \in T_{in}: |t_{in}^{\bullet}| &= 1 \tag{synchronizer output constraint}\\
+\forall t_{out} \in T_{out}: |^{\bullet}t_{out}| &= 1 \tag{distributor input constraint}
+\end{align}
+
+\section{Complexity Analysis}
+
+\begin{theorem}[Computational Complexity]
+For a BTSN with enhanced synchronization semantics:
+\begin{itemize}
+\item Fork Generation: $O(k)$ where $k$ = number of target transitions
+\item Synchronization Check: $O(|\tau(t_{in})|)$ per correlation group
+\item Scheduling: $O(n \log n)$ where $n$ = number of ready correlation groups
+\item Buffer Management: $O(1)$ for insertion, $O(m)$ for cleanup where $m$ = buffer size
+\item Correlation Tracking: $O(1)$ per token arrival
+\end{itemize}
+\end{theorem}
+
+\section{Conclusion}
+
+This enhanced mathematical model provides the formal foundation for sophisticated synchronization ID management and fork/join semantics. The model now mathematically captures:
+
+\begin{itemize}
+\item Correlation-based token identity and grouping
+\item Fork ID generation and management patterns
+\item Join vs no-join transition semantics
+\item Priority-based scheduling with fairness guarantees
+\item Adaptive buffer management strategies
+\item Comprehensive temporal analysis of wait vs processing times
+\end{itemize}
+
+The model serves as the theoretical foundation for implementing correct and efficient BTSN systems with complex synchronization requirements.
+
+\end{document}

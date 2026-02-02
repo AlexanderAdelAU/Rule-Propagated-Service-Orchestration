@@ -1,0 +1,18 @@
+<Atom>
+	<Rel>NodeType</Rel>
+	<Ind>EdgeNode</Ind>
+</Atom>
+<Atom>
+	<Rel>meetsCondition</Rel>
+	<Ind>MonitorService</Ind>
+	<Ind>acknowledgeTokenArrival</Ind>
+	<Ind>EDGE_NODE</Ind>
+	<Ind></Ind>
+</Atom>
+<Atom>
+	<Rel>destinationBinding</Rel>
+	<Ind>MonitorService</Ind>
+	<Ind>acknowledgeTokenArrival</Ind>
+	<Ind>radiologyResults</Ind>
+	<Ind>1</Ind>
+</Atom>

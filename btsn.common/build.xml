@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<project name="FatJar rtsoa.bookservice_fat.jar (experimental)" default="main" basedir=".">
+    <!-- this file was created by Fat-Jar Eclipse Plug-in -->
+    <!-- the ANT-Export is in a very early stage, so this -->
+    <!-- is only experimental, ANT 1.6 or above is        -->
+    <!-- required, feedback is always welcome:            -->
+    <!--       http://sourceforge.net/projects/fjep       -->
+    <!-- uncomment the following lines if using ANT outside Eclipse -->
+    <!--
+        <property name="fjepPath" value="reference:file:plugins/net.sf.fjep.fatjar_0.0.31.jarfatjar.jar"/>
+        <taskdef name="fatjar.build" classname="net.sf.fjep.anttask.FJBuildTask" classpath="${fjepPath}"/>
+        <typedef name="fatjar.manifest" classname="net.sf.fjep.anttask.FJManifestType" classpath="${fjepPath}"/>
+        <typedef name="fatjar.exclude" classname="net.sf.fjep.anttask.FJExcludeType" classpath="${fjepPath}"/>
+        <typedef name="fatjar.jarsource" classname="net.sf.fjep.anttask.FJJarSourceType" classpath="${fjepPath}"/>
+        <typedef name="fatjar.filesource" classname="net.sf.fjep.anttask.FJFileSourceType" classpath="${fjepPath}"/>
+    -->
+    <!-- uncomment the above lines to use ANT outside of Eclipse -->
+    <target name="main">
+        <fatjar.build output="btsn.Triage_fat.jar">
+            <fatjar.manifest mainclass="org.rtsoa.handlers.ServiceLoader"/>
+            <fatjar.filesource path="C:\Development-Thesis\Workspace\RTSOA-Journal\rtsoa.BookService\bin" relpath=""/>
+            <fatjar.filesource path="C:\Development-Thesis\Workspace\RTSOA-Journal\rtsoa.common\bin" relpath=""/>
+            <fatjar.jarsource file="C:\Development-Thesis\java libraries\xom-1.2.7\xom-1.2.7.jar" relpath=""/>
+            <fatjar.jarsource file="C:\Development-Thesis\java libraries\antlr.jar" relpath=""/>
+            <fatjar.jarsource file="C:\Development-Thesis\java libraries\oojdrew-1.0.jar" relpath=""/>
+            <fatjar.jarsource file="C:\Development-Thesis\java libraries\ptolemy.jar" relpath=""/>
+            <fatjar.jarsource file="C:\Development-Thesis\Apache\apache-log4j-1.2.16\log4j-1.2.16.jar" relpath=""/>
+            <fatjar.jarsource file="C:\Development-Thesis\JAXB\jaxb-ri-20110601\lib\jaxb-xjc.jar" relpath=""/>
+            <fatjar.jarsource file="C:\Development-Thesis\java libraries\mysql-connector-java-5.1.18\mysql-connector-java-5.1.18-bin.jar" relpath=""/>
+            <fatjar.jarsource file="C:\Development-Thesis\java libraries\opencsv-2.3\deploy\opencsv-2.3.jar" relpath=""/>
+        </fatjar.build>
+    </target>
+</project>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><payload xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="payload.xsd">
+	<header>
+		<type>process</type>
+		<ruleBaseVersion>v003</ruleBaseVersion>
+		<ruleBaseCommitment>0</ruleBaseCommitment>
+		<sequenceId>0</sequenceId>
+		<priortiseSID>true</priortiseSID>
+		<monitorIncomingEvents>false</monitorIncomingEvents>
+		<activityCount>0</activityCount>
+		<status>0</status>
+	</header>
+
+	<service>
+		<serviceName>Cardiology_InitializationService</serviceName>
+		<operation>purgeAndInitialize</operation>
+	</service>
+	
+	<joinAttribute>
+		<attributeName>token</attributeName>
+		<attributeValue>"init cardiology"</attributeValue>
+		<notBefore>0</notBefore>
+		<notAfter>0</notAfter>
+	</joinAttribute>
+	
+	<monitorData>
+		<callingService>0</callingService>
+		<eventArrivalTime>0</eventArrivalTime>
+		<taskArrivalTime>0</taskArrivalTime>
+		<processStartTime>0</processStartTime>
+		<processElapsedTime>0</processElapsedTime>
+		<lostEvents>0</lostEvents>
+	</monitorData>
+</payload>

@@ -1,0 +1,209 @@
+ INFO [main] (BuildServiceAnalysisDatabase.java:130) - Derby Embedded Driver registered successfully.
+ INFO [main] (PetriNetAnalyzer.java:2040) - Found 1 distinct workflowBases: [2000000]
+Auto-detected 1 workflow bases: [2000000]
+
+================================================================================
+WORKFLOW BASE: 2000000 (v002)
+================================================================================
+ INFO [main] (PetriNetAnalyzer.java:364) - Fork/Join analysis: 0 forks, 0 successful joins
+ INFO [main] (PetriNetAnalyzer.java:128) - Token completeness check: All tokens complete
+ INFO [main] (PetriNetAnalyzer.java:128) - Token completeness check: All tokens complete
+ INFO [main] (PetriNetAnalyzer.java:364) - Fork/Join analysis: 0 forks, 0 successful joins
+ INFO [main] (PetriNetAnalyzer.java:568) - Actual incomplete tokens: 0 (filtered 0 joined tokens)
+ INFO [main] (PetriNetAnalyzer.java:172) - Found 10 terminated tokens (checked both tables)
+ INFO [main] (PetriNetAnalyzer.java:704) - Workflow throughput: 0.83 tokens/sec
+ INFO [main] (PetriNetAnalyzer.java:612) - Place MonitorService statistics: 0 tokens, avg=0.0ms
+ INFO [main] (PetriNetAnalyzer.java:612) - Place RadiologyService statistics: 20 tokens, avg=274.0ms
+ INFO [main] (PetriNetAnalyzer.java:825) - Capacity verification for MonitorService: max marking=0, capacity=50 - PASS
+ INFO [main] (PetriNetAnalyzer.java:825) - Capacity verification for RadiologyService: max marking=1, capacity=50 - PASS
+ INFO [main] (PetriNetAnalyzer.java:240) - Retrieved 20 token paths for workflowBase=2000000
+=== PETRI NET ANALYSIS REPORT ===
+Workflow Base: 2000000
+
+1. FORK/JOIN ANALYSIS
+   No fork/join patterns detected
+
+2. TOKEN COMPLETENESS
+   [OK] All tokens completed successfully
+   [INFO] 10 tokens terminated early (routed to TERMINATE)
+     Terminated tokens: [2000000, 2010000, 2020000, 2030000, 2040000, 2050000, 2060000, 2070000, 2080000, 2090000]
+
+3. THROUGHPUT
+   0.83 tokens/second
+
+4. PLACE STATISTICS
+   Place: MonitorService
+     Tokens: 0
+     Avg residence: 0.0ms
+     Min/Max: 0/0ms
+   Place: RadiologyService
+     Tokens: 20
+     Avg residence: 274.0ms
+     Min/Max: 180/447ms
+
+5. CAPACITY VERIFICATION
+   MonitorService: [OK] BOUNDED
+   RadiologyService: [OK] BOUNDED
+
+6. DATA QUALITY
+   [OK] All residence times are non-negative
+
+=== END REPORT ===
+
+ INFO [main] (PetriNetAnalyzer.java:1896) - Generated workflow report for workflowBase=2000000
+ INFO [main] (PetriNetAnalyzer.java:1574) - GENEALOGY: Found 10 tokens for workflow 2000000
+ INFO [main] (PetriNetAnalyzer.java:1639) - GENEALOGY: 10 root tokens, 0 forked tokens, 0 max generation depth
+
+=== TOKEN GENEALOGY REPORT ===
+Workflow Base: 2000000
+Total Tokens: 10
+Root Tokens: 10
+Forked Tokens: 0
+Max Generation Depth: 0
+Total Families: 10
+
+--- Generation Distribution ---
+Generation 0: 10 tokens
+
+--- Family Trees ---
+
+Family rooted at 2000000:
+  Total members: 1
+  Direct descendants: 0
+
+Family rooted at 2010000:
+  Total members: 1
+  Direct descendants: 0
+
+Family rooted at 2020000:
+  Total members: 1
+  Direct descendants: 0
+
+Family rooted at 2030000:
+  Total members: 1
+  Direct descendants: 0
+
+Family rooted at 2040000:
+  Total members: 1
+  Direct descendants: 0
+
+Family rooted at 2050000:
+  Total members: 1
+  Direct descendants: 0
+
+Family rooted at 2060000:
+  Total members: 1
+  Direct descendants: 0
+
+Family rooted at 2070000:
+  Total members: 1
+  Direct descendants: 0
+
+Family rooted at 2080000:
+  Total members: 1
+  Direct descendants: 0
+
+Family rooted at 2090000:
+  Total members: 1
+  Direct descendants: 0
+
+=== TOKEN PATHS ===
+ INFO [main] (PetriNetAnalyzer.java:240) - Retrieved 20 token paths for workflowBase=2000000
+Token 2000000 at RadiologyService: residence=447ms
+Token 2000000 at RadiologyService: residence=434ms
+Token 2010000 at RadiologyService: residence=321ms
+Token 2010000 at RadiologyService: residence=311ms
+Token 2020000 at RadiologyService: residence=255ms
+Token 2020000 at RadiologyService: residence=244ms
+Token 2030000 at RadiologyService: residence=238ms
+Token 2030000 at RadiologyService: residence=228ms
+Token 2040000 at RadiologyService: residence=277ms
+Token 2040000 at RadiologyService: residence=261ms
+Token 2050000 at RadiologyService: residence=291ms
+Token 2050000 at RadiologyService: residence=281ms
+Token 2060000 at RadiologyService: residence=228ms
+Token 2060000 at RadiologyService: residence=216ms
+Token 2070000 at RadiologyService: residence=217ms
+Token 2070000 at RadiologyService: residence=208ms
+Token 2080000 at RadiologyService: residence=337ms
+Token 2080000 at RadiologyService: residence=328ms
+Token 2090000 at RadiologyService: residence=188ms
+Token 2090000 at RadiologyService: residence=180ms
+
+=== MARKING EVOLUTION ===
+ INFO [main] (PetriNetAnalyzer.java:795) - Retrieved 10 GENERATED events for workflowBase 2000000
+Time=1769416221520 Token=2000000 Place=RadiologyService Marking=0 Buffer=0 ToPlace=RadiologyService TransitionId=FEDERATED_RADIOLOGY_REQUEST EventType=GENERATED
+Time=1769416223916 Token=2010000 Place=RadiologyService Marking=0 Buffer=0 ToPlace=RadiologyService TransitionId=FEDERATED_RADIOLOGY_REQUEST EventType=GENERATED
+Time=1769416224114 Token=2020000 Place=RadiologyService Marking=0 Buffer=0 ToPlace=RadiologyService TransitionId=FEDERATED_RADIOLOGY_REQUEST EventType=GENERATED
+Time=1769416225512 Token=2030000 Place=RadiologyService Marking=0 Buffer=0 ToPlace=RadiologyService TransitionId=FEDERATED_RADIOLOGY_REQUEST EventType=GENERATED
+Time=1769416226113 Token=2040000 Place=RadiologyService Marking=0 Buffer=0 ToPlace=RadiologyService TransitionId=FEDERATED_RADIOLOGY_REQUEST EventType=GENERATED
+Time=1769416229713 Token=2050000 Place=RadiologyService Marking=0 Buffer=0 ToPlace=RadiologyService TransitionId=FEDERATED_RADIOLOGY_REQUEST EventType=GENERATED
+Time=1769416229914 Token=2060000 Place=RadiologyService Marking=0 Buffer=0 ToPlace=RadiologyService TransitionId=FEDERATED_RADIOLOGY_REQUEST EventType=GENERATED
+Time=1769416231713 Token=2070000 Place=RadiologyService Marking=0 Buffer=0 ToPlace=RadiologyService TransitionId=FEDERATED_RADIOLOGY_REQUEST EventType=GENERATED
+Time=1769416232712 Token=2080000 Place=RadiologyService Marking=0 Buffer=0 ToPlace=RadiologyService TransitionId=FEDERATED_RADIOLOGY_REQUEST EventType=GENERATED
+Time=1769416232914 Token=2090000 Place=RadiologyService Marking=0 Buffer=0 ToPlace=RadiologyService TransitionId=FEDERATED_RADIOLOGY_REQUEST EventType=GENERATED
+ INFO [main] (PetriNetAnalyzer.java:753) - Retrieved 0 marking snapshots for MonitorService
+ INFO [main] (PetriNetAnalyzer.java:753) - Retrieved 30 marking snapshots for RadiologyService
+Time=1769416221826 Token=2000000 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=BUFFERED
+Time=1769416221839 Token=2000000 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=ENTER
+Time=1769416222273 Token=2000000 Place=RadiologyService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_RadiologyService EventType=EXIT
+Time=1769416224255 Token=2010000 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=BUFFERED
+Time=1769416224265 Token=2010000 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=ENTER
+Time=1769416224576 Token=2010000 Place=RadiologyService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_RadiologyService EventType=EXIT
+Time=1769416225140 Token=2020000 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=BUFFERED
+Time=1769416225151 Token=2020000 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=ENTER
+Time=1769416225395 Token=2020000 Place=RadiologyService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_RadiologyService EventType=EXIT
+Time=1769416226022 Token=2030000 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=BUFFERED
+Time=1769416226032 Token=2030000 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=ENTER
+Time=1769416226260 Token=2030000 Place=RadiologyService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_RadiologyService EventType=EXIT
+Time=1769416226693 Token=2040000 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=BUFFERED
+Time=1769416226709 Token=2040000 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=ENTER
+Time=1769416226970 Token=2040000 Place=RadiologyService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_RadiologyService EventType=EXIT
+Time=1769416229956 Token=2050000 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=BUFFERED
+Time=1769416229966 Token=2050000 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=ENTER
+Time=1769416230247 Token=2050000 Place=RadiologyService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_RadiologyService EventType=EXIT
+Time=1769416230781 Token=2060000 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=BUFFERED
+Time=1769416230793 Token=2060000 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=ENTER
+Time=1769416231009 Token=2060000 Place=RadiologyService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_RadiologyService EventType=EXIT
+Time=1769416231998 Token=2070000 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=BUFFERED
+Time=1769416232007 Token=2070000 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=ENTER
+Time=1769416232215 Token=2070000 Place=RadiologyService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_RadiologyService EventType=EXIT
+Time=1769416233023 Token=2080000 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=BUFFERED
+Time=1769416233032 Token=2080000 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=ENTER
+Time=1769416233360 Token=2080000 Place=RadiologyService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_RadiologyService EventType=EXIT
+Time=1769416234083 Token=2090000 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=BUFFERED
+Time=1769416234091 Token=2090000 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=ENTER
+Time=1769416234271 Token=2090000 Place=RadiologyService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_RadiologyService EventType=EXIT
+
+================================================================================
+CROSS-VERSION PRIORITY ANALYSIS
+================================================================================
+ INFO [main] (PetriNetAnalyzer.java:1008) - Priority analysis complete: 10 samples (10 root, 0 forked), 0 root contention points, 0 root inversions
+
+=== PRIORITY ANALYSIS REPORT ===
+
+1. SAMPLE BREAKDOWN
+   Total samples: 10
+   Root tokens: 10 (used for priority analysis)
+   Forked tokens: 0 (join participants - excluded from priority analysis)
+
+2. VERSION STATISTICS (Root Tokens Only)
+   Version  Tokens     Avg Queue    Min Queue    Max Queue    Avg Service 
+   ----------------------------------------------------------------------
+   v002     10         333.6        231          440          395.7       
+
+3. CONTENTION ANALYSIS (Root Tokens Only)
+   Total contention points: 0
+
+4. PRIORITY INVERSIONS (Root Tokens Only)
+   [OK] No priority inversions detected
+
+5. JOIN COMPLETIONS (Excluded from Priority Analysis)
+   Forked tokens processed: 0
+
+6. PRIORITY VERDICT
+   [PASS] Priority scheduling is working effectively (100.0%)
+
+=== END PRIORITY REPORT ===
+
+ INFO [main] (PetriNetAnalyzer.java:1342) - Generated priority analysis report

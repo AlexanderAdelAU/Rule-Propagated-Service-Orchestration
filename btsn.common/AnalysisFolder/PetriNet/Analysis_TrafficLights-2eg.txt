@@ -1,0 +1,132 @@
+ INFO [main] (BuildServiceAnalysisDatabase.java:130) - Derby Embedded Driver registered successfully.
+ INFO [main] (PetriNetAnalyzer.java:2040) - Found 1 distinct workflowBases: [1000000]
+Auto-detected 1 workflow bases: [1000000]
+
+================================================================================
+WORKFLOW BASE: 1000000 (v001)
+================================================================================
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1000002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1000001 exit check: TERMINATE=1 -> exited=true (forked tokens only exit via TERMINATE)
+ INFO [main] (PetriNetAnalyzer.java:364) - Fork/Join analysis: 1 forks, 1 successful joins
+ INFO [main] (PetriNetAnalyzer.java:128) - Token completeness check: 2 incomplete tokens found
+ INFO [main] (PetriNetAnalyzer.java:128) - Token completeness check: 2 incomplete tokens found
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1000002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1000001 exit check: TERMINATE=1 -> exited=true (forked tokens only exit via TERMINATE)
+ INFO [main] (PetriNetAnalyzer.java:364) - Fork/Join analysis: 1 forks, 1 successful joins
+ INFO [main] (PetriNetAnalyzer.java:568) - Actual incomplete tokens: 0 (filtered 1 joined tokens)
+ INFO [main] (PetriNetAnalyzer.java:172) - Found 2 terminated tokens (checked both tables)
+ INFO [main] (PetriNetAnalyzer.java:612) - Place JOIN_CONSUMED statistics: 0 tokens, avg=0.0ms
+ INFO [main] (PetriNetAnalyzer.java:612) - Place P1_Place statistics: 2 tokens, avg=1393.0ms
+ INFO [main] (PetriNetAnalyzer.java:612) - Place TERMINATE statistics: 0 tokens, avg=0.0ms
+ INFO [main] (PetriNetAnalyzer.java:825) - Capacity verification for JOIN_CONSUMED: max marking=0, capacity=50 - PASS
+ INFO [main] (PetriNetAnalyzer.java:825) - Capacity verification for P1_Place: max marking=1, capacity=50 - PASS
+ INFO [main] (PetriNetAnalyzer.java:825) - Capacity verification for TERMINATE: max marking=0, capacity=50 - PASS
+ INFO [main] (PetriNetAnalyzer.java:240) - Retrieved 0 token paths for workflowBase=1000000
+=== PETRI NET ANALYSIS REPORT ===
+Workflow Base: 1000000
+
+1. FORK/JOIN ANALYSIS
+   Total Forks: 1
+   Successful Joins: 1
+   Forked Tokens: 2
+   Fork from 1000000 -> [1000002, 1000001] [JOINED]
+
+2. TOKEN COMPLETENESS
+   [OK] All tokens completed successfully
+   (2 tokens consumed by joins - this is correct)
+   [INFO] 2 tokens terminated early (routed to TERMINATE)
+     Terminated tokens: [1000000, 1000001]
+
+3. THROUGHPUT
+   0.00 tokens/second
+
+4. PLACE STATISTICS
+   Place: JOIN_CONSUMED
+     Tokens: 0
+     Avg residence: 0.0ms
+     Min/Max: 0/0ms
+   Place: P1_Place
+     Tokens: 2
+     Avg residence: 1393.0ms
+     Min/Max: 209/2577ms
+   Place: TERMINATE
+     Tokens: 0
+     Avg residence: 0.0ms
+     Min/Max: 0/0ms
+
+5. CAPACITY VERIFICATION
+   JOIN_CONSUMED: [OK] BOUNDED
+   P1_Place: [OK] BOUNDED
+   TERMINATE: [OK] BOUNDED
+
+6. DATA QUALITY
+   [OK] All residence times are non-negative
+
+=== END REPORT ===
+
+ INFO [main] (PetriNetAnalyzer.java:1896) - Generated workflow report for workflowBase=1000000
+ INFO [main] (PetriNetAnalyzer.java:1574) - GENEALOGY: Found 2 tokens for workflow 1000000
+ INFO [main] (PetriNetAnalyzer.java:1639) - GENEALOGY: 0 root tokens, 2 forked tokens, 0 max generation depth
+
+=== TOKEN GENEALOGY REPORT ===
+Workflow Base: 1000000
+Total Tokens: 2
+Root Tokens: 0
+Forked Tokens: 2
+Max Generation Depth: 0
+Total Families: 0
+
+--- Generation Distribution ---
+
+--- Family Trees ---
+
+=== TOKEN PATHS ===
+ INFO [main] (PetriNetAnalyzer.java:240) - Retrieved 0 token paths for workflowBase=1000000
+
+=== MARKING EVOLUTION ===
+ INFO [main] (PetriNetAnalyzer.java:795) - Retrieved 2 GENERATED events for workflowBase 1000000
+Time=1768821580035 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=TRAFFICLIGHT_EVENTGENERATOR EventType=GENERATED
+Time=1768821582427 Token=1000002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=TRAFFICLIGHT_EVENTGENERATOR EventType=GENERATED
+ INFO [main] (PetriNetAnalyzer.java:753) - Retrieved 0 marking snapshots for JOIN_CONSUMED
+ INFO [main] (PetriNetAnalyzer.java:753) - Retrieved 5 marking snapshots for P1_Place
+Time=1768821580335 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1768821582628 Token=1000002 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1768821582703 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1768821582709 Token=1000002 Place=P1_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P1 EventType=JOIN_CONSUMED
+Time=1768821582912 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P1 EventType=TERMINATE
+ INFO [main] (PetriNetAnalyzer.java:753) - Retrieved 0 marking snapshots for TERMINATE
+
+================================================================================
+CROSS-VERSION PRIORITY ANALYSIS
+================================================================================
+ INFO [main] (PetriNetAnalyzer.java:1008) - Priority analysis complete: 1 samples (0 root, 1 forked), 0 root contention points, 0 root inversions
+
+=== PRIORITY ANALYSIS REPORT ===
+
+1. SAMPLE BREAKDOWN
+   Total samples: 1
+   Root tokens: 0 (used for priority analysis)
+   Forked tokens: 1 (join participants - excluded from priority analysis)
+
+2. VERSION STATISTICS (Root Tokens Only)
+   Version  Tokens     Avg Queue    Min Queue    Max Queue    Avg Service 
+   ----------------------------------------------------------------------
+
+3. CONTENTION ANALYSIS (Root Tokens Only)
+   Total contention points: 0
+
+4. PRIORITY INVERSIONS (Root Tokens Only)
+   [OK] No priority inversions detected
+
+5. JOIN COMPLETIONS (Excluded from Priority Analysis)
+   Forked tokens processed: 1
+   Note: Join participants are fast-tracked when siblings arrive.
+         This is correct workflow semantics, not a priority violation.
+   By version: v001=1 
+
+6. PRIORITY VERDICT
+   [PASS] Priority scheduling is working effectively (100.0%)
+
+=== END PRIORITY REPORT ===
+
+ INFO [main] (PetriNetAnalyzer.java:1342) - Generated priority analysis report

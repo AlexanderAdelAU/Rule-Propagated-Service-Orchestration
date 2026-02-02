@@ -1,0 +1,127 @@
+{
+  "metadata": {
+    "name": "Traffic Light Intersection - Fork/Join Model",
+    "version": "2.5",
+    "author": "BTSN Petri Net Designer",
+    "created": "2025-12-26",
+    "type": "Fork/Join Petri Net"
+  },
+   "processType":"PetriNet",
+  "elements": [
+    {
+      "id": "P1_EVENTGENERATOR",
+      "type": "EVENT_GENERATOR",
+      "x": 88,
+      "y": 130,
+      "width": 24,
+      "height": 60,
+      "label": "P1_EVENTGENERATOR",
+      "rotation": 0.0,
+      "generator_rate": "1000",
+      "token_version": "v001",
+      "fork_behavior": {
+        "enabled": true,
+        "child_count": 2,
+        "join_target": "T_in_NS_Green"
+      }
+    },
+    {
+      "id": "T_in_NS_Green",
+      "type": "TRANSITION",
+      "x": 248,
+      "y": 130,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_NS_Green",
+      "rotation": 0.0,
+      "node_type": "JoinNode",
+      "node_value": "JOIN_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "NS_Green",
+      "type": "PLACE",
+      "x": 315,
+      "y": 135,
+      "width": 50,
+      "height": 50,
+      "label": "NS_Green",
+      "service": "P1_Place",
+      "operations": [
+        {
+          "name": "processToken",
+          "arguments": [
+            {"name": "token_branch1", "type": "String", "value": "String", "required": false},
+            {"name": "token_branch2", "type": "String", "value": "String", "required": false}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_NS_Green",
+      "type": "TRANSITION",
+      "x": 408,
+      "y": 130,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_NS_Green",
+      "rotation": 0.0,
+      "node_type": "ForkNode",
+      "node_value": "FORK_NODE",
+      "transition_type": "T_out"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "T_in_NS_Green",
+      "target": "NS_Green",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "NS_Green",
+      "target": "T_out_NS_Green",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P1_EVENTGENERATOR",
+      "target": "T_in_NS_Green",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_NS_Green",
+      "target": "T_in_NS_Green",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "waypoints": [
+        {"x": 420, "y": 80},
+        {"x": 260, "y": 80}
+      ]
+    },
+    {
+      "source": "T_out_NS_Green",
+      "target": "T_in_NS_Green",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "waypoints": [
+        {"x": 420, "y": 260},
+        {"x": 260, "y": 260}
+      ]
+    }
+  ],
+  "textElements": [
+  ]
+}

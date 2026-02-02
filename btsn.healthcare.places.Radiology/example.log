@@ -1,0 +1,5 @@
+INFO ServiceThread-Radiology_CollectorService-12201 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Completed callNextOperation for MonitorService, published=true
+INFO ServiceThread-Radiology_CollectorService-12201 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Successfully published to MonitorService via EventPublisher
+ERROR ServiceThread-Radiology_CollectorService-12201 org.btsn.handlers.ServiceThread - monitorIncomingEvents: false
+DEBUG ServiceThread-Radiology_CollectorService-12201 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Cleaned up join 3000000
+DEBUG ServiceThread-Radiology_CollectorService-12201 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Service Radiology_CollectorService sequence ID: 3000000 complete.

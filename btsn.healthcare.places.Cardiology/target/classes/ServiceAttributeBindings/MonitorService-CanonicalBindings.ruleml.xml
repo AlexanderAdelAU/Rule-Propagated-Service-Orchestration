@@ -1,0 +1,72 @@
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>MonitorService</Ind>
+</Atom>
+
+<!-- ANYOF MARKER: acknowledgeTokenArrival can execute with ANY ONE of the following inputs -->
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>acknowledgeTokenArrival</Ind>
+	<Ind>null</Ind>
+	<Ind>anyof</Ind>  <!-- This marker indicates OR semantics -->
+</Atom>
+
+<!-- List each acceptable input for acknowledgeTokenArrival -->
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>acknowledgeTokenArrival</Ind>
+	<Ind>null</Ind>
+	<Ind>triageResults</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>acknowledgeTokenArrival</Ind>
+	<Ind>null</Ind>
+	<Ind>treatmentResults</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>acknowledgeTokenArrival</Ind>
+	<Ind>null</Ind>
+	<Ind>diagnosisResults</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>acknowledgeTokenArrival</Ind>
+	<Ind>null</Ind>
+	<Ind>laboratoryResults</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>acknowledgeTokenArrival</Ind>
+	<Ind>null</Ind>
+	<Ind>radiologyResults</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>acknowledgeTokenArrival</Ind>
+	<Ind>null</Ind>
+	<Ind>cardiologyResults</Ind>
+</Atom>
+
+<!-- Other operations remain unchanged -->
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>setMeasureProcessTime</Ind>
+	<Ind>null</Ind>
+	<Ind>token</Ind>
+</Atom>
+
+<Atom>
+	<Rel>hasOperation</Rel>
+	<Ind>getMeasureProcessTime</Ind>
+	<Ind>null</Ind>
+	<Ind>token</Ind>
+</Atom>
+<Atom>
+	<Rel>hasOperation</Rel>
+	<Ind>setExpiredPackets</Ind>
+	<Ind>null</Ind>
+	<Ind>token</Ind>
+</Atom>

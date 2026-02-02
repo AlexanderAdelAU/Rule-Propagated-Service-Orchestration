@@ -1,0 +1,41 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="rulepayload">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="header"/>
+        <xs:element ref="targetservice"/>
+         <xs:element ref="rulefiledata"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="header">
+  <xs:complexType>
+  		<xs:sequence>
+  			<xs:element name="timestamp" type="xs:dateTime"></xs:element>
+  			<xs:element name="ruleFileName" type="xs:string"/>
+   			<xs:element name="ruleBaseVersion" type="xs:string" />
+   			<xs:element name="ruleBaseCommitment" type="xs:string" />
+  		</xs:sequence>
+  	</xs:complexType>
+  </xs:element>
+  
+   <xs:element name="targetservice">
+  <xs:complexType>
+  		<xs:sequence>
+  			<xs:element name="serviceName" type="xs:string"></xs:element>
+   			<xs:element name="operationName" type="xs:string" />
+  		</xs:sequence>
+  	</xs:complexType>
+  </xs:element>
+  
+  <xs:element name="rulefiledata" >
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="data" type="xs:string"/>
+         </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+ 
+</xs:schema>

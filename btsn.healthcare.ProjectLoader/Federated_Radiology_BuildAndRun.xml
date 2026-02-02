@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="Federated_Radiology_Workflow" default="run-complete-workflow" basedir=".">
+	<description>
+		Federated Radiology Workflow - Complete Workflow with Collectors
+		Executes federated radiology requests across distributed services
+		
+		Phases:
+		  Phase 1: Initialize Databases (purgeAndInitialize)
+		  Phase 2: Execute Workflow (generate and process tokens)
+		  Phase 3: Collect Performance Data
+
+		Services (Radiology, Monitor) start once and remain running throughout all phases.
+	</description>
+
+	<!-- ======================================================================= -->
+	<!-- PROPERTIES                                                              -->
+	<!-- ======================================================================= -->
+
+	<!-- Rule version for workflow execution -->
+	<property name="rule.version" value="v002" />
+
+	<!-- Process names for each phase -->
+	<property name="init.process.name" value="healthcare/Initializers/Radiology_Initialization" />
+	<property name="workflow.process.name" value="healthcare/Workflow/Federated_Radiology_Workflow" />
+	<property name="collector.process.name" value="healthcare/Collectors/Radiology_Collector" />
+
+	<!-- Phase 1: Initialization parameters (v999 = admin/non-instrumented) -->
+	<property name="init.version" value="v999" />
+	<property name="db.init.operation" value="purgeAndInitialize" />
+	<property name="sequence.id.init.radiology" value="999100000" />
+	<property name="sequence.id.init.monitor" value="999600000" />
+	<property name="init.delay.seconds" value="3" />
+
+	<!-- Phase 2: Workflow parameters -->
+	<property name="target.place" value="RadiologyService" />
+	<property name="target.operation" value="federatedRadiologyRequest" />
+	<property name="token.count" value="10" />
+	<property name="token.expire" value="120000" />
+	<property name="event.generator.id" value="FEDERATED_RADIOLOGY_REQUEST" />
+
+	<!-- Phase 3: Collector parameters (v999 = admin/non-instrumented) -->
+	<property name="collector.version" value="v999" />
+	<property name="collector.operation" value="collectAllData" />
+	<property name="query.version" value="v002" />
+	<property name="sequence.id.collect.radiology" value="999110000" />
+	<property name="collector.delay.seconds" value="3" />
+
+	<!-- Timing parameters -->
+	<property name="service.startup.seconds" value="3" />
+	<property name="phase.delay.seconds" value="5" />
+	<property name="workflow.completion.seconds" value="5" />
+
+	<!-- Base directories -->
+	<property name="build.file.dir" location="." />
+	<property name="healthcare.root.dir" location="../" />
+
+	<!-- Common project -->
+	<property name="common.project.dir" location="${healthcare.root.dir}/btsn.common" />
+	<property name="lib.dir" location="${common.project.dir}/lib" />
+	<property name="class.dir" location="${common.project.dir}/bin" />
+	<property name="common.src.dir" location="${common.project.dir}/src" />
+
+	<!-- Event Generators project -->
+	<property name="generator.project.dir" location="${healthcare.root.dir}/btsn.common.eventgenerators" />
+	<property name="generator.src.dir" location="${generator.project.dir}/src" />
+	<property name="generator.bin.dir" location="${generator.project.dir}/bin" />
+
+	<!-- Output directory -->
+	<property name="output.dir" location="${build.file.dir}" />
+	<property name="radiology.output.file" location="${output.dir}/RadiologyService.out.txt" />
+	<property name="monitor.output.file" location="${output.dir}/MonitorService.out.txt" />
+
+	<!-- Radiology Service -->
+	<property name="radiology.project.dir" location="${healthcare.root.dir}/btsn.healthcare.places.Radiology" />
+	<property name="radiology.bin.dir" location="${radiology.project.dir}/bin" />
+	<property name="radiology.src.dir" location="${radiology.project.dir}/src" />
+
+	<!-- Monitor Service -->
+	<property name="monitor.project.dir" location="${healthcare.root.dir}/btsn.common.Monitor" />
+	<property name="monitor.bin.dir" location="${monitor.project.dir}/bin" />
+	<property name="monitor.src.dir" location="${monitor.project.dir}/src" />
+
+	<!-- Java Classes -->
+	<property name="service.loader.class" value="org.btsn.handlers.ServiceLoader" />
+	<property name="init.event.generator.class" value="org.btsn.common.eventgenerators.DatabaseInitialization_EventGenerator" />
+	<property name="token.generator.class" value="org.btsn.healthcare.eventgenerators.GenericHealthcareTokenGenerator" />
+	<property name="collector.event.generator.class" value="org.btsn.common.eventgenerators.Common_Collector_EventGenerator" />
+
+	<!-- ======================================================================= -->
+	<!-- CLASSPATHS                                                              -->
+	<!-- ======================================================================= -->
+
+	<path id="common.classpath">
+		<fileset dir="${lib.dir}" erroronmissingdir="false">
+			<include name="*.jar" />
+		</fileset>
+		<pathelement location="${class.dir}" />
+	</path>
+
+	<path id="radiology.classpath">
+		<path refid="common.classpath" />
+		<pathelement location="${radiology.bin.dir}" />
+	</path>
+
+	<path id="monitor.classpath">
+		<path refid="common.classpath" />
+		<pathelement location="${monitor.bin.dir}" />
+	</path>
+
+	<path id="generator.classpath">
+		<path refid="common.classpath" />
+		<pathelement location="${generator.bin.dir}" />
+	</path>
+
+	<!-- ======================================================================= -->
+	<!-- UTILITY TARGETS                                                         -->
+	<!-- ======================================================================= -->
+
+	<target name="clean-output" description="Clean previous output files">
+		<delete file="${radiology.output.file}" quiet="true" />
+		<delete file="${monitor.output.file}" quiet="true" />
+		<echo message="Previous output files cleaned" />
+	</target>
+
+	<target name="generate-workflow-bindings" description="Generate canonical bindings from workflow JSON">
+		<echo message="=== Generating Workflow Bindings ===" />
+		<java classname="org.btsn.rulecontroller.TopologyBindingGenerator" 
+		      classpathref="generator.classpath"
+		      dir="${common.project.dir}"
+		      fork="true"
+		      failonerror="true">
+			<arg value="${workflow.process.name}" />
+			<arg value="${rule.version}" />
+		</java>
+		<echo message="Workflow bindings generated successfully" />
+	</target>
+
+	<target name="rebuild-service-ruleml" depends="generate-workflow-bindings" 
+	        description="Generate bindings and rebuild master Service.ruleml">
+		<echo message="=== Building Master Service.ruleml ===" />
+		<java classname="org.btsn.utils.BuildMasterServiceRuleBase" 
+		      classpathref="generator.classpath"
+		      dir="${common.project.dir}"
+		      fork="true"
+		      failonerror="true">
+			<arg value="${rule.version}" />
+			<arg value="ALL" />
+		</java>
+		<echo message="Master Service.ruleml built successfully" />
+	</target>
+
+	<!-- ======================================================================= -->
+	<!-- MAIN WORKFLOW TARGET                                                    -->
+	<!-- ======================================================================= -->
+
+	<target name="run-complete-workflow" depends="clean-output,rebuild-service-ruleml" 
+	        description="Run complete Federated Radiology workflow">
+		<echo message="" />
+		<echo message="================================================================" />
+		<echo message="  FEDERATED RADIOLOGY - COMPLETE WORKFLOW                      " />
+		<echo message="================================================================" />
+		<echo message="  Rule Version: ${rule.version}" />
+		<echo message="  Workflow: ${workflow.process.name}" />
+		<echo message="  Target: ${target.place}:${target.operation}" />
+		<echo message="  Tokens: ${token.count}" />
+		<echo message="================================================================" />
+		<echo message="" />
+
+		<parallel>
+			<!-- Radiology Service (runs entire duration) -->
+			<java jvm="java.exe" classname="${service.loader.class}" 
+			      fork="true" timeout="600000" 
+			      dir="${radiology.project.dir}" output="${radiology.output.file}">
+				<classpath refid="radiology.classpath" />
+				<arg value="${radiology.project.dir}" />
+				<arg value="-version" />
+				<arg value="${rule.version}" />
+			</java>
+
+			<!-- Monitor Service (runs entire duration) -->
+			<java jvm="java.exe" classname="${service.loader.class}" 
+			      fork="true" timeout="600000" 
+			      dir="${monitor.project.dir}" output="${monitor.output.file}">
+				<classpath refid="monitor.classpath" />
+				<arg value="${monitor.project.dir}" />
+				<arg value="-version" />
+				<arg value="${rule.version}" />
+			</java>
+
+			<!-- Sequential workflow phases -->
+			<sequential>
+				<sleep seconds="${service.startup.seconds}" />
+
+				<!-- ======================================================= -->
+				<!-- PHASE 1: Database Initialization                        -->
+				<!-- ======================================================= -->
+				<echo message="" />
+				<echo message="===============================================" />
+				<echo message="    PHASE 1: DATABASE INITIALIZATION           " />
+				<echo message="===============================================" />
+
+				<!-- Initialize Radiology Database -->
+				<echo message="Initializing Radiology database..." />
+				<java classname="${init.event.generator.class}" 
+				      fork="true" dir="${generator.project.dir}" failonerror="true">
+					<classpath refid="generator.classpath" />
+					<arg value="-service" /><arg value="Radiology_InitializationService" />
+					<arg value="-operation" /><arg value="${db.init.operation}" />
+					<arg value="-version" /><arg value="${init.version}" />
+					<arg value="-process" /><arg value="${init.process.name}" />
+					<arg value="-sequenceId" /><arg value="${sequence.id.init.radiology}" />
+				</java>
+				<sleep seconds="${init.delay.seconds}" />
+
+				<!-- Initialize Monitor Database -->
+				<echo message="Initializing Monitor database..." />
+				<java classname="${init.event.generator.class}" 
+				      fork="true" dir="${generator.project.dir}" failonerror="true">
+					<classpath refid="generator.classpath" />
+					<arg value="-service" /><arg value="Monitor_InitializationService" />
+					<arg value="-operation" /><arg value="${db.init.operation}" />
+					<arg value="-version" /><arg value="${init.version}" />
+					<arg value="-process" /><arg value="${init.process.name}" />
+					<arg value="-sequenceId" /><arg value="${sequence.id.init.monitor}" />
+				</java>
+				<sleep seconds="${init.delay.seconds}" />
+				<echo message="=== Phase 1 Complete ===" />
+				<sleep seconds="${phase.delay.seconds}" />
+
+				<!-- ======================================================= -->
+				<!-- PHASE 2: Workflow Execution                             -->
+				<!-- ======================================================= -->
+				<echo message="" />
+				<echo message="===============================================" />
+				<echo message="    PHASE 2: WORKFLOW EXECUTION                " />
+				<echo message="===============================================" />
+
+				<!-- Deploy workflow rules first -->
+				<echo message="Deploying workflow rules..." />
+				<java classname="${token.generator.class}" 
+				      fork="true" dir="${generator.project.dir}" failonerror="true">
+					<classpath refid="generator.classpath" />
+					<arg value="-version" /><arg value="${rule.version}" />
+					<arg value="-process" /><arg value="${workflow.process.name}" />
+					<arg value="-place" /><arg value="${target.place}" />
+					<arg value="-operation" /><arg value="${target.operation}" />
+					<arg value="-tokens" /><arg value="0" />
+					<arg value="-expire" /><arg value="${token.expire}" />
+					<arg value="-generator" /><arg value="${event.generator.id}" />
+				</java>
+				<sleep seconds="2" />
+
+				<!-- Fire tokens -->
+				<echo message="Firing ${token.count} tokens to ${target.place}..." />
+				<java classname="${token.generator.class}" 
+				      fork="true" dir="${generator.project.dir}" failonerror="true">
+					<classpath refid="generator.classpath" />
+					<arg value="-version" /><arg value="${rule.version}" />
+					<arg value="-process" /><arg value="${workflow.process.name}" />
+					<arg value="-place" /><arg value="${target.place}" />
+					<arg value="-operation" /><arg value="${target.operation}" />
+					<arg value="-tokens" /><arg value="${token.count}" />
+					<arg value="-expire" /><arg value="${token.expire}" />
+					<arg value="-generator" /><arg value="${event.generator.id}" />
+					<arg value="-skipdeploy" />
+				</java>
+				<echo message="=== Phase 2 Complete ===" />
+				<sleep seconds="${phase.delay.seconds}" />
+
+				<!-- ======================================================= -->
+				<!-- PHASE 3: Data Collection                                -->
+				<!-- ======================================================= -->
+				<echo message="" />
+				<echo message="===============================================" />
+				<echo message="    PHASE 3: DATA COLLECTION                   " />
+				<echo message="===============================================" />
+
+				<!-- Radiology Collection -->
+				<echo message="Collecting from Radiology_CollectorService..." />
+				<java classname="${collector.event.generator.class}" 
+				      fork="true" dir="${generator.project.dir}" failonerror="true">
+					<classpath refid="generator.classpath" />
+					<arg value="-service" /><arg value="Radiology_CollectorService" />
+					<arg value="-operation" /><arg value="${collector.operation}" />
+					<arg value="-version" /><arg value="${collector.version}" />
+					<arg value="-process" /><arg value="${collector.process.name}" />
+					<arg value="-queryVersion" /><arg value="${query.version}" />
+					<arg value="-sequenceId" /><arg value="${sequence.id.collect.radiology}" />
+				</java>
+				<sleep seconds="${collector.delay.seconds}" />
+				<echo message="=== Phase 3 Complete ===" />
+
+				<!-- ======================================================= -->
+				<!-- COMPLETE                                                -->
+				<!-- ======================================================= -->
+				<echo message="" />
+				<echo message="================================================================" />
+				<echo message="        FEDERATED RADIOLOGY WORKFLOW COMPLETED SUCCESSFULLY    " />
+				<echo message="================================================================" />
+				<echo message="" />
+				<echo message="Output files:" />
+				<echo message="  Radiology: ${radiology.output.file}" />
+				<echo message="  Monitor: ${monitor.output.file}" />
+				<echo message="" />
+				<echo message="Services are still running. Press Ctrl+C to stop." />
+			</sequential>
+		</parallel>
+	</target>
+
+	<!-- ======================================================================= -->
+	<!-- WORKFLOW-ONLY TARGET (skip init/collect)                               -->
+	<!-- ======================================================================= -->
+
+	<target name="run-workflow-only" depends="clean-output,rebuild-service-ruleml" 
+	        description="Run only the workflow phase (skip init and collect)">
+		<echo message="" />
+		<echo message="================================================================" />
+		<echo message="  FEDERATED RADIOLOGY - WORKFLOW ONLY                          " />
+		<echo message="================================================================" />
+		<echo message="  Target: ${target.place}:${target.operation}" />
+
+		<parallel>
+			<!-- Start services -->
+			<java jvm="java.exe" classname="${service.loader.class}" 
+			      fork="true" timeout="600000" 
+			      dir="${radiology.project.dir}" output="${radiology.output.file}">
+				<classpath refid="radiology.classpath" />
+				<arg value="${radiology.project.dir}" />
+				<arg value="-version" />
+				<arg value="${rule.version}" />
+			</java>
+
+			<java jvm="java.exe" classname="${service.loader.class}" 
+			      fork="true" timeout="600000" 
+			      dir="${monitor.project.dir}" output="${monitor.output.file}">
+				<classpath refid="monitor.classpath" />
+				<arg value="${monitor.project.dir}" />
+				<arg value="-version" />
+				<arg value="${rule.version}" />
+			</java>
+
+			<sequential>
+				<sleep seconds="${service.startup.seconds}" />
+
+				<!-- Deploy workflow rules -->
+				<echo message="Deploying workflow rules..." />
+				<java classname="${token.generator.class}" 
+				      fork="true" dir="${generator.project.dir}" failonerror="true">
+					<classpath refid="generator.classpath" />
+					<arg value="-version" /><arg value="${rule.version}" />
+					<arg value="-process" /><arg value="${workflow.process.name}" />
+					<arg value="-place" /><arg value="${target.place}" />
+					<arg value="-operation" /><arg value="${target.operation}" />
+					<arg value="-tokens" /><arg value="0" />
+					<arg value="-expire" /><arg value="${token.expire}" />
+					<arg value="-generator" /><arg value="${event.generator.id}" />
+				</java>
+
+				<!-- Fire tokens -->
+				<echo message="Firing ${token.count} tokens to ${target.place}..." />
+				<java classname="${token.generator.class}" 
+				      fork="true" dir="${generator.project.dir}" failonerror="true">
+					<classpath refid="generator.classpath" />
+					<arg value="-version" /><arg value="${rule.version}" />
+					<arg value="-process" /><arg value="${workflow.process.name}" />
+					<arg value="-place" /><arg value="${target.place}" />
+					<arg value="-operation" /><arg value="${target.operation}" />
+					<arg value="-tokens" /><arg value="${token.count}" />
+					<arg value="-expire" /><arg value="${token.expire}" />
+					<arg value="-generator" /><arg value="${event.generator.id}" />
+					<arg value="-skipdeploy" />
+				</java>
+
+				<echo message="Workflow running. Waiting ${workflow.completion.seconds} seconds..." />
+				<sleep seconds="${workflow.completion.seconds}" />
+				<echo message="Workflow complete. Check logs for results." />
+			</sequential>
+		</parallel>
+	</target>
+
+	<!-- ======================================================================= -->
+	<!-- HELP TARGET                                                             -->
+	<!-- ======================================================================= -->
+
+	<target name="help" description="Display usage information">
+		<echo message="" />
+		<echo message="================================================================" />
+		<echo message="  Federated Radiology Workflow                                 " />
+		<echo message="================================================================" />
+		<echo message="" />
+		<echo message="USAGE:" />
+		<echo message="  ant                        Run complete workflow (default)" />
+		<echo message="  ant run-complete-workflow  Run complete workflow" />
+		<echo message="  ant run-workflow-only      Skip init/collect phases" />
+		<echo message="  ant help                   Show this help" />
+		<echo message="" />
+		<echo message="CONFIGURABLE PARAMETERS:" />
+		<echo message="  -Drule.version=v002              Rule base version" />
+		<echo message="  -Dtarget.place=RadiologyService  Target service name" />
+		<echo message="  -Dtarget.operation=federatedRadiologyRequest  Service operation" />
+		<echo message="  -Dtoken.count=10                 Number of tokens to generate" />
+		<echo message="  -Dphase.delay.seconds=5          Delay between phases" />
+		<echo message="  -Dquery.version=v002             Version(s) to collect data from" />
+		<echo message="  -Dworkflow.completion.seconds=5  Wait time after firing tokens" />
+		<echo message="" />
+	</target>
+
+</project>

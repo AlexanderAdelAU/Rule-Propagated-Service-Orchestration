@@ -1,0 +1,687 @@
+{
+  "metadata": {
+    "name": "Traffic Light Intersection - Fork/Join Model",
+    "version": "2.4",
+    "author": "BTSN Petri Net Designer",
+    "created": "2025-12-26",
+    "type": "Fork/Join Petri Net"
+  },
+   "processType":"PetriNet",
+  "documentation": {
+    "title": "Traffic Light Intersection - Fork/Join Control",
+    "summary": "Models a 4-way intersection using Fork/Join constructs. When NS goes through its Green-Yellow-Red cycle, a parallel path keeps EW in Red state. Then they swap - EW cycles while NS stays Red. Fork splits the control, Join synchronizes before swap.",
+    "topology": {
+      "description": "Fork/Join pattern with parallel holding paths",
+      "pattern": "FORK splits to active cycle + holding path, JOIN synchronizes before swap"
+    },
+    "tokens": [
+      {
+        "id": "v001",
+        "name": "Controller A",
+        "color": "blue",
+        "sequenceBase": 1000000,
+        "description": "First traffic controller - higher priority"
+      },
+      {
+        "id": "v002",
+        "name": "Controller B",
+        "color": "red",
+        "sequenceBase": 2000000,
+        "description": "Second traffic controller - lower priority"
+      }
+    ],
+    "places": [
+      {"id": "P1", "service": "P1_Place", "label": "NS_Green", "description": "NS light is GREEN"},
+      {"id": "P2", "service": "P2_Place", "label": "NS_Yellow", "description": "NS light is YELLOW"},
+      {"id": "P3", "service": "P3_Place", "label": "EW_Red_Hold", "description": "EW stays RED while NS cycles"},
+      {"id": "P4", "service": "P4_Place", "label": "EW_Green", "description": "EW light is GREEN"},
+      {"id": "P5", "service": "P5_Place", "label": "EW_Yellow", "description": "EW light is YELLOW"},
+      {"id": "P6", "service": "P6_Place", "label": "NS_Red_Hold", "description": "NS stays RED while EW cycles"}
+    ],
+    "transitions": {
+      "forks": ["T_out_NS_Green (GatewayNode) - splits to NS_Yellow and EW_Red_Hold", "T_out_EW_Green (GatewayNode) - splits to EW_Yellow and NS_Red_Hold"],
+      "joins": ["T_in_EW_Green (JoinNode) - waits for NS cycle complete + EW_Red_Hold", "T_in_NS_Green (JoinNode) - waits for EW cycle complete + NS_Red_Hold"]
+    }
+  },
+  "elements": [
+    {
+      "id": "TRAFFICLIGHT_EVENTGENERATOR",
+      "type": "EVENT_GENERATOR",
+      "x": 10,
+      "y": 130,
+      "width": 24,
+      "height": 60,
+      "label": "TRAFFICLIGHT_EVENTGENERATOR",
+      "rotation": 0.0,
+      "generator_rate": "1000",
+      "token_version": "v001"
+    },
+    {
+      "id": "T_in_NS_Green",
+      "type": "TRANSITION",
+      "x": 128,
+      "y": 130,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_NS_Green",
+      "rotation": 0.0,
+      "node_type": "JoinNode",
+      "node_value": "JOIN_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "NS_Green",
+      "type": "PLACE",
+      "x": 195,
+      "y": 135,
+      "width": 50,
+      "height": 50,
+      "label": "NS_Green",
+      "service": "P1_Place",
+      "operations": [
+        {
+          "name": "processToken",
+          "arguments": [
+            {"name": "token_branch1", "type": "String", "value": "String", "required": false},
+            {"name": "token_branch2", "type": "String", "value": "String", "required": false}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_NS_Green",
+      "type": "TRANSITION",
+      "x": 288,
+      "y": 130,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_NS_Green",
+      "rotation": 0.0,
+      "node_type": "ForkNode",
+      "node_value": "FORK_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_NS_Yellow",
+      "type": "TRANSITION",
+      "x": 368,
+      "y": 130,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_NS_Yellow",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "NS_Yellow",
+      "type": "PLACE",
+      "x": 455,
+      "y": 135,
+      "width": 50,
+      "height": 50,
+      "label": "NS_Yellow",
+      "service": "P2_Place",
+      "operations": [
+        {
+          "name": "processToken",
+          "arguments": [
+            {"name": "token", "type": "String", "value": "String", "required": false}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_NS_Yellow",
+      "type": "TRANSITION",
+      "x": 548,
+      "y": 130,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_NS_Yellow",
+      "rotation": 0.0,
+      "node_type": "XorNode",
+      "node_value": "XOR_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_EW_Red_Hold",
+      "type": "TRANSITION",
+      "x": 368,
+      "y": 270,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_EW_Red_Hold",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "EW_Red_Hold",
+      "type": "PLACE",
+      "x": 455,
+      "y": 275,
+      "width": 50,
+      "height": 50,
+      "label": "EW_Red_Hold",
+      "service": "P3_Place",
+      "operations": [
+        {
+          "name": "processToken",
+          "arguments": [
+            {"name": "token", "type": "String", "value": "String", "required": false}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_EW_Red_Hold",
+      "type": "TRANSITION",
+      "x": 548,
+      "y": 270,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_EW_Red_Hold",
+      "rotation": 0.0,
+      "node_type": "XorNode",
+      "node_value": "XOR_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_EW_Green",
+      "type": "TRANSITION",
+      "x": 650,
+      "y": 190,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_EW_Green",
+      "rotation": 0.0,
+      "node_type": "JoinNode",
+      "node_value": "JOIN_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "EW_Green",
+      "type": "PLACE",
+      "x": 715,
+      "y": 195,
+      "width": 50,
+      "height": 50,
+      "label": "EW_Green",
+      "service": "P4_Place",
+      "operations": [
+        {
+          "name": "processToken",
+          "arguments": [
+            {"name": "token_branch1", "type": "String", "value": "String", "required": false},
+            {"name": "token_branch2", "type": "String", "value": "String", "required": false}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_EW_Green",
+      "type": "TRANSITION",
+      "x": 810,
+      "y": 190,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_EW_Green",
+      "rotation": 0.0,
+      "node_type": "ForkNode",
+      "node_value": "FORK_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_EW_Yellow",
+      "type": "TRANSITION",
+      "x": 910,
+      "y": 270,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_EW_Yellow",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "EW_Yellow",
+      "type": "PLACE",
+      "x": 975,
+      "y": 275,
+      "width": 50,
+      "height": 50,
+      "label": "EW_Yellow",
+      "service": "P5_Place",
+      "operations": [
+        {
+          "name": "processToken",
+          "arguments": [
+            {"name": "token", "type": "String", "value": "String", "required": false}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_EW_Yellow",
+      "type": "TRANSITION",
+      "x": 1068,
+      "y": 270,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_EW_Yellow",
+      "rotation": 0.0,
+      "node_type": "XorNode",
+      "node_value": "XOR_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_NS_Red_Hold",
+      "type": "TRANSITION",
+      "x": 908,
+      "y": 110,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_NS_Red_Hold",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "NS_Red_Hold",
+      "type": "PLACE",
+      "x": 975,
+      "y": 115,
+      "width": 50,
+      "height": 50,
+      "label": "NS_Red_Hold",
+      "service": "P6_Place",
+      "operations": [
+        {
+          "name": "processToken",
+          "arguments": [
+            {"name": "token", "type": "String", "value": "String", "required": false}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_NS_Red_Hold",
+      "type": "TRANSITION",
+      "x": 1068,
+      "y": 110,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_NS_Red_Hold",
+      "rotation": 0.0,
+      "node_type": "XorNode",
+      "node_value": "XOR_NODE",
+      "transition_type": "T_out"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "TRAFFICLIGHT_EVENTGENERATOR",
+      "target": "T_in_NS_Green",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_NS_Green",
+      "target": "NS_Green",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "NS_Green",
+      "target": "T_out_NS_Green",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_NS_Yellow",
+      "target": "NS_Yellow",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "NS_Yellow",
+      "target": "T_out_NS_Yellow",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_NS_Yellow",
+      "target": "T_in_EW_Green",
+      "label": "true",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "true",
+      "endpoint": "processToken",
+      "waypoints": [
+        {"x": 600, "y": 160},
+        {"x": 600, "y": 220}
+      ]
+    },
+    {
+      "source": "T_in_EW_Red_Hold",
+      "target": "EW_Red_Hold",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "EW_Red_Hold",
+      "target": "T_out_EW_Red_Hold",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_EW_Red_Hold",
+      "target": "T_in_EW_Green",
+      "label": "true",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "true",
+      "endpoint": "processToken",
+      "waypoints": [
+        {"x": 600, "y": 300},
+        {"x": 600, "y": 220}
+      ]
+    },
+    {
+      "source": "T_in_EW_Green",
+      "target": "EW_Green",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "EW_Green",
+      "target": "T_out_EW_Green",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_EW_Green",
+      "target": "T_in_EW_Yellow",
+      "label": "EW path",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "true",
+      "endpoint": "processToken",
+      "waypoints": [
+        {"x": 860, "y": 220},
+        {"x": 860, "y": 300}
+      ],
+      "labelOffsetX": -24,
+      "labelOffsetY": 27
+    },
+    {
+      "source": "T_out_EW_Green",
+      "target": "T_in_NS_Red_Hold",
+      "label": "NS hold",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "true",
+      "endpoint": "processToken",
+      "waypoints": [
+        {"x": 860, "y": 220},
+        {"x": 860, "y": 140}
+      ],
+      "labelOffsetX": -16,
+      "labelOffsetY": -36
+    },
+    {
+      "source": "T_in_EW_Yellow",
+      "target": "EW_Yellow",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "EW_Yellow",
+      "target": "T_out_EW_Yellow",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_NS_Red_Hold",
+      "target": "NS_Red_Hold",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "NS_Red_Hold",
+      "target": "T_out_NS_Red_Hold",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_EW_Yellow",
+      "target": "T_in_NS_Green",
+      "label": "true",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "true",
+      "endpoint": "processToken",
+      "waypoints": [
+        {"x": 1120, "y": 300},
+        {"x": 1120, "y": 400},
+        {"x": 80, "y": 400},
+        {"x": 80, "y": 160}
+      ],
+      "labelOffsetX": 18,
+      "labelOffsetY": -25
+    },
+    {
+      "source": "T_out_NS_Red_Hold",
+      "target": "T_in_NS_Green",
+      "label": "true",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "true",
+      "endpoint": "processToken",
+      "waypoints": [
+        {"x": 1120, "y": 140},
+        {"x": 1120, "y": 60},
+        {"x": 80, "y": 60},
+        {"x": 80, "y": 160}
+      ],
+      "labelOffsetX": 9,
+      "labelOffsetY": 15
+    },
+    {
+      "source": "T_out_NS_Yellow",
+      "target": "T_in_NS_Yellow",
+      "label": "retry",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "false",
+      "endpoint": "processToken",
+      "waypoints": [
+        {"x": 560, "y": 80},
+        {"x": 380, "y": 80}
+      ],
+      "labelOffsetX": -38,
+      "labelOffsetY": 7
+    },
+    {
+      "source": "T_out_EW_Red_Hold",
+      "target": "T_in_EW_Red_Hold",
+      "label": "retry",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "false",
+      "endpoint": "processToken",
+      "waypoints": [
+        {"x": 560, "y": 380},
+        {"x": 380, "y": 380}
+      ],
+      "labelOffsetX": 18,
+      "labelOffsetY": -1
+    },
+    {
+      "source": "T_out_EW_Yellow",
+      "target": "T_in_EW_Yellow",
+      "label": "retry",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "false",
+      "endpoint": "processToken",
+      "waypoints": [
+        {"x": 1080, "y": 380},
+        {"x": 920, "y": 380}
+      ],
+      "labelOffsetX": -64,
+      "labelOffsetY": -4
+    },
+    {
+      "source": "T_out_NS_Red_Hold",
+      "target": "T_in_NS_Red_Hold",
+      "label": "retry",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "false",
+      "endpoint": "processToken",
+      "waypoints": [
+        {"x": 1080, "y": 80},
+        {"x": 920, "y": 80}
+      ],
+      "labelOffsetX": -31,
+      "labelOffsetY": -5
+    },
+    {
+      "source": "T_out_NS_Green",
+      "target": "T_in_NS_Yellow",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_NS_Green",
+      "target": "T_in_EW_Red_Hold",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "waypoints": [
+        {"x": 300, "y": 300}
+      ]
+    }
+  ],
+  "textElements": [
+    {
+      "x": 350,
+      "y": 20,
+      "text": "Traffic Light Intersection - Fork/Join Model",
+      "fontSize": 14,
+      "fontStyle": 1,
+      "color": -16777216
+    },
+    {
+      "x": 200,
+      "y": 100,
+      "text": "NS GREEN",
+      "fontSize": 10,
+      "fontStyle": 1,
+      "color": -16744448
+    },
+    {
+      "x": 460,
+      "y": 100,
+      "text": "NS YELLOW",
+      "fontSize": 10,
+      "fontStyle": 1,
+      "color": -26368
+    },
+    {
+      "x": 587,
+      "y": 358,
+      "text": "EW RED (hold)",
+      "fontSize": 10,
+      "fontStyle": 0,
+      "color": -65536
+    },
+    {
+      "x": 716,
+      "y": 159,
+      "text": "EW GREEN",
+      "fontSize": 10,
+      "fontStyle": 1,
+      "color": -16744448
+    },
+    {
+      "x": 980,
+      "y": 340,
+      "text": "EW YELLOW",
+      "fontSize": 10,
+      "fontStyle": 1,
+      "color": -26368
+    },
+    {
+      "x": 970,
+      "y": 100,
+      "text": "NS RED (hold)",
+      "fontSize": 10,
+      "fontStyle": 0,
+      "color": -65536
+    },
+    {
+      "x": 280,
+      "y": 110,
+      "text": "FORK",
+      "fontSize": 9,
+      "fontStyle": 1,
+      "color": -16777216
+    },
+    {
+      "x": 620,
+      "y": 185,
+      "text": "JOIN",
+      "fontSize": 9,
+      "fontStyle": 1,
+      "color": -16777216
+    },
+    {
+      "x": 824,
+      "y": 171,
+      "text": "FORK",
+      "fontSize": 9,
+      "fontStyle": 1,
+      "color": -16777216
+    },
+    {
+      "x": 110,
+      "y": 110,
+      "text": "JOIN",
+      "fontSize": 9,
+      "fontStyle": 1,
+      "color": -16777216
+    }
+  ]
+}

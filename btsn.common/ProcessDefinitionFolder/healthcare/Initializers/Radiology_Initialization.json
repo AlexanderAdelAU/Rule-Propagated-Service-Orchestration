@@ -1,0 +1,170 @@
+{
+   "processType":"SOA",
+  "elements": [
+    {
+      "id": "EVENT_GENERATOR",
+      "type": "TRANSITION",
+      "x": 290,
+      "y": 50,
+      "width": 20,
+      "height": 60,
+      "label": "EVENT_GENERATOR",
+      "rotation": 90.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "Other"
+    },
+    {
+      "id": "T_in_Radiology_Init",
+      "type": "TRANSITION",
+      "x": 210,
+      "y": 150,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Radiology_Init",
+      "rotation": 90.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "T_in_Monitor_Init",
+      "type": "TRANSITION",
+      "x": 390,
+      "y": 150,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Monitor_Init",
+      "rotation": 90.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "Radiology_Init",
+      "type": "PLACE",
+      "x": 195,
+      "y": 255,
+      "width": 50,
+      "height": 50,
+      "label": "Radiology_Init",
+      "service": "Radiology_InitializationService",
+      "operations": [
+        {
+          "name": "purgeAndInitialize"
+        }
+      ]
+    },
+    {
+      "id": "Monitor_Init",
+      "type": "PLACE",
+      "x": 375,
+      "y": 255,
+      "width": 50,
+      "height": 50,
+      "label": "Monitor_Init",
+      "service": "Monitor_InitializationService",
+      "operations": [
+        {
+          "name": "purgeAndInitialize"
+        }
+      ]
+    },
+    {
+      "id": "T_out_Radiology_Init",
+      "type": "TRANSITION",
+      "x": 210,
+      "y": 350,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Radiology_Init",
+      "rotation": 90.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_out_Monitor_Init",
+      "type": "TRANSITION",
+      "x": 390,
+      "y": 350,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Monitor_Init",
+      "rotation": 90.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_out"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "EVENT_GENERATOR",
+      "target": "T_in_Radiology_Init",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "EVENT_GENERATOR",
+      "target": "T_in_Monitor_Init",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Radiology_Init",
+      "target": "Radiology_Init",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Monitor_Init",
+      "target": "Monitor_Init",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Radiology_Init",
+      "target": "T_out_Radiology_Init",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Monitor_Init",
+      "target": "T_out_Monitor_Init",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    }
+  ],
+  "textElements": [
+    {
+      "x": 279,
+      "y": 384,
+      "text": "TERMINATE",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 227,
+      "y": 45,
+      "text": "Radiololgy_Monitor_Intialization",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    }
+  ]
+}

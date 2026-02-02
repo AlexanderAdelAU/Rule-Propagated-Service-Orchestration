@@ -1,0 +1,23 @@
+{
+	"service": "_default",
+	"operation": "processToken",
+	"description": "Default token format for any service without a specific format file",
+	
+	"tokenStructure": {
+	  "tokenId": "${sequenceId}",
+	  "version": "${version}",
+	  "notAfter": "${notAfter}",
+	  "currentPlace": "${targetPlace}",
+	  "workflow_start_time": "${workflowStartTime}",
+	  
+	  "data": {
+		"source": "GenericTokenGenerator",
+		"generated": "true"
+	  }
+	},
+	
+	"notes": [
+	  "This is the fallback format when no service-specific format exists",
+	  "Override data fields via -data command line argument"
+	]
+  }

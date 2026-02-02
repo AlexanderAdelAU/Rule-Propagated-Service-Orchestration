@@ -1,0 +1,524 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Triage_Monitor_Initializer_Project" default="load-all-services" basedir=".">
+	<description>
+        Triage and Monitor Services Initializer - Database Initialization Workflow for Healthcare
+    </description>
+
+	<!-- =================================== -->
+	<!-- PROPERTIES SECTION                 -->
+	<!-- =================================== -->
+
+	<!-- INITIALIZATION PARAMETERS -->
+	<property name="rule.version" value="v001" />
+	<property name="sequence.id.triage" value="9999990" />
+	<property name="sequence.id.monitor" value="9999995" />
+	<property name="init.delay.seconds" value="3" />
+	<property name="db.init.operation" value="purgeAndInitialize" />
+	<property name="process.name" value="healthcare/Triage_Monitor_Initialization" />
+
+	<!-- Base directories -->
+	<property name="build.file.dir" location="." />
+	<property name="healthcare.root.dir" location="../" />
+	
+	<echo message="Root directory ${healthcare.root.dir}"/>
+
+	<!-- Common project directories -->
+	<property name="common.project.dir" location="${healthcare.root.dir}/btsn.common" />
+	<property name="lib.dir" location="${common.project.dir}/lib" />
+	<property name="class.dir" location="${common.project.dir}/bin" />
+	<property name="common.src.dir" location="${common.project.dir}/src" />
+
+	<!-- Output directory (current directory) -->
+	<property name="output.dir" location="${build.file.dir}" />
+
+	<!-- Triage Service -->
+	<property name="triage.project.dir" location="${healthcare.root.dir}/btsn.healthcare.places.Triage" />
+	<property name="triage.bin.dir" location="${triage.project.dir}/bin" />
+	<property name="triage.src.dir" location="${triage.project.dir}/src" />
+	<property name="triage.output.file" location="${output.dir}/TriageService.out.txt" />
+
+	<!-- Monitor Service -->
+	<property name="monitor.project.dir" location="${healthcare.root.dir}/btsn.healthcare.Monitor" />
+	<property name="monitor.bin.dir" location="${monitor.project.dir}/bin" />
+	<property name="monitor.src.dir" location="${monitor.project.dir}/src" />
+	<property name="monitor.output.file" location="${output.dir}/MonitorService.out.txt" />
+
+	<!-- Event Generator -->
+	<property name="generator.project.dir" location="${healthcare.root.dir}/btsn.healthcare.eventgenerators" />
+	<property name="generator.bin.dir" location="${generator.project.dir}/bin" />
+
+	<!-- REMOVED: Rule Controller properties - it's part of the common project now -->
+	<!-- Rule controller classes will be compiled as part of compile-common target -->
+
+	<!-- Java Classes -->
+	<property name="service.loader.class" value="org.btsn.healthcare.handlers.ServiceLoader" />
+	<property name="event.generator.class" value="org.btsn.healthcare.eventgenerators.DatabaseInitialization_EventGenerator" />
+
+	<!-- =================================== -->
+	<!-- CLASSPATH SECTION                  -->
+	<!-- =================================== -->
+
+	<path id="common.classpath">
+		<fileset dir="${lib.dir}" erroronmissingdir="false">
+			<include name="*.jar" />
+		</fileset>
+		<pathelement location="${class.dir}" />
+	</path>
+
+	<path id="triage.classpath">
+		<path refid="common.classpath" />
+		<pathelement location="${triage.bin.dir}" />
+	</path>
+
+	<path id="monitor.classpath">
+		<path refid="common.classpath" />
+		<pathelement location="${monitor.bin.dir}" />
+	</path>
+
+	<path id="generator.classpath">
+		<path refid="common.classpath" />
+		<pathelement location="${generator.bin.dir}" />
+		<!-- REMOVED: rule.controller.bin.dir - now part of common.classpath -->
+	</path>
+
+	<!-- =================================== -->
+	<!-- UTILITY TARGETS                    -->
+	<!-- =================================== -->
+
+	<target name="create-output-directory" description="Create output directory if it doesn't exist">
+		<mkdir dir="${output.dir}" />
+		<echo message="Output directory created/verified: ${output.dir}" />
+	</target>
+
+	<target name="clean-output" description="Clean previous output files">
+		<delete file="${triage.output.file}" quiet="true" />
+		<delete file="${monitor.output.file}" quiet="true" />
+		<echo message="Previous output files cleaned" />
+	</target>
+
+	<target name="clean-monitor-database" description="Monitor database cleanup">
+		<echo message="=== Database cleanup will be handled by the initialization process ===" />
+	</target>
+
+	<!-- =================================== -->
+	<!-- COMPILATION TARGETS                -->
+	<!-- =================================== -->
+
+	<target name="compile-common" description="Compile common classes including ServiceLoader and RuleController">
+		<echo message="Compiling common classes..." />
+		<echo message="Source directory: ${common.src.dir}" />
+		<echo message="Destination directory: ${class.dir}" />
+		
+		<mkdir dir="${class.dir}" />
+		
+		<javac srcdir="${common.src.dir}" 
+		       destdir="${class.dir}" 
+		       classpathref="common.classpath"
+		       includeantruntime="false"
+		       fork="true"
+		       source="15"
+		       target="15"
+		       failonerror="true"
+		       verbose="false"
+		       listfiles="false">
+			<compilerarg value="-Xlint:unchecked" />
+		</javac>
+		<echo message="Common classes compiled successfully (includes RuleController)" />
+	</target>
+
+	<target name="compile-triage" description="Compile Triage service classes">
+		<echo message="Compiling Triage service classes..." />
+		<mkdir dir="${triage.bin.dir}" />
+		<javac srcdir="${triage.src.dir}" 
+		       destdir="${triage.bin.dir}" 
+		       classpathref="common.classpath"
+		       includeantruntime="false"
+		       fork="true"
+		       source="15"
+		       target="15"
+		       failonerror="true">
+			<compilerarg value="-Xlint:unchecked" />
+		</javac>
+		<echo message="Triage service classes compiled successfully" />
+	</target>
+
+	<target name="compile-monitor" description="Compile Monitor service classes">
+		<echo message="Compiling Monitor service classes..." />
+		<mkdir dir="${monitor.bin.dir}" />
+		<javac srcdir="${monitor.src.dir}" 
+		       destdir="${monitor.bin.dir}" 
+		       classpathref="common.classpath"
+		       includeantruntime="false"
+		       fork="true"
+		       source="15"
+		       target="15"
+		       failonerror="true">
+			<compilerarg value="-Xlint:unchecked" />
+		</javac>
+		<echo message="Monitor service classes compiled successfully" />
+	</target>
+
+	<target name="compile-generator" description="Compile event generator classes">
+		<echo message="Compiling event generator classes..." />
+		<mkdir dir="${generator.bin.dir}" />
+		<javac srcdir="${generator.project.dir}/src" 
+		       destdir="${generator.bin.dir}" 
+		       classpathref="common.classpath"
+		       includeantruntime="false"
+		       fork="true"
+		       source="15"
+		       target="15"
+		       failonerror="true">
+			<compilerarg value="-Xlint:unchecked" />
+		</javac>
+		<echo message="Event generator classes compiled successfully" />
+	</target>
+
+	<!-- REMOVED: compile-rulecontroller target -->
+	<!-- Rule controller is now compiled as part of compile-common -->
+
+	<target name="rebuild-service-ruleml" depends="compile-common,compile-generator" description="Build the master Service.ruleml">
+		<echo message="Building master Service.ruleml..." />
+		
+		<java classname="org.btsn.utils.BuildMasterServiceRuleBase" 
+		      classpathref="generator.classpath"
+		      dir="${common.project.dir}"
+		      fork="true"
+		      failonerror="true">
+			<arg value="${rule.version}" />
+			<arg value="ALL" />
+		</java>
+		<echo message="Master Service.ruleml built successfully" />
+	</target>
+
+	<!-- =================================== -->
+	<!-- SERVICE LOADING TARGETS            -->
+	<!-- =================================== -->
+
+	<target name="load-triage-service" description="Load Triage Service">
+		<echo message="Starting Triage Service..." />
+		<java classname="${service.loader.class}" fork="true" 
+		      dir="${triage.project.dir}" output="${triage.output.file}">
+			<classpath refid="triage.classpath" />
+			<arg value="${triage.project.dir}" />
+			<arg value="-version" />
+			<arg value="${rule.version}" />
+		</java>
+	</target>
+
+	<target name="load-monitor-service" description="Load Monitor Service">
+		<echo message="Starting Monitor Service..." />
+		<java classname="${service.loader.class}" fork="true" 
+		      dir="${monitor.project.dir}" output="${monitor.output.file}">
+			<classpath refid="monitor.classpath" />
+			<arg value="${monitor.project.dir}" />
+			<arg value="-version" />
+			<arg value="${rule.version}" />
+		</java>
+	</target>
+
+	<!-- =================================== -->
+	<!-- RULE DEPLOYMENT TARGET             -->
+	<!-- =================================== -->
+
+	<target name="deploy-process-rules"
+	        description="Deploy process rules once for all services">
+		<echo message="=== DEPLOYING PROCESS RULES ===" />
+		<echo message="Process: ${process.name}" />
+		<echo message="Version: ${rule.version}" />
+		
+		<java classname="${event.generator.class}" 
+		      fork="true" 
+		      dir="${generator.project.dir}"
+		      failonerror="true">
+			<classpath refid="generator.classpath" />
+			
+			<arg value="-service" />
+			<arg value="Triage_InitializationService" />
+			
+			<arg value="-operation" />
+			<arg value="purgeAndInitialize" />
+			<arg value="-version" />
+			<arg value="${rule.version}" />
+			
+			<arg value="-process" />
+			<arg value="${process.name}" />
+			
+			<arg value="-sequenceId" />
+			<arg value="${sequence.id.triage}" />
+			
+			<arg value="-tokens" />
+			<arg value="0" />
+		</java>
+		
+		<echo message="Process rules deployed successfully" />
+		<sleep seconds="1" />
+	</target>
+
+	<target name="trigger-all-initializers-sequential" 
+	        description="Trigger Triage and Monitor initialization events sequentially with delays">
+		<echo message="=== DEPLOYING PROCESS RULES FIRST ===" />
+		<echo message="Process: ${process.name}" />
+		<echo message="Version: ${rule.version}" />
+		
+		<java classname="${event.generator.class}" 
+		      fork="true" 
+		      dir="${generator.project.dir}"
+		      failonerror="true">
+			<classpath refid="generator.classpath" />
+			
+			<arg value="-service" />
+			<arg value="Triage_InitializationService" />
+			
+			<arg value="-operation" />
+			<arg value="purgeAndInitialize" />
+			<arg value="-version" />
+			<arg value="${rule.version}" />
+			
+			<arg value="-process" />
+			<arg value="${process.name}" />
+			
+			<arg value="-sequenceId" />
+			<arg value="${sequence.id.triage}" />
+			
+			<arg value="-tokens" />
+			<arg value="0" />
+			
+			<arg value="-noexit" />
+		</java>
+		
+		<echo message="Process rules deployed successfully" />
+		<sleep seconds="1" />
+		
+		<echo message="=== TRIGGERING SERVICE INITIALIZATION EVENTS SEQUENTIALLY ===" />
+		<echo message="Database Operation: ${db.init.operation}" />
+		<echo message="Delay between services: ${init.delay.seconds} seconds" />
+
+		<!-- Trigger Triage - skip deployment (already deployed above) -->
+		<echo message="Triggering Triage Initialization Service for operation: ${db.init.operation}" />
+		<java classname="${event.generator.class}" 
+		      fork="true" 
+		      dir="${generator.project.dir}"
+		      failonerror="true">
+			<classpath refid="generator.classpath" />
+			
+			<arg value="-service" />
+			<arg value="Triage_InitializationService" />
+			
+			<arg value="-operation" />
+			<arg value="${db.init.operation}" />
+			
+			<arg value="-version" />
+			<arg value="${rule.version}" />
+			
+			<arg value="-process" />
+			<arg value="${process.name}" />
+			
+			<arg value="-sequenceId" />
+			<arg value="${sequence.id.triage}" />
+			<arg value="-tokens" />
+			<arg value="1" />
+			
+			<arg value="-skipDeploy" />
+		</java>
+		
+		<echo message="Waiting ${init.delay.seconds} seconds before next service..." />
+		<sleep seconds="${init.delay.seconds}" />
+
+		<!-- Trigger Monitor -->
+		<echo message="Triggering Monitor Initialization Service for operation: ${db.init.operation}" />
+		<java classname="${event.generator.class}" 
+		      fork="true" 
+		      dir="${generator.project.dir}"
+		      failonerror="true">
+			<classpath refid="generator.classpath" />
+			
+			<arg value="-service" />
+			<arg value="Monitor_InitializationService" />
+			
+			<arg value="-operation" />
+			<arg value="${db.init.operation}" />
+			
+			<arg value="-version" />
+			<arg value="${rule.version}" />
+			
+			<arg value="-process" />
+			<arg value="${process.name}" />
+			
+			<arg value="-sequenceId" />
+			<arg value="${sequence.id.monitor}" />
+			<arg value="-tokens" />
+			<arg value="1" />
+			
+			<arg value="-skipDeploy" />
+		</java>
+		
+		<echo message="" />
+		<echo message="=== ALL INITIALIZATION EVENTS TRIGGERED SUCCESSFULLY ===" />
+	</target>
+
+	<!-- =================================== -->
+	<!-- MAIN TARGETS                       -->
+	<!-- =================================== -->
+
+	<target name="load-all-services" 
+	        depends="clean-output,clean-monitor-database,rebuild-service-ruleml" 
+	        description="Load Triage and Monitor services with initialization (DEFAULT)">
+		<echo message="=== LOADING TRIAGE AND MONITOR SERVICES FOR INITIALIZATION ===" />
+		<echo message="Rule version: ${rule.version}" />
+		<echo message="Database Operation: ${db.init.operation}" />
+		<echo message="Process Name: ${process.name}" />
+		<echo message="Event Generator: DatabaseInitialization_EventGenerator" />
+		<echo message="" />
+
+		<!-- Start all services in parallel -->
+		<parallel>
+			<antcall target="load-triage-service" />
+			<antcall target="load-monitor-service" />
+
+			<sequential>
+				<echo message="Waiting for services to initialize..." />
+				<sleep seconds="2" />
+				
+				<!-- Deploy process rules -->
+				<antcall target="deploy-process-rules" />
+				
+				<!-- Fire initialization tokens -->
+				<echo message="=== TRIGGERING SERVICE INITIALIZATION EVENTS SEQUENTIALLY ===" />
+				<echo message="Database Operation: ${db.init.operation}" />
+				<echo message="Delay between services: ${init.delay.seconds} seconds" />
+
+				<!-- Trigger Triage -->
+				<echo message="Triggering Triage Initialization Service for operation: ${db.init.operation}" />
+				<java classname="${event.generator.class}" 
+				      fork="true" 
+				      dir="${generator.project.dir}"
+				      failonerror="true">
+					<classpath refid="generator.classpath" />
+					
+					<arg value="-service" />
+					<arg value="Triage_InitializationService" />
+					
+					<arg value="-operation" />
+					<arg value="${db.init.operation}" />
+					
+					<arg value="-version" />
+					<arg value="${rule.version}" />
+					
+					<arg value="-process" />
+					<arg value="${process.name}" />
+					
+					<arg value="-sequenceId" />
+					<arg value="${sequence.id.triage}" />
+					<arg value="-tokens" />
+					<arg value="1" />
+					
+					<arg value="-skipDeploy" />
+				</java>
+				
+				<echo message="Waiting ${init.delay.seconds} seconds before next service..." />
+				<sleep seconds="${init.delay.seconds}" />
+
+				<!-- Trigger Monitor -->
+				<echo message="Triggering Monitor Initialization Service for operation: ${db.init.operation}" />
+				<java classname="${event.generator.class}" 
+				      fork="true" 
+				      dir="${generator.project.dir}"
+				      failonerror="true">
+					<classpath refid="generator.classpath" />
+					
+					<arg value="-service" />
+					<arg value="Monitor_InitializationService" />
+					
+					<arg value="-operation" />
+					<arg value="${db.init.operation}" />
+					
+					<arg value="-version" />
+					<arg value="${rule.version}" />
+					
+					<arg value="-process" />
+					<arg value="${process.name}" />
+					
+					<arg value="-sequenceId" />
+					<arg value="${sequence.id.monitor}" />
+					<arg value="-tokens" />
+					<arg value="1" />
+					
+					<arg value="-skipDeploy" />
+				</java>
+				
+				<echo message="" />
+				<echo message="=== ALL INITIALIZATION EVENTS TRIGGERED SUCCESSFULLY ===" />
+				<echo message="Triage and Monitor services are now running and initialized." />
+				<echo message="Services will continue running until manually stopped." />
+			</sequential>
+		</parallel>
+
+		<echo message="=== TRIAGE AND MONITOR SERVICES LOADED AND INITIALIZATION COMPLETE ===" />
+	</target>
+
+	<target name="load-services-sequential" depends="clean-output,clean-monitor-database,rebuild-service-ruleml" 
+	        description="Load services sequentially then trigger initialization">
+		<echo message="=== LOADING SERVICES SEQUENTIALLY ===" />
+		<echo message="Using rule version: ${rule.version}" />
+		<echo message="Database Operation: ${db.init.operation}" />
+		
+		<antcall target="load-triage-service" />
+		<echo message="Waiting for Triage service to initialize..." />
+		<sleep seconds="2" />
+		
+		<antcall target="load-monitor-service" />
+		<echo message="Waiting for Monitor service to initialize..." />
+		<sleep seconds="2" />
+		
+		<antcall target="trigger-all-initializers-sequential" />
+		
+		<echo message="=== ALL SERVICES LOADED SEQUENTIALLY ===" />
+	</target>
+
+	<!-- =================================== -->
+	<!-- HELP TARGET                        -->
+	<!-- =================================== -->
+
+	<target name="help" description="Display available targets">
+		<echo message="=== TRIAGE MONITOR INITIALIZER WORKFLOW ===" />
+		<echo message="" />
+		<echo message="MAIN TARGETS:" />
+		<echo message="  load-all-services          - Load services in parallel then trigger initialization (DEFAULT)" />
+		<echo message="  load-services-sequential   - Load services sequentially then trigger initialization" />
+		<echo message="" />
+		<echo message="SERVICE TARGETS:" />
+		<echo message="  load-triage-service             - Load only Triage Service" />
+		<echo message="  load-monitor-service            - Load only Monitor Service" />
+		<echo message="  trigger-all-initializers-sequential - Trigger all initializations sequentially" />
+		<echo message="" />
+		<echo message="UTILITY TARGETS:" />
+		<echo message="  clean-output               - Clean previous output files" />
+		<echo message="  clean-monitor-database     - Clean monitor database (handled by initialization)" />
+		<echo message="  create-output-directory    - Create output directory" />
+		<echo message="  rebuild-service-ruleml     - Build master Service.ruleml" />
+		<echo message="  help                       - Show this help" />
+		<echo message="" />
+		<echo message="CONFIGURABLE PARAMETERS:" />
+		<echo message="  rule.version          = ${rule.version}     (Rule base version to use)" />
+		<echo message="  db.init.operation     = ${db.init.operation} (Database operation)" />
+		<echo message="  process.name          = ${process.name}     (Process name)" />
+		<echo message="  sequence.id.triage    = ${sequence.id.triage} (Triage sequence ID)" />
+		<echo message="  sequence.id.monitor   = ${sequence.id.monitor} (Monitor sequence ID)" />
+		<echo message="  init.delay.seconds    = ${init.delay.seconds} (Delay between services)" />
+		<echo message="" />
+		<echo message="USAGE EXAMPLES:" />
+		<echo message="  ant                                  - Run full initialization (DEFAULT)" />
+		<echo message="  ant load-services-sequential         - Load services one at a time" />
+		<echo message="  ant -Ddb.init.operation=purgeOnly    - Change database operation" />
+		<echo message="" />
+		<echo message="WORKFLOW:" />
+		<echo message="  1. Clean previous output files" />
+		<echo message="  2. Rebuild master Service.ruleml from all service definitions" />
+		<echo message="  3. Start Triage and Monitor services in parallel" />
+		<echo message="  4. Trigger initialization events to each service" />
+		<echo message="  5. Services initialize their databases based on operation type" />
+		<echo message="" />
+	</target>
+
+</project>

@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="ProcessEditor" default="jar" basedir=".">
+    <description>
+        Petri Net Editor - Build file for creating runnable JAR
+        
+        Source files in com.editor package:
+        - ProcessEditor.java      (main frame - UPDATED for animation panel)
+        - Canvas.java             (drawing canvas - UPDATED for metadata preservation)
+        - DocumentationPanel.java (displays workflow documentation)
+        - AnimationControlPanel.java (NEW - playback controls for token animation)
+        - AnimationOverlay.java   (NEW - draws animated tokens on canvas)
+        - TokenAnimator.java      (NEW - parses and manages token animation data)
+        - EditorFrame.java        (attributes panel)
+        - ProcessElement.java     (place/transition elements)
+        - Arrow.java              (arrow connections)
+        - TextElement.java        (text annotations)
+        - UndoRedoManager.java    (undo/redo support)
+        - PDFExporter.java        (optional PDF export)
+    </description>
+
+    <!-- Properties -->
+    <property name="src.dir" value="src"/>
+    <property name="build.dir" value="build"/>
+    <property name="dist.dir" value="dist"/>
+    <property name="lib.dir" value="lib"/>
+    <property name="main.class" value="com.editor.ProcessEditor"/>
+    <property name="jar.name" value="ProcessEditor.jar"/>
+
+    <!-- Classpath for compilation (includes external libraries if present) -->
+    <path id="compile.classpath">
+        <fileset dir="${lib.dir}" erroronmissingdir="false">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
+    <!-- Initialize build directories -->
+    <target name="init">
+        <echo message="Initializing build directories..."/>
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${dist.dir}"/>
+        <mkdir dir="${lib.dir}"/>
+    </target>
+
+    <!-- Clean build artifacts -->
+    <target name="clean" description="Clean up build artifacts">
+        <echo message="Cleaning build directories..."/>
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+    </target>
+
+    <!-- Compile Java sources -->
+    <target name="compile" depends="init" description="Compile Java sources">
+        <echo message="Compiling Java sources..."/>
+        <javac srcdir="${src.dir}" 
+               destdir="${build.dir}"
+               includeantruntime="false"
+               encoding="UTF-8"
+               source="1.8"
+               target="1.8"
+               debug="true">
+            <classpath refid="compile.classpath"/>
+            <!-- Ignore PDF exporter if iText library is not present -->
+            <exclude name="**/PDFExporter.java" unless="itext.present"/>
+        </javac>
+        
+        <!-- Check if iText library is present -->
+        <available property="itext.present" classname="com.itextpdf.text.Document">
+            <classpath refid="compile.classpath"/>
+        </available>
+        
+        <echo message="Compilation complete!"/>
+        
+        <!-- Conditional warning for missing iText -->
+        <condition property="pdf.warning.message" value="WARNING: iTextPDF library not found. PDF export will be disabled.${line.separator}To enable PDF export, download iText 5.x JAR and place it in the lib/ directory." else="">
+            <not>
+                <isset property="itext.present"/>
+            </not>
+        </condition>
+        
+        <echo message="${pdf.warning.message}"/>
+    </target>
+
+    <!-- Create JAR file -->
+    <target name="jar" depends="compile" description="Create runnable JAR file">
+        <echo message="Creating JAR file..."/>
+        
+        <!-- Create manifest -->
+        <manifest file="${build.dir}/MANIFEST.MF">
+            <attribute name="Main-Class" value="${main.class}"/>
+            <attribute name="Class-Path" value="."/>
+            <attribute name="Implementation-Title" value="Petri Net Editor"/>
+            <attribute name="Implementation-Version" value="1.1"/>
+            <attribute name="Built-By" value="${user.name}"/>
+            <attribute name="Built-Date" value="${TODAY}"/>
+        </manifest>
+
+        <!-- Create JAR -->
+        <jar destfile="${dist.dir}/${jar.name}" 
+             manifest="${build.dir}/MANIFEST.MF">
+            <fileset dir="${build.dir}">
+                <include name="**/*.class"/>
+            </fileset>
+            <!-- Include external libraries if present -->
+            <zipgroupfileset dir="${lib.dir}" erroronmissingdir="false">
+                <include name="**/*.jar"/>
+            </zipgroupfileset>
+        </jar>
+        
+        <echo message=""/>
+        <echo message="========================================"/>
+        <echo message="Build successful!"/>
+        <echo message="JAR file created: ${dist.dir}/${jar.name}"/>
+        <echo message=""/>
+        <echo message="To run on Windows, double-click the JAR file"/>
+        <echo message="or use: java -jar ${dist.dir}/${jar.name}"/>
+        <echo message="========================================"/>
+    </target>
+
+    <!-- Run the application -->
+    <target name="run" depends="jar" description="Run the application">
+        <echo message="Running Petri Net Editor..."/>
+        <java jar="${dist.dir}/${jar.name}" fork="true"/>
+    </target>
+
+    <!-- Create distribution with batch file for Windows -->
+    <target name="dist" depends="jar" description="Create distribution package">
+        <echo message="Creating distribution package..."/>
+        
+        <!-- Create Windows batch file -->
+        <echo file="${dist.dir}/run.bat">@echo off
+echo Starting Petri Net Editor...
+java -jar ${jar.name}
+if errorlevel 1 (
+    echo.
+    echo Error: Java Runtime Environment not found!
+    echo Please install Java JRE 8 or higher from https://www.java.com
+    echo.
+    pause
+)
+</echo>
+        
+        <!-- Create README -->
+        <echo file="${dist.dir}/README.txt">Petri Net Editor - Windows Distribution
+========================================
+
+REQUIREMENTS:
+- Java Runtime Environment (JRE) 8 or higher
+
+INSTALLATION:
+1. Ensure Java is installed on your system
+2. Double-click ${jar.name} to run the application
+   OR
+   Double-click run.bat to run with console output
+
+FEATURES:
+- Visual Petri net design
+- Place and Transition elements
+- Service and operation configuration
+- Documentation panel for workflow metadata
+- Export to Graphviz DOT format
+- Export to TikZ (LaTeX) format
+- Validation for duplicate labels and structural issues
+- Undo/Redo support
+
+NEW IN VERSION 1.1:
+- Documentation Panel on right side shows workflow metadata
+- Metadata and documentation sections preserved in JSON
+- Supports concurrent workflow documentation (tokens, places, mutex)
+- Token Animation: Load analysis data and watch tokens flow through the net
+- Playback controls: play, pause, step, speed adjustment, timeline scrubber
+
+OPTIONAL PDF EXPORT:
+To enable PDF export functionality:
+1. Download iText 5.x library from https://github.com/itext/itextpdf
+2. Place itextpdf-5.x.x.jar in the lib/ directory
+3. Rebuild using: ant clean jar
+
+Version 1.1
+</echo>
+        
+        <echo message=""/>
+        <echo message="========================================"/>
+        <echo message="Distribution package created in ${dist.dir}/"/>
+        <echo message="Contents:"/>
+        <echo message="  - ${jar.name} (runnable JAR)"/>
+        <echo message="  - run.bat (Windows launcher)"/>
+        <echo message="  - README.txt (documentation)"/>
+        <echo message="========================================"/>
+    </target>
+
+    <!-- Display help -->
+    <target name="help" description="Display build targets">
+        <echo message=""/>
+        <echo message="Petri Net Editor - Ant Build Targets"/>
+        <echo message="===================================="/>
+        <echo message=""/>
+        <echo message="ant clean   - Remove build artifacts"/>
+        <echo message="ant compile - Compile Java sources"/>
+        <echo message="ant jar     - Create runnable JAR (default)"/>
+        <echo message="ant run     - Build and run the application"/>
+        <echo message="ant dist    - Create distribution package"/>
+        <echo message="ant help    - Display this help message"/>
+        <echo message=""/>
+        <echo message="Source files to update:"/>
+        <echo message="  src/com/editor/ProcessEditor.java        (UPDATED)"/>
+        <echo message="  src/com/editor/Canvas.java               (UPDATED)"/>
+        <echo message="  src/com/editor/DocumentationPanel.java   (NEW)"/>
+        <echo message="  src/com/editor/AnimationControlPanel.java (NEW)"/>
+        <echo message="  src/com/editor/AnimationOverlay.java     (NEW)"/>
+        <echo message="  src/com/editor/TokenAnimator.java        (NEW)"/>
+        <echo message=""/>
+    </target>
+
+    <!-- Default target -->
+    <target name="default" depends="jar"/>
+
+</project>

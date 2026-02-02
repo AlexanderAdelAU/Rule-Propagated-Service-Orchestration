@@ -1,0 +1,118 @@
+<!-- List of service facts -->
+
+<!-- ActiveServices.ruleml.xml - loaded last or checked first -->
+
+
+<!-- Triage Service Operations -->
+<Atom>
+	<Rel>activeService</Rel>	<!-- Participates in Rule -->
+	<Ind>TriageService</Ind>  <!--Service -->
+	<Ind>processTriageAssessment</Ind>  	<!--operation -->
+	<Ind>ip0</Ind>  			<!-- Listen on channel -->
+	<Ind>1070</Ind>  		<!-- Port -->
+</Atom>
+
+<!-- Radiology Service Operations -->
+<Atom>
+	<Rel>activeService</Rel>		<!-- List of available Services that have a link -->
+	<Ind>RadiologyService</Ind>  	<!-- Name of Service -->
+	<Ind>processImagingRequest</Ind>  <!-- Name of operation -->
+	<Ind>ip0</Ind>  				<!-- Listen on channel -->
+	<Ind>1000</Ind>  			<!-- Port -->
+</Atom>
+<Atom>
+	<Rel>activeService</Rel>		<!-- List of available Services that have a link -->
+	<Ind>RadiologyService</Ind>  	<!-- Name of Service -->
+	<Ind>federatedRadiologyRequest</Ind>  <!-- Name of operation -->
+	<Ind>ip0</Ind>  				<!-- Listen on channel -->
+	<Ind>1001</Ind>  			<!-- Port -->
+</Atom>
+<!-- Cardiology Service -->
+<Atom>
+	<Rel>activeService</Rel>		<!-- List of available Services that have a link -->
+	<Ind>CardiologyService</Ind>  	<!-- Name of Service -->
+	<Ind>processCardiacAssessment</Ind>  <!-- Name of operation -->
+	<Ind>ip0</Ind>  				<!-- Listen on channel -->
+	<Ind>1010</Ind>  			<!-- Port -->
+</Atom>
+<!-- Diagnosis Service -->
+<Atom>
+	<Rel>activeService</Rel>		<!-- List of available Services that have a link -->
+	<Ind>DiagnosisService</Ind>  	<!-- Name of Service -->
+	<Ind>processClinicalDecision</Ind>  <!-- Name of operation -->
+	<Ind>ip0</Ind>  				<!-- Listen on channel -->
+	<Ind>1020</Ind>  			<!-- Port -->
+</Atom>
+
+<!-- Laboratory Book Service -->
+<Atom>
+	<Rel>activeService</Rel>		<!-- Participates in Rule -->
+	<Ind>LaboratoryService</Ind>  <!-- Name of Service -->
+	<Ind>processLabRequest</Ind>  	<!-- Name of operation -->
+	<Ind>ip0</Ind>  				<!-- Listen on channel -->
+	<Ind>1030</Ind>  			<!-- Port -->
+</Atom>
+
+<!-- Treatment Service Operations -->
+<Atom>
+	<Rel>activeService</Rel>		<!-- List of available Services that have a link -->
+	<Ind>TreatmentService</Ind>  	<!-- Name of Service -->
+	<Ind>executeTreatmentPlan</Ind>  	<!-- Name of operation -->
+	<Ind>ip0</Ind>  				<!-- Listen on channel -->
+	<Ind>1040</Ind>  			<!-- Port -->
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>		<!-- List of available Services that have a link -->
+	<Ind>TreatmentService</Ind>  	<!-- Name of Service -->
+	<Ind>executeDirectTreatment</Ind>  	<!-- Name of operation -->
+	<Ind>ip0</Ind>  				<!-- Listen on channel -->
+	<Ind>1041</Ind>  			<!-- Port -->
+</Atom>
+
+
+<!-- Acknowledge Token Arrival -->
+<Atom>
+	<Rel>activeService</Rel>		<!-- List of available Services that have a link -->
+	<Ind>MonitorService</Ind>  	<!-- Name of Service -->
+	<Ind>acknowledgeTokenArrival</Ind>  <!-- Name of operation -->
+	<Ind>ip0</Ind>  				<!-- Listen on channel -->
+	<Ind>1080</Ind>  			<!-- Port -->
+</Atom>
+
+<!-- Measurement Service Operations -->
+<Atom>
+	<Rel>activeService</Rel>		<!-- List of available Services that have a link -->
+	<Ind>MonitorService</Ind>  	<!-- Name of Service -->
+	<Ind>getMeasureProcessTime</Ind>  <!-- Name of operation -->
+	<Ind>ip0</Ind>  				<!-- Listen on channel -->
+	<Ind>1081</Ind>  			<!-- Port -->
+</Atom>
+
+<!-- Measurement Service Operations -->
+<Atom>
+	<Rel>activeService</Rel>		<!-- List of available Services that have a link -->
+	<Ind>MonitorService</Ind>  	<!-- Name of Service -->
+	<Ind>setMeasureProcessTime</Ind>  <!-- Name of operation -->
+	<Ind>ip0</Ind>  				<!-- Listen on channel -->
+	<Ind>1082</Ind>  			<!-- Port -->
+</Atom>
+
+<!-- Acknowledge Token Arrival -->
+<Atom>
+	<Rel>activeService</Rel>		<!-- List of available Services that have a link -->
+	<Ind>MonitorService</Ind>  	<!-- Name of Service -->
+	<Ind>acknowledgeTokenArrival</Ind>  <!-- Name of operation -->
+	<Ind>ip0</Ind>  				<!-- Listen on channel -->
+	<Ind>1083</Ind>  			<!-- Port -->
+</Atom>
+<Atom>
+	<Rel>activeService</Rel>		<!-- List of available Services that have a link -->
+	<Ind>MonitorService</Ind>  	<!-- Name of Service -->
+	<Ind>setExpiredPackets</Ind>  <!-- Name of operation -->
+	<Ind>ip0</Ind>  				<!-- Listen on channel -->
+	<Ind>1084</Ind>  			<!-- Port -->
+</Atom>
+
+
+

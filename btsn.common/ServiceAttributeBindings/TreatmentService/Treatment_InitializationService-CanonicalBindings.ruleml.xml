@@ -1,0 +1,12 @@
+
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>Treatment_InitializationService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>null</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>

@@ -1,0 +1,592 @@
+<Assert>
+<Rulebase mapClosure="universal">
+<!-- Version On -->
+<Data><Atom><Rel>Version</Rel><Ind>v001</Ind></Atom></Data>
+<!-- Common Rules to all services -->
+<!-- 
+This is the rule determines the operational parameters associated with
+the destination service.
+ -->
+<Implies>
+	<then>
+		<Atom>
+			<Rel>publishes</Rel>
+			<Var>service</Var>
+			<Var>condition</Var>
+			<Var>operation</Var>
+			<Var>channel</Var>
+			<Var>ip</Var>
+			<Var>port</Var>
+			<Var>decisionValue</Var>
+		</Atom>
+	</then>
+	<if>
+		<And>
+			<Atom>
+				<Rel>meetsCondition</Rel>
+				<Var>service</Var>
+				<Var>operation</Var>
+				<Var>condition</Var>
+				<Var>decisionValue</Var>
+			</Atom>
+			<Atom>
+				<Rel>activeService</Rel>
+				<Var>service</Var>
+				<Var>operation</Var>
+				<Var>ip</Var>
+				<Var>port</Var>
+			</Atom>
+			<Atom>
+				<Rel>boundChannel</Rel>
+				<Var>ip</Var>
+				<Var>channel</Var>
+			</Atom>
+		</And>
+	</if>
+</Implies>
+
+<!-- 
+Special rule for TERMINATE - no activeService needed since there's no actual service to call.
+This allows GatewayNode (and other node types) to route to termination without requiring 
+infrastructure configuration. The channel/ip/port are dummy values since ServiceThread
+recognizes TERMINATE:TERMINATE and handles it specially without making any network calls.
+-->
+<Implies>
+	<then>
+		<Atom>
+			<Rel>publishes</Rel>
+			<Ind>TERMINATE</Ind>
+			<Var>condition</Var>
+			<Ind>TERMINATE</Ind>
+			<Ind>local</Ind>
+			<Ind>localhost</Ind>
+			<Ind>0</Ind>
+			<Var>decisionValue</Var>
+		</Atom>
+	</then>
+	<if>
+		<Atom>
+			<Rel>meetsCondition</Rel>
+			<Ind>TERMINATE</Ind>
+			<Ind>TERMINATE</Ind>
+			<Var>condition</Var>
+			<Var>decisionValue</Var>
+		</Atom>
+	</if>
+</Implies>
+
+<!-- 
+This is the rule that governs the service operation. The operation Var is specified twice so 
+that the name will is returned and thus avoids the need to parse a list of operations.
+ -->
+<Implies>
+	<then>
+		<Atom>
+			<Rel>serviceName</Rel>
+			<Var>service</Var>
+			<Var>operation</Var>
+			<Var>operation</Var>
+			<Var>attribute</Var>
+			<Var>input</Var>
+			<Var>channel</Var>
+			<Var>port</Var>
+		</Atom>
+	</then>
+	<if>
+		<And>
+			<Atom>
+				<Rel>localDefined</Rel>
+				<Var>service</Var>
+			</Atom>
+			<Atom>
+				<Rel>canonicalBinding</Rel>
+				<Var>operation</Var>
+				<Var>attribute</Var>  <!-- Attribute owned and returned (can be null) -->
+				<Var>input</Var>
+
+			</Atom>
+			<Atom>
+				<Rel>activeService</Rel>
+				<Var>service</Var>
+				<Var>operation</Var>
+				<Var>ip</Var>
+				<Var>port</Var>
+			</Atom>
+			<Atom>
+				<Rel>boundChannel</Rel>
+				<Var>ip</Var>
+				<Var>channel</Var>
+			</Atom>
+
+		</And>
+	</if>
+</Implies>
+<!-- 
+This is the rule that governs the list of all services. 
+ -->
+<Implies>
+	<then>
+		<Atom>
+			<Rel>serviceList</Rel>
+			<Var>service</Var>
+			<Var>service</Var>
+			<Var>operation</Var>
+			<Var>channel</Var>
+			<Var>port</Var>
+		</Atom>
+	</then>
+	<if>
+		<And>
+
+			<Atom>
+				<Rel>activeService</Rel>
+				<Var>service</Var>
+				<Var>operation</Var>
+				<Var>ip</Var>
+				<Var>port</Var>
+			</Atom>
+			<Atom>
+				<Rel>boundChannel</Rel>
+				<Var>ip</Var>
+				<Var>channel</Var>
+			</Atom>
+		</And>
+	</if>
+</Implies>
+<!-- List of service facts -->
+<!-- ActiveServices.ruleml.xml - loaded last or checked first -->
+
+<!-- ================================================================ -->
+<!-- WORKFLOW SERVICES                                                -->
+<!-- ================================================================ -->
+
+<!-- Triage Service -->
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>TriageService</Ind>
+	<Ind>processTriageAssessment</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2100</Ind>
+</Atom>
+
+<!-- Radiology Service -->
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>RadiologyService</Ind>
+	<Ind>processImagingRequest</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2101</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>RadiologyService</Ind>
+	<Ind>federatedRadiologyRequest</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2102</Ind>
+</Atom>
+
+<!-- Cardiology Service -->
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>CardiologyService</Ind>
+	<Ind>processCardiacAssessment</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2103</Ind>
+</Atom>
+
+<!-- Diagnosis Service -->
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>DiagnosisService</Ind>
+	<Ind>processClinicalDecision</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2104</Ind>
+</Atom>
+
+<!-- Laboratory Service -->
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>LaboratoryService</Ind>
+	<Ind>processLabRequest</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2105</Ind>
+</Atom>
+
+<!-- Treatment Service -->
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>TreatmentService</Ind>
+	<Ind>executeTreatmentPlan</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2106</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>TreatmentService</Ind>
+	<Ind>executeDirectTreatment</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2107</Ind>
+</Atom>
+
+
+<!-- ================================================================ -->
+<!-- PERFORMANCE COLLECTION SERVICES                                  -->
+<!-- ================================================================ -->
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Triage_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2200</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Radiology_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2201</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Cardiology_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2202</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Diagnosis_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2203</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Laboratory_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2204</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Treatment_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2205</Ind>
+</Atom>
+
+<!-- ================================================================ -->
+<!-- PERFORMANCE COLLECTION SERVICES                                  -->
+<!-- ================================================================ -->
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Triage_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2300</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Radiology_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2301</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Cardiology_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2302</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Diagnosis_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2303</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Laboratory_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2304</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Treatment_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2305</Ind>
+</Atom>
+<!-- ================================================================ -->
+<!-- MONITOR PLACE (PetriNet - MonitorService)                         -->
+<!-- ================================================================ -->
+
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>MonitorService</Ind>
+    <Ind>acknowledgeTokenArrival</Ind>
+    <Ind>ip0</Ind>
+    <Ind>3000</Ind>
+</Atom>
+
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>MonitorService</Ind>
+    <Ind>writeServiceTimingRecord</Ind>
+    <Ind>ip0</Ind>
+    <Ind>3001</Ind>
+</Atom>
+
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>MonitorService</Ind>
+    <Ind>writeCollectorData</Ind>
+    <Ind>ip0</Ind>
+    <Ind>3002</Ind>
+</Atom>
+
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>MonitorService</Ind>
+    <Ind>initiateWorkflowDataCollection</Ind>
+    <Ind>ip0</Ind>
+    <Ind>3003</Ind>
+</Atom>
+
+<!-- ================================================================ -->
+<!-- MONITOR INITIALIZATION                                           -->
+<!-- ================================================================ -->
+
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>Monitor_InitializationService</Ind>
+    <Ind>purgeAndInitialize</Ind>
+    <Ind>ip0</Ind>
+    <Ind>3004</Ind>
+</Atom>
+<!-- List of service facts -->
+<!-- ActiveServices.ruleml.xml - loaded last or checked first -->
+
+<!-- ================================================================ -->
+<!-- WORKFLOW PLACES                                                -->
+<!-- ================================================================ -->
+
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>P1_Place</Ind>              <!-- Service Name -->
+    <Ind>processToken</Ind>           <!-- Method -->
+    <Ind>ip0</Ind>
+    <Ind>4001</Ind>
+</Atom>
+<!-- P2 Place -->
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>P2_Place</Ind>              <!-- Service Name -->
+    <Ind>processToken</Ind>           <!-- Method -->
+    <Ind>ip0</Ind>
+    <Ind>4002</Ind>
+</Atom><!-- P3 Place -->
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>P3_Place</Ind>              <!-- Service Name -->
+    <Ind>processToken</Ind>           <!-- Method -->
+    <Ind>ip0</Ind>
+    <Ind>4003</Ind>
+</Atom>
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>P4_Place</Ind>              <!-- Service Name -->
+    <Ind>processToken</Ind>           <!-- Method -->
+    <Ind>ip0</Ind>
+    <Ind>4004</Ind>
+</Atom>
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>P5_Place</Ind>              <!-- Service Name -->
+    <Ind>processToken</Ind>           <!-- Method -->
+    <Ind>ip0</Ind>
+    <Ind>4005</Ind>
+</Atom>
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>P6_Place</Ind>              <!-- Service Name -->
+    <Ind>processToken</Ind>           <!-- Method -->
+    <Ind>ip0</Ind>
+    <Ind>4006</Ind>
+</Atom>
+
+<!-- ================================================================ -->
+<!-- PERFORMANCE COLLECTION SERVICES                                  -->
+<!-- ================================================================ -->
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P1_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4300</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P2_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4301</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P3_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4302</Ind>
+</Atom>
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P4_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4303</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P5_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4304</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P6_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4305</Ind>
+</Atom>
+
+<!-- ================================================================ -->
+<!-- PERFORMANCE COLLECTION SERVICES                                  -->
+<!-- ================================================================ -->
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P1_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4100</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P2_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4101</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P3_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4102</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P4_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4103</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P5_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4104</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P6_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4105</Ind>
+</Atom>
+<!-- RemoteHostMappings.ruleml.xml -->
+<!-- Maps logical channel IDs (ip1, ip2, etc.) to actual IP addresses -->
+<!-- This file is loaded as part of Service.ruleml compilation -->
+
+<!-- Remote Host Mappings -->
+
+<Atom>
+    <Rel>boundChannel</Rel>
+    <Ind>ip0</Ind>
+    <Ind>192.168.1.152</Ind>
+</Atom>
+<Atom>
+    <Rel>boundChannel</Rel>
+    <Ind>ip1</Ind>
+    <Ind>192.168.1.82</Ind>
+</Atom>
+
+<Atom>
+    <Rel>boundChannel</Rel>
+    <Ind>ip2</Ind>
+    <Ind>192.168.1.83</Ind>
+</Atom>
+
+<Atom>
+    <Rel>boundChannel</Rel>
+    <Ind>ip3</Ind>
+    <Ind>192.168.1.84</Ind>
+</Atom>
+
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>DiagnosisService</Ind>
+</Atom>
+
+<Atom>
+    <Rel>canonicalBinding</Rel>
+    <Ind>processClinicalDecision</Ind>
+    <Ind>diagnosisResults</Ind> <!-- This is the attribute returned -->
+    <Ind>cardiologyResults</Ind> <!-- This is the attribute needed -->
+</Atom>
+<Atom>
+    <Rel>canonicalBinding</Rel>
+    <Ind>processClinicalDecision</Ind>
+    <Ind>diagnosisResults</Ind> <!-- This is the attribute returned -->
+    <Ind>laboratoryResults</Ind> <!-- This is the attribute needed -->
+</Atom>
+<Atom>
+    <Rel>canonicalBinding</Rel>
+    <Ind>processClinicalDecision</Ind>
+    <Ind>diagnosisResults</Ind> <!-- This is the attribute returned -->
+    <Ind>radiologyResults</Ind> <!-- This is the attribute needed -->
+</Atom>
+<Atom><Rel>NodeType</Rel><Ind>JoinNode</Ind></Atom><Atom><Rel>meetsCondition</Rel><Ind>TreatmentService</Ind><Ind>executeTreatmentPlan</Ind><Ind>EDGE_NODE</Ind><Ind></Ind></Atom>
+</Rulebase>
+</Assert>

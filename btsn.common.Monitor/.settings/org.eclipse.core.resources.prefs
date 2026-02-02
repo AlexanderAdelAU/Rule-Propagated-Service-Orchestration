@@ -1,0 +1,9 @@
+eclipse.preferences.version=1
+encoding//src/org/btsn/derby/Analysis/BuildServiceAnalysisDatabase.java=UTF-8
+encoding//src/org/btsn/derby/Analysis/PetriNetTokenFlowChart.java=UTF-8
+encoding//src/org/btsn/derby/Analysis/WorkflowSpatialView.java=UTF-8
+encoding//src/org/btsn/handlers/EventPublisher.java=UTF-8
+encoding//src/org/btsn/handlers/RuleHandler.java=UTF-8
+encoding//src/org/btsn/handlers/ServiceLoader.java=UTF-8
+encoding//src/org/btsn/handlers/ServiceThread.java=UTF-8
+encoding//src/org/btsn/handlers/ServiceThreadDebugger.java=UTF-8

@@ -1,0 +1,572 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Emergency_Department_Combined" default="run-complete-workflow" basedir=".">
+	<description>
+		Emergency Department Patient Workflow - Single Workflow Version
+		
+		Architecture:
+		- Phase 1: Load services ONCE, Initialize databases
+		- Phase 2: Deploy rules -> Wait for commitment -> Fire tokens
+		- Phase 3: Deploy collector rules -> Collect data
+		
+		Workflow: Triage -> Fork(Lab, Cardio, Radiology) -> Join -> Diagnosis -> Treatment -> Monitor
+	</description>
+
+	<!-- ======================================================================= -->
+	<!-- PROPERTIES                                                              -->
+	<!-- ======================================================================= -->
+
+	<!-- Rule version -->
+	<property name="rule.version" value="v001" />
+
+	<!-- Process names for each phase -->
+	<property name="init.process.name" value="healthcare/Initializers/Multi_Service_Initialization" />
+	<property name="workflow.process.name" value="healthcare/Workflow/Emergency_Department_Patient_Workflow" />
+	<property name="collector.process.name" value="healthcare/Collectors/Multi_Service_Collector" />
+
+	<!-- Phase 1: Initialization parameters -->
+	<property name="db.init.operation" value="purgeAndInitialize" />
+	<property name="sequence.id.init.triage" value="100000" />
+	<property name="sequence.id.init.laboratory" value="110000" />
+	<property name="sequence.id.init.radiology" value="120000" />
+	<property name="sequence.id.init.cardiology" value="130000" />
+	<property name="sequence.id.init.diagnosis" value="140000" />
+	<property name="sequence.id.init.treatment" value="150000" />
+	<property name="sequence.id.init.monitor" value="160000" />
+
+	<!-- Phase 2: Workflow parameters -->
+	<property name="target.service" value="TriageService" />
+	<property name="target.operation" value="processTriageAssessment" />
+	<property name="sequence.id.workflow" value="1000000" />
+	<property name="token.count" value="10" />
+	<property name="token.expire" value="120000" />
+	<property name="commitment.port" value="35001" />
+	<property name="event.generator.id" value="PATIENT_ARRIVAL" />
+
+	<!-- Phase 3: Collector parameters (sequence IDs in v001 range since collectors use v001 routing) -->
+	<property name="collector.operation" value="collectAllData" />
+	<property name="sequence.id.collect.triage" value="1410000" />
+	<property name="sequence.id.collect.laboratory" value="1420000" />
+	<property name="sequence.id.collect.radiology" value="1430000" />
+	<property name="sequence.id.collect.cardiology" value="1440000" />
+	<property name="sequence.id.collect.diagnosis" value="1450000" />
+	<property name="sequence.id.collect.treatment" value="1460000" />
+	<property name="collector.delay.seconds" value="3" />
+
+	<!-- Timing parameters -->
+	<property name="service.startup.seconds" value="5" />
+	<property name="phase.delay.seconds" value="5" />
+	<property name="deploy.wait.seconds" value="3" />
+
+	<!-- Base directories -->
+	<property name="build.file.dir" location="." />
+	<property name="healthcare.root.dir" location="../" />
+
+	<!-- Common project -->
+	<property name="common.project.dir" location="${healthcare.root.dir}/btsn.common" />
+	<property name="lib.dir" location="${common.project.dir}/lib" />
+	<property name="class.dir" location="${common.project.dir}/bin" />
+	<property name="common.src.dir" location="${common.project.dir}/src" />
+
+	<!-- Output directory -->
+	<property name="output.dir" location="${build.file.dir}" />
+	<property name="triage.output.file" location="${output.dir}/TriageService_out.txt" />
+	<property name="laboratory.output.file" location="${output.dir}/LaboratoryService_out.txt" />
+	<property name="radiology.output.file" location="${output.dir}/RadiologyService_out.txt" />
+	<property name="cardiology.output.file" location="${output.dir}/CardiologyService_out.txt" />
+	<property name="diagnosis.output.file" location="${output.dir}/DiagnosisService_out.txt" />
+	<property name="treatment.output.file" location="${output.dir}/TreatmentService_out.txt" />
+	<property name="monitor.output.file" location="${output.dir}/MonitorService_out.txt" />
+
+	<!-- Service Projects -->
+	<property name="triage.project.dir" location="${healthcare.root.dir}/btsn.healthcare.places.Triage" />
+	<property name="triage.bin.dir" location="${triage.project.dir}/bin" />
+
+	<property name="laboratory.project.dir" location="${healthcare.root.dir}/btsn.healthcare.places.Laboratory" />
+	<property name="laboratory.bin.dir" location="${laboratory.project.dir}/bin" />
+
+	<property name="radiology.project.dir" location="${healthcare.root.dir}/btsn.healthcare.places.Radiology" />
+	<property name="radiology.bin.dir" location="${radiology.project.dir}/bin" />
+
+	<property name="cardiology.project.dir" location="${healthcare.root.dir}/btsn.healthcare.places.Cardiology" />
+	<property name="cardiology.bin.dir" location="${cardiology.project.dir}/bin" />
+
+	<property name="diagnosis.project.dir" location="${healthcare.root.dir}/btsn.healthcare.places.Diagnosis" />
+	<property name="diagnosis.bin.dir" location="${diagnosis.project.dir}/bin" />
+
+	<property name="treatment.project.dir" location="${healthcare.root.dir}/btsn.healthcare.places.Treatment" />
+	<property name="treatment.bin.dir" location="${treatment.project.dir}/bin" />
+
+	<property name="monitor.project.dir" location="${healthcare.root.dir}/btsn.common.Monitor" />
+	<property name="monitor.bin.dir" location="${monitor.project.dir}/bin" />
+
+	<!-- Event Generators -->
+	<property name="generator.project.dir" location="${healthcare.root.dir}/btsn.common.eventgenerators" />
+	<property name="generator.bin.dir" location="${generator.project.dir}/bin" />
+	<property name="generator.src.dir" location="${generator.project.dir}/src" />
+
+	<!-- Java Classes -->
+	<property name="service.loader.class" value="org.btsn.handlers.ServiceLoader" />
+	<property name="init.event.generator.class" value="org.btsn.common.eventgenerators.DatabaseInitialization_EventGenerator" />
+	<property name="token.generator.class" value="org.btsn.healthcare.eventgenerators.GenericHealthcareTokenGenerator" />
+	<property name="collector.event.generator.class" value="org.btsn.common.eventgenerators.Common_Collector_EventGenerator" />
+
+	<!-- ======================================================================= -->
+	<!-- CLASSPATHS                                                              -->
+	<!-- ======================================================================= -->
+
+	<path id="common.classpath">
+		<fileset dir="${lib.dir}" erroronmissingdir="false">
+			<include name="*.jar" />
+		</fileset>
+		<pathelement location="${class.dir}" />
+	</path>
+
+	<path id="triage.classpath">
+		<path refid="common.classpath" />
+		<pathelement location="${triage.bin.dir}" />
+	</path>
+
+	<path id="laboratory.classpath">
+		<path refid="common.classpath" />
+		<pathelement location="${laboratory.bin.dir}" />
+	</path>
+
+	<path id="radiology.classpath">
+		<path refid="common.classpath" />
+		<pathelement location="${radiology.bin.dir}" />
+	</path>
+
+	<path id="cardiology.classpath">
+		<path refid="common.classpath" />
+		<pathelement location="${cardiology.bin.dir}" />
+	</path>
+
+	<path id="diagnosis.classpath">
+		<path refid="common.classpath" />
+		<pathelement location="${diagnosis.bin.dir}" />
+	</path>
+
+	<path id="treatment.classpath">
+		<path refid="common.classpath" />
+		<pathelement location="${treatment.bin.dir}" />
+	</path>
+
+	<path id="monitor.classpath">
+		<path refid="common.classpath" />
+		<pathelement location="${monitor.bin.dir}" />
+	</path>
+
+	<path id="generator.classpath">
+		<path refid="common.classpath" />
+		<pathelement location="${generator.bin.dir}" />
+	</path>
+
+	<!-- ======================================================================= -->
+	<!-- UTILITY TARGETS                                                         -->
+	<!-- ======================================================================= -->
+
+	<target name="create-output-directory">
+		<mkdir dir="${output.dir}" />
+	</target>
+
+	<target name="clean-output" description="Clean previous output files">
+		<delete file="${triage.output.file}" quiet="true" />
+		<delete file="${laboratory.output.file}" quiet="true" />
+		<delete file="${radiology.output.file}" quiet="true" />
+		<delete file="${cardiology.output.file}" quiet="true" />
+		<delete file="${diagnosis.output.file}" quiet="true" />
+		<delete file="${treatment.output.file}" quiet="true" />
+		<delete file="${monitor.output.file}" quiet="true" />
+		<echo message="Previous output files cleaned" />
+	</target>
+
+	<!-- ======================================================================= -->
+	<!-- MAIN WORKFLOW TARGET                                                    -->
+	<!-- ======================================================================= -->
+
+	<target name="run-complete-workflow" depends="create-output-directory,clean-output"
+	        description="Run complete Emergency Department workflow">
+
+		<echo message="================================================================" />
+		<echo message="  EMERGENCY DEPARTMENT PATIENT WORKFLOW                        " />
+		<echo message="================================================================" />
+		<echo message="  Rule Version: ${rule.version}" />
+		<echo message="  Tokens: ${token.count}" />
+		<echo message="  Flow: Triage -> [Lab, Cardio, Radiology] -> Diagnosis -> Treatment -> Monitor" />
+		<echo message="================================================================" />
+
+		<parallel>
+			<!-- ============================================================= -->
+			<!-- PARALLEL: Start all 7 services (ONCE)                         -->
+			<!-- ============================================================= -->
+
+			<!-- Triage Service -->
+			<java classname="${service.loader.class}" fork="true" 
+			      dir="${triage.project.dir}" output="${triage.output.file}">
+				<classpath refid="triage.classpath" />
+				<arg value="${triage.project.dir}" />
+				<arg value="-version" /><arg value="${rule.version}" />
+			</java>
+
+			<!-- Laboratory Service -->
+			<java classname="${service.loader.class}" fork="true" 
+			      dir="${laboratory.project.dir}" output="${laboratory.output.file}">
+				<classpath refid="laboratory.classpath" />
+				<arg value="${laboratory.project.dir}" />
+				<arg value="-version" /><arg value="${rule.version}" />
+			</java>
+
+			<!-- Radiology Service -->
+			<java classname="${service.loader.class}" fork="true" 
+			      dir="${radiology.project.dir}" output="${radiology.output.file}">
+				<classpath refid="radiology.classpath" />
+				<arg value="${radiology.project.dir}" />
+				<arg value="-version" /><arg value="${rule.version}" />
+			</java>
+
+			<!-- Cardiology Service -->
+			<java classname="${service.loader.class}" fork="true" 
+			      dir="${cardiology.project.dir}" output="${cardiology.output.file}">
+				<classpath refid="cardiology.classpath" />
+				<arg value="${cardiology.project.dir}" />
+				<arg value="-version" /><arg value="${rule.version}" />
+			</java>
+
+			<!-- Diagnosis Service -->
+			<java classname="${service.loader.class}" fork="true" 
+			      dir="${diagnosis.project.dir}" output="${diagnosis.output.file}">
+				<classpath refid="diagnosis.classpath" />
+				<arg value="${diagnosis.project.dir}" />
+				<arg value="-version" /><arg value="${rule.version}" />
+			</java>
+
+			<!-- Treatment Service -->
+			<java classname="${service.loader.class}" fork="true" 
+			      dir="${treatment.project.dir}" output="${treatment.output.file}">
+				<classpath refid="treatment.classpath" />
+				<arg value="${treatment.project.dir}" />
+				<arg value="-version" /><arg value="${rule.version}" />
+			</java>
+
+			<!-- Monitor Service -->
+			<java classname="${service.loader.class}" fork="true" 
+			      dir="${monitor.project.dir}" output="${monitor.output.file}">
+				<classpath refid="monitor.classpath" />
+				<arg value="${monitor.project.dir}" />
+				<arg value="-version" /><arg value="${rule.version}" />
+			</java>
+
+			<!-- ============================================================= -->
+			<!-- SEQUENTIAL: Execute phases in order                           -->
+			<!-- ============================================================= -->
+			<sequential>
+				<echo message="Waiting ${service.startup.seconds}s for services to start..." />
+				<sleep seconds="${service.startup.seconds}" />
+
+				<!-- ======================================================= -->
+				<!-- PHASE 1: Database Initialization                        -->
+				<!-- ======================================================= -->
+				<echo message="" />
+				<echo message="===============================================" />
+				<echo message="    PHASE 1: DATABASE INITIALIZATION           " />
+				<echo message="===============================================" />
+				
+				<!-- Deploy Initialization rules -->
+				<echo message="Deploying Initialization rules..." />
+				<java classname="${init.event.generator.class}" 
+				      fork="true" dir="${generator.project.dir}" failonerror="true">
+					<classpath refid="generator.classpath" />
+					<arg value="-service" /><arg value="Triage_InitializationService" />
+					<arg value="-operation" /><arg value="${db.init.operation}" />
+					<arg value="-version" /><arg value="${rule.version}" />
+					<arg value="-process" /><arg value="${init.process.name}" />
+					<arg value="-sequenceId" /><arg value="${sequence.id.init.triage}" />
+					<arg value="-tokens" /><arg value="0" />
+				</java>
+
+				<!-- Fire initialization tokens in PARALLEL -->
+				<echo message="Firing initialization tokens in PARALLEL..." />
+				<parallel>
+					<java classname="${init.event.generator.class}" 
+					      fork="true" dir="${generator.project.dir}" failonerror="true">
+						<classpath refid="generator.classpath" />
+						<arg value="-service" /><arg value="Triage_InitializationService" />
+						<arg value="-operation" /><arg value="${db.init.operation}" />
+						<arg value="-version" /><arg value="${rule.version}" />
+						<arg value="-process" /><arg value="${init.process.name}" />
+						<arg value="-sequenceId" /><arg value="${sequence.id.init.triage}" />
+						<arg value="-tokens" /><arg value="1" />
+						<arg value="-skipDeploy" />
+					</java>
+					<java classname="${init.event.generator.class}" 
+					      fork="true" dir="${generator.project.dir}" failonerror="true">
+						<classpath refid="generator.classpath" />
+						<arg value="-service" /><arg value="Laboratory_InitializationService" />
+						<arg value="-operation" /><arg value="${db.init.operation}" />
+						<arg value="-version" /><arg value="${rule.version}" />
+						<arg value="-process" /><arg value="${init.process.name}" />
+						<arg value="-sequenceId" /><arg value="${sequence.id.init.laboratory}" />
+						<arg value="-tokens" /><arg value="1" />
+						<arg value="-skipDeploy" />
+					</java>
+					<java classname="${init.event.generator.class}" 
+					      fork="true" dir="${generator.project.dir}" failonerror="true">
+						<classpath refid="generator.classpath" />
+						<arg value="-service" /><arg value="Radiology_InitializationService" />
+						<arg value="-operation" /><arg value="${db.init.operation}" />
+						<arg value="-version" /><arg value="${rule.version}" />
+						<arg value="-process" /><arg value="${init.process.name}" />
+						<arg value="-sequenceId" /><arg value="${sequence.id.init.radiology}" />
+						<arg value="-tokens" /><arg value="1" />
+						<arg value="-skipDeploy" />
+					</java>
+					<java classname="${init.event.generator.class}" 
+					      fork="true" dir="${generator.project.dir}" failonerror="true">
+						<classpath refid="generator.classpath" />
+						<arg value="-service" /><arg value="Cardiology_InitializationService" />
+						<arg value="-operation" /><arg value="${db.init.operation}" />
+						<arg value="-version" /><arg value="${rule.version}" />
+						<arg value="-process" /><arg value="${init.process.name}" />
+						<arg value="-sequenceId" /><arg value="${sequence.id.init.cardiology}" />
+						<arg value="-tokens" /><arg value="1" />
+						<arg value="-skipDeploy" />
+					</java>
+					<java classname="${init.event.generator.class}" 
+					      fork="true" dir="${generator.project.dir}" failonerror="true">
+						<classpath refid="generator.classpath" />
+						<arg value="-service" /><arg value="Diagnosis_InitializationService" />
+						<arg value="-operation" /><arg value="${db.init.operation}" />
+						<arg value="-version" /><arg value="${rule.version}" />
+						<arg value="-process" /><arg value="${init.process.name}" />
+						<arg value="-sequenceId" /><arg value="${sequence.id.init.diagnosis}" />
+						<arg value="-tokens" /><arg value="1" />
+						<arg value="-skipDeploy" />
+					</java>
+					<java classname="${init.event.generator.class}" 
+					      fork="true" dir="${generator.project.dir}" failonerror="true">
+						<classpath refid="generator.classpath" />
+						<arg value="-service" /><arg value="Treatment_InitializationService" />
+						<arg value="-operation" /><arg value="${db.init.operation}" />
+						<arg value="-version" /><arg value="${rule.version}" />
+						<arg value="-process" /><arg value="${init.process.name}" />
+						<arg value="-sequenceId" /><arg value="${sequence.id.init.treatment}" />
+						<arg value="-tokens" /><arg value="1" />
+						<arg value="-skipDeploy" />
+					</java>
+					<java classname="${init.event.generator.class}" 
+					      fork="true" dir="${generator.project.dir}" failonerror="true">
+						<classpath refid="generator.classpath" />
+						<arg value="-service" /><arg value="Monitor_InitializationService" />
+						<arg value="-operation" /><arg value="${db.init.operation}" />
+						<arg value="-version" /><arg value="${rule.version}" />
+						<arg value="-process" /><arg value="${init.process.name}" />
+						<arg value="-sequenceId" /><arg value="${sequence.id.init.monitor}" />
+						<arg value="-tokens" /><arg value="1" />
+						<arg value="-skipDeploy" />
+					</java>
+				</parallel>
+
+				<echo message="=== Phase 1 Complete ===" />
+				<sleep seconds="${phase.delay.seconds}" />
+
+				<!-- ======================================================= -->
+				<!-- PHASE 2: Patient Workflow Execution                     -->
+				<!-- Deploy -> Wait for Commitment -> Fire                   -->
+				<!-- ======================================================= -->
+				<echo message="" />
+				<echo message="===============================================" />
+				<echo message="    PHASE 2: PATIENT WORKFLOW EXECUTION        " />
+				<echo message="===============================================" />
+				<echo message="Tokens: ${token.count}, Target: ${target.service}" />
+				<echo message="Flow: Triage -> [Lab, Cardio, Radiology] -> Diagnosis -> Treatment -> Monitor" />
+				<echo message="" />
+
+				<!-- Deploy Workflow rules (tokens=0, with commitment port) -->
+				<echo message="[${rule.version}] Deploying workflow rules..." />
+				<java classname="${token.generator.class}" 
+				      fork="true" dir="${generator.project.dir}" failonerror="true">
+					<classpath refid="generator.classpath" />
+					<arg value="-version" /><arg value="${rule.version}" />
+					<arg value="-process" /><arg value="${workflow.process.name}" />
+					<arg value="-service" /><arg value="${target.service}" />
+					<arg value="-operation" /><arg value="${target.operation}" />
+					<arg value="-sequenceId" /><arg value="${sequence.id.workflow}" />
+					<arg value="-tokens" /><arg value="0" />
+					<arg value="-expire" /><arg value="${token.expire}" />
+					<arg value="-commitmentPort" /><arg value="${commitment.port}" />
+					<arg value="-generator" /><arg value="${event.generator.id}" />
+				</java>
+
+				<echo message="[${rule.version}] Waiting ${deploy.wait.seconds}s for commitment..." />
+				<sleep seconds="${deploy.wait.seconds}" />
+
+				<!-- Fire workflow tokens (-skipDeploy) -->
+				<echo message="[${rule.version}] Firing ${token.count} tokens to ${target.service}..." />
+				<java classname="${token.generator.class}" 
+				      fork="true" dir="${generator.project.dir}" failonerror="true">
+					<classpath refid="generator.classpath" />
+					<arg value="-version" /><arg value="${rule.version}" />
+					<arg value="-process" /><arg value="${workflow.process.name}" />
+					<arg value="-service" /><arg value="${target.service}" />
+					<arg value="-operation" /><arg value="${target.operation}" />
+					<arg value="-sequenceId" /><arg value="${sequence.id.workflow}" />
+					<arg value="-tokens" /><arg value="${token.count}" />
+					<arg value="-expire" /><arg value="${token.expire}" />
+					<arg value="-generator" /><arg value="${event.generator.id}" />
+					<arg value="-skipDeploy" />
+				</java>
+
+				<echo message="=== Phase 2 Complete ===" />
+				<sleep seconds="${phase.delay.seconds}" />
+
+				<!-- ======================================================= -->
+				<!-- PHASE 3: Data Collection                                -->
+				<!-- ======================================================= -->
+				<echo message="" />
+				<echo message="===============================================" />
+				<echo message="    PHASE 3: DATA COLLECTION                   " />
+				<echo message="===============================================" />
+
+				<!-- Deploy Collector rules (first collector) -->
+				<echo message="Deploying Collector rules for ${rule.version}..." />
+				<java classname="${collector.event.generator.class}" 
+				      fork="true" dir="${generator.project.dir}" failonerror="true">
+					<classpath refid="generator.classpath" />
+					<arg value="-service" /><arg value="Triage_CollectorService" />
+					<arg value="-operation" /><arg value="${collector.operation}" />
+					<arg value="-version" /><arg value="${rule.version}" />
+					<arg value="-process" /><arg value="${collector.process.name}" />
+					<arg value="-queryVersion" /><arg value="${rule.version}" />
+					<arg value="-sequenceId" /><arg value="${sequence.id.collect.triage}" />
+				</java>
+				<sleep seconds="${collector.delay.seconds}" />
+
+				<!-- Fire collectors sequentially with -skipDeploy -->
+				<echo message="Collecting data from all services..." />
+
+				<!-- Laboratory Collector -->
+				<java classname="${collector.event.generator.class}" 
+				      fork="true" dir="${generator.project.dir}" failonerror="true">
+					<classpath refid="generator.classpath" />
+					<arg value="-service" /><arg value="Laboratory_CollectorService" />
+					<arg value="-operation" /><arg value="${collector.operation}" />
+					<arg value="-version" /><arg value="${rule.version}" />
+					<arg value="-process" /><arg value="${collector.process.name}" />
+					<arg value="-queryVersion" /><arg value="${rule.version}" />
+					<arg value="-sequenceId" /><arg value="${sequence.id.collect.laboratory}" />
+					<arg value="-skipDeploy" />
+				</java>
+				<sleep seconds="${collector.delay.seconds}" />
+
+				<!-- Radiology Collector -->
+				<java classname="${collector.event.generator.class}" 
+				      fork="true" dir="${generator.project.dir}" failonerror="true">
+					<classpath refid="generator.classpath" />
+					<arg value="-service" /><arg value="Radiology_CollectorService" />
+					<arg value="-operation" /><arg value="${collector.operation}" />
+					<arg value="-version" /><arg value="${rule.version}" />
+					<arg value="-process" /><arg value="${collector.process.name}" />
+					<arg value="-queryVersion" /><arg value="${rule.version}" />
+					<arg value="-sequenceId" /><arg value="${sequence.id.collect.radiology}" />
+					<arg value="-skipDeploy" />
+				</java>
+				<sleep seconds="${collector.delay.seconds}" />
+
+				<!-- Cardiology Collector -->
+				<java classname="${collector.event.generator.class}" 
+				      fork="true" dir="${generator.project.dir}" failonerror="true">
+					<classpath refid="generator.classpath" />
+					<arg value="-service" /><arg value="Cardiology_CollectorService" />
+					<arg value="-operation" /><arg value="${collector.operation}" />
+					<arg value="-version" /><arg value="${rule.version}" />
+					<arg value="-process" /><arg value="${collector.process.name}" />
+					<arg value="-queryVersion" /><arg value="${rule.version}" />
+					<arg value="-sequenceId" /><arg value="${sequence.id.collect.cardiology}" />
+					<arg value="-skipDeploy" />
+				</java>
+				<sleep seconds="${collector.delay.seconds}" />
+
+				<!-- Diagnosis Collector -->
+				<java classname="${collector.event.generator.class}" 
+				      fork="true" dir="${generator.project.dir}" failonerror="true">
+					<classpath refid="generator.classpath" />
+					<arg value="-service" /><arg value="Diagnosis_CollectorService" />
+					<arg value="-operation" /><arg value="${collector.operation}" />
+					<arg value="-version" /><arg value="${rule.version}" />
+					<arg value="-process" /><arg value="${collector.process.name}" />
+					<arg value="-queryVersion" /><arg value="${rule.version}" />
+					<arg value="-sequenceId" /><arg value="${sequence.id.collect.diagnosis}" />
+					<arg value="-skipDeploy" />
+				</java>
+				<sleep seconds="${collector.delay.seconds}" />
+
+				<!-- Treatment Collector -->
+				<java classname="${collector.event.generator.class}" 
+				      fork="true" dir="${generator.project.dir}" failonerror="true">
+					<classpath refid="generator.classpath" />
+					<arg value="-service" /><arg value="Treatment_CollectorService" />
+					<arg value="-operation" /><arg value="${collector.operation}" />
+					<arg value="-version" /><arg value="${rule.version}" />
+					<arg value="-process" /><arg value="${collector.process.name}" />
+					<arg value="-queryVersion" /><arg value="${rule.version}" />
+					<arg value="-sequenceId" /><arg value="${sequence.id.collect.treatment}" />
+					<arg value="-skipDeploy" />
+				</java>
+
+				<echo message="=== Phase 3 Complete ===" />
+
+				<echo message="" />
+				<echo message="================================================================" />
+				<echo message="  ALL PHASES COMPLETED SUCCESSFULLY                            " />
+				<echo message="================================================================" />
+				<echo message="" />
+				<echo message="Output files:" />
+				<echo message="  Triage:     ${triage.output.file}" />
+				<echo message="  Laboratory: ${laboratory.output.file}" />
+				<echo message="  Radiology:  ${radiology.output.file}" />
+				<echo message="  Cardiology: ${cardiology.output.file}" />
+				<echo message="  Diagnosis:  ${diagnosis.output.file}" />
+				<echo message="  Treatment:  ${treatment.output.file}" />
+				<echo message="  Monitor:    ${monitor.output.file}" />
+				<echo message="" />
+				<echo message="Services are still running. Press Ctrl+C to stop." />
+			</sequential>
+		</parallel>
+	</target>
+
+	<!-- ======================================================================= -->
+	<!-- HELP TARGET                                                             -->
+	<!-- ======================================================================= -->
+
+	<target name="help" description="Display usage information">
+		<echo message="" />
+		<echo message="================================================================" />
+		<echo message="  EMERGENCY DEPARTMENT PATIENT WORKFLOW                        " />
+		<echo message="================================================================" />
+		<echo message="" />
+		<echo message="WORKFLOW TOPOLOGY:" />
+		<echo message="  Triage -> Fork(Lab, Cardio, Radiology) -> Join -> Diagnosis -> Treatment -> Monitor" />
+		<echo message="" />
+		<echo message="EXECUTION PATTERN:" />
+		<echo message="  Phase 1: Load services ONCE, Initialize databases (parallel)" />
+		<echo message="  Phase 2: Deploy rules -> Wait for commitment -> Fire tokens" />
+		<echo message="  Phase 3: Deploy collector rules -> Collect data from all services" />
+		<echo message="" />
+		<echo message="USAGE:" />
+		<echo message="  ant                              Run complete workflow (default)" />
+		<echo message="  ant run-complete-workflow        Run complete workflow" />
+		<echo message="  ant help                         Show this help" />
+		<echo message="" />
+		<echo message="CONFIGURABLE PARAMETERS:" />
+		<echo message="  -Drule.version=v001              Rule version" />
+		<echo message="  -Dtoken.count=10                 Number of tokens to fire" />
+		<echo message="  -Dservice.startup.seconds=5      Wait for services to start" />
+		<echo message="  -Dphase.delay.seconds=5          Delay between phases" />
+		<echo message="  -Ddeploy.wait.seconds=3          Wait for commitment after deploy" />
+		<echo message="" />
+		<echo message="EXAMPLE:" />
+		<echo message="  ant -Dtoken.count=50 -Drule.version=v002" />
+		<echo message="" />
+	</target>
+
+</project>

@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="Triage_Monitor_Behavior_POC" default="run-complete-workflow" basedir=".">
+	<description>
+		Triage_Monitor Behavior POC - Complete Workflow with Collectors
+		Tests configurable place behaviors (RANDOM guard on P1, ALWAYS_TRUE on Monitor)
+		
+		Phases:
+		  Phase 1: Initialize Databases (purgeAndInitialize)
+		  Phase 2: Execute Workflow (generate and process tokens)
+		  Phase 3: Collect Performance Data
+
+		Services (Triage, Monitor) start once and remain running throughout all phases.
+	</description>
+
+	<!-- ======================================================================= -->
+	<!-- PROPERTIES                                                              -->
+	<!-- ======================================================================= -->
+
+	<!-- Rule version for workflow execution -->
+	<property name="rule.version" value="v001" />
+
+	<!-- Process names for each phase -->
+	<property name="init.process.name" value="healthcare/Triage_Initialization" />
+	<property name="workflow.process.name" value="healthcare/Triage_CanaryTest_Workflow" />
+	<property name="collector.process.name" value="healthcare/Triage_Collector" />
+
+	<!-- Phase 1: Initialization parameters (v999 = admin/non-instrumented) -->
+	<property name="init.version" value="v999" />
+	<property name="db.init.operation" value="purgeAndInitialize" />
+	<property name="sequence.id.init.triage" value="999000000" />
+	<property name="sequence.id.init.monitor" value="999600000" />
+	<property name="init.delay.seconds" value="3" />
+
+	<!-- Phase 2: Workflow parameters -->
+	<property name="target.place" value="TriageService" />
+	<property name="target.operation" value="processTriageAssessment" />
+	<property name="token.count" value="10" />
+	<property name="token.expire" value="120000" />
+	<property name="event.generator.id" value="CANARY_TEST" />
+
+	<!-- Phase 3: Collector parameters (v999 = admin/non-instrumented) -->
+	<property name="collector.version" value="v999" />
+	<property name="collector.operation" value="collectAllData" />
+	<property name="query.version" value="v001" />
+	<property name="sequence.id.collect.triage" value="999010000" />
+	<property name="collector.delay.seconds" value="3" />
+
+	<!-- Timing parameters -->
+	<property name="service.startup.seconds" value="3" />
+	<property name="phase.delay.seconds" value="5" />
+	<property name="workflow.completion.seconds" value="5" />
+
+	<!-- Base directories -->
+	<property name="build.file.dir" location="." />
+	<property name="healthcare.root.dir" location="../" />
+
+	<!-- Common project -->
+	<property name="common.project.dir" location="${healthcare.root.dir}/btsn.common" />
+	<property name="lib.dir" location="${common.project.dir}/lib" />
+	<property name="class.dir" location="${common.project.dir}/bin" />
+	<property name="common.src.dir" location="${common.project.dir}/src" />
+
+	<!-- Event Generators project -->
+	<property name="generator.project.dir" location="${healthcare.root.dir}/btsn.common.eventgenerators" />
+	<property name="generator.src.dir" location="${generator.project.dir}/src" />
+	<property name="generator.bin.dir" location="${generator.project.dir}/bin" />
+
+	<!-- Output directory -->
+	<property name="output.dir" location="${build.file.dir}" />
+	<property name="Triage.output.file" location="${output.dir}/TriageService.out.txt" />
+	<property name="monitor.output.file" location="${output.dir}/MonitorService.out.txt" />
+
+	<!-- Triage Service -->
+	<property name="Triage.project.dir" location="${healthcare.root.dir}/btsn.healthcare.places.Triage" />
+	<property name="Triage.bin.dir" location="${Triage.project.dir}/bin" />
+	<property name="Triage.src.dir" location="${Triage.project.dir}/src" />
+
+	<!-- Monitor Service -->
+	<property name="monitor.project.dir" location="${healthcare.root.dir}/btsn.common.Monitor" />
+	<property name="monitor.bin.dir" location="${monitor.project.dir}/bin" />
+	<property name="monitor.src.dir" location="${monitor.project.dir}/src" />
+
+	<!-- Java Classes -->
+	<property name="service.loader.class" value="org.btsn.handlers.ServiceLoader" />
+	<property name="init.event.generator.class" value="org.btsn.common.eventgenerators.DatabaseInitialization_EventGenerator" />
+	<property name="token.generator.class" value="org.btsn.healthcare.eventgenerators.GenericHealthcareTokenGenerator" />
+	<property name="collector.event.generator.class" value="org.btsn.common.eventgenerators.Common_Collector_EventGenerator" />
+
+	<!-- ======================================================================= -->
+	<!-- CLASSPATHS                                                              -->
+	<!-- ======================================================================= -->
+
+	<path id="common.classpath">
+		<fileset dir="${lib.dir}" erroronmissingdir="false">
+			<include name="*.jar" />
+		</fileset>
+		<pathelement location="${class.dir}" />
+	</path>
+
+	<path id="Triage.classpath">
+		<path refid="common.classpath" />
+		<pathelement location="${Triage.bin.dir}" />
+	</path>
+
+	<path id="monitor.classpath">
+		<path refid="common.classpath" />
+		<pathelement location="${monitor.bin.dir}" />
+	</path>
+
+	<path id="generator.classpath">
+		<path refid="common.classpath" />
+		<pathelement location="${generator.bin.dir}" />
+	</path>
+
+	<!-- ======================================================================= -->
+	<!-- UTILITY TARGETS                                                         -->
+	<!-- ======================================================================= -->
+
+	<target name="clean-output" description="Clean previous output files">
+		<delete file="${Triage.output.file}" quiet="true" />
+		<delete file="${monitor.output.file}" quiet="true" />
+		<echo message="Previous output files cleaned" />
+	</target>
+
+	<target name="generate-workflow-bindings" description="Generate canonical bindings from workflow JSON">
+		<echo message="=== Generating Workflow Bindings ===" />
+		<java classname="org.btsn.rulecontroller.TopologyBindingGenerator" 
+		      classpathref="generator.classpath"
+		      dir="${common.project.dir}"
+		      fork="true"
+		      failonerror="true">
+			<arg value="${workflow.process.name}" />
+			<arg value="${rule.version}" />
+		</java>
+		<echo message="Workflow bindings generated successfully" />
+	</target>
+
+	<target name="rebuild-service-ruleml" depends="generate-workflow-bindings" 
+	        description="Generate bindings and rebuild master Service.ruleml">
+		<echo message="=== Building Master Service.ruleml ===" />
+		<java classname="org.btsn.utils.BuildMasterServiceRuleBase" 
+		      classpathref="generator.classpath"
+		      dir="${common.project.dir}"
+		      fork="true"
+		      failonerror="true">
+			<arg value="${rule.version}" />
+			<arg value="ALL" />
+		</java>
+		<echo message="Master Service.ruleml built successfully" />
+	</target>
+
+	<!-- ======================================================================= -->
+	<!-- MAIN WORKFLOW TARGET                                                    -->
+	<!-- ======================================================================= -->
+
+	<target name="run-complete-workflow" depends="clean-output,rebuild-service-ruleml" 
+	        description="Run complete Triage_Monitor Behavior POC workflow">
+		<echo message="" />
+		<echo message="================================================================" />
+		<echo message="  TRIAGE_MONITOR BEHAVIOR POC - COMPLETE WORKFLOW              " />
+		<echo message="================================================================" />
+		<echo message="  Version: ${rule.version}" />
+		<echo message="  Token Count: ${token.count}" />
+		<echo message="  Process: ${workflow.process.name}" />
+		<echo message="  Target: ${target.place}:${target.operation}" />
+		<echo message="================================================================" />
+		<echo message="" />
+
+		<parallel>
+			<!-- Start Triage Service (runs continuously) -->
+			<java jvm="java.exe" classname="${service.loader.class}" 
+			      fork="true" timeout="600000" 
+			      dir="${Triage.project.dir}" output="${Triage.output.file}">
+				<classpath refid="Triage.classpath" />
+				<arg value="${Triage.project.dir}" />
+				<arg value="-version" />
+				<arg value="${rule.version}" />
+			</java>
+
+			<!-- Start Monitor Service (runs continuously) -->
+			<java jvm="java.exe" classname="${service.loader.class}" 
+			      fork="true" timeout="600000" 
+			      dir="${monitor.project.dir}" output="${monitor.output.file}">
+				<classpath refid="monitor.classpath" />
+				<arg value="${monitor.project.dir}" />
+				<arg value="-version" />
+				<arg value="${rule.version}" />
+			</java>
+
+			<!-- Sequential workflow phases -->
+			<sequential>
+				<!-- Wait for services to start -->
+				<echo message="Waiting ${service.startup.seconds}s for services to initialize..." />
+				<sleep seconds="${service.startup.seconds}" />
+
+				<!-- ======================================================= -->
+				<!-- PHASE 1: Database Initialization                        -->
+				<!-- ======================================================= -->
+				<echo message="" />
+				<echo message="===============================================" />
+				<echo message="    PHASE 1: DATABASE INITIALIZATION           " />
+				<echo message="===============================================" />
+
+				<!-- Deploy Initialization rules -->
+				<echo message="Deploying Initialization rules..." />
+				<java classname="${init.event.generator.class}" 
+				      fork="true" dir="${generator.project.dir}" failonerror="true">
+					<classpath refid="generator.classpath" />
+					<arg value="-service" /><arg value="Triage_InitializationService" />
+					<arg value="-operation" /><arg value="${db.init.operation}" />
+					<arg value="-version" /><arg value="${init.version}" />
+					<arg value="-process" /><arg value="${init.process.name}" />
+					<arg value="-sequenceId" /><arg value="${sequence.id.init.triage}" />
+					<arg value="-tokens" /><arg value="1" />
+				</java>
+
+				<!-- Trigger Monitor Initialization -->
+				<java classname="${init.event.generator.class}" 
+				      fork="true" dir="${generator.project.dir}" failonerror="true">
+					<classpath refid="generator.classpath" />
+					<arg value="-service" /><arg value="Monitor_InitializationService" />
+					<arg value="-operation" /><arg value="${db.init.operation}" />
+					<arg value="-version" /><arg value="${init.version}" />
+					<arg value="-process" /><arg value="${init.process.name}" />
+					<arg value="-sequenceId" /><arg value="${sequence.id.init.monitor}" />
+					<arg value="-tokens" /><arg value="1" />
+					<arg value="-skipDeploy" />
+				</java>
+
+				<echo message="Waiting ${init.delay.seconds}s for initialization to complete..." />
+				<sleep seconds="${init.delay.seconds}" />
+				<echo message="=== Phase 1 Complete ===" />
+				<sleep seconds="${phase.delay.seconds}" />
+
+				<!-- ======================================================= -->
+				<!-- PHASE 2: Workflow Execution (BEHAVIOR POC)              -->
+				<!-- ======================================================= -->
+				<echo message="" />
+				<echo message="===============================================" />
+				<echo message="    PHASE 2: WORKFLOW EXECUTION (BEHAVIOR POC) " />
+				<echo message="===============================================" />
+				<echo message="Tokens: ${token.count}" />
+				<echo message="Target: ${target.place}:${target.operation}" />
+				<echo message="Triage Guard: RANDOM (70% pass rate)" />
+				<echo message="Monitor Guard: ALWAYS_TRUE" />
+
+				<!-- Deploy Workflow rules (tokens=0) -->
+				<echo message="Deploying Workflow rules with behavior configuration..." />
+				<java classname="${token.generator.class}" 
+				      fork="true" dir="${generator.project.dir}" failonerror="true">
+					<classpath refid="generator.classpath" />
+					<arg value="-version" /><arg value="${rule.version}" />
+					<arg value="-process" /><arg value="${workflow.process.name}" />
+					<arg value="-place" /><arg value="${target.place}" />
+					<arg value="-operation" /><arg value="${target.operation}" />
+					<arg value="-tokens" /><arg value="0" />
+					<arg value="-expire" /><arg value="${token.expire}" />
+					<arg value="-generator" /><arg value="${event.generator.id}" />
+				</java>
+
+				<!-- Execute Workflow (fire tokens) -->
+				<echo message="Firing ${token.count} tokens to ${target.place}:${target.operation}..." />
+				<java classname="${token.generator.class}" 
+				      fork="true" dir="${generator.project.dir}" failonerror="true">
+					<classpath refid="generator.classpath" />
+					<arg value="-version" /><arg value="${rule.version}" />
+					<arg value="-process" /><arg value="${workflow.process.name}" />
+					<arg value="-place" /><arg value="${target.place}" />
+					<arg value="-operation" /><arg value="${target.operation}" />
+					<arg value="-tokens" /><arg value="${token.count}" />
+					<arg value="-expire" /><arg value="${token.expire}" />
+					<arg value="-generator" /><arg value="${event.generator.id}" />
+					<arg value="-skipdeploy" />
+				</java>
+				<echo message="=== Phase 2 Complete ===" />
+				<sleep seconds="${phase.delay.seconds}" />
+
+				<!-- ======================================================= -->
+				<!-- PHASE 3: Data Collection                                -->
+				<!-- ======================================================= -->
+				<echo message="" />
+				<echo message="===============================================" />
+				<echo message="    PHASE 3: DATA COLLECTION                   " />
+				<echo message="===============================================" />
+
+				<!-- Triage Collection (with deployment) -->
+				<echo message="Collecting from Triage_CollectorService..." />
+				<java classname="${collector.event.generator.class}" 
+				      fork="true" dir="${generator.project.dir}" failonerror="true">
+					<classpath refid="generator.classpath" />
+					<arg value="-service" /><arg value="Triage_CollectorService" />
+					<arg value="-operation" /><arg value="${collector.operation}" />
+					<arg value="-version" /><arg value="${collector.version}" />
+					<arg value="-process" /><arg value="${collector.process.name}" />
+					<arg value="-queryVersion" /><arg value="${query.version}" />
+					<arg value="-sequenceId" /><arg value="${sequence.id.collect.triage}" />
+				</java>
+				<sleep seconds="${collector.delay.seconds}" />
+				<echo message="=== Phase 3 Complete ===" />
+
+				<!-- ======================================================= -->
+				<!-- COMPLETE                                                -->
+				<!-- ======================================================= -->
+				<echo message="" />
+				<echo message="================================================================" />
+				<echo message="        TRIAGE_MONITOR BEHAVIOR POC COMPLETED SUCCESSFULLY     " />
+				<echo message="================================================================" />
+				<echo message="" />
+				<echo message="BEHAVIOR TEST RESULTS:" />
+				<echo message="  - Triage Guard (RANDOM 70%): Check logs for pass/fail ratio" />
+				<echo message="  - Monitor Guard (ALWAYS_TRUE): All tokens should pass" />
+				<echo message="" />
+				<echo message="Output files:" />
+				<echo message="  Triage: ${Triage.output.file}" />
+				<echo message="  Monitor: ${monitor.output.file}" />
+				<echo message="" />
+				<echo message="Look for 'PN_BEHAVIOR' in logs to verify behavior execution." />
+				<echo message="" />
+				<echo message="Services are still running. Press Ctrl+C to stop." />
+			</sequential>
+		</parallel>
+	</target>
+
+	<!-- ======================================================================= -->
+	<!-- WORKFLOW-ONLY TARGET (skip init/collect)                               -->
+	<!-- ======================================================================= -->
+
+	<target name="run-workflow-only" depends="clean-output,rebuild-service-ruleml" 
+	        description="Run only the workflow phase (skip init and collect)">
+		<echo message="" />
+		<echo message="================================================================" />
+		<echo message="  TRIAGE_MONITOR BEHAVIOR POC - WORKFLOW ONLY                  " />
+		<echo message="================================================================" />
+		<echo message="  Target: ${target.place}:${target.operation}" />
+
+		<parallel>
+			<!-- Start services -->
+			<java jvm="java.exe" classname="${service.loader.class}" 
+			      fork="true" timeout="600000" 
+			      dir="${Triage.project.dir}" output="${Triage.output.file}">
+				<classpath refid="Triage.classpath" />
+				<arg value="${Triage.project.dir}" />
+				<arg value="-version" />
+				<arg value="${rule.version}" />
+			</java>
+
+			<java jvm="java.exe" classname="${service.loader.class}" 
+			      fork="true" timeout="600000" 
+			      dir="${monitor.project.dir}" output="${monitor.output.file}">
+				<classpath refid="monitor.classpath" />
+				<arg value="${monitor.project.dir}" />
+				<arg value="-version" />
+				<arg value="${rule.version}" />
+			</java>
+
+			<sequential>
+				<sleep seconds="${service.startup.seconds}" />
+
+				<!-- Deploy workflow rules -->
+				<echo message="Deploying workflow rules..." />
+				<java classname="${token.generator.class}" 
+				      fork="true" dir="${generator.project.dir}" failonerror="true">
+					<classpath refid="generator.classpath" />
+					<arg value="-version" /><arg value="${rule.version}" />
+					<arg value="-process" /><arg value="${workflow.process.name}" />
+					<arg value="-place" /><arg value="${target.place}" />
+					<arg value="-operation" /><arg value="${target.operation}" />
+					<arg value="-tokens" /><arg value="0" />
+					<arg value="-expire" /><arg value="${token.expire}" />
+					<arg value="-generator" /><arg value="${event.generator.id}" />
+				</java>
+
+				<!-- Fire tokens -->
+				<echo message="Firing ${token.count} tokens to ${target.place}..." />
+				<java classname="${token.generator.class}" 
+				      fork="true" dir="${generator.project.dir}" failonerror="true">
+					<classpath refid="generator.classpath" />
+					<arg value="-version" /><arg value="${rule.version}" />
+					<arg value="-process" /><arg value="${workflow.process.name}" />
+					<arg value="-place" /><arg value="${target.place}" />
+					<arg value="-operation" /><arg value="${target.operation}" />
+					<arg value="-tokens" /><arg value="${token.count}" />
+					<arg value="-expire" /><arg value="${token.expire}" />
+					<arg value="-generator" /><arg value="${event.generator.id}" />
+					<arg value="-skipdeploy" />
+				</java>
+
+				<echo message="Workflow running. Waiting ${workflow.completion.seconds} seconds..." />
+				<sleep seconds="${workflow.completion.seconds}" />
+				<echo message="Workflow complete. Check logs for behavior results." />
+			</sequential>
+		</parallel>
+	</target>
+
+	<!-- ======================================================================= -->
+	<!-- HELP TARGET                                                             -->
+	<!-- ======================================================================= -->
+
+	<target name="help" description="Display usage information">
+		<echo message="" />
+		<echo message="================================================================" />
+		<echo message="  Triage_Monitor Behavior POC Workflow                         " />
+		<echo message="================================================================" />
+		<echo message="" />
+		<echo message="USAGE:" />
+		<echo message="  ant                        Run complete workflow (default)" />
+		<echo message="  ant run-complete-workflow  Run complete workflow" />
+		<echo message="  ant run-workflow-only      Skip init/collect phases" />
+		<echo message="  ant help                   Show this help" />
+		<echo message="" />
+		<echo message="CONFIGURABLE PARAMETERS:" />
+		<echo message="  -Drule.version=v001              Rule base version" />
+		<echo message="  -Dtarget.place=TriageService     Target service name" />
+		<echo message="  -Dtarget.operation=processTriageAssessment  Service operation" />
+		<echo message="  -Dtoken.count=10                 Number of tokens to generate" />
+		<echo message="  -Dphase.delay.seconds=5          Delay between phases" />
+		<echo message="  -Dquery.version=v001             Version(s) to collect data from" />
+		<echo message="  -Dworkflow.completion.seconds=5  Wait time after firing tokens" />
+		<echo message="" />
+		<echo message="BEHAVIOR CONFIGURATION (in Triage_Monitor_Behavior_POC.json):" />
+		<echo message="  Triage Place:  guardMode=RANDOM, guardProbability=0.7" />
+		<echo message="  Monitor Place: guardMode=ALWAYS_TRUE" />
+		<echo message="" />
+	</target>
+
+</project>

@@ -1,0 +1,143 @@
+digraph BTSN_Feedforward_Correct_Model {
+  rankdir=TB;
+  node [fontname="Arial", fontsize=10];
+  edge [fontsize=8, penwidth=2];
+
+  // Title
+  labelloc="t";
+  label="BTSN Feedforward Model - MATHEMATICALLY CORRECT\nEach Place → Exactly One Transition";
+
+  // Input Layer
+  P1_InputPlace [label="P1(InputPlace)\nParsing", shape=circle, fillcolor="lightblue", style=filled];
+
+  // Feedforward Fork Transition
+  T2_FeedforwardTransition [label="T2(FeedforwardTransition)\nFork + Feedforward", shape=box, fillcolor="orange", style=filled];
+
+  // Two Slow Processing Places
+  P2_ValidationPlace [label="P2(ValidationPlace)\nSLOW: 40ms", shape=circle, fillcolor="yellow", style=filled];
+  P3_TransformPlace [label="P3(TransformPlace)\nVERY SLOW: 60ms", shape=circle, fillcolor="orange", style=filled];
+
+  // REQUIRED: Each place needs its own transition!
+  T3_ValidationTransition [label="T3(ValidationTransition)\nValidation → Join", shape=box, fillcolor="lightgreen", style=filled];
+  T4_TransformTransition [label="T4(TransformTransition)\nTransform → Join", shape=box, fillcolor="lightgreen", style=filled];
+
+  // Join Transition (NOW receives from transitions, not places!)
+  T1_FeedforwardJoinTransition [label="T1(FeedforwardJoinTransition)\n3-WAY TRANSITION SYNC:\n• T2 (feedforward)\n• T3 (validation)\n• T4 (transform)", shape=box, fillcolor="red", style=filled];
+
+  // Output continues
+  P4_OutputPlace [label="P4(OutputPlace)\nFeedforward Result", shape=circle, fillcolor="lightblue", style=filled];
+  T5_RoutingTransition [label="T5(RoutingTransition)\nOutput → Terminal", shape=box, fillcolor="lightgreen", style=filled];
+  P5_TerminalPlace [label="P5(TerminalPlace)\nFinal Output", shape=circle, fillcolor="lightblue", style=filled];
+
+  // CORRECT Network Flow (Respecting BTSN Rules)
+  P1_InputPlace -> T2_FeedforwardTransition [label="Parsed tokens"];
+
+  // Fork to places (1:N from transition)
+  T2_FeedforwardTransition -> P2_ValidationPlace [label="To validation\n40ms process"];
+  T2_FeedforwardTransition -> P3_TransformPlace [label="To transform\n60ms process"];
+
+  // Each place connects to exactly ONE transition (1:1 rule)
+  P2_ValidationPlace -> T3_ValidationTransition [label="Validated\ndata", color="orange"];
+  P3_TransformPlace -> T4_TransformTransition [label="Transformed\ndata", color="red"];
+
+  // Feedforward path (transition-to-transition)
+  T2_FeedforwardTransition -> T1_FeedforwardJoinTransition [label="FEEDFORWARD\nInstant bypass!", color="green", style=bold, penwidth=3];
+
+  // Join point receives from transitions (not places!)
+  T3_ValidationTransition -> T1_FeedforwardJoinTransition [label="Via validation\ntransition", color="orange"];
+  T4_TransformTransition -> T1_FeedforwardJoinTransition [label="Via transform\ntransition", color="red"];
+
+  // Continue downstream (maintaining 1:1 rule)
+  T1_FeedforwardJoinTransition -> P4_OutputPlace [label="Synchronized"];
+  P4_OutputPlace -> T5_RoutingTransition [label="Output"];
+  T5_RoutingTransition -> P5_TerminalPlace [label="Final"];
+
+  // Mathematical Constraints Box
+  subgraph cluster_constraints {
+    label="BTSN Mathematical Constraints ✅";
+    style=filled;
+    fillcolor=lightgreen;
+    
+    constraints_info [shape=plaintext, label=<
+    <table border="0">
+    <tr><td><b>✅ CONSTRAINT COMPLIANCE:</b></td></tr>
+    <tr><td>∀p ∈ P: |•p| = 1 (each place has one input)</td></tr>
+    <tr><td>∀p ∈ P: |p•| = 1 (each place has one output)</td></tr>
+    <tr><td>∀t ∈ T: |•t| ≥ 1 (transitions have inputs)</td></tr>
+    <tr><td>∀t ∈ T: |t•| ≥ 1 (transitions have outputs)</td></tr>
+    <tr><td><b>All places connect to exactly one transition!</b></td></tr>
+    </table>
+    >];
+  }
+
+  // Corrected Timing Analysis
+  subgraph cluster_timing {
+    label="Corrected Feedforward Timing";
+    style=filled;
+    fillcolor=lightyellow;
+    
+    timing_info [shape=plaintext, label=<
+    <table border="0">
+    <tr><td><b>Token Journey Timeline:</b></td></tr>
+    <tr><td>Time 0ms: T2 forks to P2, P3 + feedforward to T1</td></tr>
+    <tr><td>Time 0ms: T1 receives feedforward token</td></tr>
+    <tr><td>Time 40ms: P2→T3→T1 (validation path)</td></tr>
+    <tr><td>Time 60ms: P3→T4→T1 (transform path → SYNC!)</td></tr>
+    <tr><td><b>T1 synchronizes 3 transition inputs</b></td></tr>
+    </table>
+    >];
+  }
+
+  // Node Connection Analysis
+  subgraph cluster_connections {
+    label="Node Connection Verification";
+    style=filled;
+    fillcolor=lightcyan;
+    
+    connections_info [shape=plaintext, label=<
+    <table border="1">
+    <tr><td><b>Place</b></td><td><b>Input From</b></td><td><b>Output To</b></td></tr>
+    <tr><td>P1</td><td>External</td><td>T2 ✅</td></tr>
+    <tr><td>P2</td><td>T2</td><td>T3 ✅</td></tr>
+    <tr><td>P3</td><td>T2</td><td>T4 ✅</td></tr>
+    <tr><td>P4</td><td>T1</td><td>T5 ✅</td></tr>
+    <tr><td>P5</td><td>T5</td><td>External ✅</td></tr>
+    </table>
+    >];
+  }
+
+  // Transition Synchronization Points
+  subgraph cluster_sync {
+    label="Transition Synchronization Logic";
+    style=filled;
+    fillcolor=lightgray;
+    
+    sync_info [shape=plaintext, label=<
+    <table border="0">
+    <tr><td><b>T1 Synchronization Requirements:</b></td></tr>
+    <tr><td>τ(T1) = {T2, T3, T4}</td></tr>
+    <tr><td>Waits for tokens from ALL 3 transitions</td></tr>
+    <tr><td>T2: Feedforward (instant)</td></tr>
+    <tr><td>T3: Validation path (40ms)</td></tr>
+    <tr><td>T4: Transform path (60ms)</td></tr>
+    <tr><td><b>Fires when all 3 transitions provide tokens</b></td></tr>
+    </table>
+    >];
+  }
+
+  // Legend
+  subgraph cluster_legend {
+    label="Legend";
+    style=filled;
+    fillcolor=white;
+    
+    legend_place [label="Place\n(Execution Only)", shape=circle, fillcolor=lightblue, style=filled];
+    legend_normal_trans [label="Normal Transition\n(Logic/Buffer)", shape=box, fillcolor=lightgreen, style=filled];
+    legend_feedforward_trans [label="Feedforward Transition\n(Fork + Bypass)", shape=box, fillcolor=orange, style=filled];
+    legend_sync_trans [label="Sync Transition\n(Multi-input Join)", shape=box, fillcolor=red, style=filled];
+    
+    legend_place -> legend_normal_trans [style=invisible];
+    legend_normal_trans -> legend_feedforward_trans [style=invisible];
+    legend_feedforward_trans -> legend_sync_trans [style=invisible];
+  }
+}

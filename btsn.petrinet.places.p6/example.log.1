@@ -1,0 +1,652 @@
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Join 1010000 using stored expectedCount=2, currentSize=2
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Join 1010000 is COMPLETE: 2 >= 2
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Added argument 'token_branch1' to inputArgs
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Added argument 'token_branch2' to inputArgs
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Collected 2 arguments for join 1010000 (inputs: [token_branch1, token_branch2])
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Join 1010000 complete - participating forks: [fork=1010003,wfStart=1769402265621, fork=1010001,wfStart=1769402265621]
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Join 1010000 complete with 2 inputs for P6_Place.processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - JOIN-CONTINUE: Token 1010001 continues after JOIN at P6_Place
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Preserving workflowStartTime: 1769402265621
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1010001 entering place: P6_Place (buffer=0)
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Could not extract previousPlace from payload
+DEBUG ServiceThread-P6_Place-14006 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P6 token=1010001 eventType=ENTER
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P6 (JoinNode) token=1010001  -> P6_Place [ENTER] buffer=0
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1010001 arrived at join T_in_P6
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - PETRI-NET: JOIN complete - token 1010001 ENTER at P6_Place
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1010003 CONSUMED at join P6_Place (continuation token: 1010001)
+DEBUG ServiceThread-P6_Place-14006 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P6 token=1010003 eventType=JOIN_CONSUMED
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P6 (JoinNode) token=1010003  -> JOIN_CONSUMED [JOIN_CONSUMED]
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - PETRI-NET: JOIN consumed participant 1010003 at P6_Place
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing JoinNode for P6_Place.processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Processing JoinNode for P6_Place.processToken
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: Checking canonical binding for P6_Place.processToken with attribute 'token_branch2'
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: Operation processToken uses standard (AND) semantics
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: processToken requires 2 inputs total (standard AND logic)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: processToken needs 2 inputs - should use JOIN processing
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: No single-input canonical binding - proceeding with normal service call
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Invoking P6_Place.processToken via ServiceHelper (normal)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - === SERVICE INVOCATION START ===
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - Service: org.btsn.places.P6_Place.processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - SequenceID: 1010001
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - Input arguments count: 2
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - Processing argument 1/2, raw length: 845
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Unwrapped place response from key: token
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Found existing original_token to preserve
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted workflow_start_time=1769402265620
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Cleaned argument 1, length: 845 (removed 0 bytes of metadata)
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - Processing argument 2/2, raw length: 864
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Unwrapped place response from key: token
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Found existing original_token to preserve
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted workflow_start_time=1769402265620
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Cleaned argument 2, length: 864 (removed 0 bytes of metadata)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted 2 clean business data arguments (removed infrastructure metadata)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - SERVICE INVOKE: Calling org.btsn.places.P6_Place.processToken with 2 CLEAN business data arguments
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - INVOKE: Reflecting on org.btsn.places.P6_Place.processToken
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - INVOKE: Looking for method with 2 String parameters
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - === PETRI NET EVENT LOGGER INITIALIZED ===
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - PLACE_CREATED: placeId=P6, sequenceId=1010001, type=P6, capacity=1
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - INVOKE: Created instance using 1-param constructor (context) for org.btsn.places.P6_Place
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - INVOKE: Found standard method (2 String args)
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - INVOKE: Calling processToken with 2 arguments
+INFO ServiceThread-P6_Place-14006 org.btsn.base.BaseStochasticPetriNetPlace - PN_JOIN_PROCESS: place=P6, seq=1010001 - Processing synchronized inputs
+INFO ServiceThread-P6_Place-14006 org.btsn.base.BaseStochasticPetriNetPlace - PN_JOIN_PROCESS: place=P6 - Input1=1010000, Input2=1010000
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - TOKEN_ARRIVAL: placeId=P6, sequenceId=1010001, token=Token{id='1010000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P5, distribution=DETERMINISTIC, workflow_start_time=1769402265620}, valid=true}
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - CAPACITY_CHECK: placeId=P6, sequenceId=1010001, M(P)=0, capacity=1, hasCapacity=true
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - MARKING_CHANGE: placeId=P6, sequenceId=1010001, M(P)=1, reason=token_accepted
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - TOKEN_HELD: placeId=P6, sequenceId=1010001, token=Token{id='1010000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P5, distribution=DETERMINISTIC, workflow_start_time=1769402265620}, valid=true}, M(P)=1, capacity=1
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - VALIDITY_WINDOW_CHECK: placeId=P6, sequenceId=1010001, currentTime=1769402271287, notAfter=1769402385620, valid=true
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - PLACE_EXECUTION: placeId=P6, sequenceId=1010001, executionTime=51ms, result=JOIN_COMPLETED
+INFO ServiceThread-P6_Place-14006 org.btsn.base.BaseStochasticPetriNetPlace - PN_JOIN_PROCESS: place=P6, seq=1010001, guard=true (prob=0.50), delay=0ms, total=51ms
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - MARKING_CHANGE: placeId=P6, sequenceId=1010001, M(P)=0, reason=token_released
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - TOKEN_RELEASED: placeId=P6, sequenceId=1010001, token=Token{id='1010000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P5, distribution=DETERMINISTIC, workflow_start_time=1769402265620}, valid=true}, M(P)=0
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - TOKEN_DEPARTURE: placeId=P6, sequenceId=1010001, token=Token{id='1010000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P5, distribution=DETERMINISTIC, workflow_start_time=1769402265620}, valid=true}, annotation={"place":"P6","entryTime":1769402271236,"exitTime":1769402271287,"residenceTime":51,"delayMs":0,"marking":1,"capacity":1,"joinType":"AND_JOIN","input1Token":"1010000","input2Token":"1010000"}
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - SERVICE COMPLETE: org.btsn.places.P6_Place.processToken completed in 70ms
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Successfully enriched service result with metadata
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - === SERVICE INVOCATION COMPLETE ===
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Service returned: {"token":{"annotation":"{\"place\":\"P6\",\"entryTime\":1769402271236,\"exitTime\":1769402271287,\"residenceTime\":51,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"joinType\":\"AND_JOIN\",\"input1Token\":\"1010000\",\"input2Token\":\"1010000\"}","notAfter":1769402385620,"tokenId":"1010000","data":{"delayMs":"0","place":"P5","distribution":"DETERMINISTIC"},"workflow_start_time":1769402265620,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":true,"routing_path":"true"},"service_start_time":1769402271221,"version":"v001","executionTime":51,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":70,"original_token":"{\"notAfter\":1769402385620,\"tokenId\":\"1010000\",\"data\":{},\"workflow_start_time\":1769402265620,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1769402271291,"status":"JOIN_COMPLETED"}}
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1010001 exiting place: P6_Place -> MonitorService [arc=$ANON11]
+DEBUG ServiceThread-P6_Place-14006 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_out_P6 token=1010001 eventType=EXIT
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_out_P6 (JoinNode) token=1010001 P6_Place -> MonitorService [EXIT] arc=$ANON11
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - PETRI-NET: Token 1010001 EXIT from P6_Place -> MonitorService.acknowledgeTokenArrival [arc=$ANON11]
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Querying activeService for MonitorService.acknowledgeTokenArrival
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: ActiveService query returned 2 rows
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: ActiveService result - ?channelId = ip0
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: ActiveService result - ?port = 3000
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: APPLYING activeService override - Channel: ip0, Port: 3000
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Resolved ip0 to IP 192.168.1.152
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ROUTING: External to MonitorService -> 'token'
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ROUTING: Token 1010001 -> 'token' to MonitorService.acknowledgeTokenArrival
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Publishing to Service MonitorService Operation: acknowledgeTokenArrival
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Channel: 192.168.1.152, Port: 3000
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Attribute token = {"token":{"annotation":"{\"place\":\"P6\",\"entryTime\":1769402271236,\"exitTime\":1769402271287,\"residenceTime\":51,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"joinType\":\"AND_JOIN\",\"input1Token\":\"1010000\",\"input2Token\":\"1010000\"}","notAfter":1769402385620,"tokenId":"1010000","data":{"delayMs":"0","place":"P5","distribution":"DETERMINISTIC"},"workflow_start_time":1769402265620,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":true,"routing_path":"true"},"service_start_time":1769402271221,"version":"v001","executionTime":51,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":70,"original_token":"{\"notAfter\":1769402385620,\"tokenId\":\"1010000\",\"data\":{},\"workflow_start_time\":1769402265620,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1769402271291,"status":"JOIN_COMPLETED"}}
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Completed callNextOperation for MonitorService, published=true
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Successfully published to MonitorService via EventPublisher
+ERROR ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - monitorIncomingEvents: true
+WARN ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - TIMING: EventReactor arrival time not found, using ServiceThread dequeue time=1769402270754 for seqID=1010001
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - WRITE: Using captured workflowStartTime=1769402265621 for seqID=1010001
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - === SERVICE TIMING RECORD ===
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Sequence ID: 1010001
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Service: P6_Place
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Operation: processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Arrival Time (EventReactor): 1769402270754
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Invocation Time: 1769402271098
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Publish Time: 1769402271603
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Workflow Start Time: 1769402265621
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   MARKING: Buffer=0, Total=1, Capacity=50
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ==============================
+INFO ServiceThread-P6_Place-14006 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote service timing record for sequenceID: 1010001
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Queue Time (including priority queue): 344ms
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Service Time: 505ms
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Total Time: 849ms
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Buffer Utilization: 0.0%
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Service P6_Place sequence ID: 1010001 complete.
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Cleaned up join 1010000
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Current join status (mode=OPTIMIZED):
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Join 1020000: 1/2 inputs [WAITING]
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing:: token_branch2 = {"token":{"annotation":"{\"place\":\"P4\",\"entryTime\":1769402271573,\"exitTime\":1769402271684,\"residenceTime\":111,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"joinType\":\"AND_JOIN\",\"input1Token\":\"1020000\",\"input2Token\":\"1020000\"}","notAfter":1769402385819,"tokenId":"1020000","data":{"delayMs":"0","place":"P3","distribution":"DETERMINISTIC"},"workflow_start_time":1769402265819,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":false,"routing_path":"false"},"service_start_time":1769402271572,"version":"v001","executionTime":111,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":114,"original_token":"{\"notAfter\":1769402385819,\"tokenId\":\"1020000\",\"data\":{},\"workflow_start_time\":1769402265819,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1769402271686,"status":"JOIN_COMPLETED"}}
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - CAPTURE: WorkflowStartTime=1769402265819 for seqID=1020001
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Incoming Sequence ID = 1020001
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - MonitorIncomingEvents+ = true
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Using RuleBaseVersion: v001
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - FILTER: Event for P6_Place.processToken accepted by P6_Place thread
+WARN ServiceThread-P6_Place-14006 org.btsn.json.jsonLibrary - Key "token_branch2" already exists. Skipping.
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - JOIN-MAP: Added key=token_branch2 to join 1020000 (tokenId=1020001, mapSize=2)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Loading rule base for operation: processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Rule base location: C:\DevShare\BTSN_86\BTSN\btsn.petrinet.places.p6/RuleFolder.v001/processToken/Service.ruleml
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Using cached knowledge base for version: v001
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Parsing knowledge base...
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Knowledge base parsed successfully
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - T_IN-SYNC: Token 1020001 needs input synchronization (2 inputs required: [token_branch1, token_branch2])
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - decisionValueCollection already populated from publishes query - skipping legacy getDecisionValue
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1020001 buffered at T_in_P6_Place (buffer=0)
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Could not extract previousPlace from payload
+DEBUG ServiceThread-P6_Place-14006 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P6 token=1020001 eventType=BUFFERED
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P6 (JoinNode) token=1020001  -> P6_Place [BUFFERED] buffer=0
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - PETRI-NET: Token 1020001 BUFFERED at P6_Place (waiting for join)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: About to check inputCollection.isEmpty() - size: 2
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: inputCollection contents: [token_branch1, token_branch2]
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: nodeType: JoinNode
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: needsInputSynchronization: true
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Past inputCollection check, about to enter JOIN processing
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: inputCollection.get(0): token_branch1
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing input synchronization for P6_Place:processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Input sync P6_Place:processToken waiting for 2 inputs (from canonical binding: [token_branch1, token_branch2])
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - JOIN-COUNT: Stored expectedCount=2 for joinID=1020000
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Input sync P6_Place:processToken waiting for 2 inputs: [token_branch1, token_branch2]
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - TRACK: Fork 1020001 workflowStartTime=1769402265819
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Checking 1 joins for completeness in sequence ID order
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Sequence ID sorted join order:
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   - Sequence 1020000
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Join 1020000 using stored expectedCount=2, currentSize=2
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Join 1020000 is COMPLETE: 2 >= 2
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Found COMPLETE join 1020000 - processing immediately
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Join 1020000 using stored expectedCount=2, currentSize=2
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Join 1020000 is COMPLETE: 2 >= 2
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Added argument 'token_branch1' to inputArgs
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Added argument 'token_branch2' to inputArgs
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Collected 2 arguments for join 1020000 (inputs: [token_branch1, token_branch2])
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Join 1020000 complete - participating forks: [fork=1020003,wfStart=1769402265819, fork=1020001,wfStart=1769402265819]
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Join 1020000 complete with 2 inputs for P6_Place.processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - JOIN-CONTINUE: Token 1020001 continues after JOIN at P6_Place
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Preserving workflowStartTime: 1769402265819
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1020001 entering place: P6_Place (buffer=0)
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Could not extract previousPlace from payload
+DEBUG ServiceThread-P6_Place-14006 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P6 token=1020001 eventType=ENTER
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P6 (JoinNode) token=1020001  -> P6_Place [ENTER] buffer=0
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1020001 arrived at join T_in_P6
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - PETRI-NET: JOIN complete - token 1020001 ENTER at P6_Place
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1020003 CONSUMED at join P6_Place (continuation token: 1020001)
+DEBUG ServiceThread-P6_Place-14006 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P6 token=1020003 eventType=JOIN_CONSUMED
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P6 (JoinNode) token=1020003  -> JOIN_CONSUMED [JOIN_CONSUMED]
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - PETRI-NET: JOIN consumed participant 1020003 at P6_Place
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing JoinNode for P6_Place.processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Processing JoinNode for P6_Place.processToken
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: Checking canonical binding for P6_Place.processToken with attribute 'token_branch2'
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: Operation processToken uses standard (AND) semantics
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: processToken requires 2 inputs total (standard AND logic)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: processToken needs 2 inputs - should use JOIN processing
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: No single-input canonical binding - proceeding with normal service call
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Invoking P6_Place.processToken via ServiceHelper (normal)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - === SERVICE INVOCATION START ===
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - Service: org.btsn.places.P6_Place.processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - SequenceID: 1020001
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - Input arguments count: 2
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - Processing argument 1/2, raw length: 845
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Unwrapped place response from key: token
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Found existing original_token to preserve
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted workflow_start_time=1769402265819
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Cleaned argument 1, length: 845 (removed 0 bytes of metadata)
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - Processing argument 2/2, raw length: 871
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Unwrapped place response from key: token
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Found existing original_token to preserve
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted workflow_start_time=1769402265819
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Cleaned argument 2, length: 871 (removed 0 bytes of metadata)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted 2 clean business data arguments (removed infrastructure metadata)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - SERVICE INVOKE: Calling org.btsn.places.P6_Place.processToken with 2 CLEAN business data arguments
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - INVOKE: Reflecting on org.btsn.places.P6_Place.processToken
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - INVOKE: Looking for method with 2 String parameters
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - PLACE_CREATED: placeId=P6, sequenceId=1020001, type=P6, capacity=1
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - INVOKE: Created instance using 1-param constructor (context) for org.btsn.places.P6_Place
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - INVOKE: Found standard method (2 String args)
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - INVOKE: Calling processToken with 2 arguments
+INFO ServiceThread-P6_Place-14006 org.btsn.base.BaseStochasticPetriNetPlace - PN_JOIN_PROCESS: place=P6, seq=1020001 - Processing synchronized inputs
+INFO ServiceThread-P6_Place-14006 org.btsn.base.BaseStochasticPetriNetPlace - PN_JOIN_PROCESS: place=P6 - Input1=1020000, Input2=1020000
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - TOKEN_ARRIVAL: placeId=P6, sequenceId=1020001, token=Token{id='1020000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P5, distribution=DETERMINISTIC, workflow_start_time=1769402265819}, valid=true}
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - CAPACITY_CHECK: placeId=P6, sequenceId=1020001, M(P)=0, capacity=1, hasCapacity=true
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - MARKING_CHANGE: placeId=P6, sequenceId=1020001, M(P)=1, reason=token_accepted
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - TOKEN_HELD: placeId=P6, sequenceId=1020001, token=Token{id='1020000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P5, distribution=DETERMINISTIC, workflow_start_time=1769402265819}, valid=true}, M(P)=1, capacity=1
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - VALIDITY_WINDOW_CHECK: placeId=P6, sequenceId=1020001, currentTime=1769402273225, notAfter=1769402385819, valid=true
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - PLACE_EXECUTION: placeId=P6, sequenceId=1020001, executionTime=50ms, result=JOIN_COMPLETED
+INFO ServiceThread-P6_Place-14006 org.btsn.base.BaseStochasticPetriNetPlace - PN_JOIN_PROCESS: place=P6, seq=1020001, guard=true (prob=0.50), delay=0ms, total=50ms
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - MARKING_CHANGE: placeId=P6, sequenceId=1020001, M(P)=0, reason=token_released
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - TOKEN_RELEASED: placeId=P6, sequenceId=1020001, token=Token{id='1020000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P5, distribution=DETERMINISTIC, workflow_start_time=1769402265819}, valid=true}, M(P)=0
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - TOKEN_DEPARTURE: placeId=P6, sequenceId=1020001, token=Token{id='1020000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P5, distribution=DETERMINISTIC, workflow_start_time=1769402265819}, valid=true}, annotation={"place":"P6","entryTime":1769402273176,"exitTime":1769402273226,"residenceTime":50,"delayMs":0,"marking":1,"capacity":1,"joinType":"AND_JOIN","input1Token":"1020000","input2Token":"1020000"}
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - SERVICE COMPLETE: org.btsn.places.P6_Place.processToken completed in 57ms
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Successfully enriched service result with metadata
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - === SERVICE INVOCATION COMPLETE ===
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Service returned: {"token":{"annotation":"{\"place\":\"P6\",\"entryTime\":1769402273176,\"exitTime\":1769402273226,\"residenceTime\":50,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"joinType\":\"AND_JOIN\",\"input1Token\":\"1020000\",\"input2Token\":\"1020000\"}","notAfter":1769402385819,"tokenId":"1020000","data":{"delayMs":"0","place":"P5","distribution":"DETERMINISTIC"},"workflow_start_time":1769402265819,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":true,"routing_path":"true"},"service_start_time":1769402273174,"version":"v001","executionTime":50,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":57,"original_token":"{\"notAfter\":1769402385819,\"tokenId\":\"1020000\",\"data\":{},\"workflow_start_time\":1769402265819,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1769402273231,"status":"JOIN_COMPLETED"}}
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1020001 exiting place: P6_Place -> MonitorService [arc=$ANON11]
+DEBUG ServiceThread-P6_Place-14006 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_out_P6 token=1020001 eventType=EXIT
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_out_P6 (JoinNode) token=1020001 P6_Place -> MonitorService [EXIT] arc=$ANON11
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - PETRI-NET: Token 1020001 EXIT from P6_Place -> MonitorService.acknowledgeTokenArrival [arc=$ANON11]
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Querying activeService for MonitorService.acknowledgeTokenArrival
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: ActiveService query returned 2 rows
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: ActiveService result - ?channelId = ip0
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: ActiveService result - ?port = 3000
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: APPLYING activeService override - Channel: ip0, Port: 3000
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Resolved ip0 to IP 192.168.1.152
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ROUTING: External to MonitorService -> 'token'
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ROUTING: Token 1020001 -> 'token' to MonitorService.acknowledgeTokenArrival
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Publishing to Service MonitorService Operation: acknowledgeTokenArrival
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Channel: 192.168.1.152, Port: 3000
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Attribute token = {"token":{"annotation":"{\"place\":\"P6\",\"entryTime\":1769402273176,\"exitTime\":1769402273226,\"residenceTime\":50,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"joinType\":\"AND_JOIN\",\"input1Token\":\"1020000\",\"input2Token\":\"1020000\"}","notAfter":1769402385819,"tokenId":"1020000","data":{"delayMs":"0","place":"P5","distribution":"DETERMINISTIC"},"workflow_start_time":1769402265819,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":true,"routing_path":"true"},"service_start_time":1769402273174,"version":"v001","executionTime":50,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":57,"original_token":"{\"notAfter\":1769402385819,\"tokenId\":\"1020000\",\"data\":{},\"workflow_start_time\":1769402265819,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1769402273231,"status":"JOIN_COMPLETED"}}
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Completed callNextOperation for MonitorService, published=true
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Successfully published to MonitorService via EventPublisher
+ERROR ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - monitorIncomingEvents: true
+WARN ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - TIMING: EventReactor arrival time not found, using ServiceThread dequeue time=1769402272129 for seqID=1020001
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - WRITE: Using captured workflowStartTime=1769402265819 for seqID=1020001
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - === SERVICE TIMING RECORD ===
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Sequence ID: 1020001
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Service: P6_Place
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Operation: processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Arrival Time (EventReactor): 1769402272129
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Invocation Time: 1769402272856
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Publish Time: 1769402273461
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Workflow Start Time: 1769402265819
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   MARKING: Buffer=0, Total=1, Capacity=50
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ==============================
+INFO ServiceThread-P6_Place-14006 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote service timing record for sequenceID: 1020001
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Queue Time (including priority queue): 727ms
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Service Time: 605ms
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Total Time: 1332ms
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Buffer Utilization: 0.0%
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Service P6_Place sequence ID: 1020001 complete.
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Cleaned up join 1020000
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing:: token_branch1 = {"token":{"annotation":"{\"place\":\"P5\",\"entryTime\":1769402272999,\"exitTime\":1769402273179,\"residenceTime\":180,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"distribution\":\"DETERMINISTIC\",\"routingPath\":\"false\"}","notAfter":1769402387852,"tokenId":"1040000","data":{"delayMs":"0","place":"P5","distribution":"DETERMINISTIC"},"workflow_start_time":1769402267852,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":false,"routing_path":"false"},"service_start_time":1769402272998,"version":"v001","executionTime":180,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":255,"original_token":"{\"notAfter\":1769402387852,\"tokenId\":\"1040000\",\"data\":{},\"workflow_start_time\":1769402267852,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1769402273253,"status":"COMPLETED"}}
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - CAPTURE: WorkflowStartTime=1769402267852 for seqID=1040003
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Incoming Sequence ID = 1040003
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - MonitorIncomingEvents+ = true
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Using RuleBaseVersion: v001
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - FILTER: Event for P6_Place.processToken accepted by P6_Place thread
+WARN ServiceThread-P6_Place-14006 org.btsn.json.jsonLibrary - Key "token_branch1" already exists. Skipping.
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - JOIN-MAP: Added key=token_branch1 to join 1040000 (tokenId=1040003, mapSize=1)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Loading rule base for operation: processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Rule base location: C:\DevShare\BTSN_86\BTSN\btsn.petrinet.places.p6/RuleFolder.v001/processToken/Service.ruleml
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Using cached knowledge base for version: v001
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Parsing knowledge base...
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Knowledge base parsed successfully
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - T_IN-SYNC: Token 1040003 needs input synchronization (2 inputs required: [token_branch1, token_branch2])
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - decisionValueCollection already populated from publishes query - skipping legacy getDecisionValue
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1040003 buffered at T_in_P6_Place (buffer=0)
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Could not extract previousPlace from payload
+DEBUG ServiceThread-P6_Place-14006 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P6 token=1040003 eventType=BUFFERED
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P6 (JoinNode) token=1040003  -> P6_Place [BUFFERED] buffer=0
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - PETRI-NET: Token 1040003 BUFFERED at P6_Place (waiting for join)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: About to check inputCollection.isEmpty() - size: 2
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: inputCollection contents: [token_branch1, token_branch2]
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: nodeType: JoinNode
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: needsInputSynchronization: true
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Past inputCollection check, about to enter JOIN processing
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: inputCollection.get(0): token_branch1
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing input synchronization for P6_Place:processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Input sync P6_Place:processToken waiting for 2 inputs (from canonical binding: [token_branch1, token_branch2])
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - JOIN-COUNT: Stored expectedCount=2 for joinID=1040000
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Input sync P6_Place:processToken waiting for 2 inputs: [token_branch1, token_branch2]
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - TRACK: Fork 1040003 workflowStartTime=1769402267852
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Checking 1 joins for completeness in sequence ID order
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Sequence ID sorted join order:
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   - Sequence 1040000
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Join 1040000 using stored expectedCount=2, currentSize=1
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Join 1040000 is incomplete - checking next
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: No complete joins found in 1 pending joins - waiting for more inputs
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Current join status (mode=OPTIMIZED):
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Join 1040000: 1/2 inputs [WAITING]
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing:: token_branch2 = {"token":{"annotation":"{\"place\":\"P4\",\"entryTime\":1769402275413,\"exitTime\":1769402275487,\"residenceTime\":74,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"joinType\":\"AND_JOIN\",\"input1Token\":\"1040000\",\"input2Token\":\"1040000\"}","notAfter":1769402387852,"tokenId":"1040000","data":{"delayMs":"0","place":"P3","distribution":"DETERMINISTIC"},"workflow_start_time":1769402267852,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":true,"routing_path":"true"},"service_start_time":1769402275412,"version":"v001","executionTime":74,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":77,"original_token":"{\"notAfter\":1769402387852,\"tokenId\":\"1040000\",\"data\":{},\"workflow_start_time\":1769402267852,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1769402275489,"status":"JOIN_COMPLETED"}}
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - CAPTURE: WorkflowStartTime=1769402267852 for seqID=1040001
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Incoming Sequence ID = 1040001
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - MonitorIncomingEvents+ = true
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Using RuleBaseVersion: v001
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - FILTER: Event for P6_Place.processToken accepted by P6_Place thread
+WARN ServiceThread-P6_Place-14006 org.btsn.json.jsonLibrary - Key "token_branch2" already exists. Skipping.
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - JOIN-MAP: Added key=token_branch2 to join 1040000 (tokenId=1040001, mapSize=2)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Loading rule base for operation: processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Rule base location: C:\DevShare\BTSN_86\BTSN\btsn.petrinet.places.p6/RuleFolder.v001/processToken/Service.ruleml
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Using cached knowledge base for version: v001
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Parsing knowledge base...
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Knowledge base parsed successfully
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - T_IN-SYNC: Token 1040001 needs input synchronization (2 inputs required: [token_branch1, token_branch2])
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - decisionValueCollection already populated from publishes query - skipping legacy getDecisionValue
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1040001 buffered at T_in_P6_Place (buffer=0)
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Could not extract previousPlace from payload
+DEBUG ServiceThread-P6_Place-14006 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P6 token=1040001 eventType=BUFFERED
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P6 (JoinNode) token=1040001  -> P6_Place [BUFFERED] buffer=0
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - PETRI-NET: Token 1040001 BUFFERED at P6_Place (waiting for join)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: About to check inputCollection.isEmpty() - size: 2
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: inputCollection contents: [token_branch1, token_branch2]
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: nodeType: JoinNode
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: needsInputSynchronization: true
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Past inputCollection check, about to enter JOIN processing
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: inputCollection.get(0): token_branch1
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing input synchronization for P6_Place:processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Input sync P6_Place:processToken waiting for 2 inputs (from canonical binding: [token_branch1, token_branch2])
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - JOIN-COUNT: Stored expectedCount=2 for joinID=1040000
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Input sync P6_Place:processToken waiting for 2 inputs: [token_branch1, token_branch2]
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - TRACK: Fork 1040001 workflowStartTime=1769402267852
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Checking 1 joins for completeness in sequence ID order
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Sequence ID sorted join order:
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   - Sequence 1040000
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Join 1040000 using stored expectedCount=2, currentSize=2
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Join 1040000 is COMPLETE: 2 >= 2
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Found COMPLETE join 1040000 - processing immediately
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Join 1040000 using stored expectedCount=2, currentSize=2
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Join 1040000 is COMPLETE: 2 >= 2
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Added argument 'token_branch1' to inputArgs
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Added argument 'token_branch2' to inputArgs
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Collected 2 arguments for join 1040000 (inputs: [token_branch1, token_branch2])
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Join 1040000 complete - participating forks: [fork=1040003,wfStart=1769402267852, fork=1040001,wfStart=1769402267852]
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Join 1040000 complete with 2 inputs for P6_Place.processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - JOIN-CONTINUE: Token 1040001 continues after JOIN at P6_Place
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Preserving workflowStartTime: 1769402267852
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1040001 entering place: P6_Place (buffer=0)
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Could not extract previousPlace from payload
+DEBUG ServiceThread-P6_Place-14006 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P6 token=1040001 eventType=ENTER
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P6 (JoinNode) token=1040001  -> P6_Place [ENTER] buffer=0
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1040001 arrived at join T_in_P6
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - PETRI-NET: JOIN complete - token 1040001 ENTER at P6_Place
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1040003 CONSUMED at join P6_Place (continuation token: 1040001)
+DEBUG ServiceThread-P6_Place-14006 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P6 token=1040003 eventType=JOIN_CONSUMED
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P6 (JoinNode) token=1040003  -> JOIN_CONSUMED [JOIN_CONSUMED]
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - PETRI-NET: JOIN consumed participant 1040003 at P6_Place
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing JoinNode for P6_Place.processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Processing JoinNode for P6_Place.processToken
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: Checking canonical binding for P6_Place.processToken with attribute 'token_branch2'
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: Operation processToken uses standard (AND) semantics
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: processToken requires 2 inputs total (standard AND logic)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: processToken needs 2 inputs - should use JOIN processing
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: No single-input canonical binding - proceeding with normal service call
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Invoking P6_Place.processToken via ServiceHelper (normal)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - === SERVICE INVOCATION START ===
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - Service: org.btsn.places.P6_Place.processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - SequenceID: 1040001
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - Input arguments count: 2
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - Processing argument 1/2, raw length: 845
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Unwrapped place response from key: token
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Found existing original_token to preserve
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted workflow_start_time=1769402267852
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Cleaned argument 1, length: 845 (removed 0 bytes of metadata)
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - Processing argument 2/2, raw length: 866
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Unwrapped place response from key: token
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Found existing original_token to preserve
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted workflow_start_time=1769402267852
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Cleaned argument 2, length: 866 (removed 0 bytes of metadata)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted 2 clean business data arguments (removed infrastructure metadata)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - SERVICE INVOKE: Calling org.btsn.places.P6_Place.processToken with 2 CLEAN business data arguments
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - INVOKE: Reflecting on org.btsn.places.P6_Place.processToken
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - INVOKE: Looking for method with 2 String parameters
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - PLACE_CREATED: placeId=P6, sequenceId=1040001, type=P6, capacity=1
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - INVOKE: Created instance using 1-param constructor (context) for org.btsn.places.P6_Place
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - INVOKE: Found standard method (2 String args)
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - INVOKE: Calling processToken with 2 arguments
+INFO ServiceThread-P6_Place-14006 org.btsn.base.BaseStochasticPetriNetPlace - PN_JOIN_PROCESS: place=P6, seq=1040001 - Processing synchronized inputs
+INFO ServiceThread-P6_Place-14006 org.btsn.base.BaseStochasticPetriNetPlace - PN_JOIN_PROCESS: place=P6 - Input1=1040000, Input2=1040000
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - TOKEN_ARRIVAL: placeId=P6, sequenceId=1040001, token=Token{id='1040000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P5, distribution=DETERMINISTIC, workflow_start_time=1769402267852}, valid=true}
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - CAPACITY_CHECK: placeId=P6, sequenceId=1040001, M(P)=0, capacity=1, hasCapacity=true
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - MARKING_CHANGE: placeId=P6, sequenceId=1040001, M(P)=1, reason=token_accepted
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - TOKEN_HELD: placeId=P6, sequenceId=1040001, token=Token{id='1040000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P5, distribution=DETERMINISTIC, workflow_start_time=1769402267852}, valid=true}, M(P)=1, capacity=1
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - VALIDITY_WINDOW_CHECK: placeId=P6, sequenceId=1040001, currentTime=1769402276465, notAfter=1769402387852, valid=true
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - PLACE_EXECUTION: placeId=P6, sequenceId=1040001, executionTime=11ms, result=JOIN_COMPLETED
+INFO ServiceThread-P6_Place-14006 org.btsn.base.BaseStochasticPetriNetPlace - PN_JOIN_PROCESS: place=P6, seq=1040001, guard=false (prob=0.50), delay=0ms, total=11ms
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - MARKING_CHANGE: placeId=P6, sequenceId=1040001, M(P)=0, reason=token_released
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - TOKEN_RELEASED: placeId=P6, sequenceId=1040001, token=Token{id='1040000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P5, distribution=DETERMINISTIC, workflow_start_time=1769402267852}, valid=true}, M(P)=0
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - TOKEN_DEPARTURE: placeId=P6, sequenceId=1040001, token=Token{id='1040000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P5, distribution=DETERMINISTIC, workflow_start_time=1769402267852}, valid=true}, annotation={"place":"P6","entryTime":1769402276455,"exitTime":1769402276466,"residenceTime":11,"delayMs":0,"marking":1,"capacity":1,"joinType":"AND_JOIN","input1Token":"1040000","input2Token":"1040000"}
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - SERVICE COMPLETE: org.btsn.places.P6_Place.processToken completed in 13ms
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Successfully enriched service result with metadata
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - === SERVICE INVOCATION COMPLETE ===
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Service returned: {"token":{"annotation":"{\"place\":\"P6\",\"entryTime\":1769402276455,\"exitTime\":1769402276466,\"residenceTime\":11,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"joinType\":\"AND_JOIN\",\"input1Token\":\"1040000\",\"input2Token\":\"1040000\"}","notAfter":1769402387852,"tokenId":"1040000","data":{"delayMs":"0","place":"P5","distribution":"DETERMINISTIC"},"workflow_start_time":1769402267852,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":false,"routing_path":"false"},"service_start_time":1769402276454,"version":"v001","executionTime":11,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":13,"original_token":"{\"notAfter\":1769402387852,\"tokenId\":\"1040000\",\"data\":{},\"workflow_start_time\":1769402267852,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1769402276467,"status":"JOIN_COMPLETED"}}
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1040001 exiting place: P6_Place -> MonitorService [arc=$ANON11]
+DEBUG ServiceThread-P6_Place-14006 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_out_P6 token=1040001 eventType=EXIT
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_out_P6 (JoinNode) token=1040001 P6_Place -> MonitorService [EXIT] arc=$ANON11
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - PETRI-NET: Token 1040001 EXIT from P6_Place -> MonitorService.acknowledgeTokenArrival [arc=$ANON11]
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Querying activeService for MonitorService.acknowledgeTokenArrival
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: ActiveService query returned 2 rows
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: ActiveService result - ?channelId = ip0
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: ActiveService result - ?port = 3000
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: APPLYING activeService override - Channel: ip0, Port: 3000
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Resolved ip0 to IP 192.168.1.152
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ROUTING: External to MonitorService -> 'token'
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ROUTING: Token 1040001 -> 'token' to MonitorService.acknowledgeTokenArrival
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Publishing to Service MonitorService Operation: acknowledgeTokenArrival
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Channel: 192.168.1.152, Port: 3000
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Attribute token = {"token":{"annotation":"{\"place\":\"P6\",\"entryTime\":1769402276455,\"exitTime\":1769402276466,\"residenceTime\":11,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"joinType\":\"AND_JOIN\",\"input1Token\":\"1040000\",\"input2Token\":\"1040000\"}","notAfter":1769402387852,"tokenId":"1040000","data":{"delayMs":"0","place":"P5","distribution":"DETERMINISTIC"},"workflow_start_time":1769402267852,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":false,"routing_path":"false"},"service_start_time":1769402276454,"version":"v001","executionTime":11,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":13,"original_token":"{\"notAfter\":1769402387852,\"tokenId\":\"1040000\",\"data\":{},\"workflow_start_time\":1769402267852,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1769402276467,"status":"JOIN_COMPLETED"}}
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Completed callNextOperation for MonitorService, published=true
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Successfully published to MonitorService via EventPublisher
+ERROR ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - monitorIncomingEvents: true
+WARN ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - TIMING: EventReactor arrival time not found, using ServiceThread dequeue time=1769402275741 for seqID=1040001
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - WRITE: Using captured workflowStartTime=1769402267852 for seqID=1040001
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - === SERVICE TIMING RECORD ===
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Sequence ID: 1040001
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Service: P6_Place
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Operation: processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Arrival Time (EventReactor): 1769402275741
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Invocation Time: 1769402276167
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Publish Time: 1769402277090
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Workflow Start Time: 1769402267852
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   MARKING: Buffer=0, Total=1, Capacity=50
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ==============================
+INFO ServiceThread-P6_Place-14006 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote service timing record for sequenceID: 1040001
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Queue Time (including priority queue): 426ms
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Service Time: 923ms
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Total Time: 1349ms
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Buffer Utilization: 0.0%
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Service P6_Place sequence ID: 1040001 complete.
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Cleaned up join 1040000
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing:: token_branch1 = {"token":{"annotation":"{\"place\":\"P5\",\"entryTime\":1769402275781,\"exitTime\":1769402275887,\"residenceTime\":106,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"distribution\":\"DETERMINISTIC\",\"routingPath\":\"true\"}","notAfter":1769402391488,"tokenId":"1050000","data":{"delayMs":"0","place":"P5","distribution":"DETERMINISTIC"},"workflow_start_time":1769402271488,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":true,"routing_path":"true"},"service_start_time":1769402275780,"version":"v001","executionTime":106,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":110,"original_token":"{\"notAfter\":1769402391488,\"tokenId\":\"1050000\",\"data\":{},\"workflow_start_time\":1769402271488,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1769402275890,"status":"COMPLETED"}}
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - CAPTURE: WorkflowStartTime=1769402271488 for seqID=1050003
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Incoming Sequence ID = 1050003
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - MonitorIncomingEvents+ = true
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Using RuleBaseVersion: v001
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - FILTER: Event for P6_Place.processToken accepted by P6_Place thread
+WARN ServiceThread-P6_Place-14006 org.btsn.json.jsonLibrary - Key "token_branch1" already exists. Skipping.
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - JOIN-MAP: Added key=token_branch1 to join 1050000 (tokenId=1050003, mapSize=1)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Loading rule base for operation: processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Rule base location: C:\DevShare\BTSN_86\BTSN\btsn.petrinet.places.p6/RuleFolder.v001/processToken/Service.ruleml
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Using cached knowledge base for version: v001
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Parsing knowledge base...
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Knowledge base parsed successfully
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - T_IN-SYNC: Token 1050003 needs input synchronization (2 inputs required: [token_branch1, token_branch2])
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - decisionValueCollection already populated from publishes query - skipping legacy getDecisionValue
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1050003 buffered at T_in_P6_Place (buffer=0)
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Could not extract previousPlace from payload
+DEBUG ServiceThread-P6_Place-14006 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P6 token=1050003 eventType=BUFFERED
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P6 (JoinNode) token=1050003  -> P6_Place [BUFFERED] buffer=0
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - PETRI-NET: Token 1050003 BUFFERED at P6_Place (waiting for join)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: About to check inputCollection.isEmpty() - size: 2
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: inputCollection contents: [token_branch1, token_branch2]
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: nodeType: JoinNode
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: needsInputSynchronization: true
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Past inputCollection check, about to enter JOIN processing
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: inputCollection.get(0): token_branch1
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing input synchronization for P6_Place:processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Input sync P6_Place:processToken waiting for 2 inputs (from canonical binding: [token_branch1, token_branch2])
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - JOIN-COUNT: Stored expectedCount=2 for joinID=1050000
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Input sync P6_Place:processToken waiting for 2 inputs: [token_branch1, token_branch2]
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - TRACK: Fork 1050003 workflowStartTime=1769402271488
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Checking 1 joins for completeness in sequence ID order
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Sequence ID sorted join order:
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   - Sequence 1050000
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Join 1050000 using stored expectedCount=2, currentSize=1
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Join 1050000 is incomplete - checking next
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: No complete joins found in 1 pending joins - waiting for more inputs
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Current join status (mode=OPTIMIZED):
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Join 1050000: 1/2 inputs [WAITING]
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing:: token_branch2 = {"token":{"annotation":"{\"place\":\"P4\",\"entryTime\":1769402278192,\"exitTime\":1769402278394,\"residenceTime\":202,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"joinType\":\"AND_JOIN\",\"input1Token\":\"1050000\",\"input2Token\":\"1050000\"}","notAfter":1769402391488,"tokenId":"1050000","data":{"delayMs":"0","place":"P3","distribution":"DETERMINISTIC"},"workflow_start_time":1769402271488,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":false,"routing_path":"false"},"service_start_time":1769402278191,"version":"v001","executionTime":202,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":205,"original_token":"{\"notAfter\":1769402391488,\"tokenId\":\"1050000\",\"data\":{},\"workflow_start_time\":1769402271488,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1769402278396,"status":"JOIN_COMPLETED"}}
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - CAPTURE: WorkflowStartTime=1769402271488 for seqID=1050001
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Incoming Sequence ID = 1050001
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - MonitorIncomingEvents+ = true
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Using RuleBaseVersion: v001
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - FILTER: Event for P6_Place.processToken accepted by P6_Place thread
+WARN ServiceThread-P6_Place-14006 org.btsn.json.jsonLibrary - Key "token_branch2" already exists. Skipping.
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - JOIN-MAP: Added key=token_branch2 to join 1050000 (tokenId=1050001, mapSize=2)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Loading rule base for operation: processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Rule base location: C:\DevShare\BTSN_86\BTSN\btsn.petrinet.places.p6/RuleFolder.v001/processToken/Service.ruleml
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Using cached knowledge base for version: v001
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Parsing knowledge base...
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Knowledge base parsed successfully
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - T_IN-SYNC: Token 1050001 needs input synchronization (2 inputs required: [token_branch1, token_branch2])
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - decisionValueCollection already populated from publishes query - skipping legacy getDecisionValue
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1050001 buffered at T_in_P6_Place (buffer=0)
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Could not extract previousPlace from payload
+DEBUG ServiceThread-P6_Place-14006 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P6 token=1050001 eventType=BUFFERED
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P6 (JoinNode) token=1050001  -> P6_Place [BUFFERED] buffer=0
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - PETRI-NET: Token 1050001 BUFFERED at P6_Place (waiting for join)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: About to check inputCollection.isEmpty() - size: 2
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: inputCollection contents: [token_branch1, token_branch2]
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: nodeType: JoinNode
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: needsInputSynchronization: true
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Past inputCollection check, about to enter JOIN processing
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: inputCollection.get(0): token_branch1
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing input synchronization for P6_Place:processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Input sync P6_Place:processToken waiting for 2 inputs (from canonical binding: [token_branch1, token_branch2])
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - JOIN-COUNT: Stored expectedCount=2 for joinID=1050000
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Input sync P6_Place:processToken waiting for 2 inputs: [token_branch1, token_branch2]
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - TRACK: Fork 1050001 workflowStartTime=1769402271488
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Checking 1 joins for completeness in sequence ID order
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Sequence ID sorted join order:
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   - Sequence 1050000
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Join 1050000 using stored expectedCount=2, currentSize=2
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Join 1050000 is COMPLETE: 2 >= 2
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Found COMPLETE join 1050000 - processing immediately
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Join 1050000 using stored expectedCount=2, currentSize=2
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Join 1050000 is COMPLETE: 2 >= 2
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Added argument 'token_branch1' to inputArgs
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Added argument 'token_branch2' to inputArgs
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Collected 2 arguments for join 1050000 (inputs: [token_branch1, token_branch2])
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Join 1050000 complete - participating forks: [fork=1050003,wfStart=1769402271488, fork=1050001,wfStart=1769402271488]
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Join 1050000 complete with 2 inputs for P6_Place.processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - JOIN-CONTINUE: Token 1050001 continues after JOIN at P6_Place
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Preserving workflowStartTime: 1769402271488
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1050001 entering place: P6_Place (buffer=0)
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Could not extract previousPlace from payload
+DEBUG ServiceThread-P6_Place-14006 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P6 token=1050001 eventType=ENTER
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P6 (JoinNode) token=1050001  -> P6_Place [ENTER] buffer=0
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1050001 arrived at join T_in_P6
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - PETRI-NET: JOIN complete - token 1050001 ENTER at P6_Place
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1050003 CONSUMED at join P6_Place (continuation token: 1050001)
+DEBUG ServiceThread-P6_Place-14006 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P6 token=1050003 eventType=JOIN_CONSUMED
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P6 (JoinNode) token=1050003  -> JOIN_CONSUMED [JOIN_CONSUMED]
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - PETRI-NET: JOIN consumed participant 1050003 at P6_Place
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing JoinNode for P6_Place.processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Processing JoinNode for P6_Place.processToken
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: Checking canonical binding for P6_Place.processToken with attribute 'token_branch2'
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: Operation processToken uses standard (AND) semantics
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: processToken requires 2 inputs total (standard AND logic)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: processToken needs 2 inputs - should use JOIN processing
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: No single-input canonical binding - proceeding with normal service call
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Invoking P6_Place.processToken via ServiceHelper (normal)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - === SERVICE INVOCATION START ===
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - Service: org.btsn.places.P6_Place.processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - SequenceID: 1050001
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - Input arguments count: 2
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - Processing argument 1/2, raw length: 842
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Unwrapped place response from key: token
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Found existing original_token to preserve
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted workflow_start_time=1769402271488
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Cleaned argument 1, length: 842 (removed 0 bytes of metadata)
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - Processing argument 2/2, raw length: 871
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Unwrapped place response from key: token
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Found existing original_token to preserve
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted workflow_start_time=1769402271488
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Cleaned argument 2, length: 871 (removed 0 bytes of metadata)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted 2 clean business data arguments (removed infrastructure metadata)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - SERVICE INVOKE: Calling org.btsn.places.P6_Place.processToken with 2 CLEAN business data arguments
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - INVOKE: Reflecting on org.btsn.places.P6_Place.processToken
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - INVOKE: Looking for method with 2 String parameters
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - PLACE_CREATED: placeId=P6, sequenceId=1050001, type=P6, capacity=1
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - INVOKE: Created instance using 1-param constructor (context) for org.btsn.places.P6_Place
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - INVOKE: Found standard method (2 String args)
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - INVOKE: Calling processToken with 2 arguments
+INFO ServiceThread-P6_Place-14006 org.btsn.base.BaseStochasticPetriNetPlace - PN_JOIN_PROCESS: place=P6, seq=1050001 - Processing synchronized inputs
+INFO ServiceThread-P6_Place-14006 org.btsn.base.BaseStochasticPetriNetPlace - PN_JOIN_PROCESS: place=P6 - Input1=1050000, Input2=1050000
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - TOKEN_ARRIVAL: placeId=P6, sequenceId=1050001, token=Token{id='1050000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P5, distribution=DETERMINISTIC, workflow_start_time=1769402271488}, valid=true}
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - CAPACITY_CHECK: placeId=P6, sequenceId=1050001, M(P)=0, capacity=1, hasCapacity=true
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - MARKING_CHANGE: placeId=P6, sequenceId=1050001, M(P)=1, reason=token_accepted
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - TOKEN_HELD: placeId=P6, sequenceId=1050001, token=Token{id='1050000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P5, distribution=DETERMINISTIC, workflow_start_time=1769402271488}, valid=true}, M(P)=1, capacity=1
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - VALIDITY_WINDOW_CHECK: placeId=P6, sequenceId=1050001, currentTime=1769402279540, notAfter=1769402391488, valid=true
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - PLACE_EXECUTION: placeId=P6, sequenceId=1050001, executionTime=96ms, result=JOIN_COMPLETED
+INFO ServiceThread-P6_Place-14006 org.btsn.base.BaseStochasticPetriNetPlace - PN_JOIN_PROCESS: place=P6, seq=1050001, guard=false (prob=0.50), delay=0ms, total=96ms
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - MARKING_CHANGE: placeId=P6, sequenceId=1050001, M(P)=0, reason=token_released
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - TOKEN_RELEASED: placeId=P6, sequenceId=1050001, token=Token{id='1050000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P5, distribution=DETERMINISTIC, workflow_start_time=1769402271488}, valid=true}, M(P)=0
+INFO ServiceThread-P6_Place-14006 org.btsn.logger.PetriNetEventLogger - TOKEN_DEPARTURE: placeId=P6, sequenceId=1050001, token=Token{id='1050000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P5, distribution=DETERMINISTIC, workflow_start_time=1769402271488}, valid=true}, annotation={"place":"P6","entryTime":1769402279444,"exitTime":1769402279540,"residenceTime":96,"delayMs":0,"marking":1,"capacity":1,"joinType":"AND_JOIN","input1Token":"1050000","input2Token":"1050000"}
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - SERVICE COMPLETE: org.btsn.places.P6_Place.processToken completed in 98ms
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - ENRICHMENT: Successfully enriched service result with metadata
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceHelper - === SERVICE INVOCATION COMPLETE ===
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Service returned: {"token":{"annotation":"{\"place\":\"P6\",\"entryTime\":1769402279444,\"exitTime\":1769402279540,\"residenceTime\":96,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"joinType\":\"AND_JOIN\",\"input1Token\":\"1050000\",\"input2Token\":\"1050000\"}","notAfter":1769402391488,"tokenId":"1050000","data":{"delayMs":"0","place":"P5","distribution":"DETERMINISTIC"},"workflow_start_time":1769402271488,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":false,"routing_path":"false"},"service_start_time":1769402279443,"version":"v001","executionTime":96,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":98,"original_token":"{\"notAfter\":1769402391488,\"tokenId\":\"1050000\",\"data\":{},\"workflow_start_time\":1769402271488,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1769402279541,"status":"JOIN_COMPLETED"}}
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1050001 exiting place: P6_Place -> MonitorService [arc=$ANON11]
+DEBUG ServiceThread-P6_Place-14006 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_out_P6 token=1050001 eventType=EXIT
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_out_P6 (JoinNode) token=1050001 P6_Place -> MonitorService [EXIT] arc=$ANON11
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - PETRI-NET: Token 1050001 EXIT from P6_Place -> MonitorService.acknowledgeTokenArrival [arc=$ANON11]
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Querying activeService for MonitorService.acknowledgeTokenArrival
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: ActiveService query returned 2 rows
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: ActiveService result - ?channelId = ip0
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: ActiveService result - ?port = 3000
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: APPLYING activeService override - Channel: ip0, Port: 3000
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Resolved ip0 to IP 192.168.1.152
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ROUTING: External to MonitorService -> 'token'
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ROUTING: Token 1050001 -> 'token' to MonitorService.acknowledgeTokenArrival
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Publishing to Service MonitorService Operation: acknowledgeTokenArrival
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Channel: 192.168.1.152, Port: 3000
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Attribute token = {"token":{"annotation":"{\"place\":\"P6\",\"entryTime\":1769402279444,\"exitTime\":1769402279540,\"residenceTime\":96,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"joinType\":\"AND_JOIN\",\"input1Token\":\"1050000\",\"input2Token\":\"1050000\"}","notAfter":1769402391488,"tokenId":"1050000","data":{"delayMs":"0","place":"P5","distribution":"DETERMINISTIC"},"workflow_start_time":1769402271488,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":false,"routing_path":"false"},"service_start_time":1769402279443,"version":"v001","executionTime":96,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":98,"original_token":"{\"notAfter\":1769402391488,\"tokenId\":\"1050000\",\"data\":{},\"workflow_start_time\":1769402271488,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1769402279541,"status":"JOIN_COMPLETED"}}
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Completed callNextOperation for MonitorService, published=true
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Successfully published to MonitorService via EventPublisher
+ERROR ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - monitorIncomingEvents: true
+WARN ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - TIMING: EventReactor arrival time not found, using ServiceThread dequeue time=1769402278764 for seqID=1050001
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - WRITE: Using captured workflowStartTime=1769402271488 for seqID=1050001
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - === SERVICE TIMING RECORD ===
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Sequence ID: 1050001
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Service: P6_Place
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Operation: processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Arrival Time (EventReactor): 1769402278764
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Invocation Time: 1769402279292
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Publish Time: 1769402279910
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Workflow Start Time: 1769402271488
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   MARKING: Buffer=0, Total=1, Capacity=50
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ==============================
+INFO ServiceThread-P6_Place-14006 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote service timing record for sequenceID: 1050001
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Queue Time (including priority queue): 528ms
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Service Time: 618ms
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Total Time: 1146ms
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Buffer Utilization: 0.0%
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Service P6_Place sequence ID: 1050001 complete.
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Cleaned up join 1050000
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing:: token_branch1 = {"token":{"annotation":"{\"place\":\"P5\",\"entryTime\":1769402279030,\"exitTime\":1769402279147,\"residenceTime\":117,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"distribution\":\"DETERMINISTIC\",\"routingPath\":\"true\"}","notAfter":1769402391632,"tokenId":"1060000","data":{"delayMs":"0","place":"P5","distribution":"DETERMINISTIC"},"workflow_start_time":1769402271632,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":true,"routing_path":"true"},"service_start_time":1769402279029,"version":"v001","executionTime":117,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":122,"original_token":"{\"notAfter\":1769402391632,\"tokenId\":\"1060000\",\"data\":{},\"workflow_start_time\":1769402271632,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1769402279151,"status":"COMPLETED"}}
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - CAPTURE: WorkflowStartTime=1769402271632 for seqID=1060003
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Incoming Sequence ID = 1060003
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - MonitorIncomingEvents+ = true
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Using RuleBaseVersion: v001
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - FILTER: Event for P6_Place.processToken accepted by P6_Place thread
+WARN ServiceThread-P6_Place-14006 org.btsn.json.jsonLibrary - Key "token_branch1" already exists. Skipping.
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - JOIN-MAP: Added key=token_branch1 to join 1060000 (tokenId=1060003, mapSize=1)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Loading rule base for operation: processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Rule base location: C:\DevShare\BTSN_86\BTSN\btsn.petrinet.places.p6/RuleFolder.v001/processToken/Service.ruleml
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Using cached knowledge base for version: v001
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Parsing knowledge base...
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Knowledge base parsed successfully
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - T_IN-SYNC: Token 1060003 needs input synchronization (2 inputs required: [token_branch1, token_branch2])
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - decisionValueCollection already populated from publishes query - skipping legacy getDecisionValue
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1060003 buffered at T_in_P6_Place (buffer=0)
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Could not extract previousPlace from payload
+DEBUG ServiceThread-P6_Place-14006 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P6 token=1060003 eventType=BUFFERED
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P6 (JoinNode) token=1060003  -> P6_Place [BUFFERED] buffer=0
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - PETRI-NET: Token 1060003 BUFFERED at P6_Place (waiting for join)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: About to check inputCollection.isEmpty() - size: 2
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: inputCollection contents: [token_branch1, token_branch2]
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: nodeType: JoinNode
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: needsInputSynchronization: true
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Past inputCollection check, about to enter JOIN processing
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: inputCollection.get(0): token_branch1
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing input synchronization for P6_Place:processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Input sync P6_Place:processToken waiting for 2 inputs (from canonical binding: [token_branch1, token_branch2])
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - JOIN-COUNT: Stored expectedCount=2 for joinID=1060000
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Input sync P6_Place:processToken waiting for 2 inputs: [token_branch1, token_branch2]
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - TRACK: Fork 1060003 workflowStartTime=1769402271632
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Checking 1 joins for completeness in sequence ID order
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Sequence ID sorted join order:
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   - Sequence 1060000
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Join 1060000 using stored expectedCount=2, currentSize=1
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Join 1060000 is incomplete - checking next
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: No complete joins found in 1 pending joins - waiting for more inputs
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Current join status (mode=OPTIMIZED):
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread -   Join 1060000: 1/2 inputs [WAITING]
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing:: token_branch2 = {"token":{"annotation":"{\"place\":\"P4\",\"entryTime\":1769402280067,\"exitTime\":1769402280088,\"residenceTime\":21,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"joinType\":\"AND_JOIN\",\"input1Token\":\"1060000\",\"input2Token\":\"1060000\"}","notAfter":1769402391632,"tokenId":"1060000","data":{"delayMs":"0","place":"P3","distribution":"DETERMINISTIC"},"workflow_start_time":1769402271632,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":false,"routing_path":"false"},"service_start_time":1769402280066,"version":"v001","executionTime":21,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":24,"original_token":"{\"notAfter\":1769402391632,\"tokenId\":\"1060000\",\"data\":{},\"workflow_start_time\":1769402271632,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1769402280090,"status":"JOIN_COMPLETED"}}
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - CAPTURE: WorkflowStartTime=1769402271632 for seqID=1060001
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Incoming Sequence ID = 1060001
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - MonitorIncomingEvents+ = true
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - Using RuleBaseVersion: v001
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - FILTER: Event for P6_Place.processToken accepted by P6_Place thread
+WARN ServiceThread-P6_Place-14006 org.btsn.json.jsonLibrary - Key "token_branch2" already exists. Skipping.
+DEBUG ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - JOIN-MAP: Added key=token_branch2 to join 1060000 (tokenId=1060001, mapSize=2)
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Loading rule base for operation: processToken
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Rule base location: C:\DevShare\BTSN_86\BTSN\btsn.petrinet.places.p6/RuleFolder.v001/processToken/Service.ruleml
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Using cached knowledge base for version: v001
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Parsing knowledge base...
+INFO ServiceThread-P6_Place-14006 org.btsn.handlers.ServiceThread - DEBUG: Knowledge base parsed successfully

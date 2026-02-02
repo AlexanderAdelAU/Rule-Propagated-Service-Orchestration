@@ -1,0 +1,269 @@
+<Assert>
+<Rulebase mapClosure="universal">
+<!-- MASTER SERVICE RULE BASE -->
+<!-- Generated: Mon Feb 02 21:18:08 AEST 2026 -->
+<!-- Version: v002 -->
+<!-- Services: TriageService -->
+<!-- This is the SINGLE SOURCE OF TRUTH for service resolution -->
+<!-- Rule files loaded recursively from: C:\DevShare\BTSN_87\BTSN\btsn.common\RuleBase -->
+
+<!-- Version -->
+<Data><Atom><Rel>Version</Rel><Ind>v002</Ind></Atom></Data>
+
+
+<!-- ===== BEGIN: CoreRuleBase.ruleml.xml ===== -->
+<!-- Common Rules to all services -->
+<!-- 
+This is the rule determines the operational parameters associated with
+the destination service.
+ -->
+<Implies>
+	<then>
+		<Atom>
+			<Rel>publishes</Rel>
+			<Var>service</Var>
+			<Var>condition</Var>
+			<Var>operation</Var>
+			<Var>channel</Var>
+			<Var>ip</Var>
+			<Var>port</Var>
+			<Var>decisionValue</Var>
+		</Atom>
+	</then>
+	<if>
+		<And>
+			<Atom>
+				<Rel>meetsCondition</Rel>
+				<Var>service</Var>
+				<Var>operation</Var>
+				<Var>condition</Var>
+				<Var>decisionValue</Var>
+			</Atom>
+			<Atom>
+				<Rel>activeService</Rel>
+				<Var>service</Var>
+				<Var>operation</Var>
+				<Var>ip</Var>
+				<Var>port</Var>
+			</Atom>
+			<Atom>
+				<Rel>boundChannel</Rel>
+				<Var>ip</Var>
+				<Var>channel</Var>
+			</Atom>
+		</And>
+	</if>
+</Implies>
+
+<!-- 
+Special rule for TERMINATE - no activeService needed since there's no actual service to call.
+This allows GatewayNode (and other node types) to route to termination without requiring 
+infrastructure configuration. The channel/ip/port are dummy values since ServiceThread
+recognizes TERMINATE:TERMINATE and handles it specially without making any network calls.
+-->
+<Implies>
+	<then>
+		<Atom>
+			<Rel>publishes</Rel>
+			<Ind>TERMINATE</Ind>
+			<Var>condition</Var>
+			<Ind>TERMINATE</Ind>
+			<Ind>local</Ind>
+			<Ind>localhost</Ind>
+			<Ind>0</Ind>
+			<Var>decisionValue</Var>
+		</Atom>
+	</then>
+	<if>
+		<Atom>
+			<Rel>meetsCondition</Rel>
+			<Ind>TERMINATE</Ind>
+			<Ind>TERMINATE</Ind>
+			<Var>condition</Var>
+			<Var>decisionValue</Var>
+		</Atom>
+	</if>
+</Implies>
+
+<!-- 
+This is the rule that governs the service operation. The operation Var is specified twice so 
+that the name will is returned and thus avoids the need to parse a list of operations.
+ -->
+<Implies>
+	<then>
+		<Atom>
+			<Rel>serviceName</Rel>
+			<Var>service</Var>
+			<Var>operation</Var>
+			<Var>operation</Var>
+			<Var>attribute</Var>
+			<Var>input</Var>
+			<Var>channel</Var>
+			<Var>port</Var>
+		</Atom>
+	</then>
+	<if>
+		<And>
+			<Atom>
+				<Rel>localDefined</Rel>
+				<Var>service</Var>
+			</Atom>
+			<Atom>
+				<Rel>canonicalBinding</Rel>
+				<Var>operation</Var>
+				<Var>attribute</Var>  <!-- Attribute owned and returned (can be null) -->
+				<Var>input</Var>
+
+			</Atom>
+			<Atom>
+				<Rel>activeService</Rel>
+				<Var>service</Var>
+				<Var>operation</Var>
+				<Var>ip</Var>
+				<Var>port</Var>
+			</Atom>
+			<Atom>
+				<Rel>boundChannel</Rel>
+				<Var>ip</Var>
+				<Var>channel</Var>
+			</Atom>
+
+		</And>
+	</if>
+</Implies>
+<!-- 
+This is the rule that governs the list of all services. 
+ -->
+<Implies>
+	<then>
+		<Atom>
+			<Rel>serviceList</Rel>
+			<Var>service</Var>
+			<Var>service</Var>
+			<Var>operation</Var>
+			<Var>channel</Var>
+			<Var>port</Var>
+		</Atom>
+	</then>
+	<if>
+		<And>
+
+			<Atom>
+				<Rel>activeService</Rel>
+				<Var>service</Var>
+				<Var>operation</Var>
+				<Var>ip</Var>
+				<Var>port</Var>
+			</Atom>
+			<Atom>
+				<Rel>boundChannel</Rel>
+				<Var>ip</Var>
+				<Var>channel</Var>
+			</Atom>
+		</And>
+	</if>
+</Implies>
+<!-- ===== END: CoreRuleBase.ruleml.xml ===== -->
+
+<!-- ===== BEGIN: RemoteHostMappings.ruleml.xml ===== -->
+<!-- RemoteHostMappings.ruleml.xml -->
+<!-- Maps logical channel IDs (ip1, ip2, etc.) to actual IP addresses -->
+<!-- This file is loaded as part of Service.ruleml compilation -->
+
+<!-- Remote Host Mappings -->
+
+<Atom>
+    <Rel>boundChannel</Rel>
+    <Ind>ip0</Ind>
+    <Ind>192.168.1.152</Ind>
+</Atom>
+<Atom>
+    <Rel>boundChannel</Rel>
+    <Ind>ip1</Ind>
+    <Ind>192.168.1.82</Ind>
+</Atom>
+
+<Atom>
+    <Rel>boundChannel</Rel>
+    <Ind>ip2</Ind>
+    <Ind>192.168.1.83</Ind>
+</Atom>
+
+<Atom>
+    <Rel>boundChannel</Rel>
+    <Ind>ip3</Ind>
+    <Ind>192.168.1.84</Ind>
+</Atom>
+<!-- ===== END: RemoteHostMappings.ruleml.xml ===== -->
+
+<!-- ===== BEGIN: AUTO-GENERATED serviceName facts ===== -->
+<!-- These facts are automatically generated from activeService facts -->
+<!-- ServiceThread requires these to process service operations -->
+
+<Atom>
+    <Rel>serviceName</Rel>
+    <Ind>TriageService</Ind>
+    <Ind>processTriageAssessment</Ind>
+    <Ind>processTriageAssessment</Ind>
+    <Ind>null</Ind>
+    <Ind>null</Ind>
+    <Ind>ip0</Ind>
+    <Ind>2100</Ind>
+</Atom>
+
+<!-- ===== END: AUTO-GENERATED serviceName facts ===== -->
+
+<!-- ===== CANONICAL BINDINGS (filtered, hierarchical) ===== -->
+
+<!-- Service directory: TriageService -->
+
+<!-- BEGIN: TriageService/Triage_CollectorService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>Triage_CollectorService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>collectAllData</Ind>
+	<Ind>token</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>getServicePerformanceData</Ind>
+	<Ind>token</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>
+<!-- END: TriageService/Triage_CollectorService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: TriageService/Triage_InitializationService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>Triage_InitializationService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>null</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>
+<!-- END: TriageService/Triage_InitializationService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: TriageService/TriageService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>TriageService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>processTriageAssessment</Ind>
+	<Ind>triageResults</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>
+<!-- END: TriageService/TriageService-CanonicalBindings.ruleml.xml -->
+
+</Rulebase>
+</Assert>

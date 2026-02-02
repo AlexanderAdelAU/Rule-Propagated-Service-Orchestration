@@ -1,0 +1,210 @@
+{
+   "processType":"SOA",
+  "elements": [
+    {
+      "id": "T_in_Triage",
+      "type": "TRANSITION",
+      "x": 210,
+      "y": 106,
+      "width": 20,
+      "height": 68,
+      "label": "T_in_Triage",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "121",
+      "fill_color": "#CCCCCC"
+    },
+    {
+      "id": "Triage",
+      "type": "PLACE",
+      "x": 275,
+      "y": 115,
+      "width": 50,
+      "height": 50,
+      "label": "Triage",
+      "service": "TriageService",
+      "operations": [
+        {
+          "name": "processTriageAssessment"
+        }
+      ],
+      "fill_color": "#99FF66",
+      "border_color": "#000000"
+    },
+    {
+      "id": "T_out_Triage",
+      "type": "TRANSITION",
+      "x": 370,
+      "y": 107,
+      "width": 20,
+      "height": 66,
+      "label": "T_out_Triage",
+      "rotation": 0.0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out",
+      "fill_color": "#FFCC00"
+    },
+    {
+      "id": "T_in_Monitor",
+      "type": "TRANSITION",
+      "x": 470,
+      "y": 108,
+      "width": 20,
+      "height": 64,
+      "label": "T_in_Monitor",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10",
+      "fill_color": "#CCCCCC"
+    },
+    {
+      "id": "Monitor",
+      "type": "PLACE",
+      "x": 535,
+      "y": 115,
+      "width": 50,
+      "height": 50,
+      "label": "Monitor",
+      "service": "MonitorService",
+      "operations": [
+        {
+          "name": "acknowledgeTokenArrival"
+        }
+      ],
+      "fill_color": "#99FF66",
+      "border_color": "#000000"
+    },
+    {
+      "id": "T_out_Monitor",
+      "type": "TRANSITION",
+      "x": 630,
+      "y": 110,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Monitor",
+      "rotation": 0.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_out",
+      "fill_color": "#FF9999"
+    },
+    {
+      "id": "CANARY_TEST",
+      "type": "EVENT_GENERATOR",
+      "x": 88,
+      "y": 110,
+      "width": 24,
+      "height": 60,
+      "label": "CANARY_TEST",
+      "rotation": 0.0,
+      "generator_rate": "1000",
+      "token_version": "v001"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "T_in_Triage",
+      "target": "Triage",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Triage",
+      "target": "T_out_Triage",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Monitor",
+      "target": "Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Monitor",
+      "target": "T_out_Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_Triage",
+      "target": "T_in_Monitor",
+      "label": "Network",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "waypoints": [
+        {"x": 420, "y": 140}
+      ],
+      "labelOffsetX": 5,
+      "labelOffsetY": 22,
+      "connection_type": "NETWORK",
+      "availability": 1.0
+    },
+    {
+      "source": "CANARY_TEST",
+      "target": "T_in_Triage",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "connection_type": "NETWORK",
+      "availability": 1.0
+    }
+  ],
+  "textElements": [
+    {
+      "x": 283,
+      "y": 48,
+      "text": "Triage_CanaryTest_Workflow",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 606,
+      "y": 96,
+      "text": "Terminate",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 195,
+      "y": 94,
+      "text": "Edge Node",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 342,
+      "y": 94,
+      "text": "Gateway Node",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 451,
+      "y": 95,
+      "text": "Edge Node",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    }
+  ]
+}

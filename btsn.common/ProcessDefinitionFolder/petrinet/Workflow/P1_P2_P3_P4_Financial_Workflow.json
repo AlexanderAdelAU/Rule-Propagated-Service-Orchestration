@@ -1,0 +1,445 @@
+{
+  "elements": [
+    {
+      "id": "Application Received",
+      "type": "TRANSITION",
+      "x": 50,
+      "y": 200,
+      "width": 20,
+      "height": 60,
+      "label": "Application Received",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "Other"
+    },
+    {
+      "id": "T_in_P1",
+      "type": "TRANSITION",
+      "x": 120,
+      "y": 200,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_P1",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "P1: Validation",
+      "type": "PLACE",
+      "x": 180,
+      "y": 205,
+      "width": 50,
+      "height": 50,
+      "label": "P1: Validation",
+      "service": "P1_Place",
+      "operations": ["validateApplication"]
+    },
+    {
+      "id": "T_out_P1",
+      "type": "TRANSITION",
+      "x": 270,
+      "y": 200,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_P1",
+      "rotation": 0.0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P2",
+      "type": "TRANSITION",
+      "x": 370,
+      "y": 120,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_P2",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "P2: Credit Check",
+      "type": "PLACE",
+      "x": 430,
+      "y": 125,
+      "width": 50,
+      "height": 50,
+      "label": "P2: Credit Check",
+      "service": "P2_Place",
+      "operations": ["checkCreditScore"]
+    },
+    {
+      "id": "T_out_P2",
+      "type": "TRANSITION",
+      "x": 520,
+      "y": 120,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_P2",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P3",
+      "type": "TRANSITION",
+      "x": 370,
+      "y": 280,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_P3",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "P3: Fraud Detection",
+      "type": "PLACE",
+      "x": 430,
+      "y": 285,
+      "width": 50,
+      "height": 50,
+      "label": "P3: Fraud Detection",
+      "service": "P3_Place",
+      "operations": ["detectFraud"]
+    },
+    {
+      "id": "T_out_P3",
+      "type": "TRANSITION",
+      "x": 520,
+      "y": 280,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_P3",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P4",
+      "type": "TRANSITION",
+      "x": 620,
+      "y": 200,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_P4",
+      "rotation": 0.0,
+      "node_type": "JoinNode",
+      "node_value": "JOIN_NODE",
+      "transition_type": "T_in",
+      "buffer": "20"
+    },
+    {
+      "id": "P4: Underwriting",
+      "type": "PLACE",
+      "x": 680,
+      "y": 205,
+      "width": 50,
+      "height": 50,
+      "label": "P4: Underwriting",
+      "service": "P4_Place",
+      "operations": ["underwrite"]
+    },
+    {
+      "id": "T_out_P4",
+      "type": "TRANSITION",
+      "x": 770,
+      "y": 200,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_P4",
+      "rotation": 0.0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_Monitor",
+      "type": "TRANSITION",
+      "x": 870,
+      "y": 200,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Monitor",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "Monitor: Complete",
+      "type": "PLACE",
+      "x": 930,
+      "y": 205,
+      "width": 50,
+      "height": 50,
+      "label": "Monitor: Complete",
+      "service": "MonitorService",
+      "operations": ["acknowledgeTokenArrival"]
+    },
+    {
+      "id": "TERMINATE",
+      "type": "TRANSITION",
+      "x": 1020,
+      "y": 200,
+      "width": 20,
+      "height": 60,
+      "label": "TERMINATE",
+      "rotation": 0.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    },
+    {
+      "id": "Terminate_Invalid",
+      "type": "TRANSITION",
+      "x": 270,
+      "y": 350,
+      "width": 20,
+      "height": 60,
+      "label": "Terminate_Invalid",
+      "rotation": 0.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    },
+    {
+      "id": "Terminate_Declined",
+      "type": "TRANSITION",
+      "x": 770,
+      "y": 350,
+      "width": 20,
+      "height": 60,
+      "label": "Terminate_Declined",
+      "rotation": 0.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "Application Received",
+      "target": "T_in_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P1",
+      "target": "P1: Validation",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P1: Validation",
+      "target": "T_out_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P1",
+      "target": "T_in_P2",
+      "label": "valid",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "valid",
+      "endpoint": "processToken"
+    },
+    {
+      "source": "T_out_P1",
+      "target": "T_in_P3",
+      "label": "valid",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "valid",
+      "endpoint": "processToken"
+    },
+    {
+      "source": "T_out_P1",
+      "target": "Terminate_Invalid",
+      "label": "invalid",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "invalid",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P2",
+      "target": "P2: Credit Check",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P2: Credit Check",
+      "target": "T_out_P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P2",
+      "target": "T_in_P4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P3",
+      "target": "P3: Fraud Detection",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P3: Fraud Detection",
+      "target": "T_out_P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P3",
+      "target": "T_in_P4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P4",
+      "target": "P4: Underwriting",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P4: Underwriting",
+      "target": "T_out_P4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P4",
+      "target": "T_in_Monitor",
+      "label": "approved",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "approved",
+      "endpoint": "processToken"
+    },
+    {
+      "source": "T_out_P4",
+      "target": "T_in_Monitor",
+      "label": "conditional",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "conditional",
+      "endpoint": "processToken"
+    },
+    {
+      "source": "T_out_P4",
+      "target": "Terminate_Declined",
+      "label": "declined",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "declined",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Monitor",
+      "target": "Monitor: Complete",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Monitor: Complete",
+      "target": "TERMINATE",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    }
+  ],
+  "textElements": [
+    {
+      "x": 400,
+      "y": 30,
+      "text": "Loan Application Workflow (CPN with P1-P4)",
+      "fontSize": 16,
+      "fontStyle": 1,
+      "color": -16777216
+    },
+    {
+      "x": 150,
+      "y": 380,
+      "text": "Invalid applications rejected",
+      "fontSize": 10,
+      "fontStyle": 2,
+      "color": -16777216
+    },
+    {
+      "x": 650,
+      "y": 380,
+      "text": "Declined applications rejected",
+      "fontSize": 10,
+      "fontStyle": 2,
+      "color": -16777216
+    },
+    {
+      "x": 150,
+      "y": 170,
+      "text": "P1: validateApplication -> valid/invalid",
+      "fontSize": 9,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 400,
+      "y": 90,
+      "text": "P2: checkCreditScore -> good/fair/poor",
+      "fontSize": 9,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 400,
+      "y": 340,
+      "text": "P3: detectFraud -> clean/suspicious",
+      "fontSize": 9,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 650,
+      "y": 170,
+      "text": "P4: underwrite -> approved/conditional/declined",
+      "fontSize": 9,
+      "fontStyle": 0,
+      "color": -16777216
+    }
+  ]
+}

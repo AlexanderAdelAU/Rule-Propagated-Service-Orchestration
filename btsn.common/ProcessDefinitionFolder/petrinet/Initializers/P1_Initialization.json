@@ -1,0 +1,161 @@
+{
+  "elements": [
+    {
+      "id": "INTIALISATION_GENERATOR",
+      "type": "TRANSITION",
+      "x": 130,
+      "y": 50,
+      "width": 20,
+      "height": 60,
+      "label": "INTIALISATION_GENERATOR",
+      "rotation": 90.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "Other"
+    },
+    {
+      "id": "T_in_P1",
+      "type": "TRANSITION",
+      "x": 90,
+      "y": 130,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_P1",
+      "rotation": 90.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "T_in_Monitor",
+      "type": "TRANSITION",
+      "x": 170,
+      "y": 130,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Monitor",
+      "rotation": 90.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "P1",
+      "type": "PLACE",
+      "x": 75,
+      "y": 235,
+      "width": 50,
+      "height": 50,
+      "label": "P1",
+      "service": "P1_InitializationService",
+      "operations": ["purgeAndInitialize"]
+    },
+    {
+      "id": "Monitor",
+      "type": "PLACE",
+      "x": 155,
+      "y": 235,
+      "width": 50,
+      "height": 50,
+      "label": "Monitor",
+      "service": "Monitor_InitializationService",
+      "operations": ["purgeAndInitialize"]
+    },
+    {
+      "id": "T_out_P1",
+      "type": "TRANSITION",
+      "x": 90,
+      "y": 330,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_P1",
+      "rotation": 90.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_out_Monitor",
+      "type": "TRANSITION",
+      "x": 170,
+      "y": 330,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Monitor",
+      "rotation": 90.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_out"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "INTIALISATION_GENERATOR",
+      "target": "T_in_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "INTIALISATION_GENERATOR",
+      "target": "T_in_Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P1",
+      "target": "P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Monitor",
+      "target": "Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P1",
+      "target": "T_out_P1",
+      "label": "T_out_P1",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Monitor",
+      "target": "T_out_Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    }
+  ],
+  "textElements": [
+    {
+      "x": 308,
+      "y": 366,
+      "text": "TERMINATE",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 266,
+      "y": 36,
+      "text": "P1_P2_Intialization",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    }
+  ]
+}

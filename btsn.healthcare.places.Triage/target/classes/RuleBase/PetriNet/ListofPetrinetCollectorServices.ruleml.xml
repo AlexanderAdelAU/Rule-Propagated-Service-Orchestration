@@ -1,0 +1,52 @@
+
+<!-- ================================================================ -->
+<!-- PERFORMANCE COLLECTION SERVICES                                  -->
+<!-- ================================================================ -->
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P1_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4100</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P2_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4101</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P3_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4102</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P4_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4103</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P5_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4104</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P6_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4105</Ind>
+</Atom>

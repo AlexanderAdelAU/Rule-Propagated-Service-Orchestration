@@ -1,0 +1,5 @@
+INFO ServiceThread-Laboratory_CollectorService-12204 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Completed callNextOperation for MonitorService, published=true
+INFO ServiceThread-Laboratory_CollectorService-12204 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Successfully published to MonitorService via EventPublisher
+ERROR ServiceThread-Laboratory_CollectorService-12204 org.btsn.handlers.ServiceThread - monitorIncomingEvents: false
+DEBUG ServiceThread-Laboratory_CollectorService-12204 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Cleaned up join 3000000
+DEBUG ServiceThread-Laboratory_CollectorService-12204 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Service Laboratory_CollectorService sequence ID: 3000000 complete.

@@ -1,0 +1,221 @@
+----------------------------------------------------------------
+Thu Jan 29 22:29:03 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance a816c00e-019c-09ba-52eb-0000007aa160 
+on database directory C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology\ServiceAnalysisDataBase with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Loaded from file:/C:/DevShare/BTSN_86/BTSN/btsn.common/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=15.0.1+9-18
+user.dir=C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology
+os.name=Windows 7
+os.arch=amd64
+os.version=6.1
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+Thu Jan 29 22:29:34 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance ed07c066-019c-09ba-52eb-0000007aa160 
+on database directory memory:C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology\CARDIODB_3000000_30741740081866 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Loaded from file:/C:/DevShare/BTSN_86/BTSN/btsn.common/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=15.0.1+9-18
+user.dir=C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology
+os.name=Windows 7
+os.arch=amd64
+os.version=6.1
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+Thu Jan 29 22:29:38 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 01a54107-019c-09ba-52eb-0000007aa160 
+on database directory memory:C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology\CARDIODB_3010000_30746056794217 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Loaded from file:/C:/DevShare/BTSN_86/BTSN/btsn.common/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=15.0.1+9-18
+user.dir=C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology
+os.name=Windows 7
+os.arch=amd64
+os.version=6.1
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+Thu Jan 29 22:29:45 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 3ebfc1a6-019c-09ba-52eb-0000007aa160 
+on database directory memory:C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology\CARDIODB_3020000_30752561838519 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Loaded from file:/C:/DevShare/BTSN_86/BTSN/btsn.common/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=15.0.1+9-18
+user.dir=C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology
+os.name=Windows 7
+os.arch=amd64
+os.version=6.1
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+Thu Jan 29 22:29:57 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance e48a8245-019c-09ba-52eb-0000007aa160 
+on database directory memory:C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology\CARDIODB_3030000_30764640814526 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Loaded from file:/C:/DevShare/BTSN_86/BTSN/btsn.common/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=15.0.1+9-18
+user.dir=C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology
+os.name=Windows 7
+os.arch=amd64
+os.version=6.1
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+Thu Jan 29 22:30:08 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance e30582e4-019c-09ba-52eb-0000007aa160 
+on database directory memory:C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology\CARDIODB_3050000_30775935548296 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Loaded from file:/C:/DevShare/BTSN_86/BTSN/btsn.common/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=15.0.1+9-18
+user.dir=C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology
+os.name=Windows 7
+os.arch=amd64
+os.version=6.1
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+Thu Jan 29 22:30:13 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 2a30c383-019c-09ba-52eb-0000007aa160 
+on database directory memory:C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology\CARDIODB_3060000_30780449532557 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Loaded from file:/C:/DevShare/BTSN_86/BTSN/btsn.common/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=15.0.1+9-18
+user.dir=C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology
+os.name=Windows 7
+os.arch=amd64
+os.version=6.1
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+Thu Jan 29 22:30:15 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance aa0c4422-019c-09ba-52eb-0000007aa160 
+on database directory memory:C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology\CARDIODB_3070000_30782494097705 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Loaded from file:/C:/DevShare/BTSN_86/BTSN/btsn.common/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=15.0.1+9-18
+user.dir=C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology
+os.name=Windows 7
+os.arch=amd64
+os.version=6.1
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+Thu Jan 29 22:30:19 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 529804c1-019c-09ba-52eb-0000007aa160 
+on database directory memory:C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology\CARDIODB_3080000_30786185095797 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Loaded from file:/C:/DevShare/BTSN_86/BTSN/btsn.common/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=15.0.1+9-18
+user.dir=C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology
+os.name=Windows 7
+os.arch=amd64
+os.version=6.1
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+Thu Jan 29 22:30:22 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 13d40560-019c-09ba-52eb-0000007aa160 
+on database directory memory:C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology\CARDIODB_3090000_30789574102073 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Loaded from file:/C:/DevShare/BTSN_86/BTSN/btsn.common/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=15.0.1+9-18
+user.dir=C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology
+os.name=Windows 7
+os.arch=amd64
+os.version=6.1
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+Thu Jan 29 22:30:26 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance ddc045ff-019c-09ba-52eb-0000007aa160 
+on database directory memory:C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology\CARDIODB_3100000_30793838663222 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Loaded from file:/C:/DevShare/BTSN_86/BTSN/btsn.common/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=15.0.1+9-18
+user.dir=C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology
+os.name=Windows 7
+os.arch=amd64
+os.version=6.1
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+Thu Jan 29 22:30:30 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance a05cc69e-019c-09ba-52eb-0000007aa160 
+on database directory memory:C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology\CARDIODB_3110000_30797176277352 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Loaded from file:/C:/DevShare/BTSN_86/BTSN/btsn.common/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=15.0.1+9-18
+user.dir=C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology
+os.name=Windows 7
+os.arch=amd64
+os.version=6.1
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+Thu Jan 29 22:30:33 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 4ba9873d-019c-09ba-52eb-0000007aa160 
+on database directory memory:C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology\CARDIODB_3120000_30800708791391 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Loaded from file:/C:/DevShare/BTSN_86/BTSN/btsn.common/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=15.0.1+9-18
+user.dir=C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology
+os.name=Windows 7
+os.arch=amd64
+os.version=6.1
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+Thu Jan 29 22:30:36 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance cfa687dc-019c-09ba-52eb-0000007aa160 
+on database directory memory:C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology\CARDIODB_3130000_30804056280653 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Loaded from file:/C:/DevShare/BTSN_86/BTSN/btsn.common/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=15.0.1+9-18
+user.dir=C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology
+os.name=Windows 7
+os.arch=amd64
+os.version=6.1
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+Thu Jan 29 22:30:43 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 1c53c87b-019c-09ba-52eb-0000007aa160 
+on database directory memory:C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology\CARDIODB_3150000_30810936720339 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Loaded from file:/C:/DevShare/BTSN_86/BTSN/btsn.common/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=15.0.1+9-18
+user.dir=C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology
+os.name=Windows 7
+os.arch=amd64
+os.version=6.1
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+Thu Jan 29 22:30:46 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 21b1491a-019c-09ba-52eb-0000007aa160 
+on database directory memory:C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology\CARDIODB_3160000_30813990640896 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Loaded from file:/C:/DevShare/BTSN_86/BTSN/btsn.common/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=15.0.1+9-18
+user.dir=C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology
+os.name=Windows 7
+os.arch=amd64
+os.version=6.1
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+Thu Jan 29 22:30:50 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance cfbf09b9-019c-09ba-52eb-0000007aa160 
+on database directory memory:C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology\CARDIODB_3170000_30818074847377 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Loaded from file:/C:/DevShare/BTSN_86/BTSN/btsn.common/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=15.0.1+9-18
+user.dir=C:\DevShare\BTSN_86\BTSN\btsn.healthcare.places.Cardiology
+os.name=Windows 7
+os.arch=amd64
+os.version=6.1
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''

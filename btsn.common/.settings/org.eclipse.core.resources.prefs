@@ -1,0 +1,16 @@
+eclipse.preferences.version=1
+encoding//Framework\ Documenation/Healthcare\ Services\ Common\ Library=UTF-8
+encoding//Framework\ Documenation/Library\ Structure=UTF-8
+encoding//src/org/btsn/base/BaseCollectorService.java=UTF-8
+encoding//src/org/btsn/base/BaseStochasticPetriNetPlace.java=UTF-8
+encoding//src/org/btsn/base/BaseStochasticPetriNetPlace2.java=UTF-8
+encoding//src/org/btsn/base/TokenInfo.java=UTF-8
+encoding//src/org/btsn/json/JsonTokenParser.java=UTF-8
+encoding//src/org/btsn/rulecontroller/RuleDeployer.java=UTF-8
+encoding//src/org/btsn/rulecontroller/RuleDeployer2.java=UTF-8
+encoding//src/org/btsn/rulecontroller/TopologyBindingGenerator.java=UTF-8
+encoding//src/org/btsn/rulecontroller/model/WorkflowModel.java=UTF-8
+encoding//src/org/btsn/utils/BuildRuleBase.java=UTF-8
+encoding//src/org/btsn/utils/BuildRuleBase_writes_to_wrong_location.java=UTF-8
+encoding//src/org/btsn/utils/ChannelPublish.java=UTF-8
+encoding//src/org/btsn/utils/TokenPreservationHelper.java=UTF-8

@@ -1,0 +1,18 @@
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>TreatmentService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>executeTreatmentPlan</Ind>
+	<Ind>treatmentResults</Ind>  				<!-- This is the attribute returned or contributed -->
+	<Ind>diagnosisResults</Ind>			<!-- This is the attribute needed -->
+</Atom>
+
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>executeDirectTreatment</Ind>
+	<Ind>treatmentResults</Ind>  				<!-- This is the attribute returned or contributed -->
+	<Ind>triageResults</Ind>			<!-- This is the attribute needed -->
+</Atom>

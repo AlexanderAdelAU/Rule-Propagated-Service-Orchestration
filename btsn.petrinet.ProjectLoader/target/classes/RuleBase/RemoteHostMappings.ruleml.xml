@@ -1,0 +1,23 @@
+<!-- RemoteHostMappings.ruleml.xml -->
+<!-- Maps logical channel IDs (ip1, ip2, etc.) to actual IP addresses -->
+<!-- This file is loaded as part of Service.ruleml compilation -->
+
+<!-- Remote Host Mappings -->
+<Atom>
+    <Rel>boundChannel</Rel>
+    <Ind>ip1</Ind>
+    <Ind>192.168.1.82</Ind>
+</Atom>
+
+<Atom>
+    <Rel>boundChannel</Rel>
+    <Ind>ip2</Ind>
+    <Ind>192.168.1.83</Ind>
+</Atom>
+
+<Atom>
+    <Rel>boundChannel</Rel>
+    <Ind>ip3</Ind>
+    <Ind>192.168.1.84</Ind>
+</Atom>
+

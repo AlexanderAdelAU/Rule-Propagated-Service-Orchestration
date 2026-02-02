@@ -1,0 +1,508 @@
+{
+   "processType":"SOA",
+  "elements": [
+    {
+      "id": "EVENT_GENERATOR",
+      "type": "TRANSITION",
+      "x": 330,
+      "y": 10,
+      "width": 20,
+      "height": 60,
+      "label": "EVENT_GENERATOR",
+      "rotation": 90.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "Other"
+    },
+    {
+      "id": "T_in_Triage",
+      "type": "TRANSITION",
+      "x": 90,
+      "y": 130,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Triage",
+      "rotation": 90.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "T_in_Laboratory",
+      "type": "TRANSITION",
+      "x": 170,
+      "y": 130,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Laboratory",
+      "rotation": 90.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "T_in_Radiology",
+      "type": "TRANSITION",
+      "x": 250,
+      "y": 130,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Radiology",
+      "rotation": 90.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "T_in_Cardiology",
+      "type": "TRANSITION",
+      "x": 330,
+      "y": 130,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Cardiology",
+      "rotation": 90.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "T_in_Diagnosis",
+      "type": "TRANSITION",
+      "x": 410,
+      "y": 130,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Diagnosis",
+      "rotation": 90.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "T_in_Treatment",
+      "type": "TRANSITION",
+      "x": 490,
+      "y": 130,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Treatment",
+      "rotation": 90.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "Triage",
+      "type": "PLACE",
+      "x": 75,
+      "y": 235,
+      "width": 50,
+      "height": 50,
+      "label": "Triage",
+      "service": "Triage_InitializationService",
+      "operations": [
+        {
+          "name": "purgeAndInitialize"
+        }
+      ]
+    },
+    {
+      "id": "Laboratory",
+      "type": "PLACE",
+      "x": 155,
+      "y": 235,
+      "width": 50,
+      "height": 50,
+      "label": "Laboratory",
+      "service": "Laboratory_InitializationService",
+      "operations": [
+        {
+          "name": "purgeAndInitialize"
+        }
+      ]
+    },
+    {
+      "id": "Radiology",
+      "type": "PLACE",
+      "x": 235,
+      "y": 235,
+      "width": 50,
+      "height": 50,
+      "label": "Radiology",
+      "service": "Radiology_InitializationService",
+      "operations": [
+        {
+          "name": "purgeAndInitialize"
+        }
+      ]
+    },
+    {
+      "id": "Cardiology",
+      "type": "PLACE",
+      "x": 315,
+      "y": 235,
+      "width": 50,
+      "height": 50,
+      "label": "Cardiology",
+      "service": "Cardiology_InitializationService",
+      "operations": [
+        {
+          "name": "purgeAndInitialize"
+        }
+      ]
+    },
+    {
+      "id": "Diagnosis",
+      "type": "PLACE",
+      "x": 395,
+      "y": 235,
+      "width": 50,
+      "height": 50,
+      "label": "Diagnosis",
+      "service": "Diagnosis_InitializationService",
+      "operations": [
+        {
+          "name": "purgeAndInitialize"
+        }
+      ]
+    },
+    {
+      "id": "Treatment",
+      "type": "PLACE",
+      "x": 475,
+      "y": 235,
+      "width": 50,
+      "height": 50,
+      "label": "Treatment",
+      "service": "Treatment_InitializationService",
+      "operations": [
+        {
+          "name": "purgeAndInitialize"
+        }
+      ]
+    },
+    {
+      "id": "T_out_Triage",
+      "type": "TRANSITION",
+      "x": 90,
+      "y": 330,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Triage",
+      "rotation": 90.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_out_Laboratory",
+      "type": "TRANSITION",
+      "x": 170,
+      "y": 330,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Laboratory",
+      "rotation": 90.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_out_Radiology",
+      "type": "TRANSITION",
+      "x": 250,
+      "y": 330,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Radiology",
+      "rotation": 90.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_out_Cardiology",
+      "type": "TRANSITION",
+      "x": 330,
+      "y": 330,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Cardiology",
+      "rotation": 90.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_out_Diagnosis",
+      "type": "TRANSITION",
+      "x": 410,
+      "y": 330,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Diagnosis",
+      "rotation": 90.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_out_Treatment",
+      "type": "TRANSITION",
+      "x": 490,
+      "y": 330,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Treatment",
+      "rotation": 90.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_Monitor",
+      "type": "TRANSITION",
+      "x": 590,
+      "y": 130,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Monitor",
+      "rotation": 90.0,
+      "node_type": "MergeNode",
+      "node_value": "MERGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "60"
+    },
+    {
+      "id": "Monitor",
+      "type": "PLACE",
+      "x": 575,
+      "y": 235,
+      "width": 50,
+      "height": 50,
+      "label": "Monitor",
+      "service": "Monitor_InitializationService",
+      "operations": [
+        {
+          "name": "purgeAndInitialize"
+        }
+      ]
+    },
+    {
+      "id": "T_out_Monitor",
+      "type": "TRANSITION",
+      "x": 590,
+      "y": 330,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Monitor",
+      "rotation": 90.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_out"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "EVENT_GENERATOR",
+      "target": "T_in_Triage",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "waypoints": [
+        {"x": 200, "y": 60}
+      ],
+      "labelOffsetX": -53,
+      "labelOffsetY": -37
+    },
+    {
+      "source": "EVENT_GENERATOR",
+      "target": "T_in_Laboratory",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "EVENT_GENERATOR",
+      "target": "T_in_Radiology",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "EVENT_GENERATOR",
+      "target": "T_in_Cardiology",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "EVENT_GENERATOR",
+      "target": "T_in_Diagnosis",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "EVENT_GENERATOR",
+      "target": "T_in_Treatment",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Triage",
+      "target": "Triage",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Laboratory",
+      "target": "Laboratory",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Radiology",
+      "target": "Radiology",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Cardiology",
+      "target": "Cardiology",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Diagnosis",
+      "target": "Diagnosis",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Treatment",
+      "target": "Treatment",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Triage",
+      "target": "T_out_Triage",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Laboratory",
+      "target": "T_out_Laboratory",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Radiology",
+      "target": "T_out_Radiology",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Cardiology",
+      "target": "T_out_Cardiology",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Diagnosis",
+      "target": "T_out_Diagnosis",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Treatment",
+      "target": "T_out_Treatment",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Monitor",
+      "target": "Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Monitor",
+      "target": "T_out_Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "EVENT_GENERATOR",
+      "target": "T_in_Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "waypoints": [
+        {"x": 480, "y": 60}
+      ]
+    }
+  ],
+  "textElements": [
+    {
+      "x": 350,
+      "y": 650,
+      "text": "TERMINATE",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 277,
+      "y": 20,
+      "text": "Multi_Service_Initializer",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    }
+  ]
+}

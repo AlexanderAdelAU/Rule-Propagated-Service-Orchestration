@@ -1,0 +1,309 @@
+{
+   "processType":"PetriNet",
+  "elements": [
+    {
+      "id": "T_in_P1",
+      "type": "TRANSITION",
+      "x": 230,
+      "y": 170,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_P1",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "50"
+    },
+    {
+      "id": "P1",
+      "type": "PLACE",
+      "x": 295,
+      "y": 175,
+      "width": 50,
+      "height": 50,
+      "label": "P1",
+      "service": "P1_Place",
+      "operations": [
+        {
+          "name": "processToken"
+        }
+      ]
+    },
+    {
+      "id": "T_in_P2",
+      "type": "TRANSITION",
+      "x": 470,
+      "y": 170,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_P2",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "50"
+    },
+    {
+      "id": "P2",
+      "type": "PLACE",
+      "x": 535,
+      "y": 175,
+      "width": 50,
+      "height": 50,
+      "label": "P2",
+      "service": "P2_Place",
+      "operations": [
+        {
+          "name": "processToken"
+        }
+      ]
+    },
+    {
+      "id": "T_out_P2",
+      "type": "TRANSITION",
+      "x": 630,
+      "y": 170,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_P2",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_Monitor",
+      "type": "TRANSITION",
+      "x": 630,
+      "y": 250,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Monitor",
+      "rotation": 90.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "50"
+    },
+    {
+      "id": "Monitor",
+      "type": "PLACE",
+      "x": 615,
+      "y": 335,
+      "width": 50,
+      "height": 50,
+      "label": "Monitor",
+      "service": "MonitorService",
+      "operations": [
+        {
+          "name": "acknowledgeTokenArrival"
+        }
+      ]
+    },
+    {
+      "id": "T_out_Monitor",
+      "type": "TRANSITION",
+      "x": 630,
+      "y": 410,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Monitor",
+      "rotation": 90.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_out_P1",
+      "type": "TRANSITION",
+      "x": 390,
+      "y": 170,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_P1",
+      "rotation": 0.0,
+      "node_type": "XorNode",
+      "node_value": "XOR_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "P3",
+      "type": "PLACE",
+      "x": 295,
+      "y": 295,
+      "width": 50,
+      "height": 50,
+      "label": "P3",
+      "service": "P3_Place",
+      "operations": [
+        {
+          "name": "processToken"
+        }
+      ]
+    },
+    {
+      "id": "T_in_P3",
+      "type": "TRANSITION",
+      "x": 390,
+      "y": 290,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_P3",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "50"
+    },
+    {
+      "id": "T_out_P3",
+      "type": "TRANSITION",
+      "x": 230,
+      "y": 290,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_P3",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "EVENT_GENERATOR",
+      "type": "EVENT_GENERATOR",
+      "x": 108,
+      "y": 170,
+      "width": 24,
+      "height": 60,
+      "label": "EVENT_GENERATOR",
+      "rotation": 0.0,
+      "generator_rate": "1000",
+      "token_version": "v001"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "T_in_P1",
+      "target": "P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P2",
+      "target": "P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P2",
+      "target": "T_out_P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P2",
+      "target": "T_in_Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Monitor",
+      "target": "Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Monitor",
+      "target": "T_out_Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P1",
+      "target": "T_out_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P1",
+      "target": "T_in_P2",
+      "label": "true",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "true",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P3",
+      "target": "P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P3",
+      "target": "T_out_P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "EVENT_GENERATOR",
+      "target": "T_in_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P1",
+      "target": "T_in_P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P3",
+      "target": "T_in_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    }
+  ],
+  "textElements": [
+    {
+      "x": 254,
+      "y": 43,
+      "text": "P1_P2_P3_Workflow_StressTest",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 256,
+      "y": 68,
+      "text": "Places return random true or false",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    }
+  ]
+}

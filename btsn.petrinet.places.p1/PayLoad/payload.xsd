@@ -1,0 +1,65 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<xs:element name="payload">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="header" />
+				<xs:element ref="service" />
+				<xs:element ref="joinAttribute" />
+				<xs:element ref="monitorData" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="header">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="type" type="xs:string" />
+				<xs:element name="ruleBaseVersion" type="xs:string" />
+				<xs:element name="ruleBaseCommitment" type="xs:string" />
+				<xs:element name="sequenceId" type="xs:string" />
+				<xs:element name="priortiseSID" type="xs:string" />
+				<xs:element name="monitorIncomingEvents" type="xs:string" />
+				<xs:element name="activityCount" type="xs:string" />
+				<xs:element name="status" type="xs:string" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="service">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="serviceName" type="xs:NCName" />
+				<xs:element name="operation" type="xs:NCName" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+
+	<xs:element name="joinAttribute">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="attributeName" type="xs:string" />
+				<xs:element name="attributeValue" type="xs:string" />
+				<xs:element name="notBefore" type="xs:string" />
+				<xs:element name="notAfter" type="xs:string" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+
+
+	<xs:element name="monitorData">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="callingService" type="xs:string" />
+				<xs:element name="eventArrivalTime" type="xs:string" />
+				<xs:element name="taskArrivalTime" type="xs:string" />
+				<xs:element name="processStartTime" type="xs:string" />
+				<xs:element name="processElapsedTime" type="xs:string" />
+				<xs:element name="lostEvents" type="xs:string" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+</xs:schema>

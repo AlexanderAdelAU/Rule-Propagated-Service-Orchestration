@@ -1,0 +1,16 @@
+
+
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>CardiologyService</Ind>
+</Atom>
+<!-- two argument join so we need to declaration one for each argument-->
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>processCardiacAssessment</Ind>
+	<Ind>cardiologyResults</Ind>  	<!-- This is the attribute returned -->
+	<Ind>triageResults</Ind>	<!-- This input is needed -->
+	
+</Atom>
+

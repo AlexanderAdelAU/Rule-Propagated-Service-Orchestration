@@ -1,0 +1,660 @@
+{
+  "metadata": {
+    "name": "Emergency Department Patient Workflow",
+    "version": "2.0",
+    "author": "BTSN Healthcare Designer",
+    "created": "2025-01-07",
+    "type": "SOA Healthcare Workflow"
+  },
+   "processType":"SOA",
+  "documentation": {
+    "title": "Emergency Department Patient Workflow",
+    "summary": "Models patient flow through an emergency department. Patients are triaged, then either sent directly to treatment (minor cases) or through parallel diagnostic services (Laboratory, Cardiology, Radiology) that synchronize at Diagnosis before Treatment.",
+    "topology": {
+      "description": "Gateway/Fork to parallel diagnostics with Join synchronization",
+      "pattern": "GATEWAY splits based on triage decision, JOIN synchronizes diagnostic results"
+    },
+    "places": [
+      {"id": "Triage", "service": "TriageService", "description": "Initial patient assessment and routing decision"},
+      {"id": "Laboratory", "service": "LaboratoryService", "description": "Blood tests and lab work"},
+      {"id": "Cardiology", "service": "CardiologyService", "description": "Cardiac assessment and ECG"},
+      {"id": "Radiology", "service": "RadiologyService", "description": "Imaging and X-rays"},
+      {"id": "Diagnosis", "service": "DiagnosisService", "description": "Clinical decision based on all diagnostic results"},
+      {"id": "Treatment", "service": "TreatmentService", "description": "Execute treatment plan"},
+      {"id": "Monitor", "service": "MonitorService", "description": "Workflow completion tracking"}
+    ],
+    "transitions": {
+      "gateways": ["T_out_Triage (GatewayNode) - routes to diagnostics or direct treatment"],
+      "joins": ["T_in_Diagnosis (JoinNode) - synchronizes Laboratory, Cardiology, Radiology results"],
+      "merges": ["T_in_Treatment (MergeNode) - accepts from Diagnosis or direct triage path"]
+    }
+  },
+  "elements": [
+    {
+      "id": "Triage",
+      "type": "PLACE",
+      "x": 175,
+      "y": 215,
+      "width": 50,
+      "height": 50,
+      "label": "Triage",
+      "service": "TriageService",
+      "operations": [
+        {
+          "name": "processTriageAssessment"
+        }
+      ],
+      "fill_color": "#99FF66",
+      "border_color": "#000000"
+    },
+    {
+      "id": "T_out_Triage",
+      "type": "TRANSITION",
+      "x": 249,
+      "y": 210,
+      "width": 22,
+      "height": 60,
+      "label": "T_out_Triage",
+      "rotation": 180.0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out",
+      "fill_color": "#FFCC99"
+    },
+    {
+      "id": "T_in_Triage",
+      "type": "TRANSITION",
+      "x": 130,
+      "y": 210,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Triage",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10",
+      "fill_color": "#CCCCCC"
+    },
+    {
+      "id": "T_in_Laboratory",
+      "type": "TRANSITION",
+      "x": 390,
+      "y": 130,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Laboratory",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10",
+      "fill_color": "#CCCCCC"
+    },
+    {
+      "id": "T_in_Cardiology",
+      "type": "TRANSITION",
+      "x": 390,
+      "y": 210,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Cardiology",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10",
+      "fill_color": "#CCCCCC"
+    },
+    {
+      "id": "T_in_Radiology",
+      "type": "TRANSITION",
+      "x": 390,
+      "y": 290,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Radiology",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10",
+      "fill_color": "#CCCCCC"
+    },
+    {
+      "id": "Laboratory",
+      "type": "PLACE",
+      "x": 455,
+      "y": 135,
+      "width": 50,
+      "height": 50,
+      "label": "Laboratory",
+      "service": "LaboratoryService",
+      "operations": [
+        {
+          "name": "processLabRequest"
+        }
+      ],
+      "fill_color": "#99FF66",
+      "border_color": "#000000"
+    },
+    {
+      "id": "Cardiology",
+      "type": "PLACE",
+      "x": 455,
+      "y": 215,
+      "width": 50,
+      "height": 50,
+      "label": "Cardiology",
+      "service": "CardiologyService",
+      "operations": [
+        {
+          "name": "processCardiacAssessment"
+        }
+      ],
+      "fill_color": "#99FF66",
+      "border_color": "#000000"
+    },
+    {
+      "id": "Radiology",
+      "type": "PLACE",
+      "x": 455,
+      "y": 295,
+      "width": 50,
+      "height": 50,
+      "label": "Radiology",
+      "service": "RadiologyService",
+      "operations": [
+        {
+          "name": "processImagingRequest"
+        }
+      ],
+      "fill_color": "#99FF66",
+      "border_color": "#000000"
+    },
+    {
+      "id": "T_out_Laboratory",
+      "type": "TRANSITION",
+      "x": 550,
+      "y": 130,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Laboratory",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out",
+      "fill_color": "#FFCC99"
+    },
+    {
+      "id": "T_out_Radiology",
+      "type": "TRANSITION",
+      "x": 550,
+      "y": 290,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Radiology",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out",
+      "fill_color": "#FFCC99"
+    },
+    {
+      "id": "T_in_Diagnosis",
+      "type": "TRANSITION",
+      "x": 650,
+      "y": 210,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Diagnosis",
+      "rotation": 0.0,
+      "node_type": "JoinNode",
+      "node_value": "JOIN_NODE",
+      "transition_type": "T_in",
+      "buffer": "30",
+      "fill_color": "#CCCCCC"
+    },
+    {
+      "id": "Diagnosis",
+      "type": "PLACE",
+      "x": 695,
+      "y": 215,
+      "width": 50,
+      "height": 50,
+      "label": "Diagnosis",
+      "service": "DiagnosisService",
+      "operations": [
+        {
+          "name": "processClinicalDecision"
+        }
+      ],
+      "fill_color": "#99FF66",
+      "border_color": "#000000"
+    },
+    {
+      "id": "T_in_Treatment",
+      "type": "TRANSITION",
+      "x": 830,
+      "y": 210,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Treatment",
+      "rotation": 0.0,
+      "node_type": "MergeNode",
+      "node_value": "MERGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10",
+      "fill_color": "#CCCCCC"
+    },
+    {
+      "id": "T_out_Treatment",
+      "type": "TRANSITION",
+      "x": 750,
+      "y": 370,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Treatment",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out",
+      "fill_color": "#FFCC99"
+    },
+    {
+      "id": "Treatment",
+      "type": "PLACE",
+      "x": 815,
+      "y": 375,
+      "width": 50,
+      "height": 50,
+      "label": "Treatment",
+      "service": "TreatmentService",
+      "operations": [
+        {
+          "name": "executeTreatmentPlan"
+        },
+        {
+          "name": "executeDirectTreatment"
+        }
+      ],
+      "fill_color": "#99FF66",
+      "border_color": "#000000"
+    },
+    {
+      "id": "T_out_Cardiology",
+      "type": "TRANSITION",
+      "x": 550,
+      "y": 210,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Cardiology",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out",
+      "fill_color": "#FFCC99"
+    },
+    {
+      "id": "T_out_Diagnosis",
+      "type": "TRANSITION",
+      "x": 770,
+      "y": 210,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Diagnosis",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out",
+      "fill_color": "#FFCC99"
+    },
+    {
+      "id": "T_in_Monitor",
+      "type": "TRANSITION",
+      "x": 690,
+      "y": 370,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Monitor",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10",
+      "fill_color": "#CCCCCC"
+    },
+    {
+      "id": "Monitor",
+      "type": "PLACE",
+      "x": 615,
+      "y": 375,
+      "width": 50,
+      "height": 50,
+      "label": "Monitor",
+      "service": "MonitorService",
+      "operations": [
+        {
+          "name": "acknowledgeTokenArrival"
+        }
+      ],
+      "fill_color": "#FFCC66",
+      "border_color": "#000000"
+    },
+    {
+      "id": "T_out_Monitor",
+      "type": "TRANSITION",
+      "x": 570,
+      "y": 370,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Monitor",
+      "rotation": 0.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_out",
+      "fill_color": "#FF9999"
+    },
+    {
+      "id": "PATIENT_ARRIVAL",
+      "type": "EVENT_GENERATOR",
+      "x": 28,
+      "y": 210,
+      "width": 24,
+      "height": 60,
+      "label": "PATIENT_ARRIVAL",
+      "rotation": 0.0,
+      "generator_rate": "1000",
+      "token_version": "v003"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "T_out_Triage",
+      "target": "T_in_Laboratory",
+      "label": "STANDARD_WORKFLOW",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "STANDARD_WORKFLOW",
+      "endpoint": "",
+      "labelOffsetX": 38,
+      "labelOffsetY": -1,
+      "connection_type": "NETWORK",
+      "availability": 1.0
+    },
+    {
+      "source": "T_out_Triage",
+      "target": "T_in_Cardiology",
+      "label": "STANDARD_WORKFLOW",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "STANDARD_WORKFLOW",
+      "endpoint": "",
+      "labelOffsetX": 5,
+      "labelOffsetY": 19,
+      "connection_type": "NETWORK",
+      "availability": 1.0
+    },
+    {
+      "source": "T_out_Triage",
+      "target": "T_in_Radiology",
+      "label": "STANDARD_WORKFLOW",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "STANDARD_WORKFLOW",
+      "endpoint": "",
+      "labelOffsetX": -22,
+      "labelOffsetY": 23,
+      "connection_type": "NETWORK",
+      "availability": 1.0
+    },
+    {
+      "source": "T_in_Laboratory",
+      "target": "Laboratory",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Cardiology",
+      "target": "Cardiology",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Radiology",
+      "target": "Radiology",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Laboratory",
+      "target": "T_out_Laboratory",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Radiology",
+      "target": "T_out_Radiology",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_Laboratory",
+      "target": "T_in_Diagnosis",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "connection_type": "NETWORK",
+      "availability": 1.0
+    },
+    {
+      "source": "T_out_Radiology",
+      "target": "T_in_Diagnosis",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "connection_type": "NETWORK",
+      "availability": 1.0
+    },
+    {
+      "source": "T_out_Triage",
+      "target": "T_in_Treatment",
+      "label": "DIRECT_TO_TREATMENT",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "DIRECT_TO_TREATMENT",
+      "endpoint": "executeDirectTreatment",
+      "waypoints": [
+        {"x": 420, "y": 80},
+        {"x": 620, "y": 80}
+      ],
+      "labelOffsetX": -87,
+      "labelOffsetY": 17,
+      "connection_type": "NETWORK",
+      "availability": 1.0
+    },
+    {
+      "source": "T_in_Triage",
+      "target": "Triage",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Triage",
+      "target": "T_out_Triage",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Cardiology",
+      "target": "T_out_Cardiology",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_Cardiology",
+      "target": "T_in_Diagnosis",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "connection_type": "NETWORK",
+      "availability": 1.0
+    },
+    {
+      "source": "T_in_Diagnosis",
+      "target": "Diagnosis",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Treatment",
+      "target": "Treatment",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Treatment",
+      "target": "T_out_Treatment",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Diagnosis",
+      "target": "T_out_Diagnosis",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_Diagnosis",
+      "target": "T_in_Treatment",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "executeTreatmentPlan",
+      "connection_type": "NETWORK",
+      "availability": 1.0
+    },
+    {
+      "source": "T_out_Treatment",
+      "target": "T_in_Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "connection_type": "NETWORK",
+      "availability": 1.0
+    },
+    {
+      "source": "T_in_Monitor",
+      "target": "Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Monitor",
+      "target": "T_out_Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "PATIENT_ARRIVAL",
+      "target": "T_in_Triage",
+      "label": "v003",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "waypoints": [
+        {"x": 80, "y": 240}
+      ],
+      "labelOffsetX": 10,
+      "labelOffsetY": -23,
+      "connection_type": "NETWORK",
+      "availability": 1.0
+    }
+  ],
+  "textElements": [
+    {
+      "x": 645,
+      "y": 197,
+      "text": "JOIN",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 811,
+      "y": 199,
+      "text": "XOR_MERGE",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 235,
+      "y": 202,
+      "text": "GATEWAY",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 555,
+      "y": 446,
+      "text": "Terminate",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 372,
+      "y": 46,
+      "text": "Emergency_Department_Patient_Workflow",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 107,
+      "y": 201,
+      "text": "EDGE_NODE",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 739,
+      "y": 351,
+      "text": "DUAL_METHOD",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    }
+  ]
+}

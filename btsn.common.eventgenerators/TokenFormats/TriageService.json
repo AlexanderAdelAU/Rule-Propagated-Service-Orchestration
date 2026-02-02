@@ -1,0 +1,53 @@
+{
+	"service": "TriageService",
+	"operation": "processTriageAssessment",
+	"description": "Token format for Triage assessment workflow",
+	
+	"tokenStructure": {
+	  "tokenId": "${sequenceId}",
+	  "version": "${version}",
+	  "notAfter": "${notAfter}",
+	  "currentPlace": "${targetPlace}",
+	  "workflow_start_time": "${workflowStartTime}",
+	  
+	  "data": {
+		"patientId": "P_Triage_${sequenceId}",
+		"providerId": "RN_TRIAGE_001",
+		"condition": "chest pain",
+		"priority": "STANDARD",
+		"department": "EMERGENCY"
+	  }
+	},
+	
+	"dataVariants": {
+	  "chest_pain": {
+		"condition": "chest pain",
+		"priority": "HIGH",
+		"symptoms": "substernal pressure, diaphoresis"
+	  },
+	  "shortness_of_breath": {
+		"condition": "shortness of breath",
+		"priority": "HIGH",
+		"symptoms": "dyspnea, tachypnea"
+	  },
+	  "abdominal_pain": {
+		"condition": "abdominal pain",
+		"priority": "STANDARD",
+		"symptoms": "RLQ tenderness"
+	  },
+	  "headache": {
+		"condition": "headache",
+		"priority": "LOW",
+		"symptoms": "tension-type, no red flags"
+	  },
+	  "random": {
+		"_comment": "Randomly select from above variants"
+	  }
+	},
+	
+	"notes": [
+	  "tokenId, version, notAfter, currentPlace, workflow_start_time are auto-populated",
+	  "data fields can be overridden via -data command line argument",
+	  "Use dataVariants with -variant argument to select specific patient scenarios"
+	]
+  }

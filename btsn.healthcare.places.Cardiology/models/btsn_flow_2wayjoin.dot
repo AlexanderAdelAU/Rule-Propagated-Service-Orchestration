@@ -1,0 +1,51 @@
+digraph BTSNNetworkTopology {
+  rankdir=TB;
+  node [fontname="Arial", fontsize=10];
+  edge [fontsize=8, color="darkblue", penwidth=2];
+
+  // Title
+  labelloc="t";
+  label="BTSN Network Topology\nShowing Static Network Structure";
+
+  // Network Nodes
+  P5_LoggingPlace [label="P5(LoggingPlace)\nEvents: 3", shape=circle, fillcolor="lightsteelblue", style=filled];
+  P4_OutputPlace [label="P4(OutputPlace)\nEvents: 9", shape=circle, fillcolor="cornflowerblue", style=filled];
+  P6_ArchivePlace [label="P6(ArchivePlace)\nEvents: 6", shape=circle, fillcolor="cornflowerblue", style=filled];
+  T5_ArchiveFinalTransition [label="T5(ArchiveFinalTransition)\nEvents: 6", shape=box, fillcolor="green", style=filled];
+  T3_RoutingTransition [label="T3(RoutingTransition)\nEvents: 9", shape=box, fillcolor="green", style=filled];
+  T1_SyncTransition [label="T1(SyncTransition)\nEvents: 15", shape=box, fillcolor="green", style=filled];
+  P2_ValidationPlace [label="P2(ValidationPlace)\nEvents: 9", shape=circle, fillcolor="cornflowerblue", style=filled];
+  T4_FinalTransition [label="T4(FinalTransition)\nEvents: 3", shape=box, fillcolor="lightgreen", style=filled];
+  P8_ArchiveTerminalPlace [label="P8(ArchiveTerminalPlace)\nEvents: 6", shape=circle, fillcolor="cornflowerblue", style=filled];
+  P3_TransformPlace [label="P3(TransformPlace)\nEvents: 9", shape=circle, fillcolor="cornflowerblue", style=filled];
+  P7_TerminalPlace [label="P7(TerminalPlace)\nEvents: 3", shape=circle, fillcolor="lightsteelblue", style=filled];
+  T2_ForkTransition [label="T2(ForkTransition)\nEvents: 9", shape=box, fillcolor="green", style=filled];
+  P1_InputPlace [label="P1(InputPlace)\nEvents: 12", shape=circle, fillcolor="cornflowerblue", style=filled];
+
+  // Static Network Connections (Topology)
+  P1_InputPlace -> T2_ForkTransition [label="Parsed tokens", fontsize=8];
+  T2_ForkTransition -> P2_ValidationPlace [label="For validation", fontsize=8];
+  T2_ForkTransition -> P3_TransformPlace [label="For transform", fontsize=8];
+  P2_ValidationPlace -> T1_SyncTransition [label="Validated", fontsize=8];
+  P3_TransformPlace -> T1_SyncTransition [label="Transformed", fontsize=8];
+  T1_SyncTransition -> P4_OutputPlace [label="Synchronized", fontsize=8];
+  P4_OutputPlace -> T3_RoutingTransition [label="For routing", fontsize=8];
+  T3_RoutingTransition -> P5_LoggingPlace [label="Even IDs", fontsize=8];
+  T3_RoutingTransition -> P6_ArchivePlace [label="Odd IDs", fontsize=8];
+  P5_LoggingPlace -> T4_FinalTransition [label="Logged", fontsize=8];
+  P6_ArchivePlace -> T5_ArchiveFinalTransition [label="Archived", fontsize=8];
+  T4_FinalTransition -> P7_TerminalPlace [label="Final", fontsize=8];
+  T5_ArchiveFinalTransition -> P8_ArchiveTerminalPlace [label="Archived Final", fontsize=8];
+
+  // Legend
+  subgraph cluster_legend {
+    label="Legend";
+    style=filled;
+    fillcolor=lightgray;
+    
+    legend_place [label="Place\n(Execution)", shape=circle, fillcolor=lightblue, style=filled];
+    legend_transition [label="Transition\n(Logic)", shape=box, fillcolor=lightgreen, style=filled];
+    
+    legend_place -> legend_transition [label="Token Flow", style=invisible];
+  }
+}

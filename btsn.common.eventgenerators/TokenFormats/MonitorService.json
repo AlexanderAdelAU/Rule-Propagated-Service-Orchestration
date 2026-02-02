@@ -1,0 +1,39 @@
+{
+	"service": "MonitorService",
+	"operation": "processToken",
+	"description": "Token format for Monitor service (workflow tracking)",
+	
+	"tokenStructure": {
+	  "tokenId": "${sequenceId}",
+	  "version": "${version}",
+	  "notAfter": "${notAfter}",
+	  "currentPlace": "${targetPlace}",
+	  "workflow_start_time": "${workflowStartTime}",
+	  
+	  "data": {
+		"monitorType": "WORKFLOW_COMPLETION",
+		"sourceService": "upstream",
+		"trackingEnabled": "true"
+	  }
+	},
+	
+	"dataVariants": {
+	  "workflow_start": {
+		"monitorType": "WORKFLOW_START",
+		"eventType": "TOKEN_CREATED"
+	  },
+	  "workflow_completion": {
+		"monitorType": "WORKFLOW_COMPLETION",
+		"eventType": "TOKEN_COMPLETED"
+	  },
+	  "error_tracking": {
+		"monitorType": "ERROR_TRACKING",
+		"eventType": "TOKEN_ERROR"
+	  }
+	},
+	
+	"notes": [
+	  "Monitor typically receives tokens from upstream services",
+	  "Token data is enriched by upstream processing"
+	]
+  }

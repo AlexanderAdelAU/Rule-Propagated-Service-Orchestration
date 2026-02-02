@@ -1,0 +1,402 @@
+{
+   "processType":"PetriNet",
+  "elements": [
+    {
+      "id": "T_in_P1",
+      "type": "TRANSITION",
+      "x": 90,
+      "y": 130,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_P1",
+      "rotation": 90.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "T_in_Monitor",
+      "type": "TRANSITION",
+      "x": 170,
+      "y": 130,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Monitor",
+      "rotation": 90.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "P1",
+      "type": "PLACE",
+      "x": 75,
+      "y": 235,
+      "width": 50,
+      "height": 50,
+      "label": "P1",
+      "service": "P1_InitializationService",
+      "operations": [
+        {
+          "name": "purgeAndInitialize"
+        }
+      ]
+    },
+    {
+      "id": "Monitor",
+      "type": "PLACE",
+      "x": 155,
+      "y": 235,
+      "width": 50,
+      "height": 50,
+      "label": "Monitor",
+      "service": "Monitor_InitializationService",
+      "operations": [
+        {
+          "name": "purgeAndInitialize"
+        }
+      ]
+    },
+    {
+      "id": "T_out_P1",
+      "type": "TRANSITION",
+      "x": 90,
+      "y": 330,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_P1",
+      "rotation": 90.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_out_Monitor",
+      "type": "TRANSITION",
+      "x": 170,
+      "y": 330,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Monitor",
+      "rotation": 90.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P2",
+      "type": "TRANSITION",
+      "x": 250,
+      "y": 130,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_P2",
+      "rotation": 90.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "T_in_P3",
+      "type": "TRANSITION",
+      "x": 330,
+      "y": 130,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_P3",
+      "rotation": 90.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "P2",
+      "type": "PLACE",
+      "x": 235,
+      "y": 235,
+      "width": 50,
+      "height": 50,
+      "label": "P2",
+      "service": "P2_InitializationService",
+      "operations": [
+        {
+          "name": "purgeAndInitialize"
+        }
+      ]
+    },
+    {
+      "id": "P3",
+      "type": "PLACE",
+      "x": 315,
+      "y": 235,
+      "width": 50,
+      "height": 50,
+      "label": "P3",
+      "service": "P3_InitializationService",
+      "operations": [
+        {
+          "name": "purgeAndInitialize"
+        }
+      ]
+    },
+    {
+      "id": "T_out_P2",
+      "type": "TRANSITION",
+      "x": 250,
+      "y": 330,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_P2",
+      "rotation": 90.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_out_P3",
+      "type": "TRANSITION",
+      "x": 330,
+      "y": 330,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_P3",
+      "rotation": 90.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "P4",
+      "type": "PLACE",
+      "x": 395,
+      "y": 235,
+      "width": 50,
+      "height": 50,
+      "label": "P4",
+      "service": "P4_InitializationService",
+      "operations": [
+        {
+          "name": "purgeAndInitialize"
+        }
+      ]
+    },
+    {
+      "id": "T_out_P4",
+      "type": "TRANSITION",
+      "x": 410,
+      "y": 330,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_P4",
+      "rotation": 90.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P4",
+      "type": "TRANSITION",
+      "x": 410,
+      "y": 130,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_P4",
+      "rotation": 90.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "INTIALISATION_GENERATOR",
+      "type": "EVENT_GENERATOR",
+      "x": 28,
+      "y": 50,
+      "width": 24,
+      "height": 60,
+      "label": "INTIALISATION_GENERATOR",
+      "rotation": 0.0,
+      "generator_rate": "1000",
+      "token_version": "v001"
+    },
+    {
+      "id": "EG52",
+      "type": "EVENT_GENERATOR",
+      "x": 28,
+      "y": 50,
+      "width": 24,
+      "height": 60,
+      "label": "EG52",
+      "rotation": 0.0,
+      "generator_rate": "1000",
+      "token_version": "v001"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "T_in_P1",
+      "target": "P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Monitor",
+      "target": "Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P1",
+      "target": "T_out_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Monitor",
+      "target": "T_out_Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P2",
+      "target": "P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P2",
+      "target": "T_out_P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P3",
+      "target": "P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P3",
+      "target": "T_out_P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P4",
+      "target": "P4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P4",
+      "target": "T_out_P4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "INTIALISATION_GENERATOR",
+      "target": "T_in_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "waypoints": [
+        {"x": 100, "y": 80}
+      ]
+    },
+    {
+      "source": "INTIALISATION_GENERATOR",
+      "target": "T_in_Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "waypoints": [
+        {"x": 180, "y": 80}
+      ]
+    },
+    {
+      "source": "INTIALISATION_GENERATOR",
+      "target": "T_in_P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "waypoints": [
+        {"x": 260, "y": 80}
+      ]
+    },
+    {
+      "source": "INTIALISATION_GENERATOR",
+      "target": "EG52",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "INTIALISATION_GENERATOR",
+      "target": "T_in_P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "waypoints": [
+        {"x": 340, "y": 80}
+      ]
+    },
+    {
+      "source": "INTIALISATION_GENERATOR",
+      "target": "T_in_P4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "waypoints": [
+        {"x": 420, "y": 80}
+      ]
+    }
+  ],
+  "textElements": [
+    {
+      "x": 463,
+      "y": 409,
+      "text": "TERMINATE",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 266,
+      "y": 36,
+      "text": "P1_P2_P3_P4_Intialization",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    }
+  ]
+}

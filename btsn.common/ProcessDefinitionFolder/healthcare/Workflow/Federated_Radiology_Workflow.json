@@ -1,0 +1,204 @@
+{
+   "processType":"SOA",
+  "elements": [
+    {
+      "id": "T_in_Radiology",
+      "type": "TRANSITION",
+      "x": 210,
+      "y": 110,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Radiology",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "100",
+      "fill_color": "#CCCCCC"
+    },
+    {
+      "id": "Radiology",
+      "type": "PLACE",
+      "x": 275,
+      "y": 115,
+      "width": 50,
+      "height": 50,
+      "label": "Radiology",
+      "service": "RadiologyService",
+      "operations": [
+        {
+          "name": "federatedRadiologyRequest"
+        }
+      ],
+      "fill_color": "#99FF66",
+      "border_color": "#000000"
+    },
+    {
+      "id": "T_out_Radiology",
+      "type": "TRANSITION",
+      "x": 370,
+      "y": 110,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Radiology",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out",
+      "fill_color": "#FFCC00"
+    },
+    {
+      "id": "T_in_Monitor",
+      "type": "TRANSITION",
+      "x": 450,
+      "y": 110,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Monitor",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10",
+      "fill_color": "#CCCCCC"
+    },
+    {
+      "id": "Monitor",
+      "type": "PLACE",
+      "x": 515,
+      "y": 115,
+      "width": 50,
+      "height": 50,
+      "label": "Monitor",
+      "service": "MonitorService",
+      "operations": [
+        {
+          "name": "acknowledgeTokenArrival"
+        }
+      ],
+      "fill_color": "#99FF66",
+      "border_color": "#000000"
+    },
+    {
+      "id": "T_out_Monitor",
+      "type": "TRANSITION",
+      "x": 610,
+      "y": 110,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Monitor",
+      "rotation": 0.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_out",
+      "fill_color": "#FF9999"
+    },
+    {
+      "id": "FEDERATED_RADIOLOGY_REQUEST",
+      "type": "EVENT_GENERATOR",
+      "x": 128,
+      "y": 190,
+      "width": 24,
+      "height": 60,
+      "label": "FEDERATED_RADIOLOGY_REQUEST",
+      "rotation": 0.0,
+      "generator_rate": "1000",
+      "token_version": "v001"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "T_in_Radiology",
+      "target": "Radiology",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Radiology",
+      "target": "T_out_Radiology",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Monitor",
+      "target": "Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Monitor",
+      "target": "T_out_Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_Radiology",
+      "target": "T_in_Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "FEDERATED_RADIOLOGY_REQUEST",
+      "target": "T_in_Radiology",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "waypoints": [
+        {"x": 140, "y": 140}
+      ]
+    }
+  ],
+  "textElements": [
+    {
+      "x": 280,
+      "y": 55,
+      "text": "Federated_Radiology_Monitor_Workflow",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 591,
+      "y": 100,
+      "text": "Terminate",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 192,
+      "y": 97,
+      "text": "Edge Node",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 351,
+      "y": 100,
+      "text": "Edge Node",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 431,
+      "y": 99,
+      "text": "Edge Node",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    }
+  ]
+}

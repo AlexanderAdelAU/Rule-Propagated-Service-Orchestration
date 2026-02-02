@@ -1,0 +1,1 @@
+<Atom><Rel>NodeType</Rel><Ind>JoinNode</Ind></Atom><Atom><Rel>meetsCondition</Rel><Ind>TreatmentService</Ind><Ind>executeTreatmentPlan</Ind><Ind>EDGE_NODE</Ind><Ind></Ind></Atom><Atom><Rel>destinationBinding</Rel><Ind>TreatmentService</Ind><Ind>executeTreatmentPlan</Ind><Ind>diagnosisResults</Ind><Ind>1</Ind></Atom>

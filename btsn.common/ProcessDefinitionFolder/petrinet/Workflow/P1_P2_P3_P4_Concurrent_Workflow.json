@@ -1,0 +1,466 @@
+{
+   "processType":"PetriNet",
+  "elements": [
+    {
+      "id": "T_in_P1",
+      "type": "TRANSITION",
+      "x": 170,
+      "y": 270,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_P1",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "P1",
+      "type": "PLACE",
+      "x": 255,
+      "y": 275,
+      "width": 50,
+      "height": 50,
+      "label": "P1",
+      "service": "P1_Place",
+      "operations": [
+        {
+          "name": "processToken"
+        }
+      ]
+    },
+    {
+      "id": "T_out_P1",
+      "type": "TRANSITION",
+      "x": 370,
+      "y": 270,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_P1",
+      "rotation": 0.0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P3",
+      "type": "TRANSITION",
+      "x": 470,
+      "y": 210,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_P3",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "P3",
+      "type": "PLACE",
+      "x": 535,
+      "y": 215,
+      "width": 50,
+      "height": 50,
+      "label": "P3",
+      "service": "P3_Place",
+      "operations": [
+        {
+          "name": "processToken"
+        }
+      ]
+    },
+    {
+      "id": "T_out_P3",
+      "type": "TRANSITION",
+      "x": 630,
+      "y": 210,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_P3",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P2",
+      "type": "TRANSITION",
+      "x": 470,
+      "y": 310,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_P2",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "P2",
+      "type": "PLACE",
+      "x": 535,
+      "y": 315,
+      "width": 50,
+      "height": 50,
+      "label": "P2",
+      "service": "P2_Place",
+      "operations": [
+        {
+          "name": "processToken"
+        }
+      ]
+    },
+    {
+      "id": "T_out_P2",
+      "type": "TRANSITION",
+      "x": 630,
+      "y": 310,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_P2",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P4",
+      "type": "TRANSITION",
+      "x": 730,
+      "y": 270,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_P4",
+      "rotation": 0.0,
+      "node_type": "JoinNode",
+      "node_value": "JOIN_NODE",
+      "transition_type": "T_in",
+      "buffer": "30"
+    },
+    {
+      "id": "P4",
+      "type": "PLACE",
+      "x": 795,
+      "y": 275,
+      "width": 50,
+      "height": 50,
+      "label": "P4",
+      "service": "P4_Place",
+      "operations": [
+        {
+          "name": "processToken"
+        }
+      ]
+    },
+    {
+      "id": "T_out_P4",
+      "type": "TRANSITION",
+      "x": 910,
+      "y": 270,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_P4",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_Monitor",
+      "type": "TRANSITION",
+      "x": 910,
+      "y": 370,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Monitor",
+      "rotation": 90.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "Monitor",
+      "type": "PLACE",
+      "x": 895,
+      "y": 455,
+      "width": 50,
+      "height": 50,
+      "label": "Monitor",
+      "service": "MonitorService",
+      "operations": [
+        {
+          "name": "acknowledgeTokenArrival"
+        }
+      ]
+    },
+    {
+      "id": "T_out_Monitor",
+      "type": "TRANSITION",
+      "x": 910,
+      "y": 530,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Monitor",
+      "rotation": 90.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "Terminate",
+      "type": "TRANSITION",
+      "x": 370,
+      "y": 392,
+      "width": 20,
+      "height": 56,
+      "label": "Terminate",
+      "rotation": 180.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    },
+    {
+      "id": "EVENT_GENERATOR",
+      "type": "EVENT_GENERATOR",
+      "x": 68,
+      "y": 270,
+      "width": 24,
+      "height": 60,
+      "label": "EVENT_GENERATOR",
+      "rotation": 0.0,
+      "generator_rate": "1000",
+      "token_version": "v001"
+    },
+    {
+      "id": "P1_EVENTGENERATOR",
+      "type": "EVENT_GENERATOR",
+      "x": 68,
+      "y": 350,
+      "width": 24,
+      "height": 60,
+      "label": "P1_EVENTGENERATOR",
+      "rotation": 0.0,
+      "generator_rate": "1000",
+      "token_version": "v001"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "T_out_P1",
+      "target": "T_in_P3",
+      "label": "true",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "true",
+      "endpoint": "processToken",
+      "waypoints": [
+        {"x": 440, "y": 240}
+      ]
+    },
+    {
+      "source": "T_out_P1",
+      "target": "T_in_P2",
+      "label": "true",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "true",
+      "endpoint": "processToken",
+      "waypoints": [
+        {"x": 440, "y": 340}
+      ]
+    },
+    {
+      "source": "T_in_P3",
+      "target": "P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P3",
+      "target": "T_out_P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P2",
+      "target": "P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P2",
+      "target": "T_out_P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P2",
+      "target": "T_in_P4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P4",
+      "target": "P4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P4",
+      "target": "T_out_P4",
+      "label": "v001",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "waypoints": [
+        {"x": 860, "y": 300},
+        {"x": 880, "y": 300}
+      ]
+    },
+    {
+      "source": "T_out_P4",
+      "target": "T_in_Monitor",
+      "label": "v001",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Monitor",
+      "target": "Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Monitor",
+      "target": "T_out_Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P3",
+      "target": "T_in_P4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P1",
+      "target": "P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P1",
+      "target": "T_out_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P1",
+      "target": "Terminate",
+      "label": "false",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "false",
+      "endpoint": ""
+    },
+    {
+      "source": "P1_EVENTGENERATOR",
+      "target": "T_in_P1",
+      "label": "v002",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "waypoints": [
+        {"x": 180, "y": 380}
+      ]
+    },
+    {
+      "source": "EVENT_GENERATOR",
+      "target": "T_in_P1",
+      "label": "v001",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P2",
+      "target": "T_in_Monitor",
+      "label": "v002",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "waypoints": [
+        {"x": 760, "y": 400}
+      ],
+      "labelOffsetX": -17,
+      "labelOffsetY": 15
+    }
+  ],
+  "textElements": [
+    {
+      "x": 281,
+      "y": 77,
+      "text": "P1_P2_P3_P4_Fork_Concurrent_Workflow",
+      "fontSize": 14,
+      "fontStyle": 1,
+      "color": -16777216
+    },
+    {
+      "x": 328,
+      "y": 253,
+      "text": "GATEWAY NODE",
+      "fontSize": 10,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 608,
+      "y": 236,
+      "text": "JOIN",
+      "fontSize": 10,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 276,
+      "y": 98,
+      "text": "(P1 to P4 Return True of False from SPN implementation",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 702,
+      "y": 544,
+      "text": "Terminate",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    }
+  ]
+}

@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="btsn.healthcare.places.Cardiology" default="release" basedir=".">
+
+	<!-- Define a custom copy task with failonerror set to true -->
+	<presetdef name="copy">
+		<copy failonerror="true" />
+	</presetdef>
+
+	<!-- Project metadata -->
+	<property name="project.artifactId" value="btsn.places.Cardiology" />
+	<property name="project.version" value="1.0" />
+	<property name="main-class" value="org.btsn.ServiceLoader" />
+
+	<!-- Directory properties -->
+	<property name="src.dir" value="src" />
+	<property name="resources.dir" value="resources" />
+	<property name="target.dir" value="target" />
+	<property name="classes.dir" value="${target.dir}/classes" />
+	<property name="bin.dir" value="bin" />
+	<property name="doc.dir" value="doc" />
+
+	<!-- Common module properties -->
+	<property name="common.root" value="../btsn.common" />
+	<property name="common.src.dir" value="${common.root}/src" />
+	<property name="common.lib.dir" value="${common.root}/lib" />
+	<property name="common.bin.dir" value="${common.root}/bin" />
+	
+	<!-- Specific common packages to include -->
+	<property name="common.base.dir" value="${common.root}/src/org/btsn/base" />
+	<property name="common.exceptions.dir" value="${common.root}/src/org/btsn/exceptions" />
+	<property name="common.json.dir" value="${common.root}/src/org/btsn/json" />
+	<property name="common.utils.dir" value="${common.root}/src/org/btsn/utils" />
+
+	<!-- Service properties -->
+	<property name="service.root" value="." />
+	<property name="cardiologyService.target.dir" value="../org.btsn.healthcare.places.Cardiology/target" />
+
+	<!-- Classpath for compilation -->
+	<path id="project.classpath">
+		<fileset dir="${common.lib.dir}">
+			<include name="antlr.jar" />
+			<include name="derby.jar" />
+			<include name="derbyclient.jar" />
+			<include name="jaxb-xjc-3.0.2.jar" />
+			<include name="jfreechart-1.5.3.jar" />
+			<include name="jlatexmath-1.0.7.jar" />
+			<include name="json-simple-1.1.1.jar" />
+			<include name="log4j-1.2.16.jar" />
+			<include name="mysql-connector-java-5.1.18-bin.jar" />
+			<include name="oojdrew-1.0.jar" />
+			<include name="opencsv-2.3.jar" />
+			<include name="ptolemy.jar" />
+			<include name="xom-1.3.7.jar" />
+		</fileset>
+	</path>
+
+	<!-- Clean build artifacts -->
+	<target name="clean" description="Clean all build artifacts">
+		<delete dir="${target.dir}" />
+		<delete dir="${bin.dir}" />
+		<delete dir="${doc.dir}" />
+		<delete dir="${common.bin.dir}" failonerror="false" />
+		<delete dir="${cardiologyService.target.dir}" failonerror="false" />
+		<delete>
+			<fileset dir="." includes="*.zip" />
+		</delete>
+		<delete>
+			<fileset dir="${common.root}" includes="**/*.class" />
+		</delete>
+		<echo message="Cleaned project artifacts." />
+	</target>
+
+	<!-- Initialize directories -->
+	<target name="init" description="Initialize directories">
+		<mkdir dir="${classes.dir}" />
+		<mkdir dir="${bin.dir}" />
+		<tstamp />
+		<echo message="Initialized build directories." />
+		
+		<!-- Verify common source directories exist -->
+		<available file="${common.src.dir}" type="dir" property="common.src.exists"/>
+		<fail unless="common.src.exists" message="Common source directory not found: ${common.src.dir}" />
+		
+		<!-- Check for specific common packages -->
+		<available file="${common.src.dir}/org/btsn/base" type="dir" property="common.base.exists"/>
+		<available file="${common.src.dir}/org/btsn/exceptions" type="dir" property="common.exceptions.exists"/>
+		<available file="${common.src.dir}/org/btsn/json" type="dir" property="common.json.exists"/>
+		<available file="${common.src.dir}/org/btsn/utils" type="dir" property="common.utils.exists"/>
+		
+		<!-- Check for RuleBase and ServiceAttributeBindings -->
+		<available file="${common.root}/RuleBase" type="dir" property="rulebase.exists"/>
+		<available file="${common.root}/ServiceAttributeBindings" type="dir" property="serviceattributes.exists"/>
+		<available file="${common.root}/serviceAttributeBindings" type="dir" property="serviceattributes.lowercase.exists"/>
+		<available file="${common.root}/serviceLoaderQueries" type="dir" property="serviceloaderqueries.exists"/>
+		
+		<echo message="Common package status:" />
+		<echo message="  - base: ${common.base.exists}" />
+		<echo message="  - exceptions: ${common.exceptions.exists}" />
+		<echo message="  - json: ${common.json.exists}" />
+		<echo message="  - utils: ${common.utils.exists}" />
+		<echo message="  - RuleBase: ${rulebase.exists}" />
+		<echo message="  - ServiceAttributeBindings: ${serviceattributes.exists}" />
+		<echo message="  - serviceAttributeBindings: ${serviceattributes.lowercase.exists}" />
+		<echo message="  - serviceLoaderQueries: ${serviceloaderqueries.exists}" />
+		
+		<condition property="rulebase.warning">
+			<not><isset property="rulebase.exists"/></not>
+		</condition>
+		<antcall target="warn-rulebase"/>
+	</target>
+	
+	<!-- Add this after the init target -->
+	<target name="rebuild-all-service-ruleml" depends="init" description="Rebuild Service.ruleml for all versions">
+	    <echo message="Rebuilding Service.ruleml for all versions..." />
+	    
+	    <!-- Compile BuildMasterServiceRuleBase once -->
+	    <javac srcdir="${common.src.dir}" 
+	           destdir="${classes.dir}"
+	           includes="org/btsn/utils/BuildMasterServiceRuleBase.java,
+	                     org/btsn/utils/OOjdrewAPI.java"
+	           classpathref="project.classpath"
+	           includeantruntime="false"
+	           fork="true"
+	           source="15"
+	           target="15">
+	        <compilerarg value="-Xlint:unchecked"/>
+	    </javac>
+	    
+	    <!-- Build for each version -->
+	    <antcall target="build-single-ruleml">
+	        <param name="version" value="v001"/>
+	    </antcall>
+	    <antcall target="build-single-ruleml">
+	        <param name="version" value="v002"/>
+	    </antcall>
+	    <antcall target="build-single-ruleml">
+	        <param name="version" value="v003"/>
+	    </antcall>
+	    <antcall target="build-single-ruleml">
+	        <param name="version" value="v004"/>
+	    </antcall>
+	    
+	    <echo message="All Service.ruleml versions rebuilt" />
+	</target>
+
+	<!-- Helper target to build a single version -->
+	<target name="build-single-ruleml">
+	    <echo message="Building Service.ruleml for ${version}..." />
+	    <java classname="org.btsn.utils.BuildMasterServiceRuleBase"
+	          classpath="${classes.dir}:${common.lib.dir}/*"
+	          fork="true"
+	          failonerror="false">  <!-- false so it continues if one version fails -->
+	        <arg value="${version}"/>
+	        <arg value="CardiologyService"/>
+	    </java>
+	    <available file="${common.root}/RuleFolder.${version}/Service.ruleml" property="${version}.created"/>
+	    <echo message="  ${version}: ${${version}.created}" />
+	</target>
+
+		
+	<!-- Warning target for missing RuleBase -->
+	<target name="warn-rulebase" if="rulebase.warning">
+		<echo message="WARNING: RuleBase directory not found at ${common.root}/RuleBase" />
+		<echo message="The application may fail at runtime if RuleBase is required." />
+	</target>
+
+
+			
+	<!-- Compile Java sources - UPDATED FOR JAVA 15 -->
+		<target name="compile" depends="init,rebuild-all-service-ruleml" description="Compile Java source files">
+			<echo message="Compiling with Java 15 settings..." />
+			<echo message="Including common packages:" />
+			<echo message="  - btsn.common.base" />
+			<echo message="  - btsn.common.constants" />
+			<echo message="  - btsn.common.exceptions" />
+			<echo message="  - btsn.common.json" />
+			<echo message="  - btsn.common.logger" />
+			<echo message="  - btsn.common.rulecontroller" />
+			<echo message="  - btsn.common.utils" />
+			
+			<javac destdir="${classes.dir}" debug="true" classpathref="project.classpath" includeantruntime="false" encoding="UTF-8" fork="true" source="15" target="15">
+				<src path="${src.dir}" />
+				<src path="${common.src.dir}" />
+				<include name="org/btsn/base/**/*.java" />
+				<include name="org/btsn/constants/**/*.java" />
+				<include name="org/btsn/exceptions/**/*.java" />
+				<include name="org/btsn/json/**/*.java" />
+				<include name="org/btsn/logger/**/*.java" />
+				<include name="org/btsn/rulecontroller/**/*.java" />
+				<include name="org/btsn/utils/**/*.java" />
+				<include name="org/btsn/healthcare/**/*.java" />
+				<compilerarg value="-Xlint:unchecked" />
+			</javac>
+			<echo message="Compilation complete." />
+		</target>
+
+	<!-- Package JAR file -->
+	<target name="jar" depends="compile" description="Create JAR file">
+		<jar destfile="${bin.dir}/${project.artifactId}.jar" basedir="${classes.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="${main-class}" />
+				<attribute name="Class-Path" value="lib/antlr.jar lib/derby.jar lib/derbyclient.jar lib/jaxb-xjc-3.0.2.jar lib/jfreechart-1.5.3.jar lib/jlatexmath-1.0.7.jar lib/json-simple-1.1.1.jar lib/log4j-1.2.16.jar lib/mysql-connector-java-5.1.18-bin.jar lib/oojdrew-1.0.jar lib/opencsv-2.3.jar lib/ptolemy.jar lib/xom-1.3.7.jar" />
+			</manifest>
+		</jar>
+		<echo message="JAR file created: ${bin.dir}/${project.artifactId}.jar" />
+	</target>
+
+	<!-- Create release distribution -->
+	<target name="release" depends="jar" description="Create release distribution">
+		<property name="release.dir" value="${target.dir}/release" />
+		<property name="service.dir" value="${release.dir}/cardiology" />
+		
+		<mkdir dir="${service.dir}" />
+		<mkdir dir="${service.dir}/lib" />
+		<mkdir dir="${service.dir}/resources" />
+
+		<!-- Copy JAR with proper name -->
+		<copy file="${bin.dir}/${project.artifactId}.jar" 
+			  tofile="${service.dir}/btsn.healthcare.places.Cardiology.jar" />
+
+		<!-- Copy libraries -->
+		<copy todir="${service.dir}/lib">
+			<fileset dir="${common.lib.dir}">
+				<include name="antlr.jar" />
+				<include name="derby.jar" />
+				<include name="derbyclient.jar" />
+				<include name="jaxb-xjc-3.0.2.jar" />
+				<include name="jfreechart-1.5.3.jar" />
+				<include name="jlatexmath-1.0.7.jar" />
+				<include name="json-simple-1.1.1.jar" />
+				<include name="log4j-1.2.16.jar" />
+				<include name="mysql-connector-java-5.1.18-bin.jar" />
+				<include name="oojdrew-1.0.jar" />
+				<include name="opencsv-2.3.jar" />
+				<include name="ptolemy.jar" />
+				<include name="xom-1.3.7.jar" />
+			</fileset>
+		</copy>
+
+		<!-- Copy resources -->
+		<copy todir="${service.dir}/resources" failonerror="false">
+			<fileset dir="${resources.dir}" includes="**/*" erroronmissingdir="false"/>
+		</copy>
+
+		<!-- Copy btsn.common to PARENT level (release.dir, not service.dir) -->
+		<mkdir dir="${release.dir}/btsn.common" />
+		
+		<!-- Copy RuleBase -->
+		<copy todir="${release.dir}/btsn.common/RuleBase" failonerror="false">
+			<fileset dir="${common.root}/RuleBase" includes="**/*" />
+		</copy>
+		
+		<!-- Copy ServiceAttributeBindings -->
+		<copy todir="${release.dir}/btsn.common/ServiceAttributeBindings" failonerror="false">
+			<fileset dir="${common.root}/ServiceAttributeBindings" includes="**/*" erroronmissingdir="false"/>
+		</copy>
+		<copy todir="${release.dir}/btsn.common/serviceAttributeBindings" failonerror="false">
+			<fileset dir="${common.root}/serviceAttributeBindings" includes="**/*" erroronmissingdir="false"/>
+		</copy>
+		
+		<!-- Copy serviceLoaderQueries -->
+		<mkdir dir="${release.dir}/btsn.common/serviceLoaderQueries" />
+		<copy todir="${release.dir}/btsn.common/serviceLoaderQueries" failonerror="false">
+			<fileset dir="${common.root}/serviceLoaderQueries">
+				<include name="CardiologyServiceLoaderQuery.ruleml" />
+				<include name="loaderSettings.xml" />
+			</fileset>
+		</copy>
+
+		<!-- Also copy backward compatibility directories to service directory -->
+		<copy todir="${service.dir}/RuleBase" failonerror="false">
+			<fileset dir="${common.root}/RuleBase" includes="**/*" />
+		</copy>
+		<copy todir="${service.dir}/ServiceAttributeBindings" failonerror="false">
+			<fileset dir="${common.root}/ServiceAttributeBindings" includes="**/*" erroronmissingdir="false"/>
+		</copy>
+		<copy todir="${service.dir}/serviceAttributeBindings" failonerror="false">
+			<fileset dir="${common.root}/serviceAttributeBindings" includes="**/*" erroronmissingdir="false"/>
+		</copy>
+		<mkdir dir="${service.dir}/serviceLoaderQueries" />
+		<copy todir="${service.dir}/serviceLoaderQueries" failonerror="false">
+			<fileset dir="${common.root}/serviceLoaderQueries">
+				<include name="CardiologyServiceLoaderQuery.ruleml" />
+				<include name="loaderSettings.xml" />
+			</fileset>
+		</copy>
+		<mkdir dir="${service.dir}/ServiceLoaderQueries" />
+		<copy todir="${service.dir}/ServiceLoaderQueries" failonerror="false">
+			<fileset dir="${common.root}/serviceLoaderQueries">
+				<include name="CardiologyServiceLoaderQuery.ruleml" />
+				<include name="loaderSettings.xml" />
+			</fileset>
+		</copy>
+
+		<!-- Create ROOT launch script that changes to service directory -->
+		<echo file="${release.dir}/launch.bat">@echo off
+echo Starting Cardiology Service...
+echo.
+cd cardiology
+java -cp "btsn.healthcare.places.Cardiology.jar;lib/*" org.btsn.healthcare.handlers.ServiceLoader %*
+cd ..
+if errorlevel 1 (
+    echo.
+    echo Application exited with an error.
+    pause
+)
+		</echo>
+
+		<!-- Create Unix/Linux launch script at ROOT -->
+		<echo file="${release.dir}/launch.sh">#!/bin/bash
+
+echo "Starting Cardiology Service..."
+echo ""
+cd cardiology
+java -cp "btsn.healthcare.places.Cardiology.jar:lib/*" org.btsn.healthcare.handlers.ServiceLoader "$@"
+cd ..
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "Application exited with an error."
+fi
+		</echo>
+
+		<!-- Create ZIP with new structure -->
+		<zip destfile="${project.artifactId}-${project.version}.zip" basedir="${release.dir}" />
+
+		<!-- Clean up -->
+		<delete dir="${release.dir}" />
+
+		<echo message="============================================" />
+		<echo message="Release package created successfully!" />
+		<echo message="File: ${project.artifactId}-${project.version}.zip" />
+		<echo message="Built with Java: ${java.version}" />
+		<echo message="" />
+		<echo message="ZIP Structure:" />
+		<echo message="  /btsn.common/   (at parent level)" />
+		<echo message="  /cardiology/                (service directory)" />
+		<echo message="  /launch.bat                 (at root level)" />
+		<echo message="" />
+		<echo message="Extract to any directory and run launch.bat from root" />
+		<echo message="============================================" />
+	</target>
+
+	<!-- Show Java version -->
+	<target name="java-version" description="Display Java version information">
+		<echo message="Java Version: ${java.version}" />
+		<echo message="Java Vendor: ${java.vendor}" />
+		<echo message="Java Home: ${java.home}" />
+		<echo message="Ant Java Version: ${ant.java.version}" />
+	</target>
+
+	<!-- Diagnostic target to check source structure -->
+	<target name="check-sources" description="Display source structure and verify common packages">
+		<echo message="============================================" />
+		<echo message="Source Structure Check" />
+		<echo message="============================================" />
+		<echo message="Project source dir: ${src.dir}" />
+		<echo message="Common root: ${common.root}" />
+		<echo message="Common source dir: ${common.src.dir}" />
+		<echo message="" />
+		
+		<echo message="Checking for required common packages..." />
+		<available file="${common.src.dir}/org/btsn/base" type="dir" property="base.found"/>
+		<available file="${common.src.dir}/org/btsn/exceptions" type="dir" property="exceptions.found"/>
+		<available file="${common.src.dir}/org/btsn/json" type="dir" property="json.found"/>
+		<available file="${common.src.dir}/org/btsn/utils" type="dir" property="utils.found"/>
+		
+		<echo message="Checking for RuleBase and Service directories..." />
+		<available file="${common.root}/RuleBase" type="dir" property="rulebase.found"/>
+		<available file="${common.root}/ServiceAttributeBindings" type="dir" property="serviceattributes.found"/>
+		<available file="${common.root}/serviceAttributeBindings" type="dir" property="serviceattributes.lc.found"/>
+		<available file="${common.root}/serviceLoaderQueries" type="dir" property="serviceloader.found"/>
+		
+		<condition property="all.packages.found">
+			<and>
+				<isset property="base.found"/>
+				<isset property="exceptions.found"/>
+				<isset property="json.found"/>
+				<isset property="utils.found"/>
+			</and>
+		</condition>
+		
+		<echo message="" />
+		<echo message="Package status:" />
+		<echo message="  ✓ btsn.common.base: ${base.found}" />
+		<echo message="  ✓ btsn.common.exceptions: ${exceptions.found}" />
+		<echo message="  ✓ btsn.common.json: ${json.found}" />
+		<echo message="  ✓ btsn.utils: ${utils.found}" />
+		<echo message="" />
+		<echo message="Resource directories:" />
+		<echo message="  ✓ RuleBase: ${rulebase.found}" />
+		<echo message="  ✓ ServiceAttributeBindings: ${serviceattributes.found}" />
+		<echo message="  ✓ serviceAttributeBindings (lowercase): ${serviceattributes.lc.found}" />
+		<echo message="  ✓ serviceLoaderQueries: ${serviceloader.found}" />
+		
+		<fail unless="all.packages.found" message="ERROR: Not all required common packages were found!" />
+		
+		<condition property="rulebase.missing">
+			<not><isset property="rulebase.found"/></not>
+		</condition>
+		<condition property="service.missing">
+			<and>
+				<not><isset property="serviceattributes.found"/></not>
+				<not><isset property="serviceattributes.lc.found"/></not>
+			</and>
+		</condition>
+		
+		<echo message="" />
+		<antcall target="warn-missing-resources"/>
+		<echo message="============================================" />
+	</target>
+	
+	<!-- Warning target for missing resources -->
+	<target name="warn-missing-resources">
+		<condition property="has.warnings">
+			<or>
+				<isset property="rulebase.missing"/>
+				<isset property="service.missing"/>
+			</or>
+		</condition>
+		<antcall target="show-warnings"/>
+	</target>
+	
+	<target name="show-warnings" if="has.warnings">
+		<echo message="WARNINGS:" />
+		<echo message="  - RuleBase directory missing (application may fail at runtime)" if="rulebase.missing"/>
+		<echo message="  - ServiceAttributeBindings directory missing" if="service.missing"/>
+	</target>
+
+</project>

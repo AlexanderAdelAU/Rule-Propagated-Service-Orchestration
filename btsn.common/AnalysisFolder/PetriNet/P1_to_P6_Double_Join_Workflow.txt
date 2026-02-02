@@ -1,0 +1,494 @@
+ INFO [main] (BuildServiceAnalysisDatabase.java:130) - Derby Embedded Driver registered successfully.
+ INFO [main] (PetriNetAnalyzer.java:2040) - Found 1 distinct workflowBases: [1000000]
+Auto-detected 1 workflow bases: [1000000]
+
+================================================================================
+WORKFLOW BASE: 1000000 (v001)
+================================================================================
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1090001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1090002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1090003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:529) - Base token 1090000 exit check: T_in=2, T_out=1, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
+DEBUG [main] (PetriNetAnalyzer.java:350) - Join 1090000: Base token reset pattern - all 3 children consumed, parent exited
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1060001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1060002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1060003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:529) - Base token 1060000 exit check: T_in=2, T_out=1, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
+DEBUG [main] (PetriNetAnalyzer.java:350) - Join 1060000: Base token reset pattern - all 3 children consumed, parent exited
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1050001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1050002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1050003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:529) - Base token 1050000 exit check: T_in=2, T_out=1, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
+DEBUG [main] (PetriNetAnalyzer.java:350) - Join 1050000: Base token reset pattern - all 3 children consumed, parent exited
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1040003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1040002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1040001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:529) - Base token 1040000 exit check: T_in=2, T_out=1, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
+DEBUG [main] (PetriNetAnalyzer.java:350) - Join 1040000: Base token reset pattern - all 3 children consumed, parent exited
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1020003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1020002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1020001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:529) - Base token 1020000 exit check: T_in=2, T_out=1, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
+DEBUG [main] (PetriNetAnalyzer.java:350) - Join 1020000: Base token reset pattern - all 3 children consumed, parent exited
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1010003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1010002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1010001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:529) - Base token 1010000 exit check: T_in=2, T_out=1, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
+DEBUG [main] (PetriNetAnalyzer.java:350) - Join 1010000: Base token reset pattern - all 3 children consumed, parent exited
+ INFO [main] (PetriNetAnalyzer.java:364) - Fork/Join analysis: 6 forks, 6 successful joins
+ INFO [main] (PetriNetAnalyzer.java:128) - Token completeness check: 84 incomplete tokens found
+ INFO [main] (PetriNetAnalyzer.java:128) - Token completeness check: 84 incomplete tokens found
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1090001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1090002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1090003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:529) - Base token 1090000 exit check: T_in=2, T_out=1, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
+DEBUG [main] (PetriNetAnalyzer.java:350) - Join 1090000: Base token reset pattern - all 3 children consumed, parent exited
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1060001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1060002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1060003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:529) - Base token 1060000 exit check: T_in=2, T_out=1, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
+DEBUG [main] (PetriNetAnalyzer.java:350) - Join 1060000: Base token reset pattern - all 3 children consumed, parent exited
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1050001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1050002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1050003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:529) - Base token 1050000 exit check: T_in=2, T_out=1, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
+DEBUG [main] (PetriNetAnalyzer.java:350) - Join 1050000: Base token reset pattern - all 3 children consumed, parent exited
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1040003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1040002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1040001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:529) - Base token 1040000 exit check: T_in=2, T_out=1, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
+DEBUG [main] (PetriNetAnalyzer.java:350) - Join 1040000: Base token reset pattern - all 3 children consumed, parent exited
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1020003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1020002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1020001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:529) - Base token 1020000 exit check: T_in=2, T_out=1, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
+DEBUG [main] (PetriNetAnalyzer.java:350) - Join 1020000: Base token reset pattern - all 3 children consumed, parent exited
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1010003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1010002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1010001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:529) - Base token 1010000 exit check: T_in=2, T_out=1, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
+DEBUG [main] (PetriNetAnalyzer.java:350) - Join 1010000: Base token reset pattern - all 3 children consumed, parent exited
+ INFO [main] (PetriNetAnalyzer.java:364) - Fork/Join analysis: 6 forks, 6 successful joins
+ INFO [main] (PetriNetAnalyzer.java:568) - Actual incomplete tokens: 0 (filtered 18 joined tokens)
+ INFO [main] (PetriNetAnalyzer.java:172) - Found 10 terminated tokens (checked both tables)
+ INFO [main] (PetriNetAnalyzer.java:704) - Workflow throughput: 3.90 tokens/sec
+ INFO [main] (PetriNetAnalyzer.java:612) - Place JOIN_CONSUMED statistics: 0 tokens, avg=0.0ms
+ INFO [main] (PetriNetAnalyzer.java:612) - Place MonitorService statistics: 0 tokens, avg=0.0ms
+ INFO [main] (PetriNetAnalyzer.java:612) - Place P1 statistics: 0 tokens, avg=0.0ms
+ INFO [main] (PetriNetAnalyzer.java:612) - Place P1_Place statistics: 20 tokens, avg=479.0ms
+ INFO [main] (PetriNetAnalyzer.java:612) - Place P2_Place statistics: 12 tokens, avg=370.0ms
+ INFO [main] (PetriNetAnalyzer.java:612) - Place P3_Place statistics: 12 tokens, avg=570.0ms
+ INFO [main] (PetriNetAnalyzer.java:612) - Place P4_Place statistics: 12 tokens, avg=770.0ms
+ INFO [main] (PetriNetAnalyzer.java:612) - Place P5_Place statistics: 12 tokens, avg=396.0ms
+ INFO [main] (PetriNetAnalyzer.java:612) - Place P6_Place statistics: 12 tokens, avg=359.0ms
+ INFO [main] (PetriNetAnalyzer.java:612) - Place TERMINATE statistics: 0 tokens, avg=0.0ms
+ INFO [main] (PetriNetAnalyzer.java:825) - Capacity verification for JOIN_CONSUMED: max marking=0, capacity=50 - PASS
+ INFO [main] (PetriNetAnalyzer.java:825) - Capacity verification for MonitorService: max marking=0, capacity=50 - PASS
+ INFO [main] (PetriNetAnalyzer.java:825) - Capacity verification for P1: max marking=0, capacity=50 - PASS
+ INFO [main] (PetriNetAnalyzer.java:825) - Capacity verification for P1_Place: max marking=1, capacity=50 - PASS
+ INFO [main] (PetriNetAnalyzer.java:825) - Capacity verification for P2_Place: max marking=1, capacity=50 - PASS
+ INFO [main] (PetriNetAnalyzer.java:825) - Capacity verification for P3_Place: max marking=1, capacity=50 - PASS
+ INFO [main] (PetriNetAnalyzer.java:825) - Capacity verification for P4_Place: max marking=1, capacity=50 - PASS
+ INFO [main] (PetriNetAnalyzer.java:825) - Capacity verification for P5_Place: max marking=1, capacity=50 - PASS
+ INFO [main] (PetriNetAnalyzer.java:825) - Capacity verification for P6_Place: max marking=1, capacity=50 - PASS
+ INFO [main] (PetriNetAnalyzer.java:825) - Capacity verification for TERMINATE: max marking=0, capacity=50 - PASS
+ INFO [main] (PetriNetAnalyzer.java:240) - Retrieved 0 token paths for workflowBase=1000000
+=== PETRI NET ANALYSIS REPORT ===
+Workflow Base: 1000000
+
+1. FORK/JOIN ANALYSIS
+   Total Forks: 6
+   Successful Joins: 6
+   Forked Tokens: 18
+   Fork from 1090000 -> [1090001, 1090002, 1090003] [JOINED]
+   Fork from 1060000 -> [1060001, 1060002, 1060003] [JOINED]
+   Fork from 1050000 -> [1050001, 1050002, 1050003] [JOINED]
+   Fork from 1040000 -> [1040003, 1040002, 1040001] [JOINED]
+   Fork from 1020000 -> [1020003, 1020002, 1020001] [JOINED]
+   Fork from 1010000 -> [1010003, 1010002, 1010001] [JOINED]
+
+2. TOKEN COMPLETENESS
+   [OK] All tokens completed successfully
+   (84 tokens consumed by joins - this is correct)
+   [INFO] 10 tokens terminated early (routed to TERMINATE)
+     Terminated tokens: [1000000, 1010000, 1020000, 1030000, 1040000, 1050000, 1060000, 1070000, 1080000, 1090000]
+
+3. THROUGHPUT
+   3.90 tokens/second
+
+4. PLACE STATISTICS
+   Place: JOIN_CONSUMED
+     Tokens: 0
+     Avg residence: 0.0ms
+     Min/Max: 0/0ms
+   Place: MonitorService
+     Tokens: 0
+     Avg residence: 0.0ms
+     Min/Max: 0/0ms
+   Place: P1
+     Tokens: 0
+     Avg residence: 0.0ms
+     Min/Max: 0/0ms
+   Place: P1_Place
+     Tokens: 20
+     Avg residence: 479.0ms
+     Min/Max: 235/989ms
+   Place: P2_Place
+     Tokens: 12
+     Avg residence: 370.0ms
+     Min/Max: 264/521ms
+   Place: P3_Place
+     Tokens: 12
+     Avg residence: 570.0ms
+     Min/Max: 332/1467ms
+   Place: P4_Place
+     Tokens: 12
+     Avg residence: 770.0ms
+     Min/Max: 193/2211ms
+   Place: P5_Place
+     Tokens: 12
+     Avg residence: 396.0ms
+     Min/Max: 286/531ms
+   Place: P6_Place
+     Tokens: 12
+     Avg residence: 359.0ms
+     Min/Max: 200/616ms
+   Place: TERMINATE
+     Tokens: 0
+     Avg residence: 0.0ms
+     Min/Max: 0/0ms
+
+5. CAPACITY VERIFICATION
+   JOIN_CONSUMED: [OK] BOUNDED
+   MonitorService: [OK] BOUNDED
+   P1: [OK] BOUNDED
+   P1_Place: [OK] BOUNDED
+   P2_Place: [OK] BOUNDED
+   P3_Place: [OK] BOUNDED
+   P4_Place: [OK] BOUNDED
+   P5_Place: [OK] BOUNDED
+   P6_Place: [OK] BOUNDED
+   TERMINATE: [OK] BOUNDED
+
+6. DATA QUALITY
+   [OK] All residence times are non-negative
+
+=== END REPORT ===
+
+ INFO [main] (PetriNetAnalyzer.java:1896) - Generated workflow report for workflowBase=1000000
+ INFO [main] (PetriNetAnalyzer.java:1574) - GENEALOGY: Found 28 tokens for workflow 1000000
+ INFO [main] (PetriNetAnalyzer.java:1639) - GENEALOGY: 10 root tokens, 18 forked tokens, 1 max generation depth
+
+=== TOKEN GENEALOGY REPORT ===
+Workflow Base: 1000000
+Total Tokens: 28
+Root Tokens: 10
+Forked Tokens: 18
+Max Generation Depth: 1
+Total Families: 10
+
+--- Generation Distribution ---
+Generation 0: 10 tokens
+Generation 1: 18 tokens
+
+--- Family Trees ---
+
+Family rooted at 1050000:
+  Total members: 4
+  Direct descendants: 3
+  Lineage: 1050000 -> 1050001 [Gen 1, Fork 0, Branch 1]
+  Lineage: 1050000 -> 1050002 [Gen 1, Fork 0, Branch 2]
+  Lineage: 1050000 -> 1050003 [Gen 1, Fork 0, Branch 3]
+
+Family rooted at 1090000:
+  Total members: 4
+  Direct descendants: 3
+  Lineage: 1090000 -> 1090001 [Gen 1, Fork 0, Branch 1]
+  Lineage: 1090000 -> 1090002 [Gen 1, Fork 0, Branch 2]
+  Lineage: 1090000 -> 1090003 [Gen 1, Fork 0, Branch 3]
+
+Family rooted at 1080000:
+  Total members: 1
+  Direct descendants: 0
+
+Family rooted at 1070000:
+  Total members: 1
+  Direct descendants: 0
+
+Family rooted at 1060000:
+  Total members: 4
+  Direct descendants: 3
+  Lineage: 1060000 -> 1060001 [Gen 1, Fork 0, Branch 1]
+  Lineage: 1060000 -> 1060002 [Gen 1, Fork 0, Branch 2]
+  Lineage: 1060000 -> 1060003 [Gen 1, Fork 0, Branch 3]
+
+Family rooted at 1000000:
+  Total members: 1
+  Direct descendants: 0
+
+Family rooted at 1040000:
+  Total members: 4
+  Direct descendants: 3
+  Lineage: 1040000 -> 1040003 [Gen 1, Fork 0, Branch 3]
+  Lineage: 1040000 -> 1040002 [Gen 1, Fork 0, Branch 2]
+  Lineage: 1040000 -> 1040001 [Gen 1, Fork 0, Branch 1]
+
+Family rooted at 1010000:
+  Total members: 4
+  Direct descendants: 3
+  Lineage: 1010000 -> 1010003 [Gen 1, Fork 0, Branch 3]
+  Lineage: 1010000 -> 1010002 [Gen 1, Fork 0, Branch 2]
+  Lineage: 1010000 -> 1010001 [Gen 1, Fork 0, Branch 1]
+
+Family rooted at 1020000:
+  Total members: 4
+  Direct descendants: 3
+  Lineage: 1020000 -> 1020003 [Gen 1, Fork 0, Branch 3]
+  Lineage: 1020000 -> 1020002 [Gen 1, Fork 0, Branch 2]
+  Lineage: 1020000 -> 1020001 [Gen 1, Fork 0, Branch 1]
+
+Family rooted at 1030000:
+  Total members: 1
+  Direct descendants: 0
+
+=== TOKEN PATHS ===
+ INFO [main] (PetriNetAnalyzer.java:240) - Retrieved 0 token paths for workflowBase=1000000
+
+=== MARKING EVOLUTION ===
+ INFO [main] (PetriNetAnalyzer.java:795) - Retrieved 10 GENERATED events for workflowBase 1000000
+Time=1769402263226 Token=1000000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=EVENT_GENERATOR EventType=GENERATED
+Time=1769402265621 Token=1010000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=EVENT_GENERATOR EventType=GENERATED
+Time=1769402265819 Token=1020000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=EVENT_GENERATOR EventType=GENERATED
+Time=1769402267236 Token=1030000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=EVENT_GENERATOR EventType=GENERATED
+Time=1769402267852 Token=1040000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=EVENT_GENERATOR EventType=GENERATED
+Time=1769402271488 Token=1050000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=EVENT_GENERATOR EventType=GENERATED
+Time=1769402271632 Token=1060000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=EVENT_GENERATOR EventType=GENERATED
+Time=1769402273421 Token=1070000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=EVENT_GENERATOR EventType=GENERATED
+Time=1769402274509 Token=1080000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=EVENT_GENERATOR EventType=GENERATED
+Time=1769402274874 Token=1090000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=EVENT_GENERATOR EventType=GENERATED
+ INFO [main] (PetriNetAnalyzer.java:753) - Retrieved 0 marking snapshots for JOIN_CONSUMED
+ INFO [main] (PetriNetAnalyzer.java:753) - Retrieved 0 marking snapshots for MonitorService
+ INFO [main] (PetriNetAnalyzer.java:753) - Retrieved 0 marking snapshots for P1
+ INFO [main] (PetriNetAnalyzer.java:753) - Retrieved 66 marking snapshots for P1_Place
+Time=1769402263566 Token=1000000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1769402263579 Token=1000000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1769402263814 Token=1000000 Place=P1_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P1 EventType=TERMINATE
+Time=1769402265867 Token=1010000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1769402265885 Token=1010000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1769402266125 Token=1010000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P1 EventType=EXIT
+Time=1769402266132 Token=1010001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1769402266156 Token=1010001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P1 EventType=EXIT
+Time=1769402266234 Token=1010002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1769402266244 Token=1010002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P1 EventType=EXIT
+Time=1769402266353 Token=1010003 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1769402266369 Token=1010003 Place=P1_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P1 EventType=EXIT
+Time=1769402267223 Token=1020000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1769402267244 Token=1020000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1769402267755 Token=1020000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P1 EventType=EXIT
+Time=1769402267759 Token=1020001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1769402267789 Token=1020001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P1 EventType=EXIT
+Time=1769402268114 Token=1020002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1769402268160 Token=1020002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P1 EventType=EXIT
+Time=1769402268361 Token=1020003 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1769402268393 Token=1020003 Place=P1_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P1 EventType=EXIT
+Time=1769402269802 Token=1030000 Place=P1_Place Marking=1 Buffer=1 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1769402269866 Token=1030000 Place=P1_Place Marking=1 Buffer=1 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1769402270428 Token=1030000 Place=P1_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P1 EventType=TERMINATE
+Time=1769402270945 Token=1040000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1769402270956 Token=1040000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1769402271425 Token=1040000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P1 EventType=EXIT
+Time=1769402271441 Token=1040001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1769402271448 Token=1040001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P1 EventType=EXIT
+Time=1769402271592 Token=1040002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1769402271659 Token=1040002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P1 EventType=EXIT
+Time=1769402271794 Token=1040003 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1769402271804 Token=1040003 Place=P1_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P1 EventType=EXIT
+Time=1769402272785 Token=1050000 Place=P1_Place Marking=1 Buffer=1 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1769402272893 Token=1050000 Place=P1_Place Marking=1 Buffer=1 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1769402273774 Token=1050000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P1 EventType=EXIT
+Time=1769402273777 Token=1050001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1769402273799 Token=1050001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P1 EventType=EXIT
+Time=1769402274089 Token=1050002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1769402274102 Token=1050002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P1 EventType=EXIT
+Time=1769402274359 Token=1050003 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1769402274400 Token=1050003 Place=P1_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P1 EventType=EXIT
+Time=1769402275525 Token=1060000 Place=P1_Place Marking=1 Buffer=2 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1769402275551 Token=1060000 Place=P1_Place Marking=1 Buffer=2 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1769402275914 Token=1060000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P1 EventType=EXIT
+Time=1769402275943 Token=1060001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1769402275954 Token=1060001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P1 EventType=EXIT
+Time=1769402276159 Token=1060002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1769402276210 Token=1060002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P1 EventType=EXIT
+Time=1769402276407 Token=1060003 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1769402276437 Token=1060003 Place=P1_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P1 EventType=EXIT
+Time=1769402277868 Token=1070000 Place=P1_Place Marking=1 Buffer=2 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1769402277877 Token=1070000 Place=P1_Place Marking=1 Buffer=2 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1769402278415 Token=1070000 Place=P1_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P1 EventType=TERMINATE
+Time=1769402279255 Token=1080000 Place=P1_Place Marking=1 Buffer=1 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1769402279265 Token=1080000 Place=P1_Place Marking=1 Buffer=1 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1769402279638 Token=1080000 Place=P1_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P1 EventType=TERMINATE
+Time=1769402280150 Token=1090000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1769402280206 Token=1090000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1769402280658 Token=1090000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P1 EventType=EXIT
+Time=1769402280664 Token=1090001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1769402280702 Token=1090001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P1 EventType=EXIT
+Time=1769402280899 Token=1090002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1769402280908 Token=1090002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P1 EventType=EXIT
+Time=1769402281072 Token=1090003 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1769402281081 Token=1090003 Place=P1_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P1 EventType=EXIT
+ INFO [main] (PetriNetAnalyzer.java:753) - Retrieved 18 marking snapshots for P2_Place
+Time=1769402266934 Token=1010001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1769402267013 Token=1010001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1769402267337 Token=1010001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P2 EventType=EXIT
+Time=1769402268805 Token=1020001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1769402268821 Token=1020001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1769402269085 Token=1020001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P2 EventType=EXIT
+Time=1769402272112 Token=1040001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1769402272140 Token=1040001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1769402272633 Token=1040001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P2 EventType=EXIT
+Time=1769402274808 Token=1050001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1769402274829 Token=1050001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1769402275126 Token=1050001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P2 EventType=EXIT
+Time=1769402276702 Token=1060001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1769402276739 Token=1060001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1769402277107 Token=1060001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P2 EventType=EXIT
+Time=1769402281435 Token=1090001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1769402281447 Token=1090001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1769402281826 Token=1090001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P2 EventType=EXIT
+ INFO [main] (PetriNetAnalyzer.java:753) - Retrieved 18 marking snapshots for P3_Place
+Time=1769402267302 Token=1010002 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1769402267381 Token=1010002 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=ENTER
+Time=1769402267747 Token=1010002 Place=P3_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P3 EventType=EXIT
+Time=1769402269151 Token=1020002 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1769402269165 Token=1020002 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=ENTER
+Time=1769402269569 Token=1020002 Place=P3_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P3 EventType=EXIT
+Time=1769402272725 Token=1040002 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1769402272787 Token=1040002 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=ENTER
+Time=1769402273280 Token=1040002 Place=P3_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P3 EventType=EXIT
+Time=1769402275266 Token=1050002 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1769402275304 Token=1050002 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=ENTER
+Time=1769402275663 Token=1050002 Place=P3_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P3 EventType=EXIT
+Time=1769402276945 Token=1060002 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1769402277155 Token=1060002 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=ENTER
+Time=1769402278412 Token=1060002 Place=P3_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P3 EventType=EXIT
+Time=1769402281547 Token=1090002 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1769402281565 Token=1090002 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=ENTER
+Time=1769402281897 Token=1090002 Place=P3_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P3 EventType=EXIT
+ INFO [main] (PetriNetAnalyzer.java:753) - Retrieved 30 marking snapshots for P4_Place
+Time=1769402269294 Token=1010001 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1769402270064 Token=1010002 Place=P4_Place Marking=1 Buffer=1 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1769402270168 Token=1010001 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=ENTER
+Time=1769402270184 Token=1010002 Place=P4_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P4 EventType=JOIN_CONSUMED
+Time=1769402270451 Token=1010001 Place=P4_Place Marking=0 Buffer=0 ToPlace=P6_Place TransitionId=T_out_P4 EventType=EXIT
+Time=1769402270988 Token=1020001 Place=P4_Place Marking=1 Buffer=1 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1769402271283 Token=1020002 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1769402271310 Token=1020001 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=ENTER
+Time=1769402271412 Token=1020002 Place=P4_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P4 EventType=JOIN_CONSUMED
+Time=1769402271687 Token=1020001 Place=P4_Place Marking=0 Buffer=0 ToPlace=P6_Place TransitionId=T_out_P4 EventType=EXIT
+Time=1769402274346 Token=1040001 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1769402275073 Token=1040002 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1769402275148 Token=1040001 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=ENTER
+Time=1769402275197 Token=1040002 Place=P4_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P4 EventType=JOIN_CONSUMED
+Time=1769402275490 Token=1040001 Place=P4_Place Marking=0 Buffer=0 ToPlace=P6_Place TransitionId=T_out_P4 EventType=EXIT
+Time=1769402276186 Token=1050001 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1769402276876 Token=1050002 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1769402277234 Token=1050001 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=ENTER
+Time=1769402277350 Token=1050002 Place=P4_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P4 EventType=JOIN_CONSUMED
+Time=1769402278397 Token=1050001 Place=P4_Place Marking=0 Buffer=0 ToPlace=P6_Place TransitionId=T_out_P4 EventType=EXIT
+Time=1769402279319 Token=1060001 Place=P4_Place Marking=1 Buffer=1 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1769402279630 Token=1060002 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1769402279670 Token=1060001 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=ENTER
+Time=1769402279703 Token=1060002 Place=P4_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P4 EventType=JOIN_CONSUMED
+Time=1769402280090 Token=1060001 Place=P4_Place Marking=0 Buffer=0 ToPlace=P6_Place TransitionId=T_out_P4 EventType=EXIT
+Time=1769402282396 Token=1090001 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1769402282602 Token=1090002 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1769402282686 Token=1090001 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=ENTER
+Time=1769402282697 Token=1090002 Place=P4_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P4 EventType=JOIN_CONSUMED
+Time=1769402282879 Token=1090001 Place=P4_Place Marking=0 Buffer=0 ToPlace=P6_Place TransitionId=T_out_P4 EventType=EXIT
+ INFO [main] (PetriNetAnalyzer.java:753) - Retrieved 18 marking snapshots for P5_Place
+Time=1769402267654 Token=1010003 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1769402267766 Token=1010003 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=ENTER
+Time=1769402268185 Token=1010003 Place=P5_Place Marking=0 Buffer=0 ToPlace=P6_Place TransitionId=T_out_P5 EventType=EXIT
+Time=1769402269802 Token=1020003 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1769402269822 Token=1020003 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=ENTER
+Time=1769402270201 Token=1020003 Place=P5_Place Marking=0 Buffer=0 ToPlace=P6_Place TransitionId=T_out_P5 EventType=EXIT
+Time=1769402272811 Token=1040003 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1769402272834 Token=1040003 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=ENTER
+Time=1769402273259 Token=1040003 Place=P5_Place Marking=0 Buffer=0 ToPlace=P6_Place TransitionId=T_out_P5 EventType=EXIT
+Time=1769402275590 Token=1050003 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1769402275605 Token=1050003 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=ENTER
+Time=1769402275891 Token=1050003 Place=P5_Place Marking=0 Buffer=0 ToPlace=P6_Place TransitionId=T_out_P5 EventType=EXIT
+Time=1769402278644 Token=1060003 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1769402278689 Token=1060003 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=ENTER
+Time=1769402279152 Token=1060003 Place=P5_Place Marking=0 Buffer=0 ToPlace=P6_Place TransitionId=T_out_P5 EventType=EXIT
+Time=1769402281836 Token=1090003 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1769402281847 Token=1090003 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=ENTER
+Time=1769402282138 Token=1090003 Place=P5_Place Marking=0 Buffer=0 ToPlace=P6_Place TransitionId=T_out_P5 EventType=EXIT
+ INFO [main] (PetriNetAnalyzer.java:753) - Retrieved 30 marking snapshots for P6_Place
+Time=1769402269852 Token=1010003 Place=P6_Place Marking=1 Buffer=0 ToPlace=P6_Place TransitionId=T_in_P6 EventType=BUFFERED
+Time=1769402270720 Token=1020003 Place=P6_Place Marking=1 Buffer=0 ToPlace=P6_Place TransitionId=T_in_P6 EventType=BUFFERED
+Time=1769402270972 Token=1010001 Place=P6_Place Marking=1 Buffer=0 ToPlace=P6_Place TransitionId=T_in_P6 EventType=BUFFERED
+Time=1769402271080 Token=1010001 Place=P6_Place Marking=1 Buffer=0 ToPlace=P6_Place TransitionId=T_in_P6 EventType=ENTER
+Time=1769402271091 Token=1010003 Place=P6_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P6 EventType=JOIN_CONSUMED
+Time=1769402271292 Token=1010001 Place=P6_Place Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_P6 EventType=EXIT
+Time=1769402272616 Token=1020001 Place=P6_Place Marking=1 Buffer=0 ToPlace=P6_Place TransitionId=T_in_P6 EventType=BUFFERED
+Time=1769402272647 Token=1020001 Place=P6_Place Marking=1 Buffer=0 ToPlace=P6_Place TransitionId=T_in_P6 EventType=ENTER
+Time=1769402272796 Token=1020003 Place=P6_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P6 EventType=JOIN_CONSUMED
+Time=1769402273232 Token=1020001 Place=P6_Place Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_P6 EventType=EXIT
+Time=1769402274294 Token=1040003 Place=P6_Place Marking=1 Buffer=0 ToPlace=P6_Place TransitionId=T_in_P6 EventType=BUFFERED
+Time=1769402276042 Token=1040001 Place=P6_Place Marking=1 Buffer=0 ToPlace=P6_Place TransitionId=T_in_P6 EventType=BUFFERED
+Time=1769402276133 Token=1040001 Place=P6_Place Marking=1 Buffer=0 ToPlace=P6_Place TransitionId=T_in_P6 EventType=ENTER
+Time=1769402276148 Token=1040003 Place=P6_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P6 EventType=JOIN_CONSUMED
+Time=1769402276468 Token=1040001 Place=P6_Place Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_P6 EventType=EXIT
+Time=1769402277842 Token=1050003 Place=P6_Place Marking=1 Buffer=0 ToPlace=P6_Place TransitionId=T_in_P6 EventType=BUFFERED
+Time=1769402279199 Token=1050001 Place=P6_Place Marking=1 Buffer=0 ToPlace=P6_Place TransitionId=T_in_P6 EventType=BUFFERED
+Time=1769402279229 Token=1050001 Place=P6_Place Marking=1 Buffer=0 ToPlace=P6_Place TransitionId=T_in_P6 EventType=ENTER
+Time=1769402279234 Token=1050003 Place=P6_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P6 EventType=JOIN_CONSUMED
+Time=1769402279542 Token=1050001 Place=P6_Place Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_P6 EventType=EXIT
+Time=1769402280351 Token=1060003 Place=P6_Place Marking=1 Buffer=0 ToPlace=P6_Place TransitionId=T_in_P6 EventType=BUFFERED
+Time=1769402280868 Token=1060001 Place=P6_Place Marking=1 Buffer=0 ToPlace=P6_Place TransitionId=T_in_P6 EventType=BUFFERED
+Time=1769402280945 Token=1060001 Place=P6_Place Marking=1 Buffer=0 ToPlace=P6_Place TransitionId=T_in_P6 EventType=ENTER
+Time=1769402281016 Token=1060003 Place=P6_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P6 EventType=JOIN_CONSUMED
+Time=1769402281271 Token=1060001 Place=P6_Place Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_P6 EventType=EXIT
+Time=1769402282519 Token=1090003 Place=P6_Place Marking=1 Buffer=0 ToPlace=P6_Place TransitionId=T_in_P6 EventType=BUFFERED
+Time=1769402283076 Token=1090001 Place=P6_Place Marking=1 Buffer=0 ToPlace=P6_Place TransitionId=T_in_P6 EventType=BUFFERED
+Time=1769402283109 Token=1090001 Place=P6_Place Marking=1 Buffer=0 ToPlace=P6_Place TransitionId=T_in_P6 EventType=ENTER
+Time=1769402283113 Token=1090003 Place=P6_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P6 EventType=JOIN_CONSUMED
+Time=1769402283309 Token=1090001 Place=P6_Place Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_P6 EventType=EXIT
+ INFO [main] (PetriNetAnalyzer.java:753) - Retrieved 0 marking snapshots for TERMINATE
+
+================================================================================
+CROSS-VERSION PRIORITY ANALYSIS
+================================================================================
+ INFO [main] (PetriNetAnalyzer.java:1008) - Priority analysis complete: 40 samples (10 root, 30 forked), 0 root contention points, 0 root inversions
+
+=== PRIORITY ANALYSIS REPORT ===
+
+1. SAMPLE BREAKDOWN
+   Total samples: 40
+   Root tokens: 10 (used for priority analysis)
+   Forked tokens: 30 (join participants - excluded from priority analysis)
+
+2. VERSION STATISTICS (Root Tokens Only)
+   Version  Tokens     Avg Queue    Min Queue    Max Queue    Avg Service 
+   ----------------------------------------------------------------------
+   v001     10         678.6        217          1251         908.0       
+
+3. CONTENTION ANALYSIS (Root Tokens Only)
+   Total contention points: 0
+
+4. PRIORITY INVERSIONS (Root Tokens Only)
+   [OK] No priority inversions detected
+
+5. JOIN COMPLETIONS (Excluded from Priority Analysis)
+   Forked tokens processed: 30
+   Note: Join participants are fast-tracked when siblings arrive.
+         This is correct workflow semantics, not a priority violation.
+   By version: v001=30 
+
+6. PRIORITY VERDICT
+   [PASS] Priority scheduling is working effectively (100.0%)
+
+=== END PRIORITY REPORT ===
+
+ INFO [main] (PetriNetAnalyzer.java:1342) - Generated priority analysis report

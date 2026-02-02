@@ -1,0 +1,30 @@
+# Healthcare Services Common Library
+
+## Package Structure
+```
+org.btsn.healthcare.common/
+├── base/
+│   ├── BaseHealthcareService.java          # Abstract base class
+│   ├── ServiceAssessment.java              # Base assessment interface
+│   └── TokenInfo.java                      # Common token data structure
+├── json/
+│   ├── JsonResponseBuilder.java            # Fluent JSON builder
+│   ├── JsonTokenParser.java               # Token parsing utilities
+│   └── JsonValidator.java                 # JSON validation utilities
+├── exceptions/
+│   ├── ServiceProcessingException.java    # Custom service exceptions
+│   └── JsonParsingException.java          # JSON-specific exceptions
+└── utils/
+    ├── SequenceUtils.java                 # ID generation utilities
+    ├── DatabaseUtils.java                 # Common database operations
+    └── TimestampUtils.java               # Time formatting utilities
+```
+
+## Maven/Gradle Dependency
+```xml
+<dependency>
+    <groupId>org.btsn.healthcare</groupId>
+    <artifactId>healthcare-services-common</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
