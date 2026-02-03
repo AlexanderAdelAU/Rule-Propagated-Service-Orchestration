@@ -4,7 +4,30 @@ A decentralized workflow orchestration architecture that eliminates central coor
 
 ## Overview
 
-Rather than services being passive executors controlled by a remote orchestrator, each service becomes an active orchestration point, making autonomous routing decisions based on locally-executed rules while maintaining global workflow coherence through token-based state propagation.
+Rather than services being passive executors controlled by a remote orchestrator, coordination intelligence is embedded in control nodes (T_in and T_out) at service boundaries. Services remain focused on business logic while the control nodes make autonomous routing decisions based on locally-executed rules, maintaining global workflow coherence through token-based state propagation.
+
+```
+                         Rule Distribution
+                               │
+              ┌────────────────┼────────────────┐
+              │                │                │
+              ▼                ▼                ▼
+         ┌─────────┐      ┌─────────┐     ┌─────────┐
+         │  T_in   │      │  T_out  │     │  T_in   │
+         │ (Input  │      │ (Output │     │ (Input  │
+         │  Coord) │      │  Coord) │     │  Coord) │
+         └────┬────┘      └────┬────┘     └────┬────┘
+              │                │                │
+      token   │        token   │        token   │
+              ▼                │                ▼
+         ┌─────────┐           │           ┌─────────┐
+         │   S1    │           │           │   S2    │
+         │ Service │───────────┘           │ Service │
+         └─────────┘                       └─────────┘
+
+  T_in:  Synchronization, buffering, method invocation
+  T_out: Result evaluation, conditional routing, token distribution
+```
 
 ## Key Features
 
