@@ -114,6 +114,24 @@ The implementation includes an emergency department workflow with three paths:
 2. **Comprehensive** - Triage → {Radiology, Laboratory, Cardiology} → Diagnosis → Treatment
 3. **Federated** - External radiology requests from other hospitals
 
+## Tutorial: Running the Traffic Lights Simulation
+
+1. Expand project **btsn.petrinet.ProjectLoader**
+
+2. Run the Ant build file **TrafficLight_BuildAndRun**
+
+3. When complete, open project **btsn.common.Monitor**, then open `org.btsn.derby.Analysis` and run **PetriNetAnalyzer** to confirm the analysis was captured and valid
+
+4. Copy the analysis results to: `btsn.common/AnalysisFolder/PetriNet/Analysis_TrafficLights.txt`
+
+5. To run the animator, open **btsn.ProcessEditor/com/editor/ProcessEditor**
+
+6. Open the local ProcessDefinitionFolder in common and select the process: `PetriNet/TrafficLights.json`
+
+7. Load the analysis file from the Analysis folder where the run was saved
+
+8. Press **Run** to see the simulation results
+
 ## License
 
 [Specify license]
