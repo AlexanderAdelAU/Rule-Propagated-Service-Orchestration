@@ -1,0 +1,525 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="P1_P2_P3_P4_Concurrent_Fork_Workflow" default="run-workflow" basedir=".">
+	<description>
+        Concurrent Petri Net Workflow - P1, P2, P3, P4 and Monitor Services
+        Runs TWO workflows concurrently to test animator with multiple tokens:
+          Workflow 1 (v001): P1_P2_P3_P4_Fork_Workflow (fork/join pattern)
+          Workflow 2 (v002): P1_P2_Workflow (simple sequential)
+    </description>
+
+	<!-- =================================== -->
+	<!-- PROPERTIES SECTION                 -->
+	<!-- =================================== -->
+
+	<!-- WORKFLOW 1 PARAMETERS (v001) -->
+	<property name="rule.version" value="v001" />
+	<property name="process.name" value="petrinet/P1_P2_P3_P4_Fork_Workflow" />
+	<property name="target.place" value="P1_Place" />
+	<property name="token.count" value="10" />
+	<property name="token.expire" value="120000" />
+	
+	<!-- WORKFLOW 2 PARAMETERS (v002) -->
+	<property name="workflow2.rule.version" value="v002" />
+	<property name="workflow2.process.name" value="petrinet/P1_P2_Workflow" />
+	<property name="workflow2.target.place" value="P1_Place" />
+	<property name="workflow2.token.count" value="10" />
+	<property name="workflow2.token.expire" value="120000" />
+	
+	<!-- SELECT MODE (1=EDGE_NODE, 2=JOIN_NODE) -->
+	<property name="mode" value="1" />
+	<property name="join.tokens" value="1000001,1000002" />
+	
+	<!-- Mode mapping -->
+	<condition property="token.mode" value="EDGE_NODE"><equals arg1="${mode}" arg2="1"/></condition>
+	<condition property="token.mode" value="JOIN_NODE"><equals arg1="${mode}" arg2="2"/></condition>
+
+	<!-- Timing -->
+	<property name="port.release.seconds" value="5" />
+	<property name="workflow.runtime.seconds" value="20" />
+
+	<!-- Base directories -->
+	<property name="build.file.dir" location="." />
+	<property name="petrinet.root.dir" location="../" />
+
+	<!-- Common project directories -->
+	<property name="common.project.dir" location="${petrinet.root.dir}/btsn.common" />
+	<property name="lib.dir" location="${common.project.dir}/lib" />
+	<property name="class.dir" location="${common.project.dir}/bin" />
+	<property name="common.src.dir" location="${common.project.dir}/src" />
+
+	<!-- Output directory (current directory) -->
+	<property name="output.dir" location="${build.file.dir}" />
+
+	<!-- P1 Service -->
+	<property name="p1.project.dir" location="${petrinet.root.dir}/btsn.petrinet.places.p1" />
+	<property name="p1.bin.dir" location="${p1.project.dir}/bin" />
+	<property name="p1.output.file" location="${output.dir}/P1_Place.out.txt" />
+
+	<!-- P2 Service -->
+	<property name="p2.project.dir" location="${petrinet.root.dir}/btsn.petrinet.places.p2" />
+	<property name="p2.bin.dir" location="${p2.project.dir}/bin" />
+	<property name="p2.output.file" location="${output.dir}/P2_Place.out.txt" />
+
+	<!-- P3 Service -->
+	<property name="p3.project.dir" location="${petrinet.root.dir}/btsn.petrinet.places.p3" />
+	<property name="p3.bin.dir" location="${p3.project.dir}/bin" />
+	<property name="p3.output.file" location="${output.dir}/P3_Place.out.txt" />
+
+	<!-- P4 Service -->
+	<property name="p4.project.dir" location="${petrinet.root.dir}/btsn.petrinet.places.p4" />
+	<property name="p4.bin.dir" location="${p4.project.dir}/bin" />
+	<property name="p4.output.file" location="${output.dir}/P4_Place.out.txt" />
+
+	<!-- Monitor Service -->
+	<property name="monitor.project.dir" location="${petrinet.root.dir}/btsn.common.Monitor" />
+	<property name="monitor.bin.dir" location="${monitor.project.dir}/bin" />
+	<property name="monitor.output.file" location="${output.dir}/MonitorService.out.txt" />
+
+	<!-- Event Generator -->
+	<property name="generator.project.dir" location="${petrinet.root.dir}/btsn.common.eventgenerators" />
+	<property name="generator.bin.dir" location="${generator.project.dir}/bin" />
+
+	<!-- Java Classes -->
+	<property name="service.loader.class" value="org.btsn.handlers.ServiceLoader" />
+	<property name="token.generator.class" value="org.btsn.petrinet.eventgenerators.GenericPetriNetTokenGenerator" />
+
+	<!-- =================================== -->
+	<!-- CLASSPATH SECTION                  -->
+	<!-- =================================== -->
+
+	<path id="common.classpath">
+		<fileset dir="${lib.dir}" erroronmissingdir="false">
+			<include name="*.jar" />
+		</fileset>
+		<pathelement location="${class.dir}" />
+	</path>
+
+	<path id="p1.classpath">
+		<path refid="common.classpath" />
+		<pathelement location="${p1.bin.dir}" />
+	</path>
+
+	<path id="p2.classpath">
+		<path refid="common.classpath" />
+		<pathelement location="${p2.bin.dir}" />
+	</path>
+
+	<path id="p3.classpath">
+		<path refid="common.classpath" />
+		<pathelement location="${p3.bin.dir}" />
+	</path>
+
+	<path id="p4.classpath">
+		<path refid="common.classpath" />
+		<pathelement location="${p4.bin.dir}" />
+	</path>
+
+	<path id="monitor.classpath">
+		<path refid="common.classpath" />
+		<pathelement location="${monitor.bin.dir}" />
+	</path>
+
+	<path id="generator.classpath">
+		<path refid="common.classpath" />
+		<pathelement location="${generator.bin.dir}" />
+	</path>
+
+	<!-- =================================== -->
+	<!-- UTILITY TARGETS                    -->
+	<!-- =================================== -->
+
+	<target name="kill-java-processes" description="Kill any lingering Java processes">
+		<echo message="Killing any lingering Java processes..." />
+		<exec executable="cmd" osfamily="windows" failonerror="false">
+			<arg value="/c"/>
+			<arg value="taskkill /F /IM java.exe /T 2>nul"/>
+		</exec>
+		<exec executable="bash" osfamily="unix" failonerror="false">
+			<arg value="-c"/>
+			<arg value="pkill -9 java 2>/dev/null || true"/>
+		</exec>
+		<echo message="Waiting ${port.release.seconds}s for ports to be released..." />
+		<sleep seconds="${port.release.seconds}"/>
+		<echo message="Process cleanup complete" />
+	</target>
+
+	<target name="clean-output" description="Clean previous output files">
+		<delete file="${p1.output.file}" quiet="true" />
+		<delete file="${p2.output.file}" quiet="true" />
+		<delete file="${p3.output.file}" quiet="true" />
+		<delete file="${p4.output.file}" quiet="true" />
+		<delete file="${monitor.output.file}" quiet="true" />
+		<echo message="Previous output files cleaned" />
+	</target>
+
+	<!-- =================================== -->
+	<!-- RULE BASE BUILD TARGET             -->
+	<!-- =================================== -->
+
+	<target name="rebuild-service-ruleml" description="Rebuild master Service.ruleml from all service definitions">
+		<echo message="=== Building Master Service.ruleml ===" />
+		<java classname="org.btsn.utils.BuildMasterServiceRuleBase" 
+		      classpathref="generator.classpath"
+		      dir="${common.project.dir}"
+		      fork="true"
+		      failonerror="true">
+			<arg value="${rule.version}" />
+			<arg value="ALL" />
+		</java>
+		<echo message="Master Service.ruleml built successfully" />
+	</target>
+
+	<!-- =================================== -->
+	<!-- SERVICE LOADING TARGETS            -->
+	<!-- =================================== -->
+
+	<target name="load-p1-service" description="Load P1_Place service">
+		<echo message="Starting P1_Place service..." />
+		<java classname="${service.loader.class}" 
+		      fork="true" 
+		      dir="${p1.project.dir}"
+		      output="${p1.output.file}">
+			<classpath refid="p1.classpath" />
+			<arg value="${p1.project.dir}" />
+			<arg value="-version" />
+			<arg value="${rule.version}" />
+			<arg value="-service" />
+			<arg value="P1_Place" />
+		</java>
+	</target>
+
+	<target name="load-p2-service" description="Load P2_Place service">
+		<echo message="Starting P2_Place service..." />
+		<java classname="${service.loader.class}" 
+		      fork="true" 
+		      dir="${p2.project.dir}"
+		      output="${p2.output.file}">
+			<classpath refid="p2.classpath" />
+			<arg value="${p2.project.dir}" />
+			<arg value="-version" />
+			<arg value="${rule.version}" />
+			<arg value="-service" />
+			<arg value="P2_Place" />
+		</java>
+	</target>
+
+	<target name="load-p3-service" description="Load P3_Place service">
+		<echo message="Starting P3_Place service..." />
+		<java classname="${service.loader.class}" 
+		      fork="true" 
+		      dir="${p3.project.dir}"
+		      output="${p3.output.file}">
+			<classpath refid="p3.classpath" />
+			<arg value="${p3.project.dir}" />
+			<arg value="-version" />
+			<arg value="${rule.version}" />
+			<arg value="-service" />
+			<arg value="P3_Place" />
+		</java>
+	</target>
+
+	<target name="load-p4-service" description="Load P4_Place service">
+		<echo message="Starting P4_Place service..." />
+		<java classname="${service.loader.class}" 
+		      fork="true" 
+		      dir="${p4.project.dir}"
+		      output="${p4.output.file}">
+			<classpath refid="p4.classpath" />
+			<arg value="${p4.project.dir}" />
+			<arg value="-version" />
+			<arg value="${rule.version}" />
+			<arg value="-service" />
+			<arg value="P4_Place" />
+		</java>
+	</target>
+
+	<target name="load-monitor-service" description="Load Monitor service">
+		<echo message="Starting Monitor service..." />
+		<java classname="${service.loader.class}" 
+		      fork="true" 
+		      dir="${monitor.project.dir}"
+		      output="${monitor.output.file}">
+			<classpath refid="monitor.classpath" />
+			<arg value="${monitor.project.dir}" />
+			<arg value="-version" />
+			<arg value="${rule.version}" />
+			<arg value="-service" />
+			<arg value="MonitorService" />
+		</java>
+	</target>
+
+	<!-- =================================== -->
+	<!-- DEPLOY WORKFLOW RULES TARGETS      -->
+	<!-- =================================== -->
+
+	<target name="deploy-workflow1-rules" description="Deploy Workflow 1 rules (tokens=0)">
+		<echo message="=== Deploying Workflow 1 Rules ===" />
+		<echo message="Process: ${process.name}" />
+		<echo message="Version: ${rule.version}" />
+		
+		<java classname="${token.generator.class}" 
+		      fork="true" 
+		      dir="${generator.project.dir}"
+		      failonerror="true">
+			<classpath refid="generator.classpath" />
+			<arg value="-version" />
+			<arg value="${rule.version}" />
+			<arg value="-process" />
+			<arg value="${process.name}" />
+			<arg value="-place" />
+			<arg value="${target.place}" />
+			<arg value="-tokens" />
+			<arg value="0" />
+			<arg value="-expire" />
+			<arg value="${token.expire}" />
+		</java>
+		<echo message="Workflow 1 rules deployed." />
+	</target>
+
+	<target name="deploy-workflow2-rules" description="Deploy Workflow 2 rules (tokens=0)">
+		<echo message="=== Deploying Workflow 2 Rules ===" />
+		<echo message="Process: ${workflow2.process.name}" />
+		<echo message="Version: ${workflow2.rule.version}" />
+		
+		<java classname="${token.generator.class}" 
+		      fork="true" 
+		      dir="${generator.project.dir}"
+		      failonerror="true">
+			<classpath refid="generator.classpath" />
+			<arg value="-version" />
+			<arg value="${workflow2.rule.version}" />
+			<arg value="-process" />
+			<arg value="${workflow2.process.name}" />
+			<arg value="-place" />
+			<arg value="${workflow2.target.place}" />
+			<arg value="-tokens" />
+			<arg value="0" />
+			<arg value="-expire" />
+			<arg value="${workflow2.token.expire}" />
+		</java>
+		<echo message="Workflow 2 rules deployed." />
+	</target>
+
+	<!-- =================================== -->
+	<!-- WORKFLOW EXECUTION TARGETS         -->
+	<!-- =================================== -->
+
+	<target name="execute-workflow1" description="Deploy rules and fire tokens for Workflow 1">
+		<echo message="=== EXECUTING WORKFLOW 1 ===" />
+		<antcall target="deploy-workflow1-rules" />
+		<echo message="Mode: ${token.mode}" />
+		<antcall target="fire-tokens-workflow1-${token.mode}" />
+	</target>
+
+	<target name="execute-workflow2" description="Deploy rules and fire tokens for Workflow 2">
+		<echo message="=== EXECUTING WORKFLOW 2 ===" />
+		<antcall target="deploy-workflow2-rules" />
+		<echo message="Firing ${workflow2.token.count} tokens for Workflow 2..." />
+		<java classname="${token.generator.class}" 
+		      fork="true" 
+		      dir="${generator.project.dir}"
+		      failonerror="true">
+			<classpath refid="generator.classpath" />
+			<arg value="-version" />
+			<arg value="${workflow2.rule.version}" />
+			<arg value="-process" />
+			<arg value="${workflow2.process.name}" />
+			<arg value="-place" />
+			<arg value="${workflow2.target.place}" />
+			<arg value="-tokens" />
+			<arg value="${workflow2.token.count}" />
+			<arg value="-expire" />
+			<arg value="${workflow2.token.expire}" />
+			<arg value="-skipdeploy" />
+		</java>
+	</target>
+
+	<!-- Fire tokens for Workflow 1 EDGE_NODE mode -->
+	<target name="fire-tokens-workflow1-EDGE_NODE">
+		<echo message="Firing ${token.count} edge token(s) for Workflow 1..." />
+		<java classname="${token.generator.class}" 
+		      fork="true" 
+		      dir="${generator.project.dir}"
+		      failonerror="true">
+			<classpath refid="generator.classpath" />
+			<arg value="-version" />
+			<arg value="${rule.version}" />
+			<arg value="-process" />
+			<arg value="${process.name}" />
+			<arg value="-place" />
+			<arg value="${target.place}" />
+			<arg value="-tokens" />
+			<arg value="${token.count}" />
+			<arg value="-expire" />
+			<arg value="${token.expire}" />
+			<arg value="-skipdeploy" />
+		</java>
+	</target>
+
+	<!-- Fire tokens for Workflow 1 JOIN_NODE mode -->
+	<target name="fire-tokens-workflow1-JOIN_NODE">
+		<echo message="Firing join tokens: ${join.tokens} for Workflow 1" />
+		<java classname="${token.generator.class}" 
+		      fork="true" 
+		      dir="${generator.project.dir}"
+		      failonerror="true">
+			<classpath refid="generator.classpath" />
+			<arg value="-version" />
+			<arg value="${rule.version}" />
+			<arg value="-process" />
+			<arg value="${process.name}" />
+			<arg value="-place" />
+			<arg value="${target.place}" />
+			<arg value="-expire" />
+			<arg value="${token.expire}" />
+			<arg value="-joinargs" />
+			<arg value="${join.tokens}" />
+			<arg value="-skipdeploy" />
+		</java>
+	</target>
+
+	<!-- =================================== -->
+	<!-- MAIN TARGETS                        -->
+	<!-- =================================== -->
+
+	<target name="run-workflow" 
+	        depends="kill-java-processes,clean-output,rebuild-service-ruleml" 
+	        description="Load all services and execute BOTH workflows concurrently">
+		<echo message="=== CONCURRENT WORKFLOW EXECUTION ===" />
+		<echo message="Workflow 1: ${process.name} (${rule.version})" />
+		<echo message="Workflow 2: ${workflow2.process.name} (${workflow2.rule.version})" />
+		<echo message="Mode: ${token.mode}" />
+		<echo message="" />
+
+		<!-- Start all services in parallel -->
+		<parallel timeout="120000">
+			<antcall target="load-p1-service" />
+			<antcall target="load-p2-service" />
+			<antcall target="load-p3-service" />
+			<antcall target="load-p4-service" />
+			<antcall target="load-monitor-service" />
+
+			<sequential>
+				<echo message="Waiting for services to initialize..." />
+				<sleep seconds="2" />
+				
+				<!-- Execute both workflows concurrently -->
+				<parallel>
+					<antcall target="execute-workflow1" />
+					<antcall target="execute-workflow2" />
+				</parallel>
+				
+				<echo message="" />
+				<echo message="Workflows triggered. Waiting ${workflow.runtime.seconds}s for completion..." />
+				<sleep seconds="${workflow.runtime.seconds}" />
+				<echo message="Workflow complete. Killing services..." />
+				<sleep seconds="2" />
+				<antcall target="kill-java-processes" />
+			</sequential>
+		</parallel>
+
+		<echo message="" />
+		<echo message="=== CONCURRENT WORKFLOW COMPLETE ===" />
+	</target>
+
+	<target name="run-workflow1-only" 
+	        depends="kill-java-processes,clean-output,rebuild-service-ruleml" 
+	        description="Load all services and execute Workflow 1 only">
+		<echo message="=== WORKFLOW 1 ONLY ===" />
+		<echo message="Process: ${process.name}" />
+		<echo message="Version: ${rule.version}" />
+		<echo message="Mode: ${token.mode}" />
+		<echo message="" />
+
+		<parallel timeout="120000">
+			<antcall target="load-p1-service" />
+			<antcall target="load-p2-service" />
+			<antcall target="load-p3-service" />
+			<antcall target="load-p4-service" />
+			<antcall target="load-monitor-service" />
+
+			<sequential>
+				<echo message="Waiting for services to initialize..." />
+				<sleep seconds="2" />
+				<antcall target="execute-workflow1" />
+				<echo message="" />
+				<sleep seconds="${workflow.runtime.seconds}" />
+				<echo message="Workflow complete. Killing services..." />
+				<sleep seconds="2" />
+				<antcall target="kill-java-processes" />
+			</sequential>
+		</parallel>
+
+		<echo message="" />
+		<echo message="=== WORKFLOW 1 COMPLETE ===" />
+	</target>
+
+	<target name="run-workflow2-only" 
+	        depends="kill-java-processes,clean-output,rebuild-service-ruleml" 
+	        description="Load all services and execute Workflow 2 only">
+		<echo message="=== WORKFLOW 2 ONLY ===" />
+		<echo message="Process: ${workflow2.process.name}" />
+		<echo message="Version: ${workflow2.rule.version}" />
+		<echo message="" />
+
+		<parallel timeout="120000">
+			<antcall target="load-p1-service" />
+			<antcall target="load-p2-service" />
+			<antcall target="load-p3-service" />
+			<antcall target="load-p4-service" />
+			<antcall target="load-monitor-service" />
+
+			<sequential>
+				<echo message="Waiting for services to initialize..." />
+				<sleep seconds="2" />
+				<antcall target="execute-workflow2" />
+				<echo message="" />
+				<sleep seconds="${workflow.runtime.seconds}" />
+				<echo message="Workflow complete. Killing services..." />
+				<sleep seconds="2" />
+				<antcall target="kill-java-processes" />
+			</sequential>
+		</parallel>
+
+		<echo message="" />
+		<echo message="=== WORKFLOW 2 COMPLETE ===" />
+	</target>
+
+	<!-- =================================== -->
+	<!-- HELP TARGET                        -->
+	<!-- =================================== -->
+
+	<target name="help" description="Display available targets">
+		<echo message="=== CONCURRENT FORK WORKFLOW ===" />
+		<echo message="" />
+		<echo message="WORKFLOWS:" />
+		<echo message="  Workflow 1 (v001): ${process.name}" />
+		<echo message="  Workflow 2 (v002): ${workflow2.process.name}" />
+		<echo message="" />
+		<echo message="MAIN TARGETS:" />
+		<echo message="  run-workflow         - Run BOTH workflows concurrently (default)" />
+		<echo message="  run-workflow1-only   - Run Workflow 1 only" />
+		<echo message="  run-workflow2-only   - Run Workflow 2 only" />
+		<echo message="" />
+		<echo message="MODE SELECTION (Workflow 1 only):" />
+		<echo message="  1 = EDGE_NODE  (normal token firing)" />
+		<echo message="  2 = JOIN_NODE  (join test)" />
+		<echo message="" />
+		<echo message="CURRENT SETTINGS:" />
+		<echo message="  mode                    = ${mode} (${token.mode})" />
+		<echo message="  token.count (WF1)       = ${token.count}" />
+		<echo message="  workflow2.token.count   = ${workflow2.token.count}" />
+		<echo message="  join.tokens             = ${join.tokens}" />
+		<echo message="" />
+		<echo message="USAGE:" />
+		<echo message="  ant                              (run both workflows)" />
+		<echo message="  ant run-workflow1-only           (WF1 only)" />
+		<echo message="  ant run-workflow2-only           (WF2 only)" />
+		<echo message="  ant -Dmode=1                     (EDGE_NODE)" />
+		<echo message="  ant -Dmode=2                     (JOIN_NODE)" />
+		<echo message="  ant -Dtoken.count=50             (WF1 tokens)" />
+		<echo message="  ant -Dworkflow2.token.count=25   (WF2 tokens)" />
+		<echo message="" />
+	</target>
+
+</project>

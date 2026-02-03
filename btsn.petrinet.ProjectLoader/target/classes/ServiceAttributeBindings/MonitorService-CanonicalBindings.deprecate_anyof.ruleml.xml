@@ -1,0 +1,37 @@
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>MonitorService</Ind>
+</Atom>
+
+<!-- MonitorService can accept the following -->
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>executeTreatmentPlan</Ind>
+	<Ind>null</Ind>
+	<Ind>anyof</Ind>
+	<Ind>diagnosisResults</Ind>     <!-- ❌ This is missing! -->
+	<Ind>triageResults</Ind>
+	<Ind>cardiologyResults</Ind>
+	<Ind>radiologyResults</Ind>
+	<Ind>laboratoryResults</Ind>
+	<Ind>treatmentResults</Ind>
+</Atom>
+
+
+
+<Atom>
+	<Rel>hasOperation</Rel>		<!-- List of available Services that have a link -->
+	<Ind>MonitorService</Ind>  <!-- Name of Service -->
+	<Ind>getMeasureProcessTime</Ind>  <!-- Name of operation -->
+	<Ind>null</Ind>  	<!-- This is the attribute returned or contributed -->
+	<Ind>token</Ind>			<!-- This is the attribute needed -->
+</Atom>
+<Atom>
+	<Rel>hasOperation</Rel>		<!-- List of available Services that have a link -->
+	<Ind>MonitorService</Ind>  <!-- Name of Service -->
+	<Ind>setExpiredPackets</Ind>  <!-- Name of operation -->
+	<Ind>null</Ind>  	<!-- This is the attribute returned or contributed -->
+	<Ind>token</Ind>			<!-- This is the attribute needed -->
+</Atom>
+	
