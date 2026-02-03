@@ -1,2 +1,0 @@
-Error: Could not find or load main class org.btsn.handlers.ServiceLoader
-Caused by: java.lang.ClassNotFoundException: org.btsn.handlers.ServiceLoader
