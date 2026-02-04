@@ -10,36 +10,6 @@ Rather than services being passive executors controlled by a remote orchestrator
 
 *Dual-layer architecture: Rule distribution (compile-time) and token flow (runtime)*
 
-## How It Works
-
-Each service is wrapped by coordination nodes that handle all orchestration logic:
-
-![Building Block](images/building_block.png)
-
-*Fundamental building block: T_in → Service → T_out*
-
-### Token Flow
-
-1. **Token Arrival**: An XML payload arrives at the T_in node containing method arguments for the service
-2. **Rule Validation**: T_in checks if the token belongs to a valid ruleset version
-3. **Service Invocation**: If valid, T_in invokes the service method with the token's arguments
-4. **Token Enrichment**: The service result enriches the token with new data
-5. **Routing Decision**: T_out evaluates the result against its rule fragment to determine the next destination
-6. **Token Publication**: The enriched token is routed to the next service's T_in node
-
-### Payload Structure
-
-```xml
-<payload>
-  <header>        <!-- Orchestration metadata: version, sequence ID -->
-  <service>       <!-- Target service and method -->
-  <joinAttribute> <!-- Business data (the token) -->
-  <monitorData>   <!-- Performance metrics -->
-</payload>
-```
-
-The **payload** provides orchestration context while the **token** (inside joinAttribute) carries business state that accumulates as it traverses services.
-
 ## Key Features
 
 - **Distributed Orchestration** - No central engine bottleneck or single point of failure
