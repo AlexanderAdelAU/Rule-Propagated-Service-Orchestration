@@ -23,8 +23,13 @@ Rather than services being passive executors controlled by a remote orchestrator
 
 The system implements a two-layer architecture:
 
-- **Rule Distribution Layer** (compile-time) - Transforms DOT workflow specifications into service-specific rule fragments
-- **Token Flow Layer** (runtime) - Tokens traverse the service network with embedded orchestration at each node
+- **Rule Deployment Layer** (compile-time) - At deployment time, the RulePropagation component transforms JSON workflow specifications into service-specific rule fragments. Each service receives rules defining its coordination behavior (NodeType atoms), routing conditions (meetsCondition atoms), and decision values (DecisionValue atoms). These rules can occur in real-time whilst other process are still in flight.  They are distributed via UDP with a commitment protocol ensuring all services acknowledge receipt before workflow activation is allowed.
+- **Token Flow Layer** (runtime) - At runtime, tokens carrying both workflow state and accumulated business data traverse the service network. Each ServiceThread component acts as an embedded orchestrator, receiving tokens through its EventReactor, querying local OOjDREW rule engine for routing decisions, invoking the business service, and publishing results via EventPublisher to downstream services.
+
+
+### Rule Deployment Layer
+
+![RuleGeneration](images/rule_generation.png)
 
 ### Core Components
 
@@ -43,6 +48,7 @@ The system implements a two-layer architecture:
 - **ForkNode** - Parallel service invocation
 - **JoinNode** - Correlation-based synchronization
 - **MergeNode** - Flexible input handling
+
 
 ## Project Structure
 
