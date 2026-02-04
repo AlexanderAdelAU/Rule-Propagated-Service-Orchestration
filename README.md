@@ -1,6 +1,6 @@
 # Rule-Propagated-Service-Orchestration
 
-A decentralized workflow orchestration architecture that eliminates central coordination bottlenecks by embedding orchestration logic as executable rules at service boundaries.
+RPSO is a decentralized workflow orchestration architecture that eliminates central coordination bottlenecks by embedding orchestration logic as executable rules at service boundaries. Unlike traditional orchestrators that maintain global workflow state in a central engine, DORA distributes coordination intelligence to autonomous service nodes that make local routing decisions based on locally-cached rules while maintaining global workflow coherence through token-based state propagation. The architecture operates through a two-phase approach: compile-time transformation of declarative JSON workflow specifications into service-specific rule fragments, followed by runtime execution where services independently evaluate rules to determine routing without inter-service coordination. Implementation of an emergency department workflow demonstrates measurable benefits in failure isolation. 
 
 ## Overview
 
