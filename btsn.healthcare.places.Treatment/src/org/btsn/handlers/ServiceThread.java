@@ -468,6 +468,12 @@ class ServiceThread implements Runnable {
 				serviceMap = xph.findMultipleXMLItems(incomingXMLPayLoad, "//service/*");
 				monitorDataMap = xph.findMultipleXMLItems(incomingXMLPayLoad, "//monitorData/*");
 
+				// PRIORITY FIX: Clear completedJoin flag on arrival.
+				// This flag is set by the PREVIOUS service when publishing after a join completion.
+				// EventReactor already used it for priority queue ordering at this hop,
+				// so clear it now to prevent it propagating to subsequent hops.
+				monitorDataMap.remove("completedJoin");
+
 				String payloadAttributeName = attrMap.get("attributeName");
 				String payloadAttributeValue = attrMap.get("attributeValue");
 
@@ -1148,6 +1154,11 @@ class ServiceThread implements Runnable {
 	    }
 	    instrumentJoinComplete(continuingTokenId, this.serviceName, participantTokenIds, currentWorkflowStartTime);
 	    
+	    // PRIORITY FIX: Signal that this token has completed a join.
+	    // EventReactor will use this to boost the token in the priority queue,
+	    // ensuring post-join tokens are dequeued ahead of normal tokens.
+	    monitorDataMap.put("completedJoin", "true");
+	    
 	    processControlNode();
 
 	    logger.info("ORCHESTRATOR: Service " + serviceName + " sequence ID: " + sequenceID + " complete.");
@@ -1211,6 +1222,10 @@ class ServiceThread implements Runnable {
 
 			sequenceID = joinKey;
 			headerMap.put("sequenceId", joinKey.toString());
+			
+			// PRIORITY FIX: Signal that this token has completed a join (SEQUENTIAL mode).
+			monitorDataMap.put("completedJoin", "true");
+			
 			processControlNode();
 
 			logger.info("ORCHESTRATOR: Service " + serviceName + " sequence ID: " + sequenceID + " complete.");

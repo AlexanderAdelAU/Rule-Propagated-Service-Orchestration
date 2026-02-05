@@ -585,6 +585,6 @@ This is the rule that governs the list of all services.
 	<Ind>token</Ind>
 	<Ind>token_branch2</Ind>
 </Atom>
-<Atom><Rel>NodeType</Rel><Ind>JoinNode</Ind></Atom><Atom><Rel>meetsCondition</Rel><Ind>MonitorService</Ind><Ind>acknowledgeTokenArrival</Ind><Ind>EDGE_NODE</Ind><Ind></Ind></Atom>
+<Atom><Rel>NodeType</Rel><Ind>ForkNode</Ind></Atom><Atom><Rel>NodeType</Rel><Ind>ForkNode</Ind></Atom><Atom><Rel>meetsCondition</Rel><Ind>P5_Place</Ind><Ind>processToken</Ind><Ind>FORK_NODE</Ind><Ind></Ind></Atom><Atom><Rel>meetsCondition</Rel><Ind>P6_Place</Ind><Ind>processToken</Ind><Ind>FORK_NODE</Ind><Ind></Ind></Atom>
 </Rulebase>
 </Assert>

@@ -5,11 +5,7 @@
  INFO [main] (ServiceLoader.java:456) - Using build version: v001
  INFO [main] (ServiceLoader.java:116) - Created shutdown control file: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4\all_services_v001.running
  INFO [main] (ServiceLoader.java:117) - DELETE this file to trigger graceful shutdown
- INFO [main] (ServiceLoader.java:153) - Shutdown listener started on port 39001
-BUILDRULE BASE - Build Version v001
-BuildRuleBase: Detected service context, writing to LOCAL: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4/RuleFolder.v001/
-BuildRuleBase: Searching for rule files in: C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase
- INFO [main] (ServiceLoader.java:154) - Send 'SHUTDOWN' to this port to stop services
+ WARN [main] (ServiceLoader.java:185) - Could not start shutdown listener: Address already in use: bind
  INFO [main] (ServiceLoader.java:478) - === Building rule base with version v001 ===
   Found rule file: C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\CoreRuleBase.ruleml.xml
   Found rule file: C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\RemoteHostMappings.ruleml.xml
@@ -43,6 +39,9 @@ All files have been concatenated into Service.ruleml at: C:\DevShare\BTSN_R001\B
  INFO [main] (ServiceLoader.java:482) - Registered version v001 as valid
  INFO [main] (ServiceLoader.java:485) - === Checking for remote deployment mode ===
  INFO [main] (ServiceLoader.java:296) - === Auto-detecting deployment mode from facts ===
+BUILDRULE BASE - Build Version v001
+BuildRuleBase: Detected service context, writing to LOCAL: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4/RuleFolder.v001/
+BuildRuleBase: Searching for rule files in: C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase
  INFO [main] (ServiceLoader.java:302) - This machine's primary IP: 192.168.1.152
  INFO [main] (ServiceLoader.java:320) - All IPs for this machine: [fe80:0:0:0:0:100:7f:fffe%net5, fe80:0:0:0:0:5efe:c0a8:198%net7, fe80:0:0:0:4478:23a2:44e3:e737%eth5, 0:0:0:0:0:0:0:1, 192.168.1.152, 127.0.0.1]
 DEBUG: getRuleBaset attempting to read from: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4\RuleFolder.v001/Service.ruleml
@@ -69,28 +68,24 @@ Loading services C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4\ServiceLoade
 DEBUG: getRuleBaset attempting to read from: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4\RuleFolder.v001/Service.ruleml
  INFO [ServiceThread-P4_CollectorService-collectAllData] (ServiceLoader.java:862) - Starting REMOTE UDP ServiceThread for P4_CollectorService:collectAllData on port: 14103
  INFO [RuleHandler-P4_CollectorService-collectAllData] (ServiceLoader.java:809) - Starting UDP RuleHandler for service: P4_CollectorService, operation: collectAllData, channel: ip0, port: 24103, listening on: all interfaces
+RuleHandler: Remote mode detected, will listen on all interfaces
+RuleHandler: Created UDP socket on port 24103 listening on ALL INTERFACES (remote mode)
+Rule Handler is listening on UDP port: 24103 (mode: REMOTE)
+ INFO [RuleHandler-P4_CollectorService-collectAllData] (ServiceLoader.java:815) - Successfully created UDP RuleHandler for P4_CollectorService:collectAllData listening on port 24103
  INFO [main] (ServiceLoader.java:561) - Found operation: P4_InitializationService.purgeAndInitialize on ip0:4303
  INFO [main] (ServiceLoader.java:573) - Creating ServiceThreads for 1 operations
  INFO [main] (ServiceLoader.java:675) - Setting up P4_InitializationService.purgeAndInitialize -> EventReactor:14303, RuleHandler:24303
  INFO [main] (ServiceLoader.java:703) - Successfully created ServiceThread for P4_InitializationService.purgeAndInitialize
  INFO [main] (ServiceLoader.java:515) - LOADING service: P4_Place
 Loading services C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4\ServiceLoaderQueries\P4_Place-LoaderQuery.ruleml... 
-RuleHandler: Remote mode detected, will listen on all interfaces
-RuleHandler: Created UDP socket on port 24103 listening on ALL INTERFACES (remote mode)
  INFO [main] (ServiceLoader.java:523) - === DETECTED SERVICELIST QUERY FOR: P4_Place ===
 DEBUG: getRuleBaset attempting to read from: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4\RuleFolder.v001/Service.ruleml
- INFO [ServiceThread-P4_InitializationService-purgeAndInitialize] (ServiceLoader.java:862) - Starting REMOTE UDP ServiceThread for P4_InitializationService:purgeAndInitialize on port: 14303
  INFO [RuleHandler-P4_InitializationService-purgeAndInitialize] (ServiceLoader.java:809) - Starting UDP RuleHandler for service: P4_InitializationService, operation: purgeAndInitialize, channel: ip0, port: 24303, listening on: all interfaces
 RuleHandler: Remote mode detected, will listen on all interfaces
 RuleHandler: Created UDP socket on port 24303 listening on ALL INTERFACES (remote mode)
-Rule Handler is listening on UDP port: 24103 (mode: REMOTE)
- INFO [RuleHandler-P4_CollectorService-collectAllData] (ServiceLoader.java:815) - Successfully created UDP RuleHandler for P4_CollectorService:collectAllData listening on port 24103
 Rule Handler is listening on UDP port: 24303 (mode: REMOTE)
  INFO [RuleHandler-P4_InitializationService-purgeAndInitialize] (ServiceLoader.java:815) - Successfully created UDP RuleHandler for P4_InitializationService:purgeAndInitialize listening on port 24303
-Feb 05, 2026 11:44:56 AM org.btsn.handlers.EventPublisher <init>
-INFO: === Initializing EventPublisher ===
-Feb 05, 2026 11:44:57 AM org.btsn.handlers.EventPublisher <init>
-INFO: === Initializing EventPublisher ===
+ INFO [ServiceThread-P4_InitializationService-purgeAndInitialize] (ServiceLoader.java:862) - Starting REMOTE UDP ServiceThread for P4_InitializationService:purgeAndInitialize on port: 14303
  INFO [main] (ServiceLoader.java:561) - Found operation: P4_Place.processToken on ip0:4004
  INFO [main] (ServiceLoader.java:573) - Creating ServiceThreads for 1 operations
  INFO [main] (ServiceLoader.java:675) - Setting up P4_Place.processToken -> EventReactor:14004, RuleHandler:24004
@@ -105,122 +100,144 @@ INFO: === Initializing EventPublisher ===
  INFO [main] (ServiceLoader.java:633) -   2. Send 'SHUTDOWN' to UDP port: 39001
  INFO [main] (ServiceLoader.java:634) -   3. Kill the process
  INFO [ServiceThread-P4_Place-processToken] (ServiceLoader.java:862) - Starting REMOTE UDP ServiceThread for P4_Place:processToken on port: 14004
-Feb 05, 2026 11:44:57 AM org.btsn.handlers.EventPublisher <init>
-INFO: === Initializing EventPublisher ===
-Feb 05, 2026 11:44:57 AM org.btsn.handlers.EventPublisher loadPublisherConfiguration
-INFO: EventPublisher: Config - MaxWireLength: 4096, SocketTimeout: 5000ms
-Feb 05, 2026 11:44:57 AM org.btsn.handlers.EventPublisher <init>
-INFO: EventPublisher: Ready for local/remote publishing
-Feb 05, 2026 11:44:57 AM org.btsn.handlers.EventPublisher <init>
-INFO: EventPublisher: Compression enabled: true
-Feb 05, 2026 11:44:57 AM org.btsn.handlers.EventPublisher <init>
-INFO: EventPublisher: Max wire length: 4096 bytes
-Feb 05, 2026 11:44:57 AM org.btsn.handlers.EventPublisher <init>
-INFO: EventPublisher: Chunking enabled for payloads > 4096 bytes
-Feb 05, 2026 11:44:57 AM org.btsn.handlers.EventPublisher loadPublisherConfiguration
-INFO: EventPublisher: Config - MaxWireLength: 4096, SocketTimeout: 5000ms
-Feb 05, 2026 11:44:57 AM org.btsn.handlers.EventPublisher <init>
-INFO: EventPublisher: Ready for local/remote publishing
-Feb 05, 2026 11:44:57 AM org.btsn.handlers.EventPublisher <init>
-INFO: EventPublisher: Compression enabled: true
-Feb 05, 2026 11:44:57 AM org.btsn.handlers.EventPublisher <init>
-INFO: EventPublisher: Max wire length: 4096 bytes
-Feb 05, 2026 11:44:57 AM org.btsn.handlers.EventPublisher <init>
-INFO: EventPublisher: Chunking enabled for payloads > 4096 bytes
-Feb 05, 2026 11:44:57 AM org.btsn.handlers.EventPublisher loadPublisherConfiguration
-INFO: EventPublisher: Config - MaxWireLength: 4096, SocketTimeout: 5000ms
-Feb 05, 2026 11:44:57 AM org.btsn.handlers.EventPublisher <init>
-INFO: EventPublisher: Ready for local/remote publishing
-Feb 05, 2026 11:44:57 AM org.btsn.handlers.EventPublisher <init>
-INFO: EventPublisher: Compression enabled: true
-Feb 05, 2026 11:44:57 AM org.btsn.handlers.EventPublisher <init>
-INFO: EventPublisher: Max wire length: 4096 bytes
-Feb 05, 2026 11:44:57 AM org.btsn.handlers.EventPublisher <init>
-INFO: EventPublisher: Chunking enabled for payloads > 4096 bytes
  INFO [RuleHandler-P4_Place-processToken] (ServiceLoader.java:809) - Starting UDP RuleHandler for service: P4_Place, operation: processToken, channel: ip0, port: 24004, listening on: all interfaces
 RuleHandler: Remote mode detected, will listen on all interfaces
 RuleHandler: Created UDP socket on port 24004 listening on ALL INTERFACES (remote mode)
 Rule Handler is listening on UDP port: 24004 (mode: REMOTE)
  INFO [RuleHandler-P4_Place-processToken] (ServiceLoader.java:815) - Successfully created UDP RuleHandler for P4_Place:processToken listening on port 24004
+Feb 05, 2026 5:07:30 PM org.btsn.handlers.EventPublisher <init>
+INFO: === Initializing EventPublisher ===
+Feb 05, 2026 5:07:30 PM org.btsn.handlers.EventPublisher <init>
+INFO: === Initializing EventPublisher ===
+Feb 05, 2026 5:07:30 PM org.btsn.handlers.EventPublisher <init>
+INFO: === Initializing EventPublisher ===
+Feb 05, 2026 5:07:30 PM org.btsn.handlers.EventPublisher loadPublisherConfiguration
+INFO: EventPublisher: Config - MaxWireLength: 4096, SocketTimeout: 5000ms
+Feb 05, 2026 5:07:30 PM org.btsn.handlers.EventPublisher <init>
+INFO: EventPublisher: Ready for local/remote publishing
+Feb 05, 2026 5:07:30 PM org.btsn.handlers.EventPublisher <init>
+INFO: EventPublisher: Compression enabled: true
+Feb 05, 2026 5:07:30 PM org.btsn.handlers.EventPublisher loadPublisherConfiguration
+INFO: EventPublisher: Config - MaxWireLength: 4096, SocketTimeout: 5000ms
+Feb 05, 2026 5:07:30 PM org.btsn.handlers.EventPublisher <init>
+INFO: EventPublisher: Ready for local/remote publishing
+Feb 05, 2026 5:07:30 PM org.btsn.handlers.EventPublisher <init>
+INFO: EventPublisher: Compression enabled: true
+Feb 05, 2026 5:07:30 PM org.btsn.handlers.EventPublisher <init>
+INFO: EventPublisher: Max wire length: 4096 bytes
+Feb 05, 2026 5:07:30 PM org.btsn.handlers.EventPublisher <init>
+INFO: EventPublisher: Chunking enabled for payloads > 4096 bytes
+Feb 05, 2026 5:07:30 PM org.btsn.handlers.EventPublisher <init>
+INFO: EventPublisher: Max wire length: 4096 bytes
+Feb 05, 2026 5:07:30 PM org.btsn.handlers.EventPublisher <init>
+INFO: EventPublisher: Chunking enabled for payloads > 4096 bytes
+Feb 05, 2026 5:07:30 PM org.btsn.handlers.EventPublisher loadPublisherConfiguration
+INFO: EventPublisher: Config - MaxWireLength: 4096, SocketTimeout: 5000ms
 ServiceThread: Derived SERVICE_PACKAGE from own package: org.btsn.places
- INFO [ServiceThread-P4_CollectorService-collectAllData] (BuildServiceAnalysisDatabase.java:130) - Derby Embedded Driver registered successfully.
-=== SERVICE ORCHESTRATOR INITIALIZING ===
-My Identity: P4_CollectorService:collectAllData
-Channel: ip0, Port: 14103
+Feb 05, 2026 5:07:30 PM org.btsn.handlers.EventPublisher <init>
+INFO: EventPublisher: Ready for local/remote publishing
+Feb 05, 2026 5:07:30 PM org.btsn.handlers.EventPublisher <init>
+INFO: EventPublisher: Compression enabled: true
+Feb 05, 2026 5:07:30 PM org.btsn.handlers.EventPublisher <init>
+INFO: EventPublisher: Max wire length: 4096 bytes
+Feb 05, 2026 5:07:30 PM org.btsn.handlers.EventPublisher <init>
+INFO: EventPublisher: Chunking enabled for payloads > 4096 bytes
  INFO [ServiceThread-P4_Place-processToken] (BuildServiceAnalysisDatabase.java:130) - Derby Embedded Driver registered successfully.
 === SERVICE ORCHESTRATOR INITIALIZING ===
 My Identity: P4_Place:processToken
 Channel: ip0, Port: 14004
+ INFO [ServiceThread-P4_CollectorService-collectAllData] (BuildServiceAnalysisDatabase.java:130) - Derby Embedded Driver registered successfully.
+=== SERVICE ORCHESTRATOR INITIALIZING ===
+My Identity: P4_CollectorService:collectAllData
+Channel: ip0, Port: 14103
  INFO [ServiceThread-P4_InitializationService-purgeAndInitialize] (BuildServiceAnalysisDatabase.java:130) - Derby Embedded Driver registered successfully.
 === SERVICE ORCHESTRATOR INITIALIZING ===
 My Identity: P4_InitializationService:purgeAndInitialize
 Channel: ip0, Port: 14303
+ INFO [ServiceThread-P4_CollectorService-collectAllData] (BuildServiceAnalysisDatabase.java:130) - Derby Embedded Driver registered successfully.
+ INFO [ServiceThread-P4_CollectorService-collectAllData] (PetriNetInstrumentationHelper.java:84) - === PETRI NET INSTRUMENTATION INITIALIZED ===
+ INFO [ServiceThread-P4_CollectorService-collectAllData] (PetriNetInstrumentationHelper.java:85) - Service: ip0:14103
+ INFO [ServiceThread-P4_CollectorService-collectAllData] (PetriNetInstrumentationHelper.java:86) - Recording: Transitions=true, Genealogy=true, Joins=true
+ INFO [ServiceThread-P4_CollectorService-collectAllData] (ServiceThread.java:226) - ORCHESTRATOR: Petri Net instrumentation ENABLED (full mode)
  INFO [ServiceThread-P4_InitializationService-purgeAndInitialize] (BuildServiceAnalysisDatabase.java:130) - Derby Embedded Driver registered successfully.
  INFO [ServiceThread-P4_InitializationService-purgeAndInitialize] (PetriNetInstrumentationHelper.java:84) - === PETRI NET INSTRUMENTATION INITIALIZED ===
  INFO [ServiceThread-P4_InitializationService-purgeAndInitialize] (PetriNetInstrumentationHelper.java:85) - Service: ip0:14303
  INFO [ServiceThread-P4_InitializationService-purgeAndInitialize] (PetriNetInstrumentationHelper.java:86) - Recording: Transitions=true, Genealogy=true, Joins=true
  INFO [ServiceThread-P4_InitializationService-purgeAndInitialize] (ServiceThread.java:226) - ORCHESTRATOR: Petri Net instrumentation ENABLED (full mode)
  INFO [ServiceThread-P4_InitializationService-purgeAndInitialize] (ServiceThread.java:245) - Join processing strategy: OPTIMIZED (any complete join)
+ INFO [ServiceThread-P4_CollectorService-collectAllData] (ServiceThread.java:245) - Join processing strategy: OPTIMIZED (any complete join)
+ INFO [ServiceThread-P4_InitializationService-purgeAndInitialize] (ServiceThread.java:264) - Starting EventReactor for channel: ip0, port: 14303
+Service Handler is listening on UDP port: 14303 (ALL INTERFACES, remote mode, compression enabled)
  INFO [ServiceThread-P4_Place-processToken] (BuildServiceAnalysisDatabase.java:130) - Derby Embedded Driver registered successfully.
  INFO [ServiceThread-P4_Place-processToken] (PetriNetInstrumentationHelper.java:84) - === PETRI NET INSTRUMENTATION INITIALIZED ===
  INFO [ServiceThread-P4_Place-processToken] (PetriNetInstrumentationHelper.java:85) - Service: ip0:14004
  INFO [ServiceThread-P4_Place-processToken] (PetriNetInstrumentationHelper.java:86) - Recording: Transitions=true, Genealogy=true, Joins=true
  INFO [ServiceThread-P4_Place-processToken] (ServiceThread.java:226) - ORCHESTRATOR: Petri Net instrumentation ENABLED (full mode)
  INFO [ServiceThread-P4_Place-processToken] (ServiceThread.java:245) - Join processing strategy: OPTIMIZED (any complete join)
- INFO [ServiceThread-P4_InitializationService-purgeAndInitialize] (ServiceThread.java:264) - Starting EventReactor for channel: ip0, port: 14303
- INFO [ServiceThread-P4_CollectorService-collectAllData] (BuildServiceAnalysisDatabase.java:130) - Derby Embedded Driver registered successfully.
- INFO [ServiceThread-P4_CollectorService-collectAllData] (PetriNetInstrumentationHelper.java:84) - === PETRI NET INSTRUMENTATION INITIALIZED ===
- INFO [ServiceThread-P4_CollectorService-collectAllData] (PetriNetInstrumentationHelper.java:85) - Service: ip0:14103
- INFO [ServiceThread-P4_CollectorService-collectAllData] (PetriNetInstrumentationHelper.java:86) - Recording: Transitions=true, Genealogy=true, Joins=true
- INFO [ServiceThread-P4_CollectorService-collectAllData] (ServiceThread.java:226) - ORCHESTRATOR: Petri Net instrumentation ENABLED (full mode)
- INFO [ServiceThread-P4_CollectorService-collectAllData] (ServiceThread.java:245) - Join processing strategy: OPTIMIZED (any complete join)
- INFO [ServiceThread-P4_Place-processToken] (ServiceThread.java:264) - Starting EventReactor for channel: ip0, port: 14004
- INFO [ServiceThread-P4_CollectorService-collectAllData] (ServiceThread.java:264) - Starting EventReactor for channel: ip0, port: 14103
-Feb 05, 2026 11:45:00 AM org.btsn.handlers.EventReactor <init>
+Feb 05, 2026 5:07:31 PM org.btsn.handlers.EventReactor <init>
 INFO: EventReactor: Chunk reassembly enabled (buffer expiry: 30000ms)
-Feb 05, 2026 11:45:00 AM org.btsn.handlers.EventReactor <init>
+Feb 05, 2026 5:07:31 PM org.btsn.handlers.EventReactor <init>
+INFO: Created and started UDP network pool thread = Thread-5
+Feb 05, 2026 5:07:31 PM org.btsn.handlers.EventReactor <init>
+INFO: Created and started UDP network pool thread = Thread-6
+Feb 05, 2026 5:07:31 PM org.btsn.handlers.EventReactor <init>
 INFO: Created and started UDP network pool thread = Thread-7
-Feb 05, 2026 11:45:00 AM org.btsn.handlers.EventReactor <init>
+Feb 05, 2026 5:07:31 PM org.btsn.handlers.EventReactor <init>
 INFO: Created and started UDP network pool thread = Thread-8
-Feb 05, 2026 11:45:00 AM org.btsn.handlers.EventReactor <init>
-INFO: Created and started UDP network pool thread = Thread-9
-Feb 05, 2026 11:45:00 AM org.btsn.handlers.EventReactor <init>
+Feb 05, 2026 5:07:31 PM org.btsn.handlers.EventReactor <init>
+INFO: EventReactor: Chunk reassembly enabled (buffer expiry: 30000ms)
+Feb 05, 2026 5:07:31 PM org.btsn.handlers.EventReactor <init>
 INFO: Created and started UDP network pool thread = Thread-10
-Feb 05, 2026 11:45:00 AM org.btsn.handlers.EventReactor <init>
-INFO: EventReactor: Chunk reassembly enabled (buffer expiry: 30000ms)
-Feb 05, 2026 11:45:00 AM org.btsn.handlers.EventReactor <init>
+Feb 05, 2026 5:07:31 PM org.btsn.handlers.EventReactor <init>
 INFO: Created and started UDP network pool thread = Thread-11
-Feb 05, 2026 11:45:00 AM org.btsn.handlers.EventReactor <init>
+Feb 05, 2026 5:07:31 PM org.btsn.handlers.EventReactor <init>
 INFO: Created and started UDP network pool thread = Thread-12
-Feb 05, 2026 11:45:00 AM org.btsn.handlers.EventReactor <init>
+Feb 05, 2026 5:07:31 PM org.btsn.handlers.EventReactor <init>
 INFO: Created and started UDP network pool thread = Thread-13
-Feb 05, 2026 11:45:00 AM org.btsn.handlers.EventReactor <init>
-INFO: Created and started UDP network pool thread = Thread-14
-Feb 05, 2026 11:45:00 AM org.btsn.handlers.EventReactor <init>
-INFO: EventReactor: Chunk reassembly enabled (buffer expiry: 30000ms)
-Feb 05, 2026 11:45:00 AM org.btsn.handlers.EventReactor <init>
-INFO: Created and started UDP network pool thread = Thread-15
-Feb 05, 2026 11:45:00 AM org.btsn.handlers.EventReactor <init>
-INFO: Created and started UDP network pool thread = Thread-16
-Service Handler is listening on UDP port: 14103 (ALL INTERFACES, remote mode, compression enabled)
-Service Handler is listening on UDP port: 14004 (ALL INTERFACES, remote mode, compression enabled)
- INFO [ServiceThread-P4_Place-processToken] (ServiceThread.java:273) - EventReactor started successfully on attempt 1
-=== SERVICE ORCHESTRATOR READY ===
- INFO [ServiceThread-P4_Place-processToken] (ServiceLoader.java:873) - Successfully created REMOTE UDP ServiceThread for port 14004
- INFO [ServiceThread-P4_CollectorService-collectAllData] (ServiceThread.java:273) - EventReactor started successfully on attempt 1
-=== SERVICE ORCHESTRATOR READY ===
- INFO [ServiceThread-P4_CollectorService-collectAllData] (ServiceLoader.java:873) - Successfully created REMOTE UDP ServiceThread for port 14103
- INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:429) - ServiceThread ORCHESTRATOR starting main processing loop
-Service Handler is listening on UDP port: 14303 (ALL INTERFACES, remote mode, compression enabled)
- INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:429) - ServiceThread ORCHESTRATOR starting main processing loop
  INFO [ServiceThread-P4_InitializationService-purgeAndInitialize] (ServiceThread.java:273) - EventReactor started successfully on attempt 1
 === SERVICE ORCHESTRATOR READY ===
  INFO [ServiceThread-P4_InitializationService-purgeAndInitialize] (ServiceLoader.java:873) - Successfully created REMOTE UDP ServiceThread for port 14303
+ INFO [ServiceThread-P4_Place-processToken] (ServiceThread.java:264) - Starting EventReactor for channel: ip0, port: 14004
+Service Handler is listening on UDP port: 14004 (ALL INTERFACES, remote mode, compression enabled)
  INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:429) - ServiceThread ORCHESTRATOR starting main processing loop
-Feb 05, 2026 11:45:00 AM org.btsn.handlers.EventReactor <init>
+ INFO [ServiceThread-P4_Place-processToken] (ServiceThread.java:273) - EventReactor started successfully on attempt 1
+ INFO [ServiceThread-P4_CollectorService-collectAllData] (ServiceThread.java:264) - Starting EventReactor for channel: ip0, port: 14103
+=== SERVICE ORCHESTRATOR READY ===
+ INFO [ServiceThread-P4_Place-processToken] (ServiceLoader.java:873) - Successfully created REMOTE UDP ServiceThread for port 14004
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:429) - ServiceThread ORCHESTRATOR starting main processing loop
+Service Handler is listening on UDP port: 14103 (ALL INTERFACES, remote mode, compression enabled)
+ INFO [ServiceThread-P4_CollectorService-collectAllData] (ServiceThread.java:273) - EventReactor started successfully on attempt 1
+=== SERVICE ORCHESTRATOR READY ===
+ INFO [ServiceThread-P4_CollectorService-collectAllData] (ServiceLoader.java:873) - Successfully created REMOTE UDP ServiceThread for port 14103
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:429) - ServiceThread ORCHESTRATOR starting main processing loop
+Feb 05, 2026 5:07:31 PM org.btsn.handlers.EventReactor <init>
+INFO: EventReactor: Chunk reassembly enabled (buffer expiry: 30000ms)
+Feb 05, 2026 5:07:31 PM org.btsn.handlers.EventReactor <init>
+INFO: Created and started UDP network pool thread = Thread-15
+Feb 05, 2026 5:07:31 PM org.btsn.handlers.EventReactor <init>
+INFO: Created and started UDP network pool thread = Thread-16
+Feb 05, 2026 5:07:31 PM org.btsn.handlers.EventReactor <init>
 INFO: Created and started UDP network pool thread = Thread-17
-Feb 05, 2026 11:45:01 AM org.btsn.handlers.EventReactor <init>
+Feb 05, 2026 5:07:31 PM org.btsn.handlers.EventReactor <init>
 INFO: Created and started UDP network pool thread = Thread-18
+Rule Handler received from 192.168.1.152:52300 - payload length: 669
+=== RECEIVED XML PAYLOAD ===
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><rulepayload xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="rulepayload.xsd">
+	<header>
+		<timestamp>2012-01-02T20:05:05.491+10:30</timestamp>
+		<ruleFileName>ThisServiceControlNode</ruleFileName>
+		<ruleBaseVersion>v999</ruleBaseVersion>
+		<ruleBaseCommitment>5</ruleBaseCommitment>
+	</header>
+	<targetservice>
+		<serviceName>P4_InitializationService</serviceName>
+		<operationName>purgeAndInitialize</operationName>
+	</targetservice>
+	<rulefiledata><data><![CDATA[<Atom><Rel>NodeType</Rel><Ind>TerminateNode</Ind></Atom>]]></data>
+	</rulefiledata>
+</rulepayload>
+=== END PAYLOAD ===
+CreatFile: file deleted
 Received rule payload packet.....for operation: purgeAndInitialize<?xml version="1.0" encoding="UTF-8" standalone="no"?><rulepayload xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="rulepayload.xsd">
 	<header>
 		<timestamp>2012-01-02T20:05:05.491+10:30</timestamp>
@@ -258,57 +275,41 @@ Processing C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\PetriNet\ListofPetrin
 Processing C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\RemoteHostMappings.ruleml.xml... 
 Processing binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\P4\P4_InitializationService-CanonicalBindings.ruleml.xml
 Processing control Node file.... P4_InitializationService-ControlNodeRules.ruleml.xml
-Rule Handler received from 192.168.1.152:63457 - payload length: 669
-=== RECEIVED XML PAYLOAD ===
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><rulepayload xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="rulepayload.xsd">
-	<header>
-		<timestamp>2012-01-02T20:05:05.491+10:30</timestamp>
-		<ruleFileName>ThisServiceControlNode</ruleFileName>
-		<ruleBaseVersion>v999</ruleBaseVersion>
-		<ruleBaseCommitment>5</ruleBaseCommitment>
-	</header>
-	<targetservice>
-		<serviceName>P4_InitializationService</serviceName>
-		<operationName>purgeAndInitialize</operationName>
-	</targetservice>
-	<rulefiledata><data><![CDATA[<Atom><Rel>NodeType</Rel><Ind>TerminateNode</Ind></Atom>]]></data>
-	</rulefiledata>
-</rulepayload>
-=== END PAYLOAD ===
-CreatFile: file deleted
 All files have been concatenated into Service.ruleml
 Sending commitment to remote source: 192.168.1.152:35999
 Converted XML to simple format: CONFIRMED:v999:5
 Sent commitment response: CONFIRMED:v999:5 to 192.168.1.152:35999
 Sent acknowledgment to 192.168.1.152
-Scheduler returned pArgs: [999300000870, 999300000]
-pArgs.get(0): 999300000870
+Scheduler returned pArgs: [999300000312, 999300000]
+pArgs.get(0): 999300000312
 queueAction: 50
 MAXQUEUE: 50
 costKeyTokenMap size before: 0
 === EVENT ACCEPTED - PROCESSING ===
-costKey: 999300000870
+costKey: 999300000312
 sid: 999300000
+Maximum Buffer size seen is = 1
+PRIORITY: seqId=999300000 version=v999 completedJoin=false schedulerKey=999300000312 -> priorityKey=10999300000
 === ADDING TO PROCESSING QUEUE ===
-About to add costKey 999300000870 to costKeyTokenMap
+About to add costKey 10999300000 to costKeyTokenMap
 Successfully added to costKeyTokenMap
 costKeyTokenMap size after: 1
 About to call notify() to wake up ServiceThread
 === END EVENT PROCESSING ===
-DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:474) - ORCHESTRATOR: Processing:: token = "init p4"
-DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:518) - CAPTURE: WorkflowStartTime=1770255911766 for seqID=999300000
- INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:531) - Incoming Sequence ID = 999300000
- INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:532) - MonitorIncomingEvents+ = true
-DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:548) - Using RuleBaseVersion: v999
-DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:563) - FILTER: Event for P4_InitializationService.purgeAndInitialize accepted by P4_InitializationService thread
+DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:480) - ORCHESTRATOR: Processing:: token = "init p4"
+DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:524) - CAPTURE: WorkflowStartTime=1770275261163 for seqID=999300000
+ INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:537) - Incoming Sequence ID = 999300000
+ INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:538) - MonitorIncomingEvents+ = true
+DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:554) - Using RuleBaseVersion: v999
+DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:569) - FILTER: Event for P4_InitializationService.purgeAndInitialize accepted by P4_InitializationService thread
  WARN [ServiceThread-P4_InitializationService-14303] (jsonLibrary.java:87) - Key "token" already exists. Skipping.
-DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:579) - JOIN-MAP: Added key=token to join 999300000 (tokenId=999300000, mapSize=1)
- INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:588) - DEBUG: Loading rule base for operation: purgeAndInitialize
- INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:589) - DEBUG: Rule base location: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4/RuleFolder.v999/purgeAndInitialize/Service.ruleml
- INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:596) - DEBUG: Loading fresh knowledge base from: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4/RuleFolder.v999/purgeAndInitialize/Service.ruleml
+DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:585) - JOIN-MAP: Added key=token to join 999300000 (tokenId=999300000, mapSize=1)
+ INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:594) - DEBUG: Loading rule base for operation: purgeAndInitialize
+ INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:595) - DEBUG: Rule base location: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4/RuleFolder.v999/purgeAndInitialize/Service.ruleml
+ INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:602) - DEBUG: Loading fresh knowledge base from: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4/RuleFolder.v999/purgeAndInitialize/Service.ruleml
 DEBUG: getRuleBaset attempting to read from: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4/RuleFolder.v999/purgeAndInitialize/Service.ruleml
- INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:604) - DEBUG: Loaded knowledge base length: 13394
-DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:605) - DEBUG: Knowledge base content preview: <Assert>
+ INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:610) - DEBUG: Loaded knowledge base length: 13394
+DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:611) - DEBUG: Knowledge base content preview: <Assert>
 <Rulebase mapClosure="universal">
 <!-- Version On -->
 <Data><Atom><Rel>Version</Rel><Ind>v999</Ind></Atom></Data>
@@ -329,29 +330,28 @@ the destination service.
 			<Var>port</Var>
 			<Var>decisionValue</Var>
 		</A
- INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:614) - DEBUG: Parsing knowledge base...
-Maximum Buffer size seen is = 1
- INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:616) - DEBUG: Knowledge base parsed successfully
-DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:2333) - CANONICAL-BINDING: Checking canonical binding for P4_InitializationService.purgeAndInitialize with attribute 'token'
-DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:2361) - CANONICAL-BINDING: Operation purgeAndInitialize uses standard (AND) semantics
- INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:2399) - CANONICAL-BINDING: purgeAndInitialize requires 1 inputs total (standard AND logic)
- INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:2409) - CANONICAL-BINDING: purgeAndInitialize needs 1 input - can call immediately with 'token'
- INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:641) - ORCHESTRATOR: Canonical binding found - overriding serviceName facts
- INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:644) - ORCHESTRATOR: Overrode inputCollection for canonical binding
- WARN [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:2508) - Using legacy getDecisionValue - consider updating CoreRuleBase to include decisionValue in publishes
- INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:652) - DEBUG: Skipping getNextService for TerminateNode
+ INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:620) - DEBUG: Parsing knowledge base...
+ INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:622) - DEBUG: Knowledge base parsed successfully
+DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:2348) - CANONICAL-BINDING: Checking canonical binding for P4_InitializationService.purgeAndInitialize with attribute 'token'
+DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:2376) - CANONICAL-BINDING: Operation purgeAndInitialize uses standard (AND) semantics
+ INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:2414) - CANONICAL-BINDING: purgeAndInitialize requires 1 inputs total (standard AND logic)
+ INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:2424) - CANONICAL-BINDING: purgeAndInitialize needs 1 input - can call immediately with 'token'
+ INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:647) - ORCHESTRATOR: Canonical binding found - overriding serviceName facts
+ INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:650) - ORCHESTRATOR: Overrode inputCollection for canonical binding
+ WARN [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:2523) - Using legacy getDecisionValue - consider updating CoreRuleBase to include decisionValue in publishes
+ INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:658) - DEBUG: Skipping getNextService for TerminateNode
 DEBUG [ServiceThread-P4_InitializationService-14303] (PetriNetInstrumentationHelper.java:349) - Skipping instrumentation for admin token 999300000 (v999)
-DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:3095) - PETRI-NET: Token 999300000 BUFFERED at P4_InitializationService (T_in arrival)
+DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:3110) - PETRI-NET: Token 999300000 BUFFERED at P4_InitializationService (T_in arrival)
 DEBUG [ServiceThread-P4_InitializationService-14303] (PetriNetInstrumentationHelper.java:132) - Skipping instrumentation for admin token 999300000 (v999)
-DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:3101) - PETRI-NET: Token 999300000 ENTER at P4_InitializationService
- INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:671) - DEBUG: About to check inputCollection.isEmpty() - size: 1
- INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:672) - DEBUG: inputCollection contents: [null]
- INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:673) - DEBUG: nodeType: TerminateNode
- INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:674) - DEBUG: needsInputSynchronization: false
- INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:691) - DEBUG: Past inputCollection check, about to enter JOIN processing
- INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:692) - DEBUG: inputCollection.get(0): null
- INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:712) - ORCHESTRATOR: Zero-input service P4_InitializationService:purgeAndInitialize executing with trigger token (no workflow data required)
- INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:1239) - ORCHESTRATOR: Processing TerminateNode for P4_InitializationService.purgeAndInitialize
+DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:3116) - PETRI-NET: Token 999300000 ENTER at P4_InitializationService
+ INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:677) - DEBUG: About to check inputCollection.isEmpty() - size: 1
+ INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:678) - DEBUG: inputCollection contents: [null]
+ INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:679) - DEBUG: nodeType: TerminateNode
+ INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:680) - DEBUG: needsInputSynchronization: false
+ INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:697) - DEBUG: Past inputCollection check, about to enter JOIN processing
+ INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:698) - DEBUG: inputCollection.get(0): null
+ INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:718) - ORCHESTRATOR: Zero-input service P4_InitializationService:purgeAndInitialize executing with trigger token (no workflow data required)
+ INFO [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:1254) - ORCHESTRATOR: Processing TerminateNode for P4_InitializationService.purgeAndInitialize
  INFO [ServiceThread-P4_InitializationService-14303] (TransitionHandler.java:834) - ORCHESTRATOR: Invoking P4_InitializationService.purgeAndInitialize via ServiceHelper
  INFO [ServiceThread-P4_InitializationService-14303] (ServiceHelper.java:125) - === SERVICE INVOCATION START ===
  INFO [ServiceThread-P4_InitializationService-14303] (ServiceHelper.java:126) - Service: org.btsn.places.P4_InitializationService.purgeAndInitialize
@@ -365,9 +365,9 @@ java.lang.ClassCastException: class java.lang.String cannot be cast to class org
 	at org.btsn.handlers.ServiceHelper.process(ServiceHelper.java:144)
 	at org.btsn.handlers.ServiceHelper.process(ServiceHelper.java:223)
 	at org.btsn.handlers.TransitionHandler.processTerminateType(TransitionHandler.java:842)
-	at org.btsn.handlers.ServiceThread.processControlNode(ServiceThread.java:1249)
-	at org.btsn.handlers.ServiceThread.parsePayLoad(ServiceThread.java:715)
-	at org.btsn.handlers.ServiceThread.run(ServiceThread.java:477)
+	at org.btsn.handlers.ServiceThread.processControlNode(ServiceThread.java:1264)
+	at org.btsn.handlers.ServiceThread.parsePayLoad(ServiceThread.java:721)
+	at org.btsn.handlers.ServiceThread.run(ServiceThread.java:483)
 	at java.base/java.lang.Thread.run(Thread.java:832)
  WARN [ServiceThread-P4_InitializationService-14303] (ServiceHelper.java:243) - ENRICHMENT: Failed to parse token, creating empty metadata
  INFO [ServiceThread-P4_InitializationService-14303] (ServiceHelper.java:149) - ENRICHMENT: Initialized workflow start time (first service)
@@ -378,9 +378,9 @@ java.lang.ClassCastException: class java.lang.String cannot be cast to class org
 	at org.btsn.handlers.ServiceHelper.process(ServiceHelper.java:161)
 	at org.btsn.handlers.ServiceHelper.process(ServiceHelper.java:223)
 	at org.btsn.handlers.TransitionHandler.processTerminateType(TransitionHandler.java:842)
-	at org.btsn.handlers.ServiceThread.processControlNode(ServiceThread.java:1249)
-	at org.btsn.handlers.ServiceThread.parsePayLoad(ServiceThread.java:715)
-	at org.btsn.handlers.ServiceThread.run(ServiceThread.java:477)
+	at org.btsn.handlers.ServiceThread.processControlNode(ServiceThread.java:1264)
+	at org.btsn.handlers.ServiceThread.parsePayLoad(ServiceThread.java:721)
+	at org.btsn.handlers.ServiceThread.run(ServiceThread.java:483)
 	at java.base/java.lang.Thread.run(Thread.java:832)
  WARN [ServiceThread-P4_InitializationService-14303] (ServiceHelper.java:330) - ENRICHMENT: Failed to parse token, returning as-is
 DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceHelper.java:163) - ENRICHMENT: Cleaned argument 1, length: 9 (removed 0 bytes of metadata)
@@ -433,15 +433,804 @@ DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceHelper.java:590) - 
  WARN [ServiceThread-P4_InitializationService-14303] (BuildServiceAnalysisDatabase.java:1550) - Could not get count for EVENTRESPONSETABLE: Table/View 'EVENTRESPONSETABLE' does not exist.
  INFO [ServiceThread-P4_InitializationService-14303] (BuildServiceAnalysisDatabase.java:1555) - Retrieved measurement statistics: {CONSOLIDATED_MARKING_EVOLUTION_Count=0, CONSOLIDATED_PLACE_STATISTICS_Count=0, CONSOLIDATED_TOKEN_GENEALOGY_Count=0, CONSOLIDATED_TOKEN_PATHS_Count=0, CONSOLIDATED_TRANSITION_FIRINGS_Count=0, EVENTRESPONSETABLE_Count=-1, JOIN_SYNCHRONIZATION_Count=0, MARKINGS_Count=0, PROCESSMEASUREMENTS_Count=0, SERVICECONTRIBUTION_Count=0, SERVICEMEASUREMENTS_Count=0, TOKEN_GENEALOGY_Count=0, TRANSITION_FIRINGS_Count=0}
 [SUCCESS] P4 purged and verified on attempt 1
- INFO [ServiceThread-P4_InitializationService-14303] (ServiceHelper.java:189) - SERVICE COMPLETE: org.btsn.places.P4_InitializationService.purgeAndInitialize completed in 1709ms
+ INFO [ServiceThread-P4_InitializationService-14303] (ServiceHelper.java:189) - SERVICE COMPLETE: org.btsn.places.P4_InitializationService.purgeAndInitialize completed in 1265ms
  WARN [ServiceThread-P4_InitializationService-14303] (ServiceHelper.java:376) - ENRICHMENT: Output attribute 'token' not found in service result, cannot enrich
  INFO [ServiceThread-P4_InitializationService-14303] (ServiceHelper.java:197) - ENRICHMENT: Successfully enriched service result with metadata
  INFO [ServiceThread-P4_InitializationService-14303] (ServiceHelper.java:199) - === SERVICE INVOCATION COMPLETE ===
- INFO [ServiceThread-P4_InitializationService-14303] (TransitionHandler.java:848) - ORCHESTRATOR: Service returned: {"duration_ms":1668,"tables_purged":12,"service":"P4_InitializationService","action":"purge_and_initialize","status":"success","attempts":1,"statistics":{"CONSOLIDATED_TOKEN_PATHS_Count":0,"SERVICECONTRIBUTION_Count":0,"CONSOLIDATED_TRANSITION_FIRINGS_Count":0,"CONSOLIDATED_MARKING_EVOLUTION_Count":0,"EVENTRESPONSETABLE_Count":-1,"CONSOLIDATED_TOKEN_GENEALOGY_Count":0,"TOKEN_GENEALOGY_Count":0,"MARKINGS_Count":0,"SERVICEMEASUREMENTS_Count":0,"CONSOLIDATED_PLACE_STATISTICS_Count":0,"PROCESSMEASUREMENTS_Count":0,"TRANSITION_FIRINGS_Count":0,"JOIN_SYNCHRONIZATION_Count":0}}
+ INFO [ServiceThread-P4_InitializationService-14303] (TransitionHandler.java:848) - ORCHESTRATOR: Service returned: {"duration_ms":1246,"tables_purged":12,"service":"P4_InitializationService","action":"purge_and_initialize","status":"success","attempts":1,"statistics":{"CONSOLIDATED_TOKEN_PATHS_Count":0,"SERVICECONTRIBUTION_Count":0,"CONSOLIDATED_TRANSITION_FIRINGS_Count":0,"CONSOLIDATED_MARKING_EVOLUTION_Count":0,"EVENTRESPONSETABLE_Count":-1,"CONSOLIDATED_TOKEN_GENEALOGY_Count":0,"TOKEN_GENEALOGY_Count":0,"MARKINGS_Count":0,"SERVICEMEASUREMENTS_Count":0,"CONSOLIDATED_PLACE_STATISTICS_Count":0,"PROCESSMEASUREMENTS_Count":0,"TRANSITION_FIRINGS_Count":0,"JOIN_SYNCHRONIZATION_Count":0}}
 DEBUG [ServiceThread-P4_InitializationService-14303] (PetriNetInstrumentationHelper.java:587) - Skipping instrumentation for admin token 999300000 (v999)
-DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:3205) - PETRI-NET: Token 999300000 TERMINATED at P4_InitializationService
+DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:3220) - PETRI-NET: Token 999300000 TERMINATED at P4_InitializationService
  INFO [ServiceThread-P4_InitializationService-14303] (TransitionHandler.java:853) - ORCHESTRATOR: Token 999300000 terminated after P4_InitializationService.purgeAndInitialize
 DEBUG [ServiceThread-P4_InitializationService-14303] (TransitionHandler.java:859) - Processing Terminate Type complete.
-ERROR [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:1291) - monitorIncomingEvents: false
-DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:1164) - ORCHESTRATOR: Cleaned up join 999300000
-DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:718) - ORCHESTRATOR: Service P4_InitializationService sequence ID: 999300000 complete.
+ERROR [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:1306) - monitorIncomingEvents: false
+DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:1175) - ORCHESTRATOR: Cleaned up join 999300000
+DEBUG [ServiceThread-P4_InitializationService-14303] (ServiceThread.java:724) - ORCHESTRATOR: Service P4_InitializationService sequence ID: 999300000 complete.
+Rule Handler received from 192.168.1.152:52327 - payload length: 915
+=== RECEIVED XML PAYLOAD ===
+Received rule payload packet.....for operation: processToken<?xml version="1.0" encoding="UTF-8" standalone="no"?><rulepayload xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="rulepayload.xsd">
+	<header>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><rulepayload xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="rulepayload.xsd">
+	<header>
+		<timestamp>2012-01-02T20:05:05.491+10:30</timestamp>
+		<timestamp>2012-01-02T20:05:05.491+10:30</timestamp>
+		<ruleFileName>ThisServiceControlNode</ruleFileName>
+		<ruleFileName>ThisServiceControlNode</ruleFileName>
+		<ruleBaseVersion>v001</ruleBaseVersion>
+		<ruleBaseCommitment>6</ruleBaseCommitment>
+	</header>
+	<targetservice>
+		<ruleBaseVersion>v001</ruleBaseVersion>
+		<ruleBaseCommitment>6</ruleBaseCommitment>
+	</header>
+	<targetservice>
+		<serviceName>P4_Place</serviceName>
+		<serviceName>P4_Place</serviceName>
+		<operationName>processToken</operationName>
+	</targetservice>
+		<operationName>processToken</operationName>
+	</targetservice>
+	<rulefiledata><data><![CDATA[<Atom><Rel>NodeType</Rel><Ind>ForkNode</Ind></Atom><Atom><Rel>NodeType</Rel><Ind>ForkNode</Ind></Atom><Atom><Rel>meetsCondition</Rel><Ind>P5_Place</Ind><Ind>processToken</Ind><Ind>FORK_NODE</Ind><Ind></Ind></Atom><Atom><Rel>meetsCondition</Rel><Ind>P6_Place</Ind><Ind>processToken</Ind><Ind>FORK_NODE</Ind><Ind></Ind></Atom>]]></data>
+	</rulefiledata>
+</rulepayload>
+	<rulefiledata><data><![CDATA[<Atom><Rel>NodeType</Rel><Ind>ForkNode</Ind></Atom><Atom><Rel>NodeType</Rel><Ind>ForkNode</Ind></Atom><Atom><Rel>meetsCondition</Rel><Ind>P5_Place</Ind><Ind>processToken</Ind><Ind>FORK_NODE</Ind><Ind></Ind></Atom><Atom><Rel>meetsCondition</Rel><Ind>P6_Place</Ind><Ind>processToken</Ind><Ind>FORK_NODE</Ind><Ind></Ind></Atom>]]></data>
+	</rulefiledata>
+</rulepayload>
+=== END PAYLOAD ===
+Searching in: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings
+CreatFile: file deleted
+Found binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\P4\P4_Place-CanonicalBindings.ruleml.xml
+  Found rule file: C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\CoreRuleBase.ruleml.xml
+  Found rule file: C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\RemoteHostMappings.ruleml.xml
+  Found rule file: C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\Healthcare\ListofHealthCareActiveServices.ruleml.xml
+  Found rule file: C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\Healthcare\ListofHealthCareCollectorServices.ruleml.xml
+  Found rule file: C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\Healthcare\ListofHealthcareInitializationServices.ruleml.xml
+  Found rule file: C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\Monitor\ListofMonitorActiveServices.ruleml.xml
+  Found rule file: C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\PetriNet\ListofPetriNetActiveServices.ruleml.xml
+  Found rule file: C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\PetriNet\ListofPetrinetCollectorServices.ruleml.xml
+  Found rule file: C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\PetriNet\ListofPetriNetInitializationServices.ruleml.xml
+Found 9 rule files in RuleBase
+Processing C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\CoreRuleBase.ruleml.xml... 
+Processing C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\Healthcare\ListofHealthCareActiveServices.ruleml.xml... 
+Processing C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\Healthcare\ListofHealthCareCollectorServices.ruleml.xml... 
+Processing C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\Healthcare\ListofHealthcareInitializationServices.ruleml.xml... 
+Processing C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\Monitor\ListofMonitorActiveServices.ruleml.xml... 
+Processing C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\PetriNet\ListofPetriNetActiveServices.ruleml.xml... 
+Processing C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\PetriNet\ListofPetriNetInitializationServices.ruleml.xml... 
+Processing C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\PetriNet\ListofPetrinetCollectorServices.ruleml.xml... 
+Processing C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\RemoteHostMappings.ruleml.xml... 
+Processing binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\P4\P4_Place-CanonicalBindings.ruleml.xml
+Processing control Node file.... P4_Place-ControlNodeRules.ruleml.xml
+All files have been concatenated into Service.ruleml
+Sending commitment to remote source: 192.168.1.152:35001
+Converted XML to simple format: CONFIRMED:v001:6
+Sent commitment response: CONFIRMED:v001:6 to 192.168.1.152:35001
+Sent acknowledgment to 192.168.1.152
+Scheduler returned pArgs: [1000001791, 1000001]
+pArgs.get(0): 1000001791
+queueAction: 50
+MAXQUEUE: 50
+costKeyTokenMap size before: 0
+=== EVENT ACCEPTED - PROCESSING ===
+costKey: 1000001791
+sid: 1000001
+Maximum Buffer size seen is = 1
+PRIORITY: seqId=1000001 version=v001 completedJoin=true schedulerKey=1000001791 -> priorityKey=1000001
+=== ADDING TO PROCESSING QUEUE ===
+About to add costKey 1000001 to costKeyTokenMap
+Successfully added to costKeyTokenMap
+costKeyTokenMap size after: 1
+About to call notify() to wake up ServiceThread
+=== END EVENT PROCESSING ===
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:480) - ORCHESTRATOR: Processing:: token_branch1 = {"token":{"annotation":"{\"place\":\"P2\",\"entryTime\":1770275297553,\"exitTime\":1770275297657,\"residenceTime\":104,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"distribution\":\"DETERMINISTIC\",\"routingPath\":\"true\"}","notAfter":1770275407633,"tokenId":"1000001","data":{"delayMs":"0","place":"P2","distribution":"DETERMINISTIC"},"workflow_start_time":1770275287633,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":true,"routing_path":"true"},"service_start_time":1770275297552,"version":"v001","executionTime":104,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":106,"original_token":"{\"notAfter\":1770275407633,\"tokenId\":\"1000001\",\"data\":{},\"workflow_start_time\":1770275287633,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1770275297658,"status":"COMPLETED"}}
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:524) - CAPTURE: WorkflowStartTime=1770275293228 for seqID=1000001
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:537) - Incoming Sequence ID = 1000001
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:538) - MonitorIncomingEvents+ = true
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:554) - Using RuleBaseVersion: v001
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:569) - FILTER: Event for P4_Place.processToken accepted by P4_Place thread
+ WARN [ServiceThread-P4_Place-14004] (jsonLibrary.java:87) - Key "token_branch1" already exists. Skipping.
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:585) - JOIN-MAP: Added key=token_branch1 to join 1000000 (tokenId=1000001, mapSize=1)
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:594) - DEBUG: Loading rule base for operation: processToken
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:595) - DEBUG: Rule base location: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4/RuleFolder.v001/processToken/Service.ruleml
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:602) - DEBUG: Loading fresh knowledge base from: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4/RuleFolder.v001/processToken/Service.ruleml
+DEBUG: getRuleBaset attempting to read from: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4/RuleFolder.v001/processToken/Service.ruleml
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:610) - DEBUG: Loaded knowledge base length: 13817
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:611) - DEBUG: Knowledge base content preview: <Assert>
+<Rulebase mapClosure="universal">
+<!-- Version On -->
+<Data><Atom><Rel>Version</Rel><Ind>v001</Ind></Atom></Data>
+<!-- Common Rules to all services -->
+<!-- 
+This is the rule determines the operational parameters associated with
+the destination service.
+ -->
+<Implies>
+	<then>
+		<Atom>
+			<Rel>publishes</Rel>
+			<Var>service</Var>
+			<Var>condition</Var>
+			<Var>operation</Var>
+			<Var>channel</Var>
+			<Var>ip</Var>
+			<Var>port</Var>
+			<Var>decisionValue</Var>
+		</A
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:620) - DEBUG: Parsing knowledge base...
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:622) - DEBUG: Knowledge base parsed successfully
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:637) - T_IN-SYNC: Token 1000001 needs input synchronization (2 inputs required: [token_branch1, token_branch2])
+ WARN [ServiceThread-P4_Place-14004] (ServiceThread.java:2523) - Using legacy getDecisionValue - consider updating CoreRuleBase to include decisionValue in publishes
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:354) - Token 1000001 buffered at T_in_P4_Place (buffer=0)
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:1085) - Could not extract previousPlace from payload
+DEBUG [ServiceThread-P4_Place-14004] (BuildServiceAnalysisDatabase.java:807) - Wrote transition firing: T_in_P4 token=1000001 eventType=BUFFERED
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:909) - Recorded transition: T_in_P4 (ForkNode) token=1000001  -> P4_Place [BUFFERED] buffer=0
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:3103) - PETRI-NET: Token 1000001 BUFFERED at P4_Place (waiting for join)
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:677) - DEBUG: About to check inputCollection.isEmpty() - size: 2
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:678) - DEBUG: inputCollection contents: [token_branch1, token_branch2]
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:679) - DEBUG: nodeType: ForkNode
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:680) - DEBUG: needsInputSynchronization: true
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:697) - DEBUG: Past inputCollection check, about to enter JOIN processing
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:698) - DEBUG: inputCollection.get(0): token_branch1
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:836) - ORCHESTRATOR: Processing input synchronization for P4_Place:processToken
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:841) - ORCHESTRATOR: Input sync P4_Place:processToken waiting for 2 inputs (from canonical binding: [token_branch1, token_branch2])
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:865) - JOIN-COUNT: Stored expectedCount=2 for joinID=1000000
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:868) - ORCHESTRATOR: Input sync P4_Place:processToken waiting for 2 inputs: [token_branch1, token_branch2]
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:885) - TRACK: Fork 1000001 workflowStartTime=1770275293228
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:898) - ORCHESTRATOR [OPTIMIZED]: Checking 1 joins for completeness in sequence ID order
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:902) - ORCHESTRATOR [OPTIMIZED]: Sequence ID sorted join order:
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:904) -   - Sequence 1000000
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1047) - Join 1000000 using stored expectedCount=2, currentSize=1
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:929) - ORCHESTRATOR [OPTIMIZED]: Join 1000000 is incomplete - checking next
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:936) - ORCHESTRATOR [OPTIMIZED]: No complete joins found in 1 pending joins - waiting for more inputs
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1192) - ORCHESTRATOR: Current join status (mode=OPTIMIZED):
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1203) -   Join 1000000: 1/2 inputs [WAITING]
+Scheduler returned pArgs: [1000002903, 1000002]
+pArgs.get(0): 1000002903
+queueAction: 50
+MAXQUEUE: 50
+costKeyTokenMap size before: 0
+=== EVENT ACCEPTED - PROCESSING ===
+costKey: 1000002903
+sid: 1000002
+PRIORITY: seqId=1000002 version=v001 completedJoin=true schedulerKey=1000002903 -> priorityKey=1000002
+=== ADDING TO PROCESSING QUEUE ===
+About to add costKey 1000002 to costKeyTokenMap
+Successfully added to costKeyTokenMap
+costKeyTokenMap size after: 1
+About to call notify() to wake up ServiceThread
+=== END EVENT PROCESSING ===
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:480) - ORCHESTRATOR: Processing:: token_branch2 = {"token":{"annotation":"{\"place\":\"P3\",\"entryTime\":1770275298579,\"exitTime\":1770275298722,\"residenceTime\":143,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"distribution\":\"DETERMINISTIC\",\"routingPath\":\"true\"}","notAfter":1770275407633,"tokenId":"1000001","data":{"delayMs":"0","place":"P3","distribution":"DETERMINISTIC"},"workflow_start_time":1770275287633,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":true,"routing_path":"true"},"service_start_time":1770275298578,"version":"v001","executionTime":143,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":146,"original_token":"{\"notAfter\":1770275407633,\"tokenId\":\"1000001\",\"data\":{},\"workflow_start_time\":1770275287633,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1770275298724,"status":"COMPLETED"}}
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:524) - CAPTURE: WorkflowStartTime=1770275293228 for seqID=1000002
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:537) - Incoming Sequence ID = 1000002
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:538) - MonitorIncomingEvents+ = true
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:554) - Using RuleBaseVersion: v001
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:569) - FILTER: Event for P4_Place.processToken accepted by P4_Place thread
+ WARN [ServiceThread-P4_Place-14004] (jsonLibrary.java:87) - Key "token_branch2" already exists. Skipping.
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:585) - JOIN-MAP: Added key=token_branch2 to join 1000000 (tokenId=1000002, mapSize=2)
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:594) - DEBUG: Loading rule base for operation: processToken
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:595) - DEBUG: Rule base location: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4/RuleFolder.v001/processToken/Service.ruleml
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:600) - DEBUG: Using cached knowledge base for version: v001
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:620) - DEBUG: Parsing knowledge base...
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:622) - DEBUG: Knowledge base parsed successfully
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:637) - T_IN-SYNC: Token 1000002 needs input synchronization (2 inputs required: [token_branch1, token_branch2])
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:2518) - decisionValueCollection already populated from publishes query - skipping legacy getDecisionValue
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:354) - Token 1000002 buffered at T_in_P4_Place (buffer=0)
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:1085) - Could not extract previousPlace from payload
+DEBUG [ServiceThread-P4_Place-14004] (BuildServiceAnalysisDatabase.java:807) - Wrote transition firing: T_in_P4 token=1000002 eventType=BUFFERED
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:909) - Recorded transition: T_in_P4 (ForkNode) token=1000002  -> P4_Place [BUFFERED] buffer=0
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:3103) - PETRI-NET: Token 1000002 BUFFERED at P4_Place (waiting for join)
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:677) - DEBUG: About to check inputCollection.isEmpty() - size: 2
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:678) - DEBUG: inputCollection contents: [token_branch1, token_branch2]
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:679) - DEBUG: nodeType: ForkNode
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:680) - DEBUG: needsInputSynchronization: true
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:697) - DEBUG: Past inputCollection check, about to enter JOIN processing
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:698) - DEBUG: inputCollection.get(0): token_branch1
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:836) - ORCHESTRATOR: Processing input synchronization for P4_Place:processToken
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:841) - ORCHESTRATOR: Input sync P4_Place:processToken waiting for 2 inputs (from canonical binding: [token_branch1, token_branch2])
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:865) - JOIN-COUNT: Stored expectedCount=2 for joinID=1000000
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:868) - ORCHESTRATOR: Input sync P4_Place:processToken waiting for 2 inputs: [token_branch1, token_branch2]
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:885) - TRACK: Fork 1000002 workflowStartTime=1770275293228
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:898) - ORCHESTRATOR [OPTIMIZED]: Checking 1 joins for completeness in sequence ID order
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:902) - ORCHESTRATOR [OPTIMIZED]: Sequence ID sorted join order:
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:904) -   - Sequence 1000000
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1047) - Join 1000000 using stored expectedCount=2, currentSize=2
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1052) - Join 1000000 is COMPLETE: 2 >= 2
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:925) - ORCHESTRATOR [OPTIMIZED]: Found COMPLETE join 1000000 - processing immediately
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1047) - Join 1000000 using stored expectedCount=2, currentSize=2
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1052) - Join 1000000 is COMPLETE: 2 >= 2
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1104) - ORCHESTRATOR: Added argument 'token_branch1' to inputArgs
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1104) - ORCHESTRATOR: Added argument 'token_branch2' to inputArgs
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:1106) - ORCHESTRATOR: Collected 2 arguments for join 1000000 (inputs: [token_branch1, token_branch2])
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:1124) - ORCHESTRATOR: Join 1000000 complete - participating forks: [fork=1000001,wfStart=1770275293228, fork=1000002,wfStart=1770275293228]
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:1131) - ORCHESTRATOR: Join 1000000 complete with 2 inputs for P4_Place.processToken
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:1138) - JOIN-CONTINUE: Token 1000001 continues after JOIN at P4_Place
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:1139) - ORCHESTRATOR: Preserving workflowStartTime: 1770275293228
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:137) - Token 1000001 entering place: P4_Place (buffer=0)
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:1085) - Could not extract previousPlace from payload
+DEBUG [ServiceThread-P4_Place-14004] (BuildServiceAnalysisDatabase.java:807) - Wrote transition firing: T_in_P4 token=1000001 eventType=ENTER
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:909) - Recorded transition: T_in_P4 (JoinNode) token=1000001  -> P4_Place [ENTER] buffer=0
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:1066) - Token 1000001 arrived at join T_in_P4
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:3200) - PETRI-NET: JOIN complete - token 1000001 ENTER at P4_Place
+ INFO [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:519) - Token 1000002 CONSUMED at join P4_Place (continuation token: 1000001)
+DEBUG [ServiceThread-P4_Place-14004] (BuildServiceAnalysisDatabase.java:807) - Wrote transition firing: T_in_P4 token=1000002 eventType=JOIN_CONSUMED
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:909) - Recorded transition: T_in_P4 (JoinNode) token=1000002  -> JOIN_CONSUMED [JOIN_CONSUMED]
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:3207) - PETRI-NET: JOIN consumed participant 1000002 at P4_Place
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:1254) - ORCHESTRATOR: Processing ForkNode for P4_Place.processToken
+ INFO [ServiceThread-P4_Place-14004] (TransitionHandler.java:664) - ORCHESTRATOR: Processing ForkNode (Parallel Gateway) for P4_Place.processToken
+DEBUG: getRuleBaset attempting to read from: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4/RuleFolder.v001/processToken/Service.ruleml
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1601) - FORK: Reloaded knowledge base successfully
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:2348) - CANONICAL-BINDING: Checking canonical binding for P4_Place.processToken with attribute 'token_branch2'
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:2376) - CANONICAL-BINDING: Operation processToken uses standard (AND) semantics
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2414) - CANONICAL-BINDING: processToken requires 2 inputs total (standard AND logic)
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2428) - CANONICAL-BINDING: processToken needs 2 inputs - should use JOIN processing
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:2148) - ORCHESTRATOR: No single-input canonical binding - proceeding with normal service call
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2149) - ORCHESTRATOR: Invoking P4_Place.processToken via ServiceHelper (normal)
+ INFO [ServiceThread-P4_Place-14004] (ServiceHelper.java:125) - === SERVICE INVOCATION START ===
+ INFO [ServiceThread-P4_Place-14004] (ServiceHelper.java:126) - Service: org.btsn.places.P4_Place.processToken
+ INFO [ServiceThread-P4_Place-14004] (ServiceHelper.java:127) - SequenceID: 1000001
+ INFO [ServiceThread-P4_Place-14004] (ServiceHelper.java:128) - Input arguments count: 2
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:139) - Processing argument 1/2, raw length: 842
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:313) - ENRICHMENT: Unwrapped place response from key: token
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:253) - ENRICHMENT: Found existing original_token to preserve
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:268) - ENRICHMENT: Extracted workflow_start_time=1770275287633
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:163) - ENRICHMENT: Cleaned argument 1, length: 842 (removed 0 bytes of metadata)
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:139) - Processing argument 2/2, raw length: 842
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:313) - ENRICHMENT: Unwrapped place response from key: token
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:253) - ENRICHMENT: Found existing original_token to preserve
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:268) - ENRICHMENT: Extracted workflow_start_time=1770275287633
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:163) - ENRICHMENT: Cleaned argument 2, length: 842 (removed 0 bytes of metadata)
+ INFO [ServiceThread-P4_Place-14004] (ServiceHelper.java:167) - ENRICHMENT: Extracted 2 clean business data arguments (removed infrastructure metadata)
+ INFO [ServiceThread-P4_Place-14004] (ServiceHelper.java:178) - SERVICE INVOKE: Calling org.btsn.places.P4_Place.processToken with 2 CLEAN business data arguments
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:506) - INVOKE: Reflecting on org.btsn.places.P4_Place.processToken
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:507) - INVOKE: Looking for method with 2 String parameters
+ INFO [ServiceThread-P4_Place-14004] (PetriNetEventLogger.java:45) - === PETRI NET EVENT LOGGER INITIALIZED ===
+ INFO [ServiceThread-P4_Place-14004] (PetriNetEventLogger.java:320) - PLACE_CREATED: placeId=P4, sequenceId=1000001, type=P4, capacity=1
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:631) - INVOKE: Created instance using 1-param constructor (context) for org.btsn.places.P4_Place
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:557) - INVOKE: Found standard method (2 String args)
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:590) - INVOKE: Calling processToken with 2 arguments
+ INFO [ServiceThread-P4_Place-14004] (BaseStochasticPetriNetPlace.java:386) - PN_JOIN_PROCESS: place=P4, seq=1000001 - Processing synchronized inputs
+[P4] Unwrapped place response from key: token
+[P4] Preserved workflow_start_time: 1770275287633
+[P4] Parsed token: id=1000001, version=v001, place=P1_Place
+[P4] Unwrapped place response from key: token
+[P4] Preserved workflow_start_time: 1770275287633
+[P4] Parsed token: id=1000001, version=v001, place=P1_Place
+ INFO [ServiceThread-P4_Place-14004] (BaseStochasticPetriNetPlace.java:394) - PN_JOIN_PROCESS: place=P4 - Input1=1000001, Input2=1000001
+ INFO [ServiceThread-P4_Place-14004] (PetriNetEventLogger.java:320) - TOKEN_ARRIVAL: placeId=P4, sequenceId=1000001, token=Token{id='1000001', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P2, distribution=DETERMINISTIC, workflow_start_time=1770275287633}, valid=true}
+ INFO [ServiceThread-P4_Place-14004] (PetriNetEventLogger.java:320) - CAPACITY_CHECK: placeId=P4, sequenceId=1000001, M(P)=0, capacity=1, hasCapacity=true
+ INFO [ServiceThread-P4_Place-14004] (PetriNetEventLogger.java:320) - MARKING_CHANGE: placeId=P4, sequenceId=1000001, M(P)=1, reason=token_accepted
+ INFO [ServiceThread-P4_Place-14004] (PetriNetEventLogger.java:320) - TOKEN_HELD: placeId=P4, sequenceId=1000001, token=Token{id='1000001', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P2, distribution=DETERMINISTIC, workflow_start_time=1770275287633}, valid=true}, M(P)=1, capacity=1
+ INFO [ServiceThread-P4_Place-14004] (PetriNetEventLogger.java:320) - VALIDITY_WINDOW_CHECK: placeId=P4, sequenceId=1000001, currentTime=1770275299234, notAfter=1770275407633, valid=true
+ INFO [ServiceThread-P4_Place-14004] (PetriNetEventLogger.java:320) - PLACE_EXECUTION: placeId=P4, sequenceId=1000001, executionTime=6ms, result=JOIN_COMPLETED
+ INFO [ServiceThread-P4_Place-14004] (BaseStochasticPetriNetPlace.java:434) - PN_JOIN_PROCESS: place=P4, seq=1000001, guard=false (prob=0.50), delay=0ms, total=6ms
+ INFO [ServiceThread-P4_Place-14004] (PetriNetEventLogger.java:320) - MARKING_CHANGE: placeId=P4, sequenceId=1000001, M(P)=0, reason=token_released
+ INFO [ServiceThread-P4_Place-14004] (PetriNetEventLogger.java:320) - TOKEN_RELEASED: placeId=P4, sequenceId=1000001, token=Token{id='1000001', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P2, distribution=DETERMINISTIC, workflow_start_time=1770275287633}, valid=true}, M(P)=0
+ INFO [ServiceThread-P4_Place-14004] (PetriNetEventLogger.java:320) - TOKEN_DEPARTURE: placeId=P4, sequenceId=1000001, token=Token{id='1000001', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P2, distribution=DETERMINISTIC, workflow_start_time=1770275287633}, valid=true}, annotation={"place":"P4","entryTime":1770275299229,"exitTime":1770275299235,"residenceTime":6,"delayMs":0,"marking":1,"capacity":1,"joinType":"AND_JOIN","input1Token":"1000001","input2Token":"1000001"}
+ INFO [ServiceThread-P4_Place-14004] (ServiceHelper.java:189) - SERVICE COMPLETE: org.btsn.places.P4_Place.processToken completed in 99ms
+ INFO [ServiceThread-P4_Place-14004] (ServiceHelper.java:197) - ENRICHMENT: Successfully enriched service result with metadata
+ INFO [ServiceThread-P4_Place-14004] (ServiceHelper.java:199) - === SERVICE INVOCATION COMPLETE ===
+ INFO [ServiceThread-P4_Place-14004] (TransitionHandler.java:673) - FORK: Transformation service returned: {"token":{"annotation":"{\"place\":\"P4\",\"entryTime\":1770275299229,\"exitTime\":1770275299235,\"residenceTime\":6,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"joinType\":\"AND_JOIN\",\"input1Token\":\"1000001\",\"input2Token\":\"1000001\"}","notAfter":1770275407633,"tokenId":"1000001","data":{"delayMs":"0","place":"P2","distribution":"DETERMINISTIC"},"workflow_start_time":1770275287633,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":false,"routing_path":"false"},"service_start_time":1770275299220,"version":"v001","executionTime":6,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":99,"original_token":"{\"notAfter\":1770275407633,\"tokenId\":\"1000001\",\"data\":{},\"workflow_start_time\":1770275287633,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1770275299319,"status":"JOIN_COMPLETED"}}
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:1573) - FORK: Collected service P5_Place.processToken (unconditional)
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:1573) - FORK: Collected service P6_Place.processToken (unconditional)
+ INFO [ServiceThread-P4_Place-14004] (TransitionHandler.java:699) - FORK: Parallel split to 2 service(s)
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1452) - CANONICAL-RETURN: Querying return attribute for operation=processToken, rowsReturned=2
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1460) - CANONICAL-RETURN: row[0] key='?inputAttr' value='token_branch1'
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1460) - CANONICAL-RETURN: row[1] key='?returnAttr' value='token'
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:1463) - CANONICAL-RETURN: Found return attribute 'token' for operation=processToken
+ INFO [ServiceThread-P4_Place-14004] (TransitionHandler.java:707) - FORK: Using return attribute 'token' from canonical binding
+ INFO [ServiceThread-P4_Place-14004] (TransitionHandler.java:723) - FORK: Routing child token 1000001 to P5_Place.processToken with attribute 'token' (branch=0)
+DEBUG [ServiceThread-P4_Place-14004] (BuildServiceAnalysisDatabase.java:841) - Wrote token genealogy: parent=1000000 -> child=1000001
+ INFO [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:676) - GENEALOGY: Recorded fork 1000000 -> 1000001 via T_out_P4_Place (workflowBase=1000000)
+DEBUG [ServiceThread-P4_Place-14004] (BuildServiceAnalysisDatabase.java:807) - Wrote transition firing: T_out_P4_Place token=1000000 eventType=FORK_CONSUMED
+ INFO [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:778) - FORK_CONSUMED: Parent token 1000000 consumed at T_out_P4_Place (workflowBase=1000000)
+DEBUG [ServiceThread-P4_Place-14004] (BuildServiceAnalysisDatabase.java:807) - Wrote transition firing: T_out_P4 token=1000001 eventType=FORK
+ INFO [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:727) - FORK: Child token 1000001 created from parent 1000000 at T_out_P4
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:3176) - PETRI-NET: FORK 1000000 -> child 1000001 at P4_Place
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:592) - Token 1000001 exiting place: P4_Place -> P5_Place [arc=token]
+DEBUG [ServiceThread-P4_Place-14004] (BuildServiceAnalysisDatabase.java:807) - Wrote transition firing: T_out_P4 token=1000001 eventType=EXIT
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:909) - Recorded transition: T_out_P4 (ForkNode) token=1000001 P4_Place -> P5_Place [EXIT] arc=token
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:3151) - PETRI-NET: Token 1000001 EXIT from P4_Place -> P5_Place.processToken [arc=token]
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2031) - ROUTING: Token 1000001 -> 'token' (explicit) to P5_Place.processToken
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:1926) - FORK: Routed to P5_Place via activeService on 192.168.1.152:4005 (no T_out record)
+ INFO [ServiceThread-P4_Place-14004] (TransitionHandler.java:723) - FORK: Routing child token 1000002 to P6_Place.processToken with attribute 'token' (branch=1)
+DEBUG [ServiceThread-P4_Place-14004] (BuildServiceAnalysisDatabase.java:841) - Wrote token genealogy: parent=1000000 -> child=1000002
+ INFO [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:676) - GENEALOGY: Recorded fork 1000000 -> 1000002 via T_out_P4_Place (workflowBase=1000000)
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:750) - Parent 1000000 already marked as consumed at T_out_P4_Place
+DEBUG [ServiceThread-P4_Place-14004] (BuildServiceAnalysisDatabase.java:807) - Wrote transition firing: T_out_P4 token=1000002 eventType=FORK
+ INFO [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:727) - FORK: Child token 1000002 created from parent 1000000 at T_out_P4
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:3176) - PETRI-NET: FORK 1000000 -> child 1000002 at P4_Place
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:592) - Token 1000002 exiting place: P4_Place -> P6_Place [arc=token]
+DEBUG [ServiceThread-P4_Place-14004] (BuildServiceAnalysisDatabase.java:807) - Wrote transition firing: T_out_P4 token=1000002 eventType=EXIT
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:909) - Recorded transition: T_out_P4 (ForkNode) token=1000002 P4_Place -> P6_Place [EXIT] arc=token
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:3151) - PETRI-NET: Token 1000002 EXIT from P4_Place -> P6_Place.processToken [arc=token]
+Feb 05, 2026 5:08:19 PM org.btsn.handlers.EventPublisher publishServiceEvent
+INFO: EventPublisher: Publishing EVT_P5_PLACE_PROCESSTOKEN_1770275299456_979 to 192.168.1.152:4005
+Feb 05, 2026 5:08:19 PM org.btsn.handlers.EventPublisher publishDirectly
+INFO: EventPublisher: Created shared socket on port 52335
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2031) - ROUTING: Token 1000002 -> 'token' (explicit) to P6_Place.processToken
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:1926) - FORK: Routed to P6_Place via activeService on 192.168.1.152:4006 (no T_out record)
+ INFO [ServiceThread-P4_Place-14004] (TransitionHandler.java:741) - FORK: Parallel routing complete - 2 child tokens created
+ERROR [ServiceThread-P4_Place-14004] (ServiceThread.java:1306) - monitorIncomingEvents: true
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:2815) - TIMING: Using EventReactor arrival time=1770275298908 for seqID=1000002
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:2830) - WRITE: Using captured workflowStartTime=1770275293228 for seqID=1000002
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2852) - === SERVICE TIMING RECORD ===
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2853) -   Sequence ID: 1000002
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2854) -   Service: P4_Place
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2855) -   Operation: processToken
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2856) -   Arrival Time (EventReactor): 1770275298908
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2857) -   Invocation Time: 1770275299135
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2858) -   Publish Time: 1770275299623
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2859) -   Workflow Start Time: 1770275293228
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2860) -   MARKING: Buffer=0, Total=1, Capacity=50
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2862) - ==============================
+Feb 05, 2026 5:08:19 PM org.btsn.handlers.EventPublisher publishServiceEvent
+INFO: EventPublisher: Publishing EVT_P6_PLACE_PROCESSTOKEN_1770275299621_170 to 192.168.1.152:4006
+ INFO [ServiceThread-P4_Place-14004] (BuildServiceAnalysisDatabase.java:683) - Wrote service timing record for sequenceID: 1000002
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:2874) -   Queue Time (including priority queue): 227ms
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:2875) -   Service Time: 488ms
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:2876) -   Total Time: 715ms
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:2877) -   Buffer Utilization: 0.0%
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:1164) - ORCHESTRATOR: Service P4_Place sequence ID: 1000001 complete.
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1175) - ORCHESTRATOR: Cleaned up join 1000000
+Scheduler returned pArgs: [1000001679, 1000001]
+pArgs.get(0): 1000001679
+queueAction: 50
+MAXQUEUE: 50
+costKeyTokenMap size before: 0
+=== EVENT ACCEPTED - PROCESSING ===
+costKey: 1000001679
+sid: 1000001
+PRIORITY: seqId=1000001 version=v001 completedJoin=true schedulerKey=1000001679 -> priorityKey=1000001
+=== ADDING TO PROCESSING QUEUE ===
+About to add costKey 1000001 to costKeyTokenMap
+Successfully added to costKeyTokenMap
+costKeyTokenMap size after: 1
+About to call notify() to wake up ServiceThread
+=== END EVENT PROCESSING ===
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:480) - ORCHESTRATOR: Processing:: token_branch1 = {"token":{"annotation":"{\"place\":\"P2\",\"entryTime\":1770275304353,\"exitTime\":1770275304498,\"residenceTime\":145,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"distribution\":\"DETERMINISTIC\",\"routingPath\":\"true\"}","notAfter":1770275407633,"tokenId":"1000001","data":{"delayMs":"0","place":"P2","distribution":"DETERMINISTIC"},"workflow_start_time":1770275287633,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":true,"routing_path":"true"},"service_start_time":1770275304352,"version":"v001","executionTime":145,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":147,"original_token":"{\"notAfter\":1770275407633,\"tokenId\":\"1000001\",\"data\":{},\"workflow_start_time\":1770275287633,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1770275304499,"status":"COMPLETED"}}
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:524) - CAPTURE: WorkflowStartTime=1770275293228 for seqID=1000001
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:537) - Incoming Sequence ID = 1000001
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:538) - MonitorIncomingEvents+ = true
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:554) - Using RuleBaseVersion: v001
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:569) - FILTER: Event for P4_Place.processToken accepted by P4_Place thread
+ WARN [ServiceThread-P4_Place-14004] (jsonLibrary.java:87) - Key "token_branch1" already exists. Skipping.
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:585) - JOIN-MAP: Added key=token_branch1 to join 1000000 (tokenId=1000001, mapSize=1)
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:594) - DEBUG: Loading rule base for operation: processToken
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:595) - DEBUG: Rule base location: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4/RuleFolder.v001/processToken/Service.ruleml
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:600) - DEBUG: Using cached knowledge base for version: v001
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:620) - DEBUG: Parsing knowledge base...
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:622) - DEBUG: Knowledge base parsed successfully
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:637) - T_IN-SYNC: Token 1000001 needs input synchronization (2 inputs required: [token_branch1, token_branch2])
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:2518) - decisionValueCollection already populated from publishes query - skipping legacy getDecisionValue
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:354) - Token 1000001 buffered at T_in_P4_Place (buffer=0)
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:1085) - Could not extract previousPlace from payload
+DEBUG [ServiceThread-P4_Place-14004] (BuildServiceAnalysisDatabase.java:807) - Wrote transition firing: T_in_P4 token=1000001 eventType=BUFFERED
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:909) - Recorded transition: T_in_P4 (ForkNode) token=1000001  -> P4_Place [BUFFERED] buffer=0
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:3103) - PETRI-NET: Token 1000001 BUFFERED at P4_Place (waiting for join)
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:677) - DEBUG: About to check inputCollection.isEmpty() - size: 2
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:678) - DEBUG: inputCollection contents: [token_branch1, token_branch2]
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:679) - DEBUG: nodeType: ForkNode
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:680) - DEBUG: needsInputSynchronization: true
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:697) - DEBUG: Past inputCollection check, about to enter JOIN processing
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:698) - DEBUG: inputCollection.get(0): token_branch1
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:836) - ORCHESTRATOR: Processing input synchronization for P4_Place:processToken
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:841) - ORCHESTRATOR: Input sync P4_Place:processToken waiting for 2 inputs (from canonical binding: [token_branch1, token_branch2])
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:865) - JOIN-COUNT: Stored expectedCount=2 for joinID=1000000
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:868) - ORCHESTRATOR: Input sync P4_Place:processToken waiting for 2 inputs: [token_branch1, token_branch2]
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:885) - TRACK: Fork 1000001 workflowStartTime=1770275293228
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:898) - ORCHESTRATOR [OPTIMIZED]: Checking 1 joins for completeness in sequence ID order
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:902) - ORCHESTRATOR [OPTIMIZED]: Sequence ID sorted join order:
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:904) -   - Sequence 1000000
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1047) - Join 1000000 using stored expectedCount=2, currentSize=1
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:929) - ORCHESTRATOR [OPTIMIZED]: Join 1000000 is incomplete - checking next
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:936) - ORCHESTRATOR [OPTIMIZED]: No complete joins found in 1 pending joins - waiting for more inputs
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1192) - ORCHESTRATOR: Current join status (mode=OPTIMIZED):
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1203) -   Join 1000000: 1/2 inputs [WAITING]
+Rule Handler received from 192.168.1.152:52348 - payload length: 778
+=== RECEIVED XML PAYLOAD ===
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><rulepayload xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="rulepayload.xsd">
+	<header>
+		<timestamp>2012-01-02T20:05:05.491+10:30</timestamp>
+		<ruleFileName>ThisServiceControlNode</ruleFileName>
+		<ruleBaseVersion>v999</ruleBaseVersion>
+		<ruleBaseCommitment>5</ruleBaseCommitment>
+	</header>
+	<targetservice>
+		<serviceName>P4_CollectorService</serviceName>
+		<operationName>collectAllData</operationName>
+	</targetservice>
+	<rulefiledata><data><![CDATA[<Atom><Rel>NodeType</Rel><Ind>EdgeNode</Ind></Atom><Atom><Rel>meetsCondition</Rel><Ind>MonitorService</Ind><Ind>writeCollectorData</Ind><Ind>EDGE_NODE</Ind><Ind></Ind></Atom>]]></data>
+	</rulefiledata>
+</rulepayload>
+=== END PAYLOAD ===
+Received rule payload packet.....for operation: collectAllData<?xml version="1.0" encoding="UTF-8" standalone="no"?><rulepayload xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="rulepayload.xsd">
+	<header>
+		<timestamp>2012-01-02T20:05:05.491+10:30</timestamp>
+		<ruleFileName>ThisServiceControlNode</ruleFileName>
+		<ruleBaseVersion>v999</ruleBaseVersion>
+		<ruleBaseCommitment>5</ruleBaseCommitment>
+	</header>
+	<targetservice>
+		<serviceName>P4_CollectorService</serviceName>
+		<operationName>collectAllData</operationName>
+	</targetservice>
+	<rulefiledata><data><![CDATA[<Atom><Rel>NodeType</Rel><Ind>EdgeNode</Ind></Atom><Atom><Rel>meetsCondition</Rel><Ind>MonitorService</Ind><Ind>writeCollectorData</Ind><Ind>EDGE_NODE</Ind><Ind></Ind></Atom>]]></data>
+	</rulefiledata>
+</rulepayload>
+Searching in: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings
+Found binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\P4\P4_CollectorService-CanonicalBindings.ruleml.xml
+  Found rule file: C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\CoreRuleBase.ruleml.xml
+  Found rule file: C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\RemoteHostMappings.ruleml.xml
+  Found rule file: C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\Healthcare\ListofHealthCareActiveServices.ruleml.xml
+  Found rule file: C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\Healthcare\ListofHealthCareCollectorServices.ruleml.xml
+  Found rule file: C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\Healthcare\ListofHealthcareInitializationServices.ruleml.xml
+  Found rule file: C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\Monitor\ListofMonitorActiveServices.ruleml.xml
+  Found rule file: C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\PetriNet\ListofPetriNetActiveServices.ruleml.xml
+  Found rule file: C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\PetriNet\ListofPetrinetCollectorServices.ruleml.xml
+  Found rule file: C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\PetriNet\ListofPetriNetInitializationServices.ruleml.xml
+Found 9 rule files in RuleBase
+Processing C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\CoreRuleBase.ruleml.xml... 
+Processing C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\Healthcare\ListofHealthCareActiveServices.ruleml.xml... 
+Processing C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\Healthcare\ListofHealthCareCollectorServices.ruleml.xml... 
+Processing C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\Healthcare\ListofHealthcareInitializationServices.ruleml.xml... 
+Processing C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\Monitor\ListofMonitorActiveServices.ruleml.xml... 
+Processing C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\PetriNet\ListofPetriNetActiveServices.ruleml.xml... 
+Processing C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\PetriNet\ListofPetriNetInitializationServices.ruleml.xml... 
+Processing C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\PetriNet\ListofPetrinetCollectorServices.ruleml.xml... 
+Processing C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase\RemoteHostMappings.ruleml.xml... 
+Processing binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\P4\P4_CollectorService-CanonicalBindings.ruleml.xml
+Processing control Node file.... P4_CollectorService-ControlNodeRules.ruleml.xml
+All files have been concatenated into Service.ruleml
+Sending commitment to remote source: 192.168.1.152:35999
+Converted XML to simple format: CONFIRMED:v999:5
+Sent commitment response: CONFIRMED:v999:5 to 192.168.1.152:35999
+Sent acknowledgment to 192.168.1.152
+CreatFile: file deleted
+Scheduler returned pArgs: [1000002221, 1000002]
+pArgs.get(0): 1000002221
+queueAction: 50
+MAXQUEUE: 50
+costKeyTokenMap size before: 0
+=== EVENT ACCEPTED - PROCESSING ===
+costKey: 1000002221
+sid: 1000002
+PRIORITY: seqId=1000002 version=v001 completedJoin=true schedulerKey=1000002221 -> priorityKey=1000002
+=== ADDING TO PROCESSING QUEUE ===
+About to add costKey 1000002 to costKeyTokenMap
+Successfully added to costKeyTokenMap
+costKeyTokenMap size after: 1
+About to call notify() to wake up ServiceThread
+=== END EVENT PROCESSING ===
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:480) - ORCHESTRATOR: Processing:: token_branch2 = {"token":{"annotation":"{\"place\":\"P3\",\"entryTime\":1770275307910,\"exitTime\":1770275308051,\"residenceTime\":141,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"distribution\":\"DETERMINISTIC\",\"routingPath\":\"true\"}","notAfter":1770275407633,"tokenId":"1000001","data":{"delayMs":"0","place":"P3","distribution":"DETERMINISTIC"},"workflow_start_time":1770275287633,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":true,"routing_path":"true"},"service_start_time":1770275307909,"version":"v001","executionTime":141,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":143,"original_token":"{\"notAfter\":1770275407633,\"tokenId\":\"1000001\",\"data\":{},\"workflow_start_time\":1770275287633,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1770275308052,"status":"COMPLETED"}}
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:524) - CAPTURE: WorkflowStartTime=1770275293228 for seqID=1000002
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:537) - Incoming Sequence ID = 1000002
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:538) - MonitorIncomingEvents+ = true
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:554) - Using RuleBaseVersion: v001
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:569) - FILTER: Event for P4_Place.processToken accepted by P4_Place thread
+ WARN [ServiceThread-P4_Place-14004] (jsonLibrary.java:87) - Key "token_branch2" already exists. Skipping.
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:585) - JOIN-MAP: Added key=token_branch2 to join 1000000 (tokenId=1000002, mapSize=2)
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:594) - DEBUG: Loading rule base for operation: processToken
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:595) - DEBUG: Rule base location: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4/RuleFolder.v001/processToken/Service.ruleml
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:600) - DEBUG: Using cached knowledge base for version: v001
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:620) - DEBUG: Parsing knowledge base...
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:622) - DEBUG: Knowledge base parsed successfully
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:637) - T_IN-SYNC: Token 1000002 needs input synchronization (2 inputs required: [token_branch1, token_branch2])
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:2518) - decisionValueCollection already populated from publishes query - skipping legacy getDecisionValue
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:354) - Token 1000002 buffered at T_in_P4_Place (buffer=0)
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:1085) - Could not extract previousPlace from payload
+DEBUG [ServiceThread-P4_Place-14004] (BuildServiceAnalysisDatabase.java:807) - Wrote transition firing: T_in_P4 token=1000002 eventType=BUFFERED
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:909) - Recorded transition: T_in_P4 (ForkNode) token=1000002  -> P4_Place [BUFFERED] buffer=0
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:3103) - PETRI-NET: Token 1000002 BUFFERED at P4_Place (waiting for join)
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:677) - DEBUG: About to check inputCollection.isEmpty() - size: 2
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:678) - DEBUG: inputCollection contents: [token_branch1, token_branch2]
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:679) - DEBUG: nodeType: ForkNode
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:680) - DEBUG: needsInputSynchronization: true
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:697) - DEBUG: Past inputCollection check, about to enter JOIN processing
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:698) - DEBUG: inputCollection.get(0): token_branch1
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:836) - ORCHESTRATOR: Processing input synchronization for P4_Place:processToken
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:841) - ORCHESTRATOR: Input sync P4_Place:processToken waiting for 2 inputs (from canonical binding: [token_branch1, token_branch2])
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:865) - JOIN-COUNT: Stored expectedCount=2 for joinID=1000000
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:868) - ORCHESTRATOR: Input sync P4_Place:processToken waiting for 2 inputs: [token_branch1, token_branch2]
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:885) - TRACK: Fork 1000002 workflowStartTime=1770275293228
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:898) - ORCHESTRATOR [OPTIMIZED]: Checking 1 joins for completeness in sequence ID order
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:902) - ORCHESTRATOR [OPTIMIZED]: Sequence ID sorted join order:
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:904) -   - Sequence 1000000
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1047) - Join 1000000 using stored expectedCount=2, currentSize=2
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1052) - Join 1000000 is COMPLETE: 2 >= 2
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:925) - ORCHESTRATOR [OPTIMIZED]: Found COMPLETE join 1000000 - processing immediately
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1047) - Join 1000000 using stored expectedCount=2, currentSize=2
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1052) - Join 1000000 is COMPLETE: 2 >= 2
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1104) - ORCHESTRATOR: Added argument 'token_branch1' to inputArgs
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1104) - ORCHESTRATOR: Added argument 'token_branch2' to inputArgs
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:1106) - ORCHESTRATOR: Collected 2 arguments for join 1000000 (inputs: [token_branch1, token_branch2])
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:1124) - ORCHESTRATOR: Join 1000000 complete - participating forks: [fork=1000001,wfStart=1770275293228, fork=1000002,wfStart=1770275293228]
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:1131) - ORCHESTRATOR: Join 1000000 complete with 2 inputs for P4_Place.processToken
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:1138) - JOIN-CONTINUE: Token 1000001 continues after JOIN at P4_Place
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:1139) - ORCHESTRATOR: Preserving workflowStartTime: 1770275293228
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:137) - Token 1000001 entering place: P4_Place (buffer=0)
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:1085) - Could not extract previousPlace from payload
+DEBUG [ServiceThread-P4_Place-14004] (BuildServiceAnalysisDatabase.java:807) - Wrote transition firing: T_in_P4 token=1000001 eventType=ENTER
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:909) - Recorded transition: T_in_P4 (JoinNode) token=1000001  -> P4_Place [ENTER] buffer=0
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:1066) - Token 1000001 arrived at join T_in_P4
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:3200) - PETRI-NET: JOIN complete - token 1000001 ENTER at P4_Place
+ INFO [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:519) - Token 1000002 CONSUMED at join P4_Place (continuation token: 1000001)
+DEBUG [ServiceThread-P4_Place-14004] (BuildServiceAnalysisDatabase.java:807) - Wrote transition firing: T_in_P4 token=1000002 eventType=JOIN_CONSUMED
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:909) - Recorded transition: T_in_P4 (JoinNode) token=1000002  -> JOIN_CONSUMED [JOIN_CONSUMED]
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:3207) - PETRI-NET: JOIN consumed participant 1000002 at P4_Place
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:1254) - ORCHESTRATOR: Processing ForkNode for P4_Place.processToken
+ INFO [ServiceThread-P4_Place-14004] (TransitionHandler.java:664) - ORCHESTRATOR: Processing ForkNode (Parallel Gateway) for P4_Place.processToken
+DEBUG: getRuleBaset attempting to read from: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4/RuleFolder.v001/processToken/Service.ruleml
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1601) - FORK: Reloaded knowledge base successfully
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:2348) - CANONICAL-BINDING: Checking canonical binding for P4_Place.processToken with attribute 'token_branch2'
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:2376) - CANONICAL-BINDING: Operation processToken uses standard (AND) semantics
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2414) - CANONICAL-BINDING: processToken requires 2 inputs total (standard AND logic)
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2428) - CANONICAL-BINDING: processToken needs 2 inputs - should use JOIN processing
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:2148) - ORCHESTRATOR: No single-input canonical binding - proceeding with normal service call
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2149) - ORCHESTRATOR: Invoking P4_Place.processToken via ServiceHelper (normal)
+ INFO [ServiceThread-P4_Place-14004] (ServiceHelper.java:125) - === SERVICE INVOCATION START ===
+ INFO [ServiceThread-P4_Place-14004] (ServiceHelper.java:126) - Service: org.btsn.places.P4_Place.processToken
+ INFO [ServiceThread-P4_Place-14004] (ServiceHelper.java:127) - SequenceID: 1000001
+ INFO [ServiceThread-P4_Place-14004] (ServiceHelper.java:128) - Input arguments count: 2
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:139) - Processing argument 1/2, raw length: 842
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:313) - ENRICHMENT: Unwrapped place response from key: token
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:253) - ENRICHMENT: Found existing original_token to preserve
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:268) - ENRICHMENT: Extracted workflow_start_time=1770275287633
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:163) - ENRICHMENT: Cleaned argument 1, length: 842 (removed 0 bytes of metadata)
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:139) - Processing argument 2/2, raw length: 842
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:313) - ENRICHMENT: Unwrapped place response from key: token
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:253) - ENRICHMENT: Found existing original_token to preserve
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:268) - ENRICHMENT: Extracted workflow_start_time=1770275287633
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:163) - ENRICHMENT: Cleaned argument 2, length: 842 (removed 0 bytes of metadata)
+ INFO [ServiceThread-P4_Place-14004] (ServiceHelper.java:167) - ENRICHMENT: Extracted 2 clean business data arguments (removed infrastructure metadata)
+ INFO [ServiceThread-P4_Place-14004] (ServiceHelper.java:178) - SERVICE INVOKE: Calling org.btsn.places.P4_Place.processToken with 2 CLEAN business data arguments
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:506) - INVOKE: Reflecting on org.btsn.places.P4_Place.processToken
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:507) - INVOKE: Looking for method with 2 String parameters
+ INFO [ServiceThread-P4_Place-14004] (PetriNetEventLogger.java:320) - PLACE_CREATED: placeId=P4, sequenceId=1000001, type=P4, capacity=1
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:631) - INVOKE: Created instance using 1-param constructor (context) for org.btsn.places.P4_Place
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:557) - INVOKE: Found standard method (2 String args)
+DEBUG [ServiceThread-P4_Place-14004] (ServiceHelper.java:590) - INVOKE: Calling processToken with 2 arguments
+ INFO [ServiceThread-P4_Place-14004] (BaseStochasticPetriNetPlace.java:386) - PN_JOIN_PROCESS: place=P4, seq=1000001 - Processing synchronized inputs
+[P4] Unwrapped place response from key: token
+[P4] Preserved workflow_start_time: 1770275287633
+[P4] Parsed token: id=1000001, version=v001, place=P1_Place
+[P4] Unwrapped place response from key: token
+[P4] Preserved workflow_start_time: 1770275287633
+[P4] Parsed token: id=1000001, version=v001, place=P1_Place
+ INFO [ServiceThread-P4_Place-14004] (BaseStochasticPetriNetPlace.java:394) - PN_JOIN_PROCESS: place=P4 - Input1=1000001, Input2=1000001
+ INFO [ServiceThread-P4_Place-14004] (PetriNetEventLogger.java:320) - TOKEN_ARRIVAL: placeId=P4, sequenceId=1000001, token=Token{id='1000001', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P2, distribution=DETERMINISTIC, workflow_start_time=1770275287633}, valid=true}
+ INFO [ServiceThread-P4_Place-14004] (PetriNetEventLogger.java:320) - CAPACITY_CHECK: placeId=P4, sequenceId=1000001, M(P)=0, capacity=1, hasCapacity=true
+ INFO [ServiceThread-P4_Place-14004] (PetriNetEventLogger.java:320) - MARKING_CHANGE: placeId=P4, sequenceId=1000001, M(P)=1, reason=token_accepted
+ INFO [ServiceThread-P4_Place-14004] (PetriNetEventLogger.java:320) - TOKEN_HELD: placeId=P4, sequenceId=1000001, token=Token{id='1000001', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P2, distribution=DETERMINISTIC, workflow_start_time=1770275287633}, valid=true}, M(P)=1, capacity=1
+ INFO [ServiceThread-P4_Place-14004] (PetriNetEventLogger.java:320) - VALIDITY_WINDOW_CHECK: placeId=P4, sequenceId=1000001, currentTime=1770275308618, notAfter=1770275407633, valid=true
+ INFO [ServiceThread-P4_Place-14004] (PetriNetEventLogger.java:320) - PLACE_EXECUTION: placeId=P4, sequenceId=1000001, executionTime=2ms, result=JOIN_COMPLETED
+ INFO [ServiceThread-P4_Place-14004] (BaseStochasticPetriNetPlace.java:434) - PN_JOIN_PROCESS: place=P4, seq=1000001, guard=false (prob=0.50), delay=0ms, total=2ms
+ INFO [ServiceThread-P4_Place-14004] (PetriNetEventLogger.java:320) - MARKING_CHANGE: placeId=P4, sequenceId=1000001, M(P)=0, reason=token_released
+ INFO [ServiceThread-P4_Place-14004] (PetriNetEventLogger.java:320) - TOKEN_RELEASED: placeId=P4, sequenceId=1000001, token=Token{id='1000001', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P2, distribution=DETERMINISTIC, workflow_start_time=1770275287633}, valid=true}, M(P)=0
+ INFO [ServiceThread-P4_Place-14004] (PetriNetEventLogger.java:320) - TOKEN_DEPARTURE: placeId=P4, sequenceId=1000001, token=Token{id='1000001', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P2, distribution=DETERMINISTIC, workflow_start_time=1770275287633}, valid=true}, annotation={"place":"P4","entryTime":1770275308616,"exitTime":1770275308618,"residenceTime":2,"delayMs":0,"marking":1,"capacity":1,"joinType":"AND_JOIN","input1Token":"1000001","input2Token":"1000001"}
+ INFO [ServiceThread-P4_Place-14004] (ServiceHelper.java:189) - SERVICE COMPLETE: org.btsn.places.P4_Place.processToken completed in 5ms
+ INFO [ServiceThread-P4_Place-14004] (ServiceHelper.java:197) - ENRICHMENT: Successfully enriched service result with metadata
+ INFO [ServiceThread-P4_Place-14004] (ServiceHelper.java:199) - === SERVICE INVOCATION COMPLETE ===
+ INFO [ServiceThread-P4_Place-14004] (TransitionHandler.java:673) - FORK: Transformation service returned: {"token":{"annotation":"{\"place\":\"P4\",\"entryTime\":1770275308616,\"exitTime\":1770275308618,\"residenceTime\":2,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"joinType\":\"AND_JOIN\",\"input1Token\":\"1000001\",\"input2Token\":\"1000001\"}","notAfter":1770275407633,"tokenId":"1000001","data":{"delayMs":"0","place":"P2","distribution":"DETERMINISTIC"},"workflow_start_time":1770275287633,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":false,"routing_path":"false"},"service_start_time":1770275308615,"version":"v001","executionTime":2,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":5,"original_token":"{\"notAfter\":1770275407633,\"tokenId\":\"1000001\",\"data\":{},\"workflow_start_time\":1770275287633,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1770275308620,"status":"JOIN_COMPLETED"}}
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:1573) - FORK: Collected service P5_Place.processToken (unconditional)
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:1573) - FORK: Collected service P6_Place.processToken (unconditional)
+ INFO [ServiceThread-P4_Place-14004] (TransitionHandler.java:699) - FORK: Parallel split to 2 service(s)
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1452) - CANONICAL-RETURN: Querying return attribute for operation=processToken, rowsReturned=2
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1460) - CANONICAL-RETURN: row[0] key='?inputAttr' value='token_branch1'
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1460) - CANONICAL-RETURN: row[1] key='?returnAttr' value='token'
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:1463) - CANONICAL-RETURN: Found return attribute 'token' for operation=processToken
+ INFO [ServiceThread-P4_Place-14004] (TransitionHandler.java:707) - FORK: Using return attribute 'token' from canonical binding
+ INFO [ServiceThread-P4_Place-14004] (TransitionHandler.java:723) - FORK: Routing child token 1000001 to P5_Place.processToken with attribute 'token' (branch=0)
+DEBUG [ServiceThread-P4_Place-14004] (BuildServiceAnalysisDatabase.java:841) - Wrote token genealogy: parent=1000000 -> child=1000001
+ INFO [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:676) - GENEALOGY: Recorded fork 1000000 -> 1000001 via T_out_P4_Place (workflowBase=1000000)
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:750) - Parent 1000000 already marked as consumed at T_out_P4_Place
+DEBUG [ServiceThread-P4_Place-14004] (BuildServiceAnalysisDatabase.java:807) - Wrote transition firing: T_out_P4 token=1000001 eventType=FORK
+ INFO [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:727) - FORK: Child token 1000001 created from parent 1000000 at T_out_P4
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:3176) - PETRI-NET: FORK 1000000 -> child 1000001 at P4_Place
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:592) - Token 1000001 exiting place: P4_Place -> P5_Place [arc=token]
+DEBUG [ServiceThread-P4_Place-14004] (BuildServiceAnalysisDatabase.java:807) - Wrote transition firing: T_out_P4 token=1000001 eventType=EXIT
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:909) - Recorded transition: T_out_P4 (ForkNode) token=1000001 P4_Place -> P5_Place [EXIT] arc=token
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:3151) - PETRI-NET: Token 1000001 EXIT from P4_Place -> P5_Place.processToken [arc=token]
+Feb 05, 2026 5:08:28 PM org.btsn.handlers.EventPublisher publishServiceEvent
+INFO: EventPublisher: Publishing EVT_P5_PLACE_PROCESSTOKEN_1770275308853_312 to 192.168.1.152:4005
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2031) - ROUTING: Token 1000001 -> 'token' (explicit) to P5_Place.processToken
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:1926) - FORK: Routed to P5_Place via activeService on 192.168.1.152:4005 (no T_out record)
+ INFO [ServiceThread-P4_Place-14004] (TransitionHandler.java:723) - FORK: Routing child token 1000002 to P6_Place.processToken with attribute 'token' (branch=1)
+DEBUG [ServiceThread-P4_Place-14004] (BuildServiceAnalysisDatabase.java:841) - Wrote token genealogy: parent=1000000 -> child=1000002
+ INFO [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:676) - GENEALOGY: Recorded fork 1000000 -> 1000002 via T_out_P4_Place (workflowBase=1000000)
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:750) - Parent 1000000 already marked as consumed at T_out_P4_Place
+DEBUG [ServiceThread-P4_Place-14004] (BuildServiceAnalysisDatabase.java:807) - Wrote transition firing: T_out_P4 token=1000002 eventType=FORK
+ INFO [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:727) - FORK: Child token 1000002 created from parent 1000000 at T_out_P4
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:3176) - PETRI-NET: FORK 1000000 -> child 1000002 at P4_Place
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:592) - Token 1000002 exiting place: P4_Place -> P6_Place [arc=token]
+DEBUG [ServiceThread-P4_Place-14004] (BuildServiceAnalysisDatabase.java:807) - Wrote transition firing: T_out_P4 token=1000002 eventType=EXIT
+DEBUG [ServiceThread-P4_Place-14004] (PetriNetInstrumentationHelper.java:909) - Recorded transition: T_out_P4 (ForkNode) token=1000002 P4_Place -> P6_Place [EXIT] arc=token
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:3151) - PETRI-NET: Token 1000002 EXIT from P4_Place -> P6_Place.processToken [arc=token]
+Feb 05, 2026 5:08:28 PM org.btsn.handlers.EventPublisher publishServiceEvent
+INFO: EventPublisher: Publishing EVT_P6_PLACE_PROCESSTOKEN_1770275308961_469 to 192.168.1.152:4006
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2031) - ROUTING: Token 1000002 -> 'token' (explicit) to P6_Place.processToken
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:1926) - FORK: Routed to P6_Place via activeService on 192.168.1.152:4006 (no T_out record)
+ INFO [ServiceThread-P4_Place-14004] (TransitionHandler.java:741) - FORK: Parallel routing complete - 2 child tokens created
+ERROR [ServiceThread-P4_Place-14004] (ServiceThread.java:1306) - monitorIncomingEvents: true
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:2815) - TIMING: Using EventReactor arrival time=1770275308267 for seqID=1000002
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:2830) - WRITE: Using captured workflowStartTime=1770275293228 for seqID=1000002
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2852) - === SERVICE TIMING RECORD ===
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2853) -   Sequence ID: 1000002
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2854) -   Service: P4_Place
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2855) -   Operation: processToken
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2856) -   Arrival Time (EventReactor): 1770275308267
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2857) -   Invocation Time: 1770275308532
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2858) -   Publish Time: 1770275308962
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2859) -   Workflow Start Time: 1770275293228
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2860) -   MARKING: Buffer=0, Total=1, Capacity=50
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:2862) - ==============================
+ INFO [ServiceThread-P4_Place-14004] (BuildServiceAnalysisDatabase.java:683) - Wrote service timing record for sequenceID: 1000002
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:2874) -   Queue Time (including priority queue): 265ms
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:2875) -   Service Time: 430ms
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:2876) -   Total Time: 695ms
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:2877) -   Buffer Utilization: 0.0%
+ INFO [ServiceThread-P4_Place-14004] (ServiceThread.java:1164) - ORCHESTRATOR: Service P4_Place sequence ID: 1000001 complete.
+DEBUG [ServiceThread-P4_Place-14004] (ServiceThread.java:1175) - ORCHESTRATOR: Cleaned up join 1000000
+Scheduler returned pArgs: [1000000120, 1000000]
+pArgs.get(0): 1000000120
+queueAction: 50
+MAXQUEUE: 50
+costKeyTokenMap size before: 0
+=== EVENT ACCEPTED - PROCESSING ===
+costKey: 1000000120
+sid: 1000000
+PRIORITY: seqId=1000000 version=v999 completedJoin=false schedulerKey=1000000120 -> priorityKey=10001000000
+=== ADDING TO PROCESSING QUEUE ===
+About to add costKey 10001000000 to costKeyTokenMap
+Successfully added to costKeyTokenMap
+costKeyTokenMap size after: 1
+About to call notify() to wake up ServiceThread
+=== END EVENT PROCESSING ===
+DEBUG [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:480) - ORCHESTRATOR: Processing:: token = {"token":"workflow_1000000_v001"}
+DEBUG [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:524) - CAPTURE: WorkflowStartTime=1770275322058 for seqID=1000000
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:537) - Incoming Sequence ID = 1000000
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:538) - MonitorIncomingEvents+ = true
+DEBUG [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:554) - Using RuleBaseVersion: v999
+DEBUG [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:569) - FILTER: Event for P4_CollectorService.collectAllData accepted by P4_CollectorService thread
+ WARN [ServiceThread-P4_CollectorService-14103] (jsonLibrary.java:87) - Key "token" already exists. Skipping.
+DEBUG [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:585) - JOIN-MAP: Added key=token to join 1000000 (tokenId=1000000, mapSize=1)
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:594) - DEBUG: Loading rule base for operation: collectAllData
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:595) - DEBUG: Rule base location: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4/RuleFolder.v999/collectAllData/Service.ruleml
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:602) - DEBUG: Loading fresh knowledge base from: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4/RuleFolder.v999/collectAllData/Service.ruleml
+DEBUG: getRuleBaset attempting to read from: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4/RuleFolder.v999/collectAllData/Service.ruleml
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:610) - DEBUG: Loaded knowledge base length: 13498
+DEBUG [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:611) - DEBUG: Knowledge base content preview: <Assert>
+<Rulebase mapClosure="universal">
+<!-- Version On -->
+<Data><Atom><Rel>Version</Rel><Ind>v999</Ind></Atom></Data>
+<!-- Common Rules to all services -->
+<!-- 
+This is the rule determines the operational parameters associated with
+the destination service.
+ -->
+<Implies>
+	<then>
+		<Atom>
+			<Rel>publishes</Rel>
+			<Var>service</Var>
+			<Var>condition</Var>
+			<Var>operation</Var>
+			<Var>channel</Var>
+			<Var>ip</Var>
+			<Var>port</Var>
+			<Var>decisionValue</Var>
+		</A
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:620) - DEBUG: Parsing knowledge base...
+Maximum Buffer size seen is = 1
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:622) - DEBUG: Knowledge base parsed successfully
+DEBUG [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:2348) - CANONICAL-BINDING: Checking canonical binding for P4_CollectorService.collectAllData with attribute 'token'
+DEBUG [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:2376) - CANONICAL-BINDING: Operation collectAllData uses standard (AND) semantics
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:2414) - CANONICAL-BINDING: collectAllData requires 1 inputs total (standard AND logic)
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:2424) - CANONICAL-BINDING: collectAllData needs 1 input - can call immediately with 'token'
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:647) - ORCHESTRATOR: Canonical binding found - overriding serviceName facts
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:650) - ORCHESTRATOR: Overrode inputCollection for canonical binding
+ WARN [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:2523) - Using legacy getDecisionValue - consider updating CoreRuleBase to include decisionValue in publishes
+DEBUG [ServiceThread-P4_CollectorService-14103] (PetriNetInstrumentationHelper.java:354) - Token 1000000 buffered at T_in_P4_CollectorService (buffer=0)
+DEBUG [ServiceThread-P4_CollectorService-14103] (PetriNetInstrumentationHelper.java:1085) - Could not extract previousPlace from payload
+ WARN [ServiceThread-P4_CollectorService-14103] (PetriNetInstrumentationHelper.java:1270) - NAMING CONVENTION VIOLATION: Service 'P4_CollectorService' does not end with '_Place'. Expected format: {NodeName}_Place. Transition IDs may not match topology. Please rename the service.
+DEBUG [ServiceThread-P4_CollectorService-14103] (BuildServiceAnalysisDatabase.java:807) - Wrote transition firing: T_in_P4_CollectorService token=1000000 eventType=BUFFERED
+DEBUG [ServiceThread-P4_CollectorService-14103] (PetriNetInstrumentationHelper.java:909) - Recorded transition: T_in_P4_CollectorService (EdgeNode) token=1000000  -> P4_CollectorService [BUFFERED] buffer=0
+DEBUG [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:3110) - PETRI-NET: Token 1000000 BUFFERED at P4_CollectorService (T_in arrival)
+DEBUG [ServiceThread-P4_CollectorService-14103] (PetriNetInstrumentationHelper.java:137) - Token 1000000 entering place: P4_CollectorService (buffer=0)
+DEBUG [ServiceThread-P4_CollectorService-14103] (PetriNetInstrumentationHelper.java:1085) - Could not extract previousPlace from payload
+ WARN [ServiceThread-P4_CollectorService-14103] (PetriNetInstrumentationHelper.java:1270) - NAMING CONVENTION VIOLATION: Service 'P4_CollectorService' does not end with '_Place'. Expected format: {NodeName}_Place. Transition IDs may not match topology. Please rename the service.
+DEBUG [ServiceThread-P4_CollectorService-14103] (BuildServiceAnalysisDatabase.java:807) - Wrote transition firing: T_in_P4_CollectorService token=1000000 eventType=ENTER
+DEBUG [ServiceThread-P4_CollectorService-14103] (PetriNetInstrumentationHelper.java:909) - Recorded transition: T_in_P4_CollectorService (EdgeNode) token=1000000  -> P4_CollectorService [ENTER] buffer=0
+DEBUG [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:3116) - PETRI-NET: Token 1000000 ENTER at P4_CollectorService
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:677) - DEBUG: About to check inputCollection.isEmpty() - size: 1
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:678) - DEBUG: inputCollection contents: [null]
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:679) - DEBUG: nodeType: EdgeNode
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:680) - DEBUG: needsInputSynchronization: false
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:697) - DEBUG: Past inputCollection check, about to enter JOIN processing
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:698) - DEBUG: inputCollection.get(0): null
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:718) - ORCHESTRATOR: Zero-input service P4_CollectorService:collectAllData executing with trigger token (no workflow data required)
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:1254) - ORCHESTRATOR: Processing EdgeNode for P4_CollectorService.collectAllData
+ INFO [ServiceThread-P4_CollectorService-14103] (TransitionHandler.java:798) - ORCHESTRATOR: Processing EdgeNode/MergeNode for P4_CollectorService.collectAllData
+DEBUG [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:2348) - CANONICAL-BINDING: Checking canonical binding for P4_CollectorService.collectAllData with attribute 'token'
+DEBUG [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:2376) - CANONICAL-BINDING: Operation collectAllData uses standard (AND) semantics
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:2414) - CANONICAL-BINDING: collectAllData requires 1 inputs total (standard AND logic)
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:2424) - CANONICAL-BINDING: collectAllData needs 1 input - can call immediately with 'token'
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:2128) - ORCHESTRATOR: Found single-input canonical binding - calling P4_CollectorService.collectAllData immediately
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:2135) - ORCHESTRATOR: Invoking P4_CollectorService.collectAllData via ServiceHelper (canonical binding)
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceHelper.java:125) - === SERVICE INVOCATION START ===
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceHelper.java:126) - Service: org.btsn.places.P4_CollectorService.collectAllData
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceHelper.java:127) - SequenceID: 1000000
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceHelper.java:128) - Input arguments count: 1
+DEBUG [ServiceThread-P4_CollectorService-14103] (ServiceHelper.java:139) - Processing argument 1/1, raw length: 33
+DEBUG [ServiceThread-P4_CollectorService-14103] (ServiceHelper.java:257) - ENRICHMENT: First service - raw token IS original_token
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceHelper.java:149) - ENRICHMENT: Initialized workflow start time (first service)
+DEBUG [ServiceThread-P4_CollectorService-14103] (ServiceHelper.java:163) - ENRICHMENT: Cleaned argument 1, length: 33 (removed 0 bytes of metadata)
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceHelper.java:167) - ENRICHMENT: Extracted 1 clean business data arguments (removed infrastructure metadata)
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceHelper.java:178) - SERVICE INVOKE: Calling org.btsn.places.P4_CollectorService.collectAllData with 1 CLEAN business data arguments
+DEBUG [ServiceThread-P4_CollectorService-14103] (ServiceHelper.java:506) - INVOKE: Reflecting on org.btsn.places.P4_CollectorService.collectAllData
+DEBUG [ServiceThread-P4_CollectorService-14103] (ServiceHelper.java:507) - INVOKE: Looking for method with 1 String parameters
+P4_CollectorService initialized with context: 1000000, place: P4_Place, buildVersion: token
+DEBUG [ServiceThread-P4_CollectorService-14103] (ServiceHelper.java:620) - INVOKE: Created instance using 3-param constructor (context, placeName, buildVersion) for org.btsn.places.P4_CollectorService
+DEBUG [ServiceThread-P4_CollectorService-14103] (ServiceHelper.java:557) - INVOKE: Found standard method (1 String args)
+DEBUG [ServiceThread-P4_CollectorService-14103] (ServiceHelper.java:590) - INVOKE: Calling collectAllData with 1 arguments
+=== P4_CollectorService: UNIFIED DATA COLLECTION ===
+Raw token received: {"token":"workflow_1000000_v001"}
+Successfully parsed version: v001
+Collecting performance data...
+=== P4_CollectorService: PERFORMANCE DATA COLLECTION ===
+Raw token received: {"token":"workflow_1000000_v001"}
+Successfully parsed version(s): [v001]
+P4_CollectorService: Collecting data for version: v001
+P4_CollectorService:   v001 - 2 timing records
+P4_CollectorService:   v001 - 2 marking records
+P4_CollectorService: TOTAL 2 timing records across 1 version(s)
+P4_CollectorService: TOTAL 2 marking records across 1 version(s)
+P4_CollectorService: Generated response (1361 chars)
+Performance data collected: 2 timing records, 2 marking records
+Collecting Petri Net data...
+=== P4_CollectorService: PETRI NET DATA COLLECTION ===
+Raw token received: {"token":"workflow_1000000_v001"}
+Successfully parsed version(s): [v001]
+P4_CollectorService: Collecting Petri Net data for version: v001
+DEBUG: Query params - T_in_P4, T_out_P4, placeName=P4_Place, version='v001' length=4
+P4_CollectorService:   v001 - 16 transition firings
+P4_CollectorService:   v001 - 8 token paths
+P4_CollectorService:   v001 - 16 marking snapshots
+P4_CollectorService:   v001 - 1 statistics records
+P4_CollectorService:   v001 - 4 genealogy records
+P4_CollectorService: TOTAL 16 transition firing records across 1 version(s)
+P4_CollectorService: TOTAL 8 token path records across 1 version(s)
+P4_CollectorService: TOTAL 16 marking snapshot records across 1 version(s)
+P4_CollectorService: TOTAL 1 statistics records across 1 version(s)
+P4_CollectorService: TOTAL 4 genealogy records across 1 version(s)
+P4_CollectorService: Generated response (8704 chars)
+Petri Net data collected: 16 firings, 8 paths, 16 markings, 1 statistics
+P4_CollectorService: Generated unified response (9787 chars)
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceHelper.java:189) - SERVICE COMPLETE: org.btsn.places.P4_CollectorService.collectAllData completed in 557ms
+ WARN [ServiceThread-P4_CollectorService-14103] (ServiceHelper.java:384) - ENRICHMENT: Inner object is not a JSONObject, cannot enrich
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceHelper.java:197) - ENRICHMENT: Successfully enriched service result with metadata
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceHelper.java:199) - === SERVICE INVOCATION COMPLETE ===
+ INFO [ServiceThread-P4_CollectorService-14103] (TransitionHandler.java:803) - ORCHESTRATOR: Service returned: {"monitoredPlace":"P4_Place","petriNetData":{"firingRecordCount":16,"workflowGroups":{"1000000":{"markingEvolution":[{"marking":1,"tokenId":1000001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275298067,"bufferSize":0},{"marking":1,"tokenId":1000002,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275299042,"bufferSize":0},{"marking":1,"tokenId":1000001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770275299125,"bufferSize":0},{"marking":1,"tokenId":1000002,"transitionId":"T_in_P4","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770275299131,"bufferSize":0},{"marking":0,"tokenId":1000001,"transitionId":"T_out_P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275299391,"bufferSize":0},{"marking":0,"tokenId":1000001,"transitionId":"T_out_P4","toPlace":"P5_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275299403,"bufferSize":0},{"marking":0,"tokenId":1000002,"transitionId":"T_out_P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275299461,"bufferSize":0},{"marking":0,"tokenId":1000002,"transitionId":"T_out_P4","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275299507,"bufferSize":0},{"marking":1,"tokenId":1000001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275304876,"bufferSize":0},{"marking":1,"tokenId":1000002,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275308431,"bufferSize":0},{"marking":1,"tokenId":1000001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770275308520,"bufferSize":0},{"marking":1,"tokenId":1000002,"transitionId":"T_in_P4","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770275308528,"bufferSize":0},{"marking":0,"tokenId":1000001,"transitionId":"T_out_P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275308789,"bufferSize":0},{"marking":0,"tokenId":1000001,"transitionId":"T_out_P4","toPlace":"P5_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275308794,"bufferSize":0},{"marking":0,"tokenId":1000002,"transitionId":"T_out_P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275308854,"bufferSize":0},{"marking":0,"tokenId":1000002,"transitionId":"T_out_P4","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275308869,"bufferSize":0}],"tokenGenealogy":[{"childTokenId":1000001,"forkTimestamp":1770275299391,"parentTokenId":1000000,"forkTransitionId":"T_out_P4_Place","workflowBase":1000000},{"childTokenId":1000002,"forkTimestamp":1770275299461,"parentTokenId":1000000,"forkTransitionId":"T_out_P4_Place","workflowBase":1000000},{"childTokenId":1000001,"forkTimestamp":1770275308789,"parentTokenId":1000000,"forkTransitionId":"T_out_P4_Place","workflowBase":1000000},{"childTokenId":1000002,"forkTimestamp":1770275308854,"parentTokenId":1000000,"forkTransitionId":"T_out_P4_Place","workflowBase":1000000}],"tokenPaths":[{"entryTime":1770275298067,"exitTime":1770275299391,"residenceTime":1324,"entryBufferSize":0,"tokenId":1000001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275299042,"exitTime":1770275299461,"residenceTime":419,"entryBufferSize":0,"tokenId":1000002,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275299125,"exitTime":1770275299391,"residenceTime":266,"entryBufferSize":0,"tokenId":1000001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275299131,"exitTime":1770275299461,"residenceTime":330,"entryBufferSize":0,"tokenId":1000002,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275304876,"exitTime":1770275308789,"residenceTime":3913,"entryBufferSize":0,"tokenId":1000001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275308431,"exitTime":1770275308854,"residenceTime":423,"entryBufferSize":0,"tokenId":1000002,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275308520,"exitTime":1770275308789,"residenceTime":269,"entryBufferSize":0,"tokenId":1000001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275308528,"exitTime":1770275308854,"residenceTime":326,"entryBufferSize":0,"tokenId":1000002,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"}],"transitionFirings":[{"tokenId":1000001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275298067,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275299042,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770275299125,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770275299131,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_out_P4","fromPlace":"P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275299391,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_out_P4","fromPlace":"P4_Place","toPlace":"P5_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275299403,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_out_P4","fromPlace":"P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275299461,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_out_P4","fromPlace":"P4_Place","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275299507,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275304876,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275308431,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770275308520,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770275308528,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_out_P4","fromPlace":"P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275308789,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_out_P4","fromPlace":"P4_Place","toPlace":"P5_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275308794,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_out_P4","fromPlace":"P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275308854,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_out_P4","fromPlace":"P4_Place","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275308869,"bufferSize":0}],"statistics":[{"avgResidenceTime":908.0,"minResidenceTime":266,"maxBufferSize":0,"tokenCount":8,"maxResidenceTime":3913,"workflowBase":1000000,"throughput":1.1013215859030836,"placeName":"P4_Place","avgBufferSize":0.0}]}},"pathRecordCount":8,"statisticsRecordCount":1,"markingRecordCount":16},"reportingService":"P4_CollectorService","collectionTime":1770275322405,"performanceData":{"workflowGroups":{"1770275293228":[{"maxQueueCapacity":50,"arrivalTime":1770275308267,"totalTime":695,"workflowStartTime":1770275293228,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1000002,"operation":"processToken","serviceTime":430,"queueTime":265,"bufferSize":0},{"maxQueueCapacity":50,"arrivalTime":1770275298908,"totalTime":715,"workflowStartTime":1770275293228,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1000002,"operation":"processToken","serviceTime":488,"queueTime":227,"bufferSize":0}]},"markingData":{"1770275293228":[{"publishTime":1770275308962,"maxQueueCapacity":50,"arrivalTime":1770275308267,"invocationTime":1770275308532,"workflowStartTime":1770275293228,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1000002,"operation":"processToken","bufferSize":0},{"publishTime":1770275299623,"maxQueueCapacity":50,"arrivalTime":1770275298908,"invocationTime":1770275299135,"workflowStartTime":1770275293228,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1000002,"operation":"processToken","bufferSize":0}]},"timingRecordCount":2,"markingRecordCount":2},"reportingChannel":"unified_collection","serviceContext":"1000000","version":"v001","token":"{\"token\":\"workflow_1000000_v001\"}"}
+DEBUG [ServiceThread-P4_CollectorService-14103] (PetriNetInstrumentationHelper.java:592) - Token 1000000 exiting place: P4_CollectorService -> MonitorService [arc=$ANON11]
+ WARN [ServiceThread-P4_CollectorService-14103] (PetriNetInstrumentationHelper.java:1270) - NAMING CONVENTION VIOLATION: Service 'P4_CollectorService' does not end with '_Place'. Expected format: {NodeName}_Place. Transition IDs may not match topology. Please rename the service.
+DEBUG [ServiceThread-P4_CollectorService-14103] (BuildServiceAnalysisDatabase.java:807) - Wrote transition firing: T_out_P4_CollectorService token=1000000 eventType=EXIT
+DEBUG [ServiceThread-P4_CollectorService-14103] (PetriNetInstrumentationHelper.java:909) - Recorded transition: T_out_P4_CollectorService (EdgeNode) token=1000000 P4_CollectorService -> MonitorService [EXIT] arc=$ANON11
+DEBUG [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:3151) - PETRI-NET: Token 1000000 EXIT from P4_CollectorService -> MonitorService.writeCollectorData [arc=$ANON11]
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:2673) - DEBUG: Querying activeService for MonitorService.writeCollectorData
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:2675) - DEBUG: ActiveService query returned 2 rows
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:2686) - DEBUG: ActiveService result - ?channelId = ip0
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:2686) - DEBUG: ActiveService result - ?port = 3002
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:2697) - ORCHESTRATOR: APPLYING activeService override - Channel: ip0, Port: 3002
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:2720) - ORCHESTRATOR: Resolved ip0 to IP 192.168.1.152
+DEBUG [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:1382) - ROUTING: External to MonitorService -> 'token'
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:2754) - ROUTING: Token 1000000 -> 'token' to MonitorService.writeCollectorData
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:2778) - ORCHESTRATOR: Publishing to Service MonitorService Operation: writeCollectorData
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:2779) - ORCHESTRATOR: Channel: 192.168.1.152, Port: 3002
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:2780) - ORCHESTRATOR: Attribute token = {"monitoredPlace":"P4_Place","petriNetData":{"firingRecordCount":16,"workflowGroups":{"1000000":{"markingEvolution":[{"marking":1,"tokenId":1000001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275298067,"bufferSize":0},{"marking":1,"tokenId":1000002,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275299042,"bufferSize":0},{"marking":1,"tokenId":1000001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770275299125,"bufferSize":0},{"marking":1,"tokenId":1000002,"transitionId":"T_in_P4","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770275299131,"bufferSize":0},{"marking":0,"tokenId":1000001,"transitionId":"T_out_P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275299391,"bufferSize":0},{"marking":0,"tokenId":1000001,"transitionId":"T_out_P4","toPlace":"P5_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275299403,"bufferSize":0},{"marking":0,"tokenId":1000002,"transitionId":"T_out_P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275299461,"bufferSize":0},{"marking":0,"tokenId":1000002,"transitionId":"T_out_P4","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275299507,"bufferSize":0},{"marking":1,"tokenId":1000001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275304876,"bufferSize":0},{"marking":1,"tokenId":1000002,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275308431,"bufferSize":0},{"marking":1,"tokenId":1000001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770275308520,"bufferSize":0},{"marking":1,"tokenId":1000002,"transitionId":"T_in_P4","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770275308528,"bufferSize":0},{"marking":0,"tokenId":1000001,"transitionId":"T_out_P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275308789,"bufferSize":0},{"marking":0,"tokenId":1000001,"transitionId":"T_out_P4","toPlace":"P5_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275308794,"bufferSize":0},{"marking":0,"tokenId":1000002,"transitionId":"T_out_P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275308854,"bufferSize":0},{"marking":0,"tokenId":1000002,"transitionId":"T_out_P4","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275308869,"bufferSize":0}],"tokenGenealogy":[{"childTokenId":1000001,"forkTimestamp":1770275299391,"parentTokenId":1000000,"forkTransitionId":"T_out_P4_Place","workflowBase":1000000},{"childTokenId":1000002,"forkTimestamp":1770275299461,"parentTokenId":1000000,"forkTransitionId":"T_out_P4_Place","workflowBase":1000000},{"childTokenId":1000001,"forkTimestamp":1770275308789,"parentTokenId":1000000,"forkTransitionId":"T_out_P4_Place","workflowBase":1000000},{"childTokenId":1000002,"forkTimestamp":1770275308854,"parentTokenId":1000000,"forkTransitionId":"T_out_P4_Place","workflowBase":1000000}],"tokenPaths":[{"entryTime":1770275298067,"exitTime":1770275299391,"residenceTime":1324,"entryBufferSize":0,"tokenId":1000001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275299042,"exitTime":1770275299461,"residenceTime":419,"entryBufferSize":0,"tokenId":1000002,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275299125,"exitTime":1770275299391,"residenceTime":266,"entryBufferSize":0,"tokenId":1000001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275299131,"exitTime":1770275299461,"residenceTime":330,"entryBufferSize":0,"tokenId":1000002,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275304876,"exitTime":1770275308789,"residenceTime":3913,"entryBufferSize":0,"tokenId":1000001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275308431,"exitTime":1770275308854,"residenceTime":423,"entryBufferSize":0,"tokenId":1000002,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275308520,"exitTime":1770275308789,"residenceTime":269,"entryBufferSize":0,"tokenId":1000001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275308528,"exitTime":1770275308854,"residenceTime":326,"entryBufferSize":0,"tokenId":1000002,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"}],"transitionFirings":[{"tokenId":1000001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275298067,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275299042,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770275299125,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770275299131,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_out_P4","fromPlace":"P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275299391,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_out_P4","fromPlace":"P4_Place","toPlace":"P5_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275299403,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_out_P4","fromPlace":"P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275299461,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_out_P4","fromPlace":"P4_Place","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275299507,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275304876,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275308431,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770275308520,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770275308528,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_out_P4","fromPlace":"P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275308789,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_out_P4","fromPlace":"P4_Place","toPlace":"P5_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275308794,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_out_P4","fromPlace":"P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275308854,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_out_P4","fromPlace":"P4_Place","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275308869,"bufferSize":0}],"statistics":[{"avgResidenceTime":908.0,"minResidenceTime":266,"maxBufferSize":0,"tokenCount":8,"maxResidenceTime":3913,"workflowBase":1000000,"throughput":1.1013215859030836,"placeName":"P4_Place","avgBufferSize":0.0}]}},"pathRecordCount":8,"statisticsRecordCount":1,"markingRecordCount":16},"reportingService":"P4_CollectorService","collectionTime":1770275322405,"performanceData":{"workflowGroups":{"1770275293228":[{"maxQueueCapacity":50,"arrivalTime":1770275308267,"totalTime":695,"workflowStartTime":1770275293228,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1000002,"operation":"processToken","serviceTime":430,"queueTime":265,"bufferSize":0},{"maxQueueCapacity":50,"arrivalTime":1770275298908,"totalTime":715,"workflowStartTime":1770275293228,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1000002,"operation":"processToken","serviceTime":488,"queueTime":227,"bufferSize":0}]},"markingData":{"1770275293228":[{"publishTime":1770275308962,"maxQueueCapacity":50,"arrivalTime":1770275308267,"invocationTime":1770275308532,"workflowStartTime":1770275293228,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1000002,"operation":"processToken","bufferSize":0},{"publishTime":1770275299623,"maxQueueCapacity":50,"arrivalTime":1770275298908,"invocationTime":1770275299135,"workflowStartTime":1770275293228,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1000002,"operation":"processToken","bufferSize":0}]},"timingRecordCount":2,"markingRecordCount":2},"reportingChannel":"unified_collection","serviceContext":"1000000","version":"v001","token":"{\"token\":\"workflow_1000000_v001\"}"}
+Feb 05, 2026 5:08:43 PM org.btsn.handlers.EventPublisher publishServiceEvent
+INFO: EventPublisher: Publishing EVT_MONITORSERVICE_WRITECOLLECTORDATA_1770275323078_663 to 192.168.1.152:3002
+Feb 05, 2026 5:08:43 PM org.btsn.handlers.EventPublisher publishDirectly
+INFO: EventPublisher: Created shared socket on port 52361
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:2788) - ORCHESTRATOR: Completed callNextOperation for MonitorService, published=true
+ INFO [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:2792) - ORCHESTRATOR: Successfully published to MonitorService via EventPublisher
+ERROR [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:1306) - monitorIncomingEvents: false
+DEBUG [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:1175) - ORCHESTRATOR: Cleaned up join 1000000
+DEBUG [ServiceThread-P4_CollectorService-14103] (ServiceThread.java:724) - ORCHESTRATOR: Service P4_CollectorService sequence ID: 1000000 complete.

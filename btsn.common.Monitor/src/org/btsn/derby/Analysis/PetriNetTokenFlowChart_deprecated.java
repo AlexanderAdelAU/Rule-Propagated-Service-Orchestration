@@ -33,7 +33,7 @@ import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
  * - Hover tooltips with token details
  * - PDF and LaTeX export
  */
-public class PetriNetTokenFlowChart extends JPanel {
+public class PetriNetTokenFlowChart_deprecated extends JPanel {
 
     private static final String PROTOCOL = "jdbc:derby:";
     private static final String DB_NAME = "ServiceAnalysisDataBase";
@@ -183,7 +183,7 @@ public class PetriNetTokenFlowChart extends JPanel {
         }
     }
 
-    public PetriNetTokenFlowChart() {
+    public PetriNetTokenFlowChart_deprecated() {
         setBackground(Color.WHITE);
         updateFonts();
         
@@ -1303,7 +1303,7 @@ public class PetriNetTokenFlowChart extends JPanel {
     // MAIN & GUI
     // =========================================================================
     
-    public static void createAndShowGUI(PetriNetTokenFlowChart chart) {
+    public static void createAndShowGUI(PetriNetTokenFlowChart_deprecated chart) {
         JFrame frame = new JFrame("Petri Net Token Flow Visualization");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
@@ -1454,7 +1454,7 @@ public class PetriNetTokenFlowChart extends JPanel {
     
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            PetriNetTokenFlowChart chart = new PetriNetTokenFlowChart();
+            PetriNetTokenFlowChart_deprecated chart = new PetriNetTokenFlowChart_deprecated();
             createAndShowGUI(chart);
         });
     }

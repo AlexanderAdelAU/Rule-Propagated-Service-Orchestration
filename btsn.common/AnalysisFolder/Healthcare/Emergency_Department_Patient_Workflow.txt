@@ -1,5 +1,5 @@
  INFO [main] (BuildServiceAnalysisDatabase.java:130) - Derby Embedded Driver registered successfully.
- INFO [main] (PetriNetAnalyzer.java:2040) - Found 1 distinct workflowBases: [1000000]
+ INFO [main] (PetriNetAnalyzer.java:2324) - Found 1 distinct workflowBases: [1000000]
 Auto-detected 1 workflow bases: [1000000]
 
 ================================================================================
@@ -10,6 +10,16 @@ DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1090002 exit check: TERM
 DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1090003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
 DEBUG [main] (PetriNetAnalyzer.java:529) - Base token 1090000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
 DEBUG [main] (PetriNetAnalyzer.java:350) - Join 1090000: Base token reset pattern - all 3 children consumed, parent exited
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1080001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1080002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1080003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:529) - Base token 1080000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
+DEBUG [main] (PetriNetAnalyzer.java:350) - Join 1080000: Base token reset pattern - all 3 children consumed, parent exited
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1070001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1070002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1070003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:529) - Base token 1070000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
+DEBUG [main] (PetriNetAnalyzer.java:350) - Join 1070000: Base token reset pattern - all 3 children consumed, parent exited
 DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1060001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
 DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1060002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
 DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1060003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
@@ -20,11 +30,6 @@ DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1050002 exit check: TERM
 DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1050003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
 DEBUG [main] (PetriNetAnalyzer.java:529) - Base token 1050000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
 DEBUG [main] (PetriNetAnalyzer.java:350) - Join 1050000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1040003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1040002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1040001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG [main] (PetriNetAnalyzer.java:529) - Base token 1040000 exit check: T_in=2, T_out=2, TERMINATE=0 (consolidated=0, raw=0) -> exited=true
-DEBUG [main] (PetriNetAnalyzer.java:350) - Join 1040000: Base token reset pattern - all 3 children consumed, parent exited
 DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1030003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
 DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1030002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
 DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1030001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
@@ -35,11 +40,6 @@ DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1010002 exit check: TERM
 DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1010001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
 DEBUG [main] (PetriNetAnalyzer.java:529) - Base token 1010000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
 DEBUG [main] (PetriNetAnalyzer.java:350) - Join 1010000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1000003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1000002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1000001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG [main] (PetriNetAnalyzer.java:529) - Base token 1000000 exit check: T_in=2, T_out=2, TERMINATE=7 (consolidated=0, raw=7) -> exited=true
-DEBUG [main] (PetriNetAnalyzer.java:350) - Join 1000000: Base token reset pattern - all 3 children consumed, parent exited
  INFO [main] (PetriNetAnalyzer.java:364) - Fork/Join analysis: 7 forks, 7 successful joins
  INFO [main] (PetriNetAnalyzer.java:128) - Token completeness check: 28 incomplete tokens found
  INFO [main] (PetriNetAnalyzer.java:128) - Token completeness check: 28 incomplete tokens found
@@ -48,6 +48,16 @@ DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1090002 exit check: TERM
 DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1090003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
 DEBUG [main] (PetriNetAnalyzer.java:529) - Base token 1090000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
 DEBUG [main] (PetriNetAnalyzer.java:350) - Join 1090000: Base token reset pattern - all 3 children consumed, parent exited
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1080001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1080002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1080003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:529) - Base token 1080000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
+DEBUG [main] (PetriNetAnalyzer.java:350) - Join 1080000: Base token reset pattern - all 3 children consumed, parent exited
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1070001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1070002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1070003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
+DEBUG [main] (PetriNetAnalyzer.java:529) - Base token 1070000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
+DEBUG [main] (PetriNetAnalyzer.java:350) - Join 1070000: Base token reset pattern - all 3 children consumed, parent exited
 DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1060001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
 DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1060002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
 DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1060003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
@@ -58,11 +68,6 @@ DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1050002 exit check: TERM
 DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1050003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
 DEBUG [main] (PetriNetAnalyzer.java:529) - Base token 1050000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
 DEBUG [main] (PetriNetAnalyzer.java:350) - Join 1050000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1040003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1040002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1040001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG [main] (PetriNetAnalyzer.java:529) - Base token 1040000 exit check: T_in=2, T_out=2, TERMINATE=0 (consolidated=0, raw=0) -> exited=true
-DEBUG [main] (PetriNetAnalyzer.java:350) - Join 1040000: Base token reset pattern - all 3 children consumed, parent exited
 DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1030003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
 DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1030002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
 DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1030001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
@@ -73,24 +78,19 @@ DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1010002 exit check: TERM
 DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1010001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
 DEBUG [main] (PetriNetAnalyzer.java:529) - Base token 1010000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
 DEBUG [main] (PetriNetAnalyzer.java:350) - Join 1010000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1000003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1000002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG [main] (PetriNetAnalyzer.java:470) - Forked token 1000001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG [main] (PetriNetAnalyzer.java:529) - Base token 1000000 exit check: T_in=2, T_out=2, TERMINATE=7 (consolidated=0, raw=7) -> exited=true
-DEBUG [main] (PetriNetAnalyzer.java:350) - Join 1000000: Base token reset pattern - all 3 children consumed, parent exited
  INFO [main] (PetriNetAnalyzer.java:364) - Fork/Join analysis: 7 forks, 7 successful joins
  INFO [main] (PetriNetAnalyzer.java:568) - Actual incomplete tokens: 0 (filtered 21 joined tokens)
- INFO [main] (PetriNetAnalyzer.java:172) - Found 6 terminated tokens (checked both tables)
- INFO [main] (PetriNetAnalyzer.java:704) - Workflow throughput: 2.62 tokens/sec
- INFO [main] (PetriNetAnalyzer.java:612) - Place CardiologyService statistics: 14 tokens, avg=1752.0ms
- INFO [main] (PetriNetAnalyzer.java:612) - Place DiagnosisService statistics: 14 tokens, avg=2350.0ms
+ INFO [main] (PetriNetAnalyzer.java:172) - Found 10 terminated tokens (checked both tables)
+ INFO [main] (PetriNetAnalyzer.java:704) - Workflow throughput: 2.49 tokens/sec
+ INFO [main] (PetriNetAnalyzer.java:612) - Place CardiologyService statistics: 14 tokens, avg=1549.0ms
+ INFO [main] (PetriNetAnalyzer.java:612) - Place DiagnosisService statistics: 14 tokens, avg=1576.0ms
  INFO [main] (PetriNetAnalyzer.java:612) - Place FORK_CONSUMED statistics: 0 tokens, avg=0.0ms
  INFO [main] (PetriNetAnalyzer.java:612) - Place JOIN_CONSUMED statistics: 0 tokens, avg=0.0ms
- INFO [main] (PetriNetAnalyzer.java:612) - Place LaboratoryService statistics: 14 tokens, avg=1267.0ms
+ INFO [main] (PetriNetAnalyzer.java:612) - Place LaboratoryService statistics: 14 tokens, avg=1103.0ms
  INFO [main] (PetriNetAnalyzer.java:612) - Place MonitorService statistics: 0 tokens, avg=0.0ms
- INFO [main] (PetriNetAnalyzer.java:612) - Place RadiologyService statistics: 14 tokens, avg=1312.0ms
- INFO [main] (PetriNetAnalyzer.java:612) - Place TreatmentService statistics: 20 tokens, avg=1829.0ms
- INFO [main] (PetriNetAnalyzer.java:612) - Place TriageService statistics: 20 tokens, avg=1054.0ms
+ INFO [main] (PetriNetAnalyzer.java:612) - Place RadiologyService statistics: 14 tokens, avg=1044.0ms
+ INFO [main] (PetriNetAnalyzer.java:612) - Place TreatmentService statistics: 20 tokens, avg=840.0ms
+ INFO [main] (PetriNetAnalyzer.java:612) - Place TriageService statistics: 20 tokens, avg=710.0ms
  INFO [main] (PetriNetAnalyzer.java:825) - Capacity verification for CardiologyService: max marking=1, capacity=50 - PASS
  INFO [main] (PetriNetAnalyzer.java:825) - Capacity verification for DiagnosisService: max marking=1, capacity=50 - PASS
  INFO [main] (PetriNetAnalyzer.java:825) - Capacity verification for FORK_CONSUMED: max marking=0, capacity=50 - PASS
@@ -109,31 +109,31 @@ Workflow Base: 1000000
    Successful Joins: 7
    Forked Tokens: 21
    Fork from 1090000 -> [1090001, 1090002, 1090003] [JOINED]
+   Fork from 1080000 -> [1080001, 1080002, 1080003] [JOINED]
+   Fork from 1070000 -> [1070001, 1070002, 1070003] [JOINED]
    Fork from 1060000 -> [1060001, 1060002, 1060003] [JOINED]
    Fork from 1050000 -> [1050001, 1050002, 1050003] [JOINED]
-   Fork from 1040000 -> [1040003, 1040002, 1040001] [JOINED]
    Fork from 1030000 -> [1030003, 1030002, 1030001] [JOINED]
    Fork from 1010000 -> [1010003, 1010002, 1010001] [JOINED]
-   Fork from 1000000 -> [1000003, 1000002, 1000001] [JOINED]
 
 2. TOKEN COMPLETENESS
    [OK] All tokens completed successfully
    (28 tokens consumed by joins - this is correct)
-   [INFO] 6 tokens terminated early (routed to TERMINATE)
-     Terminated tokens: [1000000, 1010000, 1030000, 1050000, 1060000, 1090000]
+   [INFO] 10 tokens terminated early (routed to TERMINATE)
+     Terminated tokens: [1000000, 1010000, 1020000, 1030000, 1040000, 1050000, 1060000, 1070000, 1080000, 1090000]
 
 3. THROUGHPUT
-   2.62 tokens/second
+   2.49 tokens/second
 
 4. PLACE STATISTICS
    Place: CardiologyService
      Tokens: 14
-     Avg residence: 1752.0ms
-     Min/Max: 641/2995ms
+     Avg residence: 1549.0ms
+     Min/Max: 944/1942ms
    Place: DiagnosisService
      Tokens: 14
-     Avg residence: 2350.0ms
-     Min/Max: 302/6282ms
+     Avg residence: 1576.0ms
+     Min/Max: 401/3036ms
    Place: FORK_CONSUMED
      Tokens: 0
      Avg residence: 0.0ms
@@ -144,24 +144,24 @@ Workflow Base: 1000000
      Min/Max: 0/0ms
    Place: LaboratoryService
      Tokens: 14
-     Avg residence: 1267.0ms
-     Min/Max: 614/2233ms
+     Avg residence: 1103.0ms
+     Min/Max: 543/1555ms
    Place: MonitorService
      Tokens: 0
      Avg residence: 0.0ms
      Min/Max: 0/0ms
    Place: RadiologyService
      Tokens: 14
-     Avg residence: 1312.0ms
-     Min/Max: 572/2812ms
+     Avg residence: 1044.0ms
+     Min/Max: 495/1936ms
    Place: TreatmentService
      Tokens: 20
-     Avg residence: 1829.0ms
-     Min/Max: 219/5084ms
+     Avg residence: 840.0ms
+     Min/Max: 335/1856ms
    Place: TriageService
      Tokens: 20
-     Avg residence: 1054.0ms
-     Min/Max: 431/1656ms
+     Avg residence: 710.0ms
+     Min/Max: 310/1086ms
 
 5. CAPACITY VERIFICATION
    CardiologyService: [OK] BOUNDED
@@ -179,9 +179,9 @@ Workflow Base: 1000000
 
 === END REPORT ===
 
- INFO [main] (PetriNetAnalyzer.java:1896) - Generated workflow report for workflowBase=1000000
- INFO [main] (PetriNetAnalyzer.java:1574) - GENEALOGY: Found 31 tokens for workflow 1000000
- INFO [main] (PetriNetAnalyzer.java:1639) - GENEALOGY: 10 root tokens, 21 forked tokens, 1 max generation depth
+ INFO [main] (PetriNetAnalyzer.java:2180) - Generated workflow report for workflowBase=1000000
+ INFO [main] (PetriNetAnalyzer.java:1858) - GENEALOGY: Found 31 tokens for workflow 1000000
+ INFO [main] (PetriNetAnalyzer.java:1923) - GENEALOGY: 10 root tokens, 21 forked tokens, 1 max generation depth
 
 === TOKEN GENEALOGY REPORT ===
 Workflow Base: 1000000
@@ -212,12 +212,18 @@ Family rooted at 1090000:
   Lineage: 1090000 -> 1090003 [Gen 1, Fork 0, Branch 3]
 
 Family rooted at 1080000:
-  Total members: 1
-  Direct descendants: 0
+  Total members: 4
+  Direct descendants: 3
+  Lineage: 1080000 -> 1080001 [Gen 1, Fork 0, Branch 1]
+  Lineage: 1080000 -> 1080002 [Gen 1, Fork 0, Branch 2]
+  Lineage: 1080000 -> 1080003 [Gen 1, Fork 0, Branch 3]
 
 Family rooted at 1070000:
-  Total members: 1
-  Direct descendants: 0
+  Total members: 4
+  Direct descendants: 3
+  Lineage: 1070000 -> 1070001 [Gen 1, Fork 0, Branch 1]
+  Lineage: 1070000 -> 1070002 [Gen 1, Fork 0, Branch 2]
+  Lineage: 1070000 -> 1070003 [Gen 1, Fork 0, Branch 3]
 
 Family rooted at 1060000:
   Total members: 4
@@ -227,18 +233,12 @@ Family rooted at 1060000:
   Lineage: 1060000 -> 1060003 [Gen 1, Fork 0, Branch 3]
 
 Family rooted at 1000000:
-  Total members: 4
-  Direct descendants: 3
-  Lineage: 1000000 -> 1000003 [Gen 1, Fork 0, Branch 3]
-  Lineage: 1000000 -> 1000002 [Gen 1, Fork 0, Branch 2]
-  Lineage: 1000000 -> 1000001 [Gen 1, Fork 0, Branch 1]
+  Total members: 1
+  Direct descendants: 0
 
 Family rooted at 1040000:
-  Total members: 4
-  Direct descendants: 3
-  Lineage: 1040000 -> 1040003 [Gen 1, Fork 0, Branch 3]
-  Lineage: 1040000 -> 1040002 [Gen 1, Fork 0, Branch 2]
-  Lineage: 1040000 -> 1040001 [Gen 1, Fork 0, Branch 1]
+  Total members: 1
+  Direct descendants: 0
 
 Family rooted at 1010000:
   Total members: 4
@@ -260,350 +260,352 @@ Family rooted at 1030000:
 
 === TOKEN PATHS ===
  INFO [main] (PetriNetAnalyzer.java:240) - Retrieved 96 token paths for workflowBase=1000000
-Token 1000000 at TriageService: residence=542ms
-Token 1000000 at TriageService: residence=526ms
-Token 1000001 at LaboratoryService: residence=1057ms
-Token 1000001 at LaboratoryService: residence=1044ms
-Token 1000001 at DiagnosisService: residence=5427ms
-Token 1000001 at DiagnosisService: residence=3163ms
-Token 1000001 at TreatmentService: residence=3184ms
-Token 1000001 at TreatmentService: residence=3148ms
-Token 1000002 at CardiologyService: residence=2995ms
-Token 1000002 at CardiologyService: residence=2958ms
-Token 1000003 at RadiologyService: residence=1515ms
-Token 1000003 at RadiologyService: residence=1408ms
-Token 1010000 at TriageService: residence=1656ms
-Token 1010000 at TriageService: residence=1644ms
-Token 1010001 at LaboratoryService: residence=1248ms
-Token 1010001 at LaboratoryService: residence=1227ms
-Token 1010001 at DiagnosisService: residence=3917ms
-Token 1010001 at DiagnosisService: residence=2609ms
-Token 1010001 at TreatmentService: residence=5084ms
-Token 1010001 at TreatmentService: residence=5056ms
-Token 1010002 at CardiologyService: residence=2524ms
-Token 1010002 at CardiologyService: residence=2409ms
-Token 1010003 at RadiologyService: residence=2812ms
-Token 1010003 at RadiologyService: residence=2797ms
-Token 1020000 at TriageService: residence=1456ms
-Token 1020000 at TriageService: residence=1356ms
-Token 1020000 at TreatmentService: residence=4496ms
-Token 1020000 at TreatmentService: residence=4468ms
-Token 1030000 at TriageService: residence=933ms
-Token 1030000 at TriageService: residence=910ms
-Token 1030001 at LaboratoryService: residence=2023ms
-Token 1030001 at LaboratoryService: residence=1774ms
-Token 1030001 at DiagnosisService: residence=6282ms
-Token 1030001 at DiagnosisService: residence=1051ms
-Token 1030001 at TreatmentService: residence=1094ms
-Token 1030001 at TreatmentService: residence=1084ms
-Token 1030002 at CardiologyService: residence=863ms
-Token 1030002 at CardiologyService: residence=641ms
-Token 1030003 at RadiologyService: residence=1040ms
-Token 1030003 at RadiologyService: residence=1012ms
-Token 1040000 at TriageService: residence=1452ms
-Token 1040000 at TriageService: residence=1363ms
-Token 1040001 at LaboratoryService: residence=1081ms
-Token 1040001 at LaboratoryService: residence=1064ms
-Token 1040001 at DiagnosisService: residence=3014ms
-Token 1040001 at DiagnosisService: residence=826ms
-Token 1040001 at TreatmentService: residence=1885ms
-Token 1040001 at TreatmentService: residence=1042ms
-Token 1040002 at CardiologyService: residence=2593ms
-Token 1040002 at CardiologyService: residence=2561ms
-Token 1040003 at RadiologyService: residence=953ms
-Token 1040003 at RadiologyService: residence=938ms
-Token 1050000 at TriageService: residence=443ms
-Token 1050000 at TriageService: residence=431ms
-Token 1050001 at LaboratoryService: residence=818ms
-Token 1050001 at LaboratoryService: residence=794ms
-Token 1050001 at DiagnosisService: residence=2100ms
-Token 1050001 at DiagnosisService: residence=592ms
-Token 1050001 at TreatmentService: residence=230ms
-Token 1050001 at TreatmentService: residence=219ms
-Token 1050002 at CardiologyService: residence=1216ms
-Token 1050002 at CardiologyService: residence=1029ms
-Token 1050003 at RadiologyService: residence=595ms
-Token 1050003 at RadiologyService: residence=572ms
-Token 1060000 at TriageService: residence=935ms
-Token 1060000 at TriageService: residence=926ms
-Token 1060001 at LaboratoryService: residence=2233ms
-Token 1060001 at LaboratoryService: residence=2097ms
-Token 1060001 at DiagnosisService: residence=1971ms
-Token 1060001 at DiagnosisService: residence=302ms
-Token 1060001 at TreatmentService: residence=374ms
-Token 1060001 at TreatmentService: residence=362ms
-Token 1060002 at CardiologyService: residence=1599ms
-Token 1060002 at CardiologyService: residence=1585ms
-Token 1060003 at RadiologyService: residence=1682ms
-Token 1060003 at RadiologyService: residence=1618ms
-Token 1070000 at TriageService: residence=1643ms
-Token 1070000 at TriageService: residence=1621ms
-Token 1070000 at TreatmentService: residence=1401ms
-Token 1070000 at TreatmentService: residence=1252ms
-Token 1080000 at TriageService: residence=1095ms
-Token 1080000 at TriageService: residence=1004ms
-Token 1080000 at TreatmentService: residence=784ms
-Token 1080000 at TreatmentService: residence=769ms
-Token 1090000 at TriageService: residence=595ms
-Token 1090000 at TriageService: residence=555ms
-Token 1090001 at LaboratoryService: residence=664ms
-Token 1090001 at LaboratoryService: residence=614ms
-Token 1090001 at DiagnosisService: residence=1147ms
-Token 1090001 at DiagnosisService: residence=510ms
-Token 1090001 at TreatmentService: residence=337ms
-Token 1090001 at TreatmentService: residence=328ms
-Token 1090002 at CardiologyService: residence=786ms
-Token 1090002 at CardiologyService: residence=770ms
-Token 1090003 at RadiologyService: residence=723ms
-Token 1090003 at RadiologyService: residence=713ms
+Token 1000000 at TriageService: residence=523ms
+Token 1000000 at TriageService: residence=511ms
+Token 1000000 at TreatmentService: residence=486ms
+Token 1000000 at TreatmentService: residence=469ms
+Token 1010000 at TriageService: residence=322ms
+Token 1010000 at TriageService: residence=310ms
+Token 1010001 at LaboratoryService: residence=1292ms
+Token 1010001 at LaboratoryService: residence=1265ms
+Token 1010001 at DiagnosisService: residence=2303ms
+Token 1010001 at DiagnosisService: residence=1399ms
+Token 1010001 at TreatmentService: residence=919ms
+Token 1010001 at TreatmentService: residence=908ms
+Token 1010002 at CardiologyService: residence=1850ms
+Token 1010002 at CardiologyService: residence=1652ms
+Token 1010003 at RadiologyService: residence=1936ms
+Token 1010003 at RadiologyService: residence=1922ms
+Token 1020000 at TriageService: residence=520ms
+Token 1020000 at TriageService: residence=510ms
+Token 1020000 at TreatmentService: residence=1509ms
+Token 1020000 at TreatmentService: residence=1483ms
+Token 1030000 at TriageService: residence=808ms
+Token 1030000 at TriageService: residence=798ms
+Token 1030001 at LaboratoryService: residence=1555ms
+Token 1030001 at LaboratoryService: residence=1541ms
+Token 1030001 at DiagnosisService: residence=2157ms
+Token 1030001 at DiagnosisService: residence=1211ms
+Token 1030001 at TreatmentService: residence=1856ms
+Token 1030001 at TreatmentService: residence=1846ms
+Token 1030002 at CardiologyService: residence=1730ms
+Token 1030002 at CardiologyService: residence=1667ms
+Token 1030003 at RadiologyService: residence=1452ms
+Token 1030003 at RadiologyService: residence=1374ms
+Token 1040000 at TriageService: residence=449ms
+Token 1040000 at TriageService: residence=438ms
+Token 1040000 at TreatmentService: residence=773ms
+Token 1040000 at TreatmentService: residence=727ms
+Token 1050000 at TriageService: residence=805ms
+Token 1050000 at TriageService: residence=795ms
+Token 1050001 at LaboratoryService: residence=1201ms
+Token 1050001 at LaboratoryService: residence=1190ms
+Token 1050001 at DiagnosisService: residence=1226ms
+Token 1050001 at DiagnosisService: residence=401ms
+Token 1050001 at TreatmentService: residence=635ms
+Token 1050001 at TreatmentService: residence=624ms
+Token 1050002 at CardiologyService: residence=1416ms
+Token 1050002 at CardiologyService: residence=1373ms
+Token 1050003 at RadiologyService: residence=513ms
+Token 1050003 at RadiologyService: residence=495ms
+Token 1060000 at TriageService: residence=702ms
+Token 1060000 at TriageService: residence=693ms
+Token 1060001 at LaboratoryService: residence=823ms
+Token 1060001 at LaboratoryService: residence=812ms
+Token 1060001 at DiagnosisService: residence=2745ms
+Token 1060001 at DiagnosisService: residence=635ms
+Token 1060001 at TreatmentService: residence=610ms
+Token 1060001 at TreatmentService: residence=601ms
+Token 1060002 at CardiologyService: residence=1942ms
+Token 1060002 at CardiologyService: residence=1878ms
+Token 1060003 at RadiologyService: residence=1321ms
+Token 1060003 at RadiologyService: residence=1300ms
+Token 1070000 at TriageService: residence=942ms
+Token 1070000 at TriageService: residence=934ms
+Token 1070001 at LaboratoryService: residence=591ms
+Token 1070001 at LaboratoryService: residence=543ms
+Token 1070001 at DiagnosisService: residence=3036ms
+Token 1070001 at DiagnosisService: residence=1087ms
+Token 1070001 at TreatmentService: residence=764ms
+Token 1070001 at TreatmentService: residence=715ms
+Token 1070002 at CardiologyService: residence=1624ms
+Token 1070002 at CardiologyService: residence=1599ms
+Token 1070003 at RadiologyService: residence=603ms
+Token 1070003 at RadiologyService: residence=573ms
+Token 1080000 at TriageService: residence=1006ms
+Token 1080000 at TriageService: residence=997ms
+Token 1080001 at LaboratoryService: residence=1299ms
+Token 1080001 at LaboratoryService: residence=1288ms
+Token 1080001 at DiagnosisService: residence=2764ms
+Token 1080001 at DiagnosisService: residence=1511ms
+Token 1080001 at TreatmentService: residence=610ms
+Token 1080001 at TreatmentService: residence=598ms
+Token 1080002 at CardiologyService: residence=956ms
+Token 1080002 at CardiologyService: residence=944ms
+Token 1080003 at RadiologyService: residence=739ms
+Token 1080003 at RadiologyService: residence=728ms
+Token 1090000 at TriageService: residence=1086ms
+Token 1090000 at TriageService: residence=1067ms
+Token 1090001 at LaboratoryService: residence=1049ms
+Token 1090001 at LaboratoryService: residence=999ms
+Token 1090001 at DiagnosisService: residence=1162ms
+Token 1090001 at DiagnosisService: residence=439ms
+Token 1090001 at TreatmentService: residence=346ms
+Token 1090001 at TreatmentService: residence=335ms
+Token 1090002 at CardiologyService: residence=1541ms
+Token 1090002 at CardiologyService: residence=1522ms
+Token 1090003 at RadiologyService: residence=842ms
+Token 1090003 at RadiologyService: residence=827ms
 
 === MARKING EVOLUTION ===
  INFO [main] (PetriNetAnalyzer.java:795) - Retrieved 10 GENERATED events for workflowBase 1000000
-Time=1769414495527 Token=1000000 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=PATIENT_ARRIVAL EventType=GENERATED
-Time=1769414497926 Token=1010000 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=PATIENT_ARRIVAL EventType=GENERATED
-Time=1769414498340 Token=1020000 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=PATIENT_ARRIVAL EventType=GENERATED
-Time=1769414499638 Token=1030000 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=PATIENT_ARRIVAL EventType=GENERATED
-Time=1769414500122 Token=1040000 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=PATIENT_ARRIVAL EventType=GENERATED
-Time=1769414503762 Token=1050000 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=PATIENT_ARRIVAL EventType=GENERATED
-Time=1769414503921 Token=1060000 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=PATIENT_ARRIVAL EventType=GENERATED
-Time=1769414505731 Token=1070000 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=PATIENT_ARRIVAL EventType=GENERATED
-Time=1769414506820 Token=1080000 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=PATIENT_ARRIVAL EventType=GENERATED
-Time=1769414506953 Token=1090000 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=PATIENT_ARRIVAL EventType=GENERATED
+Time=1770275608314 Token=1000000 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=PATIENT_ARRIVAL EventType=GENERATED
+Time=1770275613913 Token=1010000 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=PATIENT_ARRIVAL EventType=GENERATED
+Time=1770275617718 Token=1020000 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=PATIENT_ARRIVAL EventType=GENERATED
+Time=1770275619922 Token=1030000 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=PATIENT_ARRIVAL EventType=GENERATED
+Time=1770275623321 Token=1040000 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=PATIENT_ARRIVAL EventType=GENERATED
+Time=1770275624553 Token=1050000 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=PATIENT_ARRIVAL EventType=GENERATED
+Time=1770275626347 Token=1060000 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=PATIENT_ARRIVAL EventType=GENERATED
+Time=1770275627919 Token=1070000 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=PATIENT_ARRIVAL EventType=GENERATED
+Time=1770275629761 Token=1080000 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=PATIENT_ARRIVAL EventType=GENERATED
+Time=1770275631711 Token=1090000 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=PATIENT_ARRIVAL EventType=GENERATED
  INFO [main] (PetriNetAnalyzer.java:753) - Retrieved 21 marking snapshots for CardiologyService
-Time=1769414497903 Token=1000002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=BUFFERED
-Time=1769414497940 Token=1000002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=ENTER
-Time=1769414500898 Token=1000002 Place=CardiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_CardiologyService EventType=EXIT
-Time=1769414502577 Token=1010002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=BUFFERED
-Time=1769414502692 Token=1010002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=ENTER
-Time=1769414505101 Token=1010002 Place=CardiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_CardiologyService EventType=EXIT
-Time=1769414508426 Token=1030002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=BUFFERED
-Time=1769414508648 Token=1030002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=ENTER
-Time=1769414509289 Token=1030002 Place=CardiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_CardiologyService EventType=EXIT
-Time=1769414513198 Token=1040002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=BUFFERED
-Time=1769414513230 Token=1040002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=ENTER
-Time=1769414515791 Token=1040002 Place=CardiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_CardiologyService EventType=EXIT
-Time=1769414517483 Token=1050002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=BUFFERED
-Time=1769414517670 Token=1050002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=ENTER
-Time=1769414518699 Token=1050002 Place=CardiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_CardiologyService EventType=EXIT
-Time=1769414520818 Token=1060002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=BUFFERED
-Time=1769414520832 Token=1060002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=ENTER
-Time=1769414522417 Token=1060002 Place=CardiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_CardiologyService EventType=EXIT
-Time=1769414528428 Token=1090002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=BUFFERED
-Time=1769414528444 Token=1090002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=ENTER
-Time=1769414529214 Token=1090002 Place=CardiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_CardiologyService EventType=EXIT
+Time=1770275615629 Token=1010002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=BUFFERED
+Time=1770275615827 Token=1010002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=ENTER
+Time=1770275617479 Token=1010002 Place=CardiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_CardiologyService EventType=EXIT
+Time=1770275622983 Token=1030002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=BUFFERED
+Time=1770275623046 Token=1030002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=ENTER
+Time=1770275624713 Token=1030002 Place=CardiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_CardiologyService EventType=EXIT
+Time=1770275629718 Token=1050002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=BUFFERED
+Time=1770275629761 Token=1050002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=ENTER
+Time=1770275631134 Token=1050002 Place=CardiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_CardiologyService EventType=EXIT
+Time=1770275633833 Token=1060002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=BUFFERED
+Time=1770275633897 Token=1060002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=ENTER
+Time=1770275635775 Token=1060002 Place=CardiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_CardiologyService EventType=EXIT
+Time=1770275637312 Token=1070002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=BUFFERED
+Time=1770275637337 Token=1070002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=ENTER
+Time=1770275638936 Token=1070002 Place=CardiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_CardiologyService EventType=EXIT
+Time=1770275641440 Token=1080002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=BUFFERED
+Time=1770275641452 Token=1080002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=ENTER
+Time=1770275642396 Token=1080002 Place=CardiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_CardiologyService EventType=EXIT
+Time=1770275644433 Token=1090002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=BUFFERED
+Time=1770275644452 Token=1090002 Place=CardiologyService Marking=1 Buffer=0 ToPlace=CardiologyService TransitionId=T_in_CardiologyService EventType=ENTER
+Time=1770275645974 Token=1090002 Place=CardiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_CardiologyService EventType=EXIT
  INFO [main] (PetriNetAnalyzer.java:753) - Retrieved 49 marking snapshots for DiagnosisService
-Time=1769414500099 Token=1000001 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
-Time=1769414501235 Token=1000003 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
-Time=1769414501939 Token=1000002 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
-Time=1769414502363 Token=1000001 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=ENTER
-Time=1769414502369 Token=1000003 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
-Time=1769414502377 Token=1000002 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
-Time=1769414505526 Token=1000001 Place=DiagnosisService Marking=0 Buffer=0 ToPlace=TreatmentService TransitionId=T_out_DiagnosisService EventType=EXIT
-Time=1769414507037 Token=1010001 Place=DiagnosisService Marking=1 Buffer=2 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
-Time=1769414507820 Token=1010002 Place=DiagnosisService Marking=1 Buffer=1 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
-Time=1769414508285 Token=1010003 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
-Time=1769414508345 Token=1010001 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=ENTER
-Time=1769414508351 Token=1010002 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
-Time=1769414508354 Token=1010003 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
-Time=1769414510954 Token=1010001 Place=DiagnosisService Marking=0 Buffer=0 ToPlace=TreatmentService TransitionId=T_out_DiagnosisService EventType=EXIT
-Time=1769414512892 Token=1030001 Place=DiagnosisService Marking=1 Buffer=1 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
-Time=1769414516752 Token=1030002 Place=DiagnosisService Marking=1 Buffer=1 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
-Time=1769414518101 Token=1030003 Place=DiagnosisService Marking=1 Buffer=5 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
-Time=1769414518123 Token=1030001 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=ENTER
-Time=1769414518131 Token=1030002 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
-Time=1769414518134 Token=1030003 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
-Time=1769414519174 Token=1030001 Place=DiagnosisService Marking=0 Buffer=0 ToPlace=TreatmentService TransitionId=T_out_DiagnosisService EventType=EXIT
-Time=1769414521021 Token=1040001 Place=DiagnosisService Marking=1 Buffer=5 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
-Time=1769414521646 Token=1040002 Place=DiagnosisService Marking=1 Buffer=4 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
-Time=1769414523066 Token=1040003 Place=DiagnosisService Marking=1 Buffer=3 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
-Time=1769414523209 Token=1040001 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=ENTER
-Time=1769414523238 Token=1040002 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
-Time=1769414523242 Token=1040003 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
-Time=1769414524035 Token=1040001 Place=DiagnosisService Marking=0 Buffer=0 ToPlace=TreatmentService TransitionId=T_out_DiagnosisService EventType=EXIT
-Time=1769414524867 Token=1050001 Place=DiagnosisService Marking=1 Buffer=5 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
-Time=1769414525814 Token=1050002 Place=DiagnosisService Marking=1 Buffer=4 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
-Time=1769414526294 Token=1050003 Place=DiagnosisService Marking=1 Buffer=3 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
-Time=1769414526375 Token=1050001 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=ENTER
-Time=1769414526424 Token=1050002 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
-Time=1769414526443 Token=1050003 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
-Time=1769414526967 Token=1050001 Place=DiagnosisService Marking=0 Buffer=0 ToPlace=TreatmentService TransitionId=T_out_DiagnosisService EventType=EXIT
-Time=1769414527960 Token=1060001 Place=DiagnosisService Marking=1 Buffer=2 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
-Time=1769414528942 Token=1060002 Place=DiagnosisService Marking=1 Buffer=1 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
-Time=1769414529525 Token=1060003 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
-Time=1769414529629 Token=1060001 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=ENTER
-Time=1769414529634 Token=1060002 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
-Time=1769414529637 Token=1060003 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
-Time=1769414529931 Token=1060001 Place=DiagnosisService Marking=0 Buffer=0 ToPlace=TreatmentService TransitionId=T_out_DiagnosisService EventType=EXIT
-Time=1769414530336 Token=1090001 Place=DiagnosisService Marking=1 Buffer=2 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
-Time=1769414530611 Token=1090002 Place=DiagnosisService Marking=1 Buffer=1 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
-Time=1769414530851 Token=1090003 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
-Time=1769414530973 Token=1090001 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=ENTER
-Time=1769414530978 Token=1090002 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
-Time=1769414530982 Token=1090003 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
-Time=1769414531483 Token=1090001 Place=DiagnosisService Marking=0 Buffer=0 ToPlace=TreatmentService TransitionId=T_out_DiagnosisService EventType=EXIT
+Time=1770275618278 Token=1010001 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
+Time=1770275618784 Token=1010002 Place=DiagnosisService Marking=1 Buffer=1 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
+Time=1770275619093 Token=1010003 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
+Time=1770275619182 Token=1010001 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=ENTER
+Time=1770275619231 Token=1010002 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
+Time=1770275619322 Token=1010003 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
+Time=1770275620581 Token=1010001 Place=DiagnosisService Marking=0 Buffer=0 ToPlace=TreatmentService TransitionId=T_out_DiagnosisService EventType=EXIT
+Time=1770275625258 Token=1030001 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
+Time=1770275625581 Token=1030002 Place=DiagnosisService Marking=1 Buffer=1 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
+Time=1770275626127 Token=1030003 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
+Time=1770275626204 Token=1030001 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=ENTER
+Time=1770275626231 Token=1030002 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
+Time=1770275626234 Token=1030003 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
+Time=1770275627415 Token=1030001 Place=DiagnosisService Marking=0 Buffer=0 ToPlace=TreatmentService TransitionId=T_out_DiagnosisService EventType=EXIT
+Time=1770275630583 Token=1050003 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
+Time=1770275630989 Token=1050001 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
+Time=1770275631702 Token=1050002 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
+Time=1770275631814 Token=1050001 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=ENTER
+Time=1770275631825 Token=1050003 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
+Time=1770275631833 Token=1050002 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
+Time=1770275632215 Token=1050001 Place=DiagnosisService Marking=0 Buffer=0 ToPlace=TreatmentService TransitionId=T_out_DiagnosisService EventType=EXIT
+Time=1770275634601 Token=1060001 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
+Time=1770275636117 Token=1060003 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
+Time=1770275636620 Token=1060002 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
+Time=1770275636711 Token=1060001 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=ENTER
+Time=1770275636715 Token=1060003 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
+Time=1770275636718 Token=1060002 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
+Time=1770275637346 Token=1060001 Place=DiagnosisService Marking=0 Buffer=0 ToPlace=TreatmentService TransitionId=T_out_DiagnosisService EventType=EXIT
+Time=1770275638778 Token=1070001 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
+Time=1770275639441 Token=1070003 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
+Time=1770275640502 Token=1070002 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
+Time=1770275640727 Token=1070001 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=ENTER
+Time=1770275640731 Token=1070003 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
+Time=1770275640734 Token=1070002 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
+Time=1770275641814 Token=1070001 Place=DiagnosisService Marking=0 Buffer=0 ToPlace=TreatmentService TransitionId=T_out_DiagnosisService EventType=EXIT
+Time=1770275642716 Token=1080001 Place=DiagnosisService Marking=1 Buffer=1 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
+Time=1770275643243 Token=1080002 Place=DiagnosisService Marking=1 Buffer=1 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
+Time=1770275643923 Token=1080003 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
+Time=1770275643969 Token=1080001 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=ENTER
+Time=1770275643974 Token=1080002 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
+Time=1770275643978 Token=1080003 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
+Time=1770275645480 Token=1080001 Place=DiagnosisService Marking=0 Buffer=0 ToPlace=TreatmentService TransitionId=T_out_DiagnosisService EventType=EXIT
+Time=1770275646133 Token=1090001 Place=DiagnosisService Marking=1 Buffer=1 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
+Time=1770275646543 Token=1090003 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
+Time=1770275646799 Token=1090002 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=BUFFERED
+Time=1770275646856 Token=1090001 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=DiagnosisService TransitionId=T_in_DiagnosisService EventType=ENTER
+Time=1770275646860 Token=1090003 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
+Time=1770275646863 Token=1090002 Place=DiagnosisService Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_DiagnosisService EventType=JOIN_CONSUMED
+Time=1770275647295 Token=1090001 Place=DiagnosisService Marking=0 Buffer=0 ToPlace=TreatmentService TransitionId=T_out_DiagnosisService EventType=EXIT
  INFO [main] (PetriNetAnalyzer.java:753) - Retrieved 0 marking snapshots for FORK_CONSUMED
  INFO [main] (PetriNetAnalyzer.java:753) - Retrieved 0 marking snapshots for JOIN_CONSUMED
  INFO [main] (PetriNetAnalyzer.java:753) - Retrieved 21 marking snapshots for LaboratoryService
-Time=1769414497325 Token=1000001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=BUFFERED
-Time=1769414497338 Token=1000001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=ENTER
-Time=1769414498382 Token=1000001 Place=LaboratoryService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_LaboratoryService EventType=EXIT
-Time=1769414502484 Token=1010001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=BUFFERED
-Time=1769414502505 Token=1010001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=ENTER
-Time=1769414503732 Token=1010001 Place=LaboratoryService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_LaboratoryService EventType=EXIT
-Time=1769414508381 Token=1030001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=BUFFERED
-Time=1769414508630 Token=1030001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=ENTER
-Time=1769414510404 Token=1030001 Place=LaboratoryService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_LaboratoryService EventType=EXIT
-Time=1769414512432 Token=1040001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=BUFFERED
-Time=1769414512449 Token=1040001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=ENTER
-Time=1769414513513 Token=1040001 Place=LaboratoryService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_LaboratoryService EventType=EXIT
-Time=1769414514862 Token=1050001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=BUFFERED
-Time=1769414514886 Token=1050001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=ENTER
-Time=1769414515680 Token=1050001 Place=LaboratoryService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_LaboratoryService EventType=EXIT
-Time=1769414519702 Token=1060001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=BUFFERED
-Time=1769414519838 Token=1060001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=ENTER
-Time=1769414521935 Token=1060001 Place=LaboratoryService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_LaboratoryService EventType=EXIT
-Time=1769414528343 Token=1090001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=BUFFERED
-Time=1769414528393 Token=1090001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=ENTER
-Time=1769414529007 Token=1090001 Place=LaboratoryService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_LaboratoryService EventType=EXIT
+Time=1770275615351 Token=1010001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=BUFFERED
+Time=1770275615378 Token=1010001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=ENTER
+Time=1770275616643 Token=1010001 Place=LaboratoryService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_LaboratoryService EventType=EXIT
+Time=1770275622644 Token=1030001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=BUFFERED
+Time=1770275622658 Token=1030001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=ENTER
+Time=1770275624199 Token=1030001 Place=LaboratoryService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_LaboratoryService EventType=EXIT
+Time=1770275629087 Token=1050001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=BUFFERED
+Time=1770275629098 Token=1050001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=ENTER
+Time=1770275630288 Token=1050001 Place=LaboratoryService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_LaboratoryService EventType=EXIT
+Time=1770275632798 Token=1060001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=BUFFERED
+Time=1770275632809 Token=1060001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=ENTER
+Time=1770275633621 Token=1060001 Place=LaboratoryService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_LaboratoryService EventType=EXIT
+Time=1770275636328 Token=1070001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=BUFFERED
+Time=1770275636376 Token=1070001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=ENTER
+Time=1770275636919 Token=1070001 Place=LaboratoryService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_LaboratoryService EventType=EXIT
+Time=1770275639413 Token=1080001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=BUFFERED
+Time=1770275639424 Token=1080001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=ENTER
+Time=1770275640712 Token=1080001 Place=LaboratoryService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_LaboratoryService EventType=EXIT
+Time=1770275644393 Token=1090001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=BUFFERED
+Time=1770275644443 Token=1090001 Place=LaboratoryService Marking=1 Buffer=0 ToPlace=LaboratoryService TransitionId=T_in_LaboratoryService EventType=ENTER
+Time=1770275645442 Token=1090001 Place=LaboratoryService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_LaboratoryService EventType=EXIT
  INFO [main] (PetriNetAnalyzer.java:753) - Retrieved 0 marking snapshots for MonitorService
  INFO [main] (PetriNetAnalyzer.java:753) - Retrieved 21 marking snapshots for RadiologyService
-Time=1769414498262 Token=1000003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=BUFFERED
-Time=1769414498369 Token=1000003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=ENTER
-Time=1769414499777 Token=1000003 Place=RadiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_RadiologyService EventType=EXIT
-Time=1769414502592 Token=1010003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=BUFFERED
-Time=1769414502607 Token=1010003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=ENTER
-Time=1769414505404 Token=1010003 Place=RadiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_RadiologyService EventType=EXIT
-Time=1769414510232 Token=1030003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=BUFFERED
-Time=1769414510260 Token=1030003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=ENTER
-Time=1769414511272 Token=1030003 Place=RadiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_RadiologyService EventType=EXIT
-Time=1769414513633 Token=1040003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=BUFFERED
-Time=1769414513648 Token=1040003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=ENTER
-Time=1769414514586 Token=1040003 Place=RadiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_RadiologyService EventType=EXIT
-Time=1769414515808 Token=1050003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=BUFFERED
-Time=1769414515831 Token=1050003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=ENTER
-Time=1769414516403 Token=1050003 Place=RadiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_RadiologyService EventType=EXIT
-Time=1769414520015 Token=1060003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=BUFFERED
-Time=1769414520079 Token=1060003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=ENTER
-Time=1769414521697 Token=1060003 Place=RadiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_RadiologyService EventType=EXIT
-Time=1769414528743 Token=1090003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=BUFFERED
-Time=1769414528753 Token=1090003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=ENTER
-Time=1769414529466 Token=1090003 Place=RadiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_RadiologyService EventType=EXIT
+Time=1770275616171 Token=1010003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=BUFFERED
+Time=1770275616185 Token=1010003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=ENTER
+Time=1770275618107 Token=1010003 Place=RadiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_RadiologyService EventType=EXIT
+Time=1770275623095 Token=1030003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=BUFFERED
+Time=1770275623173 Token=1030003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=ENTER
+Time=1770275624547 Token=1030003 Place=RadiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_RadiologyService EventType=EXIT
+Time=1770275629242 Token=1050003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=BUFFERED
+Time=1770275629260 Token=1050003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=ENTER
+Time=1770275629755 Token=1050003 Place=RadiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_RadiologyService EventType=EXIT
+Time=1770275633963 Token=1060003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=BUFFERED
+Time=1770275633984 Token=1060003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=ENTER
+Time=1770275635284 Token=1060003 Place=RadiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_RadiologyService EventType=EXIT
+Time=1770275637272 Token=1070003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=BUFFERED
+Time=1770275637302 Token=1070003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=ENTER
+Time=1770275637875 Token=1070003 Place=RadiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_RadiologyService EventType=EXIT
+Time=1770275640504 Token=1080003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=BUFFERED
+Time=1770275640515 Token=1080003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=ENTER
+Time=1770275641243 Token=1080003 Place=RadiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_RadiologyService EventType=EXIT
+Time=1770275644519 Token=1090003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=BUFFERED
+Time=1770275644534 Token=1090003 Place=RadiologyService Marking=1 Buffer=0 ToPlace=RadiologyService TransitionId=T_in_RadiologyService EventType=ENTER
+Time=1770275645361 Token=1090003 Place=RadiologyService Marking=0 Buffer=0 ToPlace=DiagnosisService TransitionId=T_out_RadiologyService EventType=EXIT
  INFO [main] (PetriNetAnalyzer.java:753) - Retrieved 30 marking snapshots for TreatmentService
-Time=1769414506278 Token=1020000 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=BUFFERED
-Time=1769414506306 Token=1020000 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=ENTER
-Time=1769414507832 Token=1000001 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=BUFFERED
-Time=1769414507868 Token=1000001 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=ENTER
-Time=1769414510774 Token=1020000 Place=TreatmentService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_TreatmentService EventType=EXIT
-Time=1769414511016 Token=1000001 Place=TreatmentService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_TreatmentService EventType=EXIT
-Time=1769414513437 Token=1010001 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=BUFFERED
-Time=1769414513465 Token=1010001 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=ENTER
-Time=1769414518521 Token=1010001 Place=TreatmentService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_TreatmentService EventType=EXIT
-Time=1769414521477 Token=1030001 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=BUFFERED
-Time=1769414521487 Token=1030001 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=ENTER
-Time=1769414522571 Token=1030001 Place=TreatmentService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_TreatmentService EventType=EXIT
-Time=1769414523715 Token=1070000 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=BUFFERED
-Time=1769414523864 Token=1070000 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=ENTER
-Time=1769414525116 Token=1070000 Place=TreatmentService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_TreatmentService EventType=EXIT
-Time=1769414525200 Token=1040001 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=BUFFERED
-Time=1769414526043 Token=1040001 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=ENTER
-Time=1769414526754 Token=1080000 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=BUFFERED
-Time=1769414526769 Token=1080000 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=ENTER
-Time=1769414527085 Token=1040001 Place=TreatmentService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_TreatmentService EventType=EXIT
-Time=1769414527538 Token=1080000 Place=TreatmentService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_TreatmentService EventType=EXIT
-Time=1769414530747 Token=1050001 Place=TreatmentService Marking=1 Buffer=1 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=BUFFERED
-Time=1769414530758 Token=1050001 Place=TreatmentService Marking=1 Buffer=1 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=ENTER
-Time=1769414530977 Token=1050001 Place=TreatmentService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_TreatmentService EventType=EXIT
-Time=1769414531837 Token=1060001 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=BUFFERED
-Time=1769414531849 Token=1060001 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=ENTER
-Time=1769414532211 Token=1060001 Place=TreatmentService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_TreatmentService EventType=EXIT
-Time=1769414533077 Token=1090001 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=BUFFERED
-Time=1769414533086 Token=1090001 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=ENTER
-Time=1769414533414 Token=1090001 Place=TreatmentService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_TreatmentService EventType=EXIT
+Time=1770275609597 Token=1000000 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=BUFFERED
+Time=1770275609614 Token=1000000 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=ENTER
+Time=1770275610083 Token=1000000 Place=TreatmentService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_TreatmentService EventType=EXIT
+Time=1770275619889 Token=1020000 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=BUFFERED
+Time=1770275619915 Token=1020000 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=ENTER
+Time=1770275621398 Token=1020000 Place=TreatmentService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_TreatmentService EventType=EXIT
+Time=1770275622464 Token=1010001 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=BUFFERED
+Time=1770275622475 Token=1010001 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=ENTER
+Time=1770275623383 Token=1010001 Place=TreatmentService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_TreatmentService EventType=EXIT
+Time=1770275626280 Token=1040000 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=BUFFERED
+Time=1770275626326 Token=1040000 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=ENTER
+Time=1770275627053 Token=1040000 Place=TreatmentService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_TreatmentService EventType=EXIT
+Time=1770275628935 Token=1030001 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=BUFFERED
+Time=1770275628945 Token=1030001 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=ENTER
+Time=1770275630791 Token=1030001 Place=TreatmentService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_TreatmentService EventType=EXIT
+Time=1770275633083 Token=1050001 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=BUFFERED
+Time=1770275633094 Token=1050001 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=ENTER
+Time=1770275633718 Token=1050001 Place=TreatmentService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_TreatmentService EventType=EXIT
+Time=1770275638335 Token=1060001 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=BUFFERED
+Time=1770275638344 Token=1060001 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=ENTER
+Time=1770275638945 Token=1060001 Place=TreatmentService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_TreatmentService EventType=EXIT
+Time=1770275642731 Token=1070001 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=BUFFERED
+Time=1770275642780 Token=1070001 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=ENTER
+Time=1770275643495 Token=1070001 Place=TreatmentService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_TreatmentService EventType=EXIT
+Time=1770275646324 Token=1080001 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=BUFFERED
+Time=1770275646336 Token=1080001 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=ENTER
+Time=1770275646934 Token=1080001 Place=TreatmentService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_TreatmentService EventType=EXIT
+Time=1770275647735 Token=1090001 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=BUFFERED
+Time=1770275647746 Token=1090001 Place=TreatmentService Marking=1 Buffer=0 ToPlace=TreatmentService TransitionId=T_in_TreatmentService EventType=ENTER
+Time=1770275648081 Token=1090001 Place=TreatmentService Marking=0 Buffer=0 ToPlace=MonitorService TransitionId=T_out_TreatmentService EventType=EXIT
  INFO [main] (PetriNetAnalyzer.java:753) - Retrieved 79 marking snapshots for TriageService
-Time=1769414495850 Token=1000000 Place=TriageService Marking=1 Buffer=0 ToPlace=TriageService TransitionId=T_in_TriageService EventType=BUFFERED
-Time=1769414495866 Token=1000000 Place=TriageService Marking=1 Buffer=0 ToPlace=TriageService TransitionId=T_in_TriageService EventType=ENTER
-Time=1769414496392 Token=1000000 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414496401 Token=1000001 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
-Time=1769414496431 Token=1000000 Place=TriageService Marking=0 Buffer=0 ToPlace=FORK_CONSUMED TransitionId=T_out_TriageService EventType=FORK_CONSUMED
-Time=1769414496494 Token=1000001 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414496598 Token=1000002 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
-Time=1769414496609 Token=1000002 Place=TriageService Marking=0 Buffer=0 ToPlace=CardiologyService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414496703 Token=1000003 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
-Time=1769414496711 Token=1000003 Place=TriageService Marking=0 Buffer=0 ToPlace=RadiologyService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414499526 Token=1010000 Place=TriageService Marking=1 Buffer=0 ToPlace=TriageService TransitionId=T_in_TriageService EventType=BUFFERED
-Time=1769414499538 Token=1010000 Place=TriageService Marking=1 Buffer=0 ToPlace=TriageService TransitionId=T_in_TriageService EventType=ENTER
-Time=1769414501182 Token=1010000 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414501186 Token=1010001 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
-Time=1769414501191 Token=1010000 Place=TriageService Marking=0 Buffer=0 ToPlace=FORK_CONSUMED TransitionId=T_out_TriageService EventType=FORK_CONSUMED
-Time=1769414501206 Token=1010001 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414501382 Token=1010002 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
-Time=1769414501390 Token=1010002 Place=TriageService Marking=0 Buffer=0 ToPlace=CardiologyService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414501573 Token=1010003 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
-Time=1769414501590 Token=1010003 Place=TriageService Marking=0 Buffer=0 ToPlace=RadiologyService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414503026 Token=1020000 Place=TriageService Marking=1 Buffer=2 ToPlace=TriageService TransitionId=T_in_TriageService EventType=BUFFERED
-Time=1769414503126 Token=1020000 Place=TriageService Marking=1 Buffer=2 ToPlace=TriageService TransitionId=T_in_TriageService EventType=ENTER
-Time=1769414504482 Token=1020000 Place=TriageService Marking=0 Buffer=0 ToPlace=TreatmentService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414505952 Token=1030000 Place=TriageService Marking=1 Buffer=3 ToPlace=TriageService TransitionId=T_in_TriageService EventType=BUFFERED
-Time=1769414505975 Token=1030000 Place=TriageService Marking=1 Buffer=3 ToPlace=TriageService TransitionId=T_in_TriageService EventType=ENTER
-Time=1769414506885 Token=1030000 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414506957 Token=1030001 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
-Time=1769414506975 Token=1030000 Place=TriageService Marking=0 Buffer=0 ToPlace=FORK_CONSUMED TransitionId=T_out_TriageService EventType=FORK_CONSUMED
-Time=1769414506987 Token=1030001 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414507224 Token=1030002 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
-Time=1769414507325 Token=1030002 Place=TriageService Marking=0 Buffer=0 ToPlace=CardiologyService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414507682 Token=1030003 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
-Time=1769414507790 Token=1030003 Place=TriageService Marking=0 Buffer=0 ToPlace=RadiologyService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414509480 Token=1040000 Place=TriageService Marking=1 Buffer=5 ToPlace=TriageService TransitionId=T_in_TriageService EventType=BUFFERED
-Time=1769414509569 Token=1040000 Place=TriageService Marking=1 Buffer=5 ToPlace=TriageService TransitionId=T_in_TriageService EventType=ENTER
-Time=1769414510932 Token=1040000 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414510967 Token=1040001 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
-Time=1769414510986 Token=1040000 Place=TriageService Marking=0 Buffer=0 ToPlace=FORK_CONSUMED TransitionId=T_out_TriageService EventType=FORK_CONSUMED
-Time=1769414511061 Token=1040001 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414511579 Token=1040002 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
-Time=1769414511589 Token=1040002 Place=TriageService Marking=0 Buffer=0 ToPlace=CardiologyService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414511943 Token=1040003 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
-Time=1769414512098 Token=1040003 Place=TriageService Marking=0 Buffer=0 ToPlace=RadiologyService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414513651 Token=1050000 Place=TriageService Marking=1 Buffer=4 ToPlace=TriageService TransitionId=T_in_TriageService EventType=BUFFERED
-Time=1769414513663 Token=1050000 Place=TriageService Marking=1 Buffer=4 ToPlace=TriageService TransitionId=T_in_TriageService EventType=ENTER
-Time=1769414514094 Token=1050000 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414514097 Token=1050001 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
-Time=1769414514100 Token=1050000 Place=TriageService Marking=0 Buffer=0 ToPlace=FORK_CONSUMED TransitionId=T_out_TriageService EventType=FORK_CONSUMED
-Time=1769414514296 Token=1050001 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414514546 Token=1050002 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
-Time=1769414514551 Token=1050002 Place=TriageService Marking=0 Buffer=0 ToPlace=CardiologyService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414514745 Token=1050003 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
-Time=1769414514850 Token=1050003 Place=TriageService Marking=0 Buffer=0 ToPlace=RadiologyService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414516109 Token=1060000 Place=TriageService Marking=1 Buffer=3 ToPlace=TriageService TransitionId=T_in_TriageService EventType=BUFFERED
-Time=1769414516118 Token=1060000 Place=TriageService Marking=1 Buffer=3 ToPlace=TriageService TransitionId=T_in_TriageService EventType=ENTER
-Time=1769414517044 Token=1060000 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414517047 Token=1060001 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
-Time=1769414517050 Token=1060000 Place=TriageService Marking=0 Buffer=0 ToPlace=FORK_CONSUMED TransitionId=T_out_TriageService EventType=FORK_CONSUMED
-Time=1769414517165 Token=1060001 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414517449 Token=1060002 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
-Time=1769414517673 Token=1060002 Place=TriageService Marking=0 Buffer=0 ToPlace=CardiologyService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414518213 Token=1060003 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
-Time=1769414518351 Token=1060003 Place=TriageService Marking=0 Buffer=0 ToPlace=RadiologyService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414520821 Token=1070000 Place=TriageService Marking=1 Buffer=2 ToPlace=TriageService TransitionId=T_in_TriageService EventType=BUFFERED
-Time=1769414520843 Token=1070000 Place=TriageService Marking=1 Buffer=2 ToPlace=TriageService TransitionId=T_in_TriageService EventType=ENTER
-Time=1769414522464 Token=1070000 Place=TriageService Marking=0 Buffer=0 ToPlace=TreatmentService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414523797 Token=1080000 Place=TriageService Marking=1 Buffer=1 ToPlace=TriageService TransitionId=T_in_TriageService EventType=BUFFERED
-Time=1769414523888 Token=1080000 Place=TriageService Marking=1 Buffer=1 ToPlace=TriageService TransitionId=T_in_TriageService EventType=ENTER
-Time=1769414524892 Token=1080000 Place=TriageService Marking=0 Buffer=0 ToPlace=TreatmentService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414526097 Token=1090000 Place=TriageService Marking=1 Buffer=0 ToPlace=TriageService TransitionId=T_in_TriageService EventType=BUFFERED
-Time=1769414526137 Token=1090000 Place=TriageService Marking=1 Buffer=0 ToPlace=TriageService TransitionId=T_in_TriageService EventType=ENTER
-Time=1769414526692 Token=1090000 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414526715 Token=1090001 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
-Time=1769414526734 Token=1090000 Place=TriageService Marking=0 Buffer=0 ToPlace=FORK_CONSUMED TransitionId=T_out_TriageService EventType=FORK_CONSUMED
-Time=1769414526840 Token=1090001 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414527165 Token=1090002 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
-Time=1769414527184 Token=1090002 Place=TriageService Marking=0 Buffer=0 ToPlace=CardiologyService TransitionId=T_out_TriageService EventType=EXIT
-Time=1769414527578 Token=1090003 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
-Time=1769414527681 Token=1090003 Place=TriageService Marking=0 Buffer=0 ToPlace=RadiologyService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275608623 Token=1000000 Place=TriageService Marking=1 Buffer=0 ToPlace=TriageService TransitionId=T_in_TriageService EventType=BUFFERED
+Time=1770275608635 Token=1000000 Place=TriageService Marking=1 Buffer=0 ToPlace=TriageService TransitionId=T_in_TriageService EventType=ENTER
+Time=1770275609146 Token=1000000 Place=TriageService Marking=0 Buffer=0 ToPlace=TreatmentService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275614172 Token=1010000 Place=TriageService Marking=1 Buffer=0 ToPlace=TriageService TransitionId=T_in_TriageService EventType=BUFFERED
+Time=1770275614184 Token=1010000 Place=TriageService Marking=1 Buffer=0 ToPlace=TriageService TransitionId=T_in_TriageService EventType=ENTER
+Time=1770275614494 Token=1010000 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275614497 Token=1010001 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
+Time=1770275614503 Token=1010000 Place=TriageService Marking=0 Buffer=0 ToPlace=FORK_CONSUMED TransitionId=T_out_TriageService EventType=FORK_CONSUMED
+Time=1770275614594 Token=1010001 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275614699 Token=1010002 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
+Time=1770275614712 Token=1010002 Place=TriageService Marking=0 Buffer=0 ToPlace=CardiologyService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275614809 Token=1010003 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
+Time=1770275614897 Token=1010003 Place=TriageService Marking=0 Buffer=0 ToPlace=RadiologyService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275618519 Token=1020000 Place=TriageService Marking=1 Buffer=0 ToPlace=TriageService TransitionId=T_in_TriageService EventType=BUFFERED
+Time=1770275618529 Token=1020000 Place=TriageService Marking=1 Buffer=0 ToPlace=TriageService TransitionId=T_in_TriageService EventType=ENTER
+Time=1770275619039 Token=1020000 Place=TriageService Marking=0 Buffer=0 ToPlace=TreatmentService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275620502 Token=1030000 Place=TriageService Marking=1 Buffer=0 ToPlace=TriageService TransitionId=T_in_TriageService EventType=BUFFERED
+Time=1770275620512 Token=1030000 Place=TriageService Marking=1 Buffer=0 ToPlace=TriageService TransitionId=T_in_TriageService EventType=ENTER
+Time=1770275621310 Token=1030000 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275621314 Token=1030001 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
+Time=1770275621317 Token=1030000 Place=TriageService Marking=0 Buffer=0 ToPlace=FORK_CONSUMED TransitionId=T_out_TriageService EventType=FORK_CONSUMED
+Time=1770275621412 Token=1030001 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275621516 Token=1030002 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
+Time=1770275621555 Token=1030002 Place=TriageService Marking=0 Buffer=0 ToPlace=CardiologyService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275621865 Token=1030003 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
+Time=1770275621974 Token=1030003 Place=TriageService Marking=0 Buffer=0 ToPlace=RadiologyService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275625054 Token=1040000 Place=TriageService Marking=1 Buffer=0 ToPlace=TriageService TransitionId=T_in_TriageService EventType=BUFFERED
+Time=1770275625065 Token=1040000 Place=TriageService Marking=1 Buffer=0 ToPlace=TriageService TransitionId=T_in_TriageService EventType=ENTER
+Time=1770275625503 Token=1040000 Place=TriageService Marking=0 Buffer=0 ToPlace=TreatmentService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275626210 Token=1050000 Place=TriageService Marking=1 Buffer=0 ToPlace=TriageService TransitionId=T_in_TriageService EventType=BUFFERED
+Time=1770275626220 Token=1050000 Place=TriageService Marking=1 Buffer=0 ToPlace=TriageService TransitionId=T_in_TriageService EventType=ENTER
+Time=1770275627015 Token=1050000 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275627020 Token=1050001 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
+Time=1770275627022 Token=1050000 Place=TriageService Marking=0 Buffer=0 ToPlace=FORK_CONSUMED TransitionId=T_out_TriageService EventType=FORK_CONSUMED
+Time=1770275627126 Token=1050001 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275627540 Token=1050002 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
+Time=1770275627545 Token=1050002 Place=TriageService Marking=0 Buffer=0 ToPlace=CardiologyService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275628078 Token=1050003 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
+Time=1770275628086 Token=1050003 Place=TriageService Marking=0 Buffer=0 ToPlace=RadiologyService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275631200 Token=1060000 Place=TriageService Marking=1 Buffer=1 ToPlace=TriageService TransitionId=T_in_TriageService EventType=BUFFERED
+Time=1770275631209 Token=1060000 Place=TriageService Marking=1 Buffer=1 ToPlace=TriageService TransitionId=T_in_TriageService EventType=ENTER
+Time=1770275631902 Token=1060000 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275631905 Token=1060001 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
+Time=1770275631907 Token=1060000 Place=TriageService Marking=0 Buffer=0 ToPlace=FORK_CONSUMED TransitionId=T_out_TriageService EventType=FORK_CONSUMED
+Time=1770275632002 Token=1060001 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275632164 Token=1060002 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
+Time=1770275632227 Token=1060002 Place=TriageService Marking=0 Buffer=0 ToPlace=CardiologyService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275632676 Token=1060003 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
+Time=1770275632785 Token=1060003 Place=TriageService Marking=0 Buffer=0 ToPlace=RadiologyService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275634277 Token=1070000 Place=TriageService Marking=1 Buffer=2 ToPlace=TriageService TransitionId=T_in_TriageService EventType=BUFFERED
+Time=1770275634285 Token=1070000 Place=TriageService Marking=1 Buffer=2 ToPlace=TriageService TransitionId=T_in_TriageService EventType=ENTER
+Time=1770275635219 Token=1070000 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275635222 Token=1070001 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
+Time=1770275635225 Token=1070000 Place=TriageService Marking=0 Buffer=0 ToPlace=FORK_CONSUMED TransitionId=T_out_TriageService EventType=FORK_CONSUMED
+Time=1770275635231 Token=1070001 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275635765 Token=1070002 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
+Time=1770275635771 Token=1070002 Place=TriageService Marking=0 Buffer=0 ToPlace=CardiologyService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275635939 Token=1070003 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
+Time=1770275636067 Token=1070003 Place=TriageService Marking=0 Buffer=0 ToPlace=RadiologyService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275637360 Token=1080000 Place=TriageService Marking=1 Buffer=1 ToPlace=TriageService TransitionId=T_in_TriageService EventType=BUFFERED
+Time=1770275637369 Token=1080000 Place=TriageService Marking=1 Buffer=1 ToPlace=TriageService TransitionId=T_in_TriageService EventType=ENTER
+Time=1770275638366 Token=1080000 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275638369 Token=1080001 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
+Time=1770275638379 Token=1080000 Place=TriageService Marking=0 Buffer=0 ToPlace=FORK_CONSUMED TransitionId=T_out_TriageService EventType=FORK_CONSUMED
+Time=1770275638491 Token=1080001 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275638758 Token=1080002 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
+Time=1770275638925 Token=1080002 Place=TriageService Marking=0 Buffer=0 ToPlace=CardiologyService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275639193 Token=1080003 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
+Time=1770275639344 Token=1080003 Place=TriageService Marking=0 Buffer=0 ToPlace=RadiologyService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275641575 Token=1090000 Place=TriageService Marking=1 Buffer=0 ToPlace=TriageService TransitionId=T_in_TriageService EventType=BUFFERED
+Time=1770275641594 Token=1090000 Place=TriageService Marking=1 Buffer=0 ToPlace=TriageService TransitionId=T_in_TriageService EventType=ENTER
+Time=1770275642661 Token=1090000 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275642664 Token=1090001 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
+Time=1770275642666 Token=1090000 Place=TriageService Marking=0 Buffer=0 ToPlace=FORK_CONSUMED TransitionId=T_out_TriageService EventType=FORK_CONSUMED
+Time=1770275642772 Token=1090001 Place=TriageService Marking=0 Buffer=0 ToPlace=LaboratoryService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275642972 Token=1090002 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
+Time=1770275643064 Token=1090002 Place=TriageService Marking=0 Buffer=0 ToPlace=CardiologyService TransitionId=T_out_TriageService EventType=EXIT
+Time=1770275643278 Token=1090003 Place=TriageService Marking=0 Buffer=0 ToPlace=TriageService TransitionId=T_out_TriageService EventType=FORK
+Time=1770275643316 Token=1090003 Place=TriageService Marking=0 Buffer=0 ToPlace=RadiologyService TransitionId=T_out_TriageService EventType=EXIT
 
 ================================================================================
 CROSS-VERSION PRIORITY ANALYSIS
 ================================================================================
- INFO [main] (PetriNetAnalyzer.java:1008) - Priority analysis complete: 48 samples (13 root, 35 forked), 0 root contention points, 0 root inversions
+ INFO [main] (PetriNetAnalyzer.java:1129) - Place correlation: 48 matched, 0 unmatched out of 48
+ INFO [main] (PetriNetAnalyzer.java:1017) - Shared services (cross-version): []
+ INFO [main] (PetriNetAnalyzer.java:1046) - Priority analysis complete: 48 samples (13 root, 35 forked), 0 shared services, 0 shared-service contention points, 0 shared-service inversions
 
 === PRIORITY ANALYSIS REPORT ===
 
@@ -612,26 +614,35 @@ CROSS-VERSION PRIORITY ANALYSIS
    Root tokens: 13 (used for priority analysis)
    Forked tokens: 35 (join participants - excluded from priority analysis)
 
-2. VERSION STATISTICS (Root Tokens Only)
+2. SHARED SERVICES (Cross-Version Traffic)
+   [INFO] No shared services detected - each version uses exclusive services
+   Priority contention cannot be measured without shared services
+
+3. VERSION STATISTICS (Root Tokens Only)
    Version  Tokens     Avg Queue    Min Queue    Max Queue    Avg Service 
    ----------------------------------------------------------------------
-   v001     13         1132.4       278          2407         2041.5      
+   v001     13         2569.1       236          9941         1405.2      
 
-3. CONTENTION ANALYSIS (Root Tokens Only)
+4. SHARED SERVICE CONTENTION (Primary - Same Queue Only)
    Total contention points: 0
 
-4. PRIORITY INVERSIONS (Root Tokens Only)
-   [OK] No priority inversions detected
+5. SHARED SERVICE PRIORITY INVERSIONS
+   [OK] No priority inversions at shared services
 
-5. JOIN COMPLETIONS (Excluded from Priority Analysis)
+6. LEGACY ROOT TOKEN ANALYSIS (Global - Includes Cross-Service Comparisons)
+   Contention points: 0
+   Inversions: 0
+
+7. JOIN COMPLETIONS (Excluded from Priority Analysis)
    Forked tokens processed: 35
    Note: Join participants are fast-tracked when siblings arrive.
          This is correct workflow semantics, not a priority violation.
    By version: v001=35 
 
-6. PRIORITY VERDICT
-   [PASS] Priority scheduling is working effectively (100.0%)
+8. PRIORITY VERDICT (Based on Shared Service Analysis)
+   [INFO] No shared services - priority cannot be evaluated
+   Each version uses exclusive services with no queue contention
 
 === END PRIORITY REPORT ===
 
- INFO [main] (PetriNetAnalyzer.java:1342) - Generated priority analysis report
+ INFO [main] (PetriNetAnalyzer.java:1614) - Generated priority analysis report

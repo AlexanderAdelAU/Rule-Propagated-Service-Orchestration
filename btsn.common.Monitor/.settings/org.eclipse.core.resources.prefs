@@ -1,6 +1,6 @@
 eclipse.preferences.version=1
 encoding//src/org/btsn/derby/Analysis/BuildServiceAnalysisDatabase.java=UTF-8
-encoding//src/org/btsn/derby/Analysis/PetriNetTokenFlowChart.java=UTF-8
+encoding//src/org/btsn/derby/Analysis/PetriNetTokenFlowChart_deprecated.java=UTF-8
 encoding//src/org/btsn/derby/Analysis/WorkflowSpatialView.java=UTF-8
 encoding//src/org/btsn/handlers/EventPublisher.java=UTF-8
 encoding//src/org/btsn/handlers/RuleHandler.java=UTF-8

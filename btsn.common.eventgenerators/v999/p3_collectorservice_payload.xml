@@ -17,7 +17,7 @@
 	
 	<joinAttribute>
 		<attributeName>token</attributeName>
-		<attributeValue>{"token":"workflow_2000000_v002"}</attributeValue>
+		<attributeValue>{"token":"workflow_1000000_v001"}</attributeValue>
 		<notBefore>0</notBefore>
 		<notAfter>0</notAfter>
 	</joinAttribute>

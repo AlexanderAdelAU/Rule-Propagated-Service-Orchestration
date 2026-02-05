@@ -1,2 +1,4 @@
 eclipse.preferences.version=1
+encoding//src/org/btsn/handlers/EventReactor.java=UTF-8
+encoding//src/org/btsn/handlers/ServiceThread.java=UTF-8
 encoding//src/org/btsn/places/TriageService.java=UTF-8

@@ -1,5 +1,5 @@
 INFO ServiceThread-Triage_CollectorService-12200 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Completed callNextOperation for MonitorService, published=true
 INFO ServiceThread-Triage_CollectorService-12200 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Successfully published to MonitorService via EventPublisher
 ERROR ServiceThread-Triage_CollectorService-12200 org.btsn.handlers.ServiceThread - monitorIncomingEvents: false
-DEBUG ServiceThread-Triage_CollectorService-12200 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Cleaned up join 1000000
-DEBUG ServiceThread-Triage_CollectorService-12200 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Service Triage_CollectorService sequence ID: 1000000 complete.
+DEBUG ServiceThread-Triage_CollectorService-12200 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Cleaned up join 3000000
+DEBUG ServiceThread-Triage_CollectorService-12200 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Service Triage_CollectorService sequence ID: 3000000 complete.

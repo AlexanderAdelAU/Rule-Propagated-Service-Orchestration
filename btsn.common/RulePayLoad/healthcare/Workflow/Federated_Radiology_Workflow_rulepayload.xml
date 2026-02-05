@@ -2,7 +2,7 @@
 	<header>
 		<timestamp>2012-01-02T20:05:05.491+10:30</timestamp>
 		<ruleFileName>ThisServiceControlNode</ruleFileName>
-		<ruleBaseVersion>v002</ruleBaseVersion>
+		<ruleBaseVersion>v001</ruleBaseVersion>
 		<ruleBaseCommitment>2</ruleBaseCommitment>
 	</header>
 	<targetservice>

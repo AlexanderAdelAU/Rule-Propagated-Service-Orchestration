@@ -1,46 +1,5 @@
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: CONSOLIDATED_TOKEN_PATHS
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: CONSOLIDATED_TRANSITION_FIRINGS
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: JOIN_SYNCHRONIZATION
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: MARKINGS
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: PROCESSMEASUREMENTS
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: SERVICECONTRIBUTION
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: SERVICEMEASUREMENTS
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: TOKEN_GENEALOGY
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: TRANSITION_FIRINGS
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Total tables purged: 12
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Connected to Derby database: ServiceAnalysisDataBase
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Creating core measurement tables...
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table SERVICEMEASUREMENTS already exists
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table PROCESSMEASUREMENTS already exists
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table SERVICECONTRIBUTION already exists
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table MARKINGS already exists
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Core measurement tables created/verified
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Creating consolidated Petri Net tables...
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table CONSOLIDATED_TRANSITION_FIRINGS already exists
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table CONSOLIDATED_TOKEN_PATHS already exists
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table CONSOLIDATED_MARKING_EVOLUTION already exists
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table CONSOLIDATED_PLACE_STATISTICS already exists
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table CONSOLIDATED_TOKEN_GENEALOGY already exists
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Consolidated Petri Net tables created/verified
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Creating local Petri Net analysis tables...
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table TRANSITION_FIRINGS already exists
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table TOKEN_GENEALOGY already exists
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table JOIN_SYNCHRONIZATION already exists
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Local Petri Net tables created/verified
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Database initialization complete - 13 tables (4 core + 5 consolidated PN + 3 local PN + 1 event) created/verified
-WARN ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Could not get count for EVENTRESPONSETABLE: Table/View 'EVENTRESPONSETABLE' does not exist.
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Retrieved measurement statistics: {CONSOLIDATED_MARKING_EVOLUTION_Count=0, CONSOLIDATED_PLACE_STATISTICS_Count=0, CONSOLIDATED_TOKEN_GENEALOGY_Count=0, CONSOLIDATED_TOKEN_PATHS_Count=0, CONSOLIDATED_TRANSITION_FIRINGS_Count=0, EVENTRESPONSETABLE_Count=-1, JOIN_SYNCHRONIZATION_Count=0, MARKINGS_Count=0, PROCESSMEASUREMENTS_Count=0, SERVICECONTRIBUTION_Count=0, SERVICEMEASUREMENTS_Count=0, TOKEN_GENEALOGY_Count=0, TRANSITION_FIRINGS_Count=0}
-WARN ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Could not get count for EVENTRESPONSETABLE: Table/View 'EVENTRESPONSETABLE' does not exist.
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Retrieved measurement statistics: {CONSOLIDATED_MARKING_EVOLUTION_Count=0, CONSOLIDATED_PLACE_STATISTICS_Count=0, CONSOLIDATED_TOKEN_GENEALOGY_Count=0, CONSOLIDATED_TOKEN_PATHS_Count=0, CONSOLIDATED_TRANSITION_FIRINGS_Count=0, EVENTRESPONSETABLE_Count=-1, JOIN_SYNCHRONIZATION_Count=0, MARKINGS_Count=0, PROCESSMEASUREMENTS_Count=0, SERVICECONTRIBUTION_Count=0, SERVICEMEASUREMENTS_Count=0, TOKEN_GENEALOGY_Count=0, TRANSITION_FIRINGS_Count=0}
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.handlers.ServiceHelper - SERVICE COMPLETE: org.btsn.places.P4_InitializationService.purgeAndInitialize completed in 1709ms
-WARN ServiceThread-P4_InitializationService-14303 org.btsn.handlers.ServiceHelper - ENRICHMENT: Output attribute 'token' not found in service result, cannot enrich
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.handlers.ServiceHelper - ENRICHMENT: Successfully enriched service result with metadata
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.handlers.ServiceHelper - === SERVICE INVOCATION COMPLETE ===
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Service returned: {"duration_ms":1668,"tables_purged":12,"service":"P4_InitializationService","action":"purge_and_initialize","status":"success","attempts":1,"statistics":{"CONSOLIDATED_TOKEN_PATHS_Count":0,"SERVICECONTRIBUTION_Count":0,"CONSOLIDATED_TRANSITION_FIRINGS_Count":0,"CONSOLIDATED_MARKING_EVOLUTION_Count":0,"EVENTRESPONSETABLE_Count":-1,"CONSOLIDATED_TOKEN_GENEALOGY_Count":0,"TOKEN_GENEALOGY_Count":0,"MARKINGS_Count":0,"SERVICEMEASUREMENTS_Count":0,"CONSOLIDATED_PLACE_STATISTICS_Count":0,"PROCESSMEASUREMENTS_Count":0,"TRANSITION_FIRINGS_Count":0,"JOIN_SYNCHRONIZATION_Count":0}}
-DEBUG ServiceThread-P4_InitializationService-14303 org.btsn.handlers.PetriNetInstrumentationHelper - Skipping instrumentation for admin token 999300000 (v999)
-DEBUG ServiceThread-P4_InitializationService-14303 org.btsn.handlers.ServiceThread - PETRI-NET: Token 999300000 TERMINATED at P4_InitializationService
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Token 999300000 terminated after P4_InitializationService.purgeAndInitialize
-DEBUG ServiceThread-P4_InitializationService-14303 org.btsn.handlers.TransitionHandler - Processing Terminate Type complete.
-ERROR ServiceThread-P4_InitializationService-14303 org.btsn.handlers.ServiceThread - monitorIncomingEvents: false
-DEBUG ServiceThread-P4_InitializationService-14303 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Cleaned up join 999300000
-DEBUG ServiceThread-P4_InitializationService-14303 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Service P4_InitializationService sequence ID: 999300000 complete.
+INFO ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Completed callNextOperation for MonitorService, published=true
+INFO ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Successfully published to MonitorService via EventPublisher
+ERROR ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceThread - monitorIncomingEvents: false
+DEBUG ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Cleaned up join 1000000
+DEBUG ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Service P4_CollectorService sequence ID: 1000000 complete.

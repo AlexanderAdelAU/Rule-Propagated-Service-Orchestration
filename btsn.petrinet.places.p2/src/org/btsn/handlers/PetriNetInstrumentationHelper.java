@@ -63,52 +63,6 @@ public class PetriNetInstrumentationHelper {
     // In-memory join state tracking (keyed by "joinId_workflowBase")
     private final ConcurrentHashMap<String, JoinState> activeJoins;
     
-    // =============================================================================
-    // MONOTONIC TIMESTAMP TRACKING
-    // =============================================================================
-    // Tracks last recorded timestamp per token to ensure event ordering.
-    // Prevents race conditions where BUFFERED could be recorded before EXIT
-    // when sender and receiver threads call System.currentTimeMillis() independently.
-    // =============================================================================
-    private static final ConcurrentHashMap<Integer, Long> lastEventTimestamp = new ConcurrentHashMap<>();
-    
-    /**
-     * Get a monotonically increasing timestamp for a token.
-     * 
-     * This ensures that each event for a token has a timestamp strictly greater
-     * than all previous events for that token, preventing race conditions where
-     * concurrent threads could record events out of order.
-     * 
-     * THREAD SAFETY: Uses ConcurrentHashMap.compute() for atomic read-modify-write.
-     * 
-     * @param tokenId The token's sequence ID
-     * @return A timestamp guaranteed to be > any previous timestamp for this token
-     */
-    private long getMonotonicTimestamp(int tokenId) {
-        long now = System.currentTimeMillis();
-        return lastEventTimestamp.compute(tokenId, (id, lastTs) -> {
-            if (lastTs == null) {
-                return now;
-            }
-            // Ensure strictly increasing: at least 1ms after previous event
-            return Math.max(now, lastTs + 1);
-        });
-    }
-    
-    /**
-     * Clean up timestamp tracking for completed workflows.
-     * Call this when a workflow terminates to prevent memory leaks.
-     * 
-     * @param workflowBase The workflow base ID (e.g., 1000000)
-     */
-    public void cleanupWorkflowTimestamps(int workflowBase) {
-        // Remove all tokens belonging to this workflow (base + 0-99)
-        for (int i = 0; i < 100; i++) {
-            lastEventTimestamp.remove(workflowBase + i);
-        }
-        logger.debug("Cleaned up timestamp tracking for workflow " + workflowBase);
-    }
-    
     // Configuration flags
     private boolean recordTransitions = true;
     private boolean recordGenealogy = true;
@@ -253,7 +207,7 @@ public class PetriNetInstrumentationHelper {
                         parentTokenId,
                         tokenId,
                         forkTransition,
-                        getMonotonicTimestamp(tokenId),
+                        System.currentTimeMillis(),
                         calculateWorkflowBase(tokenId)
                     );
                     
@@ -328,11 +282,8 @@ public class PetriNetInstrumentationHelper {
             
             // Record the GENERATED event
             if (recordTransitions) {
-                // Use monotonic timestamp for consistency
-                long timestamp = getMonotonicTimestamp(tokenId);
-                
                 TreeMap<String, String> record = new TreeMap<>();
-                record.put("timestamp", Long.toString(timestamp));
+                record.put("timestamp", Long.toString(System.currentTimeMillis()));
                 record.put("transitionId", transitionId);
                 record.put("transitionType", "EventGenerator");
                 record.put("tokenId", Integer.toString(tokenId));
@@ -349,7 +300,7 @@ public class PetriNetInstrumentationHelper {
                 dbWriter.writeTransitionFiring(record);
                 
                 logger.info("GENERATED: Token " + tokenId + " created at " + transitionId +
-                           " -> " + firstPlaceName + " @" + timestamp);
+                           " -> " + firstPlaceName);
             }
             
         } catch (Exception e) {
@@ -476,7 +427,7 @@ public class PetriNetInstrumentationHelper {
                         parentTokenId,
                         tokenId,
                         forkTransition,
-                        getMonotonicTimestamp(tokenId),
+                        System.currentTimeMillis(),
                         calculateWorkflowBase(tokenId)
                     );
                     
@@ -711,10 +662,7 @@ public class PetriNetInstrumentationHelper {
         
         try {
             int workflowBase = calculateWorkflowBase(parentTokenId);
-            
-            // Use monotonic timestamp for the fork event
-            // This ensures FORK event is after any previous events for the parent
-            long forkTimestamp = getMonotonicTimestamp(parentTokenId);
+            long forkTimestamp = System.currentTimeMillis();
             
             TreeMap<String, String> record = new TreeMap<>();
             record.put("parentTokenId", Integer.toString(parentTokenId));
@@ -726,7 +674,7 @@ public class PetriNetInstrumentationHelper {
             dbWriter.writeTokenGenealogy(record);
             
             logger.info("GENEALOGY: Recorded fork " + parentTokenId + " -> " + childTokenId + 
-                       " via " + forkTransition + " (workflowBase=" + workflowBase + ") @" + forkTimestamp);
+                       " via " + forkTransition + " (workflowBase=" + workflowBase + ")");
             
             // Record FORK_CONSUMED event for the parent token
             // This signals that the parent token no longer exists after forking
@@ -734,10 +682,8 @@ public class PetriNetInstrumentationHelper {
             recordParentTokenConsumed(parentTokenId, forkTransition, workflowBase);
             
             // Record FORK event for the CHILD token - this is what animation needs
-            // Use monotonic timestamp for the child (initializes its timeline)
-            long childTimestamp = getMonotonicTimestamp(childTokenId);
             recordChildTokenCreated(parentTokenId, childTokenId, forkTransition,
-                                    childTimestamp, workflowBase);
+                                    forkTimestamp, workflowBase);
             
         } catch (Exception e) {
             logger.error("Failed to record fork genealogy: parent=" + parentTokenId + 
@@ -811,13 +757,10 @@ public class PetriNetInstrumentationHelper {
             fromPlace = forkTransition.substring(6); // Remove "T_out_" prefix
         }
         
-        // Use monotonic timestamp for proper event ordering
-        long timestamp = getMonotonicTimestamp(parentTokenId);
-        
         // Record the FORK_CONSUMED event
         // This tells the animator that this token no longer exists
         TreeMap<String, String> record = new TreeMap<>();
-        record.put("timestamp", Long.toString(timestamp));
+        record.put("timestamp", Long.toString(System.currentTimeMillis()));
         record.put("transitionId", forkTransition);
         record.put("transitionType", "ForkConsumed");
         record.put("tokenId", Integer.toString(parentTokenId));
@@ -833,7 +776,7 @@ public class PetriNetInstrumentationHelper {
         try {
             dbWriter.writeTransitionFiring(record);
             logger.info("FORK_CONSUMED: Parent token " + parentTokenId + 
-                       " consumed at " + forkTransition + " (workflowBase=" + workflowBase + ") @" + timestamp);
+                       " consumed at " + forkTransition + " (workflowBase=" + workflowBase + ")");
         } catch (Exception e) {
             logger.error("Failed to record FORK_CONSUMED for parent " + parentTokenId, e);
         }
@@ -937,9 +880,6 @@ public class PetriNetInstrumentationHelper {
     /**
      * Record a transition firing event
      * 
-     * TIMING: Uses getMonotonicTimestamp() to ensure events are recorded in
-     * strictly increasing order per token, preventing race conditions.
-     * 
      * @param eventType The type of event: ENTER, EXIT, FORK_CONSUMED, TERMINATE
      * @param arcValue The actual arc/guard value taken (for EDGE/XOR routing decisions)
      */
@@ -949,11 +889,8 @@ public class PetriNetInstrumentationHelper {
                                        long workflowStartTime, int bufferSize, String ruleVersion,
                                        String eventType, String arcValue) {
         try {
-            // Use monotonic timestamp to prevent race conditions
-            long timestamp = getMonotonicTimestamp(tokenId);
-            
             TreeMap<String, String> record = new TreeMap<>();
-            record.put("timestamp", Long.toString(timestamp));
+            record.put("timestamp", Long.toString(System.currentTimeMillis()));
             record.put("transitionId", transitionId);
             record.put("transitionType", transitionType != null ? transitionType : "EdgeNode");
             record.put("tokenId", Integer.toString(tokenId));
@@ -975,8 +912,7 @@ public class PetriNetInstrumentationHelper {
                         fromPlace + " -> " + toPlace +
                         " [" + eventType + "]" +
                         (arcValue != null && !arcValue.isEmpty() ? " arc=" + arcValue : "") +
-                        (bufferSize >= 0 ? " buffer=" + bufferSize : "") +
-                        " @" + timestamp);
+                        (bufferSize >= 0 ? " buffer=" + bufferSize : ""));
             
         } catch (Exception e) {
             logger.error("Failed to record transition firing: " + transitionId, e);
@@ -1066,14 +1002,11 @@ public class PetriNetInstrumentationHelper {
                                          int tokenId, int requiredCount, 
                                          int currentCount, String status) {
         try {
-            // Use monotonic timestamp for consistent ordering
-            long timestamp = getMonotonicTimestamp(tokenId);
-            
             TreeMap<String, String> record = new TreeMap<>();
             record.put("joinTransitionId", joinTransitionId);
             record.put("workflowBase", Integer.toString(workflowBase));
             record.put("tokenId", Integer.toString(tokenId));
-            record.put("arrivalTimestamp", Long.toString(timestamp));
+            record.put("arrivalTimestamp", Long.toString(System.currentTimeMillis()));
             record.put("requiredCount", Integer.toString(requiredCount));
             record.put("currentCount", Integer.toString(currentCount));
             record.put("status", status);
@@ -1084,7 +1017,7 @@ public class PetriNetInstrumentationHelper {
             logger.debug("Registered join contribution: " + joinTransitionId + 
                         " token=" + tokenId + 
                         " (" + currentCount + "/" + requiredCount + ") " +
-                        status + " @" + timestamp);
+                        status);
             
         } catch (Exception e) {
             logger.error("Failed to register join contribution: " + joinTransitionId + 

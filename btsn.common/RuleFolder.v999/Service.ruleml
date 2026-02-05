@@ -598,5 +598,45 @@ This is the rule that governs the list of all services.
 	<Ind>token</Ind>
 	<Ind>token</Ind>
 </Atom>
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P3_InitializationService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P4_InitializationService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P5_InitializationService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P6_InitializationService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
 </Rulebase>
 </Assert>

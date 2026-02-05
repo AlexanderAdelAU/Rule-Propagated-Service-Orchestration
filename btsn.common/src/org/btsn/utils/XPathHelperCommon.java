@@ -64,16 +64,38 @@ public class XPathHelperCommon {
 
 	public String modifyMultipleXMLItems(String PayLoad, String itemPath, TreeMap<String, String> newItems) {
 
-		// TreeMap<String, String> treeMap3 = new TreeMap<String, String>();
 		Document xmldoc = parseXmlString(PayLoad, false);
 
 		XPath xpath = XPathFactory.newInstance().newXPath();
 		NodeList nodes;
 		try {
 			nodes = (NodeList) xpath.evaluate(itemPath, xmldoc, XPathConstants.NODESET);
+			
+			// Track which TreeMap keys have matching XML nodes
+			java.util.Set<String> updatedKeys = new java.util.HashSet<>();
+			
 			for (int idx = 0; idx < nodes.getLength(); idx++) {
-				nodes.item(idx).setTextContent(newItems.get(nodes.item(idx).getNodeName()));
+				String nodeName = nodes.item(idx).getNodeName();
+				String newValue = newItems.get(nodeName);
+				if (newValue != null) {
+					nodes.item(idx).setTextContent(newValue);
+					updatedKeys.add(nodeName);
+				}
+				// If newValue is null, the TreeMap doesn't have this key - leave XML node unchanged
 			}
+			
+			// Append any TreeMap entries that had no matching XML node
+			if (updatedKeys.size() < newItems.size() && nodes.getLength() > 0) {
+				Node parentNode = nodes.item(0).getParentNode();
+				for (java.util.Map.Entry<String, String> entry : newItems.entrySet()) {
+					if (!updatedKeys.contains(entry.getKey())) {
+						Element newElement = xmldoc.createElement(entry.getKey().trim());
+						newElement.setTextContent(entry.getValue());
+						parentNode.appendChild(newElement);
+					}
+				}
+			}
+			
 			Transformer xformer = TransformerFactory.newInstance().newTransformer();
 			StringWriter swriter = new StringWriter();
 			StreamResult result = new StreamResult(swriter);

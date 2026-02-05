@@ -465,3 +465,351 @@ INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Appended 3 PetriNet
 INFO main org.btsn.rulecontroller.TopologyBindingGenerator - === GENERATED 3 CANONICAL BINDING FILES ===
 INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Bindings generated successfully for process type: PetriNet
 INFO main org.btsn.rulecontroller.TopologyBindingGenerator - === BINDING GENERATION COMPLETE ===
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - === TOPOLOGY BINDING GENERATOR ===
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Process: petrinet/Workflow/TrafficLight_Workflow
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Version: v001
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - === GENERATING WORKFLOW BINDINGS (Build Phase) ===
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Derived common folder from package: org.btsn.rulecontroller ? btsn.common
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Loading JSON workflow from: C:\DevShare\BTSN_R001\BTSN/btsn.common/ProcessDefinitionFolder/petrinet/Workflow/TrafficLight_Workflow.json
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Successfully loaded JSON workflow: 17232 characters
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - === PARSING JSON WORKFLOW ===
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Process type: PetriNet
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Registered EVENT_GENERATOR: TRAFFICLIGHT_EVENTGENERATOR
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_in_NS_Green -> JoinNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Place: NS_Green -> P1_Place:arguments": [
+            {"name": "token_branch1
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_out_NS_Green -> ForkNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_in_NS_Yellow -> EdgeNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Place: NS_Yellow -> P2_Place:arguments": [
+            {"name": "token
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_out_NS_Yellow -> XorNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_in_EW_Red_Hold -> EdgeNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Place: EW_Red_Hold -> P3_Place:arguments": [
+            {"name": "token
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_out_EW_Red_Hold -> XorNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_in_EW_Green -> JoinNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Place: EW_Green -> P4_Place:arguments": [
+            {"name": "token_branch1
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_out_EW_Green -> ForkNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_in_EW_Yellow -> EdgeNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Place: EW_Yellow -> P5_Place:arguments": [
+            {"name": "token
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_out_EW_Yellow -> XorNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_in_NS_Red_Hold -> EdgeNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Place: NS_Red_Hold -> P6_Place:arguments": [
+            {"name": "token
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_out_NS_Red_Hold -> XorNode
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - JSON parsing complete - 6 services, 13 transitions, 25 edges
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - === GENERATING PETRINET CANONICAL BINDINGS ===
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - === BUILDING PETRINET JOIN SLOT ASSIGNMENTS ===
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Processing JoinNode: T_in_EW_Green
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - JOIN-COUNT: Counting edge T_out_NS_Yellow -> T_in_EW_Green
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - JOIN-COUNT: Counting edge T_out_EW_Red_Hold -> T_in_EW_Green
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Using default arg names for T_in_EW_Green: [token_branch1, token_branch2]
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - JoinNode T_in_EW_Green has 2 valid incoming arcs, 2 argument slots
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator -   Assigned: T_out_NS_Yellow -> T_in_EW_Green = slot 1 (token_branch1)
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator -   Assigned: T_out_EW_Red_Hold -> T_in_EW_Green = slot 2 (token_branch2)
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Processing JoinNode: T_in_NS_Green
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - JOIN-COUNT: Counting edge T_out_EW_Yellow -> T_in_NS_Green
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - JOIN-COUNT: Counting edge T_out_NS_Red_Hold -> T_in_NS_Green
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Using default arg names for T_in_NS_Green: [token_branch1, token_branch2]
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - JOIN-SLOT: Skipping EventGenerator edge TRAFFICLIGHT_EVENTGENERATOR -> T_in_NS_Green
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - JoinNode T_in_NS_Green has 2 valid incoming arcs, 2 argument slots
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator -   Assigned: T_out_EW_Yellow -> T_in_NS_Green = slot 1 (token_branch1)
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator -   Assigned: T_out_NS_Red_Hold -> T_in_NS_Green = slot 2 (token_branch2)
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - === BUILT JOIN SLOT ASSIGNMENTS FOR 2 JOINNODES ===
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - ServiceAttributeBindings base path: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: NS_Green
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_NS_Green ? NS_Green (JoinNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service NS_Green has 1 incoming transitions
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - JOIN-COUNT: Counting edge T_out_EW_Yellow -> T_in_NS_Green
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - JOIN-COUNT: Counting edge T_out_NS_Red_Hold -> T_in_NS_Green
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: Determining return attribute for service: P1_Place
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: P1_Place has outgoing transition: T_out_NS_Green
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: No JoinNode match - using 'token'
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P1/P1_Place-CanonicalBindings.ruleml.xml
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P1/P1_Place-CanonicalBindings.ruleml.xml
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Generated canonical binding for P1_Place (incoming: JoinNode, inputs: 2)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: NS_Yellow
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_NS_Yellow ? NS_Yellow (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service NS_Yellow has 1 incoming transitions
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: Determining return attribute for service: P2_Place
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: P2_Place has outgoing transition: T_out_NS_Yellow
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: MATCH! P2_Place feeds into T_in_EW_Green -> returnAttribute='token_branch1'
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P2/P2_Place-CanonicalBindings.ruleml.xml
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P2/P2_Place-CanonicalBindings.ruleml.xml
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Generated canonical binding for P2_Place (incoming: EdgeNode, inputs: 1)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: EW_Yellow
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_EW_Yellow ? EW_Yellow (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service EW_Yellow has 1 incoming transitions
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: Determining return attribute for service: P5_Place
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: P5_Place has outgoing transition: T_out_EW_Yellow
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: MATCH! P5_Place feeds into T_in_NS_Green -> returnAttribute='token_branch1'
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P5/P5_Place-CanonicalBindings.ruleml.xml
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P5/P5_Place-CanonicalBindings.ruleml.xml
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Generated canonical binding for P5_Place (incoming: EdgeNode, inputs: 1)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: EW_Red_Hold
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_EW_Red_Hold ? EW_Red_Hold (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service EW_Red_Hold has 1 incoming transitions
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: Determining return attribute for service: P3_Place
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: P3_Place has outgoing transition: T_out_EW_Red_Hold
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: MATCH! P3_Place feeds into T_in_EW_Green -> returnAttribute='token_branch2'
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P3/P3_Place-CanonicalBindings.ruleml.xml
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P3/P3_Place-CanonicalBindings.ruleml.xml
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Generated canonical binding for P3_Place (incoming: EdgeNode, inputs: 1)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: NS_Red_Hold
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_NS_Red_Hold ? NS_Red_Hold (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service NS_Red_Hold has 1 incoming transitions
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: Determining return attribute for service: P6_Place
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: P6_Place has outgoing transition: T_out_NS_Red_Hold
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: MATCH! P6_Place feeds into T_in_NS_Green -> returnAttribute='token_branch2'
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P6/P6_Place-CanonicalBindings.ruleml.xml
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P6/P6_Place-CanonicalBindings.ruleml.xml
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Generated canonical binding for P6_Place (incoming: EdgeNode, inputs: 1)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: EW_Green
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_EW_Green ? EW_Green (JoinNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service EW_Green has 1 incoming transitions
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - JOIN-COUNT: Counting edge T_out_NS_Yellow -> T_in_EW_Green
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - JOIN-COUNT: Counting edge T_out_EW_Red_Hold -> T_in_EW_Green
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: Determining return attribute for service: P4_Place
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: P4_Place has outgoing transition: T_out_EW_Green
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: No JoinNode match - using 'token'
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P4/P4_Place-CanonicalBindings.ruleml.xml
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P4/P4_Place-CanonicalBindings.ruleml.xml
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Generated canonical binding for P4_Place (incoming: JoinNode, inputs: 2)
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Appended 6 PetriNet canonical bindings to Service.ruleml
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - === GENERATED 6 CANONICAL BINDING FILES ===
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Bindings generated successfully for process type: PetriNet
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - === BINDING GENERATION COMPLETE ===
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - === TOPOLOGY BINDING GENERATOR ===
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Process: petrinet/Workflow/TrafficLight_Workflow
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Version: v001
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - === GENERATING WORKFLOW BINDINGS (Build Phase) ===
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Derived common folder from package: org.btsn.rulecontroller ? btsn.common
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Loading JSON workflow from: C:\DevShare\BTSN_R001\BTSN/btsn.common/ProcessDefinitionFolder/petrinet/Workflow/TrafficLight_Workflow.json
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Successfully loaded JSON workflow: 17232 characters
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - === PARSING JSON WORKFLOW ===
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Process type: PetriNet
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Registered EVENT_GENERATOR: TRAFFICLIGHT_EVENTGENERATOR
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_in_NS_Green -> JoinNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Place: NS_Green -> P1_Place:arguments": [
+            {"name": "token_branch1
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_out_NS_Green -> ForkNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_in_NS_Yellow -> EdgeNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Place: NS_Yellow -> P2_Place:arguments": [
+            {"name": "token
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_out_NS_Yellow -> XorNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_in_EW_Red_Hold -> EdgeNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Place: EW_Red_Hold -> P3_Place:arguments": [
+            {"name": "token
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_out_EW_Red_Hold -> XorNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_in_EW_Green -> JoinNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Place: EW_Green -> P4_Place:arguments": [
+            {"name": "token_branch1
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_out_EW_Green -> ForkNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_in_EW_Yellow -> EdgeNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Place: EW_Yellow -> P5_Place:arguments": [
+            {"name": "token
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_out_EW_Yellow -> XorNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_in_NS_Red_Hold -> EdgeNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Place: NS_Red_Hold -> P6_Place:arguments": [
+            {"name": "token
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_out_NS_Red_Hold -> XorNode
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - JSON parsing complete - 6 services, 13 transitions, 25 edges
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - === GENERATING PETRINET CANONICAL BINDINGS ===
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - === BUILDING PETRINET JOIN SLOT ASSIGNMENTS ===
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Processing JoinNode: T_in_EW_Green
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - JOIN-COUNT: Counting edge T_out_NS_Yellow -> T_in_EW_Green
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - JOIN-COUNT: Counting edge T_out_EW_Red_Hold -> T_in_EW_Green
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Using default arg names for T_in_EW_Green: [token_branch1, token_branch2]
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - JoinNode T_in_EW_Green has 2 valid incoming arcs, 2 argument slots
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator -   Assigned: T_out_NS_Yellow -> T_in_EW_Green = slot 1 (token_branch1)
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator -   Assigned: T_out_EW_Red_Hold -> T_in_EW_Green = slot 2 (token_branch2)
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Processing JoinNode: T_in_NS_Green
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - JOIN-COUNT: Counting edge T_out_EW_Yellow -> T_in_NS_Green
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - JOIN-COUNT: Counting edge T_out_NS_Red_Hold -> T_in_NS_Green
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Using default arg names for T_in_NS_Green: [token_branch1, token_branch2]
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - JOIN-SLOT: Skipping EventGenerator edge TRAFFICLIGHT_EVENTGENERATOR -> T_in_NS_Green
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - JoinNode T_in_NS_Green has 2 valid incoming arcs, 2 argument slots
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator -   Assigned: T_out_EW_Yellow -> T_in_NS_Green = slot 1 (token_branch1)
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator -   Assigned: T_out_NS_Red_Hold -> T_in_NS_Green = slot 2 (token_branch2)
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - === BUILT JOIN SLOT ASSIGNMENTS FOR 2 JOINNODES ===
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - ServiceAttributeBindings base path: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: NS_Green
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_NS_Green ? NS_Green (JoinNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service NS_Green has 1 incoming transitions
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - JOIN-COUNT: Counting edge T_out_EW_Yellow -> T_in_NS_Green
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - JOIN-COUNT: Counting edge T_out_NS_Red_Hold -> T_in_NS_Green
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: Determining return attribute for service: P1_Place
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: P1_Place has outgoing transition: T_out_NS_Green
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: No JoinNode match - using 'token'
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P1/P1_Place-CanonicalBindings.ruleml.xml
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P1/P1_Place-CanonicalBindings.ruleml.xml
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Generated canonical binding for P1_Place (incoming: JoinNode, inputs: 2)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: NS_Yellow
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_NS_Yellow ? NS_Yellow (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service NS_Yellow has 1 incoming transitions
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: Determining return attribute for service: P2_Place
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: P2_Place has outgoing transition: T_out_NS_Yellow
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: MATCH! P2_Place feeds into T_in_EW_Green -> returnAttribute='token_branch1'
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P2/P2_Place-CanonicalBindings.ruleml.xml
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P2/P2_Place-CanonicalBindings.ruleml.xml
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Generated canonical binding for P2_Place (incoming: EdgeNode, inputs: 1)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: EW_Yellow
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_EW_Yellow ? EW_Yellow (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service EW_Yellow has 1 incoming transitions
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: Determining return attribute for service: P5_Place
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: P5_Place has outgoing transition: T_out_EW_Yellow
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: MATCH! P5_Place feeds into T_in_NS_Green -> returnAttribute='token_branch1'
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P5/P5_Place-CanonicalBindings.ruleml.xml
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P5/P5_Place-CanonicalBindings.ruleml.xml
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Generated canonical binding for P5_Place (incoming: EdgeNode, inputs: 1)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: EW_Red_Hold
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_EW_Red_Hold ? EW_Red_Hold (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service EW_Red_Hold has 1 incoming transitions
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: Determining return attribute for service: P3_Place
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: P3_Place has outgoing transition: T_out_EW_Red_Hold
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: MATCH! P3_Place feeds into T_in_EW_Green -> returnAttribute='token_branch2'
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P3/P3_Place-CanonicalBindings.ruleml.xml
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P3/P3_Place-CanonicalBindings.ruleml.xml
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Generated canonical binding for P3_Place (incoming: EdgeNode, inputs: 1)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: NS_Red_Hold
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_NS_Red_Hold ? NS_Red_Hold (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service NS_Red_Hold has 1 incoming transitions
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: Determining return attribute for service: P6_Place
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: P6_Place has outgoing transition: T_out_NS_Red_Hold
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: MATCH! P6_Place feeds into T_in_NS_Green -> returnAttribute='token_branch2'
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P6/P6_Place-CanonicalBindings.ruleml.xml
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P6/P6_Place-CanonicalBindings.ruleml.xml
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Generated canonical binding for P6_Place (incoming: EdgeNode, inputs: 1)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: EW_Green
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_EW_Green ? EW_Green (JoinNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service EW_Green has 1 incoming transitions
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - JOIN-COUNT: Counting edge T_out_NS_Yellow -> T_in_EW_Green
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - JOIN-COUNT: Counting edge T_out_EW_Red_Hold -> T_in_EW_Green
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: Determining return attribute for service: P4_Place
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: P4_Place has outgoing transition: T_out_EW_Green
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: No JoinNode match - using 'token'
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P4/P4_Place-CanonicalBindings.ruleml.xml
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P4/P4_Place-CanonicalBindings.ruleml.xml
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Generated canonical binding for P4_Place (incoming: JoinNode, inputs: 2)
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - PetriNet canonical bindings already exist in Service.ruleml - skipping append
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - === GENERATED 6 CANONICAL BINDING FILES ===
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Bindings generated successfully for process type: PetriNet
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - === BINDING GENERATION COMPLETE ===
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - === TOPOLOGY BINDING GENERATOR ===
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Process: petrinet/Workflow/TrafficLight_Workflow
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Version: v001
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - === GENERATING WORKFLOW BINDINGS (Build Phase) ===
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Derived common folder from package: org.btsn.rulecontroller ? btsn.common
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Loading JSON workflow from: C:\DevShare\BTSN_R001\BTSN/btsn.common/ProcessDefinitionFolder/petrinet/Workflow/TrafficLight_Workflow.json
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Successfully loaded JSON workflow: 17232 characters
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - === PARSING JSON WORKFLOW ===
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Process type: PetriNet
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Registered EVENT_GENERATOR: TRAFFICLIGHT_EVENTGENERATOR
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_in_NS_Green -> JoinNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Place: NS_Green -> P1_Place:arguments": [
+            {"name": "token_branch1
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_out_NS_Green -> ForkNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_in_NS_Yellow -> EdgeNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Place: NS_Yellow -> P2_Place:arguments": [
+            {"name": "token
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_out_NS_Yellow -> XorNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_in_EW_Red_Hold -> EdgeNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Place: EW_Red_Hold -> P3_Place:arguments": [
+            {"name": "token
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_out_EW_Red_Hold -> XorNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_in_EW_Green -> JoinNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Place: EW_Green -> P4_Place:arguments": [
+            {"name": "token_branch1
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_out_EW_Green -> ForkNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_in_EW_Yellow -> EdgeNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Place: EW_Yellow -> P5_Place:arguments": [
+            {"name": "token
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_out_EW_Yellow -> XorNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_in_NS_Red_Hold -> EdgeNode
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Place: NS_Red_Hold -> P6_Place:arguments": [
+            {"name": "token
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Parsed Transition: T_out_NS_Red_Hold -> XorNode
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - JSON parsing complete - 6 services, 13 transitions, 25 edges
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - === GENERATING PETRINET CANONICAL BINDINGS ===
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - === BUILDING PETRINET JOIN SLOT ASSIGNMENTS ===
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Processing JoinNode: T_in_EW_Green
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - JOIN-COUNT: Counting edge T_out_NS_Yellow -> T_in_EW_Green
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - JOIN-COUNT: Counting edge T_out_EW_Red_Hold -> T_in_EW_Green
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Using default arg names for T_in_EW_Green: [token_branch1, token_branch2]
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - JoinNode T_in_EW_Green has 2 valid incoming arcs, 2 argument slots
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator -   Assigned: T_out_NS_Yellow -> T_in_EW_Green = slot 1 (token_branch1)
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator -   Assigned: T_out_EW_Red_Hold -> T_in_EW_Green = slot 2 (token_branch2)
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Processing JoinNode: T_in_NS_Green
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - JOIN-COUNT: Counting edge T_out_EW_Yellow -> T_in_NS_Green
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - JOIN-COUNT: Counting edge T_out_NS_Red_Hold -> T_in_NS_Green
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Using default arg names for T_in_NS_Green: [token_branch1, token_branch2]
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - JOIN-SLOT: Skipping EventGenerator edge TRAFFICLIGHT_EVENTGENERATOR -> T_in_NS_Green
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - JoinNode T_in_NS_Green has 2 valid incoming arcs, 2 argument slots
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator -   Assigned: T_out_EW_Yellow -> T_in_NS_Green = slot 1 (token_branch1)
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator -   Assigned: T_out_NS_Red_Hold -> T_in_NS_Green = slot 2 (token_branch2)
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - === BUILT JOIN SLOT ASSIGNMENTS FOR 2 JOINNODES ===
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - ServiceAttributeBindings base path: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: NS_Green
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_NS_Green ? NS_Green (JoinNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service NS_Green has 1 incoming transitions
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - JOIN-COUNT: Counting edge T_out_EW_Yellow -> T_in_NS_Green
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - JOIN-COUNT: Counting edge T_out_NS_Red_Hold -> T_in_NS_Green
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: Determining return attribute for service: P1_Place
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: P1_Place has outgoing transition: T_out_NS_Green
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: No JoinNode match - using 'token'
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P1/P1_Place-CanonicalBindings.ruleml.xml
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P1/P1_Place-CanonicalBindings.ruleml.xml
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Generated canonical binding for P1_Place (incoming: JoinNode, inputs: 2)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: NS_Yellow
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_NS_Yellow ? NS_Yellow (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service NS_Yellow has 1 incoming transitions
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: Determining return attribute for service: P2_Place
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: P2_Place has outgoing transition: T_out_NS_Yellow
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: MATCH! P2_Place feeds into T_in_EW_Green -> returnAttribute='token_branch1'
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P2/P2_Place-CanonicalBindings.ruleml.xml
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P2/P2_Place-CanonicalBindings.ruleml.xml
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Generated canonical binding for P2_Place (incoming: EdgeNode, inputs: 1)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: EW_Yellow
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_EW_Yellow ? EW_Yellow (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service EW_Yellow has 1 incoming transitions
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: Determining return attribute for service: P5_Place
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: P5_Place has outgoing transition: T_out_EW_Yellow
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: MATCH! P5_Place feeds into T_in_NS_Green -> returnAttribute='token_branch1'
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P5/P5_Place-CanonicalBindings.ruleml.xml
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P5/P5_Place-CanonicalBindings.ruleml.xml
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Generated canonical binding for P5_Place (incoming: EdgeNode, inputs: 1)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: EW_Red_Hold
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_EW_Red_Hold ? EW_Red_Hold (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service EW_Red_Hold has 1 incoming transitions
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: Determining return attribute for service: P3_Place
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: P3_Place has outgoing transition: T_out_EW_Red_Hold
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: MATCH! P3_Place feeds into T_in_EW_Green -> returnAttribute='token_branch2'
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P3/P3_Place-CanonicalBindings.ruleml.xml
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P3/P3_Place-CanonicalBindings.ruleml.xml
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Generated canonical binding for P3_Place (incoming: EdgeNode, inputs: 1)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: NS_Red_Hold
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_NS_Red_Hold ? NS_Red_Hold (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service NS_Red_Hold has 1 incoming transitions
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: Determining return attribute for service: P6_Place
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: P6_Place has outgoing transition: T_out_NS_Red_Hold
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: MATCH! P6_Place feeds into T_in_NS_Green -> returnAttribute='token_branch2'
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P6/P6_Place-CanonicalBindings.ruleml.xml
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P6/P6_Place-CanonicalBindings.ruleml.xml
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Generated canonical binding for P6_Place (incoming: EdgeNode, inputs: 1)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: EW_Green
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_EW_Green ? EW_Green (JoinNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service EW_Green has 1 incoming transitions
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - JOIN-COUNT: Counting edge T_out_NS_Yellow -> T_in_EW_Green
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - JOIN-COUNT: Counting edge T_out_EW_Red_Hold -> T_in_EW_Green
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: Determining return attribute for service: P4_Place
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: P4_Place has outgoing transition: T_out_EW_Green
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - RETURN-ATTR: No JoinNode match - using 'token'
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P4/P4_Place-CanonicalBindings.ruleml.xml
+DEBUG main org.btsn.rulecontroller.TopologyBindingGenerator - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN/btsn.common/ServiceAttributeBindings/P4/P4_Place-CanonicalBindings.ruleml.xml
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Generated canonical binding for P4_Place (incoming: JoinNode, inputs: 2)
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - PetriNet canonical bindings already exist in Service.ruleml - skipping append
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - === GENERATED 6 CANONICAL BINDING FILES ===
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - Bindings generated successfully for process type: PetriNet
+INFO main org.btsn.rulecontroller.TopologyBindingGenerator - === BINDING GENERATION COMPLETE ===

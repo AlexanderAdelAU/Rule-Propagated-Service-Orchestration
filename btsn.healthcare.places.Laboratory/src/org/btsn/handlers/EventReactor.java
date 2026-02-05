@@ -669,6 +669,32 @@ public class EventReactor extends Thread {
 		servicePacket = xph.modifyMultipleXMLItems(servicePacket, "//monitorData/*", monitorDataMap);
 		servicePacket = xph.modifyMultipleXMLItems(servicePacket, "//headerMap/*", headerMap);
 
+		// ====================================================================
+		// PRIORITY COSTKEY OVERRIDE
+		// Replaces Scheduler's costKey with a two-tier priority scheme:
+		//   Tier 0 (highest): Completed-join tokens  (completedJoin=true)
+		//   Tier 1 (normal):  All other tokens
+		// Within each tier, tokens are ordered by sequenceID which encodes
+		// version priority naturally (v001=1xxxxxx < v002=2xxxxxx < v003=3xxxxxx).
+		// TreeMap.firstKey() always dequeues the LOWEST costKey first.
+		// ====================================================================
+		boolean isCompletedJoin = "true".equals(monitorDataMap.get("completedJoin"));
+		long priorityCostKey = costKey; // fallback to Scheduler's key
+		try {
+		    long sequenceId = Long.parseLong(headerMap.get("sequenceId"));
+		    // Completed joins: use raw sequenceId (lowest values dequeue first)
+		    // Normal tokens:   offset by 10B so they always sort after joins
+		    priorityCostKey = isCompletedJoin ? sequenceId : (10_000_000_000L + sequenceId);
+		    
+		    System.out.println("PRIORITY: seqId=" + sequenceId + 
+		        " version=" + headerMap.get("ruleBaseVersion") +
+		        " completedJoin=" + isCompletedJoin +
+		        " schedulerKey=" + costKey + " -> priorityKey=" + priorityCostKey);
+		} catch (NumberFormatException e) {
+		    System.err.println("PRIORITY: Failed to parse sequenceId, using Scheduler costKey: " + costKey);
+		}
+		costKey = priorityCostKey;
+
 		// Add to processing queue
 		System.out.println("=== ADDING TO PROCESSING QUEUE ===");
 		System.out.println("About to add costKey " + costKey + " to costKeyTokenMap");
