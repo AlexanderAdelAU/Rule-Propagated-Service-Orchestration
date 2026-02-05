@@ -563,5 +563,40 @@ This is the rule that governs the list of all services.
     <Ind>192.168.1.84</Ind>
 </Atom>
 
+
+<!-- ================================================================ -->
+<!-- PETRINET CANONICAL BINDINGS (Auto-generated)                    -->
+<!-- ================================================================ -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P1_InitializationService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P2_InitializationService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>Monitor_InitializationService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
 </Rulebase>
 </Assert>

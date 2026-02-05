@@ -21,9 +21,9 @@
 	<property name="rule.version" value="v001" />
 
 	<!-- Process names for each phase -->
-	<property name="init.process.name" value="healthcare/Triage_Initialization" />
-	<property name="workflow.process.name" value="healthcare/Triage_CanaryTest_Workflow" />
-	<property name="collector.process.name" value="healthcare/Triage_Collector" />
+	<property name="init.process.name" value="healthcare/Initializers/Triage_Initialization" />
+	<property name="workflow.process.name" value="healthcare/Workflow/Triage_CanaryTest_Workflow" />
+	<property name="collector.process.name" value="healthcare/Collectors/Triage_Collector" />
 
 	<!-- Phase 1: Initialization parameters (v999 = admin/non-instrumented) -->
 	<property name="init.version" value="v999" />

@@ -7,7 +7,6 @@ encoding//src/org/btsn/base/BaseStochasticPetriNetPlace2.java=UTF-8
 encoding//src/org/btsn/base/TokenInfo.java=UTF-8
 encoding//src/org/btsn/json/JsonTokenParser.java=UTF-8
 encoding//src/org/btsn/rulecontroller/RuleDeployer.java=UTF-8
-encoding//src/org/btsn/rulecontroller/RuleDeployer2.java=UTF-8
 encoding//src/org/btsn/rulecontroller/TopologyBindingGenerator.java=UTF-8
 encoding//src/org/btsn/rulecontroller/model/WorkflowModel.java=UTF-8
 encoding//src/org/btsn/utils/BuildRuleBase.java=UTF-8

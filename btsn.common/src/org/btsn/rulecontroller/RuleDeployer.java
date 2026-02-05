@@ -801,9 +801,12 @@ public class RuleDeployer {
 			// Check if this is an object array (starts with '{') or string array
 			if (content.startsWith("{")) {
 				// Object array format: [{"name": "op1", ...}, {"name": "op2", ...}]
-				// Extract "name" values from each object
+				// Extract only TOP-LEVEL "name" values from operation objects.
+				// IMPORTANT: Strip out nested "arguments":[...] blocks first so that
+				// argument names (e.g. "token") are not mistakenly picked up as operations.
+				String contentWithoutArgs = removeNestedArgumentsBlocks(content);
 				java.util.regex.Pattern namePattern = java.util.regex.Pattern.compile("\"name\"\\s*:\\s*\"([^\"]+)\"");
-				java.util.regex.Matcher matcher = namePattern.matcher(content);
+				java.util.regex.Matcher matcher = namePattern.matcher(contentWithoutArgs);
 				
 				while (matcher.find()) {
 					String opName = matcher.group(1);
@@ -942,7 +945,58 @@ public class RuleDeployer {
 	}
 
 	/**
-	 * Extract the returnAttribute for an operation from the JSON block.
+	 * Remove all "arguments":[...] blocks from a JSON string so that
+	 * regex matches on "name" fields only hit top-level operation names,
+	 * not argument names nested inside the arguments arrays.
+	 * 
+	 * Handles nested brackets correctly (e.g. arrays within argument objects).
+	 * 
+	 * @param content The JSON content from the operations array
+	 * @return The same content with all "arguments":[...] blocks replaced with empty string
+	 */
+	private String removeNestedArgumentsBlocks(String content) {
+		StringBuilder result = new StringBuilder();
+		int i = 0;
+		
+		while (i < content.length()) {
+			// Look for "arguments" key
+			int argsKeyStart = content.indexOf("\"arguments\"", i);
+			
+			if (argsKeyStart == -1) {
+				// No more arguments blocks - append rest and done
+				result.append(content.substring(i));
+				break;
+			}
+			
+			// Append everything before this "arguments" key
+			result.append(content, i, argsKeyStart);
+			
+			// Find the '[' that starts the arguments array value
+			int bracketStart = content.indexOf("[", argsKeyStart);
+			if (bracketStart == -1) {
+				// Malformed - no array bracket found, append rest and done
+				result.append(content.substring(argsKeyStart));
+				break;
+			}
+			
+			// Find the matching ']' using bracket counting
+			int bracketCount = 1;
+			int pos = bracketStart + 1;
+			while (pos < content.length() && bracketCount > 0) {
+				char c = content.charAt(pos);
+				if (c == '[') bracketCount++;
+				else if (c == ']') bracketCount--;
+				pos++;
+			}
+			
+			// Skip past the entire "arguments":[...] block
+			i = pos;
+		}
+		
+		return result.toString();
+	}
+
+	/**
 	 * 
 	 * Expected JSON format:
 	 * "operations": [

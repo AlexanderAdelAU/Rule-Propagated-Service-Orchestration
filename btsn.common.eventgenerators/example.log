@@ -1,0 +1,873 @@
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: MonitorService:acknowledgeTokenArrival
+INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: RadiologyService:processImagingRequest ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Rules for Radiology should go to itself: RadiologyService
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for RadiologyService:processImagingRequest
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for RadiologyService:processImagingRequest
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 2101
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
+INFO main org.btsn.rulecontroller.RuleDeployer -   Service: RadiologyService:processImagingRequest
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 2101
+INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Service: RadiologyService:processImagingRequest
+INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 2101
+INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: RadiologyService:processImagingRequest ===
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: Radiology
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_Radiology ? Radiology (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Radiology has 1 incoming transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_Radiology (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: Radiology
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: Radiology ? T_out_Radiology (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Radiology has 1 outgoing transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using OUTGOING EdgeNode (default output behavior)
+INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_out_Radiology (EdgeNode)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
+INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_Radiology (EdgeNode)
+DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Finding destination services from transition: T_out_Radiology (EdgeNode)
+DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Found destination service: Diagnosis via T_in_Diagnosis
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 destination services
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding operation for path from T_out_Radiology to Diagnosis
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: DiagnosisService:processClinicalDecision:EDGE_NODE:
+INFO main org.btsn.rulecontroller.RuleDeployer - Added meetsCondition: DiagnosisService:processClinicalDecision via EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: Radiology
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=10 from transition: T_in_Radiology
+INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for RadiologyService:processImagingRequest (commitment: 4), attempt: 1
+INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for RadiologyService ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
+INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 2101
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
+INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 22101 (20000 + 0 + 2101)
+INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:22101 (RuleHandler for RadiologyService:processImagingRequest, channel 0)
+INFO CommitmentListener-v001 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v001:4
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for RadiologyService:processImagingRequest in 100ms
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: RadiologyService:processImagingRequest
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: RadiologyService:processImagingRequest
+INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: TriageService:processTriageAssessment ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Rules for Triage should go to itself: TriageService
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for TriageService:processTriageAssessment
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for TriageService:processTriageAssessment
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 2100
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
+INFO main org.btsn.rulecontroller.RuleDeployer -   Service: TriageService:processTriageAssessment
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 2100
+INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Service: TriageService:processTriageAssessment
+INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 2100
+INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: TriageService:processTriageAssessment ===
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: Triage
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_Triage ? Triage (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Triage has 1 incoming transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_Triage (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: Triage
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: Triage ? T_out_Triage (GatewayNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Triage has 1 outgoing transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using OUTGOING GatewayNode (controls routing behavior)
+INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_out_Triage (GatewayNode)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: GatewayNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: GatewayNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
+INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_Triage (GatewayNode)
+INFO main org.btsn.rulecontroller.RuleDeployer - Processing GatewayNode routing for T_out_Triage
+INFO main org.btsn.rulecontroller.RuleDeployer - Processing GatewayNode: T_out_Triage
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: GatewayNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Added NodeType: GatewayNode:GATEWAY_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer - GatewayNode has 4 outgoing edges
+INFO main org.btsn.rulecontroller.RuleDeployer - GatewayNode edge: T_out_Triage -> T_in_Laboratory (decision_value='STANDARD_WORKFLOW', attributes={condition=DECISION_EQUAL_TO, decision_value=STANDARD_WORKFLOW, label=STANDARD_WORKFLOW})
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding destination service for edge: T_out_Triage -> T_in_Laboratory
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding service from: T_in_Laboratory (limited hop version)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Checking immediate neighbor: Laboratory
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found immediate service: LaboratoryService:processLabRequest
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found reachable service: LaboratoryService
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: LaboratoryService:processLabRequest:GATEWAY_NODE:STANDARD_WORKFLOW
+INFO main org.btsn.rulecontroller.RuleDeployer - GatewayNode: Added meetsCondition for LaboratoryService:processLabRequest with decision_value='STANDARD_WORKFLOW'
+INFO main org.btsn.rulecontroller.RuleDeployer - GatewayNode edge: T_out_Triage -> T_in_Cardiology (decision_value='STANDARD_WORKFLOW', attributes={condition=DECISION_EQUAL_TO, decision_value=STANDARD_WORKFLOW, label=STANDARD_WORKFLOW})
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding destination service for edge: T_out_Triage -> T_in_Cardiology
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding service from: T_in_Cardiology (limited hop version)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Checking immediate neighbor: Cardiology
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found immediate service: CardiologyService:processCardiacAssessment
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found reachable service: CardiologyService
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: CardiologyService:processCardiacAssessment:GATEWAY_NODE:STANDARD_WORKFLOW
+INFO main org.btsn.rulecontroller.RuleDeployer - GatewayNode: Added meetsCondition for CardiologyService:processCardiacAssessment with decision_value='STANDARD_WORKFLOW'
+INFO main org.btsn.rulecontroller.RuleDeployer - GatewayNode edge: T_out_Triage -> T_in_Radiology (decision_value='STANDARD_WORKFLOW', attributes={condition=DECISION_EQUAL_TO, decision_value=STANDARD_WORKFLOW, label=STANDARD_WORKFLOW})
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding destination service for edge: T_out_Triage -> T_in_Radiology
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding service from: T_in_Radiology (limited hop version)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Checking immediate neighbor: Radiology
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found immediate service: RadiologyService:processImagingRequest
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found reachable service: RadiologyService
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: RadiologyService:processImagingRequest:GATEWAY_NODE:STANDARD_WORKFLOW
+INFO main org.btsn.rulecontroller.RuleDeployer - GatewayNode: Added meetsCondition for RadiologyService:processImagingRequest with decision_value='STANDARD_WORKFLOW'
+INFO main org.btsn.rulecontroller.RuleDeployer - GatewayNode edge: T_out_Triage -> T_in_Treatment (decision_value='DIRECT_TO_TREATMENT', attributes={condition=DECISION_EQUAL_TO, decision_value=DIRECT_TO_TREATMENT, endpoint=executeDirectTreatment, label=DIRECT_TO_TREATMENT})
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding destination service for edge: T_out_Triage -> T_in_Treatment
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding service from: T_in_Treatment (limited hop version)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Checking immediate neighbor: Treatment
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found immediate service: TreatmentService:executeTreatmentPlan
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found reachable service: TreatmentService
+INFO main org.btsn.rulecontroller.RuleDeployer - Edge specifies endpoint: executeDirectTreatment
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: TreatmentService:executeDirectTreatment:GATEWAY_NODE:DIRECT_TO_TREATMENT
+INFO main org.btsn.rulecontroller.RuleDeployer - GatewayNode: Added meetsCondition for TreatmentService:executeDirectTreatment with decision_value='DIRECT_TO_TREATMENT'
+INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: Triage
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=10 from transition: T_in_Triage
+INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for TriageService:processTriageAssessment (commitment: 5), attempt: 1
+INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for TriageService ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
+INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 2100
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
+INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 22100 (20000 + 0 + 2100)
+INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:22100 (RuleHandler for TriageService:processTriageAssessment, channel 0)
+INFO CommitmentListener-v001 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v001:5
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for TriageService:processTriageAssessment in 101ms
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: TriageService:processTriageAssessment
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: TriageService:processTriageAssessment
+INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: LaboratoryService:processLabRequest ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Rules for Laboratory should go to itself: LaboratoryService
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for LaboratoryService:processLabRequest
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for LaboratoryService:processLabRequest
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 2105
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
+INFO main org.btsn.rulecontroller.RuleDeployer -   Service: LaboratoryService:processLabRequest
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 2105
+INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Service: LaboratoryService:processLabRequest
+INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 2105
+INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: LaboratoryService:processLabRequest ===
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: Laboratory
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_Laboratory ? Laboratory (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Laboratory has 1 incoming transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_Laboratory (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: Laboratory
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: Laboratory ? T_out_Laboratory (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Laboratory has 1 outgoing transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using OUTGOING EdgeNode (default output behavior)
+INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_out_Laboratory (EdgeNode)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
+INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_Laboratory (EdgeNode)
+DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Finding destination services from transition: T_out_Laboratory (EdgeNode)
+DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Found destination service: Diagnosis via T_in_Diagnosis
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 destination services
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding operation for path from T_out_Laboratory to Diagnosis
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: DiagnosisService:processClinicalDecision:EDGE_NODE:
+INFO main org.btsn.rulecontroller.RuleDeployer - Added meetsCondition: DiagnosisService:processClinicalDecision via EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: Laboratory
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=10 from transition: T_in_Laboratory
+INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for LaboratoryService:processLabRequest (commitment: 6), attempt: 1
+INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for LaboratoryService ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
+INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 2105
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
+INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 22105 (20000 + 0 + 2105)
+INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:22105 (RuleHandler for LaboratoryService:processLabRequest, channel 0)
+INFO CommitmentListener-v001 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v001:6
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for LaboratoryService:processLabRequest in 102ms
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: LaboratoryService:processLabRequest
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: LaboratoryService:processLabRequest
+INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: DiagnosisService:processClinicalDecision ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Rules for Diagnosis should go to itself: DiagnosisService
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for DiagnosisService:processClinicalDecision
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for DiagnosisService:processClinicalDecision
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 2104
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
+INFO main org.btsn.rulecontroller.RuleDeployer -   Service: DiagnosisService:processClinicalDecision
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 2104
+INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Service: DiagnosisService:processClinicalDecision
+INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 2104
+INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: DiagnosisService:processClinicalDecision ===
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: Diagnosis
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_Diagnosis ? Diagnosis (JoinNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Diagnosis has 1 incoming transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_Diagnosis (JoinNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: Diagnosis
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: Diagnosis ? T_out_Diagnosis (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Diagnosis has 1 outgoing transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using INCOMING JoinNode (controls input coordination)
+INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_in_Diagnosis (JoinNode)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: JoinNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: JoinNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
+INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_Diagnosis (EdgeNode)
+DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Finding destination services from transition: T_out_Diagnosis (EdgeNode)
+DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Found destination service: Treatment via T_in_Treatment
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 destination services
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding operation for path from T_out_Diagnosis to Treatment
+INFO main org.btsn.rulecontroller.RuleDeployer - Found endpoint 'executeTreatmentPlan' on path to Treatment
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: TreatmentService:executeTreatmentPlan:EDGE_NODE:
+INFO main org.btsn.rulecontroller.RuleDeployer - Added meetsCondition: TreatmentService:executeTreatmentPlan via EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: Diagnosis
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=30 from transition: T_in_Diagnosis
+INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for DiagnosisService:processClinicalDecision (commitment: 7), attempt: 1
+INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for DiagnosisService ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
+INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 2104
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
+INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 22104 (20000 + 0 + 2104)
+INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:22104 (RuleHandler for DiagnosisService:processClinicalDecision, channel 0)
+INFO CommitmentListener-v001 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v001:7
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for DiagnosisService:processClinicalDecision in 101ms
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: DiagnosisService:processClinicalDecision
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: DiagnosisService:processClinicalDecision
+INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: CardiologyService:processCardiacAssessment ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Rules for Cardiology should go to itself: CardiologyService
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for CardiologyService:processCardiacAssessment
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for CardiologyService:processCardiacAssessment
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 2103
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
+INFO main org.btsn.rulecontroller.RuleDeployer -   Service: CardiologyService:processCardiacAssessment
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 2103
+INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Service: CardiologyService:processCardiacAssessment
+INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 2103
+INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: CardiologyService:processCardiacAssessment ===
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: Cardiology
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_Cardiology ? Cardiology (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Cardiology has 1 incoming transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_Cardiology (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: Cardiology
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: Cardiology ? T_out_Cardiology (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Cardiology has 1 outgoing transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using OUTGOING EdgeNode (default output behavior)
+INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_out_Cardiology (EdgeNode)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
+INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_Cardiology (EdgeNode)
+DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Finding destination services from transition: T_out_Cardiology (EdgeNode)
+DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Found destination service: Diagnosis via T_in_Diagnosis
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 destination services
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding operation for path from T_out_Cardiology to Diagnosis
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: DiagnosisService:processClinicalDecision:EDGE_NODE:
+INFO main org.btsn.rulecontroller.RuleDeployer - Added meetsCondition: DiagnosisService:processClinicalDecision via EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: Cardiology
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=10 from transition: T_in_Cardiology
+INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for CardiologyService:processCardiacAssessment (commitment: 8), attempt: 1
+INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for CardiologyService ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
+INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 2103
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
+INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 22103 (20000 + 0 + 2103)
+INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:22103 (RuleHandler for CardiologyService:processCardiacAssessment, channel 0)
+INFO CommitmentListener-v001 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v001:8
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for CardiologyService:processCardiacAssessment in 102ms
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: CardiologyService:processCardiacAssessment
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: CardiologyService:processCardiacAssessment
+INFO main org.btsn.rulecontroller.RuleDeployer - === DEPLOYMENT SUMMARY ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Total services processed: 7
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: 8
+INFO main org.btsn.rulecontroller.RuleDeployer - Floating nodes skipped: 0
+INFO main org.btsn.rulecontroller.RuleDeployer - Event generators skipped: 0
+INFO main org.btsn.rulecontroller.RuleDeployer - Total in manifest: 8
+INFO main org.btsn.rulecontroller.RuleDeployer - === DEPLOYING STANDALONE MONITOR NODES ===
+INFO main org.btsn.rulecontroller.RuleDeployer - === JSON-BASED DEPLOYMENT COMPLETED SUCCESSFULLY ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Deployed 8 service operations from JSON workflow
+INFO main org.btsn.rulecontroller.RuleDeployer - === DEPLOYMENT SUCCESSFUL ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Commitments: 8
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Extracted version number 1 from 'v001'
+INFO main org.btsn.rulecontroller.RuleDeployer - Calculated commitment listener port for version 'v001': 35001 (base: 35000, offset: 1)
+INFO main org.btsn.rulecontroller.RuleDeployer - Started commitment listener on port 35001 for version v001
+INFO main org.btsn.rulecontroller.RuleDeployer - JSON-Based RuleDeployer initialized for process: healthcare/Collectors/Multi_Service_Collector version: v001
+INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING RULE DEPLOYMENT ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Process: healthcare/Collectors/Multi_Service_Collector
+INFO main org.btsn.rulecontroller.RuleDeployer - Version: v001
+INFO main org.btsn.rulecontroller.RuleDeployer - Derived common folder from package: org.btsn.rulecontroller ? btsn.common
+INFO main org.btsn.rulecontroller.RuleDeployer - Loading JSON workflow from: C:\DevShare\BTSN_R001\BTSN\btsn.common\ProcessDefinitionFolder\healthcare\Collectors\Multi_Service_Collector.json
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully loaded JSON workflow: 11686 characters
+INFO main org.btsn.rulecontroller.RuleDeployer - === PARSING JSON WORKFLOW ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Process type: SOA
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: EVENT_GENERATOR -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer - Captured buffer=10 for T_in transition: T_in_Triage
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_in_Triage -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer - Captured buffer=10 for T_in transition: T_in_Laboratory
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_in_Laboratory -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer - Captured buffer=10 for T_in transition: T_in_Radiology
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_in_Radiology -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer - Captured buffer=10 for T_in transition: T_in_Cardiology
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_in_Cardiology -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer - Captured buffer=10 for T_in transition: T_in_Diagnosis
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_in_Diagnosis -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer - Captured buffer=10 for T_in transition: T_in_Treatment
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_in_Treatment -> EdgeNode:EDGE_NODE
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Extracted operation name from object: collectAllData
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Place: Triage -> Triage_CollectorService:collectAllData
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Extracted operation name from object: collectAllData
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Place: Laboratory -> Laboratory_CollectorService:collectAllData
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Extracted operation name from object: collectAllData
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Place: Radiology -> Radiology_CollectorService:collectAllData
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Extracted operation name from object: collectAllData
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Place: Cardiology -> Cardiology_CollectorService:collectAllData
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Extracted operation name from object: collectAllData
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Place: Diagnosis -> Diagnosis_CollectorService:collectAllData
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Extracted operation name from object: collectAllData
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Place: Treatment -> Treatment_CollectorService:collectAllData
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_out_Triage -> EdgeNode:EDGE_NODE
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_out_Laboratory -> EdgeNode:EDGE_NODE
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_out_Radiology -> EdgeNode:EDGE_NODE
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_out_Cardiology -> EdgeNode:EDGE_NODE
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_out_Diagnosis -> EdgeNode:EDGE_NODE
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_out_Treatment -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer - Captured buffer=60 for T_in transition: T_in_Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_in_Monitor -> MergeNode:MERGE_NODE
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Extracted operation name from object: writeCollectorData
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Place: Monitor -> MonitorService:writeCollectorData
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_out_Monitor -> TerminateNode:TERMINATE_NODE
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: EVENT_GENERATOR -> T_in_Triage
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: EVENT_GENERATOR -> T_in_Laboratory
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: EVENT_GENERATOR -> T_in_Radiology
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: EVENT_GENERATOR -> T_in_Cardiology
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: EVENT_GENERATOR -> T_in_Diagnosis
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: EVENT_GENERATOR -> T_in_Treatment
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_in_Triage -> Triage
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_in_Laboratory -> Laboratory
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_in_Radiology -> Radiology
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_in_Cardiology -> Cardiology
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_in_Diagnosis -> Diagnosis
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_in_Treatment -> Treatment
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: Triage -> T_out_Triage
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: Laboratory -> T_out_Laboratory
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: Radiology -> T_out_Radiology
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: Cardiology -> T_out_Cardiology
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: Diagnosis -> T_out_Diagnosis
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: Treatment -> T_out_Treatment
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_out_Triage -> T_in_Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_out_Laboratory -> T_in_Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_out_Radiology -> T_in_Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_out_Cardiology -> T_in_Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_out_Diagnosis -> T_in_Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_out_Treatment -> T_in_Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_in_Monitor -> Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: Monitor -> T_out_Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer - JSON parsing complete - 7 services, 15 transitions, 26 edges
+INFO main org.btsn.rulecontroller.RuleDeployer - === POST-PARSING DEBUG ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Service nodes parsed: 7
+INFO main org.btsn.rulecontroller.RuleDeployer - Multi-op services: 0
+INFO main org.btsn.rulecontroller.RuleDeployer - Transition nodes parsed: 15
+INFO main org.btsn.rulecontroller.RuleDeployer - Workflow edges parsed: 26
+INFO main org.btsn.rulecontroller.RuleDeployer - === SERVICE NODES ===
+INFO main org.btsn.rulecontroller.RuleDeployer -   Treatment -> Treatment_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer -   Monitor -> MonitorService:writeCollectorData
+INFO main org.btsn.rulecontroller.RuleDeployer -   Radiology -> Radiology_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer -   Triage -> Triage_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer -   Laboratory -> Laboratory_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer -   Diagnosis -> Diagnosis_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer -   Cardiology -> Cardiology_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer - === TRANSITION NODES ===
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_Monitor -> TerminateNode:TERMINATE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_Radiology -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_Monitor -> MergeNode:MERGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_Laboratory -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_Treatment -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_Diagnosis -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_Cardiology -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_Cardiology -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_Diagnosis -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_Radiology -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_Laboratory -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer -   EVENT_GENERATOR -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_Treatment -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_Triage -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_Triage -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer - === WORKFLOW EDGES ===
+INFO main org.btsn.rulecontroller.RuleDeployer -   EVENT_GENERATOR -> T_in_Triage
+INFO main org.btsn.rulecontroller.RuleDeployer -   EVENT_GENERATOR -> T_in_Laboratory
+INFO main org.btsn.rulecontroller.RuleDeployer -   EVENT_GENERATOR -> T_in_Radiology
+INFO main org.btsn.rulecontroller.RuleDeployer -   EVENT_GENERATOR -> T_in_Cardiology
+INFO main org.btsn.rulecontroller.RuleDeployer -   EVENT_GENERATOR -> T_in_Diagnosis
+INFO main org.btsn.rulecontroller.RuleDeployer -   EVENT_GENERATOR -> T_in_Treatment
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_Triage -> Triage
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_Laboratory -> Laboratory
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_Radiology -> Radiology
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_Cardiology -> Cardiology
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_Diagnosis -> Diagnosis
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_Treatment -> Treatment
+INFO main org.btsn.rulecontroller.RuleDeployer -   Triage -> T_out_Triage
+INFO main org.btsn.rulecontroller.RuleDeployer -   Laboratory -> T_out_Laboratory
+INFO main org.btsn.rulecontroller.RuleDeployer -   Radiology -> T_out_Radiology
+INFO main org.btsn.rulecontroller.RuleDeployer -   Cardiology -> T_out_Cardiology
+INFO main org.btsn.rulecontroller.RuleDeployer -   Diagnosis -> T_out_Diagnosis
+INFO main org.btsn.rulecontroller.RuleDeployer -   Treatment -> T_out_Treatment
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_Triage -> T_in_Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_Laboratory -> T_in_Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_Radiology -> T_in_Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_Cardiology -> T_in_Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_Diagnosis -> T_in_Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_Treatment -> T_in_Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_Monitor -> Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer -   Monitor -> T_out_Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer - Performing comprehensive workflow validation...
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Validating service:operation pairs with OOjDREW...
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Validating service with OOjDREW: Treatment_CollectorService:collectAllData (node: Treatment)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - [OK] OOjDREW validation passed for Treatment_CollectorService:collectAllData
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Validating service with OOjDREW: MonitorService:writeCollectorData (node: Monitor)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - [OK] OOjDREW validation passed for MonitorService:writeCollectorData
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Validating service with OOjDREW: Radiology_CollectorService:collectAllData (node: Radiology)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - [OK] OOjDREW validation passed for Radiology_CollectorService:collectAllData
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Validating service with OOjDREW: Triage_CollectorService:collectAllData (node: Triage)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - [OK] OOjDREW validation passed for Triage_CollectorService:collectAllData
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Validating service with OOjDREW: Laboratory_CollectorService:collectAllData (node: Laboratory)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - [OK] OOjDREW validation passed for Laboratory_CollectorService:collectAllData
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Validating service with OOjDREW: Diagnosis_CollectorService:collectAllData (node: Diagnosis)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - [OK] OOjDREW validation passed for Diagnosis_CollectorService:collectAllData
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Validating service with OOjDREW: Cardiology_CollectorService:collectAllData (node: Cardiology)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - [OK] OOjDREW validation passed for Cardiology_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 2: Validating workflow structure...
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Validating transition node types...
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 4: Validating graph connectivity...
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 5: Validating JoinNode configurations...
+INFO main org.btsn.rulecontroller.RuleDeployer -   No JoinNodes found in workflow (this is OK for linear workflows)
+INFO main org.btsn.rulecontroller.RuleDeployer - Workflow validation complete. Found 0 issues
+INFO main org.btsn.rulecontroller.RuleDeployer - Workflow validation passed! Proceeding with deployment...
+INFO main org.btsn.rulecontroller.RuleDeployer - === SOA MODE: Preserving existing canonical binding files ===
+INFO main org.btsn.rulecontroller.RuleDeployer - SOA workflows use hand-crafted binding files - no auto-generation
+INFO main org.btsn.rulecontroller.RuleDeployer -   SOA service: Treatment_CollectorService:collectAllData - using existing binding file
+INFO main org.btsn.rulecontroller.RuleDeployer -   SOA service: MonitorService:writeCollectorData - using existing binding file
+INFO main org.btsn.rulecontroller.RuleDeployer -   SOA service: Radiology_CollectorService:collectAllData - using existing binding file
+INFO main org.btsn.rulecontroller.RuleDeployer -   SOA service: Triage_CollectorService:collectAllData - using existing binding file
+INFO main org.btsn.rulecontroller.RuleDeployer -   SOA service: Laboratory_CollectorService:collectAllData - using existing binding file
+INFO main org.btsn.rulecontroller.RuleDeployer -   SOA service: Diagnosis_CollectorService:collectAllData - using existing binding file
+INFO main org.btsn.rulecontroller.RuleDeployer -   SOA service: Cardiology_CollectorService:collectAllData - using existing binding file
+INFO main org.btsn.rulecontroller.RuleDeployer - === SOA CANONICAL BINDINGS: Preserved all 7 existing files ===
+INFO main org.btsn.rulecontroller.RuleDeployer - === DEPLOYING SERVICE NODES ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Total services to deploy: 7
+INFO main org.btsn.rulecontroller.RuleDeployer - Will process: Treatment_CollectorService:collectAllData (nodeId: Treatment) - DEPLOYABLE
+INFO main org.btsn.rulecontroller.RuleDeployer - Will process: MonitorService:writeCollectorData (nodeId: Monitor) - DEPLOYABLE
+INFO main org.btsn.rulecontroller.RuleDeployer - Will process: Radiology_CollectorService:collectAllData (nodeId: Radiology) - DEPLOYABLE
+INFO main org.btsn.rulecontroller.RuleDeployer - Will process: Triage_CollectorService:collectAllData (nodeId: Triage) - DEPLOYABLE
+INFO main org.btsn.rulecontroller.RuleDeployer - Will process: Laboratory_CollectorService:collectAllData (nodeId: Laboratory) - DEPLOYABLE
+INFO main org.btsn.rulecontroller.RuleDeployer - Will process: Diagnosis_CollectorService:collectAllData (nodeId: Diagnosis) - DEPLOYABLE
+INFO main org.btsn.rulecontroller.RuleDeployer - Will process: Cardiology_CollectorService:collectAllData (nodeId: Cardiology) - DEPLOYABLE
+INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: Treatment_CollectorService:collectAllData ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Rules for Treatment should go to itself: Treatment_CollectorService
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for Treatment_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for Treatment_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 2205
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
+INFO main org.btsn.rulecontroller.RuleDeployer -   Service: Treatment_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 2205
+INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Service: Treatment_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 2205
+INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: Treatment_CollectorService:collectAllData ===
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: Treatment
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_Treatment ? Treatment (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Treatment has 1 incoming transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_Treatment (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: Treatment
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: Treatment ? T_out_Treatment (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Treatment has 1 outgoing transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using OUTGOING EdgeNode (default output behavior)
+INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_out_Treatment (EdgeNode)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
+INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_Treatment (EdgeNode)
+DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Finding destination services from transition: T_out_Treatment (EdgeNode)
+DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Found destination service: Monitor via T_in_Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 destination services
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding operation for path from T_out_Treatment to Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: MonitorService:writeCollectorData:EDGE_NODE:
+INFO main org.btsn.rulecontroller.RuleDeployer - Added meetsCondition: MonitorService:writeCollectorData via EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: Treatment
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=10 from transition: T_in_Treatment
+INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for Treatment_CollectorService:collectAllData (commitment: 1), attempt: 1
+INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for Treatment_CollectorService ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
+INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 2205
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
+INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 22205 (20000 + 0 + 2205)
+INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:22205 (RuleHandler for Treatment_CollectorService:collectAllData, channel 0)
+INFO CommitmentListener-v001 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v001:1
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for Treatment_CollectorService:collectAllData in 221ms
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: Treatment_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: Treatment_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: MonitorService:writeCollectorData ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Rules for Monitor should go to itself: MonitorService
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for MonitorService:writeCollectorData
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for MonitorService:writeCollectorData
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 3002
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
+INFO main org.btsn.rulecontroller.RuleDeployer -   Service: MonitorService:writeCollectorData
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 3002
+INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Service: MonitorService:writeCollectorData
+INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 3002
+INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: MonitorService:writeCollectorData ===
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: Monitor
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_Monitor ? Monitor (MergeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Monitor has 1 incoming transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_Monitor (MergeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: Monitor
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: Monitor ? T_out_Monitor (TerminateNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Monitor has 1 outgoing transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using OUTGOING TerminateNode (default output behavior)
+INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_out_Monitor (TerminateNode)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: TerminateNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: TerminateNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
+INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_Monitor (TerminateNode)
+DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Finding destination services from transition: T_out_Monitor (TerminateNode)
+INFO main org.btsn.rulecontroller.RuleDeployer - Transition leads to termination - no meetsCondition added
+INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=60 from transition: T_in_Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for MonitorService:writeCollectorData (commitment: 2), attempt: 1
+INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for MonitorService ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
+INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 3002
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
+INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 23002 (20000 + 0 + 3002)
+INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:23002 (RuleHandler for MonitorService:writeCollectorData, channel 0)
+INFO CommitmentListener-v001 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v001:2
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for MonitorService:writeCollectorData in 300ms
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: MonitorService:writeCollectorData
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: MonitorService:writeCollectorData
+INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: Radiology_CollectorService:collectAllData ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Rules for Radiology should go to itself: Radiology_CollectorService
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for Radiology_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for Radiology_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 2201
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
+INFO main org.btsn.rulecontroller.RuleDeployer -   Service: Radiology_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 2201
+INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Service: Radiology_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 2201
+INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: Radiology_CollectorService:collectAllData ===
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: Radiology
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_Radiology ? Radiology (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Radiology has 1 incoming transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_Radiology (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: Radiology
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: Radiology ? T_out_Radiology (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Radiology has 1 outgoing transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using OUTGOING EdgeNode (default output behavior)
+INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_out_Radiology (EdgeNode)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
+INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_Radiology (EdgeNode)
+DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Finding destination services from transition: T_out_Radiology (EdgeNode)
+DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Found destination service: Monitor via T_in_Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 destination services
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding operation for path from T_out_Radiology to Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: MonitorService:writeCollectorData:EDGE_NODE:
+INFO main org.btsn.rulecontroller.RuleDeployer - Added meetsCondition: MonitorService:writeCollectorData via EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: Radiology
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=10 from transition: T_in_Radiology
+INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for Radiology_CollectorService:collectAllData (commitment: 3), attempt: 1
+INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for Radiology_CollectorService ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
+INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 2201
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
+INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 22201 (20000 + 0 + 2201)
+INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:22201 (RuleHandler for Radiology_CollectorService:collectAllData, channel 0)
+INFO CommitmentListener-v001 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v001:3
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for Radiology_CollectorService:collectAllData in 107ms
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: Radiology_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: Radiology_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: Triage_CollectorService:collectAllData ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Rules for Triage should go to itself: Triage_CollectorService
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for Triage_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for Triage_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 2200
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
+INFO main org.btsn.rulecontroller.RuleDeployer -   Service: Triage_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 2200
+INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Service: Triage_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 2200
+INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: Triage_CollectorService:collectAllData ===
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: Triage
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_Triage ? Triage (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Triage has 1 incoming transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_Triage (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: Triage
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: Triage ? T_out_Triage (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Triage has 1 outgoing transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using OUTGOING EdgeNode (default output behavior)
+INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_out_Triage (EdgeNode)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
+INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_Triage (EdgeNode)
+DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Finding destination services from transition: T_out_Triage (EdgeNode)
+DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Found destination service: Monitor via T_in_Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 destination services
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding operation for path from T_out_Triage to Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: MonitorService:writeCollectorData:EDGE_NODE:
+INFO main org.btsn.rulecontroller.RuleDeployer - Added meetsCondition: MonitorService:writeCollectorData via EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: Triage
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=10 from transition: T_in_Triage
+INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for Triage_CollectorService:collectAllData (commitment: 4), attempt: 1
+INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for Triage_CollectorService ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
+INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 2200
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
+INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 22200 (20000 + 0 + 2200)
+INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:22200 (RuleHandler for Triage_CollectorService:collectAllData, channel 0)
+INFO CommitmentListener-v001 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v001:4
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for Triage_CollectorService:collectAllData in 106ms
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: Triage_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: Triage_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: Laboratory_CollectorService:collectAllData ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Rules for Laboratory should go to itself: Laboratory_CollectorService
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for Laboratory_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for Laboratory_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 2204
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
+INFO main org.btsn.rulecontroller.RuleDeployer -   Service: Laboratory_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 2204
+INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Service: Laboratory_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 2204
+INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: Laboratory_CollectorService:collectAllData ===
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: Laboratory
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_Laboratory ? Laboratory (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Laboratory has 1 incoming transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_Laboratory (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: Laboratory
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: Laboratory ? T_out_Laboratory (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Laboratory has 1 outgoing transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using OUTGOING EdgeNode (default output behavior)
+INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_out_Laboratory (EdgeNode)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
+INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_Laboratory (EdgeNode)
+DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Finding destination services from transition: T_out_Laboratory (EdgeNode)
+DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Found destination service: Monitor via T_in_Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 destination services
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding operation for path from T_out_Laboratory to Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: MonitorService:writeCollectorData:EDGE_NODE:
+INFO main org.btsn.rulecontroller.RuleDeployer - Added meetsCondition: MonitorService:writeCollectorData via EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: Laboratory
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=10 from transition: T_in_Laboratory
+INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for Laboratory_CollectorService:collectAllData (commitment: 5), attempt: 1
+INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for Laboratory_CollectorService ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
+INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 2204
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
+INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 22204 (20000 + 0 + 2204)
+INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:22204 (RuleHandler for Laboratory_CollectorService:collectAllData, channel 0)
+INFO CommitmentListener-v001 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v001:5
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for Laboratory_CollectorService:collectAllData in 240ms
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: Laboratory_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: Laboratory_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: Diagnosis_CollectorService:collectAllData ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Rules for Diagnosis should go to itself: Diagnosis_CollectorService
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for Diagnosis_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for Diagnosis_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 2203
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
+INFO main org.btsn.rulecontroller.RuleDeployer -   Service: Diagnosis_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 2203
+INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Service: Diagnosis_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 2203
+INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: Diagnosis_CollectorService:collectAllData ===
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: Diagnosis
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_Diagnosis ? Diagnosis (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Diagnosis has 1 incoming transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_Diagnosis (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: Diagnosis
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: Diagnosis ? T_out_Diagnosis (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Diagnosis has 1 outgoing transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using OUTGOING EdgeNode (default output behavior)
+INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_out_Diagnosis (EdgeNode)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
+INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_Diagnosis (EdgeNode)
+DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Finding destination services from transition: T_out_Diagnosis (EdgeNode)
+DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Found destination service: Monitor via T_in_Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 destination services
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding operation for path from T_out_Diagnosis to Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: MonitorService:writeCollectorData:EDGE_NODE:
+INFO main org.btsn.rulecontroller.RuleDeployer - Added meetsCondition: MonitorService:writeCollectorData via EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: Diagnosis
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=10 from transition: T_in_Diagnosis
+INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for Diagnosis_CollectorService:collectAllData (commitment: 6), attempt: 1
+INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for Diagnosis_CollectorService ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
+INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 2203
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
+INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 22203 (20000 + 0 + 2203)
+INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:22203 (RuleHandler for Diagnosis_CollectorService:collectAllData, channel 0)
+INFO CommitmentListener-v001 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v001:6
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for Diagnosis_CollectorService:collectAllData in 325ms
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: Diagnosis_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: Diagnosis_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: Cardiology_CollectorService:collectAllData ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Rules for Cardiology should go to itself: Cardiology_CollectorService
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for Cardiology_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for Cardiology_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 2202
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
+INFO main org.btsn.rulecontroller.RuleDeployer -   Service: Cardiology_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 2202
+INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Service: Cardiology_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 2202
+INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: Cardiology_CollectorService:collectAllData ===
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: Cardiology
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_Cardiology ? Cardiology (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Cardiology has 1 incoming transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_Cardiology (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: Cardiology
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: Cardiology ? T_out_Cardiology (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Cardiology has 1 outgoing transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using OUTGOING EdgeNode (default output behavior)
+INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_out_Cardiology (EdgeNode)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
+INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_Cardiology (EdgeNode)
+DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Finding destination services from transition: T_out_Cardiology (EdgeNode)
+DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Found destination service: Monitor via T_in_Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 destination services
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding operation for path from T_out_Cardiology to Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: MonitorService:writeCollectorData:EDGE_NODE:
+INFO main org.btsn.rulecontroller.RuleDeployer - Added meetsCondition: MonitorService:writeCollectorData via EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: Cardiology
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=10 from transition: T_in_Cardiology
+INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for Cardiology_CollectorService:collectAllData (commitment: 7), attempt: 1
+INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for Cardiology_CollectorService ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
+INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 2202
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
+INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 22202 (20000 + 0 + 2202)
+INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:22202 (RuleHandler for Cardiology_CollectorService:collectAllData, channel 0)
+INFO CommitmentListener-v001 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v001:7
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for Cardiology_CollectorService:collectAllData in 107ms
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: Cardiology_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: Cardiology_CollectorService:collectAllData
+INFO main org.btsn.rulecontroller.RuleDeployer - === DEPLOYMENT SUMMARY ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Total services processed: 7
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: 7
+INFO main org.btsn.rulecontroller.RuleDeployer - Floating nodes skipped: 0
+INFO main org.btsn.rulecontroller.RuleDeployer - Event generators skipped: 0
+INFO main org.btsn.rulecontroller.RuleDeployer - Total in manifest: 7
+INFO main org.btsn.rulecontroller.RuleDeployer - === DEPLOYING STANDALONE MONITOR NODES ===
+INFO main org.btsn.rulecontroller.RuleDeployer - === JSON-BASED DEPLOYMENT COMPLETED SUCCESSFULLY ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Deployed 7 service operations from JSON workflow
+INFO main org.btsn.rulecontroller.RuleDeployer - === DEPLOYMENT SUCCESSFUL ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Commitments: 7

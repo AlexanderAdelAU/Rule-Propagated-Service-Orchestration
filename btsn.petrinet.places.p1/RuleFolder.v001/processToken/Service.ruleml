@@ -579,6 +579,6 @@ This is the rule that governs the list of all services.
 	<Ind>token</Ind>
 	<Ind>token</Ind>
 </Atom>
-<Atom><Rel>NodeType</Rel><Ind>GatewayNode</Ind></Atom><Atom><Rel>NodeType</Rel><Ind>GatewayNode</Ind></Atom><Atom><Rel>meetsCondition</Rel><Ind>P2_Place</Ind><Ind>processToken</Ind><Ind>GATEWAY_NODE</Ind><Ind>true</Ind></Atom><Atom><Rel>meetsCondition</Rel><Ind>P3_Place</Ind><Ind>processToken</Ind><Ind>GATEWAY_NODE</Ind><Ind>true</Ind></Atom><Atom><Rel>meetsCondition</Rel><Ind>TERMINATE</Ind><Ind>TERMINATE</Ind><Ind>GATEWAY_NODE</Ind><Ind>false</Ind></Atom>
+<Atom><Rel>NodeType</Rel><Ind>GatewayNode</Ind></Atom><Atom><Rel>NodeType</Rel><Ind>GatewayNode</Ind></Atom><Atom><Rel>meetsCondition</Rel><Ind>P2_Place</Ind><Ind>processToken</Ind><Ind>GATEWAY_NODE</Ind><Ind></Ind></Atom>
 </Rulebase>
 </Assert>
