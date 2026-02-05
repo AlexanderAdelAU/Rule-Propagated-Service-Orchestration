@@ -1,0 +1,52 @@
+
+<!-- ================================================================ -->
+<!-- PERFORMANCE COLLECTION SERVICES                                  -->
+<!-- ================================================================ -->
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Triage_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2300</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Radiology_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2301</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Cardiology_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2302</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Diagnosis_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2303</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Laboratory_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2304</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Treatment_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2305</Ind>
+</Atom>

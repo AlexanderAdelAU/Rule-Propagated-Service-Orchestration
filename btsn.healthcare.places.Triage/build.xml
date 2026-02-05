@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="btsn.healthcare.places.Triage" default="release" basedir=".">
 
-	<!-- Define a custom copy task with failonerror set to true -->
-	<presetdef name="copy">
-		<copy failonerror="true" />
-	</presetdef>
-
 	<!-- Project metadata -->
 	<property name="project.artifactId" value="btsn.places.Triage" />
 	<property name="project.version" value="1.0" />
-	<property name="main-class" value="org.btsn.ServiceLoader" />
+	<property name="main-class" value="org.btsn.handlers.ServiceLoader" />
 
 	<!-- Directory properties -->
 	<property name="src.dir" value="src" />
@@ -91,7 +86,7 @@
 		<available file="${common.root}/RuleBase" type="dir" property="rulebase.exists"/>
 		<available file="${common.root}/ServiceAttributeBindings" type="dir" property="serviceattributes.exists"/>
 		<available file="${common.root}/serviceAttributeBindings" type="dir" property="serviceattributes.lowercase.exists"/>
-		<available file="${common.root}/serviceLoaderQueries" type="dir" property="serviceloaderqueries.exists"/>
+		<available file="ServiceLoaderQueries" type="dir" property="serviceloaderqueries.exists"/>
 		
 		<echo message="Common package status:" />
 		<echo message="  - base: ${common.base.exists}" />
@@ -139,6 +134,9 @@
 	    <antcall target="build-single-ruleml">
 	        <param name="version" value="v004"/>
 	    </antcall>
+	    <antcall target="build-single-ruleml">
+	        <param name="version" value="v999"/>
+	    </antcall>
 	    
 	    <echo message="All Service.ruleml versions rebuilt" />
 	</target>
@@ -154,7 +152,7 @@
 	        <arg value="TriageService"/>
 	    </java>
 	    <available file="${common.root}/RuleFolder.${version}/Service.ruleml" property="${version}.created"/>
-	    <echo message="  ${version}: ${${version}.created}" />
+	    <echo message="  ${version}: build complete" />
 	</target>
 
 		
@@ -306,45 +304,35 @@
 			<fileset dir="${common.root}/RuleBase" includes="**/*" />
 		</copy>
 		
+		<!-- Copy versioned RuleFolders -->
+		<copy todir="${release.dir}/btsn.common" failonerror="false">
+			<fileset dir="${common.root}">
+				<include name="RuleFolder.v*/**" />
+			</fileset>
+		</copy>
+		
 		<!-- Copy ServiceAttributeBindings -->
 		<copy todir="${release.dir}/btsn.common/ServiceAttributeBindings" failonerror="false">
 			<fileset dir="${common.root}/ServiceAttributeBindings" includes="**/*" erroronmissingdir="false"/>
 		</copy>
-		<copy todir="${release.dir}/btsn.common/serviceAttributeBindings" failonerror="false">
-			<fileset dir="${common.root}/serviceAttributeBindings" includes="**/*" erroronmissingdir="false"/>
-		</copy>
-		
-		<!-- Copy serviceLoaderQueries -->
-		<mkdir dir="${release.dir}/btsn.common/serviceLoaderQueries" />
-		<copy todir="${release.dir}/btsn.common/serviceLoaderQueries" failonerror="false">
-			<fileset dir="${common.root}/serviceLoaderQueries">
-				<include name="TriageServiceLoaderQuery.ruleml" />
-				<include name="loaderSettings.xml" />
-			</fileset>
-		</copy>
+
 
 		<!-- Also copy backward compatibility directories to service directory -->
 		<copy todir="${service.dir}/RuleBase" failonerror="false">
 			<fileset dir="${common.root}/RuleBase" includes="**/*" />
 		</copy>
+		<copy todir="${service.dir}" failonerror="false">
+			<fileset dir="${common.root}">
+				<include name="RuleFolder.v*/**" />
+			</fileset>
+		</copy>
 		<copy todir="${service.dir}/ServiceAttributeBindings" failonerror="false">
 			<fileset dir="${common.root}/ServiceAttributeBindings" includes="**/*" erroronmissingdir="false"/>
 		</copy>
-		<copy todir="${service.dir}/serviceAttributeBindings" failonerror="false">
-			<fileset dir="${common.root}/serviceAttributeBindings" includes="**/*" erroronmissingdir="false"/>
-		</copy>
-		<mkdir dir="${service.dir}/serviceLoaderQueries" />
-		<copy todir="${service.dir}/serviceLoaderQueries" failonerror="false">
-			<fileset dir="${common.root}/serviceLoaderQueries">
-				<include name="TriageServiceLoaderQuery.ruleml" />
-				<include name="loaderSettings.xml" />
-			</fileset>
-		</copy>
 		<mkdir dir="${service.dir}/ServiceLoaderQueries" />
 		<copy todir="${service.dir}/ServiceLoaderQueries" failonerror="false">
-			<fileset dir="${common.root}/serviceLoaderQueries">
-				<include name="TriageServiceLoaderQuery.ruleml" />
-				<include name="loaderSettings.xml" />
+			<fileset dir="ServiceLoaderQueries" erroronmissingdir="false">
+				<include name="**/*" />
 			</fileset>
 		</copy>
 
@@ -352,8 +340,14 @@
 		<echo file="${release.dir}/launch.bat">@echo off
 echo Starting Triage Service...
 echo.
+if "%~1"=="" (
+    echo Usage: launch.bat -version &lt;version&gt; [-service &lt;serviceName&gt;]
+    echo Example: launch.bat -version v001
+    echo          launch.bat -version v001 -service TriageService
+    exit /b 1
+)
 cd triage
-java -cp "btsn.healthcare.places.Triage.jar;lib/*" org.btsn.healthcare.handlers.ServiceLoader %*
+java -cp "${project.artifactId}.jar;lib/*" ${main-class} %*
 cd ..
 if errorlevel 1 (
     echo.
@@ -367,8 +361,14 @@ if errorlevel 1 (
 
 echo "Starting Triage Service..."
 echo ""
+if [ $# -eq 0 ]; then
+    echo "Usage: ./launch.sh -version &lt;version&gt; [-service &lt;serviceName&gt;]"
+    echo "Example: ./launch.sh -version v001"
+    echo "         ./launch.sh -version v001 -service TriageService"
+    exit 1
+fi
 cd triage
-java -cp "btsn.healthcare.places.Triage.jar:lib/*" org.btsn.healthcare.handlers.ServiceLoader "$@"
+java -cp "${project.artifactId}.jar:lib/*" ${main-class} "$@"
 cd ..
 if [ $? -ne 0 ]; then
     echo ""

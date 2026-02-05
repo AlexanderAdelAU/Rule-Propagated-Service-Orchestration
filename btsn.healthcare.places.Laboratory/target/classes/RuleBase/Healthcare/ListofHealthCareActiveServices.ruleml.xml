@@ -1,0 +1,77 @@
+<!-- List of service facts -->
+<!-- ActiveServices.ruleml.xml - loaded last or checked first -->
+
+<!-- ================================================================ -->
+<!-- WORKFLOW SERVICES                                                -->
+<!-- ================================================================ -->
+
+<!-- Triage Service -->
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>TriageService</Ind>
+	<Ind>processTriageAssessment</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2100</Ind>
+</Atom>
+
+<!-- Radiology Service -->
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>RadiologyService</Ind>
+	<Ind>processImagingRequest</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2101</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>RadiologyService</Ind>
+	<Ind>federatedRadiologyRequest</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2102</Ind>
+</Atom>
+
+<!-- Cardiology Service -->
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>CardiologyService</Ind>
+	<Ind>processCardiacAssessment</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2103</Ind>
+</Atom>
+
+<!-- Diagnosis Service -->
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>DiagnosisService</Ind>
+	<Ind>processClinicalDecision</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2104</Ind>
+</Atom>
+
+<!-- Laboratory Service -->
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>LaboratoryService</Ind>
+	<Ind>processLabRequest</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2105</Ind>
+</Atom>
+
+<!-- Treatment Service -->
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>TreatmentService</Ind>
+	<Ind>executeTreatmentPlan</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2106</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>TreatmentService</Ind>
+	<Ind>executeDirectTreatment</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2107</Ind>
+</Atom>
+

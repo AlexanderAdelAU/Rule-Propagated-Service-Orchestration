@@ -1,0 +1,18 @@
+
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>Cardiology_CollectorService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>collectAllData</Ind>
+	<Ind>token</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>getServicePerformanceData</Ind>
+	<Ind>token</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>

@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="btsn.healthcare.places.Cardiology" default="release" basedir=".">
 
-	<!-- Define a custom copy task with failonerror set to true -->
-	<presetdef name="copy">
-		<copy failonerror="true" />
-	</presetdef>
-
 	<!-- Project metadata -->
 	<property name="project.artifactId" value="btsn.places.Cardiology" />
 	<property name="project.version" value="1.0" />
-	<property name="main-class" value="org.btsn.ServiceLoader" />
+	<property name="main-class" value="org.btsn.handlers.ServiceLoader" />
 
 	<!-- Directory properties -->
 	<property name="src.dir" value="src" />
@@ -91,7 +86,7 @@
 		<available file="${common.root}/RuleBase" type="dir" property="rulebase.exists"/>
 		<available file="${common.root}/ServiceAttributeBindings" type="dir" property="serviceattributes.exists"/>
 		<available file="${common.root}/serviceAttributeBindings" type="dir" property="serviceattributes.lowercase.exists"/>
-		<available file="${common.root}/serviceLoaderQueries" type="dir" property="serviceloaderqueries.exists"/>
+		<available file="ServiceLoaderQueries" type="dir" property="serviceloaderqueries.exists"/>
 		
 		<echo message="Common package status:" />
 		<echo message="  - base: ${common.base.exists}" />
@@ -139,6 +134,9 @@
 	    <antcall target="build-single-ruleml">
 	        <param name="version" value="v004"/>
 	    </antcall>
+	    <antcall target="build-single-ruleml">
+	        <param name="version" value="v999"/>
+	    </antcall>
 	    
 	    <echo message="All Service.ruleml versions rebuilt" />
 	</target>
@@ -154,7 +152,7 @@
 	        <arg value="CardiologyService"/>
 	    </java>
 	    <available file="${common.root}/RuleFolder.${version}/Service.ruleml" property="${version}.created"/>
-	    <echo message="  ${version}: ${${version}.created}" />
+	    <echo message="  ${version}: build complete" />
 	</target>
 
 		
@@ -188,58 +186,114 @@
 				<include name="org/btsn/logger/**/*.java" />
 				<include name="org/btsn/rulecontroller/**/*.java" />
 				<include name="org/btsn/utils/**/*.java" />
-				<include name="org/btsn/healthcare/**/*.java" />
+				<include name="**/*.java" />
+				<exclude name="**/ServiceLoader.java" />
 				<compilerarg value="-Xlint:unchecked" />
+				<compilerarg value="-Xlint:deprecation" />
 			</javac>
-			<echo message="Compilation complete." />
+			<echo message="Compilation complete with Java 15." />
 		</target>
 
-	<!-- Package JAR file -->
-	<target name="jar" depends="compile" description="Create JAR file">
+	<!-- Copy resources -->
+	<target name="copy-resources" depends="compile" description="Copy resources">
+		<copy todir="${classes.dir}" failonerror="false">
+			<fileset dir="${resources.dir}" />
+		</copy>
+		
+		<!-- Also copy any resources from common packages -->
+		<copy todir="${classes.dir}" failonerror="false">
+			<fileset dir="${common.src.dir}">
+				<include name="org/btsn/**/*.properties" />
+				<include name="org/btsn/**/*.xml" />
+				<include name="org/btsn/**/*.json" />
+				<include name="org/btsn/**/*.txt" />
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		
+		<!-- Copy RuleBase and ServiceAttributeBindings to classes for inclusion in JAR -->
+		<copy todir="${classes.dir}/RuleBase" failonerror="false">
+			<fileset dir="${common.root}/RuleBase" includes="**/*" />
+		</copy>
+		<copy todir="${classes.dir}/ServiceAttributeBindings" failonerror="false">
+			<fileset dir="${common.root}/ServiceAttributeBindings" includes="**/*" />
+		</copy>
+	</target>
+
+	<!-- Create JAR file -->
+	<target name="jar" depends="copy-resources" description="Create the project JAR file">
+		<echo message="Creating JAR file: ${bin.dir}/${project.artifactId}.jar..." />
 		<jar destfile="${bin.dir}/${project.artifactId}.jar" basedir="${classes.dir}">
 			<manifest>
 				<attribute name="Main-Class" value="${main-class}" />
-				<attribute name="Class-Path" value="lib/antlr.jar lib/derby.jar lib/derbyclient.jar lib/jaxb-xjc-3.0.2.jar lib/jfreechart-1.5.3.jar lib/jlatexmath-1.0.7.jar lib/json-simple-1.1.1.jar lib/log4j-1.2.16.jar lib/mysql-connector-java-5.1.18-bin.jar lib/oojdrew-1.0.jar lib/opencsv-2.3.jar lib/ptolemy.jar lib/xom-1.3.7.jar" />
+				<attribute name="Class-Path" value="lib/antlr.jar lib/jaxb-xjc-3.0.2.jar lib/log4j-1.2.16.jar lib/mysql-connector-java-5.1.18-bin.jar lib/oojdrew-1.0.jar lib/derby.jar lib/derbyclient.jar lib/jfreechart-1.5.3.jar lib/jlatexmath-1.0.7.jar lib/ptolemy.jar lib/json-simple-1.1.1.jar lib/xom-1.3.7.jar lib/opencsv-2.3.jar" />
+				<!-- Add Java version requirement to manifest -->
+				<attribute name="Build-Jdk" value="${java.version}" />
+				<attribute name="Created-By" value="${java.version} (${java.vendor})" />
 			</manifest>
 		</jar>
-		<echo message="JAR file created: ${bin.dir}/${project.artifactId}.jar" />
+		<echo message="JAR file created with Java ${java.version}." />
 	</target>
 
-	<!-- Create release distribution -->
-	<target name="release" depends="jar" description="Create release distribution">
-		<property name="release.dir" value="${target.dir}/release" />
+	<!-- Create release package with new structure -->
+	<target name="release" depends="jar" description="Create a deployable ZIP package">
+		<tstamp />
+		<property name="release.dir" value="cardiology-deployment" />
 		<property name="service.dir" value="${release.dir}/cardiology" />
+
+		<echo message="Creating release package with parent-level btsn.common..." />
+		<echo message="Java version: ${java.version}" />
 		
+		<!-- Create directory structure -->
+		<mkdir dir="${release.dir}" />
 		<mkdir dir="${service.dir}" />
-		<mkdir dir="${service.dir}/lib" />
-		<mkdir dir="${service.dir}/resources" />
 
-		<!-- Copy JAR with proper name -->
-		<copy file="${bin.dir}/${project.artifactId}.jar" 
-			  tofile="${service.dir}/btsn.healthcare.places.Cardiology.jar" />
+		<!-- Copy service-specific files to cardiology subdirectory -->
+		<copy todir="${service.dir}">
+			<fileset dir=".">
+				<!-- Include service-specific items -->
+				<include name="**/*" />
 
-		<!-- Copy libraries -->
-		<copy todir="${service.dir}/lib">
-			<fileset dir="${common.lib.dir}">
-				<include name="antlr.jar" />
-				<include name="derby.jar" />
-				<include name="derbyclient.jar" />
-				<include name="jaxb-xjc-3.0.2.jar" />
-				<include name="jfreechart-1.5.3.jar" />
-				<include name="jlatexmath-1.0.7.jar" />
-				<include name="json-simple-1.1.1.jar" />
-				<include name="log4j-1.2.16.jar" />
-				<include name="mysql-connector-java-5.1.18-bin.jar" />
-				<include name="oojdrew-1.0.jar" />
-				<include name="opencsv-2.3.jar" />
-				<include name="ptolemy.jar" />
-				<include name="xom-1.3.7.jar" />
+				<!-- Exclude build artifacts -->
+				<exclude name="target/**" />
+				<exclude name="bin/**" />
+				<exclude name="doc/**" />
+				<exclude name="${release.dir}/**" />
+				<exclude name="*.zip" />
+
+				<!-- Exclude source files -->
+				<exclude name="src/**" />
+
+				<!-- Exclude build files -->
+				<exclude name="build.xml" />
+				<exclude name=".project" />
+				<exclude name=".classpath" />
+				<exclude name=".settings/**" />
+
+				<!-- Exclude version control -->
+				<exclude name=".git/**" />
+				<exclude name=".gitignore" />
+				<exclude name=".svn/**" />
+
+				<!-- Exclude IDE files -->
+				<exclude name="*.iml" />
+				<exclude name=".idea/**" />
+
+				<!-- Exclude temp files -->
+				<exclude name="*.log" />
+				<exclude name="*.tmp" />
+				<exclude name="*.bak" />
+				<exclude name="**/*.class" />
 			</fileset>
 		</copy>
 
-		<!-- Copy resources -->
-		<copy todir="${service.dir}/resources" failonerror="false">
-			<fileset dir="${resources.dir}" includes="**/*" erroronmissingdir="false"/>
+		<!-- Copy the JAR file to service directory -->
+		<copy file="${bin.dir}/${project.artifactId}.jar" todir="${service.dir}" />
+
+		<!-- Copy libraries to service directory -->
+		<mkdir dir="${service.dir}/lib" />
+		<copy todir="${service.dir}/lib">
+			<fileset dir="${common.lib.dir}" includes="*.jar" />
 		</copy>
 
 		<!-- Copy btsn.common to PARENT level (release.dir, not service.dir) -->
@@ -250,45 +304,35 @@
 			<fileset dir="${common.root}/RuleBase" includes="**/*" />
 		</copy>
 		
+		<!-- Copy versioned RuleFolders -->
+		<copy todir="${release.dir}/btsn.common" failonerror="false">
+			<fileset dir="${common.root}">
+				<include name="RuleFolder.v*/**" />
+			</fileset>
+		</copy>
+		
 		<!-- Copy ServiceAttributeBindings -->
 		<copy todir="${release.dir}/btsn.common/ServiceAttributeBindings" failonerror="false">
 			<fileset dir="${common.root}/ServiceAttributeBindings" includes="**/*" erroronmissingdir="false"/>
 		</copy>
-		<copy todir="${release.dir}/btsn.common/serviceAttributeBindings" failonerror="false">
-			<fileset dir="${common.root}/serviceAttributeBindings" includes="**/*" erroronmissingdir="false"/>
-		</copy>
-		
-		<!-- Copy serviceLoaderQueries -->
-		<mkdir dir="${release.dir}/btsn.common/serviceLoaderQueries" />
-		<copy todir="${release.dir}/btsn.common/serviceLoaderQueries" failonerror="false">
-			<fileset dir="${common.root}/serviceLoaderQueries">
-				<include name="CardiologyServiceLoaderQuery.ruleml" />
-				<include name="loaderSettings.xml" />
-			</fileset>
-		</copy>
+
 
 		<!-- Also copy backward compatibility directories to service directory -->
 		<copy todir="${service.dir}/RuleBase" failonerror="false">
 			<fileset dir="${common.root}/RuleBase" includes="**/*" />
 		</copy>
+		<copy todir="${service.dir}" failonerror="false">
+			<fileset dir="${common.root}">
+				<include name="RuleFolder.v*/**" />
+			</fileset>
+		</copy>
 		<copy todir="${service.dir}/ServiceAttributeBindings" failonerror="false">
 			<fileset dir="${common.root}/ServiceAttributeBindings" includes="**/*" erroronmissingdir="false"/>
 		</copy>
-		<copy todir="${service.dir}/serviceAttributeBindings" failonerror="false">
-			<fileset dir="${common.root}/serviceAttributeBindings" includes="**/*" erroronmissingdir="false"/>
-		</copy>
-		<mkdir dir="${service.dir}/serviceLoaderQueries" />
-		<copy todir="${service.dir}/serviceLoaderQueries" failonerror="false">
-			<fileset dir="${common.root}/serviceLoaderQueries">
-				<include name="CardiologyServiceLoaderQuery.ruleml" />
-				<include name="loaderSettings.xml" />
-			</fileset>
-		</copy>
 		<mkdir dir="${service.dir}/ServiceLoaderQueries" />
 		<copy todir="${service.dir}/ServiceLoaderQueries" failonerror="false">
-			<fileset dir="${common.root}/serviceLoaderQueries">
-				<include name="CardiologyServiceLoaderQuery.ruleml" />
-				<include name="loaderSettings.xml" />
+			<fileset dir="ServiceLoaderQueries" erroronmissingdir="false">
+				<include name="**/*" />
 			</fileset>
 		</copy>
 
@@ -296,8 +340,14 @@
 		<echo file="${release.dir}/launch.bat">@echo off
 echo Starting Cardiology Service...
 echo.
+if "%~1"=="" (
+    echo Usage: launch.bat -version &lt;version&gt; [-service &lt;serviceName&gt;]
+    echo Example: launch.bat -version v001
+    echo          launch.bat -version v001 -service CardiologyService
+    exit /b 1
+)
 cd cardiology
-java -cp "btsn.healthcare.places.Cardiology.jar;lib/*" org.btsn.healthcare.handlers.ServiceLoader %*
+java -cp "${project.artifactId}.jar;lib/*" ${main-class} %*
 cd ..
 if errorlevel 1 (
     echo.
@@ -311,8 +361,14 @@ if errorlevel 1 (
 
 echo "Starting Cardiology Service..."
 echo ""
+if [ $# -eq 0 ]; then
+    echo "Usage: ./launch.sh -version &lt;version&gt; [-service &lt;serviceName&gt;]"
+    echo "Example: ./launch.sh -version v001"
+    echo "         ./launch.sh -version v001 -service CardiologyService"
+    exit 1
+fi
 cd cardiology
-java -cp "btsn.healthcare.places.Cardiology.jar:lib/*" org.btsn.healthcare.handlers.ServiceLoader "$@"
+java -cp "${project.artifactId}.jar:lib/*" ${main-class} "$@"
 cd ..
 if [ $? -ne 0 ]; then
     echo ""
@@ -333,7 +389,7 @@ fi
 		<echo message="" />
 		<echo message="ZIP Structure:" />
 		<echo message="  /btsn.common/   (at parent level)" />
-		<echo message="  /cardiology/                (service directory)" />
+		<echo message="  /cardiology/                    (service directory)" />
 		<echo message="  /launch.bat                 (at root level)" />
 		<echo message="" />
 		<echo message="Extract to any directory and run launch.bat from root" />

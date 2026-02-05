@@ -1,0 +1,12 @@
+
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>TriageService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>processTriageAssessment</Ind>
+	<Ind>triageResults</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>

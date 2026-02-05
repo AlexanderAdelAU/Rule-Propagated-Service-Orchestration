@@ -1,11 +1,11 @@
 <Assert>
 <Rulebase mapClosure="universal">
 <!-- MASTER SERVICE RULE BASE -->
-<!-- Generated: Mon Feb 02 21:24:53 AEST 2026 -->
+<!-- Generated: Thu Feb 05 22:46:47 AEST 2026 -->
 <!-- Version: v002 -->
 <!-- Services: CardiologyService -->
 <!-- This is the SINGLE SOURCE OF TRUTH for service resolution -->
-<!-- Rule files loaded recursively from: C:\DevShare\BTSN_87\BTSN\btsn.common\RuleBase -->
+<!-- Rule files loaded recursively from: C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase -->
 
 <!-- Version -->
 <Data><Atom><Rel>Version</Rel><Ind>v002</Ind></Atom></Data>

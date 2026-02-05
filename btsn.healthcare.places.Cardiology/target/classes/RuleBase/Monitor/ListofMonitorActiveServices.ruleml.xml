@@ -1,0 +1,47 @@
+<!-- ================================================================ -->
+<!-- MONITOR PLACE (PetriNet - MonitorService)                         -->
+<!-- ================================================================ -->
+
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>MonitorService</Ind>
+    <Ind>acknowledgeTokenArrival</Ind>
+    <Ind>ip0</Ind>
+    <Ind>3000</Ind>
+</Atom>
+
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>MonitorService</Ind>
+    <Ind>writeServiceTimingRecord</Ind>
+    <Ind>ip0</Ind>
+    <Ind>3001</Ind>
+</Atom>
+
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>MonitorService</Ind>
+    <Ind>writeCollectorData</Ind>
+    <Ind>ip0</Ind>
+    <Ind>3002</Ind>
+</Atom>
+
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>MonitorService</Ind>
+    <Ind>initiateWorkflowDataCollection</Ind>
+    <Ind>ip0</Ind>
+    <Ind>3003</Ind>
+</Atom>
+
+<!-- ================================================================ -->
+<!-- MONITOR INITIALIZATION                                           -->
+<!-- ================================================================ -->
+
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>Monitor_InitializationService</Ind>
+    <Ind>purgeAndInitialize</Ind>
+    <Ind>ip0</Ind>
+    <Ind>3004</Ind>
+</Atom>

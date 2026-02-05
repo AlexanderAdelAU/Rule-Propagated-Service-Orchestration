@@ -1,6 +1,6 @@
 ----------------------------------------------------------------
-Thu Feb 05 17:36:42 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance a816c00e-019c-2cbb-23eb-00000081c1e0 
+Thu Feb 05 22:33:40 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance a816c00e-019c-2dcb-0a81-00000089f358 
 on database directory C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\ServiceAnalysisDataBase with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
 Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
 java.vendor=Oracle Corporation
@@ -12,9 +12,9 @@ os.version=6.1
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
 ----------------------------------------------------------------
-Thu Feb 05 17:37:09 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance ed07c066-019c-2cbb-23eb-00000081c1e0 
-on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3000000_27653906925782 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Thu Feb 05 22:34:07 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance ed07c066-019c-2dcb-0a81-00000089f358 
+on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3000000_45422424353028 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
 Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
 java.vendor=Oracle Corporation
 java.runtime.version=15.0.1+9-18
@@ -25,9 +25,9 @@ os.version=6.1
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
 ----------------------------------------------------------------
-Thu Feb 05 17:37:15 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 6a6b410a-019c-2cbb-23eb-00000081c1e0 
-on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3010000_27658984448220 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Thu Feb 05 22:34:12 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 22290109-019c-2dcb-0a81-00000089f358 
+on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3010000_45427525288319 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
 Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
 java.vendor=Oracle Corporation
 java.runtime.version=15.0.1+9-18
@@ -38,9 +38,9 @@ os.version=6.1
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
 ----------------------------------------------------------------
-Thu Feb 05 17:37:15 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance baf0810c-019c-2cbb-23eb-00000081c1e0 
-on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_1000000_27660143835180 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Thu Feb 05 22:34:13 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance baf0810c-019c-2dcb-0a81-00000089f358 
+on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_1000000_45428241648456 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
 Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
 java.vendor=Oracle Corporation
 java.runtime.version=15.0.1+9-18
@@ -51,9 +51,9 @@ os.version=6.1
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
 ----------------------------------------------------------------
-Thu Feb 05 17:37:20 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 85ad4247-019c-2cbb-23eb-00000081c1e0 
-on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3020000_27664952475587 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Thu Feb 05 22:34:21 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 8d1bc246-019c-2dcb-0a81-00000089f358 
+on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3030000_45435258424000 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
 Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
 java.vendor=Oracle Corporation
 java.runtime.version=15.0.1+9-18
@@ -64,9 +64,9 @@ os.version=6.1
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
 ----------------------------------------------------------------
-Thu Feb 05 17:37:21 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance c7f5c24b-019c-2cbb-23eb-00000081c1e0 
-on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_1010000_27665912037183 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Thu Feb 05 22:34:26 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 4bbe82e5-019c-2dcb-0a81-00000089f358 
+on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_1010000_45440911842185 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
 Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
 java.vendor=Oracle Corporation
 java.runtime.version=15.0.1+9-18
@@ -77,9 +77,9 @@ os.version=6.1
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
 ----------------------------------------------------------------
-Thu Feb 05 17:37:24 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 74d3c386-019c-2cbb-23eb-00000081c1e0 
-on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_1020000_27669076368873 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Thu Feb 05 22:34:28 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 35464312-019c-2dcb-0a81-00000089f358 
+on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3040000_45443256350457 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
 Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
 java.vendor=Oracle Corporation
 java.runtime.version=15.0.1+9-18
@@ -90,9 +90,9 @@ os.version=6.1
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
 ----------------------------------------------------------------
-Thu Feb 05 17:37:26 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 0e2fc426-019c-2cbb-23eb-00000081c1e0 
-on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_1030000_27671294959988 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Thu Feb 05 22:34:31 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance c314c423-019c-2dcb-0a81-00000089f358 
+on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3050000_45446045432395 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
 Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
 java.vendor=Oracle Corporation
 java.runtime.version=15.0.1+9-18
@@ -103,9 +103,9 @@ os.version=6.1
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
 ----------------------------------------------------------------
-Thu Feb 05 17:37:29 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance c08bc4c6-019c-2cbb-23eb-00000081c1e0 
-on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_1040000_27673846276181 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Thu Feb 05 22:34:35 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance ae2984c4-019c-2dcb-0a81-00000089f358 
+on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_1020000_45450588541446 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
 Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
 java.vendor=Oracle Corporation
 java.runtime.version=15.0.1+9-18
@@ -116,9 +116,9 @@ os.version=6.1
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
 ----------------------------------------------------------------
-Thu Feb 05 17:37:32 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 8be7c566-019c-2cbb-23eb-00000081c1e0 
-on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_1050000_27675728624462 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Thu Feb 05 22:34:39 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 79358564-019c-2dcb-0a81-00000089f358 
+on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_1030000_45454173343454 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
 Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
 java.vendor=Oracle Corporation
 java.runtime.version=15.0.1+9-18
@@ -129,9 +129,9 @@ os.version=6.1
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
 ----------------------------------------------------------------
-Thu Feb 05 17:37:33 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 5d418604-019c-2cbb-23eb-00000081c1e0 
-on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3030000_27678194002529 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Thu Feb 05 22:34:42 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 5d418604-019c-2dcb-0a81-00000089f358 
+on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_1040000_45457011183011 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
 Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
 java.vendor=Oracle Corporation
 java.runtime.version=15.0.1+9-18
@@ -142,9 +142,9 @@ os.version=6.1
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
 ----------------------------------------------------------------
-Thu Feb 05 17:37:35 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance c3f686a5-019c-2cbb-23eb-00000081c1e0 
-on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_1060000_27679477602161 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Thu Feb 05 22:34:45 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 5a4d86a4-019c-2dcb-0a81-00000089f358 
+on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_1050000_45460178712662 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
 Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
 java.vendor=Oracle Corporation
 java.runtime.version=15.0.1+9-18
@@ -155,9 +155,35 @@ os.version=6.1
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
 ----------------------------------------------------------------
-Thu Feb 05 17:37:36 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance da2a8745-019c-2cbb-23eb-00000081c1e0 
-on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_1070000_27681190752842 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Thu Feb 05 22:34:50 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 83fbc746-019c-2dcb-0a81-00000089f358 
+on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_1060000_45465539883584 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=15.0.1+9-18
+user.dir=C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology
+os.name=Windows 7
+os.arch=amd64
+os.version=6.1
+derby.system.home=null
+----------------------------------------------------------------
+Thu Feb 05 22:34:51 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance d79f0748-019c-2dcb-0a81-00000089f358 
+on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3110000_45466459476412 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=15.0.1+9-18
+user.dir=C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology
+os.name=Windows 7
+os.arch=amd64
+os.version=6.1
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
+Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+Thu Feb 05 22:34:56 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 89100881-019c-2dcb-0a81-00000089f358 
+on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3120000_45470239571629 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
 Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
 java.vendor=Oracle Corporation
 java.runtime.version=15.0.1+9-18
@@ -168,9 +194,9 @@ os.version=6.1
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
 ----------------------------------------------------------------
-Thu Feb 05 17:37:39 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 095e87e5-019c-2cbb-23eb-00000081c1e0 
-on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_1080000_27683450226135 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Thu Feb 05 22:35:00 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance c514491f-019c-2dcb-0a81-00000089f358 
+on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3130000_45475512746892 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
 Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
 java.vendor=Oracle Corporation
 java.runtime.version=15.0.1+9-18
@@ -181,9 +207,9 @@ os.version=6.1
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
 ----------------------------------------------------------------
-Thu Feb 05 17:37:41 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 51928885-019c-2cbb-23eb-00000081c1e0 
-on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_1090000_27685587635836 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Thu Feb 05 22:35:07 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 633809c1-019c-2dcb-0a81-00000089f358 
+on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_1080000_45482366336101 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
 Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
 java.vendor=Oracle Corporation
 java.runtime.version=15.0.1+9-18
@@ -194,9 +220,9 @@ os.version=6.1
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
 ----------------------------------------------------------------
-Thu Feb 05 17:37:42 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 1a190889-019c-2cbb-23eb-00000081c1e0 
-on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3040000_27686747141437 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Thu Feb 05 22:35:08 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 9604ca5e-019c-2dcb-0a81-00000089f358 
+on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3140000_45483492266804 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
 Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
 java.vendor=Oracle Corporation
 java.runtime.version=15.0.1+9-18
@@ -207,9 +233,9 @@ os.version=6.1
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
 ----------------------------------------------------------------
-Thu Feb 05 17:37:49 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 8818c9c3-019c-2cbb-23eb-00000081c1e0 
-on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3070000_27693591922089 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Thu Feb 05 22:35:13 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance a1600b01-019c-2dcb-0a81-00000089f358 
+on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3160000_45488043771016 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
 Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
 java.vendor=Oracle Corporation
 java.runtime.version=15.0.1+9-18
@@ -220,9 +246,9 @@ os.version=6.1
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
 ----------------------------------------------------------------
-Thu Feb 05 17:37:52 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 00644a62-019c-2cbb-23eb-00000081c1e0 
-on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3080000_27696710892814 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Thu Feb 05 22:35:15 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 1723cb06-019c-2dcb-0a81-00000089f358 
+on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_1090000_45490365518753 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
 Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
 java.vendor=Oracle Corporation
 java.runtime.version=15.0.1+9-18
@@ -233,9 +259,9 @@ os.version=6.1
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
 ----------------------------------------------------------------
-Thu Feb 05 17:37:56 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance a1600b01-019c-2cbb-23eb-00000081c1e0 
-on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3090000_27700692635288 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Thu Feb 05 22:35:17 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 38780c40-019c-2dcb-0a81-00000089f358 
+on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3170000_45492670517219 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
 Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
 java.vendor=Oracle Corporation
 java.runtime.version=15.0.1+9-18
@@ -246,9 +272,9 @@ os.version=6.1
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
 ----------------------------------------------------------------
-Thu Feb 05 17:37:58 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 5b0c0ba0-019c-2cbb-23eb-00000081c1e0 
-on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3100000_27703134525377 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Thu Feb 05 22:35:19 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 13ac4cdf-019c-2dcb-0a81-00000089f358 
+on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3180000_45494565839616 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
 Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
 java.vendor=Oracle Corporation
 java.runtime.version=15.0.1+9-18
@@ -259,100 +285,9 @@ os.version=6.1
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
 ----------------------------------------------------------------
-Thu Feb 05 17:38:01 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 1d684c3f-019c-2cbb-23eb-00000081c1e0 
-on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3110000_27706291977551 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
-Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
-java.vendor=Oracle Corporation
-java.runtime.version=15.0.1+9-18
-user.dir=C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology
-os.name=Windows 7
-os.arch=amd64
-os.version=6.1
-derby.system.home=null
-Database Class Loader started - derby.database.classpath=''
-----------------------------------------------------------------
-Thu Feb 05 17:38:06 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance d874ccde-019c-2cbb-23eb-00000081c1e0 
-on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3120000_27710626038875 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
-Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
-java.vendor=Oracle Corporation
-java.runtime.version=15.0.1+9-18
-user.dir=C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology
-os.name=Windows 7
-os.arch=amd64
-os.version=6.1
-derby.system.home=null
-Database Class Loader started - derby.database.classpath=''
-----------------------------------------------------------------
-Thu Feb 05 17:38:09 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 7c318d7d-019c-2cbb-23eb-00000081c1e0 
-on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3130000_27714327514330 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
-Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
-java.vendor=Oracle Corporation
-java.runtime.version=15.0.1+9-18
-user.dir=C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology
-os.name=Windows 7
-os.arch=amd64
-os.version=6.1
-derby.system.home=null
-Database Class Loader started - derby.database.classpath=''
-----------------------------------------------------------------
-Thu Feb 05 17:38:12 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance f89e8e1c-019c-2cbb-23eb-00000081c1e0 
-on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3140000_27716885946500 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
-Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
-java.vendor=Oracle Corporation
-java.runtime.version=15.0.1+9-18
-user.dir=C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology
-os.name=Windows 7
-os.arch=amd64
-os.version=6.1
-derby.system.home=null
-Database Class Loader started - derby.database.classpath=''
-----------------------------------------------------------------
-Thu Feb 05 17:38:19 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 3dbbcebb-019c-2cbb-23eb-00000081c1e0 
-on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3160000_27723667674359 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
-Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
-java.vendor=Oracle Corporation
-java.runtime.version=15.0.1+9-18
-user.dir=C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology
-os.name=Windows 7
-os.arch=amd64
-os.version=6.1
-derby.system.home=null
-Database Class Loader started - derby.database.classpath=''
-----------------------------------------------------------------
-Thu Feb 05 17:38:23 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 3b894f5a-019c-2cbb-23eb-00000081c1e0 
-on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3170000_27727871294993 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
-Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
-java.vendor=Oracle Corporation
-java.runtime.version=15.0.1+9-18
-user.dir=C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology
-os.name=Windows 7
-os.arch=amd64
-os.version=6.1
-derby.system.home=null
-Database Class Loader started - derby.database.classpath=''
-----------------------------------------------------------------
-Thu Feb 05 17:38:26 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance e2070ff9-019c-2cbb-23eb-00000081c1e0 
-on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3180000_27730812697589 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
-Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
-java.vendor=Oracle Corporation
-java.runtime.version=15.0.1+9-18
-user.dir=C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology
-os.name=Windows 7
-os.arch=amd64
-os.version=6.1
-derby.system.home=null
-Database Class Loader started - derby.database.classpath=''
-----------------------------------------------------------------
-Thu Feb 05 17:38:31 AEST 2026:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance 21351098-019c-2cbb-23eb-00000081c1e0 
-on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3190000_27735600912096 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
+Thu Feb 05 22:35:21 AEST 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance e790cd7e-019c-2dcb-0a81-00000089f358 
+on database directory memory:C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Radiology\RADDB_3190000_45496116170969 with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@443b7951 
 Loaded from file:/C:/DevShare/BTSN_R001/BTSN/btsn.common/lib/derby.jar
 java.vendor=Oracle Corporation
 java.runtime.version=15.0.1+9-18

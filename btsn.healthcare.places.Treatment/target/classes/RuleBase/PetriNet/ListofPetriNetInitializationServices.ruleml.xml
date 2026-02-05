@@ -1,0 +1,51 @@
+
+<!-- ================================================================ -->
+<!-- PERFORMANCE COLLECTION SERVICES                                  -->
+<!-- ================================================================ -->
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P1_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4300</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P2_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4301</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P3_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4302</Ind>
+</Atom>
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P4_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4303</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P5_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4304</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P6_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4305</Ind>
+</Atom>

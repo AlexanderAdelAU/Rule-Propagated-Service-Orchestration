@@ -3,3 +3,319 @@ INFO ServiceThread-Triage_CollectorService-12200 org.btsn.handlers.ServiceThread
 ERROR ServiceThread-Triage_CollectorService-12200 org.btsn.handlers.ServiceThread - monitorIncomingEvents: false
 DEBUG ServiceThread-Triage_CollectorService-12200 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Cleaned up join 3000000
 DEBUG ServiceThread-Triage_CollectorService-12200 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Service Triage_CollectorService sequence ID: 3000000 complete.
+INFO main org.btsn.handlers.ServiceLoader - === Starting Rule-Driven ServiceLoader ===
+INFO main org.btsn.handlers.ServiceLoader - === ServiceLoader Configuration ===
+INFO main org.btsn.handlers.ServiceLoader -   Version: v001
+INFO main org.btsn.handlers.ServiceLoader -   Service Filter: NONE (loading ALL services)
+INFO main org.btsn.handlers.ServiceLoader - Using build version: v001
+INFO main org.btsn.handlers.ServiceLoader - Created shutdown control file: C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Triage\all_services_v001.running
+INFO main org.btsn.handlers.ServiceLoader - DELETE this file to trigger graceful shutdown
+WARN main org.btsn.handlers.ServiceLoader - Could not start shutdown listener: Address already in use: bind
+INFO main org.btsn.handlers.ServiceLoader - === Building rule base with version v001 ===
+INFO main org.btsn.handlers.ServiceLoader - Registered version v001 as valid
+INFO main org.btsn.handlers.ServiceLoader - === Checking for remote deployment mode ===
+INFO main org.btsn.handlers.ServiceLoader - === Auto-detecting deployment mode from facts ===
+INFO main org.btsn.handlers.ServiceLoader - This machine's primary IP: 192.168.1.152
+INFO main org.btsn.handlers.ServiceLoader - All IPs for this machine: [fe80:0:0:0:0:100:7f:fffe%net5, fe80:0:0:0:0:5efe:c0a8:198%net7, fe80:0:0:0:4478:23a2:44e3:e737%eth5, 0:0:0:0:0:0:0:1, 192.168.1.152, 127.0.0.1]
+INFO main org.btsn.handlers.ServiceLoader - *** FOUND: Channel ip0 maps to this machine at 192.168.1.152 ***
+INFO main org.btsn.handlers.ServiceLoader - Checking for services using channel: ip0
+INFO main org.btsn.handlers.ServiceLoader - Found 3 activeService entries using ip0
+INFO main org.btsn.handlers.ServiceLoader - Found 3 activeService entries using ip0
+INFO main org.btsn.handlers.ServiceLoader - *** REMOTE MODE AUTO-ENABLED ***
+INFO main org.btsn.handlers.ServiceLoader - *** This host (192.168.1.152) is configured for remote services ***
+INFO main org.btsn.handlers.ServiceLoader - *** Channel ip0 maps to this machine ***
+DEBUG main org.btsn.handlers.ServiceLoader - ServiceLoader: Looking in directory: C:\DevShare\BTSN_R001\BTSN\btsn.healthcare.places.Triage/ServiceLoaderQueries for rulebase
+INFO main org.btsn.handlers.ServiceLoader - LOADING service: TriageService
+INFO main org.btsn.handlers.ServiceLoader - === DETECTED SERVICELIST QUERY FOR: TriageService ===
+INFO main org.btsn.handlers.ServiceLoader - Found operation: TriageService.processTriageAssessment on ip0:2100
+INFO main org.btsn.handlers.ServiceLoader - Creating ServiceThreads for 1 operations
+INFO main org.btsn.handlers.ServiceLoader - Setting up TriageService.processTriageAssessment -> EventReactor:12100, RuleHandler:22100
+INFO RuleHandler-TriageService-processTriageAssessment org.btsn.handlers.UDPLoadRuleHandlerThread - Starting UDP RuleHandler for service: TriageService, operation: processTriageAssessment, channel: ip0, port: 22100, listening on: all interfaces
+ERROR RuleHandler-TriageService-processTriageAssessment org.btsn.handlers.UDPLoadRuleHandlerThread - Failed to create UDP RuleHandler for TriageService:processTriageAssessment
+java.io.IOException: Failed to create UDP socket for port: 22100. Error: Address already in use: bind
+	at org.btsn.handlers.RuleHandler.<init>(RuleHandler.java:78)
+	at org.btsn.handlers.UDPLoadRuleHandlerThread.run(ServiceLoader.java:814)
+	at java.base/java.lang.Thread.run(Thread.java:832)
+Caused by: java.net.BindException: Address already in use: bind
+	at java.base/sun.nio.ch.Net.bind0(Native Method)
+	at java.base/sun.nio.ch.Net.bind(Net.java:550)
+	at java.base/sun.nio.ch.DatagramChannelImpl.bindInternal(DatagramChannelImpl.java:1189)
+	at java.base/sun.nio.ch.DatagramChannelImpl.bind(DatagramChannelImpl.java:1160)
+	at java.base/sun.nio.ch.DatagramSocketAdaptor.bind(DatagramSocketAdaptor.java:107)
+	at java.base/java.net.DatagramSocket.createDelegate(DatagramSocket.java:1131)
+	at java.base/java.net.DatagramSocket.<init>(DatagramSocket.java:197)
+	at java.base/java.net.DatagramSocket.<init>(DatagramSocket.java:256)
+	at org.btsn.handlers.RuleHandler.<init>(RuleHandler.java:50)
+	... 2 more
+INFO main org.btsn.handlers.ServiceLoader - Successfully created ServiceThread for TriageService.processTriageAssessment
+INFO ServiceThread-TriageService-processTriageAssessment org.btsn.handlers.UDPServiceThread - Starting REMOTE UDP ServiceThread for TriageService:processTriageAssessment on port: 12100
+INFO main org.btsn.handlers.ServiceLoader - LOADING service: Triage_CollectorService
+INFO main org.btsn.handlers.ServiceLoader - === DETECTED SERVICELIST QUERY FOR: Triage_CollectorService ===
+INFO main org.btsn.handlers.ServiceLoader - Found operation: Triage_CollectorService.collectAllData on ip0:2200
+INFO main org.btsn.handlers.ServiceLoader - Creating ServiceThreads for 1 operations
+INFO main org.btsn.handlers.ServiceLoader - Setting up Triage_CollectorService.collectAllData -> EventReactor:12200, RuleHandler:22200
+INFO main org.btsn.handlers.ServiceLoader - Successfully created ServiceThread for Triage_CollectorService.collectAllData
+INFO main org.btsn.handlers.ServiceLoader - LOADING service: Triage_InitializationService
+INFO main org.btsn.handlers.ServiceLoader - === DETECTED SERVICELIST QUERY FOR: Triage_InitializationService ===
+INFO ServiceThread-Triage_CollectorService-collectAllData org.btsn.handlers.UDPServiceThread - Starting REMOTE UDP ServiceThread for Triage_CollectorService:collectAllData on port: 12200
+INFO RuleHandler-Triage_CollectorService-collectAllData org.btsn.handlers.UDPLoadRuleHandlerThread - Starting UDP RuleHandler for service: Triage_CollectorService, operation: collectAllData, channel: ip0, port: 22200, listening on: all interfaces
+ERROR RuleHandler-Triage_CollectorService-collectAllData org.btsn.handlers.UDPLoadRuleHandlerThread - Failed to create UDP RuleHandler for Triage_CollectorService:collectAllData
+java.io.IOException: Failed to create UDP socket for port: 22200. Error: Address already in use: bind
+	at org.btsn.handlers.RuleHandler.<init>(RuleHandler.java:78)
+	at org.btsn.handlers.UDPLoadRuleHandlerThread.run(ServiceLoader.java:814)
+	at java.base/java.lang.Thread.run(Thread.java:832)
+Caused by: java.net.BindException: Address already in use: bind
+	at java.base/sun.nio.ch.Net.bind0(Native Method)
+	at java.base/sun.nio.ch.Net.bind(Net.java:550)
+	at java.base/sun.nio.ch.DatagramChannelImpl.bindInternal(DatagramChannelImpl.java:1189)
+	at java.base/sun.nio.ch.DatagramChannelImpl.bind(DatagramChannelImpl.java:1160)
+	at java.base/sun.nio.ch.DatagramSocketAdaptor.bind(DatagramSocketAdaptor.java:107)
+	at java.base/java.net.DatagramSocket.createDelegate(DatagramSocket.java:1131)
+	at java.base/java.net.DatagramSocket.<init>(DatagramSocket.java:197)
+	at java.base/java.net.DatagramSocket.<init>(DatagramSocket.java:256)
+	at org.btsn.handlers.RuleHandler.<init>(RuleHandler.java:50)
+	... 2 more
+INFO main org.btsn.handlers.ServiceLoader - Found operation: Triage_InitializationService.purgeAndInitialize on ip0:2300
+INFO main org.btsn.handlers.ServiceLoader - Creating ServiceThreads for 1 operations
+INFO main org.btsn.handlers.ServiceLoader - Setting up Triage_InitializationService.purgeAndInitialize -> EventReactor:12300, RuleHandler:22300
+INFO main org.btsn.handlers.ServiceLoader - Successfully created ServiceThread for Triage_InitializationService.purgeAndInitialize
+INFO main org.btsn.handlers.ServiceLoader - === ServiceLoader Startup Complete ===
+INFO main org.btsn.handlers.ServiceLoader - Version: v001
+INFO main org.btsn.handlers.ServiceLoader - Mode: REMOTE on 192.168.1.152
+INFO main org.btsn.handlers.ServiceLoader - Services loaded: 3
+INFO main org.btsn.handlers.ServiceLoader - Services skipped: 0
+INFO main org.btsn.handlers.ServiceLoader - === Shutdown Options ===
+INFO main org.btsn.handlers.ServiceLoader -   1. Delete file: all_services_v001.running
+INFO main org.btsn.handlers.ServiceLoader -   2. Send 'SHUTDOWN' to UDP port: 39001
+INFO main org.btsn.handlers.ServiceLoader -   3. Kill the process
+INFO ServiceThread-Triage_InitializationService-purgeAndInitialize org.btsn.handlers.UDPServiceThread - Starting REMOTE UDP ServiceThread for Triage_InitializationService:purgeAndInitialize on port: 12300
+INFO RuleHandler-Triage_InitializationService-purgeAndInitialize org.btsn.handlers.UDPLoadRuleHandlerThread - Starting UDP RuleHandler for service: Triage_InitializationService, operation: purgeAndInitialize, channel: ip0, port: 22300, listening on: all interfaces
+ERROR RuleHandler-Triage_InitializationService-purgeAndInitialize org.btsn.handlers.UDPLoadRuleHandlerThread - Failed to create UDP RuleHandler for Triage_InitializationService:purgeAndInitialize
+java.io.IOException: Failed to create UDP socket for port: 22300. Error: Address already in use: bind
+	at org.btsn.handlers.RuleHandler.<init>(RuleHandler.java:78)
+	at org.btsn.handlers.UDPLoadRuleHandlerThread.run(ServiceLoader.java:814)
+	at java.base/java.lang.Thread.run(Thread.java:832)
+Caused by: java.net.BindException: Address already in use: bind
+	at java.base/sun.nio.ch.Net.bind0(Native Method)
+	at java.base/sun.nio.ch.Net.bind(Net.java:550)
+	at java.base/sun.nio.ch.DatagramChannelImpl.bindInternal(DatagramChannelImpl.java:1189)
+	at java.base/sun.nio.ch.DatagramChannelImpl.bind(DatagramChannelImpl.java:1160)
+	at java.base/sun.nio.ch.DatagramSocketAdaptor.bind(DatagramSocketAdaptor.java:107)
+	at java.base/java.net.DatagramSocket.createDelegate(DatagramSocket.java:1131)
+	at java.base/java.net.DatagramSocket.<init>(DatagramSocket.java:197)
+	at java.base/java.net.DatagramSocket.<init>(DatagramSocket.java:256)
+	at org.btsn.handlers.RuleHandler.<init>(RuleHandler.java:50)
+	... 2 more
+INFO ServiceThread-Triage_CollectorService-collectAllData org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Derby Embedded Driver registered successfully.
+INFO ServiceThread-TriageService-processTriageAssessment org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Derby Embedded Driver registered successfully.
+INFO ServiceThread-Triage_InitializationService-purgeAndInitialize org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Derby Embedded Driver registered successfully.
+INFO ServiceThread-TriageService-processTriageAssessment org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Derby Embedded Driver registered successfully.
+INFO ServiceThread-TriageService-processTriageAssessment org.btsn.handlers.PetriNetInstrumentationHelper - === PETRI NET INSTRUMENTATION INITIALIZED ===
+INFO ServiceThread-TriageService-processTriageAssessment org.btsn.handlers.PetriNetInstrumentationHelper - Service: ip0:12100
+INFO ServiceThread-TriageService-processTriageAssessment org.btsn.handlers.PetriNetInstrumentationHelper - Recording: Transitions=true, Genealogy=true, Joins=true
+INFO ServiceThread-TriageService-processTriageAssessment org.btsn.handlers.ServiceThread - ORCHESTRATOR: Petri Net instrumentation ENABLED (full mode)
+INFO ServiceThread-Triage_InitializationService-purgeAndInitialize org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Derby Embedded Driver registered successfully.
+INFO ServiceThread-Triage_InitializationService-purgeAndInitialize org.btsn.handlers.PetriNetInstrumentationHelper - === PETRI NET INSTRUMENTATION INITIALIZED ===
+INFO ServiceThread-Triage_InitializationService-purgeAndInitialize org.btsn.handlers.PetriNetInstrumentationHelper - Service: ip0:12300
+INFO ServiceThread-Triage_InitializationService-purgeAndInitialize org.btsn.handlers.PetriNetInstrumentationHelper - Recording: Transitions=true, Genealogy=true, Joins=true
+INFO ServiceThread-Triage_InitializationService-purgeAndInitialize org.btsn.handlers.ServiceThread - ORCHESTRATOR: Petri Net instrumentation ENABLED (full mode)
+INFO ServiceThread-Triage_InitializationService-purgeAndInitialize org.btsn.handlers.ServiceThread - Join processing strategy: OPTIMIZED (any complete join)
+INFO ServiceThread-TriageService-processTriageAssessment org.btsn.handlers.ServiceThread - Join processing strategy: OPTIMIZED (any complete join)
+INFO ServiceThread-Triage_InitializationService-purgeAndInitialize org.btsn.handlers.ServiceThread - Starting EventReactor for channel: ip0, port: 12300
+INFO ServiceThread-TriageService-processTriageAssessment org.btsn.handlers.ServiceThread - Starting EventReactor for channel: ip0, port: 12100
+INFO ServiceThread-Triage_CollectorService-collectAllData org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Derby Embedded Driver registered successfully.
+INFO ServiceThread-Triage_CollectorService-collectAllData org.btsn.handlers.PetriNetInstrumentationHelper - === PETRI NET INSTRUMENTATION INITIALIZED ===
+INFO ServiceThread-Triage_CollectorService-collectAllData org.btsn.handlers.PetriNetInstrumentationHelper - Service: ip0:12200
+INFO ServiceThread-Triage_CollectorService-collectAllData org.btsn.handlers.PetriNetInstrumentationHelper - Recording: Transitions=true, Genealogy=true, Joins=true
+INFO ServiceThread-Triage_CollectorService-collectAllData org.btsn.handlers.ServiceThread - ORCHESTRATOR: Petri Net instrumentation ENABLED (full mode)
+WARN ServiceThread-Triage_InitializationService-purgeAndInitialize org.btsn.handlers.ServiceThread - Attempt 1/3 failed to start EventReactor: Failed to initialize EventReactor UDP socket
+INFO ServiceThread-Triage_CollectorService-collectAllData org.btsn.handlers.ServiceThread - Join processing strategy: OPTIMIZED (any complete join)
+WARN ServiceThread-TriageService-processTriageAssessment org.btsn.handlers.ServiceThread - Attempt 1/3 failed to start EventReactor: Failed to initialize EventReactor UDP socket
+INFO ServiceThread-Triage_CollectorService-collectAllData org.btsn.handlers.ServiceThread - Starting EventReactor for channel: ip0, port: 12200
+WARN ServiceThread-Triage_CollectorService-collectAllData org.btsn.handlers.ServiceThread - Attempt 1/3 failed to start EventReactor: Failed to initialize EventReactor UDP socket
+WARN ServiceThread-Triage_InitializationService-purgeAndInitialize org.btsn.handlers.ServiceThread - Attempt 2/3 failed to start EventReactor: Failed to initialize EventReactor UDP socket
+WARN ServiceThread-TriageService-processTriageAssessment org.btsn.handlers.ServiceThread - Attempt 2/3 failed to start EventReactor: Failed to initialize EventReactor UDP socket
+WARN ServiceThread-Triage_CollectorService-collectAllData org.btsn.handlers.ServiceThread - Attempt 2/3 failed to start EventReactor: Failed to initialize EventReactor UDP socket
+WARN ServiceThread-Triage_CollectorService-collectAllData org.btsn.handlers.ServiceThread - Attempt 3/3 failed to start EventReactor: Failed to initialize EventReactor UDP socket
+ERROR ServiceThread-Triage_CollectorService-collectAllData org.btsn.handlers.ServiceThread - All attempts failed to start EventReactor
+java.lang.Exception: Failed to initialize EventReactor UDP socket
+	at org.btsn.handlers.EventReactor.<init>(EventReactor.java:149)
+	at org.btsn.handlers.ServiceThread.<init>(ServiceThread.java:271)
+	at org.btsn.handlers.UDPServiceThread.run(ServiceLoader.java:867)
+	at java.base/java.lang.Thread.run(Thread.java:832)
+Caused by: java.net.BindException: Address already in use: bind
+	at java.base/sun.nio.ch.Net.bind0(Native Method)
+	at java.base/sun.nio.ch.Net.bind(Net.java:550)
+	at java.base/sun.nio.ch.DatagramChannelImpl.bindInternal(DatagramChannelImpl.java:1189)
+	at java.base/sun.nio.ch.DatagramChannelImpl.bind(DatagramChannelImpl.java:1160)
+	at java.base/sun.nio.ch.DatagramSocketAdaptor.bind(DatagramSocketAdaptor.java:107)
+	at java.base/java.net.DatagramSocket.createDelegate(DatagramSocket.java:1131)
+	at java.base/java.net.DatagramSocket.<init>(DatagramSocket.java:197)
+	at java.base/java.net.DatagramSocket.<init>(DatagramSocket.java:256)
+	at org.btsn.handlers.EventReactor.<init>(EventReactor.java:131)
+	... 3 more
+ERROR ServiceThread-Triage_CollectorService-collectAllData org.btsn.handlers.ServiceThread - Failed to initialize ServiceThread for channel: ip0
+java.lang.RuntimeException: Failed to initialize ServiceThread after 3 attempts
+	at org.btsn.handlers.ServiceThread.<init>(ServiceThread.java:282)
+	at org.btsn.handlers.UDPServiceThread.run(ServiceLoader.java:867)
+	at java.base/java.lang.Thread.run(Thread.java:832)
+Caused by: java.lang.Exception: Failed to initialize EventReactor UDP socket
+	at org.btsn.handlers.EventReactor.<init>(EventReactor.java:149)
+	at org.btsn.handlers.ServiceThread.<init>(ServiceThread.java:271)
+	... 2 more
+Caused by: java.net.BindException: Address already in use: bind
+	at java.base/sun.nio.ch.Net.bind0(Native Method)
+	at java.base/sun.nio.ch.Net.bind(Net.java:550)
+	at java.base/sun.nio.ch.DatagramChannelImpl.bindInternal(DatagramChannelImpl.java:1189)
+	at java.base/sun.nio.ch.DatagramChannelImpl.bind(DatagramChannelImpl.java:1160)
+	at java.base/sun.nio.ch.DatagramSocketAdaptor.bind(DatagramSocketAdaptor.java:107)
+	at java.base/java.net.DatagramSocket.createDelegate(DatagramSocket.java:1131)
+	at java.base/java.net.DatagramSocket.<init>(DatagramSocket.java:197)
+	at java.base/java.net.DatagramSocket.<init>(DatagramSocket.java:256)
+	at org.btsn.handlers.EventReactor.<init>(EventReactor.java:131)
+	... 3 more
+ERROR ServiceThread-Triage_CollectorService-collectAllData org.btsn.handlers.UDPServiceThread - Failed to create UDP ServiceThread for Triage_CollectorService
+java.lang.RuntimeException: ServiceThread initialization failed
+	at org.btsn.handlers.ServiceThread.<init>(ServiceThread.java:300)
+	at org.btsn.handlers.UDPServiceThread.run(ServiceLoader.java:867)
+	at java.base/java.lang.Thread.run(Thread.java:832)
+Caused by: java.lang.RuntimeException: Failed to initialize ServiceThread after 3 attempts
+	at org.btsn.handlers.ServiceThread.<init>(ServiceThread.java:282)
+	... 2 more
+Caused by: java.lang.Exception: Failed to initialize EventReactor UDP socket
+	at org.btsn.handlers.EventReactor.<init>(EventReactor.java:149)
+	at org.btsn.handlers.ServiceThread.<init>(ServiceThread.java:271)
+	... 2 more
+Caused by: java.net.BindException: Address already in use: bind
+	at java.base/sun.nio.ch.Net.bind0(Native Method)
+	at java.base/sun.nio.ch.Net.bind(Net.java:550)
+	at java.base/sun.nio.ch.DatagramChannelImpl.bindInternal(DatagramChannelImpl.java:1189)
+	at java.base/sun.nio.ch.DatagramChannelImpl.bind(DatagramChannelImpl.java:1160)
+	at java.base/sun.nio.ch.DatagramSocketAdaptor.bind(DatagramSocketAdaptor.java:107)
+	at java.base/java.net.DatagramSocket.createDelegate(DatagramSocket.java:1131)
+	at java.base/java.net.DatagramSocket.<init>(DatagramSocket.java:197)
+	at java.base/java.net.DatagramSocket.<init>(DatagramSocket.java:256)
+	at org.btsn.handlers.EventReactor.<init>(EventReactor.java:131)
+	... 3 more
+WARN ServiceThread-TriageService-processTriageAssessment org.btsn.handlers.ServiceThread - Attempt 3/3 failed to start EventReactor: Failed to initialize EventReactor UDP socket
+ERROR ServiceThread-TriageService-processTriageAssessment org.btsn.handlers.ServiceThread - All attempts failed to start EventReactor
+java.lang.Exception: Failed to initialize EventReactor UDP socket
+	at org.btsn.handlers.EventReactor.<init>(EventReactor.java:149)
+	at org.btsn.handlers.ServiceThread.<init>(ServiceThread.java:271)
+	at org.btsn.handlers.UDPServiceThread.run(ServiceLoader.java:867)
+	at java.base/java.lang.Thread.run(Thread.java:832)
+Caused by: java.net.BindException: Address already in use: bind
+	at java.base/sun.nio.ch.Net.bind0(Native Method)
+	at java.base/sun.nio.ch.Net.bind(Net.java:550)
+	at java.base/sun.nio.ch.DatagramChannelImpl.bindInternal(DatagramChannelImpl.java:1189)
+	at java.base/sun.nio.ch.DatagramChannelImpl.bind(DatagramChannelImpl.java:1160)
+	at java.base/sun.nio.ch.DatagramSocketAdaptor.bind(DatagramSocketAdaptor.java:107)
+	at java.base/java.net.DatagramSocket.createDelegate(DatagramSocket.java:1131)
+	at java.base/java.net.DatagramSocket.<init>(DatagramSocket.java:197)
+	at java.base/java.net.DatagramSocket.<init>(DatagramSocket.java:256)
+	at org.btsn.handlers.EventReactor.<init>(EventReactor.java:131)
+	... 3 more
+WARN ServiceThread-Triage_InitializationService-purgeAndInitialize org.btsn.handlers.ServiceThread - Attempt 3/3 failed to start EventReactor: Failed to initialize EventReactor UDP socket
+ERROR ServiceThread-TriageService-processTriageAssessment org.btsn.handlers.ServiceThread - Failed to initialize ServiceThread for channel: ip0
+java.lang.RuntimeException: Failed to initialize ServiceThread after 3 attempts
+	at org.btsn.handlers.ServiceThread.<init>(ServiceThread.java:282)
+	at org.btsn.handlers.UDPServiceThread.run(ServiceLoader.java:867)
+	at java.base/java.lang.Thread.run(Thread.java:832)
+Caused by: java.lang.Exception: Failed to initialize EventReactor UDP socket
+	at org.btsn.handlers.EventReactor.<init>(EventReactor.java:149)
+	at org.btsn.handlers.ServiceThread.<init>(ServiceThread.java:271)
+	... 2 more
+Caused by: java.net.BindException: Address already in use: bind
+	at java.base/sun.nio.ch.Net.bind0(Native Method)
+	at java.base/sun.nio.ch.Net.bind(Net.java:550)
+	at java.base/sun.nio.ch.DatagramChannelImpl.bindInternal(DatagramChannelImpl.java:1189)
+	at java.base/sun.nio.ch.DatagramChannelImpl.bind(DatagramChannelImpl.java:1160)
+	at java.base/sun.nio.ch.DatagramSocketAdaptor.bind(DatagramSocketAdaptor.java:107)
+	at java.base/java.net.DatagramSocket.createDelegate(DatagramSocket.java:1131)
+	at java.base/java.net.DatagramSocket.<init>(DatagramSocket.java:197)
+	at java.base/java.net.DatagramSocket.<init>(DatagramSocket.java:256)
+	at org.btsn.handlers.EventReactor.<init>(EventReactor.java:131)
+	... 3 more
+ERROR ServiceThread-Triage_InitializationService-purgeAndInitialize org.btsn.handlers.ServiceThread - All attempts failed to start EventReactor
+java.lang.Exception: Failed to initialize EventReactor UDP socket
+	at org.btsn.handlers.EventReactor.<init>(EventReactor.java:149)
+	at org.btsn.handlers.ServiceThread.<init>(ServiceThread.java:271)
+	at org.btsn.handlers.UDPServiceThread.run(ServiceLoader.java:867)
+	at java.base/java.lang.Thread.run(Thread.java:832)
+Caused by: java.net.BindException: Address already in use: bind
+	at java.base/sun.nio.ch.Net.bind0(Native Method)
+	at java.base/sun.nio.ch.Net.bind(Net.java:550)
+	at java.base/sun.nio.ch.DatagramChannelImpl.bindInternal(DatagramChannelImpl.java:1189)
+	at java.base/sun.nio.ch.DatagramChannelImpl.bind(DatagramChannelImpl.java:1160)
+	at java.base/sun.nio.ch.DatagramSocketAdaptor.bind(DatagramSocketAdaptor.java:107)
+	at java.base/java.net.DatagramSocket.createDelegate(DatagramSocket.java:1131)
+	at java.base/java.net.DatagramSocket.<init>(DatagramSocket.java:197)
+	at java.base/java.net.DatagramSocket.<init>(DatagramSocket.java:256)
+	at org.btsn.handlers.EventReactor.<init>(EventReactor.java:131)
+	... 3 more
+ERROR ServiceThread-Triage_InitializationService-purgeAndInitialize org.btsn.handlers.ServiceThread - Failed to initialize ServiceThread for channel: ip0
+java.lang.RuntimeException: Failed to initialize ServiceThread after 3 attempts
+	at org.btsn.handlers.ServiceThread.<init>(ServiceThread.java:282)
+	at org.btsn.handlers.UDPServiceThread.run(ServiceLoader.java:867)
+	at java.base/java.lang.Thread.run(Thread.java:832)
+Caused by: java.lang.Exception: Failed to initialize EventReactor UDP socket
+	at org.btsn.handlers.EventReactor.<init>(EventReactor.java:149)
+	at org.btsn.handlers.ServiceThread.<init>(ServiceThread.java:271)
+	... 2 more
+Caused by: java.net.BindException: Address already in use: bind
+	at java.base/sun.nio.ch.Net.bind0(Native Method)
+	at java.base/sun.nio.ch.Net.bind(Net.java:550)
+	at java.base/sun.nio.ch.DatagramChannelImpl.bindInternal(DatagramChannelImpl.java:1189)
+	at java.base/sun.nio.ch.DatagramChannelImpl.bind(DatagramChannelImpl.java:1160)
+	at java.base/sun.nio.ch.DatagramSocketAdaptor.bind(DatagramSocketAdaptor.java:107)
+	at java.base/java.net.DatagramSocket.createDelegate(DatagramSocket.java:1131)
+	at java.base/java.net.DatagramSocket.<init>(DatagramSocket.java:197)
+	at java.base/java.net.DatagramSocket.<init>(DatagramSocket.java:256)
+	at org.btsn.handlers.EventReactor.<init>(EventReactor.java:131)
+	... 3 more
+ERROR ServiceThread-Triage_InitializationService-purgeAndInitialize org.btsn.handlers.UDPServiceThread - Failed to create UDP ServiceThread for Triage_InitializationService
+java.lang.RuntimeException: ServiceThread initialization failed
+	at org.btsn.handlers.ServiceThread.<init>(ServiceThread.java:300)
+	at org.btsn.handlers.UDPServiceThread.run(ServiceLoader.java:867)
+	at java.base/java.lang.Thread.run(Thread.java:832)
+Caused by: java.lang.RuntimeException: Failed to initialize ServiceThread after 3 attempts
+	at org.btsn.handlers.ServiceThread.<init>(ServiceThread.java:282)
+	... 2 more
+Caused by: java.lang.Exception: Failed to initialize EventReactor UDP socket
+	at org.btsn.handlers.EventReactor.<init>(EventReactor.java:149)
+	at org.btsn.handlers.ServiceThread.<init>(ServiceThread.java:271)
+	... 2 more
+Caused by: java.net.BindException: Address already in use: bind
+	at java.base/sun.nio.ch.Net.bind0(Native Method)
+	at java.base/sun.nio.ch.Net.bind(Net.java:550)
+	at java.base/sun.nio.ch.DatagramChannelImpl.bindInternal(DatagramChannelImpl.java:1189)
+	at java.base/sun.nio.ch.DatagramChannelImpl.bind(DatagramChannelImpl.java:1160)
+	at java.base/sun.nio.ch.DatagramSocketAdaptor.bind(DatagramSocketAdaptor.java:107)
+	at java.base/java.net.DatagramSocket.createDelegate(DatagramSocket.java:1131)
+	at java.base/java.net.DatagramSocket.<init>(DatagramSocket.java:197)
+	at java.base/java.net.DatagramSocket.<init>(DatagramSocket.java:256)
+	at org.btsn.handlers.EventReactor.<init>(EventReactor.java:131)
+	... 3 more
+ERROR ServiceThread-TriageService-processTriageAssessment org.btsn.handlers.UDPServiceThread - Failed to create UDP ServiceThread for TriageService
+java.lang.RuntimeException: ServiceThread initialization failed
+	at org.btsn.handlers.ServiceThread.<init>(ServiceThread.java:300)
+	at org.btsn.handlers.UDPServiceThread.run(ServiceLoader.java:867)
+	at java.base/java.lang.Thread.run(Thread.java:832)
+Caused by: java.lang.RuntimeException: Failed to initialize ServiceThread after 3 attempts
+	at org.btsn.handlers.ServiceThread.<init>(ServiceThread.java:282)
+	... 2 more
+Caused by: java.lang.Exception: Failed to initialize EventReactor UDP socket
+	at org.btsn.handlers.EventReactor.<init>(EventReactor.java:149)
+	at org.btsn.handlers.ServiceThread.<init>(ServiceThread.java:271)
+	... 2 more
+Caused by: java.net.BindException: Address already in use: bind
+	at java.base/sun.nio.ch.Net.bind0(Native Method)
+	at java.base/sun.nio.ch.Net.bind(Net.java:550)
+	at java.base/sun.nio.ch.DatagramChannelImpl.bindInternal(DatagramChannelImpl.java:1189)
+	at java.base/sun.nio.ch.DatagramChannelImpl.bind(DatagramChannelImpl.java:1160)
+	at java.base/sun.nio.ch.DatagramSocketAdaptor.bind(DatagramSocketAdaptor.java:107)
+	at java.base/java.net.DatagramSocket.createDelegate(DatagramSocket.java:1131)
+	at java.base/java.net.DatagramSocket.<init>(DatagramSocket.java:197)
+	at java.base/java.net.DatagramSocket.<init>(DatagramSocket.java:256)
+	at org.btsn.handlers.EventReactor.<init>(EventReactor.java:131)
+	... 3 more

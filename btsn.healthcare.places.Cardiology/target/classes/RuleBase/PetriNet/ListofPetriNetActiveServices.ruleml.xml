@@ -1,0 +1,50 @@
+<!-- List of service facts -->
+<!-- ActiveServices.ruleml.xml - loaded last or checked first -->
+
+<!-- ================================================================ -->
+<!-- WORKFLOW PLACES                                                -->
+<!-- ================================================================ -->
+
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>P1_Place</Ind>              <!-- Service Name -->
+    <Ind>processToken</Ind>           <!-- Method -->
+    <Ind>ip0</Ind>
+    <Ind>4001</Ind>
+</Atom>
+<!-- P2 Place -->
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>P2_Place</Ind>              <!-- Service Name -->
+    <Ind>processToken</Ind>           <!-- Method -->
+    <Ind>ip0</Ind>
+    <Ind>4002</Ind>
+</Atom><!-- P3 Place -->
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>P3_Place</Ind>              <!-- Service Name -->
+    <Ind>processToken</Ind>           <!-- Method -->
+    <Ind>ip0</Ind>
+    <Ind>4003</Ind>
+</Atom>
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>P4_Place</Ind>              <!-- Service Name -->
+    <Ind>processToken</Ind>           <!-- Method -->
+    <Ind>ip0</Ind>
+    <Ind>4004</Ind>
+</Atom>
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>P5_Place</Ind>              <!-- Service Name -->
+    <Ind>processToken</Ind>           <!-- Method -->
+    <Ind>ip0</Ind>
+    <Ind>4005</Ind>
+</Atom>
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>P6_Place</Ind>              <!-- Service Name -->
+    <Ind>processToken</Ind>           <!-- Method -->
+    <Ind>ip0</Ind>
+    <Ind>4006</Ind>
+</Atom>

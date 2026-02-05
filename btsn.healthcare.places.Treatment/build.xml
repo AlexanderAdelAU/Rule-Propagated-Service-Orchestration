@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="btsn.healthcare.places.Triage" default="release" basedir=".">
-
-	<!-- Define a custom copy task with failonerror set to true -->
-	<presetdef name="copy">
-		<copy failonerror="true" />
-	</presetdef>
+<project name="btsn.healthcare.places.Treatment" default="release" basedir=".">
 
 	<!-- Project metadata -->
-	<property name="project.artifactId" value="btsn.healthcare.places.Triage" />
+	<property name="project.artifactId" value="btsn.places.Treatment" />
 	<property name="project.version" value="1.0" />
-	<property name="main-class" value="org.btsn.healthcare.handlers.ServiceLoader" />
+	<property name="main-class" value="org.btsn.handlers.ServiceLoader" />
 
 	<!-- Directory properties -->
 	<property name="src.dir" value="src" />
@@ -20,20 +15,20 @@
 	<property name="doc.dir" value="doc" />
 
 	<!-- Common module properties -->
-	<property name="common.root" value="../btsn.healthcare.common" />
+	<property name="common.root" value="../btsn.common" />
 	<property name="common.src.dir" value="${common.root}/src" />
 	<property name="common.lib.dir" value="${common.root}/lib" />
 	<property name="common.bin.dir" value="${common.root}/bin" />
 	
 	<!-- Specific common packages to include -->
-	<property name="common.base.dir" value="${common.root}/src/org/btsn/healthcare/common/base" />
-	<property name="common.exceptions.dir" value="${common.root}/src/org/btsn/healthcare/common/exceptions" />
-	<property name="common.json.dir" value="${common.root}/src/org/btsn/healthcare/common/json" />
-	<property name="common.utils.dir" value="${common.root}/src/org/btsn/healthcare/common/utils" />
+	<property name="common.base.dir" value="${common.root}/src/org/btsn/base" />
+	<property name="common.exceptions.dir" value="${common.root}/src/org/btsn/exceptions" />
+	<property name="common.json.dir" value="${common.root}/src/org/btsn/json" />
+	<property name="common.utils.dir" value="${common.root}/src/org/btsn/utils" />
 
 	<!-- Service properties -->
 	<property name="service.root" value="." />
-	<property name="triageService.target.dir" value="../org.btsn.healthcare.places.Triage/target" />
+	<property name="treatmentService.target.dir" value="../org.btsn.healthcare.places.Treatment/target" />
 
 	<!-- Classpath for compilation -->
 	<path id="project.classpath">
@@ -60,7 +55,7 @@
 		<delete dir="${bin.dir}" />
 		<delete dir="${doc.dir}" />
 		<delete dir="${common.bin.dir}" failonerror="false" />
-		<delete dir="${triageService.target.dir}" failonerror="false" />
+		<delete dir="${treatmentService.target.dir}" failonerror="false" />
 		<delete>
 			<fileset dir="." includes="*.zip" />
 		</delete>
@@ -82,16 +77,16 @@
 		<fail unless="common.src.exists" message="Common source directory not found: ${common.src.dir}" />
 		
 		<!-- Check for specific common packages -->
-		<available file="${common.src.dir}/org/btsn/healthcare/common/base" type="dir" property="common.base.exists"/>
-		<available file="${common.src.dir}/org/btsn/healthcare/common/exceptions" type="dir" property="common.exceptions.exists"/>
-		<available file="${common.src.dir}/org/btsn/healthcare/common/json" type="dir" property="common.json.exists"/>
-		<available file="${common.src.dir}/org/btsn/healthcare/common/utils" type="dir" property="common.utils.exists"/>
+		<available file="${common.src.dir}/org/btsn/base" type="dir" property="common.base.exists"/>
+		<available file="${common.src.dir}/org/btsn/exceptions" type="dir" property="common.exceptions.exists"/>
+		<available file="${common.src.dir}/org/btsn/json" type="dir" property="common.json.exists"/>
+		<available file="${common.src.dir}/org/btsn/utils" type="dir" property="common.utils.exists"/>
 		
 		<!-- Check for RuleBase and ServiceAttributeBindings -->
 		<available file="${common.root}/RuleBase" type="dir" property="rulebase.exists"/>
 		<available file="${common.root}/ServiceAttributeBindings" type="dir" property="serviceattributes.exists"/>
 		<available file="${common.root}/serviceAttributeBindings" type="dir" property="serviceattributes.lowercase.exists"/>
-		<available file="${common.root}/serviceLoaderQueries" type="dir" property="serviceloaderqueries.exists"/>
+		<available file="ServiceLoaderQueries" type="dir" property="serviceloaderqueries.exists"/>
 		
 		<echo message="Common package status:" />
 		<echo message="  - base: ${common.base.exists}" />
@@ -116,8 +111,8 @@
 	    <!-- Compile BuildMasterServiceRuleBase once -->
 	    <javac srcdir="${common.src.dir}" 
 	           destdir="${classes.dir}"
-	           includes="org/btsn/healthcare/common/utils/BuildMasterServiceRuleBase.java,
-	                     org/btsn/healthcare/common/utils/OOjdrewAPI.java"
+	           includes="org/btsn/utils/BuildMasterServiceRuleBase.java,
+	                     org/btsn/utils/OOjdrewAPI.java"
 	           classpathref="project.classpath"
 	           includeantruntime="false"
 	           fork="true"
@@ -139,6 +134,9 @@
 	    <antcall target="build-single-ruleml">
 	        <param name="version" value="v004"/>
 	    </antcall>
+	    <antcall target="build-single-ruleml">
+	        <param name="version" value="v999"/>
+	    </antcall>
 	    
 	    <echo message="All Service.ruleml versions rebuilt" />
 	</target>
@@ -146,15 +144,15 @@
 	<!-- Helper target to build a single version -->
 	<target name="build-single-ruleml">
 	    <echo message="Building Service.ruleml for ${version}..." />
-	    <java classname="org.btsn.healthcare.common.utils.BuildMasterServiceRuleBase"
+	    <java classname="org.btsn.utils.BuildMasterServiceRuleBase"
 	          classpath="${classes.dir}:${common.lib.dir}/*"
 	          fork="true"
 	          failonerror="false">  <!-- false so it continues if one version fails -->
 	        <arg value="${version}"/>
-	        <arg value="TriageService"/>
+	        <arg value="TreatmentService"/>
 	    </java>
 	    <available file="${common.root}/RuleFolder.${version}/Service.ruleml" property="${version}.created"/>
-	    <echo message="  ${version}: ${${version}.created}" />
+	    <echo message="  ${version}: build complete" />
 	</target>
 
 		
@@ -170,20 +168,26 @@
 		<target name="compile" depends="init,rebuild-all-service-ruleml" description="Compile Java source files">
 			<echo message="Compiling with Java 15 settings..." />
 			<echo message="Including common packages:" />
-			<echo message="  - org.btsn.healthcare.common.base" />
-			<echo message="  - org.btsn.healthcare.common.exceptions" />
-			<echo message="  - org.btsn.healthcare.common.json" />
-			<echo message="  - org.btsn.healthcare.common.utils" />
+			<echo message="  - btsn.common.base" />
+			<echo message="  - btsn.common.constants" />
+			<echo message="  - btsn.common.exceptions" />
+			<echo message="  - btsn.common.json" />
+			<echo message="  - btsn.common.logger" />
+			<echo message="  - btsn.common.rulecontroller" />
+			<echo message="  - btsn.common.utils" />
 			
 			<javac destdir="${classes.dir}" debug="true" classpathref="project.classpath" includeantruntime="false" encoding="UTF-8" fork="true" source="15" target="15">
 				<src path="${src.dir}" />
 				<src path="${common.src.dir}" />
-				<include name="org/btsn/healthcare/common/base/**/*.java" />
-				<include name="org/btsn/healthcare/common/exceptions/**/*.java" />
-				<include name="org/btsn/healthcare/common/json/**/*.java" />
-				<include name="org/btsn/healthcare/common/utils/**/*.java" />
+				<include name="org/btsn/base/**/*.java" />
+				<include name="org/btsn/constants/**/*.java" />
+				<include name="org/btsn/exceptions/**/*.java" />
+				<include name="org/btsn/json/**/*.java" />
+				<include name="org/btsn/logger/**/*.java" />
+				<include name="org/btsn/rulecontroller/**/*.java" />
+				<include name="org/btsn/utils/**/*.java" />
 				<include name="**/*.java" />
-				<exclude name="**/ServiceLoader2.java" />
+				<exclude name="**/ServiceLoader.java" />
 				<compilerarg value="-Xlint:unchecked" />
 				<compilerarg value="-Xlint:deprecation" />
 			</javac>
@@ -199,10 +203,10 @@
 		<!-- Also copy any resources from common packages -->
 		<copy todir="${classes.dir}" failonerror="false">
 			<fileset dir="${common.src.dir}">
-				<include name="org/btsn/healthcare/common/**/*.properties" />
-				<include name="org/btsn/healthcare/common/**/*.xml" />
-				<include name="org/btsn/healthcare/common/**/*.json" />
-				<include name="org/btsn/healthcare/common/**/*.txt" />
+				<include name="org/btsn/**/*.properties" />
+				<include name="org/btsn/**/*.xml" />
+				<include name="org/btsn/**/*.json" />
+				<include name="org/btsn/**/*.txt" />
 				<exclude name="**/*.java" />
 			</fileset>
 		</copy>
@@ -234,17 +238,17 @@
 	<!-- Create release package with new structure -->
 	<target name="release" depends="jar" description="Create a deployable ZIP package">
 		<tstamp />
-		<property name="release.dir" value="triage-deployment" />
-		<property name="service.dir" value="${release.dir}/triage" />
+		<property name="release.dir" value="treatment-deployment" />
+		<property name="service.dir" value="${release.dir}/treatment" />
 
-		<echo message="Creating release package with parent-level btsn.healthcare.common..." />
+		<echo message="Creating release package with parent-level btsn.common..." />
 		<echo message="Java version: ${java.version}" />
 		
 		<!-- Create directory structure -->
 		<mkdir dir="${release.dir}" />
 		<mkdir dir="${service.dir}" />
 
-		<!-- Copy service-specific files to triage subdirectory -->
+		<!-- Copy service-specific files to treatment subdirectory -->
 		<copy todir="${service.dir}">
 			<fileset dir=".">
 				<!-- Include service-specific items -->
@@ -292,62 +296,58 @@
 			<fileset dir="${common.lib.dir}" includes="*.jar" />
 		</copy>
 
-		<!-- Copy btsn.healthcare.common to PARENT level (release.dir, not service.dir) -->
-		<mkdir dir="${release.dir}/btsn.healthcare.common" />
+		<!-- Copy btsn.common to PARENT level (release.dir, not service.dir) -->
+		<mkdir dir="${release.dir}/btsn.common" />
 		
 		<!-- Copy RuleBase -->
-		<copy todir="${release.dir}/btsn.healthcare.common/RuleBase" failonerror="false">
+		<copy todir="${release.dir}/btsn.common/RuleBase" failonerror="false">
 			<fileset dir="${common.root}/RuleBase" includes="**/*" />
 		</copy>
 		
-		<!-- Copy ServiceAttributeBindings -->
-		<copy todir="${release.dir}/btsn.healthcare.common/ServiceAttributeBindings" failonerror="false">
-			<fileset dir="${common.root}/ServiceAttributeBindings" includes="**/*" erroronmissingdir="false"/>
-		</copy>
-		<copy todir="${release.dir}/btsn.healthcare.common/serviceAttributeBindings" failonerror="false">
-			<fileset dir="${common.root}/serviceAttributeBindings" includes="**/*" erroronmissingdir="false"/>
-		</copy>
-		
-		<!-- Copy serviceLoaderQueries -->
-		<mkdir dir="${release.dir}/btsn.healthcare.common/serviceLoaderQueries" />
-		<copy todir="${release.dir}/btsn.healthcare.common/serviceLoaderQueries" failonerror="false">
-			<fileset dir="${common.root}/serviceLoaderQueries">
-				<include name="TriageServiceLoaderQuery.ruleml" />
-				<include name="loaderSettings.xml" />
+		<!-- Copy versioned RuleFolders -->
+		<copy todir="${release.dir}/btsn.common" failonerror="false">
+			<fileset dir="${common.root}">
+				<include name="RuleFolder.v*/**" />
 			</fileset>
 		</copy>
+		
+		<!-- Copy ServiceAttributeBindings -->
+		<copy todir="${release.dir}/btsn.common/ServiceAttributeBindings" failonerror="false">
+			<fileset dir="${common.root}/ServiceAttributeBindings" includes="**/*" erroronmissingdir="false"/>
+		</copy>
+
 
 		<!-- Also copy backward compatibility directories to service directory -->
 		<copy todir="${service.dir}/RuleBase" failonerror="false">
 			<fileset dir="${common.root}/RuleBase" includes="**/*" />
 		</copy>
+		<copy todir="${service.dir}" failonerror="false">
+			<fileset dir="${common.root}">
+				<include name="RuleFolder.v*/**" />
+			</fileset>
+		</copy>
 		<copy todir="${service.dir}/ServiceAttributeBindings" failonerror="false">
 			<fileset dir="${common.root}/ServiceAttributeBindings" includes="**/*" erroronmissingdir="false"/>
 		</copy>
-		<copy todir="${service.dir}/serviceAttributeBindings" failonerror="false">
-			<fileset dir="${common.root}/serviceAttributeBindings" includes="**/*" erroronmissingdir="false"/>
-		</copy>
-		<mkdir dir="${service.dir}/serviceLoaderQueries" />
-		<copy todir="${service.dir}/serviceLoaderQueries" failonerror="false">
-			<fileset dir="${common.root}/serviceLoaderQueries">
-				<include name="TriageServiceLoaderQuery.ruleml" />
-				<include name="loaderSettings.xml" />
-			</fileset>
-		</copy>
 		<mkdir dir="${service.dir}/ServiceLoaderQueries" />
 		<copy todir="${service.dir}/ServiceLoaderQueries" failonerror="false">
-			<fileset dir="${common.root}/serviceLoaderQueries">
-				<include name="TriageServiceLoaderQuery.ruleml" />
-				<include name="loaderSettings.xml" />
+			<fileset dir="ServiceLoaderQueries" erroronmissingdir="false">
+				<include name="**/*" />
 			</fileset>
 		</copy>
 
 		<!-- Create ROOT launch script that changes to service directory -->
 		<echo file="${release.dir}/launch.bat">@echo off
-echo Starting Triage Service...
+echo Starting Treatment Service...
 echo.
-cd triage
-java -cp "btsn.healthcare.places.Triage.jar;lib/*" org.btsn.healthcare.handlers.ServiceLoader %*
+if "%~1"=="" (
+    echo Usage: launch.bat -version &lt;version&gt; [-service &lt;serviceName&gt;]
+    echo Example: launch.bat -version v001
+    echo          launch.bat -version v001 -service TreatmentService
+    exit /b 1
+)
+cd treatment
+java -cp "${project.artifactId}.jar;lib/*" ${main-class} %*
 cd ..
 if errorlevel 1 (
     echo.
@@ -359,10 +359,16 @@ if errorlevel 1 (
 		<!-- Create Unix/Linux launch script at ROOT -->
 		<echo file="${release.dir}/launch.sh">#!/bin/bash
 
-echo "Starting Triage Service..."
+echo "Starting Treatment Service..."
 echo ""
-cd triage
-java -cp "btsn.healthcare.places.Triage.jar:lib/*" org.btsn.healthcare.handlers.ServiceLoader "$@"
+if [ $# -eq 0 ]; then
+    echo "Usage: ./launch.sh -version &lt;version&gt; [-service &lt;serviceName&gt;]"
+    echo "Example: ./launch.sh -version v001"
+    echo "         ./launch.sh -version v001 -service TreatmentService"
+    exit 1
+fi
+cd treatment
+java -cp "${project.artifactId}.jar:lib/*" ${main-class} "$@"
 cd ..
 if [ $? -ne 0 ]; then
     echo ""
@@ -382,8 +388,8 @@ fi
 		<echo message="Built with Java: ${java.version}" />
 		<echo message="" />
 		<echo message="ZIP Structure:" />
-		<echo message="  /btsn.healthcare.common/   (at parent level)" />
-		<echo message="  /triage/                    (service directory)" />
+		<echo message="  /btsn.common/   (at parent level)" />
+		<echo message="  /treatment/                    (service directory)" />
 		<echo message="  /launch.bat                 (at root level)" />
 		<echo message="" />
 		<echo message="Extract to any directory and run launch.bat from root" />
@@ -409,10 +415,10 @@ fi
 		<echo message="" />
 		
 		<echo message="Checking for required common packages..." />
-		<available file="${common.src.dir}/org/btsn/healthcare/common/base" type="dir" property="base.found"/>
-		<available file="${common.src.dir}/org/btsn/healthcare/common/exceptions" type="dir" property="exceptions.found"/>
-		<available file="${common.src.dir}/org/btsn/healthcare/common/json" type="dir" property="json.found"/>
-		<available file="${common.src.dir}/org/btsn/healthcare/common/utils" type="dir" property="utils.found"/>
+		<available file="${common.src.dir}/org/btsn/base" type="dir" property="base.found"/>
+		<available file="${common.src.dir}/org/btsn/exceptions" type="dir" property="exceptions.found"/>
+		<available file="${common.src.dir}/org/btsn/json" type="dir" property="json.found"/>
+		<available file="${common.src.dir}/org/btsn/utils" type="dir" property="utils.found"/>
 		
 		<echo message="Checking for RuleBase and Service directories..." />
 		<available file="${common.root}/RuleBase" type="dir" property="rulebase.found"/>
@@ -431,10 +437,10 @@ fi
 		
 		<echo message="" />
 		<echo message="Package status:" />
-		<echo message="  ✓ org.btsn.healthcare.common.base: ${base.found}" />
-		<echo message="  ✓ org.btsn.healthcare.common.exceptions: ${exceptions.found}" />
-		<echo message="  ✓ org.btsn.healthcare.common.json: ${json.found}" />
-		<echo message="  ✓ org.btsn.healthcare.common.utils: ${utils.found}" />
+		<echo message="  ✓ btsn.common.base: ${base.found}" />
+		<echo message="  ✓ btsn.common.exceptions: ${exceptions.found}" />
+		<echo message="  ✓ btsn.common.json: ${json.found}" />
+		<echo message="  ✓ btsn.utils: ${utils.found}" />
 		<echo message="" />
 		<echo message="Resource directories:" />
 		<echo message="  ✓ RuleBase: ${rulebase.found}" />

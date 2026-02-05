@@ -1,7 +1,17 @@
 <Assert>
 <Rulebase mapClosure="universal">
-<!-- Version No -->
+<!-- MASTER SERVICE RULE BASE -->
+<!-- Generated: Thu Feb 05 22:46:48 AEST 2026 -->
+<!-- Version: v003 -->
+<!-- Services: CardiologyService -->
+<!-- This is the SINGLE SOURCE OF TRUTH for service resolution -->
+<!-- Rule files loaded recursively from: C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase -->
+
+<!-- Version -->
 <Data><Atom><Rel>Version</Rel><Ind>v003</Ind></Atom></Data>
+
+
+<!-- ===== BEGIN: CoreRuleBase.ruleml.xml ===== -->
 <!-- Common Rules to all services -->
 <!-- 
 This is the rule determines the operational parameters associated with
@@ -153,387 +163,9 @@ This is the rule that governs the list of all services.
 		</And>
 	</if>
 </Implies>
-<!-- List of service facts -->
-<!-- ActiveServices.ruleml.xml - loaded last or checked first -->
+<!-- ===== END: CoreRuleBase.ruleml.xml ===== -->
 
-<!-- ================================================================ -->
-<!-- WORKFLOW SERVICES                                                -->
-<!-- ================================================================ -->
-
-<!-- Triage Service -->
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>TriageService</Ind>
-	<Ind>processTriageAssessment</Ind>
-	<Ind>ip0</Ind>
-	<Ind>2100</Ind>
-</Atom>
-
-<!-- Radiology Service -->
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>RadiologyService</Ind>
-	<Ind>processImagingRequest</Ind>
-	<Ind>ip0</Ind>
-	<Ind>2101</Ind>
-</Atom>
-
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>RadiologyService</Ind>
-	<Ind>federatedRadiologyRequest</Ind>
-	<Ind>ip0</Ind>
-	<Ind>2102</Ind>
-</Atom>
-
-<!-- Cardiology Service -->
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>CardiologyService</Ind>
-	<Ind>processCardiacAssessment</Ind>
-	<Ind>ip0</Ind>
-	<Ind>2103</Ind>
-</Atom>
-
-<!-- Diagnosis Service -->
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>DiagnosisService</Ind>
-	<Ind>processClinicalDecision</Ind>
-	<Ind>ip0</Ind>
-	<Ind>2104</Ind>
-</Atom>
-
-<!-- Laboratory Service -->
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>LaboratoryService</Ind>
-	<Ind>processLabRequest</Ind>
-	<Ind>ip0</Ind>
-	<Ind>2105</Ind>
-</Atom>
-
-<!-- Treatment Service -->
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>TreatmentService</Ind>
-	<Ind>executeTreatmentPlan</Ind>
-	<Ind>ip0</Ind>
-	<Ind>2106</Ind>
-</Atom>
-
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>TreatmentService</Ind>
-	<Ind>executeDirectTreatment</Ind>
-	<Ind>ip0</Ind>
-	<Ind>2107</Ind>
-</Atom>
-
-
-<!-- ================================================================ -->
-<!-- PERFORMANCE COLLECTION SERVICES                                  -->
-<!-- ================================================================ -->
-
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>Triage_CollectorService</Ind>
-	<Ind>collectAllData</Ind>
-	<Ind>ip0</Ind>
-	<Ind>2200</Ind>
-</Atom>
-
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>Radiology_CollectorService</Ind>
-	<Ind>collectAllData</Ind>
-	<Ind>ip0</Ind>
-	<Ind>2201</Ind>
-</Atom>
-
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>Cardiology_CollectorService</Ind>
-	<Ind>collectAllData</Ind>
-	<Ind>ip0</Ind>
-	<Ind>2202</Ind>
-</Atom>
-
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>Diagnosis_CollectorService</Ind>
-	<Ind>collectAllData</Ind>
-	<Ind>ip0</Ind>
-	<Ind>2203</Ind>
-</Atom>
-
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>Laboratory_CollectorService</Ind>
-	<Ind>collectAllData</Ind>
-	<Ind>ip0</Ind>
-	<Ind>2204</Ind>
-</Atom>
-
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>Treatment_CollectorService</Ind>
-	<Ind>collectAllData</Ind>
-	<Ind>ip0</Ind>
-	<Ind>2205</Ind>
-</Atom>
-
-<!-- ================================================================ -->
-<!-- PERFORMANCE COLLECTION SERVICES                                  -->
-<!-- ================================================================ -->
-
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>Triage_InitializationService</Ind>
-	<Ind>purgeAndInitialize</Ind>
-	<Ind>ip0</Ind>
-	<Ind>2300</Ind>
-</Atom>
-
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>Radiology_InitializationService</Ind>
-	<Ind>purgeAndInitialize</Ind>
-	<Ind>ip0</Ind>
-	<Ind>2301</Ind>
-</Atom>
-
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>Cardiology_InitializationService</Ind>
-	<Ind>purgeAndInitialize</Ind>
-	<Ind>ip0</Ind>
-	<Ind>2302</Ind>
-</Atom>
-
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>Diagnosis_InitializationService</Ind>
-	<Ind>purgeAndInitialize</Ind>
-	<Ind>ip0</Ind>
-	<Ind>2303</Ind>
-</Atom>
-
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>Laboratory_InitializationService</Ind>
-	<Ind>purgeAndInitialize</Ind>
-	<Ind>ip0</Ind>
-	<Ind>2304</Ind>
-</Atom>
-
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>Treatment_InitializationService</Ind>
-	<Ind>purgeAndInitialize</Ind>
-	<Ind>ip0</Ind>
-	<Ind>2305</Ind>
-</Atom>
-<!-- ================================================================ -->
-<!-- MONITOR PLACE (PetriNet - MonitorService)                         -->
-<!-- ================================================================ -->
-
-<Atom>
-    <Rel>activeService</Rel>
-    <Ind>MonitorService</Ind>
-    <Ind>acknowledgeTokenArrival</Ind>
-    <Ind>ip0</Ind>
-    <Ind>3000</Ind>
-</Atom>
-
-<Atom>
-    <Rel>activeService</Rel>
-    <Ind>MonitorService</Ind>
-    <Ind>writeServiceTimingRecord</Ind>
-    <Ind>ip0</Ind>
-    <Ind>3001</Ind>
-</Atom>
-
-<Atom>
-    <Rel>activeService</Rel>
-    <Ind>MonitorService</Ind>
-    <Ind>writeCollectorData</Ind>
-    <Ind>ip0</Ind>
-    <Ind>3002</Ind>
-</Atom>
-
-<Atom>
-    <Rel>activeService</Rel>
-    <Ind>MonitorService</Ind>
-    <Ind>initiateWorkflowDataCollection</Ind>
-    <Ind>ip0</Ind>
-    <Ind>3003</Ind>
-</Atom>
-
-<!-- ================================================================ -->
-<!-- MONITOR INITIALIZATION                                           -->
-<!-- ================================================================ -->
-
-<Atom>
-    <Rel>activeService</Rel>
-    <Ind>Monitor_InitializationService</Ind>
-    <Ind>purgeAndInitialize</Ind>
-    <Ind>ip0</Ind>
-    <Ind>3004</Ind>
-</Atom>
-<!-- List of service facts -->
-<!-- ActiveServices.ruleml.xml - loaded last or checked first -->
-
-<!-- ================================================================ -->
-<!-- WORKFLOW PLACES                                                -->
-<!-- ================================================================ -->
-
-<Atom>
-    <Rel>activeService</Rel>
-    <Ind>P1_Place</Ind>              <!-- Service Name -->
-    <Ind>processToken</Ind>           <!-- Method -->
-    <Ind>ip0</Ind>
-    <Ind>4001</Ind>
-</Atom>
-<!-- P2 Place -->
-<Atom>
-    <Rel>activeService</Rel>
-    <Ind>P2_Place</Ind>              <!-- Service Name -->
-    <Ind>processToken</Ind>           <!-- Method -->
-    <Ind>ip0</Ind>
-    <Ind>4002</Ind>
-</Atom><!-- P3 Place -->
-<Atom>
-    <Rel>activeService</Rel>
-    <Ind>P3_Place</Ind>              <!-- Service Name -->
-    <Ind>processToken</Ind>           <!-- Method -->
-    <Ind>ip0</Ind>
-    <Ind>4003</Ind>
-</Atom>
-<Atom>
-    <Rel>activeService</Rel>
-    <Ind>P4_Place</Ind>              <!-- Service Name -->
-    <Ind>processToken</Ind>           <!-- Method -->
-    <Ind>ip0</Ind>
-    <Ind>4004</Ind>
-</Atom>
-<Atom>
-    <Rel>activeService</Rel>
-    <Ind>P5_Place</Ind>              <!-- Service Name -->
-    <Ind>processToken</Ind>           <!-- Method -->
-    <Ind>ip0</Ind>
-    <Ind>4005</Ind>
-</Atom>
-<Atom>
-    <Rel>activeService</Rel>
-    <Ind>P6_Place</Ind>              <!-- Service Name -->
-    <Ind>processToken</Ind>           <!-- Method -->
-    <Ind>ip0</Ind>
-    <Ind>4006</Ind>
-</Atom>
-
-<!-- ================================================================ -->
-<!-- PERFORMANCE COLLECTION SERVICES                                  -->
-<!-- ================================================================ -->
-
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>P1_InitializationService</Ind>
-	<Ind>purgeAndInitialize</Ind>
-	<Ind>ip0</Ind>
-	<Ind>4300</Ind>
-</Atom>
-
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>P2_InitializationService</Ind>
-	<Ind>purgeAndInitialize</Ind>
-	<Ind>ip0</Ind>
-	<Ind>4301</Ind>
-</Atom>
-
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>P3_InitializationService</Ind>
-	<Ind>purgeAndInitialize</Ind>
-	<Ind>ip0</Ind>
-	<Ind>4302</Ind>
-</Atom>
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>P4_InitializationService</Ind>
-	<Ind>purgeAndInitialize</Ind>
-	<Ind>ip0</Ind>
-	<Ind>4303</Ind>
-</Atom>
-
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>P5_InitializationService</Ind>
-	<Ind>purgeAndInitialize</Ind>
-	<Ind>ip0</Ind>
-	<Ind>4304</Ind>
-</Atom>
-
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>P6_InitializationService</Ind>
-	<Ind>purgeAndInitialize</Ind>
-	<Ind>ip0</Ind>
-	<Ind>4305</Ind>
-</Atom>
-
-<!-- ================================================================ -->
-<!-- PERFORMANCE COLLECTION SERVICES                                  -->
-<!-- ================================================================ -->
-
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>P1_CollectorService</Ind>
-	<Ind>collectAllData</Ind>
-	<Ind>ip0</Ind>
-	<Ind>4100</Ind>
-</Atom>
-
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>P2_CollectorService</Ind>
-	<Ind>collectAllData</Ind>
-	<Ind>ip0</Ind>
-	<Ind>4101</Ind>
-</Atom>
-
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>P3_CollectorService</Ind>
-	<Ind>collectAllData</Ind>
-	<Ind>ip0</Ind>
-	<Ind>4102</Ind>
-</Atom>
-
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>P4_CollectorService</Ind>
-	<Ind>collectAllData</Ind>
-	<Ind>ip0</Ind>
-	<Ind>4103</Ind>
-</Atom>
-
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>P5_CollectorService</Ind>
-	<Ind>collectAllData</Ind>
-	<Ind>ip0</Ind>
-	<Ind>4104</Ind>
-</Atom>
-
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>P6_CollectorService</Ind>
-	<Ind>collectAllData</Ind>
-	<Ind>ip0</Ind>
-	<Ind>4105</Ind>
-</Atom>
+<!-- ===== BEGIN: RemoteHostMappings.ruleml.xml ===== -->
 <!-- RemoteHostMappings.ruleml.xml -->
 <!-- Maps logical channel IDs (ip1, ip2, etc.) to actual IP addresses -->
 <!-- This file is loaded as part of Service.ruleml compilation -->
@@ -562,6 +194,78 @@ This is the rule that governs the list of all services.
     <Ind>ip3</Ind>
     <Ind>192.168.1.84</Ind>
 </Atom>
+<!-- ===== END: RemoteHostMappings.ruleml.xml ===== -->
+
+<!-- ===== BEGIN: AUTO-GENERATED serviceName facts ===== -->
+<!-- These facts are automatically generated from activeService facts -->
+<!-- ServiceThread requires these to process service operations -->
+
+<Atom>
+    <Rel>serviceName</Rel>
+    <Ind>CardiologyService</Ind>
+    <Ind>processCardiacAssessment</Ind>
+    <Ind>processCardiacAssessment</Ind>
+    <Ind>null</Ind>
+    <Ind>null</Ind>
+    <Ind>ip0</Ind>
+    <Ind>2103</Ind>
+</Atom>
+
+<!-- ===== END: AUTO-GENERATED serviceName facts ===== -->
+
+<!-- ===== CANONICAL BINDINGS (filtered, hierarchical) ===== -->
+
+<!-- Service directory: CardiologyService -->
+
+<!-- BEGIN: CardiologyService/Cardiology_CollectorService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>Cardiology_CollectorService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>collectAllData</Ind>
+	<Ind>token</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>getServicePerformanceData</Ind>
+	<Ind>token</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>
+<!-- END: CardiologyService/Cardiology_CollectorService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: CardiologyService/Cardiology_InitializationService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>Cardiology_InitializationService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>null</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>
+<!-- END: CardiologyService/Cardiology_InitializationService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: CardiologyService/CardiologyService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>CardiologyService</Ind>
+</Atom>
+
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>processCardiacAssessment</Ind>
+	<Ind>cardiologyResults</Ind>  	<!-- This is the attribute returned -->
+	<Ind>triageResults</Ind>	<!-- This input is needed -->
+	
+</Atom>
+<!-- END: CardiologyService/CardiologyService-CanonicalBindings.ruleml.xml -->
 
 </Rulebase>
 </Assert>

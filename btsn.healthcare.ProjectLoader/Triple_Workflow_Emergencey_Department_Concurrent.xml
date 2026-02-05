@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="Emergency_Department_Federated_Radiology" default="run-complete-workflow" basedir=".">
+<project name="Emergency_Department_Federated_Radiology" default="run-complete-workflow" basedir="."
+	    xmlns:if="ant:if" xmlns:unless="ant:unless">
 	<description>
 		Emergency Department with Federated Radiology - Multi-Workflow Execution
 		
@@ -15,6 +16,25 @@
 		
 		Each workflow has its own process definition JSON file and version for token isolation.
 	</description>
+
+	<!-- ======================================================================= -->
+	<!-- DEPLOYMENT CONFIGURATION                                                -->
+	<!-- ======================================================================= -->
+	<!-- Service deployment modes:                                                -->
+	<!--   local  = launch service process on THIS machine                       -->
+	<!--   remote = service runs on ANOTHER machine (skip launch, still send     -->
+	<!--            events to it for init/workflow/collection phases)             -->
+	<!--                                                                         -->
+	<!-- Override from command line: ant -Dtriage.mode=remote                     -->
+	<!-- ======================================================================= -->
+
+	<property name="triage.mode"     value="remote" />
+	<property name="laboratory.mode" value="local" />
+	<property name="radiology.mode"  value="local" />
+	<property name="cardiology.mode" value="local" />
+	<property name="diagnosis.mode"  value="local" />
+	<property name="treatment.mode"  value="local" />
+	<property name="monitor.mode"    value="local" />
 
 	<!-- ======================================================================= -->
 	<!-- PROPERTIES                                                              -->
@@ -189,6 +209,33 @@
 	</path>
 
 	<!-- ======================================================================= -->
+	<!-- DEPLOYMENT MODE RESOLUTION                                              -->
+	<!-- ======================================================================= -->
+
+	<target name="resolve-deployment-modes">
+		<!-- Resolve boolean properties from mode settings -->
+		<condition property="triage.is.local"><equals arg1="${triage.mode}" arg2="local" /></condition>
+		<condition property="laboratory.is.local"><equals arg1="${laboratory.mode}" arg2="local" /></condition>
+		<condition property="radiology.is.local"><equals arg1="${radiology.mode}" arg2="local" /></condition>
+		<condition property="cardiology.is.local"><equals arg1="${cardiology.mode}" arg2="local" /></condition>
+		<condition property="diagnosis.is.local"><equals arg1="${diagnosis.mode}" arg2="local" /></condition>
+		<condition property="treatment.is.local"><equals arg1="${treatment.mode}" arg2="local" /></condition>
+		<condition property="monitor.is.local"><equals arg1="${monitor.mode}" arg2="local" /></condition>
+
+		<!-- Display deployment configuration -->
+		<echo message="" />
+		<echo message="  Deployment Configuration:" />
+		<echo message="    Triage:     ${triage.mode}" />
+		<echo message="    Laboratory: ${laboratory.mode}" />
+		<echo message="    Radiology:  ${radiology.mode}" />
+		<echo message="    Cardiology: ${cardiology.mode}" />
+		<echo message="    Diagnosis:  ${diagnosis.mode}" />
+		<echo message="    Treatment:  ${treatment.mode}" />
+		<echo message="    Monitor:    ${monitor.mode}" />
+		<echo message="" />
+	</target>
+
+	<!-- ======================================================================= -->
 	<!-- UTILITY TARGETS                                                         -->
 	<!-- ======================================================================= -->
 
@@ -233,7 +280,7 @@
 	<!-- MAIN WORKFLOW TARGET                                                    -->
 	<!-- ======================================================================= -->
 
-	<target name="run-complete-workflow" depends="create-output-directory,clean-output"
+	<target name="run-complete-workflow" depends="resolve-deployment-modes,create-output-directory,clean-output"
 	        description="Run complete Emergency Department workflow with federated Radiology">
 
 		<echo message="================================================================" />
@@ -254,7 +301,8 @@
 			<!-- ============================================================= -->
 
 			<!-- Triage Service -->
-			<java classname="${service.loader.class}" fork="true" 
+			<echo message="  [triage] Skipping - running on remote host" unless:set="triage.is.local" />
+			<java classname="${service.loader.class}" fork="true" if:set="triage.is.local"
 			      dir="${triage.project.dir}" output="${triage.output.file}">
 				<classpath refid="triage.classpath" />
 				<arg value="${triage.project.dir}" />
@@ -262,7 +310,8 @@
 			</java>
 
 			<!-- Laboratory Service -->
-			<java classname="${service.loader.class}" fork="true" 
+			<echo message="  [laboratory] Skipping - running on remote host" unless:set="laboratory.is.local" />
+			<java classname="${service.loader.class}" fork="true" if:set="laboratory.is.local"
 			      dir="${laboratory.project.dir}" output="${laboratory.output.file}">
 				<classpath refid="laboratory.classpath" />
 				<arg value="${laboratory.project.dir}" />
@@ -270,7 +319,8 @@
 			</java>
 
 			<!-- Radiology Service -->
-			<java classname="${service.loader.class}" fork="true" 
+			<echo message="  [radiology] Skipping - running on remote host" unless:set="radiology.is.local" />
+			<java classname="${service.loader.class}" fork="true" if:set="radiology.is.local"
 			      dir="${radiology.project.dir}" output="${radiology.output.file}">
 				<classpath refid="radiology.classpath" />
 				<arg value="${radiology.project.dir}" />
@@ -278,7 +328,8 @@
 			</java>
 
 			<!-- Cardiology Service -->
-			<java classname="${service.loader.class}" fork="true" 
+			<echo message="  [cardiology] Skipping - running on remote host" unless:set="cardiology.is.local" />
+			<java classname="${service.loader.class}" fork="true" if:set="cardiology.is.local"
 			      dir="${cardiology.project.dir}" output="${cardiology.output.file}">
 				<classpath refid="cardiology.classpath" />
 				<arg value="${cardiology.project.dir}" />
@@ -286,7 +337,8 @@
 			</java>
 
 			<!-- Diagnosis Service -->
-			<java classname="${service.loader.class}" fork="true" 
+			<echo message="  [diagnosis] Skipping - running on remote host" unless:set="diagnosis.is.local" />
+			<java classname="${service.loader.class}" fork="true" if:set="diagnosis.is.local"
 			      dir="${diagnosis.project.dir}" output="${diagnosis.output.file}">
 				<classpath refid="diagnosis.classpath" />
 				<arg value="${diagnosis.project.dir}" />
@@ -294,7 +346,8 @@
 			</java>
 
 			<!-- Treatment Service -->
-			<java classname="${service.loader.class}" fork="true" 
+			<echo message="  [treatment] Skipping - running on remote host" unless:set="treatment.is.local" />
+			<java classname="${service.loader.class}" fork="true" if:set="treatment.is.local"
 			      dir="${treatment.project.dir}" output="${treatment.output.file}">
 				<classpath refid="treatment.classpath" />
 				<arg value="${treatment.project.dir}" />
@@ -302,7 +355,8 @@
 			</java>
 
 			<!-- Monitor Service -->
-			<java classname="${service.loader.class}" fork="true" 
+			<echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local" />
+			<java classname="${service.loader.class}" fork="true" if:set="monitor.is.local"
 			      dir="${monitor.project.dir}" output="${monitor.output.file}">
 				<classpath refid="monitor.classpath" />
 				<arg value="${monitor.project.dir}" />
@@ -691,8 +745,16 @@
 		<echo message="  -Dservice.startup.seconds=5      Wait for services to start" />
 		<echo message="  -Dphase.delay.seconds=5          Delay between phases" />
 		<echo message="" />
-		<echo message="EXAMPLE:" />
+		<echo message="DEPLOYMENT MODES (per service):" />
+		<echo message="  -D&lt;service&gt;.mode=local           Launch service on this machine (default)" />
+		<echo message="  -D&lt;service&gt;.mode=remote          Service runs on another machine (skip launch)" />
+		<echo message="" />
+		<echo message="  Services: triage, laboratory, radiology, cardiology, diagnosis, treatment, monitor" />
+		<echo message="" />
+		<echo message="EXAMPLES:" />
 		<echo message="  ant -Dpatient.token.count=20 -Dcanary.token.count=5 -Dfederated.token.count=10" />
+		<echo message="  ant -Dradiology.mode=remote -Dcardiology.mode=remote" />
+		<echo message="  ant -Dtriage.mode=local -Dlaboratory.mode=remote  (mixed deployment)" />
 		<echo message="" />
 	</target>
 

@@ -1,4 +1,4 @@
-DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceThread - CAPTURE: WorkflowStartTime=1770277144159 for seqID=3000000
+DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceThread - CAPTURE: WorkflowStartTime=1770294952797 for seqID=3000000
 INFO ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceThread - Incoming Sequence ID = 3000000
 INFO ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceThread - MonitorIncomingEvents+ = false
 DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceThread - Using RuleBaseVersion: v001
@@ -43,10 +43,10 @@ INFO ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - === SE
 INFO ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - Service: org.btsn.places.MonitorService.writeCollectorData
 INFO ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - SequenceID: 3000000
 INFO ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - Input arguments count: 1
-DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - Processing argument 1/1, raw length: 45769
+DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - Processing argument 1/1, raw length: 39028
 DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - ENRICHMENT: First service - raw token IS original_token
 INFO ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - ENRICHMENT: Initialized workflow start time (first service)
-DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - ENRICHMENT: Cleaned argument 1, length: 45769 (removed 0 bytes of metadata)
+DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - ENRICHMENT: Cleaned argument 1, length: 39028 (removed 0 bytes of metadata)
 INFO ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted 1 clean business data arguments (removed infrastructure metadata)
 INFO ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - SERVICE INVOKE: Calling org.btsn.places.MonitorService.writeCollectorData with 1 CLEAN business data arguments
 DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - INVOKE: Reflecting on org.btsn.places.MonitorService.writeCollectorData
@@ -56,51 +56,45 @@ INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Monitor
 DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - INVOKE: Created instance using 1-param constructor (context) for org.btsn.places.MonitorService
 DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - INVOKE: Found standard method (1 String args)
 DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - INVOKE: Calling writeCollectorData with 1 arguments
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3120001 -> workflowBase=3000000 (v003: arrival=1770277092710ms, queue=10406ms, service=1278ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3140001 -> workflowBase=3000000 (v003: arrival=1770277099922ms, queue=10582ms, service=1473ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3010001 -> workflowBase=3000000 (v003: arrival=1770277042363ms, queue=4084ms, service=1280ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3000001 -> workflowBase=3000000 (v003: arrival=1770277038269ms, queue=1698ms, service=4322ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3160001 -> workflowBase=3000000 (v003: arrival=1770277103884ms, queue=8596ms, service=634ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3100001 -> workflowBase=3000000 (v003: arrival=1770277084369ms, queue=8489ms, service=1326ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3040001 -> workflowBase=3000000 (v003: arrival=1770277063878ms, queue=281ms, service=803ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3180001 -> workflowBase=3000000 (v003: arrival=1770277111373ms, queue=2908ms, service=337ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3030001 -> workflowBase=3000000 (v003: arrival=1770277056539ms, queue=608ms, service=1673ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3190001 -> workflowBase=3000000 (v003: arrival=1770277112918ms, queue=2043ms, service=311ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3170001 -> workflowBase=3000000 (v003: arrival=1770277107727ms, queue=5886ms, service=320ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3080001 -> workflowBase=3000000 (v003: arrival=1770277076532ms, queue=2913ms, service=4226ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3110001 -> workflowBase=3000000 (v003: arrival=1770277087739ms, queue=8831ms, service=4618ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3020001 -> workflowBase=3000000 (v003: arrival=1770277046803ms, queue=1527ms, service=1861ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3150000 -> workflowBase=3000000 (v003: arrival=1770277093866ms, queue=1297ms, service=4237ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3130001 -> workflowBase=3000000 (v003: arrival=1770277095078ms, queue=12034ms, service=1610ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3090001 -> workflowBase=3000000 (v003: arrival=1770277081197ms, queue=5093ms, service=2867ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3060000 -> workflowBase=3000000 (v003: arrival=1770277066553ms, queue=359ms, service=527ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3050000 -> workflowBase=3000000 (v003: arrival=1770277065520ms, queue=389ms, service=406ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3070001 -> workflowBase=3000000 (v003: arrival=1770277072049ms, queue=1858ms, service=3577ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3120001 -> workflowBase=3000000 (v003: buffer=2, total=3, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3140001 -> workflowBase=3000000 (v003: buffer=2, total=3, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3010001 -> workflowBase=3000000 (v003: buffer=0, total=1, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3000001 -> workflowBase=3000000 (v003: buffer=0, total=1, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3160001 -> workflowBase=3000000 (v003: buffer=2, total=3, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3100001 -> workflowBase=3000000 (v003: buffer=1, total=2, capacity=50)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3130001 -> workflowBase=3000000 (v003: arrival=1770294906937ms, queue=1834ms, service=3191ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3110001 -> workflowBase=3000000 (v003: arrival=1770294895076ms, queue=1435ms, service=1809ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3170001 -> workflowBase=3000000 (v003: arrival=1770294920943ms, queue=747ms, service=601ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3040001 -> workflowBase=3000000 (v003: arrival=1770294874697ms, queue=1590ms, service=3331ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3020000 -> workflowBase=3000000 (v003: arrival=1770294846577ms, queue=1728ms, service=4545ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3140001 -> workflowBase=3000000 (v003: arrival=1770294913598ms, queue=1117ms, service=1138ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3050001 -> workflowBase=3000000 (v003: arrival=1770294877226ms, queue=3125ms, service=2027ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3180001 -> workflowBase=3000000 (v003: arrival=1770294922810ms, queue=369ms, service=404ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3160001 -> workflowBase=3000000 (v003: arrival=1770294919116ms, queue=958ms, service=1010ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3190001 -> workflowBase=3000000 (v003: arrival=1770294924151ms, queue=297ms, service=855ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3060000 -> workflowBase=3000000 (v003: arrival=1770294873414ms, queue=1215ms, service=3305ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3070000 -> workflowBase=3000000 (v003: arrival=1770294877337ms, queue=1753ms, service=2815ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3080000 -> workflowBase=3000000 (v003: arrival=1770294881739ms, queue=1939ms, service=714ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3090000 -> workflowBase=3000000 (v003: arrival=1770294883598ms, queue=1875ms, service=832ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3010001 -> workflowBase=3000000 (v003: arrival=1770294861894ms, queue=2181ms, service=1307ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3030001 -> workflowBase=3000000 (v003: arrival=1770294869097ms, queue=921ms, service=2977ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=3100000 -> workflowBase=3000000 (v003: arrival=1770294885006ms, queue=2295ms, service=1313ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3130001 -> workflowBase=3000000 (v003: buffer=0, total=1, capacity=50)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3110001 -> workflowBase=3000000 (v003: buffer=0, total=1, capacity=50)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3170001 -> workflowBase=3000000 (v003: buffer=0, total=1, capacity=50)
 INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3040001 -> workflowBase=3000000 (v003: buffer=0, total=1, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3180001 -> workflowBase=3000000 (v003: buffer=1, total=2, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3030001 -> workflowBase=3000000 (v003: buffer=0, total=1, capacity=50)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3020000 -> workflowBase=3000000 (v003: buffer=0, total=1, capacity=50)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3140001 -> workflowBase=3000000 (v003: buffer=0, total=1, capacity=50)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3050001 -> workflowBase=3000000 (v003: buffer=0, total=1, capacity=50)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3180001 -> workflowBase=3000000 (v003: buffer=0, total=1, capacity=50)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3160001 -> workflowBase=3000000 (v003: buffer=0, total=1, capacity=50)
 INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3190001 -> workflowBase=3000000 (v003: buffer=0, total=1, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3170001 -> workflowBase=3000000 (v003: buffer=2, total=3, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3080001 -> workflowBase=3000000 (v003: buffer=0, total=1, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3110001 -> workflowBase=3000000 (v003: buffer=2, total=3, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3020001 -> workflowBase=3000000 (v003: buffer=0, total=1, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3150000 -> workflowBase=3000000 (v003: buffer=0, total=1, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3130001 -> workflowBase=3000000 (v003: buffer=2, total=3, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3090001 -> workflowBase=3000000 (v003: buffer=0, total=1, capacity=50)
 INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3060000 -> workflowBase=3000000 (v003: buffer=0, total=1, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3050000 -> workflowBase=3000000 (v003: buffer=0, total=1, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3070001 -> workflowBase=3000000 (v003: buffer=0, total=1, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - SERVICE COMPLETE: org.btsn.places.MonitorService.writeCollectorData completed in 268ms
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3070000 -> workflowBase=3000000 (v003: buffer=0, total=1, capacity=50)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3080000 -> workflowBase=3000000 (v003: buffer=0, total=1, capacity=50)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3090000 -> workflowBase=3000000 (v003: buffer=0, total=1, capacity=50)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3010001 -> workflowBase=3000000 (v003: buffer=0, total=1, capacity=50)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3030001 -> workflowBase=3000000 (v003: buffer=0, total=1, capacity=50)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=3100000 -> workflowBase=3000000 (v003: buffer=0, total=1, capacity=50)
+INFO ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - SERVICE COMPLETE: org.btsn.places.MonitorService.writeCollectorData completed in 217ms
 WARN ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - ENRICHMENT: Output attribute 'token' not found in service result, cannot enrich
 INFO ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - ENRICHMENT: Successfully enriched service result with metadata
 INFO ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - === SERVICE INVOCATION COMPLETE ===
-INFO ServiceThread-MonitorService-13002 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Service returned: {"performanceRecordsProcessed":40,"petriNetRecordsProcessed":161,"status":"success","totalRecordsProcessed":201}
+INFO ServiceThread-MonitorService-13002 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Service returned: {"performanceRecordsProcessed":34,"petriNetRecordsProcessed":137,"status":"success","totalRecordsProcessed":171}
 DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.PetriNetInstrumentationHelper - Token 3000000 exiting place: MonitorService -> TERMINATE
 WARN ServiceThread-MonitorService-13002 org.btsn.handlers.PetriNetInstrumentationHelper - NAMING CONVENTION VIOLATION: Service 'MonitorService' does not end with '_Place'. Expected format: {NodeName}_Place. Transition IDs may not match topology. Please rename the service.
 DEBUG ServiceThread-MonitorService-13002 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_out_MonitorService token=3000000 eventType=TERMINATE
@@ -112,257 +106,3 @@ DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.TransitionHandler - P
 ERROR ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceThread - monitorIncomingEvents: false
 DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Cleaned up join 3000000
 DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Service MonitorService sequence ID: 3000000 complete.
-INFO main org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Derby Embedded Driver registered successfully.
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Found 3 distinct workflowBases: [1000000, 2000000, 3000000]
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Fork/Join analysis: 0 forks, 0 successful joins
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Token completeness check: All tokens complete
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Token completeness check: All tokens complete
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Fork/Join analysis: 0 forks, 0 successful joins
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Actual incomplete tokens: 0 (filtered 0 joined tokens)
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Found 10 terminated tokens (checked both tables)
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Workflow throughput: 0.41 tokens/sec
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Place MonitorService statistics: 0 tokens, avg=0.0ms
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Place RadiologyService statistics: 20 tokens, avg=1196.0ms
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Capacity verification for MonitorService: max marking=0, capacity=50 - PASS
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Capacity verification for RadiologyService: max marking=1, capacity=50 - PASS
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 20 token paths for workflowBase=1000000
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Generated workflow report for workflowBase=1000000
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - GENEALOGY: Found 10 tokens for workflow 1000000
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - GENEALOGY: 10 root tokens, 0 forked tokens, 0 max generation depth
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 20 token paths for workflowBase=1000000
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 10 GENERATED events for workflowBase 1000000
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 0 marking snapshots for MonitorService
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 30 marking snapshots for RadiologyService
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Fork/Join analysis: 0 forks, 0 successful joins
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Token completeness check: All tokens complete
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Token completeness check: All tokens complete
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Fork/Join analysis: 0 forks, 0 successful joins
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Actual incomplete tokens: 0 (filtered 0 joined tokens)
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Found 10 terminated tokens (checked both tables)
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Workflow throughput: 0.42 tokens/sec
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Place MonitorService statistics: 0 tokens, avg=0.0ms
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Place TriageService statistics: 20 tokens, avg=918.0ms
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Capacity verification for MonitorService: max marking=0, capacity=50 - PASS
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Capacity verification for TriageService: max marking=1, capacity=50 - PASS
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 20 token paths for workflowBase=2000000
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Generated workflow report for workflowBase=2000000
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - GENEALOGY: Found 10 tokens for workflow 2000000
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - GENEALOGY: 10 root tokens, 0 forked tokens, 0 max generation depth
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 20 token paths for workflowBase=2000000
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 10 GENERATED events for workflowBase 2000000
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 0 marking snapshots for MonitorService
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 30 marking snapshots for TriageService
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3190001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3190002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3190003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3190000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3190000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3170001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3170002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3170003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3170000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3170000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3000001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3000003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3000002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3000000 exit check: T_in=2, T_out=2, TERMINATE=7 (consolidated=0, raw=7) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3000000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3080002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3080003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3080001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3080000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3080000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3040002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3040003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3040001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3040000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3040000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3020002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3020003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3020001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3020000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3020000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3140003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3140002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3140001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3140000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3140000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3120003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3120002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3120001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3120000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3120000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3100003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3100002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3100001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3100000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3100000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3180001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3180002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3180003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3180000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3180000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3160001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3160002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3160003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3160000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3160000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3010001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3010003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3010002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3010000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3010000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3070002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3070003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3070001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3070000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3070000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3030002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3030003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3030001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3030000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3030000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3130003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3130002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3130001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3130000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3130000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3110003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3110002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3110001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3110000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3110000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3090003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3090002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3090001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3090000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3090000: Base token reset pattern - all 3 children consumed, parent exited
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Fork/Join analysis: 17 forks, 17 successful joins
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Token completeness check: 68 incomplete tokens found
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Token completeness check: 68 incomplete tokens found
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3190001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3190002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3190003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3190000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3190000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3170001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3170002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3170003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3170000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3170000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3000001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3000003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3000002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3000000 exit check: T_in=2, T_out=2, TERMINATE=7 (consolidated=0, raw=7) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3000000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3080002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3080003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3080001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3080000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3080000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3040002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3040003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3040001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3040000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3040000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3020002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3020003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3020001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3020000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3020000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3140003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3140002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3140001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3140000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3140000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3120003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3120002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3120001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3120000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3120000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3100003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3100002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3100001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3100000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3100000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3180001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3180002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3180003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3180000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3180000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3160001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3160002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3160003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3160000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3160000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3010001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3010003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3010002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3010000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3010000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3070002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3070003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3070001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3070000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3070000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3030002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3030003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3030001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3030000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3030000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3130003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3130002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3130001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3130000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3130000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3110003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3110002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3110001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3110000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3110000: Base token reset pattern - all 3 children consumed, parent exited
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3090003 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3090002 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Forked token 3090001 exit check: TERMINATE=0 -> exited=false (forked tokens only exit via TERMINATE)
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Base token 3090000 exit check: T_in=2, T_out=2, TERMINATE=1 (consolidated=0, raw=1) -> exited=true
-DEBUG main org.btsn.derby.Analysis.PetriNetAnalyzer - Join 3090000: Base token reset pattern - all 3 children consumed, parent exited
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Fork/Join analysis: 17 forks, 17 successful joins
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Actual incomplete tokens: 0 (filtered 51 joined tokens)
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Found 20 terminated tokens (checked both tables)
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Workflow throughput: 2.58 tokens/sec
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Place CardiologyService statistics: 34 tokens, avg=1235.0ms
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Place DiagnosisService statistics: 34 tokens, avg=1668.0ms
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Place FORK_CONSUMED statistics: 0 tokens, avg=0.0ms
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Place JOIN_CONSUMED statistics: 0 tokens, avg=0.0ms
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Place LaboratoryService statistics: 34 tokens, avg=884.0ms
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Place MonitorService statistics: 0 tokens, avg=0.0ms
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Place RadiologyService statistics: 34 tokens, avg=1196.0ms
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Place TreatmentService statistics: 40 tokens, avg=1491.0ms
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Place TriageService statistics: 40 tokens, avg=866.0ms
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Capacity verification for CardiologyService: max marking=1, capacity=50 - PASS
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Capacity verification for DiagnosisService: max marking=1, capacity=50 - PASS
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Capacity verification for FORK_CONSUMED: max marking=0, capacity=50 - PASS
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Capacity verification for JOIN_CONSUMED: max marking=0, capacity=50 - PASS
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Capacity verification for LaboratoryService: max marking=1, capacity=50 - PASS
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Capacity verification for MonitorService: max marking=0, capacity=50 - PASS
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Capacity verification for RadiologyService: max marking=1, capacity=50 - PASS
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Capacity verification for TreatmentService: max marking=1, capacity=50 - PASS
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Capacity verification for TriageService: max marking=1, capacity=50 - PASS
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 216 token paths for workflowBase=3000000
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Generated workflow report for workflowBase=3000000
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - GENEALOGY: Found 71 tokens for workflow 3000000
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - GENEALOGY: 20 root tokens, 51 forked tokens, 1 max generation depth
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 216 token paths for workflowBase=3000000
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 20 GENERATED events for workflowBase 3000000
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 51 marking snapshots for CardiologyService
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 119 marking snapshots for DiagnosisService
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 0 marking snapshots for FORK_CONSUMED
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 0 marking snapshots for JOIN_CONSUMED
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 51 marking snapshots for LaboratoryService
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 0 marking snapshots for MonitorService
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 51 marking snapshots for RadiologyService
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 60 marking snapshots for TreatmentService
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 179 marking snapshots for TriageService
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Place correlation: 384 matched, 0 unmatched out of 384
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Shared services (cross-version): [TriageService, RadiologyService]
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Priority analysis complete: 384 samples (129 root, 255 forked), 2 shared services, 45 shared-service contention points, 27 shared-service inversions
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Generated priority analysis report

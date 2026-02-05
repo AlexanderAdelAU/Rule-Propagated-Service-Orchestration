@@ -189,55 +189,55 @@ public class CardiologyServiceExample {
         System.out.println();
         
         System.out.println("CARDIOLOGY-SPECIFIC FEATURES:");
-        System.out.println("• 12-Lead ECG Analysis and Interpretation");
-        System.out.println("• Cardiac Rhythm Detection and Classification");
-        System.out.println("• ST Segment Analysis for ACS Detection");
-        System.out.println("• Cardiac Risk Stratification (TIMI-like scoring)");
-        System.out.println("• Clinical Recommendations Based on Findings");
-        System.out.println("• Arrhythmia Detection and Assessment");
+        System.out.println("- 12-Lead ECG Analysis and Interpretation");
+        System.out.println("- Cardiac Rhythm Detection and Classification");
+        System.out.println("- ST Segment Analysis for ACS Detection");
+        System.out.println("- Cardiac Risk Stratification (TIMI-like scoring)");
+        System.out.println("- Clinical Recommendations Based on Findings");
+        System.out.println("- Arrhythmia Detection and Assessment");
         System.out.println();
         
         System.out.println("ECG RHYTHMS DETECTED:");
-        System.out.println("• normal_sinus_rhythm: Regular rhythm 60-100 bpm");
-        System.out.println("• sinus_tachycardia: Regular rhythm >100 bpm");
-        System.out.println("• sinus_bradycardia: Regular rhythm <60 bpm");
-        System.out.println("• atrial_fibrillation: Irregularly irregular rhythm");
+        System.out.println("- normal_sinus_rhythm: Regular rhythm 60-100 bpm");
+        System.out.println("- sinus_tachycardia: Regular rhythm >100 bpm");
+        System.out.println("- sinus_bradycardia: Regular rhythm <60 bpm");
+        System.out.println("- atrial_fibrillation: Irregularly irregular rhythm");
         System.out.println();
         
         System.out.println("ST SEGMENT ANALYSIS:");
-        System.out.println("• no_acute_st_changes: Normal ST segments");
-        System.out.println("• st_elevation_in_leads_V2_V3_V4: Anterior STEMI pattern");
-        System.out.println("• st_depression_in_leads_II_III_aVF: Inferior ischemia");
-        System.out.println("• diffuse_st_depression: Widespread ischemia");
-        System.out.println("• right_heart_strain_pattern: Pulmonary embolism/RHF");
+        System.out.println("- no_acute_st_changes: Normal ST segments");
+        System.out.println("- st_elevation_in_leads_V2_V3_V4: Anterior STEMI pattern");
+        System.out.println("- st_depression_in_leads_II_III_aVF: Inferior ischemia");
+        System.out.println("- diffuse_st_depression: Widespread ischemia");
+        System.out.println("- right_heart_strain_pattern: Pulmonary embolism/RHF");
         System.out.println();
         
         System.out.println("RISK STRATIFICATION:");
-        System.out.println("• high_risk: ST elevation, high risk score, urgent intervention needed");
-        System.out.println("• intermediate_risk: ST depression, moderate risk score, close monitoring");
-        System.out.println("• low_risk: Normal ECG, low risk factors, routine follow-up");
+        System.out.println("- high_risk: ST elevation, high risk score, urgent intervention needed");
+        System.out.println("- intermediate_risk: ST depression, moderate risk score, close monitoring");
+        System.out.println("- low_risk: Normal ECG, low risk factors, routine follow-up");
         System.out.println();
         
         System.out.println("CLINICAL INDICATIONS HANDLED:");
-        System.out.println("• chest_pain -> ACS assessment, STEMI/NSTEMI detection");
-        System.out.println("• shortness_of_breath -> Heart failure assessment, strain patterns");
-        System.out.println("• palpitations -> Arrhythmia detection, rhythm analysis");
-        System.out.println("• syncope -> Conduction abnormalities, arrhythmia evaluation");
-        System.out.println("• routine_ecg -> Baseline assessment, screening");
+        System.out.println("- chest_pain -> ACS assessment, STEMI/NSTEMI detection");
+        System.out.println("- shortness_of_breath -> Heart failure assessment, strain patterns");
+        System.out.println("- palpitations -> Arrhythmia detection, rhythm analysis");
+        System.out.println("- syncope -> Conduction abnormalities, arrhythmia evaluation");
+        System.out.println("- routine_ecg -> Baseline assessment, screening");
         System.out.println();
         
         System.out.println("CRITICAL FINDINGS FLAGGED:");
-        System.out.println("• STEMI patterns requiring immediate catheterization");
-        System.out.println("• High-grade AV blocks requiring pacing");
-        System.out.println("• Malignant arrhythmias requiring urgent treatment");
-        System.out.println("• Acute ischemic changes requiring cardiology consultation");
+        System.out.println("- STEMI patterns requiring immediate catheterization");
+        System.out.println("- High-grade AV blocks requiring pacing");
+        System.out.println("- Malignant arrhythmias requiring urgent treatment");
+        System.out.println("- Acute ischemic changes requiring cardiology consultation");
         System.out.println();
         
         System.out.println("INTEGRATION WITH HEALTHCARE FLOW:");
-        System.out.println("• Receives orders from triage with specific indications");
-        System.out.println("• Provides cardiac assessment for clinical decision synchronization");
-        System.out.println("• Generates risk-appropriate recommendations");
-        System.out.println("• Feeds results to T_in_Diagnosis synchronization point");
+        System.out.println("- Receives orders from triage with specific indications");
+        System.out.println("- Provides cardiac assessment for clinical decision synchronization");
+        System.out.println("- Generates risk-appropriate recommendations");
+        System.out.println("- Feeds results to T_in_Diagnosis synchronization point");
         System.out.println();
     }
 }
