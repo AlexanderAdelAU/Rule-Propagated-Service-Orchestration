@@ -228,7 +228,7 @@ The implementation includes an emergency department workflow with three paths:
 
 # License
 
-**Copyright (c) 2025 [Your Name]**
+**Copyright (c) 2025 [Alexander Cameron]**
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to use, copy, modify, merge, and distribute the Software for non-commercial purposes, subject to the following conditions: the above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
