@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="Triage_Monitor_Behavior_POC" default="run-complete-workflow" basedir=".">
+<project name="Triage_Monitor_Behavior_POC" default="run-complete-workflow" basedir="."
+	    xmlns:if="ant:if" xmlns:unless="ant:unless">
 	<description>
 		Triage_Monitor Behavior POC - Complete Workflow with Collectors
 		Tests configurable place behaviors (RANDOM guard on P1, ALWAYS_TRUE on Monitor)
@@ -12,6 +13,20 @@
 
 		Services (Triage, Monitor) start once and remain running throughout all phases.
 	</description>
+
+	<!-- ======================================================================= -->
+	<!-- DEPLOYMENT CONFIGURATION                                                -->
+	<!-- ======================================================================= -->
+	<!-- Service deployment modes:                                                -->
+	<!--   local  = launch service process on THIS machine                       -->
+	<!--   remote = service runs on ANOTHER machine (skip launch, still send     -->
+	<!--            events to it for init/workflow/collection phases)             -->
+	<!--                                                                         -->
+	<!-- Override from command line: ant -Dtriage.mode=remote                     -->
+	<!-- ======================================================================= -->
+
+	<property name="triage.mode"  value="local" />
+	<property name="monitor.mode" value="local" />
 
 	<!-- ======================================================================= -->
 	<!-- PROPERTIES                                                              -->
@@ -114,6 +129,23 @@
 	</path>
 
 	<!-- ======================================================================= -->
+	<!-- DEPLOYMENT MODE RESOLUTION                                              -->
+	<!-- ======================================================================= -->
+
+	<target name="resolve-deployment-modes">
+		<!-- Resolve boolean properties from mode settings -->
+		<condition property="triage.is.local"><equals arg1="${triage.mode}" arg2="local" /></condition>
+		<condition property="monitor.is.local"><equals arg1="${monitor.mode}" arg2="local" /></condition>
+
+		<!-- Display deployment configuration -->
+		<echo message="" />
+		<echo message="  Deployment Configuration:" />
+		<echo message="    Triage:  ${triage.mode}" />
+		<echo message="    Monitor: ${monitor.mode}" />
+		<echo message="" />
+	</target>
+
+	<!-- ======================================================================= -->
 	<!-- UTILITY TARGETS                                                         -->
 	<!-- ======================================================================= -->
 
@@ -154,7 +186,7 @@
 	<!-- MAIN WORKFLOW TARGET                                                    -->
 	<!-- ======================================================================= -->
 
-	<target name="run-complete-workflow" depends="clean-output,rebuild-service-ruleml" 
+	<target name="run-complete-workflow" depends="resolve-deployment-modes,clean-output,rebuild-service-ruleml" 
 	        description="Run complete Triage_Monitor Behavior POC workflow">
 		<echo message="" />
 		<echo message="================================================================" />
@@ -169,7 +201,8 @@
 
 		<parallel>
 			<!-- Start Triage Service (runs continuously) -->
-			<java jvm="java.exe" classname="${service.loader.class}" 
+			<echo message="  [triage] Skipping - running on remote host" unless:set="triage.is.local" />
+			<java jvm="java.exe" classname="${service.loader.class}" if:set="triage.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${Triage.project.dir}" output="${Triage.output.file}">
 				<classpath refid="Triage.classpath" />
@@ -179,7 +212,8 @@
 			</java>
 
 			<!-- Start Monitor Service (runs continuously) -->
-			<java jvm="java.exe" classname="${service.loader.class}" 
+			<echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local" />
+			<java jvm="java.exe" classname="${service.loader.class}" if:set="monitor.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${monitor.project.dir}" output="${monitor.output.file}">
 				<classpath refid="monitor.classpath" />
@@ -326,7 +360,7 @@
 	<!-- WORKFLOW-ONLY TARGET (skip init/collect)                               -->
 	<!-- ======================================================================= -->
 
-	<target name="run-workflow-only" depends="clean-output,rebuild-service-ruleml" 
+	<target name="run-workflow-only" depends="resolve-deployment-modes,clean-output,rebuild-service-ruleml" 
 	        description="Run only the workflow phase (skip init and collect)">
 		<echo message="" />
 		<echo message="================================================================" />
@@ -336,7 +370,8 @@
 
 		<parallel>
 			<!-- Start services -->
-			<java jvm="java.exe" classname="${service.loader.class}" 
+			<echo message="  [triage] Skipping - running on remote host" unless:set="triage.is.local" />
+			<java jvm="java.exe" classname="${service.loader.class}" if:set="triage.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${Triage.project.dir}" output="${Triage.output.file}">
 				<classpath refid="Triage.classpath" />
@@ -345,7 +380,8 @@
 				<arg value="${rule.version}" />
 			</java>
 
-			<java jvm="java.exe" classname="${service.loader.class}" 
+			<echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local" />
+			<java jvm="java.exe" classname="${service.loader.class}" if:set="monitor.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${monitor.project.dir}" output="${monitor.output.file}">
 				<classpath refid="monitor.classpath" />
@@ -408,6 +444,12 @@
 		<echo message="  ant run-complete-workflow  Run complete workflow" />
 		<echo message="  ant run-workflow-only      Skip init/collect phases" />
 		<echo message="  ant help                   Show this help" />
+		<echo message="" />
+		<echo message="DEPLOYMENT MODES (per service):" />
+		<echo message="  -D&lt;service&gt;.mode=local           Launch service on this machine (default)" />
+		<echo message="  -D&lt;service&gt;.mode=remote          Service runs on another machine (skip launch)" />
+		<echo message="" />
+		<echo message="  Services: triage, monitor" />
 		<echo message="" />
 		<echo message="CONFIGURABLE PARAMETERS:" />
 		<echo message="  -Drule.version=v001              Rule base version" />

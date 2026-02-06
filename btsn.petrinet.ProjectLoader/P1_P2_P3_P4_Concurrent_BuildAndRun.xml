@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="P1_P2_P3_P4_Concurrent_BuildAndRun" default="run-complete-workflow" basedir=".">
+<project name="P1_P2_P3_P4_Concurrent_BuildAndRun" default="run-complete-workflow" basedir="."
+	    xmlns:if="ant:if" xmlns:unless="ant:unless">
 	<description>
 		P1_P2_P3_P4 Concurrent Petri Net - Multi-Workflow Execution
 		
@@ -15,6 +16,23 @@
 		
 		Each workflow has its own process definition JSON file and version for token isolation.
 	</description>
+
+	<!-- ======================================================================= -->
+	<!-- DEPLOYMENT CONFIGURATION                                                -->
+	<!-- ======================================================================= -->
+	<!-- Service deployment modes:                                                -->
+	<!--   local  = launch service process on THIS machine                       -->
+	<!--   remote = service runs on ANOTHER machine (skip launch, still send     -->
+	<!--            events to it for init/workflow/collection phases)             -->
+	<!--                                                                         -->
+	<!-- Override from command line: ant -Dp1.mode=remote -Dp2.mode=remote        -->
+	<!-- ======================================================================= -->
+
+	<property name="p1.mode"      value="local" />
+	<property name="p2.mode"      value="local" />
+	<property name="p3.mode"      value="local" />
+	<property name="p4.mode"      value="local" />
+	<property name="monitor.mode" value="local" />
 
 	<!-- ======================================================================= -->
 	<!-- PROPERTIES                                                              -->
@@ -157,6 +175,29 @@
 	</path>
 
 	<!-- ======================================================================= -->
+	<!-- DEPLOYMENT MODE RESOLUTION                                              -->
+	<!-- ======================================================================= -->
+
+	<target name="resolve-deployment-modes">
+		<!-- Resolve boolean properties from mode settings -->
+		<condition property="p1.is.local"><equals arg1="${p1.mode}" arg2="local" /></condition>
+		<condition property="p2.is.local"><equals arg1="${p2.mode}" arg2="local" /></condition>
+		<condition property="p3.is.local"><equals arg1="${p3.mode}" arg2="local" /></condition>
+		<condition property="p4.is.local"><equals arg1="${p4.mode}" arg2="local" /></condition>
+		<condition property="monitor.is.local"><equals arg1="${monitor.mode}" arg2="local" /></condition>
+
+		<!-- Display deployment configuration -->
+		<echo message="" />
+		<echo message="  Deployment Configuration:" />
+		<echo message="    P1:      ${p1.mode}" />
+		<echo message="    P2:      ${p2.mode}" />
+		<echo message="    P3:      ${p3.mode}" />
+		<echo message="    P4:      ${p4.mode}" />
+		<echo message="    Monitor: ${monitor.mode}" />
+		<echo message="" />
+	</target>
+
+	<!-- ======================================================================= -->
 	<!-- UTILITY TARGETS                                                         -->
 	<!-- ======================================================================= -->
 
@@ -224,7 +265,7 @@
 	<!-- MAIN WORKFLOW TARGET                                                    -->
 	<!-- ======================================================================= -->
 
-	<target name="run-complete-workflow" depends="create-output-directory,clean-output,rebuild-service-ruleml"
+	<target name="run-complete-workflow" depends="resolve-deployment-modes,create-output-directory,clean-output,rebuild-service-ruleml"
 	        description="Run complete concurrent workflow with init, execution and collection">
 
 		<echo message="================================================================" />
@@ -244,7 +285,8 @@
 			<!-- ============================================================= -->
 
 			<!-- P1 Service -->
-			<java classname="${service.loader.class}" fork="true" 
+			<echo message="  [p1] Skipping - running on remote host" unless:set="p1.is.local" />
+			<java classname="${service.loader.class}" fork="true" if:set="p1.is.local"
 			      dir="${p1.project.dir}" output="${p1.output.file}">
 				<classpath refid="p1.classpath" />
 				<arg value="${p1.project.dir}" />
@@ -252,7 +294,8 @@
 			</java>
 
 			<!-- P2 Service -->
-			<java classname="${service.loader.class}" fork="true" 
+			<echo message="  [p2] Skipping - running on remote host" unless:set="p2.is.local" />
+			<java classname="${service.loader.class}" fork="true" if:set="p2.is.local"
 			      dir="${p2.project.dir}" output="${p2.output.file}">
 				<classpath refid="p2.classpath" />
 				<arg value="${p2.project.dir}" />
@@ -260,7 +303,8 @@
 			</java>
 
 			<!-- P3 Service -->
-			<java classname="${service.loader.class}" fork="true" 
+			<echo message="  [p3] Skipping - running on remote host" unless:set="p3.is.local" />
+			<java classname="${service.loader.class}" fork="true" if:set="p3.is.local"
 			      dir="${p3.project.dir}" output="${p3.output.file}">
 				<classpath refid="p3.classpath" />
 				<arg value="${p3.project.dir}" />
@@ -268,7 +312,8 @@
 			</java>
 
 			<!-- P4 Service -->
-			<java classname="${service.loader.class}" fork="true" 
+			<echo message="  [p4] Skipping - running on remote host" unless:set="p4.is.local" />
+			<java classname="${service.loader.class}" fork="true" if:set="p4.is.local"
 			      dir="${p4.project.dir}" output="${p4.output.file}">
 				<classpath refid="p4.classpath" />
 				<arg value="${p4.project.dir}" />
@@ -276,7 +321,8 @@
 			</java>
 
 			<!-- Monitor Service -->
-			<java classname="${service.loader.class}" fork="true" 
+			<echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local" />
+			<java classname="${service.loader.class}" fork="true" if:set="monitor.is.local"
 			      dir="${monitor.project.dir}" output="${monitor.output.file}">
 				<classpath refid="monitor.classpath" />
 				<arg value="${monitor.project.dir}" />
@@ -571,6 +617,12 @@
 		<echo message="  ant                              Run complete workflow (default)" />
 		<echo message="  ant run-complete-workflow        Run complete workflow" />
 		<echo message="  ant help                         Show this help" />
+		<echo message="" />
+		<echo message="DEPLOYMENT MODES (per service):" />
+		<echo message="  -D&lt;service&gt;.mode=local           Launch service on this machine (default)" />
+		<echo message="  -D&lt;service&gt;.mode=remote          Service runs on another machine (skip launch)" />
+		<echo message="" />
+		<echo message="  Services: p1, p2, p3, p4, monitor" />
 		<echo message="" />
 		<echo message="CONFIGURABLE PARAMETERS:" />
 		<echo message="  -Dworkflow1.token.count=10       Tokens via EVENT_GENERATOR (workflow1)" />

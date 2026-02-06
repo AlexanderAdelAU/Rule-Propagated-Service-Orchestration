@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="P1_P2_BuildAndRun" default="run-complete-workflow" basedir=".">
+<project name="P1_P2_BuildAndRun" default="run-complete-workflow" basedir="."
+	    xmlns:if="ant:if" xmlns:unless="ant:unless">
 	<description>
 		P1_P2 Petri Net - Complete Workflow with Initialization and Collection
 		
@@ -16,6 +17,21 @@
 
 		Services (P1, P2, Monitor) start once and remain running throughout all phases.
 	</description>
+
+	<!-- ======================================================================= -->
+	<!-- DEPLOYMENT CONFIGURATION                                                -->
+	<!-- ======================================================================= -->
+	<!-- Service deployment modes:                                                -->
+	<!--   local  = launch service process on THIS machine                       -->
+	<!--   remote = service runs on ANOTHER machine (skip launch, still send     -->
+	<!--            events to it for init/workflow/collection phases)             -->
+	<!--                                                                         -->
+	<!-- Override from command line: ant -Dp1.mode=remote                         -->
+	<!-- ======================================================================= -->
+
+	<property name="p1.mode"      value="local" />
+	<property name="p2.mode"      value="local" />
+	<property name="monitor.mode" value="local" />
 
 	<!-- ======================================================================= -->
 	<!-- PROPERTIES                                                              -->
@@ -140,6 +156,25 @@
 	</path>
 
 	<!-- ======================================================================= -->
+	<!-- DEPLOYMENT MODE RESOLUTION                                              -->
+	<!-- ======================================================================= -->
+
+	<target name="resolve-deployment-modes">
+		<!-- Resolve boolean properties from mode settings -->
+		<condition property="p1.is.local"><equals arg1="${p1.mode}" arg2="local" /></condition>
+		<condition property="p2.is.local"><equals arg1="${p2.mode}" arg2="local" /></condition>
+		<condition property="monitor.is.local"><equals arg1="${monitor.mode}" arg2="local" /></condition>
+
+		<!-- Display deployment configuration -->
+		<echo message="" />
+		<echo message="  Deployment Configuration:" />
+		<echo message="    P1:      ${p1.mode}" />
+		<echo message="    P2:      ${p2.mode}" />
+		<echo message="    Monitor: ${monitor.mode}" />
+		<echo message="" />
+	</target>
+
+	<!-- ======================================================================= -->
 	<!-- UTILITY TARGETS                                                         -->
 	<!-- ======================================================================= -->
 
@@ -219,7 +254,7 @@
 	<!-- MAIN TARGET: COMPLETE WORKFLOW                                          -->
 	<!-- ======================================================================= -->
 
-	<target name="run-complete-workflow" depends="clean-output,rebuild-service-ruleml" 
+	<target name="run-complete-workflow" depends="resolve-deployment-modes,clean-output,rebuild-service-ruleml" 
 	        description="Run complete P1-P2 workflow with init, execution and collection (DEFAULT)">
 		<echo message="" />
 		<echo message="================================================================" />
@@ -233,7 +268,8 @@
 
 		<parallel>
 			<!-- Start P1 Service -->
-			<java jvm="java.exe" classname="${service.loader.class}" 
+			<echo message="  [p1] Skipping - running on remote host" unless:set="p1.is.local" />
+			<java jvm="java.exe" classname="${service.loader.class}" if:set="p1.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p1.project.dir}" output="${p1.output.file}">
 				<classpath refid="p1.classpath" />
@@ -243,7 +279,8 @@
 			</java>
 
 			<!-- Start P2 Service -->
-			<java jvm="java.exe" classname="${service.loader.class}" 
+			<echo message="  [p2] Skipping - running on remote host" unless:set="p2.is.local" />
+			<java jvm="java.exe" classname="${service.loader.class}" if:set="p2.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p2.project.dir}" output="${p2.output.file}">
 				<classpath refid="p2.classpath" />
@@ -253,7 +290,8 @@
 			</java>
 
 			<!-- Start Monitor Service -->
-			<java jvm="java.exe" classname="${service.loader.class}" 
+			<echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local" />
+			<java jvm="java.exe" classname="${service.loader.class}" if:set="monitor.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${monitor.project.dir}" output="${monitor.output.file}">
 				<classpath refid="monitor.classpath" />
@@ -409,7 +447,7 @@
 	<!-- WORKFLOW-ONLY TARGET (skip init/collect)                               -->
 	<!-- ======================================================================= -->
 
-	<target name="run-workflow-only" depends="clean-output,rebuild-service-ruleml" 
+	<target name="run-workflow-only" depends="resolve-deployment-modes,clean-output,rebuild-service-ruleml" 
 	        description="Run only the workflow phase (skip init and collect)">
 		<echo message="" />
 		<echo message="================================================================" />
@@ -421,7 +459,8 @@
 
 		<parallel>
 			<!-- Start services -->
-			<java jvm="java.exe" classname="${service.loader.class}" 
+			<echo message="  [p1] Skipping - running on remote host" unless:set="p1.is.local" />
+			<java jvm="java.exe" classname="${service.loader.class}" if:set="p1.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p1.project.dir}" output="${p1.output.file}">
 				<classpath refid="p1.classpath" />
@@ -430,7 +469,8 @@
 				<arg value="${rule.version}" />
 			</java>
 
-			<java jvm="java.exe" classname="${service.loader.class}" 
+			<echo message="  [p2] Skipping - running on remote host" unless:set="p2.is.local" />
+			<java jvm="java.exe" classname="${service.loader.class}" if:set="p2.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p2.project.dir}" output="${p2.output.file}">
 				<classpath refid="p2.classpath" />
@@ -439,7 +479,8 @@
 				<arg value="${rule.version}" />
 			</java>
 
-			<java jvm="java.exe" classname="${service.loader.class}" 
+			<echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local" />
+			<java jvm="java.exe" classname="${service.loader.class}" if:set="monitor.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${monitor.project.dir}" output="${monitor.output.file}">
 				<classpath refid="monitor.classpath" />
@@ -495,6 +536,12 @@
 		<echo message="  ant run-complete-workflow  Run complete workflow" />
 		<echo message="  ant run-workflow-only      Skip init/collect phases" />
 		<echo message="  ant help                   Show this help" />
+		<echo message="" />
+		<echo message="DEPLOYMENT MODES (per service):" />
+		<echo message="  -D&lt;service&gt;.mode=local           Launch service on this machine (default)" />
+		<echo message="  -D&lt;service&gt;.mode=remote          Service runs on another machine (skip launch)" />
+		<echo message="" />
+		<echo message="  Services: p1, p2, monitor" />
 		<echo message="" />
 		<echo message="CONFIGURABLE PARAMETERS:" />
 		<echo message="  -Drule.version=v001                    Rule base version" />
