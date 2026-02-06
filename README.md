@@ -1,10 +1,10 @@
 # Rule-Propagated-Service-Orchestration
 
-RPSO is a decentralized workflow orchestration architecture that eliminates central coordination bottlenecks by embedding orchestration logic as executable rules at service boundaries. Unlike traditional orchestrators that maintain global workflow state in a central engine, DORA distributes coordination intelligence to autonomous service nodes that make local routing decisions based on locally-cached rules while maintaining global workflow coherence through token-based state propagation. The architecture operates through a two-phase approach: compile-time transformation of declarative JSON workflow specifications into service-specific rule fragments, followed by runtime execution where services independently evaluate rules to determine routing without inter-service coordination. Implementation of an emergency department workflow demonstrates measurable benefits in failure isolation. 
+RPSO is a decentralized workflow orchestration architecture that eliminates central coordination bottlenecks by embedding orchestration logic as executable rules at service or mesh boundaries. Unlike traditional orchestrators that maintain global workflow state in a central engine, RPSO distributes coordination intelligence to autonomous service nodes that make local routing decisions based on locally-cached rules while maintaining global workflow coherence through token-based state propagation. The architecture operates through a two-phase approach: compile-time transformation of declarative JSON workflow specifications into service-specific rule fragments, followed by runtime execution where services independently evaluate rules to determine routing without inter-service coordination. 
 
 ## Overview
 
-Rather than services being passive executors controlled by a remote orchestrator, coordination intelligence is embedded in control nodes (T_in and T_out) at service boundaries. Services remain focused on business logic while the control nodes make autonomous routing decisions based on locally-executed rules, maintaining global workflow coherence through token-based state propagation.
+Rather than services being passive executors controlled by a remote orchestrator, coordination intelligence is embedded in control nodes (*T_in* and *T_out*) at service boundaries. Services remain focused on business logic while the control nodes make autonomous routing decisions based on locally-executed rules, maintaining global workflow coherence through token-based state propagation.  The service or computation node is not touch by the control nodes except to invoke them.  The dotted lines notate network connections.
 
 ![Architecture](images/architecture.png)
 
@@ -16,7 +16,7 @@ Rather than services being passive executors controlled by a remote orchestrator
 - **Rule-Based Coordination** - Services execute RuleML rules locally via OOjDREW engine
 - **Token-Based State** - Workflow state propagates with tokens, eliminating external state stores
 - **Bounded Failure Impact** - Node failures affect only dependent workflows (20-33%) vs 100% in centralized systems
-- **Concurrent Versioning** - Multiple workflow versions (v001, v002, v003) execute simultaneously
+- **Concurrent Versioning** - Multiple workflow versions (RuleBases v001, v002, v003, etc) execute simultaneously
 - **Geographic Distribution** - Native support for distributed deployments
 
 ## Architecture
@@ -24,14 +24,15 @@ Rather than services being passive executors controlled by a remote orchestrator
 The system implements a two-layer architecture:
 
 - **Rule Deployment Layer** (compile-time) - At deployment time, the RulePropagation component transforms JSON workflow specifications into service-specific rule fragments. Each service receives rules defining its coordination behavior (NodeType atoms), routing conditions (meetsCondition atoms), and decision values (DecisionValue atoms). These rules can occur in real-time whilst other process are still in flight.  They are distributed via UDP with a commitment protocol ensuring all services acknowledge receipt before workflow activation is allowed.
-- **Token Flow Layer** (runtime) - At runtime, tokens carrying both workflow state and accumulated business data traverse the service network. Each ServiceThread component acts as an embedded orchestrator, receiving tokens through its EventReactor, querying local OOjDREW rule engine for routing decisions, invoking the business service, and publishing results via EventPublisher to downstream services.
 
 
 ### Rule Deployment Layer
 
 ![RuleGeneration](images/rule_generation.png)
 
-### Core Components
+- **Token Flow Layer** (runtime) - At runtime, an xml payload traverses the network carrying both workflow state and accumulated business data.  Each control node reads the payload (*T_in*) and prioritises and buffers the arriving tokens that carries the service's operation arguments.   Once the service has been invoked the results enrich the token, and then EventPublisher (*T_out*) querying local OOjDREW rule engine for routing decisions to downstream services.
+
+### Control Node - Core Components
 
 | Component | Description |
 |-----------|-------------|
@@ -44,10 +45,46 @@ The system implements a two-layer architecture:
 
 ### Coordination Patterns
 
+- **GatewayNode** - XOR-based routing guards
 - **DecisionNode** - Conditional routing based on service results
 - **ForkNode** - Parallel service invocation
 - **JoinNode** - Correlation-based synchronization
 - **MergeNode** - Flexible input handling
+
+### Service Defintions (RuleBase)
+Services Names and Operations are defined as RuleML atoms, where ip0 is mapped to an IP address, and the last entry represents the port number, for example
+
+<!-- List of service facts -->
+
+```xml
+<!-- List of service facts -->
+
+<!-- Triage Service -->
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>TriageService</Ind>
+	<Ind>processTriageAssessment</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2100</Ind>
+</Atom>
+
+<!-- Radiology Service -->
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>RadiologyService</Ind>
+	<Ind>processImagingRequest</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2101</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>RadiologyService</Ind>
+	<Ind>federatedRadiologyRequest</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2102</Ind>
+</Atom>
+```
 
 
 ## Project Structure
