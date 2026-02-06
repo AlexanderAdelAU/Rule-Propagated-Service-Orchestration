@@ -100,12 +100,11 @@ The **token identity** (`sequenceId`) and **token value** (`attributeValue`) tra
 ### Service Defintions (RuleBase)
 Services Names and Operations are defined as RuleML atoms, where ip0 is mapped to an IP address, and the last entry represents the port number, for example
 
-<!-- List of service facts -->
 
 ```xml
 <!-- List of service facts -->
 
-<!-- Triage Service -->
+<!-- Triage Service Method -->
 <Atom>
 	<Rel>activeService</Rel>
 	<Ind>TriageService</Ind>
@@ -114,7 +113,7 @@ Services Names and Operations are defined as RuleML atoms, where ip0 is mapped t
 	<Ind>2100</Ind>
 </Atom>
 
-<!-- Radiology Service -->
+<!-- Radiology Service Methods -->
 <Atom>
 	<Rel>activeService</Rel>
 	<Ind>RadiologyService</Ind>
@@ -156,7 +155,7 @@ Services Names and Operations are defined as RuleML atoms, where ip0 is mapped t
 - Java 15+
 - Apache Ant
 - OOjDREW rule engine
-- Derby/MySQL (optional)
+- Derby (Embedded)
 
 ## Building
 
@@ -201,11 +200,9 @@ Services register via RuleML atoms:
 
 ## Validation Scenario
 
-The implementation includes an emergency department workflow with three paths:
+The implementation includes an emergency department workflow along with simple Petri Net type services workflow.  An example of a simple process workflow is shown below.
 
-1. **Fast Track** - Direct triage to treatment (20% of cases)
-2. **Comprehensive** - Triage → {Radiology, Laboratory, Cardiology} → Diagnosis → Treatment
-3. **Federated** - External radiology requests from other hospitals
+![HowToBuildAModel](images/building_a_model.png)
 
 ## Tutorial: Running the Traffic Lights Simulation
 
@@ -223,7 +220,7 @@ The implementation includes an emergency department workflow with three paths:
 
 7. Load the analysis file from the Analysis folder where the run was saved
 
-8. Press **Run** to see the simulation results
+8. Press **Play** to see the simulation results
 
 
 # License

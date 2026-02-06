@@ -714,6 +714,14 @@
       "fontSize": 12,
       "fontStyle": 0,
       "color": -16777216
+    },
+    {
+      "x": 655,
+      "y": 239,
+      "text": "Service Nodes return True or | False with equal probability",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
     }
   ]
 }
