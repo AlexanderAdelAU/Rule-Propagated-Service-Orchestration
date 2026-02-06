@@ -1,9 +1,9 @@
 <Assert>
 <Rulebase mapClosure="universal">
 <!-- MASTER SERVICE RULE BASE -->
-<!-- Generated: Thu Feb 05 22:53:55 AEST 2026 -->
+<!-- Generated: Fri Feb 06 11:18:12 AEST 2026 -->
 <!-- Version: v001 -->
-<!-- Services: TreatmentService -->
+<!-- Services: ALL -->
 <!-- This is the SINGLE SOURCE OF TRUTH for service resolution -->
 <!-- Rule files loaded recursively from: C:\DevShare\BTSN_R001\BTSN\btsn.common\RuleBase -->
 
@@ -165,6 +165,403 @@ This is the rule that governs the list of all services.
 </Implies>
 <!-- ===== END: CoreRuleBase.ruleml.xml ===== -->
 
+<!-- ===== BEGIN: Healthcare\ListofHealthCareActiveServices.ruleml.xml ===== -->
+<!-- List of service facts -->
+<!-- ActiveServices.ruleml.xml - loaded last or checked first -->
+
+<!-- ================================================================ -->
+<!-- WORKFLOW SERVICES                                                -->
+<!-- ================================================================ -->
+
+<!-- Triage Service -->
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>TriageService</Ind>
+	<Ind>processTriageAssessment</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2100</Ind>
+</Atom>
+
+<!-- Radiology Service -->
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>RadiologyService</Ind>
+	<Ind>processImagingRequest</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2101</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>RadiologyService</Ind>
+	<Ind>federatedRadiologyRequest</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2102</Ind>
+</Atom>
+
+<!-- Cardiology Service -->
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>CardiologyService</Ind>
+	<Ind>processCardiacAssessment</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2103</Ind>
+</Atom>
+
+<!-- Diagnosis Service -->
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>DiagnosisService</Ind>
+	<Ind>processClinicalDecision</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2104</Ind>
+</Atom>
+
+<!-- Laboratory Service -->
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>LaboratoryService</Ind>
+	<Ind>processLabRequest</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2105</Ind>
+</Atom>
+
+<!-- Treatment Service -->
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>TreatmentService</Ind>
+	<Ind>executeTreatmentPlan</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2106</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>TreatmentService</Ind>
+	<Ind>executeDirectTreatment</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2107</Ind>
+</Atom>
+<!-- ===== END: Healthcare\ListofHealthCareActiveServices.ruleml.xml ===== -->
+
+<!-- ===== BEGIN: Healthcare\ListofHealthCareCollectorServices.ruleml.xml ===== -->
+<!-- ================================================================ -->
+<!-- PERFORMANCE COLLECTION SERVICES                                  -->
+<!-- ================================================================ -->
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Triage_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2200</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Radiology_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2201</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Cardiology_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2202</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Diagnosis_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2203</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Laboratory_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2204</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Treatment_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2205</Ind>
+</Atom>
+<!-- ===== END: Healthcare\ListofHealthCareCollectorServices.ruleml.xml ===== -->
+
+<!-- ===== BEGIN: Healthcare\ListofHealthcareInitializationServices.ruleml.xml ===== -->
+<!-- ================================================================ -->
+<!-- PERFORMANCE COLLECTION SERVICES                                  -->
+<!-- ================================================================ -->
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Triage_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2300</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Radiology_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2301</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Cardiology_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2302</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Diagnosis_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2303</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Laboratory_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2304</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>Treatment_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>2305</Ind>
+</Atom>
+<!-- ===== END: Healthcare\ListofHealthcareInitializationServices.ruleml.xml ===== -->
+
+<!-- ===== BEGIN: Monitor\ListofMonitorActiveServices.ruleml.xml ===== -->
+<!-- ================================================================ -->
+<!-- MONITOR PLACE (PetriNet - MonitorService)                         -->
+<!-- ================================================================ -->
+
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>MonitorService</Ind>
+    <Ind>acknowledgeTokenArrival</Ind>
+    <Ind>ip0</Ind>
+    <Ind>3000</Ind>
+</Atom>
+
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>MonitorService</Ind>
+    <Ind>writeServiceTimingRecord</Ind>
+    <Ind>ip0</Ind>
+    <Ind>3001</Ind>
+</Atom>
+
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>MonitorService</Ind>
+    <Ind>writeCollectorData</Ind>
+    <Ind>ip0</Ind>
+    <Ind>3002</Ind>
+</Atom>
+
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>MonitorService</Ind>
+    <Ind>initiateWorkflowDataCollection</Ind>
+    <Ind>ip0</Ind>
+    <Ind>3003</Ind>
+</Atom>
+
+<!-- ================================================================ -->
+<!-- MONITOR INITIALIZATION                                           -->
+<!-- ================================================================ -->
+
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>Monitor_InitializationService</Ind>
+    <Ind>purgeAndInitialize</Ind>
+    <Ind>ip0</Ind>
+    <Ind>3004</Ind>
+</Atom>
+<!-- ===== END: Monitor\ListofMonitorActiveServices.ruleml.xml ===== -->
+
+<!-- ===== BEGIN: PetriNet\ListofPetriNetActiveServices.ruleml.xml ===== -->
+<!-- List of service facts -->
+<!-- ActiveServices.ruleml.xml - loaded last or checked first -->
+
+<!-- ================================================================ -->
+<!-- WORKFLOW PLACES                                                -->
+<!-- ================================================================ -->
+
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>P1_Place</Ind>              <!-- Service Name -->
+    <Ind>processToken</Ind>           <!-- Method -->
+    <Ind>ip0</Ind>
+    <Ind>4001</Ind>
+</Atom>
+<!-- P2 Place -->
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>P2_Place</Ind>              <!-- Service Name -->
+    <Ind>processToken</Ind>           <!-- Method -->
+    <Ind>ip0</Ind>
+    <Ind>4002</Ind>
+</Atom><!-- P3 Place -->
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>P3_Place</Ind>              <!-- Service Name -->
+    <Ind>processToken</Ind>           <!-- Method -->
+    <Ind>ip0</Ind>
+    <Ind>4003</Ind>
+</Atom>
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>P4_Place</Ind>              <!-- Service Name -->
+    <Ind>processToken</Ind>           <!-- Method -->
+    <Ind>ip0</Ind>
+    <Ind>4004</Ind>
+</Atom>
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>P5_Place</Ind>              <!-- Service Name -->
+    <Ind>processToken</Ind>           <!-- Method -->
+    <Ind>ip0</Ind>
+    <Ind>4005</Ind>
+</Atom>
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>P6_Place</Ind>              <!-- Service Name -->
+    <Ind>processToken</Ind>           <!-- Method -->
+    <Ind>ip0</Ind>
+    <Ind>4006</Ind>
+</Atom>
+<!-- ===== END: PetriNet\ListofPetriNetActiveServices.ruleml.xml ===== -->
+
+<!-- ===== BEGIN: PetriNet\ListofPetriNetInitializationServices.ruleml.xml ===== -->
+<!-- ================================================================ -->
+<!-- PERFORMANCE COLLECTION SERVICES                                  -->
+<!-- ================================================================ -->
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P1_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4300</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P2_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4301</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P3_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4302</Ind>
+</Atom>
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P4_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4303</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P5_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4304</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P6_InitializationService</Ind>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4305</Ind>
+</Atom>
+<!-- ===== END: PetriNet\ListofPetriNetInitializationServices.ruleml.xml ===== -->
+
+<!-- ===== BEGIN: PetriNet\ListofPetrinetCollectorServices.ruleml.xml ===== -->
+<!-- ================================================================ -->
+<!-- PERFORMANCE COLLECTION SERVICES                                  -->
+<!-- ================================================================ -->
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P1_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4100</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P2_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4101</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P3_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4102</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P4_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4103</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P5_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4104</Ind>
+</Atom>
+
+<Atom>
+	<Rel>activeService</Rel>
+	<Ind>P6_CollectorService</Ind>
+	<Ind>collectAllData</Ind>
+	<Ind>ip0</Ind>
+	<Ind>4105</Ind>
+</Atom>
+<!-- ===== END: PetriNet\ListofPetrinetCollectorServices.ruleml.xml ===== -->
+
 <!-- ===== BEGIN: RemoteHostMappings.ruleml.xml ===== -->
 <!-- RemoteHostMappings.ruleml.xml -->
 <!-- Maps logical channel IDs (ip1, ip2, etc.) to actual IP addresses -->
@@ -196,26 +593,612 @@ This is the rule that governs the list of all services.
 </Atom>
 <!-- ===== END: RemoteHostMappings.ruleml.xml ===== -->
 
-<!-- ===== BEGIN: AUTO-GENERATED serviceName facts ===== -->
-<!-- These facts are automatically generated from activeService facts -->
-<!-- ServiceThread requires these to process service operations -->
-
-<Atom>
-    <Rel>serviceName</Rel>
-    <Ind>TreatmentService</Ind>
-    <Ind>executeTreatmentPlan</Ind>
-    <Ind>executeTreatmentPlan</Ind>
-    <Ind>null</Ind>
-    <Ind>null</Ind>
-    <Ind>ip0</Ind>
-    <Ind>2106</Ind>
-</Atom>
-
-<!-- ===== END: AUTO-GENERATED serviceName facts ===== -->
-
 <!-- ===== CANONICAL BINDINGS (filtered, hierarchical) ===== -->
 
-<!-- Service directory: TreatmentService -->
+<!-- BEGIN: CardiologyService/Cardiology_CollectorService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>Cardiology_CollectorService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>collectAllData</Ind>
+	<Ind>token</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>getServicePerformanceData</Ind>
+	<Ind>token</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>
+<!-- END: CardiologyService/Cardiology_CollectorService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: CardiologyService/Cardiology_InitializationService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>Cardiology_InitializationService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>null</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>
+<!-- END: CardiologyService/Cardiology_InitializationService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: CardiologyService/CardiologyService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>CardiologyService</Ind>
+</Atom>
+
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>processCardiacAssessment</Ind>
+	<Ind>cardiologyResults</Ind>  	<!-- This is the attribute returned -->
+	<Ind>triageResults</Ind>	<!-- This input is needed -->
+	
+</Atom>
+<!-- END: CardiologyService/CardiologyService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: DiagnosisService/Diagnosis_CollectorService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>Diagnosis_CollectorService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>collectAllData</Ind>
+	<Ind>token</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>getServicePerformanceData</Ind>
+	<Ind>token</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>
+<!-- END: DiagnosisService/Diagnosis_CollectorService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: DiagnosisService/Diagnosis_InitializationService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>Diagnosis_InitializationService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>null</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>
+<!-- END: DiagnosisService/Diagnosis_InitializationService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: DiagnosisService/DiagnosisService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>DiagnosisService</Ind>
+</Atom>
+
+<Atom>
+    <Rel>canonicalBinding</Rel>
+    <Ind>processClinicalDecision</Ind>
+    <Ind>diagnosisResults</Ind> <!-- This is the attribute returned -->
+    <Ind>cardiologyResults</Ind> <!-- This is the attribute needed -->
+</Atom>
+<Atom>
+    <Rel>canonicalBinding</Rel>
+    <Ind>processClinicalDecision</Ind>
+    <Ind>diagnosisResults</Ind> <!-- This is the attribute returned -->
+    <Ind>laboratoryResults</Ind> <!-- This is the attribute needed -->
+</Atom>
+<Atom>
+    <Rel>canonicalBinding</Rel>
+    <Ind>processClinicalDecision</Ind>
+    <Ind>diagnosisResults</Ind> <!-- This is the attribute returned -->
+    <Ind>radiologyResults</Ind> <!-- This is the attribute needed -->
+</Atom>
+<!-- END: DiagnosisService/DiagnosisService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: LaboratoryService/Laboratory_CollectorService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>Laboratory_CollectorService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>collectAllData</Ind>
+	<Ind>token</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>getServicePerformanceData</Ind>
+	<Ind>token</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>
+<!-- END: LaboratoryService/Laboratory_CollectorService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: LaboratoryService/Laboratory_InitializationService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>Laboratory_InitializationService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>null</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>
+<!-- END: LaboratoryService/Laboratory_InitializationService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: LaboratoryService/LaboratoryService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>LaboratoryService</Ind>
+</Atom>
+<!-- three argument join so we need to declaration one for each argument-->
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>processLabRequest</Ind>
+	<Ind>laboratoryResults</Ind>  	<!-- This is the attribute returned -->
+	<Ind>triageResults</Ind>			<!-- This input is needed -->
+</Atom>
+<!-- END: LaboratoryService/LaboratoryService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: Monitor/Monitor_InitializationService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding for Monitor_InitializationService -->
+<!-- Auto-generated by RuleDeployer - DO NOT EDIT -->
+<!-- Input count: 1 -->
+<!-- Return attribute from topology: token -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>Monitor_InitializationService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
+<!-- END: Monitor/Monitor_InitializationService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: MonitorService/Monitor_InitializationService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding for Monitor_InitializationService -->
+<!-- Auto-generated by RulePropagation - DO NOT EDIT -->
+<!-- Input count: 1 -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>Monitor_InitializationService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
+<!-- END: MonitorService/Monitor_InitializationService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: MonitorService/MonitorService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding for MonitorService -->
+<!-- Auto-generated by TopologyBindingGenerator - DO NOT EDIT -->
+<!-- Input count: 1 -->
+<!-- Return attribute from topology: token -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>MonitorService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>arguments": [
+            {"name": "token</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
+<!-- END: MonitorService/MonitorService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: P1/P1_CollectorService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding for P1_CollectorService -->
+<!-- Auto-generated by RuleDeployer - DO NOT EDIT -->
+<!-- Input count: 1 -->
+<!-- Return attribute from topology: token -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P1_CollectorService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>collectAllData</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
+<!-- END: P1/P1_CollectorService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: P1/P1_InitializationService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding for P1_InitializationService -->
+<!-- Auto-generated by RuleDeployer - DO NOT EDIT -->
+<!-- Input count: 1 -->
+<!-- Return attribute from topology: token -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P1_InitializationService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
+<!-- END: P1/P1_InitializationService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: P1/P1_Place-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding for P1_Place -->
+<!-- Auto-generated by TopologyBindingGenerator - DO NOT EDIT -->
+<!-- Input count: 1 -->
+<!-- Return attribute from topology: token -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P1_Place</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>arguments": [
+            {"name": "token</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
+<!-- END: P1/P1_Place-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: P2/P2_CollectorService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding for P2_CollectorService -->
+<!-- Auto-generated by RuleDeployer - DO NOT EDIT -->
+<!-- Input count: 1 -->
+<!-- Return attribute from topology: token -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P2_CollectorService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>collectAllData</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
+<!-- END: P2/P2_CollectorService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: P2/P2_InitializationService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding for P2_InitializationService -->
+<!-- Auto-generated by RuleDeployer - DO NOT EDIT -->
+<!-- Input count: 1 -->
+<!-- Return attribute from topology: token -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P2_InitializationService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
+<!-- END: P2/P2_InitializationService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: P2/P2_Place-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding for P2_Place -->
+<!-- Auto-generated by TopologyBindingGenerator - DO NOT EDIT -->
+<!-- Input count: 1 -->
+<!-- Return attribute from topology: token -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P2_Place</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>arguments": [
+            {"name": "token</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
+<!-- END: P2/P2_Place-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: P3/P3_CollectorService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding for P3_CollectorService -->
+<!-- Auto-generated by RuleDeployer - DO NOT EDIT -->
+<!-- Input count: 1 -->
+<!-- Return attribute from topology: token -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P3_CollectorService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>collectAllData</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
+<!-- END: P3/P3_CollectorService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: P3/P3_InitializationService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding for P3_InitializationService -->
+<!-- Auto-generated by RuleDeployer - DO NOT EDIT -->
+<!-- Input count: 1 -->
+<!-- Return attribute from topology: token -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P3_InitializationService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
+<!-- END: P3/P3_InitializationService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: P3/P3_Place-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding for P3_Place -->
+<!-- Auto-generated by RuleDeployer - DO NOT EDIT -->
+<!-- Input count: 1 -->
+<!-- Arguments from topology: [token] -->
+<!-- Return attribute from topology: token_branch2 -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P3_Place</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>processToken</Ind>
+	<Ind>token_branch2</Ind>
+	<Ind>token</Ind>
+</Atom>
+<!-- END: P3/P3_Place-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: P4/P4_CollectorService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding for P4_CollectorService -->
+<!-- Auto-generated by RuleDeployer - DO NOT EDIT -->
+<!-- Input count: 1 -->
+<!-- Return attribute from topology: token -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P4_CollectorService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>collectAllData</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
+<!-- END: P4/P4_CollectorService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: P4/P4_InitializationService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding for P4_InitializationService -->
+<!-- Auto-generated by RuleDeployer - DO NOT EDIT -->
+<!-- Input count: 1 -->
+<!-- Return attribute from topology: token -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P4_InitializationService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
+<!-- END: P4/P4_InitializationService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: P4/P4_Place-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding for P4_Place -->
+<!-- Auto-generated by RuleDeployer - DO NOT EDIT -->
+<!-- Input count: 2 -->
+<!-- Arguments from topology: [token_branch1, token_branch2] -->
+<!-- Return attribute from topology: token -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P4_Place</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>processToken</Ind>
+	<Ind>token</Ind>
+	<Ind>token_branch1</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>processToken</Ind>
+	<Ind>token</Ind>
+	<Ind>token_branch2</Ind>
+</Atom>
+<!-- END: P4/P4_Place-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: P5/P5_CollectorService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding for P5_CollectorService -->
+<!-- Auto-generated by RuleDeployer - DO NOT EDIT -->
+<!-- Input count: 1 -->
+<!-- Return attribute from topology: token -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P5_CollectorService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>collectAllData</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
+<!-- END: P5/P5_CollectorService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: P5/P5_InitializationService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding for P5_InitializationService -->
+<!-- Auto-generated by RuleDeployer - DO NOT EDIT -->
+<!-- Input count: 1 -->
+<!-- Return attribute from topology: token -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P5_InitializationService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
+<!-- END: P5/P5_InitializationService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: P5/P5_Place-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding for P5_Place -->
+<!-- Auto-generated by RuleDeployer - DO NOT EDIT -->
+<!-- Input count: 1 -->
+<!-- Arguments from topology: [token] -->
+<!-- Return attribute from topology: token_branch1 -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P5_Place</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>processToken</Ind>
+	<Ind>token_branch1</Ind>
+	<Ind>token</Ind>
+</Atom>
+<!-- END: P5/P5_Place-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: P6/P6_CollectorService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding for P6_CollectorService -->
+<!-- Auto-generated by RuleDeployer - DO NOT EDIT -->
+<!-- Input count: 1 -->
+<!-- Return attribute from topology: token -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P6_CollectorService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>collectAllData</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
+<!-- END: P6/P6_CollectorService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: P6/P6_InitializationService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding for P6_InitializationService -->
+<!-- Auto-generated by RuleDeployer - DO NOT EDIT -->
+<!-- Input count: 1 -->
+<!-- Return attribute from topology: token -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P6_InitializationService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
+<!-- END: P6/P6_InitializationService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: P6/P6_Place-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding for P6_Place -->
+<!-- Auto-generated by RuleDeployer - DO NOT EDIT -->
+<!-- Input count: 1 -->
+<!-- Arguments from topology: [token] -->
+<!-- Return attribute from topology: token_branch2 -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P6_Place</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>processToken</Ind>
+	<Ind>token_branch2</Ind>
+	<Ind>token</Ind>
+</Atom>
+<!-- END: P6/P6_Place-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: RadiologyService/Radiology_CollectorService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>Radiology_CollectorService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>collectAllData</Ind>
+	<Ind>token</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>getServicePerformanceData</Ind>
+	<Ind>token</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>
+<!-- END: RadiologyService/Radiology_CollectorService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: RadiologyService/Radiology_InitializationService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>Radiology_InitializationService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>null</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>
+<!-- END: RadiologyService/Radiology_InitializationService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: RadiologyService/RadiologyService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>RadiologyService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>processImagingRequest</Ind>
+	<Ind>radiologyResults</Ind>  	<!-- This is the attribute returned -->
+	<Ind>triageResults</Ind>	<!-- This input is needed -->
+</Atom>
+
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>federatedRadiologyRequest</Ind>
+	<Ind>radiologyResults</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>
+<!-- END: RadiologyService/RadiologyService-CanonicalBindings.ruleml.xml -->
 
 <!-- BEGIN: TreatmentService/Treatment_CollectorService-CanonicalBindings.ruleml.xml -->
 <!-- Canonical Binding Service and Operation facts -->
@@ -272,5 +1255,88 @@ This is the rule that governs the list of all services.
 </Atom>
 <!-- END: TreatmentService/TreatmentService-CanonicalBindings.ruleml.xml -->
 
+<!-- BEGIN: TriageService/Triage_CollectorService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>Triage_CollectorService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>collectAllData</Ind>
+	<Ind>token</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>getServicePerformanceData</Ind>
+	<Ind>token</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>
+<!-- END: TriageService/Triage_CollectorService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: TriageService/Triage_InitializationService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>Triage_InitializationService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>purgeAndInitialize</Ind>
+	<Ind>null</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>
+<!-- END: TriageService/Triage_InitializationService-CanonicalBindings.ruleml.xml -->
+
+<!-- BEGIN: TriageService/TriageService-CanonicalBindings.ruleml.xml -->
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>TriageService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>processTriageAssessment</Ind>
+	<Ind>triageResults</Ind>  	<!-- This is the attribute returned -->
+	<Ind>token</Ind>	<!-- This input is needed -->
+</Atom>
+<!-- END: TriageService/TriageService-CanonicalBindings.ruleml.xml -->
+
+
+<!-- ================================================================ -->
+<!-- PETRINET CANONICAL BINDINGS (Auto-generated)                    -->
+<!-- ================================================================ -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P1_Place</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>processToken</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P2_Place</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>processToken</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>MonitorService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>acknowledgeTokenArrival</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
 </Rulebase>
 </Assert>
