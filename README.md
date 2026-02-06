@@ -23,14 +23,16 @@ Rather than services being passive executors controlled by a remote orchestrator
 
 The system implements a two-layer architecture:
 
-- **Rule Deployment Layer** (compile-time) - At deployment time, the RulePropagation component transforms JSON workflow specifications into service-specific rule fragments. Each service receives rules defining its coordination behavior (NodeType atoms), routing conditions (meetsCondition atoms), and decision values (DecisionValue atoms). These rules can occur in real-time whilst other process are still in flight.  They are distributed via UDP with a commitment protocol ensuring all services acknowledge receipt before workflow activation is allowed.
-
+- **Rule Deployment Layer** (compile-time)
+- **Token Flow Layer** (runtime)
 
 ### Rule Deployment Layer
+ At deployment time, the RulePropagation component transforms JSON workflow specifications into service-specific rule fragments. Each service receives rules defining its coordination behavior (NodeType atoms), routing conditions (meetsCondition atoms), and decision values (DecisionValue atoms). These rules can occur in real-time whilst other process are still in flight.  They are distributed via UDP with a commitment protocol ensuring all services acknowledge receipt before workflow activation is allowed.
 
 ![RuleGeneration](images/rule_generation.png)
 
-- **Token Flow Layer** (runtime) - At runtime, an xml payload traverses the network carrying both workflow state and accumulated business data.  Each control node reads the payload (*T_in*) and prioritises and buffers the arriving tokens that carries the service's operation arguments.   Once the service has been invoked the results enrich the token, and then EventPublisher (*T_out*) querying local OOjDREW rule engine for routing decisions to downstream services.
+### Token Flow Layer
+At runtime, an xml payload traverses the network carrying both workflow state and accumulated business data.  Each **Control Node** reads the payload (*T_in*) and prioritises and buffers the arriving tokens that carries the service's operation arguments.   Once the service has been invoked the results enrich the token, and then EventPublisher (*T_out*) querying local OOjDREW rule engine for routing decisions to downstream services.
 
 ### Control Node - Core Components
 
