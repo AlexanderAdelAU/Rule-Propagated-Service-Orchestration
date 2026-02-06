@@ -34,6 +34,50 @@ The system implements a two-layer architecture:
 ### Token Flow Layer
 At runtime, an xml payload traverses the network carrying both workflow state and accumulated business data.  Each **Control Node** reads the payload (*T_in*) and prioritises and buffers the arriving tokens that carries the service's operation arguments.   Once the service has been invoked the results enrich the token, and then EventPublisher (*T_out*) querying local OOjDREW rule engine for routing decisions to downstream services.
 
+## Payload Structure
+
+The inter-service payload is an **XML document** with four main sections:
+
+```xml
+<payload>
+    <header>...</header>
+    <service>...</service>
+    <joinAttribute>...</joinAttribute>
+    <monitorData>...</monitorData>
+</payload>
+```
+
+### Sections
+
+| Section | Purpose | Key Fields |
+|---------|---------|------------|
+| `<header>` | Routing & versioning | `sequenceId`, `ruleBaseVersion`, `monitorIncomingEvents` |
+| `<service>` | Target service info | `serviceName`, `operation` |
+| `<joinAttribute>` | Token data | `attributeName`, `attributeValue`, `notAfter` |
+| `<monitorData>` | Instrumentation | `processStartTime`, `eventGeneratorTimestamp`, `sourceEventGenerator`, `processElapsedTime` |
+
+### Token Data Flow
+
+1. **Incoming** — `ServiceThread` extracts maps via XPath:
+   ```java
+   headerMap = xph.findMultipleXMLItems(incomingXMLPayLoad, "//header/*");
+   attrMap = xph.findMultipleXMLItems(incomingXMLPayLoad, "//joinAttribute/*");
+   ```
+
+2. **Service invocation** — Token data passed to service via `attributeValue`
+
+3. **Outgoing** — Maps updated and written back to XML:
+   ```java
+   outgoingXMLPayLoad = xph.modifyMultipleXMLItems(outgoingXMLPayLoad, "//service/*", serviceMap);
+   outgoingXMLPayLoad = xph.modifyMultipleXMLItems(outgoingXMLPayLoad, "//joinAttribute/*", attrMap);
+   ```
+
+4. **Publish** — `EventPublisher` sends payload to next service's channel/port
+
+*Key Point*
+
+The **token identity** (`sequenceId`) and **token value** (`attributeValue`) travel together in the payload, allowing join synchronization via `argValPriorityMap` keyed by join ID.
+
 ### Control Node - Core Components
 
 | Component | Description |
@@ -181,9 +225,16 @@ The implementation includes an emergency department workflow with three paths:
 
 8. Press **Run** to see the simulation results
 
-## License
 
-[Specify license]
+# License
+
+**Copyright (c) 2025 [Your Name]**
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to use, copy, modify, merge, and distribute the Software for non-commercial purposes, subject to the following conditions: the above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+**Commons Clause Restriction:** The grant of rights under this license does not include the right to Sell the Software. "Sell" means providing the Software, or any derivative work, to third parties for a fee or other consideration, or offering a product or service whose value derives substantially from the Software's functionality. For commercial licensing enquiries, contact [your email].
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED.
 
 ## Author
 
