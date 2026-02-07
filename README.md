@@ -1,14 +1,17 @@
 # Rule-Propagated-Service-Orchestration
 
-RPSO is a decentralized workflow orchestration architecture that eliminates central coordination bottlenecks by embedding orchestration logic as executable rules at service or mesh boundaries. Unlike traditional orchestrators that maintain global workflow state in a central engine, RPSO distributes coordination intelligence to autonomous service nodes that make local routing decisions based on locally-cached rules while maintaining global workflow coherence through token-based state propagation. The architecture operates through a two-phase approach: compile-time transformation of declarative JSON workflow specifications into service-specific rule fragments, followed by runtime execution where services independently evaluate rules to determine routing without inter-service coordination. 
+RPSO is a decentralized workflow orchestration architecture that eliminates central coordination bottlenecks by embedding orchestration logic as executable rules at service or mesh boundaries. Unlike traditional orchestrators that maintain global workflow state in a central engine, RPSO distributes coordination intelligence to autonomous synchronising nodes that are ideally, but not essentially, co-hosted on the service node or mesh platform as a set of Java classes (handlers). Thes control nodes make local routing decisions based on locally-cached rules while maintaining global workflow coherence through token-based state propagation. The architecture operates through a two-phase approach: compile-time transformation of declarative JSON workflow specifications into service-specific rule fragments, followed by runtime execution where services independently evaluate rules to determine routing without inter-service coordination. 
+
+![BasicPattern](images/basic_pattern.png)
+*Figure 1. Core orchestration pattern*
 
 ## Overview
 
-Rather than services being passive executors controlled by a remote orchestrator, coordination intelligence is embedded in control nodes (*T_in* and *T_out*) at service boundaries. Services remain focused on business logic while the control nodes make autonomous routing decisions based on locally-executed rules, maintaining global workflow coherence through token-based state propagation.  The service or computation node is not touch by the control nodes except to invoke them.  The dotted lines notate network connections.
+The control nodes is annotated as *T_in* and the routing node annotated as *T_out* as shown in the figure below.The dotted arrows between *T_out and *T_in reflects that generally network connections of some sort.  Services remain focused on business logic while the control nodes make autonomous routing decisions based on locally-executed rules.  These rule are sent to the control nodes prior to a particular workflow commencing. In this manner global workflow coherence can be maintained through token-based state propagation between control and routing nodes.  The service or computation node is not touch by the control nodes except to invoke them.  The dotted lines notate network connections.
 
 ![Architecture](images/architecture.png)
 
-*Dual-layer architecture: Rule distribution (compile-time) and token flow (runtime)*
+*Figure 2. Dual-layer architecture: Rule distribution (compile-time) and token flow (runtime)*
 
 ## Key Features
 
