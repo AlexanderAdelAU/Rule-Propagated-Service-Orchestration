@@ -4,19 +4,19 @@ RPSO is a decentralized workflow orchestration architecture that eliminates cent
 
 
 <p align="center">
-  <img src="images/basic_pattern.png" alt="Core orchestration pattern" width="100%" />
+  <img src="images/basic_pattern.png" alt="Core orchestration pattern" width="80%" />
 </p>
 
 *Figure 1. Core orchestration pattern*
 
 ## Overview
 
-The control nodes is annotated as *T_in* and the routing node annotated as *T_out* as shown in the figure below.The dotted arrows between *T_out and *T_in reflects that generally network connections of some sort.  Services remain focused on business logic while the control nodes make autonomous routing decisions based on locally-executed rules.  These rule are sent to the control nodes prior to a particular workflow commencing. In this manner global workflow coherence can be maintained through token-based state propagation between control and routing nodes.  The service or computation node is not touch by the control nodes except to invoke them.  The dotted lines notate network connections.
+The control nodes is are implemented with the notation  *T_in* and the routing node annotated as *T_out* as shown in the figure below. The dotted arrows between *T_out and *T_in reflects that generally network connections of some sort.  Services remain focused on business logic while the control nodes make autonomous routing decisions based on locally-executed rules.  These rule are sent to the control nodes prior to a particular workflow commencing. In this manner global workflow coherence can be maintained through token-based state propagation between control and routing nodes.  The service or computation node is not touch by the control nodes except to invoke them.  The dotted lines notate network connections.
 
 
-<div style="text-align: center;">
-  <img src="images/rule_deployment.png" alt="Core orchestration pattern">
-</div>
+<p align="center">
+  <img src="images/rule_deployment.png" alt="Rule Deployment pattern" width="80%" />
+</p>
 
 *Figure 2. Dual-layer architecture: Rule distribution (compile-time) and token flow (runtime)*
 
@@ -26,20 +26,23 @@ The Java classes that implement the architecture interfaces are build on standar
 
 
 <p align="center">
-  <img src="images/java_implementation.png" alt="Core orchestration pattern" width="100%" />
+  <img src="images/java_implementation.png" alt="Java implementation classes" width="80%" />
 </p>
-
 
 *Figure 3. Java Implementation Handler Classes.*
 
-## Key Features
+### Control Node - Core Components
 
-- **Distributed Orchestration** - No central engine bottleneck or single point of failure
-- **Rule-Based Coordination** - Services execute RuleML rules locally via OOjDREW engine
-- **Token-Based State** - Workflow state propagates with tokens, eliminating external state stores
-- **Bounded Failure Impact** - Node failures affect only dependent workflows (20-33%) vs 100% in centralized systems
-- **Concurrent Versioning** - Multiple workflow versions (RuleBases v001, v002, v003, etc) execute simultaneously
-- **Geographic Distribution** - Native support for distributed deployments
+| Component | Description |
+|-----------|-------------|
+| EventReactor | UDP-based token reception with buffering |
+| Scheduler | Order according to ruleBase Version and Join Priority |
+| ServiceThread | Embedded orchestrator coordinating all components |
+| Rule Handler | Receives and validates rule fragments |
+| OOjDREW Engine | RuleML query processing for routing decisions |
+| EventPublisher | Intelligent token routing to downstream services |
+| ServiceHelper | Multi-protocol service invocation |
+
 
 ## High Level Architecture Concepts
 
@@ -100,16 +103,6 @@ The inter-service payload is an **XML document** with four main sections:
 
 The **token identity** (`sequenceId`) and **token value** (`attributeValue`) travel together in the payload, allowing join synchronization via `argValPriorityMap` keyed by join ID.
 
-### Control Node - Core Components
-
-| Component | Description |
-|-----------|-------------|
-| ServiceThread | Embedded orchestrator coordinating all components |
-| EventReactor | UDP-based token reception with buffering |
-| Rule Handler | Receives and validates rule fragments |
-| OOjDREW Engine | RuleML query processing for routing decisions |
-| EventPublisher | Intelligent token routing to downstream services |
-| ServiceHelper | Multi-protocol service invocation |
 
 ### Coordination Patterns
 
