@@ -112,7 +112,7 @@ The **token identity** (`sequenceId`) and **token value** (`attributeValue`) tra
 - **JoinNode** - Correlation-based synchronization
 - **MergeNode** - Flexible input handling
 
-### Service Defintions (RuleBase)
+### Service Definitions (RuleBase)
 Services Names and Operations are defined as RuleML atoms, where ip0 is mapped to an IP address, and the last entry represents the port number, for example
 
 
@@ -145,7 +145,38 @@ Services Names and Operations are defined as RuleML atoms, where ip0 is mapped t
 	<Ind>2102</Ind>
 </Atom>
 ```
+### Canonical Bindings (ServiceAttributeBindings)
+Services arguments are defined in a similar manner the Service Definitions. 
 
+The definition of service attributes is done on the basis *"if you want to talk to me you must call my operations with the following arguments and I will return the following values"*.  This form of compartmentalisation makes routing straight forward.  In the example below we can see that the ```DiagnosisService``` method ```processClinicalDecision``` requires three arguments, ```cardiologyResults```  , ```laboratoryResults``` and ```radiologyResults```.  In the workflow definition of this process this would represent a ```Join Node```.
+
+```xml
+
+<!-- Canonical Binding Service and Operation facts -->
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>DiagnosisService</Ind>
+</Atom>
+
+<Atom>
+    <Rel>canonicalBinding</Rel>
+    <Ind>processClinicalDecision</Ind>
+    <Ind>diagnosisResults</Ind> <!-- This is the attribute returned -->
+    <Ind>cardiologyResults</Ind> <!-- This is the attribute needed -->
+</Atom>
+<Atom>
+    <Rel>canonicalBinding</Rel>
+    <Ind>processClinicalDecision</Ind>
+    <Ind>diagnosisResults</Ind> <!-- This is the attribute returned -->
+    <Ind>laboratoryResults</Ind> <!-- This is the attribute needed -->
+</Atom>
+<Atom>
+    <Rel>canonicalBinding</Rel>
+    <Ind>processClinicalDecision</Ind>
+    <Ind>diagnosisResults</Ind> <!-- This is the attribute returned -->
+    <Ind>radiologyResults</Ind> <!-- This is the attribute needed -->
+</Atom>
+```
 
 ## Project Structure
 
