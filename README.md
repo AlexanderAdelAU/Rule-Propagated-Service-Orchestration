@@ -2,16 +2,32 @@
 
 RPSO is a decentralized workflow orchestration architecture that eliminates central coordination bottlenecks by embedding orchestration logic as executable rules at service or mesh boundaries. Unlike traditional orchestrators that maintain global workflow state in a central engine, RPSO distributes coordination intelligence to autonomous synchronising nodes that are ideally, but not essentially, co-hosted on the service node or mesh platform as a set of Java classes (handlers). These control nodes make local routing decisions based on locally-cached rules while maintaining global workflow coherence through an xml payload that carries token-based state propagation. The architecture operates through a two-phase approach: compile-time transformation of declarative JSON workflow specifications into service-specific rule fragments, followed by runtime execution where control nodes independently evaluate rules to determine routing without inter-service coordination. 
 
-![BasicPattern](images/basic_pattern.png)
+<div style="text-align: center;">
+  <img src="images/basic_pattern.png" alt="Core orchestration pattern">
+</div>
+
 *Figure 1. Core orchestration pattern*
 
 ## Overview
 
 The control nodes is annotated as *T_in* and the routing node annotated as *T_out* as shown in the figure below.The dotted arrows between *T_out and *T_in reflects that generally network connections of some sort.  Services remain focused on business logic while the control nodes make autonomous routing decisions based on locally-executed rules.  These rule are sent to the control nodes prior to a particular workflow commencing. In this manner global workflow coherence can be maintained through token-based state propagation between control and routing nodes.  The service or computation node is not touch by the control nodes except to invoke them.  The dotted lines notate network connections.
 
-![Architecture](images/rule_deployment.png)
+
+<div style="text-align: center;">
+  <img src="images/rule_deployment.png" alt="Core orchestration pattern">
+</div>
 
 *Figure 2. Dual-layer architecture: Rule distribution (compile-time) and token flow (runtime)*
+
+## Java Implementation
+
+The Java classes that implement the architecture interfaces are build on standard event patterns however the **ServiceThread**  performs the major activity of managing the incoming payload data and performing joins, routing etc and most importantly determining if it the requested invocation is valide.  Following invocation the results are passed to the routing handler for publishing to the next service in the workflow. 
+
+<div style="text-align: center;">
+  <img src="images/java_implementation.png" alt="Core orchestration pattern">
+</div>
+
+*Figure 3. Java Implementation Handler Classes.*
 
 ## Key Features
 
@@ -22,7 +38,7 @@ The control nodes is annotated as *T_in* and the routing node annotated as *T_ou
 - **Concurrent Versioning** - Multiple workflow versions (RuleBases v001, v002, v003, etc) execute simultaneously
 - **Geographic Distribution** - Native support for distributed deployments
 
-## Architecture
+## High Level Architecture Concepts
 
 The system implements a two-layer architecture:
 
@@ -162,14 +178,11 @@ Services Names and Operations are defined as RuleML atoms, where ip0 is mapped t
 
 ## Building
 
-Each service can be built independently:
+Each service or mesh project is normally built by the IDE, for example Eclipse.   If you wish to run the service on another host the project can be built independently by running
 
-```bash
-cd btsn.healthcare.places.Triage
-ant clean release
-```
+ ```Ant build.xml ```:
 
-This produces a distributable ZIP containing the service JAR, dependencies, and launch scripts.
+This produces a distributable ZIP containing the service JAR, dependencies, and launch scripts. This allows a service or build to be deployed to any host on the network.
 
 ## Configuration
 
@@ -217,7 +230,7 @@ The implementation includes an emergency department workflow along with simple P
 
 4. Copy the analysis results to: `btsn.common/AnalysisFolder/PetriNet/Analysis_TrafficLights.txt`
 
-5. To run the animator, open **btsn.ProcessEditor/com/editor/ProcessEditor**
+5. To run the animator, open **btsn.WorkflowEditor/com/editor/ProcessEditor**
 
 6. Open the local ProcessDefinitionFolder in common and select the process: `PetriNet/TrafficLights.json`
 
