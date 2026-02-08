@@ -2,9 +2,10 @@
 
 RPSO is a decentralized workflow orchestration architecture that eliminates central coordination bottlenecks by embedding orchestration logic as executable rules at service or mesh boundaries. Unlike traditional orchestrators that maintain global workflow state in a central engine, RPSO distributes coordination intelligence to autonomous synchronising nodes that are ideally, but not essentially, co-hosted on the service node or mesh platform as a set of Java classes (handlers). These control nodes make local routing decisions based on locally-cached rules while maintaining global workflow coherence through an xml payload that carries token-based state propagation. The architecture operates through a two-phase approach: compile-time transformation of declarative JSON workflow specifications into service-specific rule fragments, followed by runtime execution where control nodes independently evaluate rules to determine routing without inter-service coordination. 
 
-<div style="text-align: center;">
-  <img src="images/basic_pattern.png" alt="Core orchestration pattern">
-</div>
+
+<p align="center">
+  <img src="images/basic_pattern.png" alt="Core orchestration pattern" width="100%" />
+</p>
 
 *Figure 1. Core orchestration pattern*
 
@@ -21,11 +22,13 @@ The control nodes is annotated as *T_in* and the routing node annotated as *T_ou
 
 ## Java Implementation
 
-The Java classes that implement the architecture interfaces are build on standard event patterns however the **ServiceThread**  performs the major activity of managing the incoming payload data and performing joins, routing etc and most importantly determining if it the requested invocation is valide.  Following invocation the results are passed to the routing handler for publishing to the next service in the workflow. 
+The Java classes that implement the architecture interfaces are build on standard event patterns however the *ServiceThread*  performs the bulk of the activities of managing the incoming payload data and performing node type joins, routing etc and most importantly determining if it the requested invocation is valid.  Following invocation the results are passed to the routing handler for looking up the publishing rules and routing to the next service in the workflow. 
 
-<div style="text-align: center;">
-  <img src="images/java_implementation.png" alt="Core orchestration pattern">
-</div>
+
+<p align="center">
+  <img src="images/java_implementation.png" alt="Core orchestration pattern" width="100%" />
+</p>
+
 
 *Figure 3. Java Implementation Handler Classes.*
 
