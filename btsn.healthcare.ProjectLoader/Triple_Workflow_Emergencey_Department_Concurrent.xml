@@ -28,7 +28,7 @@
 	<!-- Override from command line: ant -Dtriage.mode=remote                     -->
 	<!-- ======================================================================= -->
 
-	<property name="triage.mode"     value="remote" />
+	<property name="triage.mode"     value="local" />
 	<property name="laboratory.mode" value="local" />
 	<property name="radiology.mode"  value="local" />
 	<property name="cardiology.mode" value="local" />

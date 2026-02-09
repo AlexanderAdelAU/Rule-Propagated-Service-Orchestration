@@ -55,11 +55,12 @@ The system implements a two-layer architecture:
  At deployment time, the RulePropagation component transforms JSON workflow specifications into service-specific rule fragments. Each service receives rules defining its coordination behavior (NodeType atoms), routing conditions (meetsCondition atoms), and decision values (DecisionValue atoms). These rules can occur in real-time whilst other process are still in flight.  They are distributed via UDP with a commitment protocol ensuring all services acknowledge receipt before workflow activation is allowed.
 
 ![RuleGeneration](images/rule_generation.png)
+*Figure 4. Rule Fragments Deployment Flow*
 
 ### Token Flow Layer
 At runtime, an xml payload traverses the network carrying both workflow state and accumulated business data.  Each **Control Node** reads the payload (*T_in*) and prioritises and buffers the arriving tokens that carries the service's operation arguments.   Once the service has been invoked the results enrich the token, and then EventPublisher (*T_out*) querying local OOjDREW rule engine for routing decisions to downstream services.
 
-## Payload Structure
+### Payload Structure
 
 The inter-service payload is an **XML document** with four main sections:
 
@@ -203,7 +204,7 @@ The definition of service attributes is done on the basis *"if you want to talk 
 - OOjDREW rule engine
 - Derby (Embedded)
 
-## Building
+## Building a Project
 
 Each service or mesh project is normally built by the IDE, for example Eclipse.   If you wish to run the service on another host the project can be built independently by running
 
@@ -211,57 +212,36 @@ Each service or mesh project is normally built by the IDE, for example Eclipse. 
 
 This produces a distributable ZIP containing the service JAR, dependencies, and launch scripts. This allows a service or build to be deployed to any host on the network.
 
-## Configuration
-
-### Rule Distribution
-
-Rules are distributed via UDP with version-based port calculation:
-- Rule listener: port 20000 + (channel × 1000) + basePort
-- Commitment acknowledgment: port 30000
-
-### Service Registration
-
-Services register via RuleML atoms:
-
-```xml
-<!-- Local deployment (multicast) -->
-<Atom><Rel>hasOperation</Rel>
-  <Ind>DiagnosisService</Ind>
-  <Ind>processClinicalDecision</Ind>
-  <Ind>a4</Ind>
-  <Ind>1024</Ind>
-</Atom>
-
-<!-- Remote deployment -->
-<Atom><Rel>activeService</Rel>
-  <Ind>DiagnosisService</Ind>
-  <Ind>processClinicalDecision</Ind>
-  <Ind>ip0</Ind>
-  <Ind>1020</Ind>
-</Atom>
-```
+For example to build the Triage service with its Control Node navigate to `btsn.healthcare.places.Triage` and then run `build.xml`.   This will generate the zip file `btsn.places.Triage-1.0.zip` which you can copy to any platform.  Running `launch.bat` will load the complete application.  It just remains then to launch any one of the process workflows defined in the `btsn.healthcare.ProjectLoader` directory.
 
 ## Validation Scenario
 
-The implementation includes an emergency department workflow along with simple Petri Net type services workflow.  An example of a simple process workflow is shown below.
+The implementations includes a healthcare emergency department workflow along with simple Petri Net type services workflow.  An example of a practical  process workflow is shown below in Figure 5. 
 
 ![HowToBuildAModel](images/building_a_model.png)
+*Figure 5. Emergency_Department_Patient_Workflow.*
 
-## Tutorial: Running the Traffic Lights Simulation
+## Tutorial: Running the Healthcare Workflow
 
-1. Expand project **btsn.petrinet.ProjectLoader**
+If you would just like to run an existing animation you do not need to build and run the process, you can just go straight to step 5.
 
-2. Run the Ant build file **TrafficLight_BuildAndRun**
+### Running the Emergency_Department_Patient_Workflow
 
-3. When complete, open project **btsn.common.Monitor**, then open `org.btsn.derby.Analysis` and run **PetriNetAnalyzer** to confirm the analysis was captured and valid
+1. Expand project `btsn.healthcare.ProjectLoader`
 
-4. Copy the analysis results to: `btsn.common/AnalysisFolder/PetriNet/Analysis_TrafficLights.txt`
+2. Run the Ant build file `Emergency_Department_BuildAndRun`
 
-5. To run the animator, open **btsn.WorkflowEditor/com/editor/ProcessEditor**
+3. When complete, open project `btsn.common.Monitor`, then open `org.btsn.derby.Analysis` and run `PetriNetAnalyzer` to confirm the analysis was captured and valid
 
-6. Open the local ProcessDefinitionFolder in common and select the process: `PetriNet/TrafficLights.json`
+4. Copy the analysis results to: `btsn.common/AnalysisFolder/Healthcare/Emergency_Department_Patient_Workflow.txt`
 
-7. Load the analysis file from the Analysis folder where the run was saved
+### Animating a Process
+
+5. To run the animator, open `btsn.WorkflowEditor/com/editor/ProcessEditor`
+
+6. Now we need to load the workflow defintion file in the process editor.  Open the workflow definition folder `ProcessDefinitionFolder/healthcare/Workflow` in `btsn.common` and navigate to select the process: `Emergency_Department_Patient_Workflow.json`
+
+7. Load the analysis file from the Analysis, e.g. `btsn.common/AnalysisFolder/Healthcare/Emergency_Department_Patient_Workflow.txt`
 
 8. Press **Play** to see the simulation results
 
