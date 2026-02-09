@@ -580,16 +580,6 @@ This is the rule that governs the list of all services.
 </Atom>
 <Atom>
 	<Rel>localDefined</Rel>
-	<Ind>P2_InitializationService</Ind>
-</Atom>
-<Atom>
-	<Rel>canonicalBinding</Rel>
-	<Ind>purgeAndInitialize</Ind>
-	<Ind>token</Ind>
-	<Ind>token</Ind>
-</Atom>
-<Atom>
-	<Rel>localDefined</Rel>
 	<Ind>Monitor_InitializationService</Ind>
 </Atom>
 <Atom>

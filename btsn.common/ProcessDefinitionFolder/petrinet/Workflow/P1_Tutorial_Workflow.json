@@ -1,0 +1,212 @@
+{
+   "processType":"PetriNet",
+  "elements": [
+    {
+      "id": "T_in_P1",
+      "type": "TRANSITION",
+      "x": 210,
+      "y": 130,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_P1",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "50",
+      "fill_color": "#CCCCCC"
+    },
+    {
+      "id": "P1",
+      "type": "PLACE",
+      "x": 275,
+      "y": 135,
+      "width": 50,
+      "height": 50,
+      "label": "P1",
+      "service": "P1_Place",
+      "operations": [
+        {
+          "name": "processToken",
+          "arguments": [
+            {"name": "token", "type": "String", "value": "string", "required": false}
+          ]
+        }
+      ],
+      "fill_color": "#33FF33"
+    },
+    {
+      "id": "T_in_Monitor",
+      "type": "TRANSITION",
+      "x": 510,
+      "y": 190,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Monitor",
+      "rotation": 90.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "50",
+      "fill_color": "#CCCCCC"
+    },
+    {
+      "id": "Monitor",
+      "type": "PLACE",
+      "x": 495,
+      "y": 275,
+      "width": 50,
+      "height": 50,
+      "label": "Monitor",
+      "service": "MonitorService",
+      "operations": [
+        {
+          "name": "acknowledgeTokenArrival",
+          "arguments": [
+            {"name": "token", "type": "String", "value": "string", "required": false}
+          ]
+        }
+      ],
+      "fill_color": "#33FF33"
+    },
+    {
+      "id": "T_out_Monitor",
+      "type": "TRANSITION",
+      "x": 510,
+      "y": 350,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Monitor",
+      "rotation": 90.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_out",
+      "fill_color": "#FF9933"
+    },
+    {
+      "id": "T_out_P1",
+      "type": "TRANSITION",
+      "x": 370,
+      "y": 130,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_P1",
+      "rotation": 0.0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out",
+      "fill_color": "#FF9933"
+    },
+    {
+      "id": "P1_EVENTGENERATOR",
+      "type": "EVENT_GENERATOR",
+      "x": 88,
+      "y": 130,
+      "width": 24,
+      "height": 60,
+      "label": "P1_EVENTGENERATOR",
+      "rotation": 0.0,
+      "generator_rate": "1000",
+      "token_version": "v002"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "T_in_P1",
+      "target": "P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Monitor",
+      "target": "Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Monitor",
+      "target": "T_out_Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P1",
+      "target": "T_out_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P1_EVENTGENERATOR",
+      "target": "T_in_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "connection_type": "NETWORK",
+      "availability": 1.0
+    },
+    {
+      "source": "T_out_P1",
+      "target": "T_in_Monitor",
+      "label": "true",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "true",
+      "endpoint": "",
+      "waypoints": [
+        {"x": 520, "y": 160}
+      ],
+      "labelOffsetX": 26,
+      "labelOffsetY": -20,
+      "connection_type": "NETWORK",
+      "availability": 1.0
+    },
+    {
+      "source": "T_out_P1",
+      "target": "T_in_P1",
+      "label": "false",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "false",
+      "endpoint": "",
+      "waypoints": [
+        {"x": 380, "y": 80},
+        {"x": 220, "y": 80}
+      ],
+      "labelOffsetX": -32,
+      "labelOffsetY": -10
+    }
+  ],
+  "textElements": [
+    {
+      "x": 251,
+      "y": 45,
+      "text": "P1_Workflow_Tutorial",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 229,
+      "y": 241,
+      "text": "Place P1 returns a random| result. (either True or False)",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 410,
+      "y": 295,
+      "text": "Monitor is an |observer only",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    }
+  ]
+}

@@ -13,7 +13,8 @@
       "node_type": "EdgeNode",
       "node_value": "EDGE_NODE",
       "transition_type": "T_in",
-      "buffer": "50"
+      "buffer": "50",
+      "fill_color": "#CCCCCC"
     },
     {
       "id": "P1",
@@ -31,7 +32,8 @@
             {"name": "token", "type": "String", "value": "string", "required": false}
           ]
         }
-      ]
+      ],
+      "fill_color": "#33FF33"
     },
     {
       "id": "T_in_P2",
@@ -45,7 +47,8 @@
       "node_type": "EdgeNode",
       "node_value": "EDGE_NODE",
       "transition_type": "T_in",
-      "buffer": "50"
+      "buffer": "50",
+      "fill_color": "#CCCCCC"
     },
     {
       "id": "P2",
@@ -76,7 +79,8 @@
       "rotation": 0.0,
       "node_type": "EdgeNode",
       "node_value": "EDGE_NODE",
-      "transition_type": "T_out"
+      "transition_type": "T_out",
+      "fill_color": "#FF9933"
     },
     {
       "id": "T_in_Monitor",
@@ -90,7 +94,8 @@
       "node_type": "EdgeNode",
       "node_value": "EDGE_NODE",
       "transition_type": "T_in",
-      "buffer": "50"
+      "buffer": "50",
+      "fill_color": "#CCCCCC"
     },
     {
       "id": "Monitor",
@@ -108,7 +113,8 @@
             {"name": "token", "type": "String", "value": "string", "required": false}
           ]
         }
-      ]
+      ],
+      "fill_color": "#33FF33"
     },
     {
       "id": "T_out_Monitor",
@@ -121,7 +127,8 @@
       "rotation": 90.0,
       "node_type": "TerminateNode",
       "node_value": "TERMINATE_NODE",
-      "transition_type": "T_out"
+      "transition_type": "T_out",
+      "fill_color": "#FF9933"
     },
     {
       "id": "T_out_P1",
@@ -134,7 +141,8 @@
       "rotation": 0.0,
       "node_type": "GatewayNode",
       "node_value": "GATEWAY_NODE",
-      "transition_type": "T_out"
+      "transition_type": "T_out",
+      "fill_color": "#FF9933"
     },
     {
       "id": "P1_EVENTGENERATOR",
@@ -233,9 +241,9 @@
       "color": -16777216
     },
     {
-      "x": 223,
-      "y": 358,
-      "text": "Places return random true or false",
+      "x": 229,
+      "y": 221,
+      "text": "Place P1 returns a random| result. (either True or False)",
       "fontSize": 12,
       "fontStyle": 0,
       "color": -16777216

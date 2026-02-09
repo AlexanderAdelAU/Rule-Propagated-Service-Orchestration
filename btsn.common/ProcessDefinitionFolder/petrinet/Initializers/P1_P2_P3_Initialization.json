@@ -1,4 +1,5 @@
 {
+   "processType":"PetriNet",
   "elements": [
     {
       "id": "INTIALISATION_GENERATOR",
@@ -50,7 +51,11 @@
       "height": 50,
       "label": "P1",
       "service": "P1_InitializationService",
-      "operations": ["purgeAndInitialize"]
+      "operations": [
+        {
+          "name": "purgeAndInitialize"
+        }
+      ]
     },
     {
       "id": "Monitor",
@@ -61,7 +66,11 @@
       "height": 50,
       "label": "Monitor",
       "service": "Monitor_InitializationService",
-      "operations": ["purgeAndInitialize"]
+      "operations": [
+        {
+          "name": "purgeAndInitialize"
+        }
+      ]
     },
     {
       "id": "T_out_P1",
@@ -126,7 +135,11 @@
       "height": 50,
       "label": "P2",
       "service": "P2_InitializationService",
-      "operations": ["purgeAndInitialize"]
+      "operations": [
+        {
+          "name": "purgeAndInitialize"
+        }
+      ]
     },
     {
       "id": "P3",
@@ -137,7 +150,11 @@
       "height": 50,
       "label": "P3",
       "service": "P3_InitializationService",
-      "operations": ["purgeAndInitialize"]
+      "operations": [
+        {
+          "name": "purgeAndInitialize"
+        }
+      ]
     },
     {
       "id": "T_out_P2",

@@ -1,171 +1,49 @@
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: CONSOLIDATED_TOKEN_GENEALOGY
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: CONSOLIDATED_TOKEN_PATHS
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: CONSOLIDATED_TRANSITION_FIRINGS
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: JOIN_SYNCHRONIZATION
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: MARKINGS
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: PROCESSMEASUREMENTS
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: SERVICECONTRIBUTION
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: SERVICEMEASUREMENTS
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: TOKEN_GENEALOGY
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: TRANSITION_FIRINGS
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Total tables purged: 12
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Connected to Derby database: ServiceAnalysisDataBase
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Creating core measurement tables...
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table SERVICEMEASUREMENTS already exists
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table PROCESSMEASUREMENTS already exists
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table SERVICECONTRIBUTION already exists
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table MARKINGS already exists
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Core measurement tables created/verified
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Creating consolidated Petri Net tables...
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table CONSOLIDATED_TRANSITION_FIRINGS already exists
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table CONSOLIDATED_TOKEN_PATHS already exists
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table CONSOLIDATED_MARKING_EVOLUTION already exists
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table CONSOLIDATED_PLACE_STATISTICS already exists
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table CONSOLIDATED_TOKEN_GENEALOGY already exists
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Consolidated Petri Net tables created/verified
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Creating local Petri Net analysis tables...
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table TRANSITION_FIRINGS already exists
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table TOKEN_GENEALOGY already exists
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table JOIN_SYNCHRONIZATION already exists
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Local Petri Net tables created/verified
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Database initialization complete - 13 tables (4 core + 5 consolidated PN + 3 local PN + 1 event) created/verified
-WARN ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Could not get count for EVENTRESPONSETABLE: Table/View 'EVENTRESPONSETABLE' does not exist.
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Retrieved measurement statistics: {CONSOLIDATED_MARKING_EVOLUTION_Count=0, CONSOLIDATED_PLACE_STATISTICS_Count=0, CONSOLIDATED_TOKEN_GENEALOGY_Count=0, CONSOLIDATED_TOKEN_PATHS_Count=0, CONSOLIDATED_TRANSITION_FIRINGS_Count=0, EVENTRESPONSETABLE_Count=-1, JOIN_SYNCHRONIZATION_Count=0, MARKINGS_Count=0, PROCESSMEASUREMENTS_Count=0, SERVICECONTRIBUTION_Count=0, SERVICEMEASUREMENTS_Count=0, TOKEN_GENEALOGY_Count=0, TRANSITION_FIRINGS_Count=0}
-WARN ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Could not get count for EVENTRESPONSETABLE: Table/View 'EVENTRESPONSETABLE' does not exist.
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Retrieved measurement statistics: {CONSOLIDATED_MARKING_EVOLUTION_Count=0, CONSOLIDATED_PLACE_STATISTICS_Count=0, CONSOLIDATED_TOKEN_GENEALOGY_Count=0, CONSOLIDATED_TOKEN_PATHS_Count=0, CONSOLIDATED_TRANSITION_FIRINGS_Count=0, EVENTRESPONSETABLE_Count=-1, JOIN_SYNCHRONIZATION_Count=0, MARKINGS_Count=0, PROCESSMEASUREMENTS_Count=0, SERVICECONTRIBUTION_Count=0, SERVICEMEASUREMENTS_Count=0, TOKEN_GENEALOGY_Count=0, TRANSITION_FIRINGS_Count=0}
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.handlers.ServiceHelper - SERVICE COMPLETE: org.btsn.places.P4_InitializationService.purgeAndInitialize completed in 1265ms
-WARN ServiceThread-P4_InitializationService-14303 org.btsn.handlers.ServiceHelper - ENRICHMENT: Output attribute 'token' not found in service result, cannot enrich
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.handlers.ServiceHelper - ENRICHMENT: Successfully enriched service result with metadata
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.handlers.ServiceHelper - === SERVICE INVOCATION COMPLETE ===
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Service returned: {"duration_ms":1246,"tables_purged":12,"service":"P4_InitializationService","action":"purge_and_initialize","status":"success","attempts":1,"statistics":{"CONSOLIDATED_TOKEN_PATHS_Count":0,"SERVICECONTRIBUTION_Count":0,"CONSOLIDATED_TRANSITION_FIRINGS_Count":0,"CONSOLIDATED_MARKING_EVOLUTION_Count":0,"EVENTRESPONSETABLE_Count":-1,"CONSOLIDATED_TOKEN_GENEALOGY_Count":0,"TOKEN_GENEALOGY_Count":0,"MARKINGS_Count":0,"SERVICEMEASUREMENTS_Count":0,"CONSOLIDATED_PLACE_STATISTICS_Count":0,"PROCESSMEASUREMENTS_Count":0,"TRANSITION_FIRINGS_Count":0,"JOIN_SYNCHRONIZATION_Count":0}}
-DEBUG ServiceThread-P4_InitializationService-14303 org.btsn.handlers.PetriNetInstrumentationHelper - Skipping instrumentation for admin token 999300000 (v999)
-DEBUG ServiceThread-P4_InitializationService-14303 org.btsn.handlers.ServiceThread - PETRI-NET: Token 999300000 TERMINATED at P4_InitializationService
-INFO ServiceThread-P4_InitializationService-14303 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Token 999300000 terminated after P4_InitializationService.purgeAndInitialize
-DEBUG ServiceThread-P4_InitializationService-14303 org.btsn.handlers.TransitionHandler - Processing Terminate Type complete.
-ERROR ServiceThread-P4_InitializationService-14303 org.btsn.handlers.ServiceThread - monitorIncomingEvents: false
-DEBUG ServiceThread-P4_InitializationService-14303 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Cleaned up join 999300000
-DEBUG ServiceThread-P4_InitializationService-14303 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Service P4_InitializationService sequence ID: 999300000 complete.
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing:: token_branch1 = {"token":{"annotation":"{\"place\":\"P2\",\"entryTime\":1770275297553,\"exitTime\":1770275297657,\"residenceTime\":104,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"distribution\":\"DETERMINISTIC\",\"routingPath\":\"true\"}","notAfter":1770275407633,"tokenId":"1000001","data":{"delayMs":"0","place":"P2","distribution":"DETERMINISTIC"},"workflow_start_time":1770275287633,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":true,"routing_path":"true"},"service_start_time":1770275297552,"version":"v001","executionTime":104,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":106,"original_token":"{\"notAfter\":1770275407633,\"tokenId\":\"1000001\",\"data\":{},\"workflow_start_time\":1770275287633,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1770275297658,"status":"COMPLETED"}}
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CAPTURE: WorkflowStartTime=1770275293228 for seqID=1000001
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Incoming Sequence ID = 1000001
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - MonitorIncomingEvents+ = true
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Using RuleBaseVersion: v001
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - FILTER: Event for P4_Place.processToken accepted by P4_Place thread
-WARN ServiceThread-P4_Place-14004 org.btsn.json.jsonLibrary - Key "token_branch1" already exists. Skipping.
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - JOIN-MAP: Added key=token_branch1 to join 1000000 (tokenId=1000001, mapSize=1)
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Loading rule base for operation: processToken
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Rule base location: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4/RuleFolder.v001/processToken/Service.ruleml
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Loading fresh knowledge base from: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4/RuleFolder.v001/processToken/Service.ruleml
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Loaded knowledge base length: 13817
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Knowledge base content preview: <Assert>
-<Rulebase mapClosure="universal">
-<!-- Version On -->
-<Data><Atom><Rel>Version</Rel><Ind>v001</Ind></Atom></Data>
-<!-- Common Rules to all services -->
-<!-- 
-This is the rule determines the operational parameters associated with
-the destination service.
- -->
-<Implies>
-	<then>
-		<Atom>
-			<Rel>publishes</Rel>
-			<Var>service</Var>
-			<Var>condition</Var>
-			<Var>operation</Var>
-			<Var>channel</Var>
-			<Var>ip</Var>
-			<Var>port</Var>
-			<Var>decisionValue</Var>
-		</A
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Parsing knowledge base...
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Knowledge base parsed successfully
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - T_IN-SYNC: Token 1000001 needs input synchronization (2 inputs required: [token_branch1, token_branch2])
-WARN ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Using legacy getDecisionValue - consider updating CoreRuleBase to include decisionValue in publishes
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1000001 buffered at T_in_P4_Place (buffer=0)
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Could not extract previousPlace from payload
-DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P4 token=1000001 eventType=BUFFERED
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P4 (ForkNode) token=1000001  -> P4_Place [BUFFERED] buffer=0
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: Token 1000001 BUFFERED at P4_Place (waiting for join)
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: About to check inputCollection.isEmpty() - size: 2
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: inputCollection contents: [token_branch1, token_branch2]
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: nodeType: ForkNode
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: needsInputSynchronization: true
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Past inputCollection check, about to enter JOIN processing
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: inputCollection.get(0): token_branch1
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing input synchronization for P4_Place:processToken
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Input sync P4_Place:processToken waiting for 2 inputs (from canonical binding: [token_branch1, token_branch2])
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - JOIN-COUNT: Stored expectedCount=2 for joinID=1000000
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Input sync P4_Place:processToken waiting for 2 inputs: [token_branch1, token_branch2]
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - TRACK: Fork 1000001 workflowStartTime=1770275293228
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Checking 1 joins for completeness in sequence ID order
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Sequence ID sorted join order:
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   - Sequence 1000000
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Join 1000000 using stored expectedCount=2, currentSize=1
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Join 1000000 is incomplete - checking next
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: No complete joins found in 1 pending joins - waiting for more inputs
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Current join status (mode=OPTIMIZED):
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Join 1000000: 1/2 inputs [WAITING]
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing:: token_branch2 = {"token":{"annotation":"{\"place\":\"P3\",\"entryTime\":1770275298579,\"exitTime\":1770275298722,\"residenceTime\":143,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"distribution\":\"DETERMINISTIC\",\"routingPath\":\"true\"}","notAfter":1770275407633,"tokenId":"1000001","data":{"delayMs":"0","place":"P3","distribution":"DETERMINISTIC"},"workflow_start_time":1770275287633,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":true,"routing_path":"true"},"service_start_time":1770275298578,"version":"v001","executionTime":143,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":146,"original_token":"{\"notAfter\":1770275407633,\"tokenId\":\"1000001\",\"data\":{},\"workflow_start_time\":1770275287633,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1770275298724,"status":"COMPLETED"}}
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CAPTURE: WorkflowStartTime=1770275293228 for seqID=1000002
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Incoming Sequence ID = 1000002
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - MonitorIncomingEvents+ = true
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Using RuleBaseVersion: v001
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - FILTER: Event for P4_Place.processToken accepted by P4_Place thread
-WARN ServiceThread-P4_Place-14004 org.btsn.json.jsonLibrary - Key "token_branch2" already exists. Skipping.
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - JOIN-MAP: Added key=token_branch2 to join 1000000 (tokenId=1000002, mapSize=2)
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Loading rule base for operation: processToken
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Rule base location: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4/RuleFolder.v001/processToken/Service.ruleml
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Using cached knowledge base for version: v001
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Parsing knowledge base...
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Knowledge base parsed successfully
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - T_IN-SYNC: Token 1000002 needs input synchronization (2 inputs required: [token_branch1, token_branch2])
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - T_IN-SYNC: Token 1050002 needs input synchronization (2 inputs required: [token_branch1, token_branch2])
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - decisionValueCollection already populated from publishes query - skipping legacy getDecisionValue
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1000002 buffered at T_in_P4_Place (buffer=0)
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1050002 buffered at T_in_P4_Place (buffer=0)
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Could not extract previousPlace from payload
-DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P4 token=1000002 eventType=BUFFERED
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P4 (ForkNode) token=1000002  -> P4_Place [BUFFERED] buffer=0
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: Token 1000002 BUFFERED at P4_Place (waiting for join)
+DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P4 token=1050002 eventType=BUFFERED
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P4 (JoinNode) token=1050002  -> P4_Place [BUFFERED] buffer=0
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: Token 1050002 BUFFERED at P4_Place (waiting for join)
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: About to check inputCollection.isEmpty() - size: 2
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: inputCollection contents: [token_branch1, token_branch2]
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: nodeType: ForkNode
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: nodeType: JoinNode
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: needsInputSynchronization: true
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Past inputCollection check, about to enter JOIN processing
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: inputCollection.get(0): token_branch1
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing input synchronization for P4_Place:processToken
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Input sync P4_Place:processToken waiting for 2 inputs (from canonical binding: [token_branch1, token_branch2])
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - JOIN-COUNT: Stored expectedCount=2 for joinID=1000000
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - JOIN-COUNT: Stored expectedCount=2 for joinID=1050000
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Input sync P4_Place:processToken waiting for 2 inputs: [token_branch1, token_branch2]
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - TRACK: Fork 1000002 workflowStartTime=1770275293228
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - TRACK: Fork 1050002 workflowStartTime=1770634688535
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Checking 1 joins for completeness in sequence ID order
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Sequence ID sorted join order:
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   - Sequence 1000000
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Join 1000000 using stored expectedCount=2, currentSize=2
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Join 1000000 is COMPLETE: 2 >= 2
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Found COMPLETE join 1000000 - processing immediately
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Join 1000000 using stored expectedCount=2, currentSize=2
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Join 1000000 is COMPLETE: 2 >= 2
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   - Sequence 1050000
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Join 1050000 using stored expectedCount=2, currentSize=2
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Join 1050000 is COMPLETE: 2 >= 2
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Found COMPLETE join 1050000 - processing immediately
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Join 1050000 using stored expectedCount=2, currentSize=2
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Join 1050000 is COMPLETE: 2 >= 2
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Added argument 'token_branch1' to inputArgs
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Added argument 'token_branch2' to inputArgs
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Collected 2 arguments for join 1000000 (inputs: [token_branch1, token_branch2])
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Join 1000000 complete - participating forks: [fork=1000001,wfStart=1770275293228, fork=1000002,wfStart=1770275293228]
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Join 1000000 complete with 2 inputs for P4_Place.processToken
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - JOIN-CONTINUE: Token 1000001 continues after JOIN at P4_Place
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Preserving workflowStartTime: 1770275293228
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1000001 entering place: P4_Place (buffer=0)
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Collected 2 arguments for join 1050000 (inputs: [token_branch1, token_branch2])
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Join 1050000 complete - participating forks: [fork=1050001,wfStart=1770634688535, fork=1050002,wfStart=1770634688535]
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Join 1050000 complete with 2 inputs for P4_Place.processToken
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - JOIN-CONTINUE: Token 1050001 continues after JOIN at P4_Place
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Preserving workflowStartTime: 1770634688535
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1050001 entering place: P4_Place (buffer=0)
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Could not extract previousPlace from payload
-DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P4 token=1000001 eventType=ENTER
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P4 (JoinNode) token=1000001  -> P4_Place [ENTER] buffer=0
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1000001 arrived at join T_in_P4
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: JOIN complete - token 1000001 ENTER at P4_Place
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1000002 CONSUMED at join P4_Place (continuation token: 1000001)
-DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P4 token=1000002 eventType=JOIN_CONSUMED
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P4 (JoinNode) token=1000002  -> JOIN_CONSUMED [JOIN_CONSUMED]
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: JOIN consumed participant 1000002 at P4_Place
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing ForkNode for P4_Place.processToken
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Processing ForkNode (Parallel Gateway) for P4_Place.processToken
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - FORK: Reloaded knowledge base successfully
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: Checking canonical binding for P4_Place.processToken with attribute 'token_branch2'
+DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P4 token=1050001 eventType=ENTER
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P4 (JoinNode) token=1050001  -> P4_Place [ENTER] buffer=0
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1050001 arrived at join T_in_P4
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: JOIN complete - token 1050001 ENTER at P4_Place
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1050002 CONSUMED at join P4_Place (continuation token: 1050001)
+DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P4 token=1050002 eventType=JOIN_CONSUMED
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P4 (JoinNode) token=1050002  -> JOIN_CONSUMED [JOIN_CONSUMED]
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: JOIN consumed participant 1050002 at P4_Place
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing JoinNode for P4_Place.processToken
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Processing JoinNode for P4_Place.processToken
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: Checking canonical binding for P4_Place.processToken with attribute 'token_branch1'
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: Operation processToken uses standard (AND) semantics
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: processToken requires 2 inputs total (standard AND logic)
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: processToken needs 2 inputs - should use JOIN processing
@@ -173,198 +51,179 @@ DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATO
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Invoking P4_Place.processToken via ServiceHelper (normal)
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - === SERVICE INVOCATION START ===
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - Service: org.btsn.places.P4_Place.processToken
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - SequenceID: 1000001
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - SequenceID: 1050001
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - Input arguments count: 2
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - Processing argument 1/2, raw length: 842
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - Processing argument 1/2, raw length: 845
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Unwrapped place response from key: token
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Found existing original_token to preserve
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted workflow_start_time=1770275287633
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Cleaned argument 1, length: 842 (removed 0 bytes of metadata)
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted workflow_start_time=1770634688535
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Cleaned argument 1, length: 845 (removed 0 bytes of metadata)
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - Processing argument 2/2, raw length: 842
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Unwrapped place response from key: token
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Found existing original_token to preserve
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted workflow_start_time=1770275287633
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted workflow_start_time=1770634688535
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Cleaned argument 2, length: 842 (removed 0 bytes of metadata)
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted 2 clean business data arguments (removed infrastructure metadata)
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - SERVICE INVOKE: Calling org.btsn.places.P4_Place.processToken with 2 CLEAN business data arguments
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - INVOKE: Reflecting on org.btsn.places.P4_Place.processToken
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - INVOKE: Looking for method with 2 String parameters
 INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - === PETRI NET EVENT LOGGER INITIALIZED ===
-INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - PLACE_CREATED: placeId=P4, sequenceId=1000001, type=P4, capacity=1
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - PLACE_CREATED: placeId=P4, sequenceId=1050001, type=P4, capacity=1
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - INVOKE: Created instance using 1-param constructor (context) for org.btsn.places.P4_Place
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - INVOKE: Found standard method (2 String args)
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - INVOKE: Calling processToken with 2 arguments
-INFO ServiceThread-P4_Place-14004 org.btsn.base.BaseStochasticPetriNetPlace - PN_JOIN_PROCESS: place=P4, seq=1000001 - Processing synchronized inputs
-INFO ServiceThread-P4_Place-14004 org.btsn.base.BaseStochasticPetriNetPlace - PN_JOIN_PROCESS: place=P4 - Input1=1000001, Input2=1000001
-INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - TOKEN_ARRIVAL: placeId=P4, sequenceId=1000001, token=Token{id='1000001', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P2, distribution=DETERMINISTIC, workflow_start_time=1770275287633}, valid=true}
-INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - CAPACITY_CHECK: placeId=P4, sequenceId=1000001, M(P)=0, capacity=1, hasCapacity=true
-INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - MARKING_CHANGE: placeId=P4, sequenceId=1000001, M(P)=1, reason=token_accepted
-INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - TOKEN_HELD: placeId=P4, sequenceId=1000001, token=Token{id='1000001', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P2, distribution=DETERMINISTIC, workflow_start_time=1770275287633}, valid=true}, M(P)=1, capacity=1
-INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - VALIDITY_WINDOW_CHECK: placeId=P4, sequenceId=1000001, currentTime=1770275299234, notAfter=1770275407633, valid=true
-INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - PLACE_EXECUTION: placeId=P4, sequenceId=1000001, executionTime=6ms, result=JOIN_COMPLETED
-INFO ServiceThread-P4_Place-14004 org.btsn.base.BaseStochasticPetriNetPlace - PN_JOIN_PROCESS: place=P4, seq=1000001, guard=false (prob=0.50), delay=0ms, total=6ms
-INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - MARKING_CHANGE: placeId=P4, sequenceId=1000001, M(P)=0, reason=token_released
-INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - TOKEN_RELEASED: placeId=P4, sequenceId=1000001, token=Token{id='1000001', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P2, distribution=DETERMINISTIC, workflow_start_time=1770275287633}, valid=true}, M(P)=0
-INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - TOKEN_DEPARTURE: placeId=P4, sequenceId=1000001, token=Token{id='1000001', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P2, distribution=DETERMINISTIC, workflow_start_time=1770275287633}, valid=true}, annotation={"place":"P4","entryTime":1770275299229,"exitTime":1770275299235,"residenceTime":6,"delayMs":0,"marking":1,"capacity":1,"joinType":"AND_JOIN","input1Token":"1000001","input2Token":"1000001"}
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - SERVICE COMPLETE: org.btsn.places.P4_Place.processToken completed in 99ms
+INFO ServiceThread-P4_Place-14004 org.btsn.base.BaseStochasticPetriNetPlace - PN_JOIN_PROCESS: place=P4, seq=1050001 - Processing synchronized inputs
+INFO ServiceThread-P4_Place-14004 org.btsn.base.BaseStochasticPetriNetPlace - PN_JOIN_PROCESS: place=P4 - Input1=1050000, Input2=1050000
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - TOKEN_ARRIVAL: placeId=P4, sequenceId=1050001, token=Token{id='1050000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P3, distribution=DETERMINISTIC, workflow_start_time=1770634688535}, valid=true}
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - CAPACITY_CHECK: placeId=P4, sequenceId=1050001, M(P)=0, capacity=1, hasCapacity=true
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - MARKING_CHANGE: placeId=P4, sequenceId=1050001, M(P)=1, reason=token_accepted
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - TOKEN_HELD: placeId=P4, sequenceId=1050001, token=Token{id='1050000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P3, distribution=DETERMINISTIC, workflow_start_time=1770634688535}, valid=true}, M(P)=1, capacity=1
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - VALIDITY_WINDOW_CHECK: placeId=P4, sequenceId=1050001, currentTime=1770634691821, notAfter=1770634808535, valid=true
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - PLACE_EXECUTION: placeId=P4, sequenceId=1050001, executionTime=22ms, result=JOIN_COMPLETED
+INFO ServiceThread-P4_Place-14004 org.btsn.base.BaseStochasticPetriNetPlace - PN_JOIN_PROCESS: place=P4, seq=1050001, guard=true (prob=0.50), delay=0ms, total=22ms
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - MARKING_CHANGE: placeId=P4, sequenceId=1050001, M(P)=0, reason=token_released
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - TOKEN_RELEASED: placeId=P4, sequenceId=1050001, token=Token{id='1050000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P3, distribution=DETERMINISTIC, workflow_start_time=1770634688535}, valid=true}, M(P)=0
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - TOKEN_DEPARTURE: placeId=P4, sequenceId=1050001, token=Token{id='1050000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P3, distribution=DETERMINISTIC, workflow_start_time=1770634688535}, valid=true}, annotation={"place":"P4","entryTime":1770634691800,"exitTime":1770634691822,"residenceTime":22,"delayMs":0,"marking":1,"capacity":1,"joinType":"AND_JOIN","input1Token":"1050000","input2Token":"1050000"}
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - SERVICE COMPLETE: org.btsn.places.P4_Place.processToken completed in 35ms
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Using wrapped response key 'token' instead of 'token_branch2'
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Successfully enriched service result with metadata
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - === SERVICE INVOCATION COMPLETE ===
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.TransitionHandler - FORK: Transformation service returned: {"token":{"annotation":"{\"place\":\"P4\",\"entryTime\":1770275299229,\"exitTime\":1770275299235,\"residenceTime\":6,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"joinType\":\"AND_JOIN\",\"input1Token\":\"1000001\",\"input2Token\":\"1000001\"}","notAfter":1770275407633,"tokenId":"1000001","data":{"delayMs":"0","place":"P2","distribution":"DETERMINISTIC"},"workflow_start_time":1770275287633,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":false,"routing_path":"false"},"service_start_time":1770275299220,"version":"v001","executionTime":6,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":99,"original_token":"{\"notAfter\":1770275407633,\"tokenId\":\"1000001\",\"data\":{},\"workflow_start_time\":1770275287633,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1770275299319,"status":"JOIN_COMPLETED"}}
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - FORK: Collected service P5_Place.processToken (unconditional)
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - FORK: Collected service P6_Place.processToken (unconditional)
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.TransitionHandler - FORK: Parallel split to 2 service(s)
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CANONICAL-RETURN: Querying return attribute for operation=processToken, rowsReturned=2
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CANONICAL-RETURN: row[0] key='?inputAttr' value='token_branch1'
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CANONICAL-RETURN: row[1] key='?returnAttr' value='token'
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CANONICAL-RETURN: Found return attribute 'token' for operation=processToken
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.TransitionHandler - FORK: Using return attribute 'token' from canonical binding
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.TransitionHandler - FORK: Routing child token 1000001 to P5_Place.processToken with attribute 'token' (branch=0)
-DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote token genealogy: parent=1000000 -> child=1000001
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - GENEALOGY: Recorded fork 1000000 -> 1000001 via T_out_P4_Place (workflowBase=1000000)
-DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_out_P4_Place token=1000000 eventType=FORK_CONSUMED
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - FORK_CONSUMED: Parent token 1000000 consumed at T_out_P4_Place (workflowBase=1000000)
-DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_out_P4 token=1000001 eventType=FORK
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - FORK: Child token 1000001 created from parent 1000000 at T_out_P4
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: FORK 1000000 -> child 1000001 at P4_Place
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1000001 exiting place: P4_Place -> P5_Place [arc=token]
-DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_out_P4 token=1000001 eventType=EXIT
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_out_P4 (ForkNode) token=1000001 P4_Place -> P5_Place [EXIT] arc=token
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: Token 1000001 EXIT from P4_Place -> P5_Place.processToken [arc=token]
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ROUTING: Token 1000001 -> 'token' (explicit) to P5_Place.processToken
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - FORK: Routed to P5_Place via activeService on 192.168.1.152:4005 (no T_out record)
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.TransitionHandler - FORK: Routing child token 1000002 to P6_Place.processToken with attribute 'token' (branch=1)
-DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote token genealogy: parent=1000000 -> child=1000002
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - GENEALOGY: Recorded fork 1000000 -> 1000002 via T_out_P4_Place (workflowBase=1000000)
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Parent 1000000 already marked as consumed at T_out_P4_Place
-DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_out_P4 token=1000002 eventType=FORK
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - FORK: Child token 1000002 created from parent 1000000 at T_out_P4
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: FORK 1000000 -> child 1000002 at P4_Place
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1000002 exiting place: P4_Place -> P6_Place [arc=token]
-DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_out_P4 token=1000002 eventType=EXIT
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_out_P4 (ForkNode) token=1000002 P4_Place -> P6_Place [EXIT] arc=token
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: Token 1000002 EXIT from P4_Place -> P6_Place.processToken [arc=token]
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ROUTING: Token 1000002 -> 'token' (explicit) to P6_Place.processToken
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - FORK: Routed to P6_Place via activeService on 192.168.1.152:4006 (no T_out record)
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.TransitionHandler - FORK: Parallel routing complete - 2 child tokens created
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Service returned: {"token":{"annotation":"{\"place\":\"P4\",\"entryTime\":1770634691800,\"exitTime\":1770634691822,\"residenceTime\":22,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"joinType\":\"AND_JOIN\",\"input1Token\":\"1050000\",\"input2Token\":\"1050000\"}","notAfter":1770634808535,"tokenId":"1050000","data":{"delayMs":"0","place":"P3","distribution":"DETERMINISTIC"},"workflow_start_time":1770634688535,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":true,"routing_path":"true"},"service_start_time":1770634691790,"version":"v001","executionTime":22,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":35,"original_token":"{\"notAfter\":1770634808535,\"tokenId\":\"1050000\",\"data\":{},\"workflow_start_time\":1770634688535,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1770634691825,"status":"JOIN_COMPLETED"}}
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1050001 exiting place: P4_Place -> P6_Place [arc=$ANON11]
+DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_out_P4 token=1050001 eventType=EXIT
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_out_P4 (JoinNode) token=1050001 P4_Place -> P6_Place [EXIT] arc=$ANON11
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: Token 1050001 EXIT from P4_Place -> P6_Place.processToken [arc=$ANON11]
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Querying activeService for P6_Place.processToken
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: ActiveService query returned 2 rows
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: ActiveService result - ?channelId = ip0
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: ActiveService result - ?port = 4006
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: APPLYING activeService override - Channel: ip0, Port: 4006
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Resolved ip0 to IP 192.168.1.152
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ROUTING: External to P6_Place -> 'token_branch2'
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ROUTING: Token 1050001 -> 'token_branch2' to P6_Place.processToken
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Publishing to Service P6_Place Operation: processToken
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Channel: 192.168.1.152, Port: 4006
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Attribute token_branch2 = {"token":{"annotation":"{\"place\":\"P4\",\"entryTime\":1770634691800,\"exitTime\":1770634691822,\"residenceTime\":22,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"joinType\":\"AND_JOIN\",\"input1Token\":\"1050000\",\"input2Token\":\"1050000\"}","notAfter":1770634808535,"tokenId":"1050000","data":{"delayMs":"0","place":"P3","distribution":"DETERMINISTIC"},"workflow_start_time":1770634688535,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":true,"routing_path":"true"},"service_start_time":1770634691790,"version":"v001","executionTime":22,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":35,"original_token":"{\"notAfter\":1770634808535,\"tokenId\":\"1050000\",\"data\":{},\"workflow_start_time\":1770634688535,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1770634691825,"status":"JOIN_COMPLETED"}}
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Completed callNextOperation for P6_Place, published=true
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Successfully published to P6_Place via EventPublisher
 ERROR ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - monitorIncomingEvents: true
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - TIMING: Using EventReactor arrival time=1770275298908 for seqID=1000002
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - WRITE: Using captured workflowStartTime=1770275293228 for seqID=1000002
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - TIMING: Using EventReactor arrival time=1770634690641 for seqID=1050002
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - WRITE: Using captured workflowStartTime=1770634688535 for seqID=1050002
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - === SERVICE TIMING RECORD ===
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Sequence ID: 1000002
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Sequence ID: 1050002
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Service: P4_Place
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Operation: processToken
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Arrival Time (EventReactor): 1770275298908
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Invocation Time: 1770275299135
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Publish Time: 1770275299623
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Workflow Start Time: 1770275293228
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Arrival Time (EventReactor): 1770634690641
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Invocation Time: 1770634691683
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Publish Time: 1770634692604
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Workflow Start Time: 1770634688535
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   MARKING: Buffer=0, Total=1, Capacity=50
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ==============================
-INFO ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote service timing record for sequenceID: 1000002
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Queue Time (including priority queue): 227ms
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Service Time: 488ms
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Total Time: 715ms
+INFO ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote service timing record for sequenceID: 1050002
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Queue Time (including priority queue): 1042ms
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Service Time: 921ms
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Total Time: 1963ms
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Buffer Utilization: 0.0%
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Service P4_Place sequence ID: 1000001 complete.
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Cleaned up join 1000000
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing:: token_branch1 = {"token":{"annotation":"{\"place\":\"P2\",\"entryTime\":1770275304353,\"exitTime\":1770275304498,\"residenceTime\":145,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"distribution\":\"DETERMINISTIC\",\"routingPath\":\"true\"}","notAfter":1770275407633,"tokenId":"1000001","data":{"delayMs":"0","place":"P2","distribution":"DETERMINISTIC"},"workflow_start_time":1770275287633,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":true,"routing_path":"true"},"service_start_time":1770275304352,"version":"v001","executionTime":145,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":147,"original_token":"{\"notAfter\":1770275407633,\"tokenId\":\"1000001\",\"data\":{},\"workflow_start_time\":1770275287633,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1770275304499,"status":"COMPLETED"}}
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CAPTURE: WorkflowStartTime=1770275293228 for seqID=1000001
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Incoming Sequence ID = 1000001
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - MonitorIncomingEvents+ = true
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Using RuleBaseVersion: v001
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - FILTER: Event for P4_Place.processToken accepted by P4_Place thread
-WARN ServiceThread-P4_Place-14004 org.btsn.json.jsonLibrary - Key "token_branch1" already exists. Skipping.
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - JOIN-MAP: Added key=token_branch1 to join 1000000 (tokenId=1000001, mapSize=1)
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Loading rule base for operation: processToken
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Rule base location: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4/RuleFolder.v001/processToken/Service.ruleml
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Using cached knowledge base for version: v001
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Parsing knowledge base...
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Knowledge base parsed successfully
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - T_IN-SYNC: Token 1000001 needs input synchronization (2 inputs required: [token_branch1, token_branch2])
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - decisionValueCollection already populated from publishes query - skipping legacy getDecisionValue
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1000001 buffered at T_in_P4_Place (buffer=0)
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Could not extract previousPlace from payload
-DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P4 token=1000001 eventType=BUFFERED
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P4 (ForkNode) token=1000001  -> P4_Place [BUFFERED] buffer=0
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: Token 1000001 BUFFERED at P4_Place (waiting for join)
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: About to check inputCollection.isEmpty() - size: 2
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: inputCollection contents: [token_branch1, token_branch2]
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: nodeType: ForkNode
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: needsInputSynchronization: true
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Past inputCollection check, about to enter JOIN processing
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: inputCollection.get(0): token_branch1
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing input synchronization for P4_Place:processToken
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Input sync P4_Place:processToken waiting for 2 inputs (from canonical binding: [token_branch1, token_branch2])
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - JOIN-COUNT: Stored expectedCount=2 for joinID=1000000
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Input sync P4_Place:processToken waiting for 2 inputs: [token_branch1, token_branch2]
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - TRACK: Fork 1000001 workflowStartTime=1770275293228
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Checking 1 joins for completeness in sequence ID order
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Sequence ID sorted join order:
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   - Sequence 1000000
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Join 1000000 using stored expectedCount=2, currentSize=1
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Join 1000000 is incomplete - checking next
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: No complete joins found in 1 pending joins - waiting for more inputs
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Current join status (mode=OPTIMIZED):
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Join 1000000: 1/2 inputs [WAITING]
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing:: token_branch2 = {"token":{"annotation":"{\"place\":\"P3\",\"entryTime\":1770275307910,\"exitTime\":1770275308051,\"residenceTime\":141,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"distribution\":\"DETERMINISTIC\",\"routingPath\":\"true\"}","notAfter":1770275407633,"tokenId":"1000001","data":{"delayMs":"0","place":"P3","distribution":"DETERMINISTIC"},"workflow_start_time":1770275287633,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":true,"routing_path":"true"},"service_start_time":1770275307909,"version":"v001","executionTime":141,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":143,"original_token":"{\"notAfter\":1770275407633,\"tokenId\":\"1000001\",\"data\":{},\"workflow_start_time\":1770275287633,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1770275308052,"status":"COMPLETED"}}
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CAPTURE: WorkflowStartTime=1770275293228 for seqID=1000002
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Incoming Sequence ID = 1000002
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Service P4_Place sequence ID: 1050001 complete.
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Cleaned up join 1050000
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing:: token_branch2 = {"token":{"annotation":"{\"place\":\"P2\",\"entryTime\":1770634692644,\"exitTime\":1770634692750,\"residenceTime\":106,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"distribution\":\"DETERMINISTIC\",\"routingPath\":\"false\"}","notAfter":1770634810341,"tokenId":"1060000","data":{"delayMs":"0","place":"P2","distribution":"DETERMINISTIC"},"workflow_start_time":1770634690341,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":false,"routing_path":"false"},"service_start_time":1770634692641,"version":"v001","executionTime":106,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":127,"original_token":"{\"notAfter\":1770634810341,\"tokenId\":\"1060000\",\"data\":{},\"workflow_start_time\":1770634690341,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1770634692768,"status":"COMPLETED"}}
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CAPTURE: WorkflowStartTime=1770634690342 for seqID=1060001
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Incoming Sequence ID = 1060001
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - MonitorIncomingEvents+ = true
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Using RuleBaseVersion: v001
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - FILTER: Event for P4_Place.processToken accepted by P4_Place thread
 WARN ServiceThread-P4_Place-14004 org.btsn.json.jsonLibrary - Key "token_branch2" already exists. Skipping.
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - JOIN-MAP: Added key=token_branch2 to join 1000000 (tokenId=1000002, mapSize=2)
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - JOIN-MAP: Added key=token_branch2 to join 1060000 (tokenId=1060001, mapSize=1)
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Loading rule base for operation: processToken
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Rule base location: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4/RuleFolder.v001/processToken/Service.ruleml
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Using cached knowledge base for version: v001
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Parsing knowledge base...
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Knowledge base parsed successfully
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - T_IN-SYNC: Token 1000002 needs input synchronization (2 inputs required: [token_branch1, token_branch2])
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - T_IN-SYNC: Token 1060001 needs input synchronization (2 inputs required: [token_branch1, token_branch2])
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - decisionValueCollection already populated from publishes query - skipping legacy getDecisionValue
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1000002 buffered at T_in_P4_Place (buffer=0)
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1060001 buffered at T_in_P4_Place (buffer=0)
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Could not extract previousPlace from payload
-DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P4 token=1000002 eventType=BUFFERED
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P4 (ForkNode) token=1000002  -> P4_Place [BUFFERED] buffer=0
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: Token 1000002 BUFFERED at P4_Place (waiting for join)
+DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P4 token=1060001 eventType=BUFFERED
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P4 (JoinNode) token=1060001  -> P4_Place [BUFFERED] buffer=0
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: Token 1060001 BUFFERED at P4_Place (waiting for join)
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: About to check inputCollection.isEmpty() - size: 2
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: inputCollection contents: [token_branch1, token_branch2]
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: nodeType: ForkNode
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: nodeType: JoinNode
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: needsInputSynchronization: true
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Past inputCollection check, about to enter JOIN processing
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: inputCollection.get(0): token_branch1
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing input synchronization for P4_Place:processToken
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Input sync P4_Place:processToken waiting for 2 inputs (from canonical binding: [token_branch1, token_branch2])
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - JOIN-COUNT: Stored expectedCount=2 for joinID=1000000
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - JOIN-COUNT: Stored expectedCount=2 for joinID=1060000
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Input sync P4_Place:processToken waiting for 2 inputs: [token_branch1, token_branch2]
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - TRACK: Fork 1000002 workflowStartTime=1770275293228
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - TRACK: Fork 1060001 workflowStartTime=1770634690342
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Checking 1 joins for completeness in sequence ID order
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Sequence ID sorted join order:
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   - Sequence 1000000
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Join 1000000 using stored expectedCount=2, currentSize=2
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Join 1000000 is COMPLETE: 2 >= 2
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Found COMPLETE join 1000000 - processing immediately
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Join 1000000 using stored expectedCount=2, currentSize=2
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Join 1000000 is COMPLETE: 2 >= 2
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   - Sequence 1060000
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Join 1060000 using stored expectedCount=2, currentSize=1
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Join 1060000 is incomplete - checking next
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: No complete joins found in 1 pending joins - waiting for more inputs
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Current join status (mode=OPTIMIZED):
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Join 1060000: 1/2 inputs [WAITING]
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing:: token_branch1 = {"token":{"annotation":"{\"place\":\"P3\",\"entryTime\":1770634693035,\"exitTime\":1770634693164,\"residenceTime\":129,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"distribution\":\"DETERMINISTIC\",\"routingPath\":\"false\"}","notAfter":1770634810341,"tokenId":"1060000","data":{"delayMs":"0","place":"P3","distribution":"DETERMINISTIC"},"workflow_start_time":1770634690341,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":false,"routing_path":"false"},"service_start_time":1770634693021,"version":"v001","executionTime":129,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":261,"original_token":"{\"notAfter\":1770634810341,\"tokenId\":\"1060000\",\"data\":{},\"workflow_start_time\":1770634690341,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1770634693282,"status":"COMPLETED"}}
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CAPTURE: WorkflowStartTime=1770634690342 for seqID=1060002
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Incoming Sequence ID = 1060002
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - MonitorIncomingEvents+ = true
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Using RuleBaseVersion: v001
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - FILTER: Event for P4_Place.processToken accepted by P4_Place thread
+WARN ServiceThread-P4_Place-14004 org.btsn.json.jsonLibrary - Key "token_branch1" already exists. Skipping.
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - JOIN-MAP: Added key=token_branch1 to join 1060000 (tokenId=1060002, mapSize=2)
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Loading rule base for operation: processToken
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Rule base location: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4/RuleFolder.v001/processToken/Service.ruleml
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Using cached knowledge base for version: v001
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Parsing knowledge base...
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Knowledge base parsed successfully
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - T_IN-SYNC: Token 1060002 needs input synchronization (2 inputs required: [token_branch1, token_branch2])
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - decisionValueCollection already populated from publishes query - skipping legacy getDecisionValue
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1060002 buffered at T_in_P4_Place (buffer=0)
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Could not extract previousPlace from payload
+DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P4 token=1060002 eventType=BUFFERED
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P4 (JoinNode) token=1060002  -> P4_Place [BUFFERED] buffer=0
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: Token 1060002 BUFFERED at P4_Place (waiting for join)
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: About to check inputCollection.isEmpty() - size: 2
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: inputCollection contents: [token_branch1, token_branch2]
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: nodeType: JoinNode
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: needsInputSynchronization: true
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Past inputCollection check, about to enter JOIN processing
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: inputCollection.get(0): token_branch1
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing input synchronization for P4_Place:processToken
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Input sync P4_Place:processToken waiting for 2 inputs (from canonical binding: [token_branch1, token_branch2])
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - JOIN-COUNT: Stored expectedCount=2 for joinID=1060000
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Input sync P4_Place:processToken waiting for 2 inputs: [token_branch1, token_branch2]
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - TRACK: Fork 1060002 workflowStartTime=1770634690342
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Checking 1 joins for completeness in sequence ID order
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Sequence ID sorted join order:
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   - Sequence 1060000
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Join 1060000 using stored expectedCount=2, currentSize=2
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Join 1060000 is COMPLETE: 2 >= 2
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Found COMPLETE join 1060000 - processing immediately
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Join 1060000 using stored expectedCount=2, currentSize=2
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Join 1060000 is COMPLETE: 2 >= 2
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Added argument 'token_branch1' to inputArgs
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Added argument 'token_branch2' to inputArgs
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Collected 2 arguments for join 1000000 (inputs: [token_branch1, token_branch2])
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Join 1000000 complete - participating forks: [fork=1000001,wfStart=1770275293228, fork=1000002,wfStart=1770275293228]
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Join 1000000 complete with 2 inputs for P4_Place.processToken
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - JOIN-CONTINUE: Token 1000001 continues after JOIN at P4_Place
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Preserving workflowStartTime: 1770275293228
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1000001 entering place: P4_Place (buffer=0)
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Collected 2 arguments for join 1060000 (inputs: [token_branch1, token_branch2])
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Join 1060000 complete - participating forks: [fork=1060001,wfStart=1770634690342, fork=1060002,wfStart=1770634690342]
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Join 1060000 complete with 2 inputs for P4_Place.processToken
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - JOIN-CONTINUE: Token 1060001 continues after JOIN at P4_Place
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Preserving workflowStartTime: 1770634690342
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1060001 entering place: P4_Place (buffer=0)
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Could not extract previousPlace from payload
-DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P4 token=1000001 eventType=ENTER
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P4 (JoinNode) token=1000001  -> P4_Place [ENTER] buffer=0
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1000001 arrived at join T_in_P4
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: JOIN complete - token 1000001 ENTER at P4_Place
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1000002 CONSUMED at join P4_Place (continuation token: 1000001)
-DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P4 token=1000002 eventType=JOIN_CONSUMED
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P4 (JoinNode) token=1000002  -> JOIN_CONSUMED [JOIN_CONSUMED]
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: JOIN consumed participant 1000002 at P4_Place
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing ForkNode for P4_Place.processToken
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Processing ForkNode (Parallel Gateway) for P4_Place.processToken
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - FORK: Reloaded knowledge base successfully
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: Checking canonical binding for P4_Place.processToken with attribute 'token_branch2'
+DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P4 token=1060001 eventType=ENTER
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P4 (JoinNode) token=1060001  -> P4_Place [ENTER] buffer=0
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1060001 arrived at join T_in_P4
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: JOIN complete - token 1060001 ENTER at P4_Place
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1060002 CONSUMED at join P4_Place (continuation token: 1060001)
+DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P4 token=1060002 eventType=JOIN_CONSUMED
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P4 (JoinNode) token=1060002  -> JOIN_CONSUMED [JOIN_CONSUMED]
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: JOIN consumed participant 1060002 at P4_Place
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing JoinNode for P4_Place.processToken
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Processing JoinNode for P4_Place.processToken
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: Checking canonical binding for P4_Place.processToken with attribute 'token_branch1'
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: Operation processToken uses standard (AND) semantics
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: processToken requires 2 inputs total (standard AND logic)
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: processToken needs 2 inputs - should use JOIN processing
@@ -372,99 +231,261 @@ DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATO
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Invoking P4_Place.processToken via ServiceHelper (normal)
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - === SERVICE INVOCATION START ===
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - Service: org.btsn.places.P4_Place.processToken
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - SequenceID: 1000001
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - SequenceID: 1060001
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - Input arguments count: 2
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - Processing argument 1/2, raw length: 842
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - Processing argument 1/2, raw length: 845
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Unwrapped place response from key: token
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Found existing original_token to preserve
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted workflow_start_time=1770275287633
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Cleaned argument 1, length: 842 (removed 0 bytes of metadata)
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - Processing argument 2/2, raw length: 842
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted workflow_start_time=1770634690341
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Cleaned argument 1, length: 845 (removed 0 bytes of metadata)
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - Processing argument 2/2, raw length: 845
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Unwrapped place response from key: token
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Found existing original_token to preserve
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted workflow_start_time=1770275287633
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Cleaned argument 2, length: 842 (removed 0 bytes of metadata)
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted workflow_start_time=1770634690341
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Cleaned argument 2, length: 845 (removed 0 bytes of metadata)
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted 2 clean business data arguments (removed infrastructure metadata)
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - SERVICE INVOKE: Calling org.btsn.places.P4_Place.processToken with 2 CLEAN business data arguments
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - INVOKE: Reflecting on org.btsn.places.P4_Place.processToken
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - INVOKE: Looking for method with 2 String parameters
-INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - PLACE_CREATED: placeId=P4, sequenceId=1000001, type=P4, capacity=1
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - PLACE_CREATED: placeId=P4, sequenceId=1060001, type=P4, capacity=1
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - INVOKE: Created instance using 1-param constructor (context) for org.btsn.places.P4_Place
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - INVOKE: Found standard method (2 String args)
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - INVOKE: Calling processToken with 2 arguments
-INFO ServiceThread-P4_Place-14004 org.btsn.base.BaseStochasticPetriNetPlace - PN_JOIN_PROCESS: place=P4, seq=1000001 - Processing synchronized inputs
-INFO ServiceThread-P4_Place-14004 org.btsn.base.BaseStochasticPetriNetPlace - PN_JOIN_PROCESS: place=P4 - Input1=1000001, Input2=1000001
-INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - TOKEN_ARRIVAL: placeId=P4, sequenceId=1000001, token=Token{id='1000001', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P2, distribution=DETERMINISTIC, workflow_start_time=1770275287633}, valid=true}
-INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - CAPACITY_CHECK: placeId=P4, sequenceId=1000001, M(P)=0, capacity=1, hasCapacity=true
-INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - MARKING_CHANGE: placeId=P4, sequenceId=1000001, M(P)=1, reason=token_accepted
-INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - TOKEN_HELD: placeId=P4, sequenceId=1000001, token=Token{id='1000001', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P2, distribution=DETERMINISTIC, workflow_start_time=1770275287633}, valid=true}, M(P)=1, capacity=1
-INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - VALIDITY_WINDOW_CHECK: placeId=P4, sequenceId=1000001, currentTime=1770275308618, notAfter=1770275407633, valid=true
-INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - PLACE_EXECUTION: placeId=P4, sequenceId=1000001, executionTime=2ms, result=JOIN_COMPLETED
-INFO ServiceThread-P4_Place-14004 org.btsn.base.BaseStochasticPetriNetPlace - PN_JOIN_PROCESS: place=P4, seq=1000001, guard=false (prob=0.50), delay=0ms, total=2ms
-INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - MARKING_CHANGE: placeId=P4, sequenceId=1000001, M(P)=0, reason=token_released
-INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - TOKEN_RELEASED: placeId=P4, sequenceId=1000001, token=Token{id='1000001', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P2, distribution=DETERMINISTIC, workflow_start_time=1770275287633}, valid=true}, M(P)=0
-INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - TOKEN_DEPARTURE: placeId=P4, sequenceId=1000001, token=Token{id='1000001', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P2, distribution=DETERMINISTIC, workflow_start_time=1770275287633}, valid=true}, annotation={"place":"P4","entryTime":1770275308616,"exitTime":1770275308618,"residenceTime":2,"delayMs":0,"marking":1,"capacity":1,"joinType":"AND_JOIN","input1Token":"1000001","input2Token":"1000001"}
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - SERVICE COMPLETE: org.btsn.places.P4_Place.processToken completed in 5ms
+INFO ServiceThread-P4_Place-14004 org.btsn.base.BaseStochasticPetriNetPlace - PN_JOIN_PROCESS: place=P4, seq=1060001 - Processing synchronized inputs
+INFO ServiceThread-P4_Place-14004 org.btsn.base.BaseStochasticPetriNetPlace - PN_JOIN_PROCESS: place=P4 - Input1=1060000, Input2=1060000
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - TOKEN_ARRIVAL: placeId=P4, sequenceId=1060001, token=Token{id='1060000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P3, distribution=DETERMINISTIC, workflow_start_time=1770634690341}, valid=true}
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - CAPACITY_CHECK: placeId=P4, sequenceId=1060001, M(P)=0, capacity=1, hasCapacity=true
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - MARKING_CHANGE: placeId=P4, sequenceId=1060001, M(P)=1, reason=token_accepted
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - TOKEN_HELD: placeId=P4, sequenceId=1060001, token=Token{id='1060000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P3, distribution=DETERMINISTIC, workflow_start_time=1770634690341}, valid=true}, M(P)=1, capacity=1
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - VALIDITY_WINDOW_CHECK: placeId=P4, sequenceId=1060001, currentTime=1770634694315, notAfter=1770634810341, valid=true
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - PLACE_EXECUTION: placeId=P4, sequenceId=1060001, executionTime=48ms, result=JOIN_COMPLETED
+INFO ServiceThread-P4_Place-14004 org.btsn.base.BaseStochasticPetriNetPlace - PN_JOIN_PROCESS: place=P4, seq=1060001, guard=true (prob=0.50), delay=0ms, total=48ms
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - MARKING_CHANGE: placeId=P4, sequenceId=1060001, M(P)=0, reason=token_released
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - TOKEN_RELEASED: placeId=P4, sequenceId=1060001, token=Token{id='1060000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P3, distribution=DETERMINISTIC, workflow_start_time=1770634690341}, valid=true}, M(P)=0
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - TOKEN_DEPARTURE: placeId=P4, sequenceId=1060001, token=Token{id='1060000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P3, distribution=DETERMINISTIC, workflow_start_time=1770634690341}, valid=true}, annotation={"place":"P4","entryTime":1770634694267,"exitTime":1770634694315,"residenceTime":48,"delayMs":0,"marking":1,"capacity":1,"joinType":"AND_JOIN","input1Token":"1060000","input2Token":"1060000"}
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - SERVICE COMPLETE: org.btsn.places.P4_Place.processToken completed in 53ms
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Using wrapped response key 'token' instead of 'token_branch2'
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Successfully enriched service result with metadata
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - === SERVICE INVOCATION COMPLETE ===
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.TransitionHandler - FORK: Transformation service returned: {"token":{"annotation":"{\"place\":\"P4\",\"entryTime\":1770275308616,\"exitTime\":1770275308618,\"residenceTime\":2,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"joinType\":\"AND_JOIN\",\"input1Token\":\"1000001\",\"input2Token\":\"1000001\"}","notAfter":1770275407633,"tokenId":"1000001","data":{"delayMs":"0","place":"P2","distribution":"DETERMINISTIC"},"workflow_start_time":1770275287633,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":false,"routing_path":"false"},"service_start_time":1770275308615,"version":"v001","executionTime":2,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":5,"original_token":"{\"notAfter\":1770275407633,\"tokenId\":\"1000001\",\"data\":{},\"workflow_start_time\":1770275287633,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1770275308620,"status":"JOIN_COMPLETED"}}
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - FORK: Collected service P5_Place.processToken (unconditional)
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - FORK: Collected service P6_Place.processToken (unconditional)
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.TransitionHandler - FORK: Parallel split to 2 service(s)
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CANONICAL-RETURN: Querying return attribute for operation=processToken, rowsReturned=2
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CANONICAL-RETURN: row[0] key='?inputAttr' value='token_branch1'
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CANONICAL-RETURN: row[1] key='?returnAttr' value='token'
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CANONICAL-RETURN: Found return attribute 'token' for operation=processToken
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.TransitionHandler - FORK: Using return attribute 'token' from canonical binding
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.TransitionHandler - FORK: Routing child token 1000001 to P5_Place.processToken with attribute 'token' (branch=0)
-DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote token genealogy: parent=1000000 -> child=1000001
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - GENEALOGY: Recorded fork 1000000 -> 1000001 via T_out_P4_Place (workflowBase=1000000)
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Parent 1000000 already marked as consumed at T_out_P4_Place
-DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_out_P4 token=1000001 eventType=FORK
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - FORK: Child token 1000001 created from parent 1000000 at T_out_P4
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: FORK 1000000 -> child 1000001 at P4_Place
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1000001 exiting place: P4_Place -> P5_Place [arc=token]
-DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_out_P4 token=1000001 eventType=EXIT
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_out_P4 (ForkNode) token=1000001 P4_Place -> P5_Place [EXIT] arc=token
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: Token 1000001 EXIT from P4_Place -> P5_Place.processToken [arc=token]
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ROUTING: Token 1000001 -> 'token' (explicit) to P5_Place.processToken
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - FORK: Routed to P5_Place via activeService on 192.168.1.152:4005 (no T_out record)
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.TransitionHandler - FORK: Routing child token 1000002 to P6_Place.processToken with attribute 'token' (branch=1)
-DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote token genealogy: parent=1000000 -> child=1000002
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - GENEALOGY: Recorded fork 1000000 -> 1000002 via T_out_P4_Place (workflowBase=1000000)
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Parent 1000000 already marked as consumed at T_out_P4_Place
-DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_out_P4 token=1000002 eventType=FORK
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - FORK: Child token 1000002 created from parent 1000000 at T_out_P4
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: FORK 1000000 -> child 1000002 at P4_Place
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1000002 exiting place: P4_Place -> P6_Place [arc=token]
-DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_out_P4 token=1000002 eventType=EXIT
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_out_P4 (ForkNode) token=1000002 P4_Place -> P6_Place [EXIT] arc=token
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: Token 1000002 EXIT from P4_Place -> P6_Place.processToken [arc=token]
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ROUTING: Token 1000002 -> 'token' (explicit) to P6_Place.processToken
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - FORK: Routed to P6_Place via activeService on 192.168.1.152:4006 (no T_out record)
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.TransitionHandler - FORK: Parallel routing complete - 2 child tokens created
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Service returned: {"token":{"annotation":"{\"place\":\"P4\",\"entryTime\":1770634694267,\"exitTime\":1770634694315,\"residenceTime\":48,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"joinType\":\"AND_JOIN\",\"input1Token\":\"1060000\",\"input2Token\":\"1060000\"}","notAfter":1770634810341,"tokenId":"1060000","data":{"delayMs":"0","place":"P3","distribution":"DETERMINISTIC"},"workflow_start_time":1770634690341,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":true,"routing_path":"true"},"service_start_time":1770634694264,"version":"v001","executionTime":48,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":53,"original_token":"{\"notAfter\":1770634810341,\"tokenId\":\"1060000\",\"data\":{},\"workflow_start_time\":1770634690341,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1770634694317,"status":"JOIN_COMPLETED"}}
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1060001 exiting place: P4_Place -> P6_Place [arc=$ANON11]
+DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_out_P4 token=1060001 eventType=EXIT
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_out_P4 (JoinNode) token=1060001 P4_Place -> P6_Place [EXIT] arc=$ANON11
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: Token 1060001 EXIT from P4_Place -> P6_Place.processToken [arc=$ANON11]
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Querying activeService for P6_Place.processToken
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: ActiveService query returned 2 rows
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: ActiveService result - ?channelId = ip0
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: ActiveService result - ?port = 4006
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: APPLYING activeService override - Channel: ip0, Port: 4006
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Resolved ip0 to IP 192.168.1.152
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ROUTING: External to P6_Place -> 'token_branch2'
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ROUTING: Token 1060001 -> 'token_branch2' to P6_Place.processToken
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Publishing to Service P6_Place Operation: processToken
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Channel: 192.168.1.152, Port: 4006
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Attribute token_branch2 = {"token":{"annotation":"{\"place\":\"P4\",\"entryTime\":1770634694267,\"exitTime\":1770634694315,\"residenceTime\":48,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"joinType\":\"AND_JOIN\",\"input1Token\":\"1060000\",\"input2Token\":\"1060000\"}","notAfter":1770634810341,"tokenId":"1060000","data":{"delayMs":"0","place":"P3","distribution":"DETERMINISTIC"},"workflow_start_time":1770634690341,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":true,"routing_path":"true"},"service_start_time":1770634694264,"version":"v001","executionTime":48,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":53,"original_token":"{\"notAfter\":1770634810341,\"tokenId\":\"1060000\",\"data\":{},\"workflow_start_time\":1770634690341,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1770634694317,"status":"JOIN_COMPLETED"}}
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Completed callNextOperation for P6_Place, published=true
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Successfully published to P6_Place via EventPublisher
 ERROR ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - monitorIncomingEvents: true
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - TIMING: Using EventReactor arrival time=1770275308267 for seqID=1000002
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - WRITE: Using captured workflowStartTime=1770275293228 for seqID=1000002
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - TIMING: Using EventReactor arrival time=1770634693615 for seqID=1060002
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - WRITE: Using captured workflowStartTime=1770634690342 for seqID=1060002
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - === SERVICE TIMING RECORD ===
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Sequence ID: 1000002
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Sequence ID: 1060002
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Service: P4_Place
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Operation: processToken
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Arrival Time (EventReactor): 1770275308267
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Invocation Time: 1770275308532
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Publish Time: 1770275308962
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Workflow Start Time: 1770275293228
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Arrival Time (EventReactor): 1770634693615
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Invocation Time: 1770634694116
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Publish Time: 1770634694501
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Workflow Start Time: 1770634690342
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   MARKING: Buffer=0, Total=1, Capacity=50
 INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ==============================
-INFO ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote service timing record for sequenceID: 1000002
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Queue Time (including priority queue): 265ms
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Service Time: 430ms
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Total Time: 695ms
+INFO ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote service timing record for sequenceID: 1060002
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Queue Time (including priority queue): 501ms
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Service Time: 385ms
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Total Time: 886ms
 DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Buffer Utilization: 0.0%
-INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Service P4_Place sequence ID: 1000001 complete.
-DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Cleaned up join 1000000
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Service P4_Place sequence ID: 1060001 complete.
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Cleaned up join 1060000
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing:: token_branch2 = {"token":{"annotation":"{\"place\":\"P2\",\"entryTime\":1770634695974,\"exitTime\":1770634696095,\"residenceTime\":121,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"distribution\":\"DETERMINISTIC\",\"routingPath\":\"false\"}","notAfter":1770634813737,"tokenId":"1080000","data":{"delayMs":"0","place":"P2","distribution":"DETERMINISTIC"},"workflow_start_time":1770634693737,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":false,"routing_path":"false"},"service_start_time":1770634695971,"version":"v001","executionTime":121,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":126,"original_token":"{\"notAfter\":1770634813737,\"tokenId\":\"1080000\",\"data\":{},\"workflow_start_time\":1770634693737,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1770634696097,"status":"COMPLETED"}}
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CAPTURE: WorkflowStartTime=1770634693737 for seqID=1080001
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Incoming Sequence ID = 1080001
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - MonitorIncomingEvents+ = true
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Using RuleBaseVersion: v001
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - FILTER: Event for P4_Place.processToken accepted by P4_Place thread
+WARN ServiceThread-P4_Place-14004 org.btsn.json.jsonLibrary - Key "token_branch2" already exists. Skipping.
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - JOIN-MAP: Added key=token_branch2 to join 1080000 (tokenId=1080001, mapSize=1)
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Loading rule base for operation: processToken
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Rule base location: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4/RuleFolder.v001/processToken/Service.ruleml
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Using cached knowledge base for version: v001
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Parsing knowledge base...
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Knowledge base parsed successfully
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - T_IN-SYNC: Token 1080001 needs input synchronization (2 inputs required: [token_branch1, token_branch2])
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - decisionValueCollection already populated from publishes query - skipping legacy getDecisionValue
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1080001 buffered at T_in_P4_Place (buffer=0)
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Could not extract previousPlace from payload
+DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P4 token=1080001 eventType=BUFFERED
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P4 (JoinNode) token=1080001  -> P4_Place [BUFFERED] buffer=0
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: Token 1080001 BUFFERED at P4_Place (waiting for join)
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: About to check inputCollection.isEmpty() - size: 2
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: inputCollection contents: [token_branch1, token_branch2]
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: nodeType: JoinNode
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: needsInputSynchronization: true
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Past inputCollection check, about to enter JOIN processing
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: inputCollection.get(0): token_branch1
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing input synchronization for P4_Place:processToken
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Input sync P4_Place:processToken waiting for 2 inputs (from canonical binding: [token_branch1, token_branch2])
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - JOIN-COUNT: Stored expectedCount=2 for joinID=1080000
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Input sync P4_Place:processToken waiting for 2 inputs: [token_branch1, token_branch2]
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - TRACK: Fork 1080001 workflowStartTime=1770634693737
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Checking 1 joins for completeness in sequence ID order
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Sequence ID sorted join order:
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   - Sequence 1080000
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Join 1080000 using stored expectedCount=2, currentSize=1
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Join 1080000 is incomplete - checking next
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: No complete joins found in 1 pending joins - waiting for more inputs
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Current join status (mode=OPTIMIZED):
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Join 1080000: 1/2 inputs [WAITING]
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing:: token_branch1 = {"token":{"annotation":"{\"place\":\"P3\",\"entryTime\":1770634696510,\"exitTime\":1770634696614,\"residenceTime\":104,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"distribution\":\"DETERMINISTIC\",\"routingPath\":\"true\"}","notAfter":1770634813737,"tokenId":"1080000","data":{"delayMs":"0","place":"P3","distribution":"DETERMINISTIC"},"workflow_start_time":1770634693737,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":true,"routing_path":"true"},"service_start_time":1770634696504,"version":"v001","executionTime":104,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":112,"original_token":"{\"notAfter\":1770634813737,\"tokenId\":\"1080000\",\"data\":{},\"workflow_start_time\":1770634693737,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1770634696616,"status":"COMPLETED"}}
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CAPTURE: WorkflowStartTime=1770634693737 for seqID=1080002
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Incoming Sequence ID = 1080002
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - MonitorIncomingEvents+ = true
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Using RuleBaseVersion: v001
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - FILTER: Event for P4_Place.processToken accepted by P4_Place thread
+WARN ServiceThread-P4_Place-14004 org.btsn.json.jsonLibrary - Key "token_branch1" already exists. Skipping.
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - JOIN-MAP: Added key=token_branch1 to join 1080000 (tokenId=1080002, mapSize=2)
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Loading rule base for operation: processToken
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Rule base location: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p4/RuleFolder.v001/processToken/Service.ruleml
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Using cached knowledge base for version: v001
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Parsing knowledge base...
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Knowledge base parsed successfully
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - T_IN-SYNC: Token 1080002 needs input synchronization (2 inputs required: [token_branch1, token_branch2])
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - decisionValueCollection already populated from publishes query - skipping legacy getDecisionValue
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1080002 buffered at T_in_P4_Place (buffer=0)
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Could not extract previousPlace from payload
+DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P4 token=1080002 eventType=BUFFERED
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P4 (JoinNode) token=1080002  -> P4_Place [BUFFERED] buffer=0
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: Token 1080002 BUFFERED at P4_Place (waiting for join)
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: About to check inputCollection.isEmpty() - size: 2
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: inputCollection contents: [token_branch1, token_branch2]
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: nodeType: JoinNode
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: needsInputSynchronization: true
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Past inputCollection check, about to enter JOIN processing
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: inputCollection.get(0): token_branch1
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing input synchronization for P4_Place:processToken
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Input sync P4_Place:processToken waiting for 2 inputs (from canonical binding: [token_branch1, token_branch2])
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - JOIN-COUNT: Stored expectedCount=2 for joinID=1080000
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Input sync P4_Place:processToken waiting for 2 inputs: [token_branch1, token_branch2]
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - TRACK: Fork 1080002 workflowStartTime=1770634693737
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Checking 1 joins for completeness in sequence ID order
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Sequence ID sorted join order:
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   - Sequence 1080000
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Join 1080000 using stored expectedCount=2, currentSize=2
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Join 1080000 is COMPLETE: 2 >= 2
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR [OPTIMIZED]: Found COMPLETE join 1080000 - processing immediately
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Join 1080000 using stored expectedCount=2, currentSize=2
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - Join 1080000 is COMPLETE: 2 >= 2
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Added argument 'token_branch1' to inputArgs
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Added argument 'token_branch2' to inputArgs
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Collected 2 arguments for join 1080000 (inputs: [token_branch1, token_branch2])
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Join 1080000 complete - participating forks: [fork=1080001,wfStart=1770634693737, fork=1080002,wfStart=1770634693737]
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Join 1080000 complete with 2 inputs for P4_Place.processToken
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - JOIN-CONTINUE: Token 1080001 continues after JOIN at P4_Place
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Preserving workflowStartTime: 1770634693737
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1080001 entering place: P4_Place (buffer=0)
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Could not extract previousPlace from payload
+DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P4 token=1080001 eventType=ENTER
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P4 (JoinNode) token=1080001  -> P4_Place [ENTER] buffer=0
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1080001 arrived at join T_in_P4
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: JOIN complete - token 1080001 ENTER at P4_Place
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1080002 CONSUMED at join P4_Place (continuation token: 1080001)
+DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_in_P4 token=1080002 eventType=JOIN_CONSUMED
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_in_P4 (JoinNode) token=1080002  -> JOIN_CONSUMED [JOIN_CONSUMED]
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: JOIN consumed participant 1080002 at P4_Place
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing JoinNode for P4_Place.processToken
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Processing JoinNode for P4_Place.processToken
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: Checking canonical binding for P4_Place.processToken with attribute 'token_branch1'
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: Operation processToken uses standard (AND) semantics
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: processToken requires 2 inputs total (standard AND logic)
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: processToken needs 2 inputs - should use JOIN processing
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: No single-input canonical binding - proceeding with normal service call
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Invoking P4_Place.processToken via ServiceHelper (normal)
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - === SERVICE INVOCATION START ===
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - Service: org.btsn.places.P4_Place.processToken
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - SequenceID: 1080001
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - Input arguments count: 2
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - Processing argument 1/2, raw length: 842
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Unwrapped place response from key: token
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Found existing original_token to preserve
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted workflow_start_time=1770634693737
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Cleaned argument 1, length: 842 (removed 0 bytes of metadata)
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - Processing argument 2/2, raw length: 845
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Unwrapped place response from key: token
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Found existing original_token to preserve
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted workflow_start_time=1770634693737
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Cleaned argument 2, length: 845 (removed 0 bytes of metadata)
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted 2 clean business data arguments (removed infrastructure metadata)
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - SERVICE INVOKE: Calling org.btsn.places.P4_Place.processToken with 2 CLEAN business data arguments
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - INVOKE: Reflecting on org.btsn.places.P4_Place.processToken
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - INVOKE: Looking for method with 2 String parameters
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - PLACE_CREATED: placeId=P4, sequenceId=1080001, type=P4, capacity=1
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - INVOKE: Created instance using 1-param constructor (context) for org.btsn.places.P4_Place
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - INVOKE: Found standard method (2 String args)
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - INVOKE: Calling processToken with 2 arguments
+INFO ServiceThread-P4_Place-14004 org.btsn.base.BaseStochasticPetriNetPlace - PN_JOIN_PROCESS: place=P4, seq=1080001 - Processing synchronized inputs
+INFO ServiceThread-P4_Place-14004 org.btsn.base.BaseStochasticPetriNetPlace - PN_JOIN_PROCESS: place=P4 - Input1=1080000, Input2=1080000
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - TOKEN_ARRIVAL: placeId=P4, sequenceId=1080001, token=Token{id='1080000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P3, distribution=DETERMINISTIC, workflow_start_time=1770634693737}, valid=true}
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - CAPACITY_CHECK: placeId=P4, sequenceId=1080001, M(P)=0, capacity=1, hasCapacity=true
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - MARKING_CHANGE: placeId=P4, sequenceId=1080001, M(P)=1, reason=token_accepted
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - TOKEN_HELD: placeId=P4, sequenceId=1080001, token=Token{id='1080000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P3, distribution=DETERMINISTIC, workflow_start_time=1770634693737}, valid=true}, M(P)=1, capacity=1
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - VALIDITY_WINDOW_CHECK: placeId=P4, sequenceId=1080001, currentTime=1770634697024, notAfter=1770634813737, valid=true
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - PLACE_EXECUTION: placeId=P4, sequenceId=1080001, executionTime=3ms, result=JOIN_COMPLETED
+INFO ServiceThread-P4_Place-14004 org.btsn.base.BaseStochasticPetriNetPlace - PN_JOIN_PROCESS: place=P4, seq=1080001, guard=false (prob=0.50), delay=0ms, total=3ms
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - MARKING_CHANGE: placeId=P4, sequenceId=1080001, M(P)=0, reason=token_released
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - TOKEN_RELEASED: placeId=P4, sequenceId=1080001, token=Token{id='1080000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P3, distribution=DETERMINISTIC, workflow_start_time=1770634693737}, valid=true}, M(P)=0
+INFO ServiceThread-P4_Place-14004 org.btsn.logger.PetriNetEventLogger - TOKEN_DEPARTURE: placeId=P4, sequenceId=1080001, token=Token{id='1080000', version='v001', place='P1_Place', processType='null', data={delayMs=0, place=P3, distribution=DETERMINISTIC, workflow_start_time=1770634693737}, valid=true}, annotation={"place":"P4","entryTime":1770634697021,"exitTime":1770634697024,"residenceTime":3,"delayMs":0,"marking":1,"capacity":1,"joinType":"AND_JOIN","input1Token":"1080000","input2Token":"1080000"}
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - SERVICE COMPLETE: org.btsn.places.P4_Place.processToken completed in 28ms
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Using wrapped response key 'token' instead of 'token_branch2'
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Successfully enriched service result with metadata
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceHelper - === SERVICE INVOCATION COMPLETE ===
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Service returned: {"token":{"annotation":"{\"place\":\"P4\",\"entryTime\":1770634697021,\"exitTime\":1770634697024,\"residenceTime\":3,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"joinType\":\"AND_JOIN\",\"input1Token\":\"1080000\",\"input2Token\":\"1080000\"}","notAfter":1770634813737,"tokenId":"1080000","data":{"delayMs":"0","place":"P3","distribution":"DETERMINISTIC"},"workflow_start_time":1770634693737,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":false,"routing_path":"false"},"service_start_time":1770634696998,"version":"v001","executionTime":3,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":28,"original_token":"{\"notAfter\":1770634813737,\"tokenId\":\"1080000\",\"data\":{},\"workflow_start_time\":1770634693737,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1770634697026,"status":"JOIN_COMPLETED"}}
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1080001 exiting place: P4_Place -> P6_Place [arc=$ANON11]
+DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_out_P4 token=1080001 eventType=EXIT
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_out_P4 (JoinNode) token=1080001 P4_Place -> P6_Place [EXIT] arc=$ANON11
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: Token 1080001 EXIT from P4_Place -> P6_Place.processToken [arc=$ANON11]
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: Querying activeService for P6_Place.processToken
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: ActiveService query returned 2 rows
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: ActiveService result - ?channelId = ip0
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - DEBUG: ActiveService result - ?port = 4006
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: APPLYING activeService override - Channel: ip0, Port: 4006
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Resolved ip0 to IP 192.168.1.152
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ROUTING: External to P6_Place -> 'token_branch2'
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ROUTING: Token 1080001 -> 'token_branch2' to P6_Place.processToken
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Publishing to Service P6_Place Operation: processToken
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Channel: 192.168.1.152, Port: 4006
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Attribute token_branch2 = {"token":{"annotation":"{\"place\":\"P4\",\"entryTime\":1770634697021,\"exitTime\":1770634697024,\"residenceTime\":3,\"delayMs\":0,\"marking\":1,\"capacity\":1,\"joinType\":\"AND_JOIN\",\"input1Token\":\"1080000\",\"input2Token\":\"1080000\"}","notAfter":1770634813737,"tokenId":"1080000","data":{"delayMs":"0","place":"P3","distribution":"DETERMINISTIC"},"workflow_start_time":1770634693737,"placeId":"token","routing_decision":{"probability":0.5,"guard_result":false,"routing_path":"false"},"service_start_time":1770634696998,"version":"v001","executionTime":3,"marking":1,"currentPlace":"P1_Place","service_processing_time_ms":28,"original_token":"{\"notAfter\":1770634813737,\"tokenId\":\"1080000\",\"data\":{},\"workflow_start_time\":1770634693737,\"currentPlace\":\"P1_Place\",\"version\":\"v001\"}","service_end_time":1770634697026,"status":"JOIN_COMPLETED"}}
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Completed callNextOperation for P6_Place, published=true
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Successfully published to P6_Place via EventPublisher
+ERROR ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - monitorIncomingEvents: true
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - TIMING: Using EventReactor arrival time=1770634696727 for seqID=1080002
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - WRITE: Using captured workflowStartTime=1770634693737 for seqID=1080002
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - === SERVICE TIMING RECORD ===
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Sequence ID: 1080002
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Service: P4_Place
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Operation: processToken
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Arrival Time (EventReactor): 1770634696727
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Invocation Time: 1770634696927
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Publish Time: 1770634697198
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Workflow Start Time: 1770634693737
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   MARKING: Buffer=0, Total=1, Capacity=50
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ==============================
+INFO ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote service timing record for sequenceID: 1080002
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Queue Time (including priority queue): 200ms
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Service Time: 271ms
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Total Time: 471ms
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Buffer Utilization: 0.0%
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Service P4_Place sequence ID: 1080001 complete.
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Cleaned up join 1080000
 DEBUG ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing:: token = {"token":"workflow_1000000_v001"}
-DEBUG ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceThread - CAPTURE: WorkflowStartTime=1770275322058 for seqID=1000000
+DEBUG ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceThread - CAPTURE: WorkflowStartTime=1770634723187 for seqID=1000000
 INFO ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceThread - Incoming Sequence ID = 1000000
 INFO ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceThread - MonitorIncomingEvents+ = true
 DEBUG ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceThread - Using RuleBaseVersion: v999
@@ -547,11 +568,11 @@ DEBUG ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceHelper - 
 DEBUG ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceHelper - INVOKE: Created instance using 3-param constructor (context, placeName, buildVersion) for org.btsn.places.P4_CollectorService
 DEBUG ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceHelper - INVOKE: Found standard method (1 String args)
 DEBUG ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceHelper - INVOKE: Calling collectAllData with 1 arguments
-INFO ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceHelper - SERVICE COMPLETE: org.btsn.places.P4_CollectorService.collectAllData completed in 557ms
+INFO ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceHelper - SERVICE COMPLETE: org.btsn.places.P4_CollectorService.collectAllData completed in 300ms
 WARN ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceHelper - ENRICHMENT: Inner object is not a JSONObject, cannot enrich
 INFO ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceHelper - ENRICHMENT: Successfully enriched service result with metadata
 INFO ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceHelper - === SERVICE INVOCATION COMPLETE ===
-INFO ServiceThread-P4_CollectorService-14103 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Service returned: {"monitoredPlace":"P4_Place","petriNetData":{"firingRecordCount":16,"workflowGroups":{"1000000":{"markingEvolution":[{"marking":1,"tokenId":1000001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275298067,"bufferSize":0},{"marking":1,"tokenId":1000002,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275299042,"bufferSize":0},{"marking":1,"tokenId":1000001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770275299125,"bufferSize":0},{"marking":1,"tokenId":1000002,"transitionId":"T_in_P4","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770275299131,"bufferSize":0},{"marking":0,"tokenId":1000001,"transitionId":"T_out_P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275299391,"bufferSize":0},{"marking":0,"tokenId":1000001,"transitionId":"T_out_P4","toPlace":"P5_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275299403,"bufferSize":0},{"marking":0,"tokenId":1000002,"transitionId":"T_out_P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275299461,"bufferSize":0},{"marking":0,"tokenId":1000002,"transitionId":"T_out_P4","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275299507,"bufferSize":0},{"marking":1,"tokenId":1000001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275304876,"bufferSize":0},{"marking":1,"tokenId":1000002,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275308431,"bufferSize":0},{"marking":1,"tokenId":1000001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770275308520,"bufferSize":0},{"marking":1,"tokenId":1000002,"transitionId":"T_in_P4","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770275308528,"bufferSize":0},{"marking":0,"tokenId":1000001,"transitionId":"T_out_P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275308789,"bufferSize":0},{"marking":0,"tokenId":1000001,"transitionId":"T_out_P4","toPlace":"P5_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275308794,"bufferSize":0},{"marking":0,"tokenId":1000002,"transitionId":"T_out_P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275308854,"bufferSize":0},{"marking":0,"tokenId":1000002,"transitionId":"T_out_P4","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275308869,"bufferSize":0}],"tokenGenealogy":[{"childTokenId":1000001,"forkTimestamp":1770275299391,"parentTokenId":1000000,"forkTransitionId":"T_out_P4_Place","workflowBase":1000000},{"childTokenId":1000002,"forkTimestamp":1770275299461,"parentTokenId":1000000,"forkTransitionId":"T_out_P4_Place","workflowBase":1000000},{"childTokenId":1000001,"forkTimestamp":1770275308789,"parentTokenId":1000000,"forkTransitionId":"T_out_P4_Place","workflowBase":1000000},{"childTokenId":1000002,"forkTimestamp":1770275308854,"parentTokenId":1000000,"forkTransitionId":"T_out_P4_Place","workflowBase":1000000}],"tokenPaths":[{"entryTime":1770275298067,"exitTime":1770275299391,"residenceTime":1324,"entryBufferSize":0,"tokenId":1000001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275299042,"exitTime":1770275299461,"residenceTime":419,"entryBufferSize":0,"tokenId":1000002,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275299125,"exitTime":1770275299391,"residenceTime":266,"entryBufferSize":0,"tokenId":1000001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275299131,"exitTime":1770275299461,"residenceTime":330,"entryBufferSize":0,"tokenId":1000002,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275304876,"exitTime":1770275308789,"residenceTime":3913,"entryBufferSize":0,"tokenId":1000001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275308431,"exitTime":1770275308854,"residenceTime":423,"entryBufferSize":0,"tokenId":1000002,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275308520,"exitTime":1770275308789,"residenceTime":269,"entryBufferSize":0,"tokenId":1000001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275308528,"exitTime":1770275308854,"residenceTime":326,"entryBufferSize":0,"tokenId":1000002,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"}],"transitionFirings":[{"tokenId":1000001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275298067,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275299042,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770275299125,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770275299131,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_out_P4","fromPlace":"P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275299391,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_out_P4","fromPlace":"P4_Place","toPlace":"P5_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275299403,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_out_P4","fromPlace":"P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275299461,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_out_P4","fromPlace":"P4_Place","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275299507,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275304876,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275308431,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770275308520,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770275308528,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_out_P4","fromPlace":"P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275308789,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_out_P4","fromPlace":"P4_Place","toPlace":"P5_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275308794,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_out_P4","fromPlace":"P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275308854,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_out_P4","fromPlace":"P4_Place","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275308869,"bufferSize":0}],"statistics":[{"avgResidenceTime":908.0,"minResidenceTime":266,"maxBufferSize":0,"tokenCount":8,"maxResidenceTime":3913,"workflowBase":1000000,"throughput":1.1013215859030836,"placeName":"P4_Place","avgBufferSize":0.0}]}},"pathRecordCount":8,"statisticsRecordCount":1,"markingRecordCount":16},"reportingService":"P4_CollectorService","collectionTime":1770275322405,"performanceData":{"workflowGroups":{"1770275293228":[{"maxQueueCapacity":50,"arrivalTime":1770275308267,"totalTime":695,"workflowStartTime":1770275293228,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1000002,"operation":"processToken","serviceTime":430,"queueTime":265,"bufferSize":0},{"maxQueueCapacity":50,"arrivalTime":1770275298908,"totalTime":715,"workflowStartTime":1770275293228,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1000002,"operation":"processToken","serviceTime":488,"queueTime":227,"bufferSize":0}]},"markingData":{"1770275293228":[{"publishTime":1770275308962,"maxQueueCapacity":50,"arrivalTime":1770275308267,"invocationTime":1770275308532,"workflowStartTime":1770275293228,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1000002,"operation":"processToken","bufferSize":0},{"publishTime":1770275299623,"maxQueueCapacity":50,"arrivalTime":1770275298908,"invocationTime":1770275299135,"workflowStartTime":1770275293228,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1000002,"operation":"processToken","bufferSize":0}]},"timingRecordCount":2,"markingRecordCount":2},"reportingChannel":"unified_collection","serviceContext":"1000000","version":"v001","token":"{\"token\":\"workflow_1000000_v001\"}"}
+INFO ServiceThread-P4_CollectorService-14103 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Service returned: {"monitoredPlace":"P4_Place","petriNetData":{"firingRecordCount":15,"workflowGroups":{"1000000":{"markingEvolution":[{"marking":1,"tokenId":1050001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770634691127,"bufferSize":0},{"marking":1,"tokenId":1050002,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770634691616,"bufferSize":0},{"marking":1,"tokenId":1050001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770634691672,"bufferSize":0},{"marking":1,"tokenId":1050002,"transitionId":"T_in_P4","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770634691679,"bufferSize":0},{"marking":0,"tokenId":1050001,"transitionId":"T_out_P4","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770634691827,"bufferSize":0},{"marking":1,"tokenId":1060001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770634693512,"bufferSize":0},{"marking":1,"tokenId":1060002,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770634694052,"bufferSize":0},{"marking":1,"tokenId":1060001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770634694074,"bufferSize":0},{"marking":1,"tokenId":1060002,"transitionId":"T_in_P4","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770634694099,"bufferSize":0},{"marking":0,"tokenId":1060001,"transitionId":"T_out_P4","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770634694318,"bufferSize":0},{"marking":1,"tokenId":1080001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770634696628,"bufferSize":0},{"marking":1,"tokenId":1080002,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770634696863,"bufferSize":0},{"marking":1,"tokenId":1080001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770634696916,"bufferSize":0},{"marking":1,"tokenId":1080002,"transitionId":"T_in_P4","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770634696921,"bufferSize":0},{"marking":0,"tokenId":1080001,"transitionId":"T_out_P4","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770634697129,"bufferSize":0}],"tokenGenealogy":[],"tokenPaths":[{"entryTime":1770634691127,"exitTime":1770634691827,"residenceTime":700,"entryBufferSize":0,"tokenId":1050001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770634691672,"exitTime":1770634691827,"residenceTime":155,"entryBufferSize":0,"tokenId":1050001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770634693512,"exitTime":1770634694318,"residenceTime":806,"entryBufferSize":0,"tokenId":1060001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770634694074,"exitTime":1770634694318,"residenceTime":244,"entryBufferSize":0,"tokenId":1060001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770634696628,"exitTime":1770634697129,"residenceTime":501,"entryBufferSize":0,"tokenId":1080001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770634696916,"exitTime":1770634697129,"residenceTime":213,"entryBufferSize":0,"tokenId":1080001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"}],"transitionFirings":[{"tokenId":1050001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770634691127,"bufferSize":0},{"tokenId":1050002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770634691616,"bufferSize":0},{"tokenId":1050001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770634691672,"bufferSize":0},{"tokenId":1050002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770634691679,"bufferSize":0},{"tokenId":1050001,"transitionId":"T_out_P4","fromPlace":"P4_Place","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770634691827,"bufferSize":0},{"tokenId":1060001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770634693512,"bufferSize":0},{"tokenId":1060002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770634694052,"bufferSize":0},{"tokenId":1060001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770634694074,"bufferSize":0},{"tokenId":1060002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770634694099,"bufferSize":0},{"tokenId":1060001,"transitionId":"T_out_P4","fromPlace":"P4_Place","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770634694318,"bufferSize":0},{"tokenId":1080001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770634696628,"bufferSize":0},{"tokenId":1080002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770634696863,"bufferSize":0},{"tokenId":1080001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770634696916,"bufferSize":0},{"tokenId":1080002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770634696921,"bufferSize":0},{"tokenId":1080001,"transitionId":"T_out_P4","fromPlace":"P4_Place","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770634697129,"bufferSize":0}],"statistics":[{"avgResidenceTime":436.0,"minResidenceTime":155,"maxBufferSize":0,"tokenCount":6,"maxResidenceTime":806,"workflowBase":1000000,"throughput":2.293577981651376,"placeName":"P4_Place","avgBufferSize":0.0}]}},"pathRecordCount":6,"statisticsRecordCount":1,"markingRecordCount":15},"reportingService":"P4_CollectorService","collectionTime":1770634723556,"performanceData":{"workflowGroups":{"1770634688535":[{"maxQueueCapacity":50,"arrivalTime":1770634690641,"totalTime":1963,"workflowStartTime":1770634688535,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1050002,"operation":"processToken","serviceTime":921,"queueTime":1042,"bufferSize":0}],"1770634693737":[{"maxQueueCapacity":50,"arrivalTime":1770634696727,"totalTime":471,"workflowStartTime":1770634693737,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1080002,"operation":"processToken","serviceTime":271,"queueTime":200,"bufferSize":0}],"1770634690342":[{"maxQueueCapacity":50,"arrivalTime":1770634693615,"totalTime":886,"workflowStartTime":1770634690342,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1060002,"operation":"processToken","serviceTime":385,"queueTime":501,"bufferSize":0}]},"markingData":{"1770634688535":[{"publishTime":1770634692604,"maxQueueCapacity":50,"arrivalTime":1770634690641,"invocationTime":1770634691683,"workflowStartTime":1770634688535,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1050002,"operation":"processToken","bufferSize":0}],"1770634693737":[{"publishTime":1770634697198,"maxQueueCapacity":50,"arrivalTime":1770634696727,"invocationTime":1770634696927,"workflowStartTime":1770634693737,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1080002,"operation":"processToken","bufferSize":0}],"1770634690342":[{"publishTime":1770634694501,"maxQueueCapacity":50,"arrivalTime":1770634693615,"invocationTime":1770634694116,"workflowStartTime":1770634690342,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1060002,"operation":"processToken","bufferSize":0}]},"timingRecordCount":3,"markingRecordCount":3},"reportingChannel":"unified_collection","serviceContext":"1000000","version":"v001","token":"{\"token\":\"workflow_1000000_v001\"}"}
 DEBUG ServiceThread-P4_CollectorService-14103 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1000000 exiting place: P4_CollectorService -> MonitorService [arc=$ANON11]
 WARN ServiceThread-P4_CollectorService-14103 org.btsn.handlers.PetriNetInstrumentationHelper - NAMING CONVENTION VIOLATION: Service 'P4_CollectorService' does not end with '_Place'. Expected format: {NodeName}_Place. Transition IDs may not match topology. Please rename the service.
 DEBUG ServiceThread-P4_CollectorService-14103 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_out_P4_CollectorService token=1000000 eventType=EXIT
@@ -567,4 +588,4 @@ DEBUG ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceThread - 
 INFO ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceThread - ROUTING: Token 1000000 -> 'token' to MonitorService.writeCollectorData
 INFO ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Publishing to Service MonitorService Operation: writeCollectorData
 INFO ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Channel: 192.168.1.152, Port: 3002
-INFO ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Attribute token = {"monitoredPlace":"P4_Place","petriNetData":{"firingRecordCount":16,"workflowGroups":{"1000000":{"markingEvolution":[{"marking":1,"tokenId":1000001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275298067,"bufferSize":0},{"marking":1,"tokenId":1000002,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275299042,"bufferSize":0},{"marking":1,"tokenId":1000001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770275299125,"bufferSize":0},{"marking":1,"tokenId":1000002,"transitionId":"T_in_P4","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770275299131,"bufferSize":0},{"marking":0,"tokenId":1000001,"transitionId":"T_out_P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275299391,"bufferSize":0},{"marking":0,"tokenId":1000001,"transitionId":"T_out_P4","toPlace":"P5_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275299403,"bufferSize":0},{"marking":0,"tokenId":1000002,"transitionId":"T_out_P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275299461,"bufferSize":0},{"marking":0,"tokenId":1000002,"transitionId":"T_out_P4","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275299507,"bufferSize":0},{"marking":1,"tokenId":1000001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275304876,"bufferSize":0},{"marking":1,"tokenId":1000002,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275308431,"bufferSize":0},{"marking":1,"tokenId":1000001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770275308520,"bufferSize":0},{"marking":1,"tokenId":1000002,"transitionId":"T_in_P4","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770275308528,"bufferSize":0},{"marking":0,"tokenId":1000001,"transitionId":"T_out_P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275308789,"bufferSize":0},{"marking":0,"tokenId":1000001,"transitionId":"T_out_P4","toPlace":"P5_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275308794,"bufferSize":0},{"marking":0,"tokenId":1000002,"transitionId":"T_out_P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275308854,"bufferSize":0},{"marking":0,"tokenId":1000002,"transitionId":"T_out_P4","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275308869,"bufferSize":0}],"tokenGenealogy":[{"childTokenId":1000001,"forkTimestamp":1770275299391,"parentTokenId":1000000,"forkTransitionId":"T_out_P4_Place","workflowBase":1000000},{"childTokenId":1000002,"forkTimestamp":1770275299461,"parentTokenId":1000000,"forkTransitionId":"T_out_P4_Place","workflowBase":1000000},{"childTokenId":1000001,"forkTimestamp":1770275308789,"parentTokenId":1000000,"forkTransitionId":"T_out_P4_Place","workflowBase":1000000},{"childTokenId":1000002,"forkTimestamp":1770275308854,"parentTokenId":1000000,"forkTransitionId":"T_out_P4_Place","workflowBase":1000000}],"tokenPaths":[{"entryTime":1770275298067,"exitTime":1770275299391,"residenceTime":1324,"entryBufferSize":0,"tokenId":1000001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275299042,"exitTime":1770275299461,"residenceTime":419,"entryBufferSize":0,"tokenId":1000002,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275299125,"exitTime":1770275299391,"residenceTime":266,"entryBufferSize":0,"tokenId":1000001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275299131,"exitTime":1770275299461,"residenceTime":330,"entryBufferSize":0,"tokenId":1000002,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275304876,"exitTime":1770275308789,"residenceTime":3913,"entryBufferSize":0,"tokenId":1000001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275308431,"exitTime":1770275308854,"residenceTime":423,"entryBufferSize":0,"tokenId":1000002,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275308520,"exitTime":1770275308789,"residenceTime":269,"entryBufferSize":0,"tokenId":1000001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770275308528,"exitTime":1770275308854,"residenceTime":326,"entryBufferSize":0,"tokenId":1000002,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"}],"transitionFirings":[{"tokenId":1000001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275298067,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275299042,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770275299125,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770275299131,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_out_P4","fromPlace":"P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275299391,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_out_P4","fromPlace":"P4_Place","toPlace":"P5_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275299403,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_out_P4","fromPlace":"P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275299461,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_out_P4","fromPlace":"P4_Place","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275299507,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275304876,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770275308431,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770275308520,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770275308528,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_out_P4","fromPlace":"P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275308789,"bufferSize":0},{"tokenId":1000001,"transitionId":"T_out_P4","fromPlace":"P4_Place","toPlace":"P5_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275308794,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_out_P4","fromPlace":"P4","toPlace":"P4","workflowBase":1000000,"eventType":"FORK","placeName":"P4_Place","timestamp":1770275308854,"bufferSize":0},{"tokenId":1000002,"transitionId":"T_out_P4","fromPlace":"P4_Place","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770275308869,"bufferSize":0}],"statistics":[{"avgResidenceTime":908.0,"minResidenceTime":266,"maxBufferSize":0,"tokenCount":8,"maxResidenceTime":3913,"workflowBase":1000000,"throughput":1.1013215859030836,"placeName":"P4_Place","avgBufferSize":0.0}]}},"pathRecordCount":8,"statisticsRecordCount":1,"markingRecordCount":16},"reportingService":"P4_CollectorService","collectionTime":1770275322405,"performanceData":{"workflowGroups":{"1770275293228":[{"maxQueueCapacity":50,"arrivalTime":1770275308267,"totalTime":695,"workflowStartTime":1770275293228,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1000002,"operation":"processToken","serviceTime":430,"queueTime":265,"bufferSize":0},{"maxQueueCapacity":50,"arrivalTime":1770275298908,"totalTime":715,"workflowStartTime":1770275293228,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1000002,"operation":"processToken","serviceTime":488,"queueTime":227,"bufferSize":0}]},"markingData":{"1770275293228":[{"publishTime":1770275308962,"maxQueueCapacity":50,"arrivalTime":1770275308267,"invocationTime":1770275308532,"workflowStartTime":1770275293228,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1000002,"operation":"processToken","bufferSize":0},{"publishTime":1770275299623,"maxQueueCapacity":50,"arrivalTime":1770275298908,"invocationTime":1770275299135,"workflowStartTime":1770275293228,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1000002,"operation":"processToken","bufferSize":0}]},"timingRecordCount":2,"markingRecordCount":2},"reportingChannel":"unified_collection","serviceContext":"1000000","version":"v001","token":"{\"token\":\"workflow_1000000_v001\"}"}
+INFO ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Attribute token = {"monitoredPlace":"P4_Place","petriNetData":{"firingRecordCount":15,"workflowGroups":{"1000000":{"markingEvolution":[{"marking":1,"tokenId":1050001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770634691127,"bufferSize":0},{"marking":1,"tokenId":1050002,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770634691616,"bufferSize":0},{"marking":1,"tokenId":1050001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770634691672,"bufferSize":0},{"marking":1,"tokenId":1050002,"transitionId":"T_in_P4","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770634691679,"bufferSize":0},{"marking":0,"tokenId":1050001,"transitionId":"T_out_P4","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770634691827,"bufferSize":0},{"marking":1,"tokenId":1060001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770634693512,"bufferSize":0},{"marking":1,"tokenId":1060002,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770634694052,"bufferSize":0},{"marking":1,"tokenId":1060001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770634694074,"bufferSize":0},{"marking":1,"tokenId":1060002,"transitionId":"T_in_P4","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770634694099,"bufferSize":0},{"marking":0,"tokenId":1060001,"transitionId":"T_out_P4","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770634694318,"bufferSize":0},{"marking":1,"tokenId":1080001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770634696628,"bufferSize":0},{"marking":1,"tokenId":1080002,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770634696863,"bufferSize":0},{"marking":1,"tokenId":1080001,"transitionId":"T_in_P4","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770634696916,"bufferSize":0},{"marking":1,"tokenId":1080002,"transitionId":"T_in_P4","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770634696921,"bufferSize":0},{"marking":0,"tokenId":1080001,"transitionId":"T_out_P4","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770634697129,"bufferSize":0}],"tokenGenealogy":[],"tokenPaths":[{"entryTime":1770634691127,"exitTime":1770634691827,"residenceTime":700,"entryBufferSize":0,"tokenId":1050001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770634691672,"exitTime":1770634691827,"residenceTime":155,"entryBufferSize":0,"tokenId":1050001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770634693512,"exitTime":1770634694318,"residenceTime":806,"entryBufferSize":0,"tokenId":1060001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770634694074,"exitTime":1770634694318,"residenceTime":244,"entryBufferSize":0,"tokenId":1060001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770634696628,"exitTime":1770634697129,"residenceTime":501,"entryBufferSize":0,"tokenId":1080001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"},{"entryTime":1770634696916,"exitTime":1770634697129,"residenceTime":213,"entryBufferSize":0,"tokenId":1080001,"exitBufferSize":0,"workflowBase":1000000,"placeName":"P4_Place"}],"transitionFirings":[{"tokenId":1050001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770634691127,"bufferSize":0},{"tokenId":1050002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770634691616,"bufferSize":0},{"tokenId":1050001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770634691672,"bufferSize":0},{"tokenId":1050002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770634691679,"bufferSize":0},{"tokenId":1050001,"transitionId":"T_out_P4","fromPlace":"P4_Place","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770634691827,"bufferSize":0},{"tokenId":1060001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770634693512,"bufferSize":0},{"tokenId":1060002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770634694052,"bufferSize":0},{"tokenId":1060001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770634694074,"bufferSize":0},{"tokenId":1060002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770634694099,"bufferSize":0},{"tokenId":1060001,"transitionId":"T_out_P4","fromPlace":"P4_Place","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770634694318,"bufferSize":0},{"tokenId":1080001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770634696628,"bufferSize":0},{"tokenId":1080002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"BUFFERED","placeName":"P4_Place","timestamp":1770634696863,"bufferSize":0},{"tokenId":1080001,"transitionId":"T_in_P4","fromPlace":"","toPlace":"P4_Place","workflowBase":1000000,"eventType":"ENTER","placeName":"P4_Place","timestamp":1770634696916,"bufferSize":0},{"tokenId":1080002,"transitionId":"T_in_P4","fromPlace":"","toPlace":"JOIN_CONSUMED","workflowBase":1000000,"eventType":"JOIN_CONSUMED","placeName":"P4_Place","timestamp":1770634696921,"bufferSize":0},{"tokenId":1080001,"transitionId":"T_out_P4","fromPlace":"P4_Place","toPlace":"P6_Place","workflowBase":1000000,"eventType":"EXIT","placeName":"P4_Place","timestamp":1770634697129,"bufferSize":0}],"statistics":[{"avgResidenceTime":436.0,"minResidenceTime":155,"maxBufferSize":0,"tokenCount":6,"maxResidenceTime":806,"workflowBase":1000000,"throughput":2.293577981651376,"placeName":"P4_Place","avgBufferSize":0.0}]}},"pathRecordCount":6,"statisticsRecordCount":1,"markingRecordCount":15},"reportingService":"P4_CollectorService","collectionTime":1770634723556,"performanceData":{"workflowGroups":{"1770634688535":[{"maxQueueCapacity":50,"arrivalTime":1770634690641,"totalTime":1963,"workflowStartTime":1770634688535,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1050002,"operation":"processToken","serviceTime":921,"queueTime":1042,"bufferSize":0}],"1770634693737":[{"maxQueueCapacity":50,"arrivalTime":1770634696727,"totalTime":471,"workflowStartTime":1770634693737,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1080002,"operation":"processToken","serviceTime":271,"queueTime":200,"bufferSize":0}],"1770634690342":[{"maxQueueCapacity":50,"arrivalTime":1770634693615,"totalTime":886,"workflowStartTime":1770634690342,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1060002,"operation":"processToken","serviceTime":385,"queueTime":501,"bufferSize":0}]},"markingData":{"1770634688535":[{"publishTime":1770634692604,"maxQueueCapacity":50,"arrivalTime":1770634690641,"invocationTime":1770634691683,"workflowStartTime":1770634688535,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1050002,"operation":"processToken","bufferSize":0}],"1770634693737":[{"publishTime":1770634697198,"maxQueueCapacity":50,"arrivalTime":1770634696727,"invocationTime":1770634696927,"workflowStartTime":1770634693737,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1080002,"operation":"processToken","bufferSize":0}],"1770634690342":[{"publishTime":1770634694501,"maxQueueCapacity":50,"arrivalTime":1770634693615,"invocationTime":1770634694116,"workflowStartTime":1770634690342,"totalMarking":1,"serviceName":"P4_Place","sequenceId":1060002,"operation":"processToken","bufferSize":0}]},"timingRecordCount":3,"markingRecordCount":3},"reportingChannel":"unified_collection","serviceContext":"1000000","version":"v001","token":"{\"token\":\"workflow_1000000_v001\"}"}

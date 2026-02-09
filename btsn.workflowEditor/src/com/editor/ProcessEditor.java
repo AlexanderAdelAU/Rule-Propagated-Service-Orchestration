@@ -1171,6 +1171,9 @@ public class ProcessEditor extends JFrame {
                     processTypeCombo.setSelectedIndex(0);  // Empty/blank
                 }
                 
+                // Extract unique colors from loaded elements into the palette
+                populateColorsFromCanvas();
+                
                 JOptionPane.showMessageDialog(this,
                     "Loaded successfully!",
                     "Load Successful",
@@ -1276,6 +1279,38 @@ public class ProcessEditor extends JFrame {
             "Version 1.1 - Now with validation!",
             "About",
             JOptionPane.INFORMATION_MESSAGE);
+    }
+    
+    /**
+     * Extract unique color pairs from all canvas elements and populate the palette.
+     * Called after loading a diagram so users can see and reuse existing colors.
+     */
+    private void populateColorsFromCanvas() {
+        recentColors.clear();
+        
+        java.util.LinkedHashSet<ColorPair> uniqueColors = new java.util.LinkedHashSet<>();
+        
+        for (ProcessElement element : canvas.getElements()) {
+            Color fill = element.getFillColor();
+            Color border = element.getBorderColor();
+            
+            // Skip elements with no custom colors (both null = default)
+            if (fill == null && border == null) {
+                continue;
+            }
+            
+            uniqueColors.add(new ColorPair(fill, border));
+        }
+        
+        // Add unique colors to palette (up to max)
+        int count = 0;
+        for (ColorPair pair : uniqueColors) {
+            if (count >= MAX_RECENT_COLORS) break;
+            recentColors.add(pair);
+            count++;
+        }
+        
+        updateColorPalette();
     }
     
     /**

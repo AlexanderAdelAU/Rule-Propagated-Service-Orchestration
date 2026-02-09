@@ -1,1 +1,1 @@
-<Atom><Rel>NodeType</Rel><Ind>XorNode</Ind></Atom><Atom><Rel>DecisionValue</Rel><Ind>true</Ind></Atom><Atom><Rel>meetsCondition</Rel><Ind>P1_Place</Ind><Ind>processToken</Ind><Ind>DECISION_EQUAL_TO</Ind><Ind>true</Ind></Atom><Atom><Rel>DecisionValue</Rel><Ind>false</Ind></Atom><Atom><Rel>meetsCondition</Rel><Ind>P5_Place</Ind><Ind>processToken</Ind><Ind>DECISION_EQUAL_TO</Ind><Ind>false</Ind></Atom>
+<Atom><Rel>NodeType</Rel><Ind>EdgeNode</Ind></Atom><Atom><Rel>meetsCondition</Rel><Ind>P6_Place</Ind><Ind>processToken</Ind><Ind>EDGE_NODE</Ind><Ind></Ind></Atom>

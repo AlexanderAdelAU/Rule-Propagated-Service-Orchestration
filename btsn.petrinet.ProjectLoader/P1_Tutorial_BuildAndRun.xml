@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="P1_P2_BuildAndRun" default="run-complete-workflow" basedir=".">
+<project name="P1_Tutorial_BuildAndRun" default="run-complete-workflow" basedir="."
+	    xmlns:if="ant:if" xmlns:unless="ant:unless">
 	<description>
-		P1_P2 Petri Net - Complete Workflow with Initialization and Collection
+		P1_Tutorial Petri Net - Complete Workflow with Initialization and Collection
 		
 		Phases:
 		  Phase 1: Initialize Databases (purgeAndInitialize)
@@ -14,8 +15,22 @@
 		  Mode 2 (JOIN_NODE): Join token firing - two tokens injected with paired IDs
 		                      Uses -joinargs to specify paired token IDs (e.g., 1000001,1000002)
 
-		Services (P1, P2, Monitor) start once and remain running throughout all phases.
+		Services (P1, Monitor) start once and remain running throughout all phases.
 	</description>
+
+	<!-- ======================================================================= -->
+	<!-- DEPLOYMENT CONFIGURATION                                                -->
+	<!-- ======================================================================= -->
+	<!-- Service deployment modes:                                                -->
+	<!--   local  = launch service process on THIS machine                       -->
+	<!--   remote = service runs on ANOTHER machine (skip launch, still send     -->
+	<!--            events to it for init/workflow/collection phases)             -->
+	<!--                                                                         -->
+	<!-- Override from command line: ant -Dp1.mode=remote                         -->
+	<!-- ======================================================================= -->
+
+	<property name="p1.mode"      value="local" />
+	<property name="monitor.mode" value="local" />
 
 	<!-- ======================================================================= -->
 	<!-- PROPERTIES                                                              -->
@@ -25,15 +40,14 @@
 	<property name="rule.version" value="v001" />
 
 	<!-- Process names for each phase -->
-	<property name="init.process.name" value="petrinet/Initializers/P1_P2_Initialization" />
-	<property name="workflow.process.name" value="petrinet/Workflow/P1_Workflow" />
-	<property name="collector.process.name" value="petrinet/Collectors/P1_P2_Collector" />
+	<property name="init.process.name" value="petrinet/Initializers/P1_Initialization" />
+	<property name="workflow.process.name" value="petrinet/Workflow/P1_Tutorial_Workflow" />
+	<property name="collector.process.name" value="petrinet/Collectors/P1_Collector" />
 
 	<!-- Phase 1: Initialization parameters (v999 = admin/non-instrumented) -->
 	<property name="init.version" value="v999" />
 	<property name="db.init.operation" value="purgeAndInitialize" />
 	<property name="sequence.id.init.p1" value="999000000" />
-	<property name="sequence.id.init.p2" value="999100000" />
 	<property name="sequence.id.init.monitor" value="999600000" />
 	<property name="init.delay.seconds" value="3" />
 
@@ -44,7 +58,7 @@
 	<property name="event.generator.id" value="P1_EVENTGENERATOR" />
 	
 	<!-- TOKEN MODE SELECTION: 1=EDGE_NODE (single tokens), 2=JOIN_NODE (paired tokens) -->
-	<property name="mode" value="2" />
+	<property name="mode" value="1" />
 	<property name="token.count" value="10" />
 	<property name="join.tokens" value="1000001,1000002" />
 	
@@ -57,7 +71,6 @@
 	<property name="collector.operation" value="collectAllData" />
 	<property name="query.version" value="v001" />
 	<property name="sequence.id.collect.p1" value="999010000" />
-	<property name="sequence.id.collect.p2" value="999020000" />
 	<property name="collector.delay.seconds" value="3" />
 
 	<!-- Timing parameters -->
@@ -84,18 +97,12 @@
 	<!-- Output directory -->
 	<property name="output.dir" location="${build.file.dir}" />
 	<property name="p1.output.file" location="${output.dir}/P1_Place.out.txt" />
-	<property name="p2.output.file" location="${output.dir}/P2_Place.out.txt" />
 	<property name="monitor.output.file" location="${output.dir}/MonitorService.out.txt" />
 
 	<!-- P1 Service -->
 	<property name="p1.project.dir" location="${petrinet.root.dir}/btsn.petrinet.places.p1" />
 	<property name="p1.bin.dir" location="${p1.project.dir}/bin" />
 	<property name="p1.src.dir" location="${p1.project.dir}/src" />
-
-	<!-- P2 Service -->
-	<property name="p2.project.dir" location="${petrinet.root.dir}/btsn.petrinet.places.p2" />
-	<property name="p2.bin.dir" location="${p2.project.dir}/bin" />
-	<property name="p2.src.dir" location="${p2.project.dir}/src" />
 
 	<!-- Monitor Service -->
 	<property name="monitor.project.dir" location="${petrinet.root.dir}/btsn.common.Monitor" />
@@ -124,11 +131,6 @@
 		<pathelement location="${p1.bin.dir}" />
 	</path>
 
-	<path id="p2.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${p2.bin.dir}" />
-	</path>
-
 	<path id="monitor.classpath">
 		<path refid="common.classpath" />
 		<pathelement location="${monitor.bin.dir}" />
@@ -140,12 +142,28 @@
 	</path>
 
 	<!-- ======================================================================= -->
+	<!-- DEPLOYMENT MODE RESOLUTION                                              -->
+	<!-- ======================================================================= -->
+
+	<target name="resolve-deployment-modes">
+		<!-- Resolve boolean properties from mode settings -->
+		<condition property="p1.is.local"><equals arg1="${p1.mode}" arg2="local" /></condition>
+		<condition property="monitor.is.local"><equals arg1="${monitor.mode}" arg2="local" /></condition>
+
+		<!-- Display deployment configuration -->
+		<echo message="" />
+		<echo message="  Deployment Configuration:" />
+		<echo message="    P1:      ${p1.mode}" />
+		<echo message="    Monitor: ${monitor.mode}" />
+		<echo message="" />
+	</target>
+
+	<!-- ======================================================================= -->
 	<!-- UTILITY TARGETS                                                         -->
 	<!-- ======================================================================= -->
 
 	<target name="clean-output" description="Clean previous output files">
 		<delete file="${p1.output.file}" quiet="true" />
-		<delete file="${p2.output.file}" quiet="true" />
 		<delete file="${monitor.output.file}" quiet="true" />
 		<echo message="Previous output files cleaned" />
 	</target>
@@ -219,11 +237,11 @@
 	<!-- MAIN TARGET: COMPLETE WORKFLOW                                          -->
 	<!-- ======================================================================= -->
 
-	<target name="run-complete-workflow" depends="clean-output,rebuild-service-ruleml" 
-	        description="Run complete P1-P2 workflow with init, execution and collection (DEFAULT)">
+	<target name="run-complete-workflow" depends="resolve-deployment-modes,clean-output,rebuild-service-ruleml" 
+	        description="Run complete P1_Tutorial workflow with init, execution and collection (DEFAULT)">
 		<echo message="" />
 		<echo message="================================================================" />
-		<echo message="  P1_P2 PETRI NET - COMPLETE WORKFLOW                          " />
+		<echo message="  P1_TUTORIAL PETRI NET - COMPLETE WORKFLOW                    " />
 		<echo message="================================================================" />
 		<echo message="  Version: ${rule.version}" />
 		<echo message="  Mode: ${token.mode}" />
@@ -233,7 +251,8 @@
 
 		<parallel>
 			<!-- Start P1 Service -->
-			<java jvm="java.exe" classname="${service.loader.class}" 
+			<echo message="  [p1] Skipping - running on remote host" unless:set="p1.is.local" />
+			<java jvm="java.exe" classname="${service.loader.class}" if:set="p1.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p1.project.dir}" output="${p1.output.file}">
 				<classpath refid="p1.classpath" />
@@ -242,18 +261,9 @@
 				<arg value="${rule.version}" />
 			</java>
 
-			<!-- Start P2 Service -->
-			<java jvm="java.exe" classname="${service.loader.class}" 
-			      fork="true" timeout="600000" 
-			      dir="${p2.project.dir}" output="${p2.output.file}">
-				<classpath refid="p2.classpath" />
-				<arg value="${p2.project.dir}" />
-				<arg value="-version" />
-				<arg value="${rule.version}" />
-			</java>
-
 			<!-- Start Monitor Service -->
-			<java jvm="java.exe" classname="${service.loader.class}" 
+			<echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local" />
+			<java jvm="java.exe" classname="${service.loader.class}" if:set="monitor.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${monitor.project.dir}" output="${monitor.output.file}">
 				<classpath refid="monitor.classpath" />
@@ -274,7 +284,7 @@
 				<echo message="    PHASE 1: DATABASE INITIALIZATION           " />
 				<echo message="===============================================" />
 
-				<!-- Deploy Initialization rules -->
+				<!-- Deploy and trigger P1 Initialization -->
 				<echo message="Deploying Initialization rules..." />
 				<java classname="${init.event.generator.class}" 
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
@@ -285,19 +295,6 @@
 					<arg value="-process" /><arg value="${init.process.name}" />
 					<arg value="-sequenceId" /><arg value="${sequence.id.init.p1}" />
 					<arg value="-tokens" /><arg value="1" />
-				</java>
-
-				<!-- Trigger P2 Initialization -->
-				<java classname="${init.event.generator.class}" 
-				      fork="true" dir="${generator.project.dir}" failonerror="true">
-					<classpath refid="generator.classpath" />
-					<arg value="-service" /><arg value="P2_InitializationService" />
-					<arg value="-operation" /><arg value="${db.init.operation}" />
-					<arg value="-version" /><arg value="${init.version}" />
-					<arg value="-process" /><arg value="${init.process.name}" />
-					<arg value="-sequenceId" /><arg value="${sequence.id.init.p2}" />
-					<arg value="-tokens" /><arg value="1" />
-					<arg value="-skipDeploy" />
 				</java>
 
 				<!-- Trigger Monitor Initialization -->
@@ -370,21 +367,6 @@
 					<arg value="-queryVersion" /><arg value="${query.version}" />
 					<arg value="-sequenceId" /><arg value="${sequence.id.collect.p1}" />
 				</java>
-				<sleep seconds="${collector.delay.seconds}" />
-
-				<!-- P2 Collection (skip deployment) -->
-				<echo message="Collecting from P2_CollectorService..." />
-				<java classname="${collector.event.generator.class}" 
-				      fork="true" dir="${generator.project.dir}" failonerror="true">
-					<classpath refid="generator.classpath" />
-					<arg value="-service" /><arg value="P2_CollectorService" />
-					<arg value="-operation" /><arg value="${collector.operation}" />
-					<arg value="-version" /><arg value="${collector.version}" />
-					<arg value="-process" /><arg value="${collector.process.name}" />
-					<arg value="-queryVersion" /><arg value="${query.version}" />
-					<arg value="-sequenceId" /><arg value="${sequence.id.collect.p2}" />
-					<arg value="-skipDeploy" />
-				</java>
 				<echo message="=== Phase 3 Complete ===" />
 
 				<!-- ======================================================= -->
@@ -392,12 +374,11 @@
 				<!-- ======================================================= -->
 				<echo message="" />
 				<echo message="================================================================" />
-				<echo message="        P1_P2 WORKFLOW COMPLETED SUCCESSFULLY                  " />
+				<echo message="        P1_TUTORIAL WORKFLOW COMPLETED SUCCESSFULLY             " />
 				<echo message="================================================================" />
 				<echo message="" />
 				<echo message="Output files:" />
 				<echo message="  P1: ${p1.output.file}" />
-				<echo message="  P2: ${p2.output.file}" />
 				<echo message="  Monitor: ${monitor.output.file}" />
 				<echo message="" />
 				<echo message="Services are still running. Press Ctrl+C to stop." />
@@ -409,19 +390,20 @@
 	<!-- WORKFLOW-ONLY TARGET (skip init/collect)                               -->
 	<!-- ======================================================================= -->
 
-	<target name="run-workflow-only" depends="clean-output,rebuild-service-ruleml" 
+	<target name="run-workflow-only" depends="resolve-deployment-modes,clean-output,rebuild-service-ruleml" 
 	        description="Run only the workflow phase (skip init and collect)">
 		<echo message="" />
 		<echo message="================================================================" />
-		<echo message="  P1_P2 PETRI NET - WORKFLOW ONLY                              " />
+		<echo message="  P1_TUTORIAL PETRI NET - WORKFLOW ONLY                        " />
 		<echo message="================================================================" />
 		<echo message="  Mode: ${token.mode}" />
 		<echo message="  Target: ${target.place}:${target.operation}" />
 		<echo message="  Event Generator: ${event.generator.id}" />
 
 		<parallel>
-			<!-- Start services -->
-			<java jvm="java.exe" classname="${service.loader.class}" 
+			<!-- Start P1 Service -->
+			<echo message="  [p1] Skipping - running on remote host" unless:set="p1.is.local" />
+			<java jvm="java.exe" classname="${service.loader.class}" if:set="p1.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p1.project.dir}" output="${p1.output.file}">
 				<classpath refid="p1.classpath" />
@@ -430,16 +412,9 @@
 				<arg value="${rule.version}" />
 			</java>
 
-			<java jvm="java.exe" classname="${service.loader.class}" 
-			      fork="true" timeout="600000" 
-			      dir="${p2.project.dir}" output="${p2.output.file}">
-				<classpath refid="p2.classpath" />
-				<arg value="${p2.project.dir}" />
-				<arg value="-version" />
-				<arg value="${rule.version}" />
-			</java>
-
-			<java jvm="java.exe" classname="${service.loader.class}" 
+			<!-- Start Monitor Service -->
+			<echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local" />
+			<java jvm="java.exe" classname="${service.loader.class}" if:set="monitor.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${monitor.project.dir}" output="${monitor.output.file}">
 				<classpath refid="monitor.classpath" />
@@ -483,7 +458,7 @@
 	<target name="help" description="Display usage information">
 		<echo message="" />
 		<echo message="================================================================" />
-		<echo message="  P1_P2 Petri Net - Complete Workflow                          " />
+		<echo message="  P1_Tutorial Petri Net - Complete Workflow                    " />
 		<echo message="================================================================" />
 		<echo message="" />
 		<echo message="TOKEN MODES:" />
@@ -495,6 +470,12 @@
 		<echo message="  ant run-complete-workflow  Run complete workflow" />
 		<echo message="  ant run-workflow-only      Skip init/collect phases" />
 		<echo message="  ant help                   Show this help" />
+		<echo message="" />
+		<echo message="DEPLOYMENT MODES (per service):" />
+		<echo message="  -D&lt;service&gt;.mode=local           Launch service on this machine (default)" />
+		<echo message="  -D&lt;service&gt;.mode=remote          Service runs on another machine (skip launch)" />
+		<echo message="" />
+		<echo message="  Services: p1, monitor" />
 		<echo message="" />
 		<echo message="CONFIGURABLE PARAMETERS:" />
 		<echo message="  -Drule.version=v001                    Rule base version" />
