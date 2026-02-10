@@ -138,3 +138,28 @@ DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.TransitionHandler - P
 ERROR ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceThread - monitorIncomingEvents: false
 DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Cleaned up join 1000000
 DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Service MonitorService sequence ID: 1000000 complete.
+INFO main org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Derby Embedded Driver registered successfully.
+INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Found 1 distinct workflowBases: [1000000]
+INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Fork/Join analysis: 0 forks, 0 successful joins
+INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Token completeness check: All tokens complete
+INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Token completeness check: All tokens complete
+INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Fork/Join analysis: 0 forks, 0 successful joins
+INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Actual incomplete tokens: 0 (filtered 0 joined tokens)
+INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Found 10 terminated tokens (checked both tables)
+INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Workflow throughput: 0.93 tokens/sec
+INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Place MonitorService statistics: 0 tokens, avg=0.0ms
+INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Place P1_Place statistics: 44 tokens, avg=235.0ms
+INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Capacity verification for MonitorService: max marking=0, capacity=50 - PASS
+INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Capacity verification for P1_Place: max marking=1, capacity=50 - PASS
+INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 0 token paths for workflowBase=1000000
+INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Generated workflow report for workflowBase=1000000
+INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - GENEALOGY: Found 10 tokens for workflow 1000000
+INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - GENEALOGY: 10 root tokens, 0 forked tokens, 0 max generation depth
+INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 0 token paths for workflowBase=1000000
+INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 10 GENERATED events for workflowBase 1000000
+INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 0 marking snapshots for MonitorService
+INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 66 marking snapshots for P1_Place
+INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Place correlation: 22 matched, 0 unmatched out of 22
+INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Shared services (cross-version): []
+INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Priority analysis complete: 22 samples (22 root, 0 forked), 0 shared services, 0 shared-service contention points, 0 shared-service inversions
+INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Generated priority analysis report
