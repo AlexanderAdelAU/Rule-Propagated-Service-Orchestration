@@ -1,0 +1,18 @@
+[Analysis] Output will be written to: C:\DevShare\BTSN_R001\BTSN\btsn.petrinet.places.p1\..\btsn.common\AnalysisFolder\PetriNet\P1_Tutorial_Workflow_Analysis.txt
+[Analysis] Process type: PetriNet
+[Analysis] Timestamp: 2026-02-09 22:24:27
+
+[Analysis] Database locked - waiting for service shutdown... (1/15)
+[Analysis] Database locked - waiting for service shutdown... (2/15)
+[Analysis] Database locked - waiting for service shutdown... (3/15)
+[Analysis] Database locked - waiting for service shutdown... (4/15)
+[Analysis] Database locked - waiting for service shutdown... (5/15)
+[Analysis] Database locked - waiting for service shutdown... (6/15)
+[Analysis] Database locked - waiting for service shutdown... (7/15)
+[Analysis] Database locked - waiting for service shutdown... (8/15)
+[Analysis] Database locked - waiting for service shutdown... (9/15)
+[Analysis] Database locked - waiting for service shutdown... (10/15)
+[Analysis] Database locked - waiting for service shutdown... (11/15)
+[Analysis] Database locked - waiting for service shutdown... (12/15)
+[Analysis] Database locked - waiting for service shutdown... (13/15)
+[Analysis] Database locked - waiting for service shutdown... (14/15)

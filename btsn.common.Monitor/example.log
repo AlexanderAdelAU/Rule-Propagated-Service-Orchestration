@@ -1,4 +1,4 @@
-DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceThread - CAPTURE: WorkflowStartTime=1770635406864 for seqID=1000000
+DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceThread - CAPTURE: WorkflowStartTime=1770648351992 for seqID=1000000
 INFO ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceThread - Incoming Sequence ID = 1000000
 INFO ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceThread - MonitorIncomingEvents+ = true
 DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceThread - Using RuleBaseVersion: v999
@@ -65,10 +65,10 @@ INFO ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - === SE
 INFO ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - Service: org.btsn.places.MonitorService.writeCollectorData
 INFO ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - SequenceID: 1000000
 INFO ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - Input arguments count: 1
-DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - Processing argument 1/1, raw length: 50872
+DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - Processing argument 1/1, raw length: 46919
 DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - ENRICHMENT: First service - raw token IS original_token
 INFO ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - ENRICHMENT: Initialized workflow start time (first service)
-DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - ENRICHMENT: Cleaned argument 1, length: 50872 (removed 0 bytes of metadata)
+DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - ENRICHMENT: Cleaned argument 1, length: 46919 (removed 0 bytes of metadata)
 INFO ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted 1 clean business data arguments (removed infrastructure metadata)
 INFO ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - SERVICE INVOKE: Calling org.btsn.places.MonitorService.writeCollectorData with 1 CLEAN business data arguments
 DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - INVOKE: Reflecting on org.btsn.places.MonitorService.writeCollectorData
@@ -78,59 +78,55 @@ INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Monitor
 DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - INVOKE: Created instance using 1-param constructor (context) for org.btsn.places.MonitorService
 DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - INVOKE: Found standard method (1 String args)
 DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - INVOKE: Calling writeCollectorData with 1 arguments
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1070000 -> workflowBase=1000000 (v001: arrival=1770635396564ms, queue=181ms, service=408ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1070000 -> workflowBase=1000000 (v001: arrival=1770635395866ms, queue=270ms, service=427ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1070000 -> workflowBase=1000000 (v001: arrival=1770635395254ms, queue=185ms, service=422ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1070000 -> workflowBase=1000000 (v001: arrival=1770635394415ms, queue=514ms, service=294ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1000000 -> workflowBase=1000000 (v001: arrival=1770635376151ms, queue=275ms, service=393ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1000000 -> workflowBase=1000000 (v001: arrival=1770635375542ms, queue=203ms, service=393ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1000000 -> workflowBase=1000000 (v001: arrival=1770635374850ms, queue=295ms, service=380ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1080000 -> workflowBase=1000000 (v001: arrival=1770635399041ms, queue=269ms, service=401ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1080000 -> workflowBase=1000000 (v001: arrival=1770635398432ms, queue=175ms, service=428ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1080000 -> workflowBase=1000000 (v001: arrival=1770635397825ms, queue=196ms, service=402ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1080000 -> workflowBase=1000000 (v001: arrival=1770635396216ms, queue=1200ms, service=398ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1090000 -> workflowBase=1000000 (v001: arrival=1770635400373ms, queue=177ms, service=386ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1090000 -> workflowBase=1000000 (v001: arrival=1770635398205ms, queue=1796ms, service=362ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1050000 -> workflowBase=1000000 (v001: arrival=1770635391008ms, queue=246ms, service=344ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1030000 -> workflowBase=1000000 (v001: arrival=1770635387594ms, queue=168ms, service=348ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1030000 -> workflowBase=1000000 (v001: arrival=1770635386994ms, queue=182ms, service=399ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1030000 -> workflowBase=1000000 (v001: arrival=1770635386421ms, queue=182ms, service=373ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1020000 -> workflowBase=1000000 (v001: arrival=1770635384225ms, queue=207ms, service=321ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1060000 -> workflowBase=1000000 (v001: arrival=1770635393951ms, queue=286ms, service=377ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1060000 -> workflowBase=1000000 (v001: arrival=1770635393331ms, queue=186ms, service=428ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1060000 -> workflowBase=1000000 (v001: arrival=1770635392813ms, queue=179ms, service=344ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1040000 -> workflowBase=1000000 (v001: arrival=1770635390316ms, queue=182ms, service=392ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1040000 -> workflowBase=1000000 (v001: arrival=1770635389821ms, queue=179ms, service=299ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1010000 -> workflowBase=1000000 (v001: arrival=1770635380424ms, queue=196ms, service=331ms)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1070000 -> workflowBase=1000000 (v001: buffer=1, total=2, capacity=50)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1070000 -> workflowBase=1000000 (v001: arrival=1770648340545ms, queue=172ms, service=305ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1070000 -> workflowBase=1000000 (v001: arrival=1770648340042ms, queue=169ms, service=322ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1070000 -> workflowBase=1000000 (v001: arrival=1770648339513ms, queue=192ms, service=323ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1040000 -> workflowBase=1000000 (v001: arrival=1770648334919ms, queue=1214ms, service=334ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1030000 -> workflowBase=1000000 (v001: arrival=1770648333389ms, queue=201ms, service=384ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1030000 -> workflowBase=1000000 (v001: arrival=1770648332698ms, queue=267ms, service=411ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1030000 -> workflowBase=1000000 (v001: arrival=1770648332079ms, queue=196ms, service=415ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1030000 -> workflowBase=1000000 (v001: arrival=1770648331533ms, queue=184ms, service=344ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1010000 -> workflowBase=1000000 (v001: arrival=1770648326118ms, queue=177ms, service=389ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1010000 -> workflowBase=1000000 (v001: arrival=1770648325532ms, queue=203ms, service=362ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1060000 -> workflowBase=1000000 (v001: arrival=1770648338442ms, queue=262ms, service=308ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1060000 -> workflowBase=1000000 (v001: arrival=1770648337917ms, queue=211ms, service=307ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1000000 -> workflowBase=1000000 (v001: arrival=1770648319956ms, queue=284ms, service=315ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1080000 -> workflowBase=1000000 (v001: arrival=1770648342476ms, queue=189ms, service=393ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1080000 -> workflowBase=1000000 (v001: arrival=1770648341870ms, queue=178ms, service=420ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1080000 -> workflowBase=1000000 (v001: arrival=1770648341311ms, queue=191ms, service=358ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1090000 -> workflowBase=1000000 (v001: arrival=1770648343822ms, queue=160ms, service=306ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1090000 -> workflowBase=1000000 (v001: arrival=1770648343302ms, queue=200ms, service=305ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1050000 -> workflowBase=1000000 (v001: arrival=1770648336115ms, queue=615ms, service=357ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1020000 -> workflowBase=1000000 (v001: arrival=1770648330454ms, queue=174ms, service=400ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1020000 -> workflowBase=1000000 (v001: arrival=1770648329849ms, queue=204ms, service=372ms)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote contribution: seq=1020000 -> workflowBase=1000000 (v001: arrival=1770648329311ms, queue=197ms, service=317ms)
 INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1070000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
 INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1070000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
 INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1070000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1040000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1030000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1030000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1030000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1030000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1010000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1010000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1060000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1060000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
 INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1000000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1000000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1000000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1080000 -> workflowBase=1000000 (v001: buffer=1, total=2, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1080000 -> workflowBase=1000000 (v001: buffer=1, total=2, capacity=50)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1080000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
 INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1080000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
 INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1080000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
 INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1090000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
 INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1090000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
 INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1050000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1030000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1030000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1030000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
 INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1020000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1060000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1060000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1060000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1040000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1040000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1010000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
-INFO ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - SERVICE COMPLETE: org.btsn.places.MonitorService.writeCollectorData completed in 475ms
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1020000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
+INFO ServiceThread-MonitorService-13002 org.btsn.places.MonitorService - Wrote marking: seq=1020000 -> workflowBase=1000000 (v001: buffer=0, total=1, capacity=50)
+INFO ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - SERVICE COMPLETE: org.btsn.places.MonitorService.writeCollectorData completed in 404ms
 WARN ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - ENRICHMENT: Output attribute 'token' not found in service result, cannot enrich
 INFO ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - ENRICHMENT: Successfully enriched service result with metadata
 INFO ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceHelper - === SERVICE INVOCATION COMPLETE ===
-INFO ServiceThread-MonitorService-13002 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Service returned: {"performanceRecordsProcessed":48,"petriNetRecordsProcessed":203,"status":"success","totalRecordsProcessed":251}
+INFO ServiceThread-MonitorService-13002 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Service returned: {"performanceRecordsProcessed":44,"petriNetRecordsProcessed":187,"status":"success","totalRecordsProcessed":231}
 DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1000000 exiting place: MonitorService -> TERMINATE
 WARN ServiceThread-MonitorService-13002 org.btsn.handlers.PetriNetInstrumentationHelper - NAMING CONVENTION VIOLATION: Service 'MonitorService' does not end with '_Place'. Expected format: {NodeName}_Place. Transition IDs may not match topology. Please rename the service.
 DEBUG ServiceThread-MonitorService-13002 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_out_MonitorService token=1000000 eventType=TERMINATE
@@ -142,28 +138,3 @@ DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.TransitionHandler - P
 ERROR ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceThread - monitorIncomingEvents: false
 DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Cleaned up join 1000000
 DEBUG ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Service MonitorService sequence ID: 1000000 complete.
-INFO main org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Derby Embedded Driver registered successfully.
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Found 1 distinct workflowBases: [1000000]
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Fork/Join analysis: 0 forks, 0 successful joins
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Token completeness check: All tokens complete
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Token completeness check: All tokens complete
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Fork/Join analysis: 0 forks, 0 successful joins
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Actual incomplete tokens: 0 (filtered 0 joined tokens)
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Found 10 terminated tokens (checked both tables)
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Workflow throughput: 0.94 tokens/sec
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Place MonitorService statistics: 0 tokens, avg=0.0ms
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Place P1_Place statistics: 48 tokens, avg=217.0ms
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Capacity verification for MonitorService: max marking=0, capacity=50 - PASS
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Capacity verification for P1_Place: max marking=1, capacity=50 - PASS
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 0 token paths for workflowBase=1000000
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Generated workflow report for workflowBase=1000000
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - GENEALOGY: Found 10 tokens for workflow 1000000
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - GENEALOGY: 10 root tokens, 0 forked tokens, 0 max generation depth
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 0 token paths for workflowBase=1000000
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 10 GENERATED events for workflowBase 1000000
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 0 marking snapshots for MonitorService
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Retrieved 72 marking snapshots for P1_Place
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Place correlation: 24 matched, 0 unmatched out of 24
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Shared services (cross-version): []
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Priority analysis complete: 24 samples (24 root, 0 forked), 0 shared services, 0 shared-service contention points, 0 shared-service inversions
-INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Generated priority analysis report

@@ -1,21 +1,273 @@
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding destination service for edge: T_out_P1 -> T_in_P5
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding service from: T_in_P5 (limited hop version)
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Checking immediate neighbor: P5
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Found immediate service: P5_Place:processToken
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Found reachable service: P5_Place
-INFO main org.btsn.rulecontroller.RuleDeployer - Edge specifies endpoint: processToken
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: P5_Place:processToken:GATEWAY_NODE:true
-INFO main org.btsn.rulecontroller.RuleDeployer - GatewayNode: Added meetsCondition for P5_Place:processToken with decision_value='true'
-INFO main org.btsn.rulecontroller.RuleDeployer - GatewayNode edge: T_out_P1 -> T_in_Terminate (decision_value='false', attributes={condition=DECISION_EQUAL_TO, decision_value=false, label=false})
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding destination service for edge: T_out_P1 -> T_in_Terminate
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding service from: T_in_Terminate (limited hop version)
-DEBUG main org.btsn.rulecontroller.RuleDeployer - No immediate service found, checking two-hop paths...
-WARN main org.btsn.rulecontroller.RuleDeployer - No service found within 2 hops from: T_in_Terminate
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: TERMINATE:TERMINATE:GATEWAY_NODE:false
-INFO main org.btsn.rulecontroller.RuleDeployer - GatewayNode: Added TERMINATE meetsCondition with decision_value='false' (via TerminateNode T_in_Terminate)
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for P1_InitializationService:purgeAndInitialize
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for P1_InitializationService:purgeAndInitialize
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 4300
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
+INFO main org.btsn.rulecontroller.RuleDeployer -   Service: P1_InitializationService:purgeAndInitialize
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 4300
+INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Service: P1_InitializationService:purgeAndInitialize
+INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 4300
+INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: P1_InitializationService:purgeAndInitialize ===
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: P1
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_P1 ? P1 (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P1 has 1 incoming transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_P1 (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: P1
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: P1 ? T_out_P1 (TerminateNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P1 has 1 outgoing transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using OUTGOING TerminateNode (default output behavior)
+INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_out_P1 (TerminateNode)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: TerminateNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: TerminateNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
+INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_P1 (TerminateNode)
+DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Finding destination services from transition: T_out_P1 (TerminateNode)
+INFO main org.btsn.rulecontroller.RuleDeployer - Transition leads to termination - no meetsCondition added
 INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
 DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: P1
 DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=10 from transition: T_in_P1
+INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for P1_InitializationService:purgeAndInitialize (commitment: 1), attempt: 1
+INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for P1_InitializationService ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
+INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 4300
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
+INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 24300 (20000 + 0 + 4300)
+INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:24300 (RuleHandler for P1_InitializationService:purgeAndInitialize, channel 0)
+INFO CommitmentListener-v999 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v999:1
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for P1_InitializationService:purgeAndInitialize in 102ms
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: P1_InitializationService:purgeAndInitialize
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: P1_InitializationService:purgeAndInitialize
+INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: Monitor_InitializationService:purgeAndInitialize ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Rules for Monitor should go to itself: Monitor_InitializationService
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for Monitor_InitializationService:purgeAndInitialize
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for Monitor_InitializationService:purgeAndInitialize
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 3004
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
+INFO main org.btsn.rulecontroller.RuleDeployer -   Service: Monitor_InitializationService:purgeAndInitialize
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 3004
+INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Service: Monitor_InitializationService:purgeAndInitialize
+INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 3004
+INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: Monitor_InitializationService:purgeAndInitialize ===
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: Monitor
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_Monitor ? Monitor (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Monitor has 1 incoming transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_Monitor (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: Monitor
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: Monitor ? T_out_Monitor (TerminateNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Monitor has 1 outgoing transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using OUTGOING TerminateNode (default output behavior)
+INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_out_Monitor (TerminateNode)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: TerminateNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: TerminateNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
+INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_Monitor (TerminateNode)
+DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Finding destination services from transition: T_out_Monitor (TerminateNode)
+INFO main org.btsn.rulecontroller.RuleDeployer - Transition leads to termination - no meetsCondition added
+INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=10 from transition: T_in_Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for Monitor_InitializationService:purgeAndInitialize (commitment: 2), attempt: 1
+INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for Monitor_InitializationService ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
+INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 3004
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
+INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 23004 (20000 + 0 + 3004)
+INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:23004 (RuleHandler for Monitor_InitializationService:purgeAndInitialize, channel 0)
+INFO CommitmentListener-v999 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v999:2
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for Monitor_InitializationService:purgeAndInitialize in 108ms
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: Monitor_InitializationService:purgeAndInitialize
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: Monitor_InitializationService:purgeAndInitialize
+INFO main org.btsn.rulecontroller.RuleDeployer - === DEPLOYMENT SUMMARY ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Total services processed: 2
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: 2
+INFO main org.btsn.rulecontroller.RuleDeployer - Floating nodes skipped: 0
+INFO main org.btsn.rulecontroller.RuleDeployer - Event generators skipped: 0
+INFO main org.btsn.rulecontroller.RuleDeployer - Total in manifest: 2
+INFO main org.btsn.rulecontroller.RuleDeployer - === DEPLOYING STANDALONE MONITOR NODES ===
+INFO main org.btsn.rulecontroller.RuleDeployer - === JSON-BASED DEPLOYMENT COMPLETED SUCCESSFULLY ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Deployed 2 service operations from JSON workflow
+INFO main org.btsn.rulecontroller.RuleDeployer - === DEPLOYMENT SUCCESSFUL ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Commitments: 2
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Extracted version number 1 from 'v001'
+INFO main org.btsn.rulecontroller.RuleDeployer - Calculated commitment listener port for version 'v001': 35001 (base: 35000, offset: 1)
+INFO main org.btsn.rulecontroller.RuleDeployer - Started commitment listener on port 35001 for version v001
+INFO main org.btsn.rulecontroller.RuleDeployer - JSON-Based RuleDeployer initialized for process: petrinet/Workflow/P1_Tutorial_Workflow version: v001
+INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING RULE DEPLOYMENT ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Process: petrinet/Workflow/P1_Tutorial_Workflow
+INFO main org.btsn.rulecontroller.RuleDeployer - Version: v001
+INFO main org.btsn.rulecontroller.RuleDeployer - Derived common folder from package: org.btsn.rulecontroller ? btsn.common
+INFO main org.btsn.rulecontroller.RuleDeployer - Loading JSON workflow from: C:\DevShare\BTSN_R001\BTSN\btsn.common\ProcessDefinitionFolder\petrinet\Workflow\P1_Tutorial_Workflow.json
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully loaded JSON workflow: 4640 characters
+INFO main org.btsn.rulecontroller.RuleDeployer - === PARSING JSON WORKFLOW ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Process type: PetriNet
+INFO main org.btsn.rulecontroller.RuleDeployer - Captured buffer=50 for T_in transition: T_in_P1
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_in_P1 -> EdgeNode:EDGE_NODE
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Extracted operation name from object: processToken
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found argument: token for operation: processToken
+INFO main org.btsn.rulecontroller.RuleDeployer - Stored operation arguments for P1_Place.processToken: [token]
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Place: P1 -> P1_Place:processToken args=[token]
+INFO main org.btsn.rulecontroller.RuleDeployer - Captured buffer=50 for T_in transition: T_in_Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_in_Monitor -> EdgeNode:EDGE_NODE
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Extracted operation name from object: acknowledgeTokenArrival
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found argument: token for operation: acknowledgeTokenArrival
+INFO main org.btsn.rulecontroller.RuleDeployer - Stored operation arguments for MonitorService.acknowledgeTokenArrival: [token]
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Place: Monitor -> MonitorService:acknowledgeTokenArrival args=[token]
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_out_Monitor -> TerminateNode:TERMINATE_NODE
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_out_P1 -> GatewayNode:GATEWAY_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer - Registered EVENT_GENERATOR 'P1_EVENTGENERATOR' as EventGenerator transition (token generation handled externally)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_in_P1 -> P1
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_in_Monitor -> Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: Monitor -> T_out_Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: P1 -> T_out_P1
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: P1_EVENTGENERATOR -> T_in_P1
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Decision Edge: T_out_P1 -> T_in_Monitor [DECISION_EQUAL_TO=true]
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Decision Edge: T_out_P1 -> T_in_P1 [DECISION_EQUAL_TO=false]
+INFO main org.btsn.rulecontroller.RuleDeployer - JSON parsing complete - 2 services, 5 transitions, 7 edges
+INFO main org.btsn.rulecontroller.RuleDeployer - === POST-PARSING DEBUG ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Service nodes parsed: 2
+INFO main org.btsn.rulecontroller.RuleDeployer - Multi-op services: 0
+INFO main org.btsn.rulecontroller.RuleDeployer - Transition nodes parsed: 5
+INFO main org.btsn.rulecontroller.RuleDeployer - Workflow edges parsed: 7
+INFO main org.btsn.rulecontroller.RuleDeployer - === SERVICE NODES ===
+INFO main org.btsn.rulecontroller.RuleDeployer -   P1 -> P1_Place:processToken
+INFO main org.btsn.rulecontroller.RuleDeployer -   Monitor -> MonitorService:acknowledgeTokenArrival
+INFO main org.btsn.rulecontroller.RuleDeployer - === TRANSITION NODES ===
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_Monitor -> TerminateNode:TERMINATE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_P1 -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_Monitor -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer -   P1_EVENTGENERATOR -> EventGenerator:EVENT_GENERATOR
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_P1 -> GatewayNode:GATEWAY_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer - === WORKFLOW EDGES ===
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_P1 -> P1
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_Monitor -> Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer -   Monitor -> T_out_Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer -   P1 -> T_out_P1
+INFO main org.btsn.rulecontroller.RuleDeployer -   P1_EVENTGENERATOR -> T_in_P1
+INFO main org.btsn.rulecontroller.RuleDeployer -   DECISION EDGE: T_out_P1 -> T_in_Monitor [DECISION_EQUAL_TO=true]
+INFO main org.btsn.rulecontroller.RuleDeployer -   DECISION EDGE: T_out_P1 -> T_in_P1 [DECISION_EQUAL_TO=false]
+INFO main org.btsn.rulecontroller.RuleDeployer - Performing comprehensive workflow validation...
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Validating service:operation pairs with OOjDREW...
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Validating service with OOjDREW: P1_Place:processToken (node: P1)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - [OK] OOjDREW validation passed for P1_Place:processToken
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Validating service with OOjDREW: MonitorService:acknowledgeTokenArrival (node: Monitor)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - [OK] OOjDREW validation passed for MonitorService:acknowledgeTokenArrival
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 2: Validating workflow structure...
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Validating transition node types...
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 4: Validating graph connectivity...
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 5: Validating JoinNode configurations...
+INFO main org.btsn.rulecontroller.RuleDeployer -   No JoinNodes found in workflow (this is OK for linear workflows)
+INFO main org.btsn.rulecontroller.RuleDeployer - Workflow validation complete. Found 0 issues
+INFO main org.btsn.rulecontroller.RuleDeployer - Workflow validation passed! Proceeding with deployment...
+INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING PETRINET CANONICAL BINDINGS ===
+INFO main org.btsn.rulecontroller.RuleDeployer - === BUILDING PETRINET JOIN SLOT ASSIGNMENTS ===
+INFO main org.btsn.rulecontroller.RuleDeployer - === BUILT JOIN SLOT ASSIGNMENTS FOR 0 JOINNODES ===
+INFO main org.btsn.rulecontroller.RuleDeployer - ServiceAttributeBindings base path: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: P1
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_P1 ? P1 (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P1 has 1 incoming transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - Using topology arguments for P1_Place: [token]
+INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Determining return attribute for service: P1_Place (nodeId=P1)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Found edge P1 -> T_out_P1
+INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: P1_Place has outgoing transition: T_out_P1
+DEBUG main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Checking against 0 JoinNode slot maps
+INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: No JoinNode match for T_out_P1 - using 'token'
+INFO main org.btsn.rulecontroller.RuleDeployer - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\P1\P1_Place-CanonicalBindings.ruleml.xml (inputs: 1, explicitArgs: true [token])
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\P1\P1_Place-CanonicalBindings.ruleml.xml
+INFO main org.btsn.rulecontroller.RuleDeployer - Generated canonical binding for P1_Place (incoming: EdgeNode, inputs: 1, args: [token])
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: Monitor
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_Monitor ? Monitor (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Monitor has 1 incoming transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - Using topology arguments for MonitorService: [token]
+INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Determining return attribute for service: MonitorService (nodeId=Monitor)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Found edge Monitor -> T_out_Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: MonitorService has outgoing transition: T_out_Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Checking against 0 JoinNode slot maps
+INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: No JoinNode match for T_out_Monitor - using 'token'
+INFO main org.btsn.rulecontroller.RuleDeployer - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\MonitorService\MonitorService-CanonicalBindings.ruleml.xml (inputs: 1, explicitArgs: true [token])
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\MonitorService\MonitorService-CanonicalBindings.ruleml.xml
+INFO main org.btsn.rulecontroller.RuleDeployer - Generated canonical binding for MonitorService (incoming: EdgeNode, inputs: 1, args: [token])
+INFO main org.btsn.rulecontroller.RuleDeployer - Appended 2 PetriNet canonical bindings to Service.ruleml
+INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATED 2 CANONICAL BINDING FILES ===
+INFO main org.btsn.rulecontroller.RuleDeployer - === DEPLOYING SERVICE NODES ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Total services to deploy: 2
+INFO main org.btsn.rulecontroller.RuleDeployer - Will process: P1_Place:processToken (nodeId: P1) - DEPLOYABLE
+INFO main org.btsn.rulecontroller.RuleDeployer - Will process: MonitorService:acknowledgeTokenArrival (nodeId: Monitor) - DEPLOYABLE
+INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: P1_Place:processToken ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Rules for P1 should go to itself: P1_Place
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for P1_Place:processToken
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for P1_Place:processToken
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 4001
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
+INFO main org.btsn.rulecontroller.RuleDeployer -   Service: P1_Place:processToken
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 4001
+INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Service: P1_Place:processToken
+INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 4001
+INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: P1_Place:processToken ===
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: P1
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_P1 ? P1 (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P1 has 1 incoming transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_P1 (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: P1
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: P1 ? T_out_P1 (GatewayNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P1 has 1 outgoing transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using OUTGOING GatewayNode (controls routing behavior)
+INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_out_P1 (GatewayNode)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: GatewayNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: GatewayNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
+INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_P1 (GatewayNode)
+INFO main org.btsn.rulecontroller.RuleDeployer - Processing GatewayNode routing for T_out_P1
+INFO main org.btsn.rulecontroller.RuleDeployer - Processing GatewayNode: T_out_P1
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: GatewayNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Added NodeType: GatewayNode:GATEWAY_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer - GatewayNode has 2 outgoing edges
+INFO main org.btsn.rulecontroller.RuleDeployer - GatewayNode edge: T_out_P1 -> T_in_Monitor (decision_value='true', attributes={condition=DECISION_EQUAL_TO, decision_value=true, label=true})
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding destination service for edge: T_out_P1 -> T_in_Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding service from: T_in_Monitor (limited hop version)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Checking immediate neighbor: Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found immediate service: MonitorService:acknowledgeTokenArrival
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found reachable service: MonitorService
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: MonitorService:acknowledgeTokenArrival:GATEWAY_NODE:true
+INFO main org.btsn.rulecontroller.RuleDeployer - GatewayNode: Added meetsCondition for MonitorService:acknowledgeTokenArrival with decision_value='true'
+INFO main org.btsn.rulecontroller.RuleDeployer - GatewayNode edge: T_out_P1 -> T_in_P1 (decision_value='false', attributes={condition=DECISION_EQUAL_TO, decision_value=false, label=false})
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding destination service for edge: T_out_P1 -> T_in_P1
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding service from: T_in_P1 (limited hop version)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Checking immediate neighbor: P1
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found immediate service: P1_Place:processToken
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found reachable service: P1_Place
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: P1_Place:processToken:GATEWAY_NODE:false
+INFO main org.btsn.rulecontroller.RuleDeployer - GatewayNode: Added meetsCondition for P1_Place:processToken with decision_value='false'
+INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: P1
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=50 from transition: T_in_P1
 INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for P1_Place:processToken (commitment: 1), attempt: 1
 INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
 INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for P1_Place ===
@@ -25,117 +277,9 @@ INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 10
 INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 24001 (20000 + 0 + 4001)
 INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:24001 (RuleHandler for P1_Place:processToken, channel 0)
 INFO CommitmentListener-v001 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v001:1
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for P1_Place:processToken in 102ms
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for P1_Place:processToken in 100ms
 INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: P1_Place:processToken
 INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: P1_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: P2_Place:processToken ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Rules for P2 should go to itself: P2_Place
-INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for P2_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for P2_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 4002
-INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
-INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
-INFO main org.btsn.rulecontroller.RuleDeployer -   Service: P2_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 4002
-INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Service: P2_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 4002
-INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: P2_Place:processToken ===
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: P2
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_P2 ? P2 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P2 has 1 incoming transitions
-INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_P2 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: P2
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: P2 ? T_out_P2 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P2 has 1 outgoing transitions
-INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using OUTGOING EdgeNode (default output behavior)
-INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_out_P2 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
-INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
-INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
-INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_P2 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Finding destination services from transition: T_out_P2 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Found destination service: P4 via T_in_P4
-INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 destination services
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding operation for path from T_out_P2 to P4
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: P4_Place:processToken:EDGE_NODE:
-INFO main org.btsn.rulecontroller.RuleDeployer - Added meetsCondition: P4_Place:processToken via EdgeNode:EDGE_NODE
-INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: P2
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=10 from transition: T_in_P2
-INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for P2_Place:processToken (commitment: 2), attempt: 1
-INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for P2_Place ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
-INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 4002
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
-INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 24002 (20000 + 0 + 4002)
-INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:24002 (RuleHandler for P2_Place:processToken, channel 0)
-INFO CommitmentListener-v001 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v001:2
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for P2_Place:processToken in 102ms
-INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: P2_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: P2_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: P3_Place:processToken ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Rules for P3 should go to itself: P3_Place
-INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for P3_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for P3_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 4003
-INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
-INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
-INFO main org.btsn.rulecontroller.RuleDeployer -   Service: P3_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 4003
-INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Service: P3_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 4003
-INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: P3_Place:processToken ===
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: P3
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_P3 ? P3 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P3 has 1 incoming transitions
-INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_P3 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: P3
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: P3 ? T_out_P3 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P3 has 1 outgoing transitions
-INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using OUTGOING EdgeNode (default output behavior)
-INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_out_P3 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
-INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
-INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
-INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_P3 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Finding destination services from transition: T_out_P3 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Found destination service: P4 via T_in_P4
-INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 destination services
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding operation for path from T_out_P3 to P4
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: P4_Place:processToken:EDGE_NODE:
-INFO main org.btsn.rulecontroller.RuleDeployer - Added meetsCondition: P4_Place:processToken via EdgeNode:EDGE_NODE
-INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: P3
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=10 from transition: T_in_P3
-INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for P3_Place:processToken (commitment: 3), attempt: 1
-INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for P3_Place ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
-INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 4003
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
-INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 24003 (20000 + 0 + 4003)
-INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:24003 (RuleHandler for P3_Place:processToken, channel 0)
-INFO CommitmentListener-v001 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v001:3
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for P3_Place:processToken in 101ms
-INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: P3_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: P3_Place:processToken
 INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: MonitorService:acknowledgeTokenArrival ===
 INFO main org.btsn.rulecontroller.RuleDeployer - Rules for Monitor should go to itself: MonitorService
 INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for MonitorService:acknowledgeTokenArrival
@@ -173,8 +317,8 @@ DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Finding destination ser
 INFO main org.btsn.rulecontroller.RuleDeployer - Transition leads to termination - no meetsCondition added
 INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
 DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: Monitor
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=10 from transition: T_in_Monitor
-INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for MonitorService:acknowledgeTokenArrival (commitment: 4), attempt: 1
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=50 from transition: T_in_Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for MonitorService:acknowledgeTokenArrival (commitment: 2), attempt: 1
 INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
 INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for MonitorService ===
 INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
@@ -182,193 +326,31 @@ INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 3000
 INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
 INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 23000 (20000 + 0 + 3000)
 INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:23000 (RuleHandler for MonitorService:acknowledgeTokenArrival, channel 0)
-INFO CommitmentListener-v001 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v001:4
+INFO CommitmentListener-v001 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v001:2
 DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for MonitorService:acknowledgeTokenArrival in 102ms
 INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: MonitorService:acknowledgeTokenArrival
 INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: MonitorService:acknowledgeTokenArrival
-INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: P4_Place:processToken ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Rules for P4 should go to itself: P4_Place
-INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for P4_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for P4_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 4004
-INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
-INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
-INFO main org.btsn.rulecontroller.RuleDeployer -   Service: P4_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 4004
-INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Service: P4_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 4004
-INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: P4_Place:processToken ===
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: P4
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_P4 ? P4 (JoinNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P4 has 1 incoming transitions
-INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_P4 (JoinNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: P4
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: P4 ? T_out_P4 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P4 has 1 outgoing transitions
-INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using INCOMING JoinNode (controls input coordination)
-INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_in_P4 (JoinNode)
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: JoinNode
-INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: JoinNode
-INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
-INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_P4 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Finding destination services from transition: T_out_P4 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Found destination service: P6 via T_in_P6
-INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 destination services
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding operation for path from T_out_P4 to P6
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: P6_Place:processToken:EDGE_NODE:
-INFO main org.btsn.rulecontroller.RuleDeployer - Added meetsCondition: P6_Place:processToken via EdgeNode:EDGE_NODE
-INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: P4
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=30 from transition: T_in_P4
-INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for P4_Place:processToken (commitment: 5), attempt: 1
-INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for P4_Place ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
-INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 4004
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
-INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 24004 (20000 + 0 + 4004)
-INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:24004 (RuleHandler for P4_Place:processToken, channel 0)
-INFO CommitmentListener-v001 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v001:5
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for P4_Place:processToken in 101ms
-INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: P4_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: P4_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: P5_Place:processToken ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Rules for P5 should go to itself: P5_Place
-INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for P5_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for P5_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 4005
-INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
-INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
-INFO main org.btsn.rulecontroller.RuleDeployer -   Service: P5_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 4005
-INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Service: P5_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 4005
-INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: P5_Place:processToken ===
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: P5
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_P5 ? P5 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P5 has 1 incoming transitions
-INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_P5 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: P5
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: P5 ? T_out_P5 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P5 has 1 outgoing transitions
-INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using OUTGOING EdgeNode (default output behavior)
-INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_out_P5 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
-INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
-INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
-INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_P5 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Finding destination services from transition: T_out_P5 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Found destination service: P6 via T_in_P6
-INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 destination services
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding operation for path from T_out_P5 to P6
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: P6_Place:processToken:EDGE_NODE:
-INFO main org.btsn.rulecontroller.RuleDeployer - Added meetsCondition: P6_Place:processToken via EdgeNode:EDGE_NODE
-INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: P5
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=10 from transition: T_in_P5
-INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for P5_Place:processToken (commitment: 6), attempt: 1
-INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for P5_Place ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
-INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 4005
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
-INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 24005 (20000 + 0 + 4005)
-INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:24005 (RuleHandler for P5_Place:processToken, channel 0)
-INFO CommitmentListener-v001 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v001:6
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for P5_Place:processToken in 101ms
-INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: P5_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: P5_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: P6_Place:processToken ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Rules for P6 should go to itself: P6_Place
-INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for P6_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for P6_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 4006
-INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
-INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
-INFO main org.btsn.rulecontroller.RuleDeployer -   Service: P6_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 4006
-INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Service: P6_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 4006
-INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: P6_Place:processToken ===
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: P6
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_P6 ? P6 (JoinNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P6 has 1 incoming transitions
-INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_P6 (JoinNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: P6
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: P6 ? T_out_P6 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P6 has 1 outgoing transitions
-INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using INCOMING JoinNode (controls input coordination)
-INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_in_P6 (JoinNode)
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: JoinNode
-INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: JoinNode
-INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
-INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_P6 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Finding destination services from transition: T_out_P6 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Found destination service: Monitor via T_in_Monitor
-INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 destination services
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding operation for path from T_out_P6 to Monitor
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: MonitorService:acknowledgeTokenArrival:EDGE_NODE:
-INFO main org.btsn.rulecontroller.RuleDeployer - Added meetsCondition: MonitorService:acknowledgeTokenArrival via EdgeNode:EDGE_NODE
-INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: P6
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=10 from transition: T_in_P6
-INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for P6_Place:processToken (commitment: 7), attempt: 1
-INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for P6_Place ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
-INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 4006
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
-INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 24006 (20000 + 0 + 4006)
-INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:24006 (RuleHandler for P6_Place:processToken, channel 0)
-INFO CommitmentListener-v001 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v001:7
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for P6_Place:processToken in 103ms
-INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: P6_Place:processToken
-INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: P6_Place:processToken
 INFO main org.btsn.rulecontroller.RuleDeployer - === DEPLOYMENT SUMMARY ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Total services processed: 7
-INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: 7
+INFO main org.btsn.rulecontroller.RuleDeployer - Total services processed: 2
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: 2
 INFO main org.btsn.rulecontroller.RuleDeployer - Floating nodes skipped: 0
 INFO main org.btsn.rulecontroller.RuleDeployer - Event generators skipped: 0
-INFO main org.btsn.rulecontroller.RuleDeployer - Total in manifest: 7
+INFO main org.btsn.rulecontroller.RuleDeployer - Total in manifest: 2
 INFO main org.btsn.rulecontroller.RuleDeployer - === DEPLOYING STANDALONE MONITOR NODES ===
 INFO main org.btsn.rulecontroller.RuleDeployer - === JSON-BASED DEPLOYMENT COMPLETED SUCCESSFULLY ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Deployed 7 service operations from JSON workflow
+INFO main org.btsn.rulecontroller.RuleDeployer - Deployed 2 service operations from JSON workflow
 INFO main org.btsn.rulecontroller.RuleDeployer - === DEPLOYMENT SUCCESSFUL ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Commitments: 7
+INFO main org.btsn.rulecontroller.RuleDeployer - Commitments: 2
 DEBUG main org.btsn.rulecontroller.RuleDeployer - Extracted version number 999 from 'v999'
 INFO main org.btsn.rulecontroller.RuleDeployer - Calculated commitment listener port for version 'v999': 35999 (base: 35000, offset: 999)
 INFO main org.btsn.rulecontroller.RuleDeployer - Started commitment listener on port 35999 for version v999
-INFO main org.btsn.rulecontroller.RuleDeployer - JSON-Based RuleDeployer initialized for process: petrinet/Collectors/P1_to_P6_Collector version: v999
+INFO main org.btsn.rulecontroller.RuleDeployer - JSON-Based RuleDeployer initialized for process: petrinet/Collectors/P1_Collector version: v999
 INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING RULE DEPLOYMENT ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Process: petrinet/Collectors/P1_to_P6_Collector
+INFO main org.btsn.rulecontroller.RuleDeployer - Process: petrinet/Collectors/P1_Collector
 INFO main org.btsn.rulecontroller.RuleDeployer - Version: v999
 INFO main org.btsn.rulecontroller.RuleDeployer - Derived common folder from package: org.btsn.rulecontroller ? btsn.common
-INFO main org.btsn.rulecontroller.RuleDeployer - Loading JSON workflow from: C:\DevShare\BTSN_R001\BTSN\btsn.common\ProcessDefinitionFolder\petrinet\Collectors\P1_to_P6_Collector.json
-INFO main org.btsn.rulecontroller.RuleDeployer - Successfully loaded JSON workflow: 11048 characters
+INFO main org.btsn.rulecontroller.RuleDeployer - Loading JSON workflow from: C:\DevShare\BTSN_R001\BTSN\btsn.common\ProcessDefinitionFolder\petrinet\Collectors\P1_Collector.json
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully loaded JSON workflow: 3445 characters
 INFO main org.btsn.rulecontroller.RuleDeployer - === PARSING JSON WORKFLOW ===
 INFO main org.btsn.rulecontroller.RuleDeployer - Process type: PetriNet
 DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: COLLECTION_GENERATOR -> EdgeNode:EDGE_NODE
@@ -382,86 +364,26 @@ DEBUG main org.btsn.rulecontroller.RuleDeployer - Extracted operation name from 
 DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Place: Monitor -> MonitorService:writeCollectorData
 DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_out_P1 -> EdgeNode:EDGE_NODE
 DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_out_Monitor -> TerminateNode:TERMINATE_NODE
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Extracted operation name from object: collectAllData
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Place: P2 -> P2_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer - Captured buffer=10 for T_in transition: T_in_P2
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_in_P2 -> EdgeNode:EDGE_NODE
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_out_P2 -> EdgeNode:EDGE_NODE
-INFO main org.btsn.rulecontroller.RuleDeployer - Captured buffer=10 for T_in transition: T_in_P3
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_in_P3 -> EdgeNode:EDGE_NODE
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Extracted operation name from object: collectAllData
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Place: P3 -> P3_CollectorService:collectAllData
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_out_P3 -> EdgeNode:EDGE_NODE
-INFO main org.btsn.rulecontroller.RuleDeployer - Captured buffer=10 for T_in transition: T_in_P4
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_in_P4 -> EdgeNode:EDGE_NODE
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Extracted operation name from object: collectAllData
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Place: P4 -> P4_CollectorService:collectAllData
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_out_P4 -> EdgeNode:EDGE_NODE
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_out_P5 -> EdgeNode:EDGE_NODE
-INFO main org.btsn.rulecontroller.RuleDeployer - Captured buffer=10 for T_in transition: T_in_P5
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_in_P5 -> EdgeNode:EDGE_NODE
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Extracted operation name from object: collectAllData
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Place: P5 -> P5_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer - Captured buffer=10 for T_in transition: T_in_P6
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_in_P6 -> EdgeNode:EDGE_NODE
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Extracted operation name from object: collectAllData
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Place: P6 -> P6_CollectorService:collectAllData
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_out_P6 -> EdgeNode:EDGE_NODE
 DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: COLLECTION_GENERATOR -> T_in_P1
 DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_in_P1 -> P1
 DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_in_Monitor -> Monitor
 DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: P1 -> T_out_P1
 DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: Monitor -> T_out_Monitor
 DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_out_P1 -> T_in_Monitor
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_in_P2 -> P2
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: P2 -> T_out_P2
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_in_P3 -> P3
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: P3 -> T_out_P3
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_out_P2 -> T_in_Monitor
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: COLLECTION_GENERATOR -> T_in_P2
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: COLLECTION_GENERATOR -> T_in_P3
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_out_P3 -> T_in_Monitor
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_in_P4 -> P4
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: P4 -> T_out_P4
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: COLLECTION_GENERATOR -> T_in_P4
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_out_P4 -> T_in_Monitor
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_in_P5 -> P5
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: P5 -> T_out_P5
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: COLLECTION_GENERATOR -> T_in_P5
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_out_P5 -> T_in_Monitor
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_in_P6 -> P6
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: P6 -> T_out_P6
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: COLLECTION_GENERATOR -> T_in_P6
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_out_P6 -> T_in_Monitor
-INFO main org.btsn.rulecontroller.RuleDeployer - JSON parsing complete - 7 services, 15 transitions, 26 edges
+INFO main org.btsn.rulecontroller.RuleDeployer - JSON parsing complete - 2 services, 5 transitions, 6 edges
 INFO main org.btsn.rulecontroller.RuleDeployer - === POST-PARSING DEBUG ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Service nodes parsed: 7
+INFO main org.btsn.rulecontroller.RuleDeployer - Service nodes parsed: 2
 INFO main org.btsn.rulecontroller.RuleDeployer - Multi-op services: 0
-INFO main org.btsn.rulecontroller.RuleDeployer - Transition nodes parsed: 15
-INFO main org.btsn.rulecontroller.RuleDeployer - Workflow edges parsed: 26
+INFO main org.btsn.rulecontroller.RuleDeployer - Transition nodes parsed: 5
+INFO main org.btsn.rulecontroller.RuleDeployer - Workflow edges parsed: 6
 INFO main org.btsn.rulecontroller.RuleDeployer - === SERVICE NODES ===
 INFO main org.btsn.rulecontroller.RuleDeployer -   P1 -> P1_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer -   P2 -> P2_CollectorService:collectAllData
 INFO main org.btsn.rulecontroller.RuleDeployer -   Monitor -> MonitorService:writeCollectorData
-INFO main org.btsn.rulecontroller.RuleDeployer -   P3 -> P3_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer -   P4 -> P4_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer -   P5 -> P5_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer -   P6 -> P6_CollectorService:collectAllData
 INFO main org.btsn.rulecontroller.RuleDeployer - === TRANSITION NODES ===
 INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_Monitor -> TerminateNode:TERMINATE_NODE
-INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_P6 -> EdgeNode:EDGE_NODE
-INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_P5 -> EdgeNode:EDGE_NODE
-INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_Monitor -> EdgeNode:EDGE_NODE
-INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_P4 -> EdgeNode:EDGE_NODE
-INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_P3 -> EdgeNode:EDGE_NODE
-INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_P4 -> EdgeNode:EDGE_NODE
 INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_P1 -> EdgeNode:EDGE_NODE
 INFO main org.btsn.rulecontroller.RuleDeployer -   COLLECTION_GENERATOR -> EdgeNode:EDGE_NODE
-INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_P2 -> EdgeNode:EDGE_NODE
-INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_P5 -> EdgeNode:EDGE_NODE
-INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_P6 -> EdgeNode:EDGE_NODE
-INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_P3 -> EdgeNode:EDGE_NODE
-INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_P2 -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_Monitor -> EdgeNode:EDGE_NODE
 INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_P1 -> EdgeNode:EDGE_NODE
 INFO main org.btsn.rulecontroller.RuleDeployer - === WORKFLOW EDGES ===
 INFO main org.btsn.rulecontroller.RuleDeployer -   COLLECTION_GENERATOR -> T_in_P1
@@ -470,42 +392,12 @@ INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_Monitor -> Monitor
 INFO main org.btsn.rulecontroller.RuleDeployer -   P1 -> T_out_P1
 INFO main org.btsn.rulecontroller.RuleDeployer -   Monitor -> T_out_Monitor
 INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_P1 -> T_in_Monitor
-INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_P2 -> P2
-INFO main org.btsn.rulecontroller.RuleDeployer -   P2 -> T_out_P2
-INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_P3 -> P3
-INFO main org.btsn.rulecontroller.RuleDeployer -   P3 -> T_out_P3
-INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_P2 -> T_in_Monitor
-INFO main org.btsn.rulecontroller.RuleDeployer -   COLLECTION_GENERATOR -> T_in_P2
-INFO main org.btsn.rulecontroller.RuleDeployer -   COLLECTION_GENERATOR -> T_in_P3
-INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_P3 -> T_in_Monitor
-INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_P4 -> P4
-INFO main org.btsn.rulecontroller.RuleDeployer -   P4 -> T_out_P4
-INFO main org.btsn.rulecontroller.RuleDeployer -   COLLECTION_GENERATOR -> T_in_P4
-INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_P4 -> T_in_Monitor
-INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_P5 -> P5
-INFO main org.btsn.rulecontroller.RuleDeployer -   P5 -> T_out_P5
-INFO main org.btsn.rulecontroller.RuleDeployer -   COLLECTION_GENERATOR -> T_in_P5
-INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_P5 -> T_in_Monitor
-INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_P6 -> P6
-INFO main org.btsn.rulecontroller.RuleDeployer -   P6 -> T_out_P6
-INFO main org.btsn.rulecontroller.RuleDeployer -   COLLECTION_GENERATOR -> T_in_P6
-INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_P6 -> T_in_Monitor
 INFO main org.btsn.rulecontroller.RuleDeployer - Performing comprehensive workflow validation...
 INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Validating service:operation pairs with OOjDREW...
 DEBUG main org.btsn.rulecontroller.RuleDeployer - Validating service with OOjDREW: P1_CollectorService:collectAllData (node: P1)
 DEBUG main org.btsn.rulecontroller.RuleDeployer - [OK] OOjDREW validation passed for P1_CollectorService:collectAllData
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Validating service with OOjDREW: P2_CollectorService:collectAllData (node: P2)
-DEBUG main org.btsn.rulecontroller.RuleDeployer - [OK] OOjDREW validation passed for P2_CollectorService:collectAllData
 DEBUG main org.btsn.rulecontroller.RuleDeployer - Validating service with OOjDREW: MonitorService:writeCollectorData (node: Monitor)
 DEBUG main org.btsn.rulecontroller.RuleDeployer - [OK] OOjDREW validation passed for MonitorService:writeCollectorData
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Validating service with OOjDREW: P3_CollectorService:collectAllData (node: P3)
-DEBUG main org.btsn.rulecontroller.RuleDeployer - [OK] OOjDREW validation passed for P3_CollectorService:collectAllData
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Validating service with OOjDREW: P4_CollectorService:collectAllData (node: P4)
-DEBUG main org.btsn.rulecontroller.RuleDeployer - [OK] OOjDREW validation passed for P4_CollectorService:collectAllData
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Validating service with OOjDREW: P5_CollectorService:collectAllData (node: P5)
-DEBUG main org.btsn.rulecontroller.RuleDeployer - [OK] OOjDREW validation passed for P5_CollectorService:collectAllData
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Validating service with OOjDREW: P6_CollectorService:collectAllData (node: P6)
-DEBUG main org.btsn.rulecontroller.RuleDeployer - [OK] OOjDREW validation passed for P6_CollectorService:collectAllData
 INFO main org.btsn.rulecontroller.RuleDeployer - Step 2: Validating workflow structure...
 INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Validating transition node types...
 INFO main org.btsn.rulecontroller.RuleDeployer - Step 4: Validating graph connectivity...
@@ -529,18 +421,6 @@ INFO main org.btsn.rulecontroller.RuleDeployer - Writing canonical binding file:
 INFO main org.btsn.rulecontroller.RuleDeployer - PetriNet mode: Using default token bindings for P1_CollectorService.collectAllData
 DEBUG main org.btsn.rulecontroller.RuleDeployer - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\P1\P1_CollectorService-CanonicalBindings.ruleml.xml
 INFO main org.btsn.rulecontroller.RuleDeployer - Generated canonical binding for P1_CollectorService (incoming: EdgeNode, inputs: 1)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: P2
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_P2 ? P2 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P2 has 1 incoming transitions
-INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Determining return attribute for service: P2_CollectorService (nodeId=P2)
-DEBUG main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Found edge P2 -> T_out_P2
-INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: P2_CollectorService has outgoing transition: T_out_P2
-DEBUG main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Checking against 0 JoinNode slot maps
-INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: No JoinNode match for T_out_P2 - using 'token'
-INFO main org.btsn.rulecontroller.RuleDeployer - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\P2\P2_CollectorService-CanonicalBindings.ruleml.xml (inputs: 1, explicitArgs: false)
-INFO main org.btsn.rulecontroller.RuleDeployer - PetriNet mode: Using default token bindings for P2_CollectorService.collectAllData
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\P2\P2_CollectorService-CanonicalBindings.ruleml.xml
-INFO main org.btsn.rulecontroller.RuleDeployer - Generated canonical binding for P2_CollectorService (incoming: EdgeNode, inputs: 1)
 INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: Monitor
 INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_Monitor ? Monitor (EdgeNode)
 INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Monitor has 1 incoming transitions
@@ -553,65 +433,12 @@ INFO main org.btsn.rulecontroller.RuleDeployer - Writing canonical binding file:
 INFO main org.btsn.rulecontroller.RuleDeployer - PetriNet mode: Using default token bindings for MonitorService.writeCollectorData
 DEBUG main org.btsn.rulecontroller.RuleDeployer - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\MonitorService\MonitorService-CanonicalBindings.ruleml.xml
 INFO main org.btsn.rulecontroller.RuleDeployer - Generated canonical binding for MonitorService (incoming: EdgeNode, inputs: 1)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: P3
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_P3 ? P3 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P3 has 1 incoming transitions
-INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Determining return attribute for service: P3_CollectorService (nodeId=P3)
-DEBUG main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Found edge P3 -> T_out_P3
-INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: P3_CollectorService has outgoing transition: T_out_P3
-DEBUG main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Checking against 0 JoinNode slot maps
-INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: No JoinNode match for T_out_P3 - using 'token'
-INFO main org.btsn.rulecontroller.RuleDeployer - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\P3\P3_CollectorService-CanonicalBindings.ruleml.xml (inputs: 1, explicitArgs: false)
-INFO main org.btsn.rulecontroller.RuleDeployer - PetriNet mode: Using default token bindings for P3_CollectorService.collectAllData
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\P3\P3_CollectorService-CanonicalBindings.ruleml.xml
-INFO main org.btsn.rulecontroller.RuleDeployer - Generated canonical binding for P3_CollectorService (incoming: EdgeNode, inputs: 1)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: P4
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_P4 ? P4 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P4 has 1 incoming transitions
-INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Determining return attribute for service: P4_CollectorService (nodeId=P4)
-DEBUG main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Found edge P4 -> T_out_P4
-INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: P4_CollectorService has outgoing transition: T_out_P4
-DEBUG main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Checking against 0 JoinNode slot maps
-INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: No JoinNode match for T_out_P4 - using 'token'
-INFO main org.btsn.rulecontroller.RuleDeployer - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\P4\P4_CollectorService-CanonicalBindings.ruleml.xml (inputs: 1, explicitArgs: false)
-INFO main org.btsn.rulecontroller.RuleDeployer - PetriNet mode: Using default token bindings for P4_CollectorService.collectAllData
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\P4\P4_CollectorService-CanonicalBindings.ruleml.xml
-INFO main org.btsn.rulecontroller.RuleDeployer - Generated canonical binding for P4_CollectorService (incoming: EdgeNode, inputs: 1)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: P5
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_P5 ? P5 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P5 has 1 incoming transitions
-INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Determining return attribute for service: P5_CollectorService (nodeId=P5)
-DEBUG main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Found edge P5 -> T_out_P5
-INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: P5_CollectorService has outgoing transition: T_out_P5
-DEBUG main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Checking against 0 JoinNode slot maps
-INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: No JoinNode match for T_out_P5 - using 'token'
-INFO main org.btsn.rulecontroller.RuleDeployer - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\P5\P5_CollectorService-CanonicalBindings.ruleml.xml (inputs: 1, explicitArgs: false)
-INFO main org.btsn.rulecontroller.RuleDeployer - PetriNet mode: Using default token bindings for P5_CollectorService.collectAllData
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\P5\P5_CollectorService-CanonicalBindings.ruleml.xml
-INFO main org.btsn.rulecontroller.RuleDeployer - Generated canonical binding for P5_CollectorService (incoming: EdgeNode, inputs: 1)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: P6
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_P6 ? P6 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P6 has 1 incoming transitions
-INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Determining return attribute for service: P6_CollectorService (nodeId=P6)
-DEBUG main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Found edge P6 -> T_out_P6
-INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: P6_CollectorService has outgoing transition: T_out_P6
-DEBUG main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Checking against 0 JoinNode slot maps
-INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: No JoinNode match for T_out_P6 - using 'token'
-INFO main org.btsn.rulecontroller.RuleDeployer - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\P6\P6_CollectorService-CanonicalBindings.ruleml.xml (inputs: 1, explicitArgs: false)
-INFO main org.btsn.rulecontroller.RuleDeployer - PetriNet mode: Using default token bindings for P6_CollectorService.collectAllData
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\P6\P6_CollectorService-CanonicalBindings.ruleml.xml
-INFO main org.btsn.rulecontroller.RuleDeployer - Generated canonical binding for P6_CollectorService (incoming: EdgeNode, inputs: 1)
 INFO main org.btsn.rulecontroller.RuleDeployer - PetriNet canonical bindings already exist in Service.ruleml - skipping append
-INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATED 7 CANONICAL BINDING FILES ===
+INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATED 2 CANONICAL BINDING FILES ===
 INFO main org.btsn.rulecontroller.RuleDeployer - === DEPLOYING SERVICE NODES ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Total services to deploy: 7
+INFO main org.btsn.rulecontroller.RuleDeployer - Total services to deploy: 2
 INFO main org.btsn.rulecontroller.RuleDeployer - Will process: P1_CollectorService:collectAllData (nodeId: P1) - DEPLOYABLE
-INFO main org.btsn.rulecontroller.RuleDeployer - Will process: P2_CollectorService:collectAllData (nodeId: P2) - DEPLOYABLE
 INFO main org.btsn.rulecontroller.RuleDeployer - Will process: MonitorService:writeCollectorData (nodeId: Monitor) - DEPLOYABLE
-INFO main org.btsn.rulecontroller.RuleDeployer - Will process: P3_CollectorService:collectAllData (nodeId: P3) - DEPLOYABLE
-INFO main org.btsn.rulecontroller.RuleDeployer - Will process: P4_CollectorService:collectAllData (nodeId: P4) - DEPLOYABLE
-INFO main org.btsn.rulecontroller.RuleDeployer - Will process: P5_CollectorService:collectAllData (nodeId: P5) - DEPLOYABLE
-INFO main org.btsn.rulecontroller.RuleDeployer - Will process: P6_CollectorService:collectAllData (nodeId: P6) - DEPLOYABLE
 INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: P1_CollectorService:collectAllData ===
 INFO main org.btsn.rulecontroller.RuleDeployer - Rules for P1 should go to itself: P1_CollectorService
 INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for P1_CollectorService:collectAllData
@@ -663,63 +490,9 @@ INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 10
 INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 24100 (20000 + 0 + 4100)
 INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:24100 (RuleHandler for P1_CollectorService:collectAllData, channel 0)
 INFO CommitmentListener-v999 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v999:1
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for P1_CollectorService:collectAllData in 102ms
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for P1_CollectorService:collectAllData in 103ms
 INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: P1_CollectorService:collectAllData
 INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: P1_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: P2_CollectorService:collectAllData ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Rules for P2 should go to itself: P2_CollectorService
-INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for P2_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for P2_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 4101
-INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
-INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
-INFO main org.btsn.rulecontroller.RuleDeployer -   Service: P2_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 4101
-INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Service: P2_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 4101
-INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: P2_CollectorService:collectAllData ===
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: P2
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_P2 ? P2 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P2 has 1 incoming transitions
-INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_P2 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: P2
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: P2 ? T_out_P2 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P2 has 1 outgoing transitions
-INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using OUTGOING EdgeNode (default output behavior)
-INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_out_P2 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
-INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
-INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
-INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_P2 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Finding destination services from transition: T_out_P2 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Found destination service: Monitor via T_in_Monitor
-INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 destination services
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding operation for path from T_out_P2 to Monitor
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: MonitorService:writeCollectorData:EDGE_NODE:
-INFO main org.btsn.rulecontroller.RuleDeployer - Added meetsCondition: MonitorService:writeCollectorData via EdgeNode:EDGE_NODE
-INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: P2
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=10 from transition: T_in_P2
-INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for P2_CollectorService:collectAllData (commitment: 2), attempt: 1
-INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for P2_CollectorService ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
-INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 4101
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
-INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 24101 (20000 + 0 + 4101)
-INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:24101 (RuleHandler for P2_CollectorService:collectAllData, channel 0)
-INFO CommitmentListener-v999 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v999:2
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for P2_CollectorService:collectAllData in 102ms
-INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: P2_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: P2_CollectorService:collectAllData
 INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: MonitorService:writeCollectorData ===
 INFO main org.btsn.rulecontroller.RuleDeployer - Rules for Monitor should go to itself: MonitorService
 INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for MonitorService:writeCollectorData
@@ -758,7 +531,7 @@ INFO main org.btsn.rulecontroller.RuleDeployer - Transition leads to termination
 INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
 DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: Monitor
 DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=10 from transition: T_in_Monitor
-INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for MonitorService:writeCollectorData (commitment: 3), attempt: 1
+INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for MonitorService:writeCollectorData (commitment: 2), attempt: 1
 INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
 INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for MonitorService ===
 INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
@@ -766,237 +539,21 @@ INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 3002
 INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
 INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 23002 (20000 + 0 + 3002)
 INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:23002 (RuleHandler for MonitorService:writeCollectorData, channel 0)
-INFO CommitmentListener-v999 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v999:3
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for MonitorService:writeCollectorData in 105ms
+INFO CommitmentListener-v999 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v999:2
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for MonitorService:writeCollectorData in 101ms
 INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: MonitorService:writeCollectorData
 INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: MonitorService:writeCollectorData
-INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: P3_CollectorService:collectAllData ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Rules for P3 should go to itself: P3_CollectorService
-INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for P3_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for P3_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 4102
-INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
-INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
-INFO main org.btsn.rulecontroller.RuleDeployer -   Service: P3_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 4102
-INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Service: P3_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 4102
-INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: P3_CollectorService:collectAllData ===
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: P3
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_P3 ? P3 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P3 has 1 incoming transitions
-INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_P3 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: P3
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: P3 ? T_out_P3 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P3 has 1 outgoing transitions
-INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using OUTGOING EdgeNode (default output behavior)
-INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_out_P3 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
-INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
-INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
-INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_P3 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Finding destination services from transition: T_out_P3 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Found destination service: Monitor via T_in_Monitor
-INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 destination services
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding operation for path from T_out_P3 to Monitor
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: MonitorService:writeCollectorData:EDGE_NODE:
-INFO main org.btsn.rulecontroller.RuleDeployer - Added meetsCondition: MonitorService:writeCollectorData via EdgeNode:EDGE_NODE
-INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: P3
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=10 from transition: T_in_P3
-INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for P3_CollectorService:collectAllData (commitment: 4), attempt: 1
-INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for P3_CollectorService ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
-INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 4102
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
-INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 24102 (20000 + 0 + 4102)
-INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:24102 (RuleHandler for P3_CollectorService:collectAllData, channel 0)
-INFO CommitmentListener-v999 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v999:4
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for P3_CollectorService:collectAllData in 101ms
-INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: P3_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: P3_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: P4_CollectorService:collectAllData ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Rules for P4 should go to itself: P4_CollectorService
-INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for P4_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for P4_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 4103
-INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
-INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
-INFO main org.btsn.rulecontroller.RuleDeployer -   Service: P4_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 4103
-INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Service: P4_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 4103
-INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: P4_CollectorService:collectAllData ===
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: P4
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_P4 ? P4 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P4 has 1 incoming transitions
-INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_P4 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: P4
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: P4 ? T_out_P4 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P4 has 1 outgoing transitions
-INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using OUTGOING EdgeNode (default output behavior)
-INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_out_P4 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
-INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
-INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
-INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_P4 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Finding destination services from transition: T_out_P4 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Found destination service: Monitor via T_in_Monitor
-INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 destination services
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding operation for path from T_out_P4 to Monitor
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: MonitorService:writeCollectorData:EDGE_NODE:
-INFO main org.btsn.rulecontroller.RuleDeployer - Added meetsCondition: MonitorService:writeCollectorData via EdgeNode:EDGE_NODE
-INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: P4
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=10 from transition: T_in_P4
-INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for P4_CollectorService:collectAllData (commitment: 5), attempt: 1
-INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for P4_CollectorService ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
-INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 4103
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
-INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 24103 (20000 + 0 + 4103)
-INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:24103 (RuleHandler for P4_CollectorService:collectAllData, channel 0)
-INFO CommitmentListener-v999 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v999:5
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for P4_CollectorService:collectAllData in 103ms
-INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: P4_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: P4_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: P5_CollectorService:collectAllData ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Rules for P5 should go to itself: P5_CollectorService
-INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for P5_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for P5_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 4104
-INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
-INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
-INFO main org.btsn.rulecontroller.RuleDeployer -   Service: P5_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 4104
-INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Service: P5_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 4104
-INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: P5_CollectorService:collectAllData ===
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: P5
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_P5 ? P5 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P5 has 1 incoming transitions
-INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_P5 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: P5
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: P5 ? T_out_P5 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P5 has 1 outgoing transitions
-INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using OUTGOING EdgeNode (default output behavior)
-INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_out_P5 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
-INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
-INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
-INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_P5 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Finding destination services from transition: T_out_P5 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Found destination service: Monitor via T_in_Monitor
-INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 destination services
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding operation for path from T_out_P5 to Monitor
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: MonitorService:writeCollectorData:EDGE_NODE:
-INFO main org.btsn.rulecontroller.RuleDeployer - Added meetsCondition: MonitorService:writeCollectorData via EdgeNode:EDGE_NODE
-INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: P5
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=10 from transition: T_in_P5
-INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for P5_CollectorService:collectAllData (commitment: 6), attempt: 1
-INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for P5_CollectorService ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
-INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 4104
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
-INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 24104 (20000 + 0 + 4104)
-INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:24104 (RuleHandler for P5_CollectorService:collectAllData, channel 0)
-INFO CommitmentListener-v999 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v999:6
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for P5_CollectorService:collectAllData in 109ms
-INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: P5_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: P5_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: P6_CollectorService:collectAllData ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Rules for P6 should go to itself: P6_CollectorService
-INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for P6_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for P6_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 4105
-INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
-INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
-INFO main org.btsn.rulecontroller.RuleDeployer -   Service: P6_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 4105
-INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Service: P6_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
-INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 4105
-INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: P6_CollectorService:collectAllData ===
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: P6
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_P6 ? P6 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P6 has 1 incoming transitions
-INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_P6 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: P6
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: P6 ? T_out_P6 (EdgeNode)
-INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P6 has 1 outgoing transitions
-INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using OUTGOING EdgeNode (default output behavior)
-INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_out_P6 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
-INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: EdgeNode
-INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
-INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_P6 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Finding destination services from transition: T_out_P6 (EdgeNode)
-DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Found destination service: Monitor via T_in_Monitor
-INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 destination services
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding operation for path from T_out_P6 to Monitor
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: MonitorService:writeCollectorData:EDGE_NODE:
-INFO main org.btsn.rulecontroller.RuleDeployer - Added meetsCondition: MonitorService:writeCollectorData via EdgeNode:EDGE_NODE
-INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: P6
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=10 from transition: T_in_P6
-INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for P6_CollectorService:collectAllData (commitment: 7), attempt: 1
-INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
-INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for P6_CollectorService ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
-INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 4105
-INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
-INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 24105 (20000 + 0 + 4105)
-INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:24105 (RuleHandler for P6_CollectorService:collectAllData, channel 0)
-INFO CommitmentListener-v999 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v999:7
-DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for P6_CollectorService:collectAllData in 101ms
-INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: P6_CollectorService:collectAllData
-INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: P6_CollectorService:collectAllData
 INFO main org.btsn.rulecontroller.RuleDeployer - === DEPLOYMENT SUMMARY ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Total services processed: 7
-INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: 7
+INFO main org.btsn.rulecontroller.RuleDeployer - Total services processed: 2
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: 2
 INFO main org.btsn.rulecontroller.RuleDeployer - Floating nodes skipped: 0
 INFO main org.btsn.rulecontroller.RuleDeployer - Event generators skipped: 0
-INFO main org.btsn.rulecontroller.RuleDeployer - Total in manifest: 7
+INFO main org.btsn.rulecontroller.RuleDeployer - Total in manifest: 2
 INFO main org.btsn.rulecontroller.RuleDeployer - === DEPLOYING STANDALONE MONITOR NODES ===
 INFO main org.btsn.rulecontroller.RuleDeployer - === JSON-BASED DEPLOYMENT COMPLETED SUCCESSFULLY ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Deployed 7 service operations from JSON workflow
+INFO main org.btsn.rulecontroller.RuleDeployer - Deployed 2 service operations from JSON workflow
 INFO main org.btsn.rulecontroller.RuleDeployer - === DEPLOYMENT SUCCESSFUL ===
-INFO main org.btsn.rulecontroller.RuleDeployer - Commitments: 7
+INFO main org.btsn.rulecontroller.RuleDeployer - Commitments: 2
 DEBUG main org.btsn.rulecontroller.RuleDeployer - Extracted version number 999 from 'v999'
 INFO main org.btsn.rulecontroller.RuleDeployer - Calculated commitment listener port for version 'v999': 35999 (base: 35000, offset: 999)
 INFO main org.btsn.rulecontroller.RuleDeployer - Started commitment listener on port 35999 for version v999
@@ -1031,3 +588,420 @@ INFO main org.btsn.rulecontroller.RuleDeployer - === POST-PARSING DEBUG ===
 INFO main org.btsn.rulecontroller.RuleDeployer - Service nodes parsed: 2
 INFO main org.btsn.rulecontroller.RuleDeployer - Multi-op services: 0
 INFO main org.btsn.rulecontroller.RuleDeployer - Transition nodes parsed: 5
+INFO main org.btsn.rulecontroller.RuleDeployer - Workflow edges parsed: 6
+INFO main org.btsn.rulecontroller.RuleDeployer - === SERVICE NODES ===
+INFO main org.btsn.rulecontroller.RuleDeployer -   P1 -> P1_InitializationService:purgeAndInitialize
+INFO main org.btsn.rulecontroller.RuleDeployer -   Monitor -> Monitor_InitializationService:purgeAndInitialize
+INFO main org.btsn.rulecontroller.RuleDeployer - === TRANSITION NODES ===
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_Monitor -> TerminateNode:TERMINATE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_P1 -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_Monitor -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer -   INTIALISATION_GENERATOR -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_P1 -> TerminateNode:TERMINATE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer - === WORKFLOW EDGES ===
+INFO main org.btsn.rulecontroller.RuleDeployer -   INTIALISATION_GENERATOR -> T_in_P1
+INFO main org.btsn.rulecontroller.RuleDeployer -   INTIALISATION_GENERATOR -> T_in_Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_P1 -> P1
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_Monitor -> Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer -   P1 -> T_out_P1
+INFO main org.btsn.rulecontroller.RuleDeployer -   Monitor -> T_out_Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer - Performing comprehensive workflow validation...
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Validating service:operation pairs with OOjDREW...
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Validating service with OOjDREW: P1_InitializationService:purgeAndInitialize (node: P1)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - [OK] OOjDREW validation passed for P1_InitializationService:purgeAndInitialize
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Validating service with OOjDREW: Monitor_InitializationService:purgeAndInitialize (node: Monitor)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - [OK] OOjDREW validation passed for Monitor_InitializationService:purgeAndInitialize
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 2: Validating workflow structure...
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Validating transition node types...
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 4: Validating graph connectivity...
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 5: Validating JoinNode configurations...
+INFO main org.btsn.rulecontroller.RuleDeployer -   No JoinNodes found in workflow (this is OK for linear workflows)
+INFO main org.btsn.rulecontroller.RuleDeployer - Workflow validation complete. Found 0 issues
+INFO main org.btsn.rulecontroller.RuleDeployer - Workflow validation passed! Proceeding with deployment...
+INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING PETRINET CANONICAL BINDINGS ===
+INFO main org.btsn.rulecontroller.RuleDeployer - === BUILDING PETRINET JOIN SLOT ASSIGNMENTS ===
+INFO main org.btsn.rulecontroller.RuleDeployer - === BUILT JOIN SLOT ASSIGNMENTS FOR 0 JOINNODES ===
+INFO main org.btsn.rulecontroller.RuleDeployer - ServiceAttributeBindings base path: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: P1
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_P1 ? P1 (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P1 has 1 incoming transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Determining return attribute for service: P1_InitializationService (nodeId=P1)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Found edge P1 -> T_out_P1
+INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: P1_InitializationService has outgoing transition: T_out_P1
+DEBUG main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Checking against 0 JoinNode slot maps
+INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: No JoinNode match for T_out_P1 - using 'token'
+INFO main org.btsn.rulecontroller.RuleDeployer - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\P1\P1_InitializationService-CanonicalBindings.ruleml.xml (inputs: 1, explicitArgs: false)
+INFO main org.btsn.rulecontroller.RuleDeployer - PetriNet mode: Using default token bindings for P1_InitializationService.purgeAndInitialize
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\P1\P1_InitializationService-CanonicalBindings.ruleml.xml
+INFO main org.btsn.rulecontroller.RuleDeployer - Generated canonical binding for P1_InitializationService (incoming: EdgeNode, inputs: 1)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: Monitor
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_Monitor ? Monitor (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Monitor has 1 incoming transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Determining return attribute for service: Monitor_InitializationService (nodeId=Monitor)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Found edge Monitor -> T_out_Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Monitor_InitializationService has outgoing transition: T_out_Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Checking against 0 JoinNode slot maps
+INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: No JoinNode match for T_out_Monitor - using 'token'
+INFO main org.btsn.rulecontroller.RuleDeployer - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\Monitor\Monitor_InitializationService-CanonicalBindings.ruleml.xml (inputs: 1, explicitArgs: false)
+INFO main org.btsn.rulecontroller.RuleDeployer - PetriNet mode: Using default token bindings for Monitor_InitializationService.purgeAndInitialize
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\Monitor\Monitor_InitializationService-CanonicalBindings.ruleml.xml
+INFO main org.btsn.rulecontroller.RuleDeployer - Generated canonical binding for Monitor_InitializationService (incoming: EdgeNode, inputs: 1)
+INFO main org.btsn.rulecontroller.RuleDeployer - Appended 2 PetriNet canonical bindings to Service.ruleml
+INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATED 2 CANONICAL BINDING FILES ===
+INFO main org.btsn.rulecontroller.RuleDeployer - === DEPLOYING SERVICE NODES ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Total services to deploy: 2
+INFO main org.btsn.rulecontroller.RuleDeployer - Will process: P1_InitializationService:purgeAndInitialize (nodeId: P1) - DEPLOYABLE
+INFO main org.btsn.rulecontroller.RuleDeployer - Will process: Monitor_InitializationService:purgeAndInitialize (nodeId: Monitor) - DEPLOYABLE
+INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: P1_InitializationService:purgeAndInitialize ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Rules for P1 should go to itself: P1_InitializationService
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for P1_InitializationService:purgeAndInitialize
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for P1_InitializationService:purgeAndInitialize
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 4300
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
+INFO main org.btsn.rulecontroller.RuleDeployer -   Service: P1_InitializationService:purgeAndInitialize
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 4300
+INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Service: P1_InitializationService:purgeAndInitialize
+INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 4300
+INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: P1_InitializationService:purgeAndInitialize ===
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: P1
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_P1 ? P1 (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P1 has 1 incoming transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_P1 (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: P1
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: P1 ? T_out_P1 (TerminateNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P1 has 1 outgoing transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using OUTGOING TerminateNode (default output behavior)
+INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_out_P1 (TerminateNode)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: TerminateNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: TerminateNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
+INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_P1 (TerminateNode)
+DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Finding destination services from transition: T_out_P1 (TerminateNode)
+INFO main org.btsn.rulecontroller.RuleDeployer - Transition leads to termination - no meetsCondition added
+INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: P1
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=10 from transition: T_in_P1
+INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for P1_InitializationService:purgeAndInitialize (commitment: 1), attempt: 1
+INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for P1_InitializationService ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
+INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 4300
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
+INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 24300 (20000 + 0 + 4300)
+INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:24300 (RuleHandler for P1_InitializationService:purgeAndInitialize, channel 0)
+INFO CommitmentListener-v999 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v999:1
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for P1_InitializationService:purgeAndInitialize in 100ms
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: P1_InitializationService:purgeAndInitialize
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: P1_InitializationService:purgeAndInitialize
+INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: Monitor_InitializationService:purgeAndInitialize ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Rules for Monitor should go to itself: Monitor_InitializationService
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for Monitor_InitializationService:purgeAndInitialize
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for Monitor_InitializationService:purgeAndInitialize
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 3004
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
+INFO main org.btsn.rulecontroller.RuleDeployer -   Service: Monitor_InitializationService:purgeAndInitialize
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 3004
+INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Service: Monitor_InitializationService:purgeAndInitialize
+INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 3004
+INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: Monitor_InitializationService:purgeAndInitialize ===
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: Monitor
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_Monitor ? Monitor (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Monitor has 1 incoming transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_Monitor (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: Monitor
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: Monitor ? T_out_Monitor (TerminateNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Monitor has 1 outgoing transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using OUTGOING TerminateNode (default output behavior)
+INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_out_Monitor (TerminateNode)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: TerminateNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: TerminateNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
+INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_Monitor (TerminateNode)
+DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Finding destination services from transition: T_out_Monitor (TerminateNode)
+INFO main org.btsn.rulecontroller.RuleDeployer - Transition leads to termination - no meetsCondition added
+INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=10 from transition: T_in_Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for Monitor_InitializationService:purgeAndInitialize (commitment: 2), attempt: 1
+INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for Monitor_InitializationService ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
+INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 3004
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
+INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 23004 (20000 + 0 + 3004)
+INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:23004 (RuleHandler for Monitor_InitializationService:purgeAndInitialize, channel 0)
+INFO CommitmentListener-v999 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v999:2
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for Monitor_InitializationService:purgeAndInitialize in 101ms
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: Monitor_InitializationService:purgeAndInitialize
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: Monitor_InitializationService:purgeAndInitialize
+INFO main org.btsn.rulecontroller.RuleDeployer - === DEPLOYMENT SUMMARY ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Total services processed: 2
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: 2
+INFO main org.btsn.rulecontroller.RuleDeployer - Floating nodes skipped: 0
+INFO main org.btsn.rulecontroller.RuleDeployer - Event generators skipped: 0
+INFO main org.btsn.rulecontroller.RuleDeployer - Total in manifest: 2
+INFO main org.btsn.rulecontroller.RuleDeployer - === DEPLOYING STANDALONE MONITOR NODES ===
+INFO main org.btsn.rulecontroller.RuleDeployer - === JSON-BASED DEPLOYMENT COMPLETED SUCCESSFULLY ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Deployed 2 service operations from JSON workflow
+INFO main org.btsn.rulecontroller.RuleDeployer - === DEPLOYMENT SUCCESSFUL ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Commitments: 2
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Extracted version number 1 from 'v001'
+INFO main org.btsn.rulecontroller.RuleDeployer - Calculated commitment listener port for version 'v001': 35001 (base: 35000, offset: 1)
+INFO main org.btsn.rulecontroller.RuleDeployer - Started commitment listener on port 35001 for version v001
+INFO main org.btsn.rulecontroller.RuleDeployer - JSON-Based RuleDeployer initialized for process: petrinet/Workflow/P1_Tutorial_Workflow version: v001
+INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING RULE DEPLOYMENT ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Process: petrinet/Workflow/P1_Tutorial_Workflow
+INFO main org.btsn.rulecontroller.RuleDeployer - Version: v001
+INFO main org.btsn.rulecontroller.RuleDeployer - Derived common folder from package: org.btsn.rulecontroller ? btsn.common
+INFO main org.btsn.rulecontroller.RuleDeployer - Loading JSON workflow from: C:\DevShare\BTSN_R001\BTSN\btsn.common\ProcessDefinitionFolder\petrinet\Workflow\P1_Tutorial_Workflow.json
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully loaded JSON workflow: 4640 characters
+INFO main org.btsn.rulecontroller.RuleDeployer - === PARSING JSON WORKFLOW ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Process type: PetriNet
+INFO main org.btsn.rulecontroller.RuleDeployer - Captured buffer=50 for T_in transition: T_in_P1
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_in_P1 -> EdgeNode:EDGE_NODE
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Extracted operation name from object: processToken
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found argument: token for operation: processToken
+INFO main org.btsn.rulecontroller.RuleDeployer - Stored operation arguments for P1_Place.processToken: [token]
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Place: P1 -> P1_Place:processToken args=[token]
+INFO main org.btsn.rulecontroller.RuleDeployer - Captured buffer=50 for T_in transition: T_in_Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_in_Monitor -> EdgeNode:EDGE_NODE
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Extracted operation name from object: acknowledgeTokenArrival
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found argument: token for operation: acknowledgeTokenArrival
+INFO main org.btsn.rulecontroller.RuleDeployer - Stored operation arguments for MonitorService.acknowledgeTokenArrival: [token]
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Place: Monitor -> MonitorService:acknowledgeTokenArrival args=[token]
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_out_Monitor -> TerminateNode:TERMINATE_NODE
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Transition: T_out_P1 -> GatewayNode:GATEWAY_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer - Registered EVENT_GENERATOR 'P1_EVENTGENERATOR' as EventGenerator transition (token generation handled externally)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_in_P1 -> P1
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: T_in_Monitor -> Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: Monitor -> T_out_Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: P1 -> T_out_P1
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Edge: P1_EVENTGENERATOR -> T_in_P1
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Decision Edge: T_out_P1 -> T_in_Monitor [DECISION_EQUAL_TO=true]
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Parsed JSON Decision Edge: T_out_P1 -> T_in_P1 [DECISION_EQUAL_TO=false]
+INFO main org.btsn.rulecontroller.RuleDeployer - JSON parsing complete - 2 services, 5 transitions, 7 edges
+INFO main org.btsn.rulecontroller.RuleDeployer - === POST-PARSING DEBUG ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Service nodes parsed: 2
+INFO main org.btsn.rulecontroller.RuleDeployer - Multi-op services: 0
+INFO main org.btsn.rulecontroller.RuleDeployer - Transition nodes parsed: 5
+INFO main org.btsn.rulecontroller.RuleDeployer - Workflow edges parsed: 7
+INFO main org.btsn.rulecontroller.RuleDeployer - === SERVICE NODES ===
+INFO main org.btsn.rulecontroller.RuleDeployer -   P1 -> P1_Place:processToken
+INFO main org.btsn.rulecontroller.RuleDeployer -   Monitor -> MonitorService:acknowledgeTokenArrival
+INFO main org.btsn.rulecontroller.RuleDeployer - === TRANSITION NODES ===
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_Monitor -> TerminateNode:TERMINATE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_P1 -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_Monitor -> EdgeNode:EDGE_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer -   P1_EVENTGENERATOR -> EventGenerator:EVENT_GENERATOR
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_out_P1 -> GatewayNode:GATEWAY_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer - === WORKFLOW EDGES ===
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_P1 -> P1
+INFO main org.btsn.rulecontroller.RuleDeployer -   T_in_Monitor -> Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer -   Monitor -> T_out_Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer -   P1 -> T_out_P1
+INFO main org.btsn.rulecontroller.RuleDeployer -   P1_EVENTGENERATOR -> T_in_P1
+INFO main org.btsn.rulecontroller.RuleDeployer -   DECISION EDGE: T_out_P1 -> T_in_Monitor [DECISION_EQUAL_TO=true]
+INFO main org.btsn.rulecontroller.RuleDeployer -   DECISION EDGE: T_out_P1 -> T_in_P1 [DECISION_EQUAL_TO=false]
+INFO main org.btsn.rulecontroller.RuleDeployer - Performing comprehensive workflow validation...
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Validating service:operation pairs with OOjDREW...
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Validating service with OOjDREW: P1_Place:processToken (node: P1)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - [OK] OOjDREW validation passed for P1_Place:processToken
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Validating service with OOjDREW: MonitorService:acknowledgeTokenArrival (node: Monitor)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - [OK] OOjDREW validation passed for MonitorService:acknowledgeTokenArrival
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 2: Validating workflow structure...
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Validating transition node types...
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 4: Validating graph connectivity...
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 5: Validating JoinNode configurations...
+INFO main org.btsn.rulecontroller.RuleDeployer -   No JoinNodes found in workflow (this is OK for linear workflows)
+INFO main org.btsn.rulecontroller.RuleDeployer - Workflow validation complete. Found 0 issues
+INFO main org.btsn.rulecontroller.RuleDeployer - Workflow validation passed! Proceeding with deployment...
+INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING PETRINET CANONICAL BINDINGS ===
+INFO main org.btsn.rulecontroller.RuleDeployer - === BUILDING PETRINET JOIN SLOT ASSIGNMENTS ===
+INFO main org.btsn.rulecontroller.RuleDeployer - === BUILT JOIN SLOT ASSIGNMENTS FOR 0 JOINNODES ===
+INFO main org.btsn.rulecontroller.RuleDeployer - ServiceAttributeBindings base path: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: P1
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_P1 ? P1 (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P1 has 1 incoming transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - Using topology arguments for P1_Place: [token]
+INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Determining return attribute for service: P1_Place (nodeId=P1)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Found edge P1 -> T_out_P1
+INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: P1_Place has outgoing transition: T_out_P1
+DEBUG main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Checking against 0 JoinNode slot maps
+INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: No JoinNode match for T_out_P1 - using 'token'
+INFO main org.btsn.rulecontroller.RuleDeployer - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\P1\P1_Place-CanonicalBindings.ruleml.xml (inputs: 1, explicitArgs: true [token])
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\P1\P1_Place-CanonicalBindings.ruleml.xml
+INFO main org.btsn.rulecontroller.RuleDeployer - Generated canonical binding for P1_Place (incoming: EdgeNode, inputs: 1, args: [token])
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: Monitor
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_Monitor ? Monitor (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Monitor has 1 incoming transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - Using topology arguments for MonitorService: [token]
+INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Determining return attribute for service: MonitorService (nodeId=Monitor)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Found edge Monitor -> T_out_Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: MonitorService has outgoing transition: T_out_Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: Checking against 0 JoinNode slot maps
+INFO main org.btsn.rulecontroller.RuleDeployer - RETURN-ATTR: No JoinNode match for T_out_Monitor - using 'token'
+INFO main org.btsn.rulecontroller.RuleDeployer - Writing canonical binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\MonitorService\MonitorService-CanonicalBindings.ruleml.xml (inputs: 1, explicitArgs: true [token])
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Successfully wrote canonical binding file: C:\DevShare\BTSN_R001\BTSN\btsn.common\ServiceAttributeBindings\MonitorService\MonitorService-CanonicalBindings.ruleml.xml
+INFO main org.btsn.rulecontroller.RuleDeployer - Generated canonical binding for MonitorService (incoming: EdgeNode, inputs: 1, args: [token])
+INFO main org.btsn.rulecontroller.RuleDeployer - Appended 2 PetriNet canonical bindings to Service.ruleml
+INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATED 2 CANONICAL BINDING FILES ===
+INFO main org.btsn.rulecontroller.RuleDeployer - === DEPLOYING SERVICE NODES ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Total services to deploy: 2
+INFO main org.btsn.rulecontroller.RuleDeployer - Will process: P1_Place:processToken (nodeId: P1) - DEPLOYABLE
+INFO main org.btsn.rulecontroller.RuleDeployer - Will process: MonitorService:acknowledgeTokenArrival (nodeId: Monitor) - DEPLOYABLE
+INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: P1_Place:processToken ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Rules for P1 should go to itself: P1_Place
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for P1_Place:processToken
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for P1_Place:processToken
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 4001
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
+INFO main org.btsn.rulecontroller.RuleDeployer -   Service: P1_Place:processToken
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 4001
+INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Service: P1_Place:processToken
+INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 4001
+INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: P1_Place:processToken ===
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: P1
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_P1 ? P1 (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P1 has 1 incoming transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_P1 (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: P1
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: P1 ? T_out_P1 (GatewayNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service P1 has 1 outgoing transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using OUTGOING GatewayNode (controls routing behavior)
+INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_out_P1 (GatewayNode)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: GatewayNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: GatewayNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
+INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_P1 (GatewayNode)
+INFO main org.btsn.rulecontroller.RuleDeployer - Processing GatewayNode routing for T_out_P1
+INFO main org.btsn.rulecontroller.RuleDeployer - Processing GatewayNode: T_out_P1
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: GatewayNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Added NodeType: GatewayNode:GATEWAY_NODE
+INFO main org.btsn.rulecontroller.RuleDeployer - GatewayNode has 2 outgoing edges
+INFO main org.btsn.rulecontroller.RuleDeployer - GatewayNode edge: T_out_P1 -> T_in_Monitor (decision_value='true', attributes={condition=DECISION_EQUAL_TO, decision_value=true, label=true})
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding destination service for edge: T_out_P1 -> T_in_Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding service from: T_in_Monitor (limited hop version)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Checking immediate neighbor: Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found immediate service: MonitorService:acknowledgeTokenArrival
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found reachable service: MonitorService
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: MonitorService:acknowledgeTokenArrival:GATEWAY_NODE:true
+INFO main org.btsn.rulecontroller.RuleDeployer - GatewayNode: Added meetsCondition for MonitorService:acknowledgeTokenArrival with decision_value='true'
+INFO main org.btsn.rulecontroller.RuleDeployer - GatewayNode edge: T_out_P1 -> T_in_P1 (decision_value='false', attributes={condition=DECISION_EQUAL_TO, decision_value=false, label=false})
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding destination service for edge: T_out_P1 -> T_in_P1
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Finding service from: T_in_P1 (limited hop version)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Checking immediate neighbor: P1
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found immediate service: P1_Place:processToken
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found reachable service: P1_Place
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote meetsCondition: P1_Place:processToken:GATEWAY_NODE:false
+INFO main org.btsn.rulecontroller.RuleDeployer - GatewayNode: Added meetsCondition for P1_Place:processToken with decision_value='false'
+INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: P1
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=50 from transition: T_in_P1
+INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for P1_Place:processToken (commitment: 1), attempt: 1
+INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for P1_Place ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
+INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 4001
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
+INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 24001 (20000 + 0 + 4001)
+INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:24001 (RuleHandler for P1_Place:processToken, channel 0)
+INFO CommitmentListener-v001 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v001:1
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for P1_Place:processToken in 141ms
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: P1_Place:processToken
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: P1_Place:processToken
+INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING DEPLOYMENT FOR: MonitorService:acknowledgeTokenArrival ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Rules for Monitor should go to itself: MonitorService
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 1: Checking activeService facts for MonitorService:acknowledgeTokenArrival
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] Found activeService entry for MonitorService:acknowledgeTokenArrival
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID from activeService: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port from activeService: 3000
+INFO main org.btsn.rulecontroller.RuleDeployer - Step 3: Resolving channel ID 'ip0' via boundChannel facts
+INFO main org.btsn.rulecontroller.RuleDeployer - [OK] REMOTE HOST DEPLOYMENT DETECTED
+INFO main org.btsn.rulecontroller.RuleDeployer -   Service: MonitorService:acknowledgeTokenArrival
+INFO main org.btsn.rulecontroller.RuleDeployer -   Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer -   Remote Host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer -   Port: 3000
+INFO main org.btsn.rulecontroller.RuleDeployer - === CHANNEL RESOLUTION COMPLETE ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Service: MonitorService:acknowledgeTokenArrival
+INFO main org.btsn.rulecontroller.RuleDeployer - From: activeService facts
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel ID: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Resolved to: REMOTE 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Channel: ip0
+INFO main org.btsn.rulecontroller.RuleDeployer - Rule Port: 3000
+INFO main org.btsn.rulecontroller.RuleDeployer - === GENERATING RULES FOR SERVICE: MonitorService:acknowledgeTokenArrival ===
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding INCOMING transitions for service: Monitor
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found incoming transition: T_in_Monitor ? Monitor (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Monitor has 1 incoming transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - Input coordination from INCOMING: T_in_Monitor (EdgeNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Finding OUTGOING transitions for service: Monitor
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Found outgoing transition: Monitor ? T_out_Monitor (TerminateNode)
+INFO main org.btsn.rulecontroller.model.WorkflowModel - Service Monitor has 1 outgoing transitions
+INFO main org.btsn.rulecontroller.RuleDeployer - DECISION: Using OUTGOING TerminateNode (default output behavior)
+INFO main org.btsn.rulecontroller.RuleDeployer - CONTROLLING TRANSITION for NodeType: T_out_Monitor (TerminateNode)
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: TerminateNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Wrote NodeType: TerminateNode
+INFO main org.btsn.rulecontroller.RuleDeployer - Found 1 outgoing transitions for routing
+INFO main org.btsn.rulecontroller.RuleDeployer - Processing OUTGOING: T_out_Monitor (TerminateNode)
+DEBUG main org.btsn.rulecontroller.model.WorkflowModel - Finding destination services from transition: T_out_Monitor (TerminateNode)
+INFO main org.btsn.rulecontroller.RuleDeployer - Transition leads to termination - no meetsCondition added
+INFO main org.btsn.rulecontroller.RuleDeployer - === END SERVICE RULE GENERATION ===
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Searching for buffer value for service: Monitor
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Found buffer=50 from transition: T_in_Monitor
+INFO main org.btsn.rulecontroller.RuleDeployer - Sending payload for MonitorService:acknowledgeTokenArrival (commitment: 2), attempt: 1
+INFO main org.btsn.rulecontroller.RuleDeployer - Using remote host: 192.168.1.152
+INFO main org.btsn.rulecontroller.RuleDeployer - === Port Calculation for MonitorService ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel: ip0 (#0)
+INFO main org.btsn.rulecontroller.RuleDeployer - Base Port: 3000
+INFO main org.btsn.rulecontroller.RuleDeployer - Channel Offset: 0 (channel x 1000)
+INFO main org.btsn.rulecontroller.RuleDeployer - Target Port: 23000 (20000 + 0 + 3000)
+INFO main org.btsn.rulecontroller.RuleDeployer - Sent UDP payload to 192.168.1.152:23000 (RuleHandler for MonitorService:acknowledgeTokenArrival, channel 0)
+INFO CommitmentListener-v001 org.btsn.rulecontroller.RuleDeployer - [OK] UDP commitment confirmation received: v001:2
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Commitment confirmed for MonitorService:acknowledgeTokenArrival in 101ms
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed rule for: MonitorService:acknowledgeTokenArrival
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: MonitorService:acknowledgeTokenArrival
+INFO main org.btsn.rulecontroller.RuleDeployer - === DEPLOYMENT SUMMARY ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Total services processed: 2
+INFO main org.btsn.rulecontroller.RuleDeployer - Successfully deployed: 2
+INFO main org.btsn.rulecontroller.RuleDeployer - Floating nodes skipped: 0
+INFO main org.btsn.rulecontroller.RuleDeployer - Event generators skipped: 0
+INFO main org.btsn.rulecontroller.RuleDeployer - Total in manifest: 2
+INFO main org.btsn.rulecontroller.RuleDeployer - === DEPLOYING STANDALONE MONITOR NODES ===
+INFO main org.btsn.rulecontroller.RuleDeployer - === JSON-BASED DEPLOYMENT COMPLETED SUCCESSFULLY ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Deployed 2 service operations from JSON workflow
+INFO main org.btsn.rulecontroller.RuleDeployer - === DEPLOYMENT SUCCESSFUL ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Commitments: 2
+DEBUG main org.btsn.rulecontroller.RuleDeployer - Extracted version number 999 from 'v999'
+INFO main org.btsn.rulecontroller.RuleDeployer - Calculated commitment listener port for version 'v999': 35999 (base: 35000, offset: 999)
+INFO main org.btsn.rulecontroller.RuleDeployer - Started commitment listener on port 35999 for version v999
+INFO main org.btsn.rulecontroller.RuleDeployer - JSON-Based RuleDeployer initialized for process: petrinet/Collectors/P1_Collector version: v999
+INFO main org.btsn.rulecontroller.RuleDeployer - === STARTING RULE DEPLOYMENT ===
+INFO main org.btsn.rulecontroller.RuleDeployer - Process: petrinet/Collectors/P1_Collector
+INFO main org.btsn.rulecontroller.RuleDeployer - Version: v999
+INFO main org.btsn.rulecontroller.RuleDeployer - Derived common folder from package: org.btsn.rulecontroller ? btsn.common
