@@ -7,7 +7,7 @@ Assuming that you have read the readme file, and have loaded the projects into e
 First, begin by running the process editor which can be found in the project  `btsn.WorkflowEditor/com/editor/ProcessEditor`.  Then from the `File` menu, load the tutorial workflow definition from `btsn.common/ProcessDefinitionFolder/petrinet/workflow/P1_Tutorial_Workflow.json`.  It should look like the workflow depicted in Figure 1.
 
 <p align="center">
-  <img src="images/P1_Workflow_Tutorial.png" alt="Core orchestration pattern" width="80%" />
+  <img src="images/P1_Workflow_Tutorial.png" alt="Core orchestration pattern" width="75%" />
 </p>
 
 *Figure 1. Tutorial of a Single Service process*
@@ -92,13 +92,13 @@ If you would like to animate the analysis markings on the actual workflow topolo
 
 ## Animating a Markings on the Process Topology
 
-5. To run the animator, open `btsn.WorkflowEditor/com/editor/ProcessEditor`
+To run the animator, open `btsn.WorkflowEditor/com/editor/ProcessEditor`
 
-6. Now we need to load the workflow definition file in the process editor.  Open the workflow definition folder `ProcessDefinitionFolder/petrinet/Workflow` in `btsn.common` and navigate to select the process: `P1_Tutorial_Workflow.json`
+Now we need to load the workflow definition file in the process editor.  Open the workflow definition folder `ProcessDefinitionFolder/petrinet/Workflow` in `btsn.common` and navigate to select the process: `P1_Tutorial_Workflow.json`
 
-7. Load the analysis file from the Analysis, e.g. `btsn.common/AnalysisFolder/PetriNet/P1_Tutorial_Workflow.txt`
+Load the analysis file you just saveed from running the `PetriNetAnalyzer` e.g. `btsn.common/AnalysisFolder/PetriNet/P1_Tutorial_Workflow.txt`
 
-8. Press **Play** to see the simulation results
+Press **Play** to see the simulation results
 
 
 
