@@ -1,6 +1,10 @@
+# Introduction
+If you just want to try out the RPSO infrastructure without wading through all the detail, a tutorial on how to use the tools and the infrastructure can be found here [Link to tutorial](Tutorial.md).  Otherwise the next section provide an insight into why a change in the approach the service or mesh orchestration is needed and a brief description of how it can be applied to your particular network.
+
 # Rule-Propagated-Service-Orchestration
 
-RPSO is a decentralized workflow orchestration architecture that eliminates central coordination bottlenecks by embedding orchestration logic as executable rules at service or mesh boundaries. Unlike traditional orchestrators that maintain global workflow state in a central engine, RPSO distributes coordination intelligence to autonomous synchronising nodes that are ideally, but not essentially, co-hosted on the service node or mesh platform as a set of Java classes (handlers). These control nodes make local routing decisions based on locally-cached rules while maintaining global workflow coherence through an xml payload that carries token-based state propagation. The architecture operates through a two-phase approach: compile-time transformation of declarative JSON workflow specifications into service-specific rule fragments, followed by runtime execution where control nodes independently evaluate rules to determine routing without inter-service coordination. 
+RPSO is a decentralized workflow orchestration infrastructure that eliminates central coordination bottlenecks by embedding orchestration logic as executable rules at service or mesh boundaries. Unlike traditional orchestrators that maintain global workflow state in a central engine, RPSO distributes coordination intelligence to autonomous synchronising nodes that are ideally, but not essentially, co-hosted on the service node or mesh platform as a set of Java classes (handlers). These control nodes make local routing decisions based on locally-cached rules while maintaining global workflow coherence through an xml payload that carries token-based state propagation. The architecture operates through a two-phase approach: compile-time transformation of declarative JSON workflow specifications into service-specific rule fragments, followed by runtime execution where control nodes independently evaluate rules to determine routing without inter-service coordination. 
+
 
 
 <p align="center">
@@ -119,7 +123,6 @@ Services Names and Operations are defined as RuleML atoms, where ip0 is mapped t
 
 ```xml
 <!-- List of service facts -->
-
 <!-- Triage Service Method -->
 <Atom>
 	<Rel>activeService</Rel>
@@ -127,23 +130,6 @@ Services Names and Operations are defined as RuleML atoms, where ip0 is mapped t
 	<Ind>processTriageAssessment</Ind>
 	<Ind>ip0</Ind>
 	<Ind>2100</Ind>
-</Atom>
-
-<!-- Radiology Service Methods -->
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>RadiologyService</Ind>
-	<Ind>processImagingRequest</Ind>
-	<Ind>ip0</Ind>
-	<Ind>2101</Ind>
-</Atom>
-
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>RadiologyService</Ind>
-	<Ind>federatedRadiologyRequest</Ind>
-	<Ind>ip0</Ind>
-	<Ind>2102</Ind>
 </Atom>
 ```
 ### Canonical Bindings (ServiceAttributeBindings)
