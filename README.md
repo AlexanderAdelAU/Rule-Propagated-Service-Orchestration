@@ -1,5 +1,18 @@
 # Introduction
-If you just want to try out the RPSO infrastructure without wading through all the detail, a tutorial on how to use the tools and the infrastructure can be found here [Link to tutorial](Tutorial.md).  Otherwise the next section provide an insight into why a change in the approach the service or mesh orchestration is needed and a brief description of how it can be applied to your particular network.
+If you just want to try out the RPSO infrastructure without wading through all the detail, a tutorial on how to use the tools and the infrastructure can be found here [Link to tutorial](Tutorial.md).  Otherwise the next section provide an insight into why a change in the approach the service or mesh orchestration is needed and a brief description of how it can be applied to your particular network.  
+
+# The Concept
+
+## Centralised Orchestration
+<p align="center">
+  <img src="images/centralised_orchestration.png" alt="Core orchestration pattern" width="80%" />
+</p>
+
+## Decentralised Orchestration
+<p align="center">
+  <img src="images/decentralised_orchestration.png" alt="Core orchestration pattern" width="80%" />
+</p>
+
 
 # Rule-Propagated-Service-Orchestration
 
