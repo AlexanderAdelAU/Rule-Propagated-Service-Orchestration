@@ -8,6 +8,8 @@ Before we start, bear in mind that the infrastructure model is based around the 
   <img src="images/control_node.png" alt="Core orchestration pattern" width="75%" />
 </p>
 
+*Figure 1. Tutorial of a Single Service process*
+
 however when working with the workflow modeling it is more convenient to separate `sync` and `publish` functions out into virtual `T_in` and `T_out` edge and gateway nodes so that the process becomes clearer and also helps with the analysis.
 
 ## Edit the Workflow with the ProcessEditor
@@ -18,7 +20,7 @@ First, begin by running the process editor which can be found in the project  `b
   <img src="images/P1_Workflow_Tutorial.png" alt="Core orchestration pattern" width="75%" />
 </p>
 
-*Figure 1. Tutorial of a Single Service process*
+*Figure 2. Tutorial of a Single Service process*
 
 
 We are using the PetriNet process type as the methods and attributes are very simple and reflect typical petri net architecture model.  The process comprises an Event Generator that generates the payload a single service node and a monitor service.

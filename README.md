@@ -39,7 +39,7 @@ The control node comprises primarily synchronisation and publishing functions.  
   <img src="images/rule_deployment_2.png" alt="Rule Deployment pattern" width="80%" />
 </p>
 
-*Figure 2. Dual-layer architecture: Rule distribution (compile-time) and token flow (runtime)*
+*Figure 4. Dual-layer architecture: Rule distribution (compile-time) and token flow (runtime)*
 
 ## Java Implementation
 
@@ -50,7 +50,7 @@ The Java classes that implement the architecture interfaces are build on standar
   <img src="images/java_implementation.png" alt="Java implementation classes" width="80%" />
 </p>
 
-*Figure 3. Java Implementation Handler Classes.*
+*Figure 5. Java Implementation Handler Classes.*
 
 ### Control Node - Core Components
 
@@ -76,7 +76,7 @@ The system implements a two-layer architecture:
  At deployment time, the RulePropagation component transforms JSON workflow specifications into service-specific rule fragments. Each service receives rules defining its coordination behavior (NodeType atoms), routing conditions (meetsCondition atoms), and decision values (DecisionValue atoms). These rules can occur in real-time whilst other process are still in flight.  They are distributed via UDP with a commitment protocol ensuring all services acknowledge receipt before workflow activation is allowed.
 
 ![RuleGeneration](images/rule_generation.png)
-*Figure 4. Rule Fragments Deployment Flow*
+*Figure 6. Rule Fragments Deployment Flow*
 
 ### Token Flow Layer
 At runtime, an xml payload traverses the network carrying both workflow state and accumulated business data.  Each **Control Node** reads the payload (*T_in*) and prioritises and buffers the arriving tokens that carries the service's operation arguments.   Once the service has been invoked the results enrich the token, and then EventPublisher (*T_out*) querying local OOjDREW rule engine for routing decisions to downstream services.
@@ -222,7 +222,7 @@ For example to build the Triage service with its Control Node navigate to `btsn.
 The implementations includes a healthcare emergency department workflow along with simple Petri Net type services workflow.  An example of a practical  process workflow is shown below in Figure 5. 
 
 ![HowToBuildAModel](images/building_a_model.png)
-*Figure 5. Emergency_Department_Patient_Workflow.*
+*Figure 7. Emergency_Department_Patient_Workflow.*
 
 ## Tutorial: Running the Healthcare Workflow
 
