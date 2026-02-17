@@ -2,6 +2,14 @@
 
 Assuming that you have read the readme file, and have loaded the projects into either Eclipse or your favourite IDE, then here a short tutorial that you can use to build your first process using process editor.  
 
+Before we start, bear in mind that the infrastructure model is based around the concept below
+
+<p align="center">
+  <img src="images/control_node.png" alt="Core orchestration pattern" width="75%" />
+</p>
+
+however when working with the workflow modeling it is more convenient to separate `sync` and `publish` functions out into virtual `T_in` and `T_out` edge and gateway nodes so that the process becomes clearer and also helps with the analysis.
+
 ## Edit the Workflow with the ProcessEditor
 
 First, begin by running the process editor which can be found in the project  `btsn.WorkflowEditor/com/editor/ProcessEditor`.  Then from the `File` menu, load the tutorial workflow definition from `btsn.common/ProcessDefinitionFolder/petrinet/workflow/P1_Tutorial_Workflow.json`.  It should look like the workflow depicted in Figure 1.
