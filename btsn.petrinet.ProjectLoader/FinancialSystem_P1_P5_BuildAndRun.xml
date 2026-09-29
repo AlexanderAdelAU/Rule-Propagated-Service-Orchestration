@@ -259,6 +259,14 @@
 				<arg value="-version" /><arg value="${rule.version}" />
 			</java>
 
+			<java jvm="java.exe" classname="${service.loader.class}" 
+			      fork="true" timeout="600000" 
+			      dir="${p5.project.dir}" output="${p5.output.file}">
+				<classpath refid="p5.classpath" />
+				<arg value="${p5.project.dir}" />
+				<arg value="-version" /><arg value="${rule.version}" />
+			</java>
+
 			<!-- Start Monitor Service -->
 			<java jvm="java.exe" classname="${service.loader.class}" 
 			      fork="true" timeout="600000" 
@@ -326,6 +334,18 @@
 					<arg value="-version" /><arg value="${init.version}" />
 					<arg value="-process" /><arg value="${init.process.name}" />
 					<arg value="-sequenceId" /><arg value="${sequence.id.init.p4}" />
+					<arg value="-tokens" /><arg value="1" />
+					<arg value="-skipDeploy" />
+				</java>
+
+				<java classname="${init.event.generator.class}" 
+				      fork="true" dir="${generator.project.dir}" failonerror="true">
+					<classpath refid="generator.classpath" />
+					<arg value="-service" /><arg value="P5_InitializationService" />
+					<arg value="-operation" /><arg value="${db.init.operation}" />
+					<arg value="-version" /><arg value="${init.version}" />
+					<arg value="-process" /><arg value="${init.process.name}" />
+					<arg value="-sequenceId" /><arg value="${sequence.id.init.p5}" />
 					<arg value="-tokens" /><arg value="1" />
 					<arg value="-skipDeploy" />
 				</java>
@@ -442,6 +462,19 @@
 					<arg value="-sequenceId" /><arg value="${sequence.id.collect.p4}" />
 					<arg value="-skipDeploy" />
 				</java>
+				<sleep seconds="${collector.delay.seconds}" />
+				<echo message="Collecting from P5_CollectorService..." />
+				<java classname="${collector.event.generator.class}" 
+				      fork="true" dir="${generator.project.dir}" failonerror="true">
+					<classpath refid="generator.classpath" />
+					<arg value="-service" /><arg value="P5_CollectorService" />
+					<arg value="-operation" /><arg value="${collector.operation}" />
+					<arg value="-version" /><arg value="${collector.version}" />
+					<arg value="-process" /><arg value="${collector.process.name}" />
+					<arg value="-queryVersion" /><arg value="${query.version}" />
+					<arg value="-sequenceId" /><arg value="${sequence.id.collect.p5}" />
+					<arg value="-skipDeploy" />
+				</java>
 				<echo message="=== Phase 3 Complete ===" />
 
 				<!-- ======================================================= -->
@@ -545,6 +578,14 @@
 			      dir="${p4.project.dir}" output="${p4.output.file}">
 				<classpath refid="p4.classpath" />
 				<arg value="${p4.project.dir}" />
+				<arg value="-version" /><arg value="${rule.version}" />
+			</java>
+
+			<java jvm="java.exe" classname="${service.loader.class}" 
+			      fork="true" timeout="600000" 
+			      dir="${p5.project.dir}" output="${p5.output.file}">
+				<classpath refid="p5.classpath" />
+				<arg value="${p5.project.dir}" />
 				<arg value="-version" /><arg value="${rule.version}" />
 			</java>
 
