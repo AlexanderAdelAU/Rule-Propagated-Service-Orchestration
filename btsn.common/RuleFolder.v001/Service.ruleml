@@ -1,7 +1,7 @@
 <Assert>
 <Rulebase mapClosure="universal">
 <!-- MASTER SERVICE RULE BASE -->
-<!-- Generated: Tue Sep 29 18:49:54 AEST 2026 -->
+<!-- Generated: Tue Sep 29 22:47:36 AEST 2026 -->
 <!-- Version: v001 -->
 <!-- Services: ALL -->
 <!-- This is the SINGLE SOURCE OF TRUTH for service resolution -->
@@ -1304,5 +1304,40 @@ This is the rule that governs the list of all services.
 </Atom>
 <!-- END: TriageService/TriageService-CanonicalBindings.ruleml.xml -->
 
+
+<!-- ================================================================ -->
+<!-- PETRINET CANONICAL BINDINGS (Auto-generated)                    -->
+<!-- ================================================================ -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P1_Place</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>processToken</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P2_Place</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>processToken</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>MonitorService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>acknowledgeTokenArrival</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>
 </Rulebase>
 </Assert>
