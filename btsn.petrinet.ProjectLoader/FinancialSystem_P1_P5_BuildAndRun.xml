@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="FinancialSystem_P1_P5_BuildAndRun" default="run-complete-workflow" basedir=".">
+<project name="FinancialSystem_P1_P5_BuildAndRun" default="run-complete-workflow" basedir="."
+	    xmlns:if="ant:if" xmlns:unless="ant:unless">
 	<description>
 		Financial System business workflow mapped onto generic stochastic Petri places P1-P5.
 
@@ -21,6 +22,22 @@
 
 		Services start once and remain running throughout all phases.
 	</description>
+
+	<!-- ======================================================================= -->
+	<!-- DEPLOYMENT CONFIGURATION                                                -->
+	<!-- ======================================================================= -->
+	<!-- Generic infrastructure participants.                                    -->
+	<!-- local  = launch ServiceLoader from that service project's directory.    -->
+	<!-- remote = service is already running elsewhere; do not launch it here.   -->
+	<!-- Workflow business roles are mapped separately in the workflow JSON.     -->
+	<!-- ======================================================================= -->
+
+	<property name="p1.mode"      value="local" />
+	<property name="p2.mode"      value="local" />
+	<property name="p3.mode"      value="local" />
+	<property name="p4.mode"      value="local" />
+	<property name="p5.mode"      value="local" />
+	<property name="monitor.mode" value="local" />
 
 	<!-- ======================================================================= -->
 	<!-- PROPERTIES                                                              -->
@@ -174,6 +191,29 @@
 	</path>
 
 	<!-- ======================================================================= -->
+	<!-- DEPLOYMENT MODE RESOLUTION                                              -->
+	<!-- ======================================================================= -->
+
+	<target name="resolve-deployment-modes">
+		<condition property="p1.is.local"><equals arg1="${p1.mode}" arg2="local" /></condition>
+		<condition property="p2.is.local"><equals arg1="${p2.mode}" arg2="local" /></condition>
+		<condition property="p3.is.local"><equals arg1="${p3.mode}" arg2="local" /></condition>
+		<condition property="p4.is.local"><equals arg1="${p4.mode}" arg2="local" /></condition>
+		<condition property="p5.is.local"><equals arg1="${p5.mode}" arg2="local" /></condition>
+		<condition property="monitor.is.local"><equals arg1="${monitor.mode}" arg2="local" /></condition>
+
+		<echo message="" />
+		<echo message="  Deployment Configuration:" />
+		<echo message="    P1:      ${p1.mode}" />
+		<echo message="    P2:      ${p2.mode}" />
+		<echo message="    P3:      ${p3.mode}" />
+		<echo message="    P4:      ${p4.mode}" />
+		<echo message="    P5:      ${p5.mode}" />
+		<echo message="    Monitor: ${monitor.mode}" />
+		<echo message="" />
+	</target>
+
+	<!-- ======================================================================= -->
 	<!-- UTILITY TARGETS                                                         -->
 	<!-- ======================================================================= -->
 
@@ -182,6 +222,7 @@
 		<delete file="${p2.output.file}" quiet="true" />
 		<delete file="${p3.output.file}" quiet="true" />
 		<delete file="${p4.output.file}" quiet="true" />
+		<delete file="${p5.output.file}" quiet="true" />
 		<delete file="${monitor.output.file}" quiet="true" />
 		<echo message="Previous output files cleaned" />
 	</target>
@@ -217,11 +258,11 @@
 	<!-- MAIN TARGET: COMPLETE WORKFLOW                                          -->
 	<!-- ======================================================================= -->
 
-	<target name="run-complete-workflow" depends="clean-output,rebuild-service-ruleml" 
+	<target name="run-complete-workflow" depends="resolve-deployment-modes,clean-output,rebuild-service-ruleml" 
 	        description="Run complete FinancialSystem P1-P5 workflow with init, execution and collection (DEFAULT)">
 		<echo message="" />
 		<echo message="================================================================" />
-		<echo message="  P1_P2_P3_P4 FORK PETRI NET - COMPLETE WORKFLOW               " />
+		<echo message="  FINANCIAL SYSTEM P1-P5 - COMPLETE WORKFLOW                   " />
 		<echo message="================================================================" />
 		<echo message="  Version: ${rule.version}" />
 		<echo message="  Mode: ${token.mode}" />
@@ -232,7 +273,8 @@
 
 		<parallel>
 			<!-- Start P1-P5 Services -->
-			<java jvm="java.exe" classname="${service.loader.class}" 
+			<echo message="  [p1] Skipping - running on remote host" unless:set="p1.is.local" />
+			<java jvm="java.exe" classname="${service.loader.class}" if:set="p1.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p1.project.dir}" output="${p1.output.file}">
 				<classpath refid="p1.classpath" />
@@ -240,7 +282,8 @@
 				<arg value="-version" /><arg value="${rule.version}" />
 			</java>
 
-			<java jvm="java.exe" classname="${service.loader.class}" 
+			<echo message="  [p2] Skipping - running on remote host" unless:set="p2.is.local" />
+			<java jvm="java.exe" classname="${service.loader.class}" if:set="p2.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p2.project.dir}" output="${p2.output.file}">
 				<classpath refid="p2.classpath" />
@@ -248,7 +291,8 @@
 				<arg value="-version" /><arg value="${rule.version}" />
 			</java>
 
-			<java jvm="java.exe" classname="${service.loader.class}" 
+			<echo message="  [p3] Skipping - running on remote host" unless:set="p3.is.local" />
+			<java jvm="java.exe" classname="${service.loader.class}" if:set="p3.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p3.project.dir}" output="${p3.output.file}">
 				<classpath refid="p3.classpath" />
@@ -256,7 +300,8 @@
 				<arg value="-version" /><arg value="${rule.version}" />
 			</java>
 
-			<java jvm="java.exe" classname="${service.loader.class}" 
+			<echo message="  [p4] Skipping - running on remote host" unless:set="p4.is.local" />
+			<java jvm="java.exe" classname="${service.loader.class}" if:set="p4.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p4.project.dir}" output="${p4.output.file}">
 				<classpath refid="p4.classpath" />
@@ -264,7 +309,8 @@
 				<arg value="-version" /><arg value="${rule.version}" />
 			</java>
 
-			<java jvm="java.exe" classname="${service.loader.class}" 
+			<echo message="  [p5] Skipping - running on remote host" unless:set="p5.is.local" />
+			<java jvm="java.exe" classname="${service.loader.class}" if:set="p5.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p5.project.dir}" output="${p5.output.file}">
 				<classpath refid="p5.classpath" />
@@ -273,7 +319,8 @@
 			</java>
 
 			<!-- Start Monitor Service -->
-			<java jvm="java.exe" classname="${service.loader.class}" 
+			<echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local" />
+			<java jvm="java.exe" classname="${service.loader.class}" if:set="monitor.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${monitor.project.dir}" output="${monitor.output.file}">
 				<classpath refid="monitor.classpath" />
@@ -541,7 +588,7 @@
 	<!-- WORKFLOW-ONLY TARGET (skip init/collect)                               -->
 	<!-- ======================================================================= -->
 
-	<target name="run-workflow-only" depends="clean-output,rebuild-service-ruleml" 
+	<target name="run-workflow-only" depends="resolve-deployment-modes,clean-output,rebuild-service-ruleml" 
 	        description="Run only the workflow phase (skip init and collect)">
 		<echo message="" />
 		<echo message="================================================================" />
@@ -554,7 +601,8 @@
 
 		<parallel>
 			<!-- Start all services -->
-			<java jvm="java.exe" classname="${service.loader.class}" 
+			<echo message="  [p1] Skipping - running on remote host" unless:set="p1.is.local" />
+			<java jvm="java.exe" classname="${service.loader.class}" if:set="p1.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p1.project.dir}" output="${p1.output.file}">
 				<classpath refid="p1.classpath" />
@@ -562,7 +610,8 @@
 				<arg value="-version" /><arg value="${rule.version}" />
 			</java>
 
-			<java jvm="java.exe" classname="${service.loader.class}" 
+			<echo message="  [p2] Skipping - running on remote host" unless:set="p2.is.local" />
+			<java jvm="java.exe" classname="${service.loader.class}" if:set="p2.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p2.project.dir}" output="${p2.output.file}">
 				<classpath refid="p2.classpath" />
@@ -570,7 +619,8 @@
 				<arg value="-version" /><arg value="${rule.version}" />
 			</java>
 
-			<java jvm="java.exe" classname="${service.loader.class}" 
+			<echo message="  [p3] Skipping - running on remote host" unless:set="p3.is.local" />
+			<java jvm="java.exe" classname="${service.loader.class}" if:set="p3.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p3.project.dir}" output="${p3.output.file}">
 				<classpath refid="p3.classpath" />
@@ -578,7 +628,8 @@
 				<arg value="-version" /><arg value="${rule.version}" />
 			</java>
 
-			<java jvm="java.exe" classname="${service.loader.class}" 
+			<echo message="  [p4] Skipping - running on remote host" unless:set="p4.is.local" />
+			<java jvm="java.exe" classname="${service.loader.class}" if:set="p4.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p4.project.dir}" output="${p4.output.file}">
 				<classpath refid="p4.classpath" />
@@ -586,7 +637,8 @@
 				<arg value="-version" /><arg value="${rule.version}" />
 			</java>
 
-			<java jvm="java.exe" classname="${service.loader.class}" 
+			<echo message="  [p5] Skipping - running on remote host" unless:set="p5.is.local" />
+			<java jvm="java.exe" classname="${service.loader.class}" if:set="p5.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p5.project.dir}" output="${p5.output.file}">
 				<classpath refid="p5.classpath" />
@@ -594,7 +646,8 @@
 				<arg value="-version" /><arg value="${rule.version}" />
 			</java>
 
-			<java jvm="java.exe" classname="${service.loader.class}" 
+			<echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local" />
+			<java jvm="java.exe" classname="${service.loader.class}" if:set="monitor.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${monitor.project.dir}" output="${monitor.output.file}">
 				<classpath refid="monitor.classpath" />
