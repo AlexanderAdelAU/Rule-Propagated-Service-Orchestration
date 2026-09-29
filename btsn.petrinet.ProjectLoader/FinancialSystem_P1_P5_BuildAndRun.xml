@@ -158,6 +158,11 @@
 		<pathelement location="${p4.bin.dir}" />
 	</path>
 
+	<path id="p5.classpath">
+		<path refid="common.classpath" />
+		<pathelement location="${p5.bin.dir}" />
+	</path>
+
 	<path id="monitor.classpath">
 		<path refid="common.classpath" />
 		<pathelement location="${monitor.bin.dir}" />
