@@ -70,3 +70,270 @@ INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Place correlation: 20 match
 INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Shared services (cross-version): []
 INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Priority analysis complete: 20 samples (20 root, 0 forked), 0 shared services, 0 shared-service contention points, 0 shared-service inversions
 INFO main org.btsn.derby.Analysis.PetriNetAnalyzer - Generated priority analysis report
+INFO main org.btsn.handlers.ServiceLoader - === Starting Rule-Driven ServiceLoader ===
+INFO main org.btsn.handlers.ServiceLoader - === ServiceLoader Configuration ===
+INFO main org.btsn.handlers.ServiceLoader -   Version: v001
+INFO main org.btsn.handlers.ServiceLoader -   Service Filter: NONE (loading ALL services)
+INFO main org.btsn.handlers.ServiceLoader - Using build version: v001
+INFO main org.btsn.handlers.ServiceLoader - Created shutdown control file: C:\DevShare\BTSN_R001\BTSN\btsn.common.Monitor\all_services_v001.running
+INFO main org.btsn.handlers.ServiceLoader - DELETE this file to trigger graceful shutdown
+WARN main org.btsn.handlers.ServiceLoader - Could not start shutdown listener: Address already in use: bind
+INFO main org.btsn.handlers.ServiceLoader - === Building rule base with version v001 ===
+INFO main org.btsn.handlers.ServiceLoader - Registered version v001 as valid
+INFO main org.btsn.handlers.ServiceLoader - === Checking for remote deployment mode ===
+INFO main org.btsn.handlers.ServiceLoader - === Auto-detecting deployment mode from facts ===
+INFO main org.btsn.handlers.ServiceLoader - This machine's primary IP: 192.168.1.152
+INFO main org.btsn.handlers.ServiceLoader - All IPs for this machine: [fe80:0:0:0:0:100:7f:fffe%net5, fe80:0:0:0:0:5efe:c0a8:198%net9, fe80:0:0:0:4478:23a2:44e3:e737%eth5, 0:0:0:0:0:0:0:1, 192.168.1.152, 127.0.0.1]
+INFO main org.btsn.handlers.ServiceLoader - *** FOUND: Channel ip0 maps to this machine at 192.168.1.152 ***
+INFO main org.btsn.handlers.ServiceLoader - Checking for services using channel: ip0
+INFO main org.btsn.handlers.ServiceLoader - Found 3 activeService entries using ip0
+INFO main org.btsn.handlers.ServiceLoader - Found 3 activeService entries using ip0
+INFO main org.btsn.handlers.ServiceLoader - *** REMOTE MODE AUTO-ENABLED ***
+INFO main org.btsn.handlers.ServiceLoader - *** This host (192.168.1.152) is configured for remote services ***
+INFO main org.btsn.handlers.ServiceLoader - *** Channel ip0 maps to this machine ***
+DEBUG main org.btsn.handlers.ServiceLoader - ServiceLoader: Looking in directory: C:\DevShare\BTSN_R001\BTSN\btsn.common.Monitor/ServiceLoaderQueries for rulebase
+INFO main org.btsn.handlers.ServiceLoader - LOADING service: MonitorService
+INFO main org.btsn.handlers.ServiceLoader - === DETECTED SERVICELIST QUERY FOR: MonitorService ===
+INFO main org.btsn.handlers.ServiceLoader - Found operation: MonitorService.acknowledgeTokenArrival on ip0:3000
+INFO main org.btsn.handlers.ServiceLoader - Found operation: MonitorService.writeServiceTimingRecord on ip0:3001
+INFO main org.btsn.handlers.ServiceLoader - Found operation: MonitorService.writeCollectorData on ip0:3002
+INFO main org.btsn.handlers.ServiceLoader - Found operation: MonitorService.initiateWorkflowDataCollection on ip0:3003
+INFO main org.btsn.handlers.ServiceLoader - Creating ServiceThreads for 4 operations
+INFO main org.btsn.handlers.ServiceLoader - Setting up MonitorService.acknowledgeTokenArrival -> EventReactor:13000, RuleHandler:23000
+INFO main org.btsn.handlers.ServiceLoader - Successfully created ServiceThread for MonitorService.acknowledgeTokenArrival
+INFO main org.btsn.handlers.ServiceLoader - Setting up MonitorService.writeServiceTimingRecord -> EventReactor:13001, RuleHandler:23001
+INFO ServiceThread-MonitorService-acknowledgeTokenArrival org.btsn.handlers.UDPServiceThread - Starting REMOTE UDP ServiceThread for MonitorService:acknowledgeTokenArrival on port: 13000
+INFO RuleHandler-MonitorService-acknowledgeTokenArrival org.btsn.handlers.UDPLoadRuleHandlerThread - Starting UDP RuleHandler for service: MonitorService, operation: acknowledgeTokenArrival, channel: ip0, port: 23000, listening on: all interfaces
+INFO main org.btsn.handlers.ServiceLoader - Successfully created ServiceThread for MonitorService.writeServiceTimingRecord
+INFO main org.btsn.handlers.ServiceLoader - Setting up MonitorService.writeCollectorData -> EventReactor:13002, RuleHandler:23002
+INFO RuleHandler-MonitorService-writeServiceTimingRecord org.btsn.handlers.UDPLoadRuleHandlerThread - Starting UDP RuleHandler for service: MonitorService, operation: writeServiceTimingRecord, channel: ip0, port: 23001, listening on: all interfaces
+INFO ServiceThread-MonitorService-writeServiceTimingRecord org.btsn.handlers.UDPServiceThread - Starting REMOTE UDP ServiceThread for MonitorService:writeServiceTimingRecord on port: 13001
+INFO ServiceThread-MonitorService-writeCollectorData org.btsn.handlers.UDPServiceThread - Starting REMOTE UDP ServiceThread for MonitorService:writeCollectorData on port: 13002
+INFO RuleHandler-MonitorService-writeCollectorData org.btsn.handlers.UDPLoadRuleHandlerThread - Starting UDP RuleHandler for service: MonitorService, operation: writeCollectorData, channel: ip0, port: 23002, listening on: all interfaces
+INFO main org.btsn.handlers.ServiceLoader - Successfully created ServiceThread for MonitorService.writeCollectorData
+INFO main org.btsn.handlers.ServiceLoader - Setting up MonitorService.initiateWorkflowDataCollection -> EventReactor:13003, RuleHandler:23003
+INFO RuleHandler-MonitorService-initiateWorkflowDataCollection org.btsn.handlers.UDPLoadRuleHandlerThread - Starting UDP RuleHandler for service: MonitorService, operation: initiateWorkflowDataCollection, channel: ip0, port: 23003, listening on: all interfaces
+INFO main org.btsn.handlers.ServiceLoader - Successfully created ServiceThread for MonitorService.initiateWorkflowDataCollection
+INFO main org.btsn.handlers.ServiceLoader - LOADING service: Monitor_InitializationService
+INFO RuleHandler-MonitorService-initiateWorkflowDataCollection org.btsn.handlers.UDPLoadRuleHandlerThread - Successfully created UDP RuleHandler for MonitorService:initiateWorkflowDataCollection listening on port 23003
+INFO main org.btsn.handlers.ServiceLoader - === DETECTED SERVICELIST QUERY FOR: Monitor_InitializationService ===
+INFO RuleHandler-MonitorService-acknowledgeTokenArrival org.btsn.handlers.UDPLoadRuleHandlerThread - Successfully created UDP RuleHandler for MonitorService:acknowledgeTokenArrival listening on port 23000
+INFO RuleHandler-MonitorService-writeServiceTimingRecord org.btsn.handlers.UDPLoadRuleHandlerThread - Successfully created UDP RuleHandler for MonitorService:writeServiceTimingRecord listening on port 23001
+INFO ServiceThread-MonitorService-initiateWorkflowDataCollection org.btsn.handlers.UDPServiceThread - Starting REMOTE UDP ServiceThread for MonitorService:initiateWorkflowDataCollection on port: 13003
+INFO RuleHandler-MonitorService-writeCollectorData org.btsn.handlers.UDPLoadRuleHandlerThread - Successfully created UDP RuleHandler for MonitorService:writeCollectorData listening on port 23002
+INFO main org.btsn.handlers.ServiceLoader - Found operation: Monitor_InitializationService.purgeAndInitialize on ip0:3004
+INFO main org.btsn.handlers.ServiceLoader - Creating ServiceThreads for 1 operations
+INFO main org.btsn.handlers.ServiceLoader - Setting up Monitor_InitializationService.purgeAndInitialize -> EventReactor:13004, RuleHandler:23004
+INFO RuleHandler-Monitor_InitializationService-purgeAndInitialize org.btsn.handlers.UDPLoadRuleHandlerThread - Starting UDP RuleHandler for service: Monitor_InitializationService, operation: purgeAndInitialize, channel: ip0, port: 23004, listening on: all interfaces
+INFO main org.btsn.handlers.ServiceLoader - Successfully created ServiceThread for Monitor_InitializationService.purgeAndInitialize
+INFO main org.btsn.handlers.ServiceLoader - === ServiceLoader Startup Complete ===
+INFO RuleHandler-Monitor_InitializationService-purgeAndInitialize org.btsn.handlers.UDPLoadRuleHandlerThread - Successfully created UDP RuleHandler for Monitor_InitializationService:purgeAndInitialize listening on port 23004
+INFO ServiceThread-Monitor_InitializationService-purgeAndInitialize org.btsn.handlers.UDPServiceThread - Starting REMOTE UDP ServiceThread for Monitor_InitializationService:purgeAndInitialize on port: 13004
+INFO main org.btsn.handlers.ServiceLoader - Version: v001
+INFO main org.btsn.handlers.ServiceLoader - Mode: REMOTE on 192.168.1.152
+INFO main org.btsn.handlers.ServiceLoader - Services loaded: 2
+INFO main org.btsn.handlers.ServiceLoader - Services skipped: 0
+INFO main org.btsn.handlers.ServiceLoader - === Shutdown Options ===
+INFO main org.btsn.handlers.ServiceLoader -   1. Delete file: all_services_v001.running
+INFO main org.btsn.handlers.ServiceLoader -   2. Send 'SHUTDOWN' to UDP port: 39001
+INFO main org.btsn.handlers.ServiceLoader -   3. Kill the process
+INFO ServiceThread-Monitor_InitializationService-purgeAndInitialize org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Derby Embedded Driver registered successfully.
+INFO ServiceThread-MonitorService-acknowledgeTokenArrival org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Derby Embedded Driver registered successfully.
+INFO ServiceThread-MonitorService-writeCollectorData org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Derby Embedded Driver registered successfully.
+INFO ServiceThread-Monitor_InitializationService-purgeAndInitialize org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Derby Embedded Driver registered successfully.
+INFO ServiceThread-Monitor_InitializationService-purgeAndInitialize org.btsn.handlers.PetriNetInstrumentationHelper - === PETRI NET INSTRUMENTATION INITIALIZED ===
+INFO ServiceThread-Monitor_InitializationService-purgeAndInitialize org.btsn.handlers.PetriNetInstrumentationHelper - Service: ip0:13004
+INFO ServiceThread-Monitor_InitializationService-purgeAndInitialize org.btsn.handlers.PetriNetInstrumentationHelper - Recording: Transitions=true, Genealogy=true, Joins=true
+INFO ServiceThread-Monitor_InitializationService-purgeAndInitialize org.btsn.handlers.ServiceThread - ORCHESTRATOR: Petri Net instrumentation ENABLED (full mode)
+INFO ServiceThread-MonitorService-initiateWorkflowDataCollection org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Derby Embedded Driver registered successfully.
+INFO ServiceThread-MonitorService-initiateWorkflowDataCollection org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Derby Embedded Driver registered successfully.
+INFO ServiceThread-MonitorService-initiateWorkflowDataCollection org.btsn.handlers.PetriNetInstrumentationHelper - === PETRI NET INSTRUMENTATION INITIALIZED ===
+INFO ServiceThread-MonitorService-initiateWorkflowDataCollection org.btsn.handlers.PetriNetInstrumentationHelper - Service: ip0:13003
+INFO ServiceThread-MonitorService-initiateWorkflowDataCollection org.btsn.handlers.PetriNetInstrumentationHelper - Recording: Transitions=true, Genealogy=true, Joins=true
+INFO ServiceThread-MonitorService-initiateWorkflowDataCollection org.btsn.handlers.ServiceThread - ORCHESTRATOR: Petri Net instrumentation ENABLED (full mode)
+INFO ServiceThread-Monitor_InitializationService-purgeAndInitialize org.btsn.handlers.ServiceThread - Join processing strategy: OPTIMIZED (any complete join)
+INFO ServiceThread-MonitorService-writeCollectorData org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Derby Embedded Driver registered successfully.
+INFO ServiceThread-MonitorService-writeCollectorData org.btsn.handlers.PetriNetInstrumentationHelper - === PETRI NET INSTRUMENTATION INITIALIZED ===
+INFO ServiceThread-MonitorService-writeCollectorData org.btsn.handlers.PetriNetInstrumentationHelper - Service: ip0:13002
+INFO ServiceThread-MonitorService-writeCollectorData org.btsn.handlers.PetriNetInstrumentationHelper - Recording: Transitions=true, Genealogy=true, Joins=true
+INFO ServiceThread-MonitorService-writeCollectorData org.btsn.handlers.ServiceThread - ORCHESTRATOR: Petri Net instrumentation ENABLED (full mode)
+INFO ServiceThread-MonitorService-writeCollectorData org.btsn.handlers.ServiceThread - Join processing strategy: OPTIMIZED (any complete join)
+INFO ServiceThread-MonitorService-writeCollectorData org.btsn.handlers.ServiceThread - Starting EventReactor for channel: ip0, port: 13002
+INFO ServiceThread-MonitorService-initiateWorkflowDataCollection org.btsn.handlers.ServiceThread - Join processing strategy: OPTIMIZED (any complete join)
+INFO ServiceThread-MonitorService-writeServiceTimingRecord org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Derby Embedded Driver registered successfully.
+INFO ServiceThread-MonitorService-writeServiceTimingRecord org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Derby Embedded Driver registered successfully.
+INFO ServiceThread-MonitorService-writeServiceTimingRecord org.btsn.handlers.PetriNetInstrumentationHelper - === PETRI NET INSTRUMENTATION INITIALIZED ===
+INFO ServiceThread-MonitorService-writeServiceTimingRecord org.btsn.handlers.PetriNetInstrumentationHelper - Service: ip0:13001
+INFO ServiceThread-MonitorService-writeServiceTimingRecord org.btsn.handlers.PetriNetInstrumentationHelper - Recording: Transitions=true, Genealogy=true, Joins=true
+INFO ServiceThread-MonitorService-writeServiceTimingRecord org.btsn.handlers.ServiceThread - ORCHESTRATOR: Petri Net instrumentation ENABLED (full mode)
+INFO ServiceThread-MonitorService-writeServiceTimingRecord org.btsn.handlers.ServiceThread - Join processing strategy: OPTIMIZED (any complete join)
+INFO ServiceThread-MonitorService-writeServiceTimingRecord org.btsn.handlers.ServiceThread - Starting EventReactor for channel: ip0, port: 13001
+INFO ServiceThread-MonitorService-writeServiceTimingRecord org.btsn.handlers.ServiceThread - EventReactor started successfully on attempt 1
+INFO ServiceThread-MonitorService-writeServiceTimingRecord org.btsn.handlers.UDPServiceThread - Successfully created REMOTE UDP ServiceThread for port 13001
+INFO ServiceThread-MonitorService-13001 org.btsn.handlers.ServiceThread - ServiceThread ORCHESTRATOR starting main processing loop
+INFO ServiceThread-Monitor_InitializationService-purgeAndInitialize org.btsn.handlers.ServiceThread - Starting EventReactor for channel: ip0, port: 13004
+INFO ServiceThread-MonitorService-writeCollectorData org.btsn.handlers.ServiceThread - EventReactor started successfully on attempt 1
+INFO ServiceThread-MonitorService-acknowledgeTokenArrival org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Derby Embedded Driver registered successfully.
+INFO ServiceThread-MonitorService-acknowledgeTokenArrival org.btsn.handlers.PetriNetInstrumentationHelper - === PETRI NET INSTRUMENTATION INITIALIZED ===
+INFO ServiceThread-MonitorService-acknowledgeTokenArrival org.btsn.handlers.PetriNetInstrumentationHelper - Service: ip0:13000
+INFO ServiceThread-MonitorService-acknowledgeTokenArrival org.btsn.handlers.PetriNetInstrumentationHelper - Recording: Transitions=true, Genealogy=true, Joins=true
+INFO ServiceThread-MonitorService-acknowledgeTokenArrival org.btsn.handlers.ServiceThread - ORCHESTRATOR: Petri Net instrumentation ENABLED (full mode)
+INFO ServiceThread-MonitorService-acknowledgeTokenArrival org.btsn.handlers.ServiceThread - Join processing strategy: OPTIMIZED (any complete join)
+INFO ServiceThread-MonitorService-writeCollectorData org.btsn.handlers.UDPServiceThread - Successfully created REMOTE UDP ServiceThread for port 13002
+INFO ServiceThread-MonitorService-acknowledgeTokenArrival org.btsn.handlers.ServiceThread - Starting EventReactor for channel: ip0, port: 13000
+INFO ServiceThread-MonitorService-initiateWorkflowDataCollection org.btsn.handlers.ServiceThread - Starting EventReactor for channel: ip0, port: 13003
+INFO ServiceThread-MonitorService-13002 org.btsn.handlers.ServiceThread - ServiceThread ORCHESTRATOR starting main processing loop
+INFO ServiceThread-MonitorService-acknowledgeTokenArrival org.btsn.handlers.ServiceThread - EventReactor started successfully on attempt 1
+INFO ServiceThread-Monitor_InitializationService-purgeAndInitialize org.btsn.handlers.ServiceThread - EventReactor started successfully on attempt 1
+INFO ServiceThread-MonitorService-acknowledgeTokenArrival org.btsn.handlers.UDPServiceThread - Successfully created REMOTE UDP ServiceThread for port 13000
+INFO ServiceThread-MonitorService-13000 org.btsn.handlers.ServiceThread - ServiceThread ORCHESTRATOR starting main processing loop
+INFO ServiceThread-Monitor_InitializationService-purgeAndInitialize org.btsn.handlers.UDPServiceThread - Successfully created REMOTE UDP ServiceThread for port 13004
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - ServiceThread ORCHESTRATOR starting main processing loop
+INFO ServiceThread-MonitorService-initiateWorkflowDataCollection org.btsn.handlers.ServiceThread - EventReactor started successfully on attempt 1
+INFO ServiceThread-MonitorService-initiateWorkflowDataCollection org.btsn.handlers.UDPServiceThread - Successfully created REMOTE UDP ServiceThread for port 13003
+INFO ServiceThread-MonitorService-13003 org.btsn.handlers.ServiceThread - ServiceThread ORCHESTRATOR starting main processing loop
+DEBUG ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing:: token = "init monitor"
+DEBUG ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - CAPTURE: WorkflowStartTime=1790671804970 for seqID=999600000
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - Incoming Sequence ID = 999600000
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - MonitorIncomingEvents+ = true
+DEBUG ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - Using RuleBaseVersion: v999
+DEBUG ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - FILTER: Event for Monitor_InitializationService.purgeAndInitialize accepted by Monitor_InitializationService thread
+WARN ServiceThread-Monitor_InitializationService-13004 org.btsn.json.jsonLibrary - Key "token" already exists. Skipping.
+DEBUG ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - JOIN-MAP: Added key=token to join 999600000 (tokenId=999600000, mapSize=1)
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - DEBUG: Loading rule base for operation: purgeAndInitialize
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - DEBUG: Rule base location: C:\DevShare\BTSN_R001\BTSN\btsn.common.Monitor/RuleFolder.v999/purgeAndInitialize/Service.ruleml
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - DEBUG: Loading fresh knowledge base from: C:\DevShare\BTSN_R001\BTSN\btsn.common.Monitor/RuleFolder.v999/purgeAndInitialize/Service.ruleml
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - DEBUG: Loaded knowledge base length: 13404
+DEBUG ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - DEBUG: Knowledge base content preview: <Assert>
+<Rulebase mapClosure="universal">
+<!-- Version On -->
+<Data><Atom><Rel>Version</Rel><Ind>v999</Ind></Atom></Data>
+<!-- Common Rules to all services -->
+<!-- 
+This is the rule determines the operational parameters associated with
+the destination service.
+ -->
+<Implies>
+	<then>
+		<Atom>
+			<Rel>publishes</Rel>
+			<Var>service</Var>
+			<Var>condition</Var>
+			<Var>operation</Var>
+			<Var>channel</Var>
+			<Var>ip</Var>
+			<Var>port</Var>
+			<Var>decisionValue</Var>
+		</A
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - DEBUG: Parsing knowledge base...
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - DEBUG: Knowledge base parsed successfully
+DEBUG ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: Checking canonical binding for Monitor_InitializationService.purgeAndInitialize with attribute 'token'
+DEBUG ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: Operation purgeAndInitialize uses standard (AND) semantics
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: purgeAndInitialize requires 1 inputs total (standard AND logic)
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - CANONICAL-BINDING: purgeAndInitialize needs 1 input - can call immediately with 'token'
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Canonical binding found - overriding serviceName facts
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Overrode inputCollection for canonical binding
+WARN ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - Using legacy getDecisionValue - consider updating CoreRuleBase to include decisionValue in publishes
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - DEBUG: Skipping getNextService for TerminateNode
+DEBUG ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.PetriNetInstrumentationHelper - Skipping instrumentation for admin token 999600000 (v999)
+DEBUG ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - PETRI-NET: Token 999600000 BUFFERED at Monitor_InitializationService (T_in arrival)
+DEBUG ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.PetriNetInstrumentationHelper - Skipping instrumentation for admin token 999600000 (v999)
+DEBUG ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - PETRI-NET: Token 999600000 ENTER at Monitor_InitializationService
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - DEBUG: About to check inputCollection.isEmpty() - size: 1
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - DEBUG: inputCollection contents: [null]
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - DEBUG: nodeType: TerminateNode
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - DEBUG: needsInputSynchronization: false
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - DEBUG: Past inputCollection check, about to enter JOIN processing
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - DEBUG: inputCollection.get(0): null
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Zero-input service Monitor_InitializationService:purgeAndInitialize executing with trigger token (no workflow data required)
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Processing TerminateNode for Monitor_InitializationService.purgeAndInitialize
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Invoking Monitor_InitializationService.purgeAndInitialize via ServiceHelper
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceHelper - === SERVICE INVOCATION START ===
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceHelper - Service: org.btsn.places.Monitor_InitializationService.purgeAndInitialize
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceHelper - SequenceID: 999600000
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceHelper - Input arguments count: 1
+DEBUG ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceHelper - Processing argument 1/1, raw length: 14
+ERROR ServiceThread-Monitor_InitializationService-13004 org.btsn.json.jsonLibrary - Error parsing JSON string: "init monitor"
+java.lang.ClassCastException: class java.lang.String cannot be cast to class org.json.simple.JSONObject (java.lang.String is in module java.base of loader 'bootstrap'; org.json.simple.JSONObject is in unnamed module of loader 'app')
+	at org.btsn.json.jsonLibrary.parseString(jsonLibrary.java:60)
+	at org.btsn.handlers.ServiceHelper.extractMetadata(ServiceHelper.java:241)
+	at org.btsn.handlers.ServiceHelper.process(ServiceHelper.java:144)
+	at org.btsn.handlers.ServiceHelper.process(ServiceHelper.java:223)
+	at org.btsn.handlers.TransitionHandler.processTerminateType(TransitionHandler.java:842)
+	at org.btsn.handlers.ServiceThread.processControlNode(ServiceThread.java:1264)
+	at org.btsn.handlers.ServiceThread.parsePayLoad(ServiceThread.java:721)
+	at org.btsn.handlers.ServiceThread.run(ServiceThread.java:483)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+WARN ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Failed to parse token, creating empty metadata
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Initialized workflow start time (first service)
+ERROR ServiceThread-Monitor_InitializationService-13004 org.btsn.json.jsonLibrary - Error parsing JSON string: "init monitor"
+java.lang.ClassCastException: class java.lang.String cannot be cast to class org.json.simple.JSONObject (java.lang.String is in module java.base of loader 'bootstrap'; org.json.simple.JSONObject is in unnamed module of loader 'app')
+	at org.btsn.json.jsonLibrary.parseString(jsonLibrary.java:60)
+	at org.btsn.handlers.ServiceHelper.extractBusinessData(ServiceHelper.java:328)
+	at org.btsn.handlers.ServiceHelper.process(ServiceHelper.java:161)
+	at org.btsn.handlers.ServiceHelper.process(ServiceHelper.java:223)
+	at org.btsn.handlers.TransitionHandler.processTerminateType(TransitionHandler.java:842)
+	at org.btsn.handlers.ServiceThread.processControlNode(ServiceThread.java:1264)
+	at org.btsn.handlers.ServiceThread.parsePayLoad(ServiceThread.java:721)
+	at org.btsn.handlers.ServiceThread.run(ServiceThread.java:483)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+WARN ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Failed to parse token, returning as-is
+DEBUG ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Cleaned argument 1, length: 14 (removed 0 bytes of metadata)
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Extracted 1 clean business data arguments (removed infrastructure metadata)
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceHelper - SERVICE INVOKE: Calling org.btsn.places.Monitor_InitializationService.purgeAndInitialize with 1 CLEAN business data arguments
+DEBUG ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceHelper - INVOKE: Reflecting on org.btsn.places.Monitor_InitializationService.purgeAndInitialize
+DEBUG ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceHelper - INVOKE: Looking for method with 1 String parameters
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Derby Embedded Driver registered successfully.
+DEBUG ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceHelper - INVOKE: Created instance using 1-param constructor (context) for org.btsn.places.Monitor_InitializationService
+DEBUG ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceHelper - INVOKE: Found standard method (1 String args)
+DEBUG ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceHelper - INVOKE: Calling purgeAndInitialize with 1 arguments
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Discovered 12 tables to purge
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: CONSOLIDATED_MARKING_EVOLUTION
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: CONSOLIDATED_PLACE_STATISTICS
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: CONSOLIDATED_TOKEN_GENEALOGY
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: CONSOLIDATED_TOKEN_PATHS
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: CONSOLIDATED_TRANSITION_FIRINGS
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: JOIN_SYNCHRONIZATION
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: MARKINGS
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: PROCESSMEASUREMENTS
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: SERVICECONTRIBUTION
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: SERVICEMEASUREMENTS
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: TOKEN_GENEALOGY
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Purged table: TRANSITION_FIRINGS
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Total tables purged: 12
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Connected to Derby database: ServiceAnalysisDataBase
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Creating core measurement tables...
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table SERVICEMEASUREMENTS already exists
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table PROCESSMEASUREMENTS already exists
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table SERVICECONTRIBUTION already exists
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table MARKINGS already exists
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Core measurement tables created/verified
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Creating consolidated Petri Net tables...
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table CONSOLIDATED_TRANSITION_FIRINGS already exists
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table CONSOLIDATED_TOKEN_PATHS already exists
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table CONSOLIDATED_MARKING_EVOLUTION already exists
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table CONSOLIDATED_PLACE_STATISTICS already exists
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table CONSOLIDATED_TOKEN_GENEALOGY already exists
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Consolidated Petri Net tables created/verified
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Creating local Petri Net analysis tables...
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table TRANSITION_FIRINGS already exists
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table TOKEN_GENEALOGY already exists
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Table JOIN_SYNCHRONIZATION already exists
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Local Petri Net tables created/verified
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Database initialization complete - 13 tables (4 core + 5 consolidated PN + 3 local PN + 1 event) created/verified
+WARN ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Could not get count for EVENTRESPONSETABLE: Table/View 'EVENTRESPONSETABLE' does not exist.
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Retrieved measurement statistics: {CONSOLIDATED_MARKING_EVOLUTION_Count=0, CONSOLIDATED_PLACE_STATISTICS_Count=0, CONSOLIDATED_TOKEN_GENEALOGY_Count=0, CONSOLIDATED_TOKEN_PATHS_Count=0, CONSOLIDATED_TRANSITION_FIRINGS_Count=0, EVENTRESPONSETABLE_Count=-1, JOIN_SYNCHRONIZATION_Count=0, MARKINGS_Count=0, PROCESSMEASUREMENTS_Count=0, SERVICECONTRIBUTION_Count=0, SERVICEMEASUREMENTS_Count=0, TOKEN_GENEALOGY_Count=0, TRANSITION_FIRINGS_Count=0}
+WARN ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Could not get count for EVENTRESPONSETABLE: Table/View 'EVENTRESPONSETABLE' does not exist.
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Retrieved measurement statistics: {CONSOLIDATED_MARKING_EVOLUTION_Count=0, CONSOLIDATED_PLACE_STATISTICS_Count=0, CONSOLIDATED_TOKEN_GENEALOGY_Count=0, CONSOLIDATED_TOKEN_PATHS_Count=0, CONSOLIDATED_TRANSITION_FIRINGS_Count=0, EVENTRESPONSETABLE_Count=-1, JOIN_SYNCHRONIZATION_Count=0, MARKINGS_Count=0, PROCESSMEASUREMENTS_Count=0, SERVICECONTRIBUTION_Count=0, SERVICEMEASUREMENTS_Count=0, TOKEN_GENEALOGY_Count=0, TRANSITION_FIRINGS_Count=0}
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceHelper - SERVICE COMPLETE: org.btsn.places.Monitor_InitializationService.purgeAndInitialize completed in 786ms
+WARN ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Output attribute 'token' not found in service result, cannot enrich
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceHelper - ENRICHMENT: Successfully enriched service result with metadata
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceHelper - === SERVICE INVOCATION COMPLETE ===
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Service returned: {"duration_ms":770,"tables_purged":12,"service":"Monitor_InitializationService","action":"purge_and_initialize","status":"success","attempts":1,"statistics":{"CONSOLIDATED_TOKEN_PATHS_Count":0,"SERVICECONTRIBUTION_Count":0,"CONSOLIDATED_TRANSITION_FIRINGS_Count":0,"CONSOLIDATED_MARKING_EVOLUTION_Count":0,"EVENTRESPONSETABLE_Count":-1,"CONSOLIDATED_TOKEN_GENEALOGY_Count":0,"TOKEN_GENEALOGY_Count":0,"MARKINGS_Count":0,"SERVICEMEASUREMENTS_Count":0,"CONSOLIDATED_PLACE_STATISTICS_Count":0,"PROCESSMEASUREMENTS_Count":0,"TRANSITION_FIRINGS_Count":0,"JOIN_SYNCHRONIZATION_Count":0}}
+DEBUG ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.PetriNetInstrumentationHelper - Skipping instrumentation for admin token 999600000 (v999)
+DEBUG ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - PETRI-NET: Token 999600000 TERMINATED at Monitor_InitializationService
+INFO ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.TransitionHandler - ORCHESTRATOR: Token 999600000 terminated after Monitor_InitializationService.purgeAndInitialize
+DEBUG ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.TransitionHandler - Processing Terminate Type complete.
+ERROR ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - monitorIncomingEvents: false
+DEBUG ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Cleaned up join 999600000
+DEBUG ServiceThread-Monitor_InitializationService-13004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Service Monitor_InitializationService sequence ID: 999600000 complete.

@@ -575,6 +575,6 @@ This is the rule that governs the list of all services.
 	<Ind>triageResults</Ind>  	<!-- This is the attribute returned -->
 	<Ind>token</Ind>	<!-- This input is needed -->
 </Atom>
-<Atom><Rel>NodeType</Rel><Ind>GatewayNode</Ind></Atom><Atom><Rel>NodeType</Rel><Ind>GatewayNode</Ind></Atom><Atom><Rel>meetsCondition</Rel><Ind>LaboratoryService</Ind><Ind>processLabRequest</Ind><Ind>GATEWAY_NODE</Ind><Ind>STANDARD_WORKFLOW</Ind></Atom><Atom><Rel>meetsCondition</Rel><Ind>CardiologyService</Ind><Ind>processCardiacAssessment</Ind><Ind>GATEWAY_NODE</Ind><Ind>STANDARD_WORKFLOW</Ind></Atom><Atom><Rel>meetsCondition</Rel><Ind>RadiologyService</Ind><Ind>processImagingRequest</Ind><Ind>GATEWAY_NODE</Ind><Ind>STANDARD_WORKFLOW</Ind></Atom><Atom><Rel>meetsCondition</Rel><Ind>TreatmentService</Ind><Ind>executeDirectTreatment</Ind><Ind>GATEWAY_NODE</Ind><Ind>DIRECT_TO_TREATMENT</Ind></Atom>
+<Atom><Rel>NodeType</Rel><Ind>GatewayNode</Ind></Atom><Atom><Rel>NodeType</Rel><Ind>GatewayNode</Ind></Atom><Atom><Rel>meetsCondition</Rel><Ind>MonitorService</Ind><Ind>acknowledgeTokenArrival</Ind><Ind>GATEWAY_NODE</Ind><Ind>Network</Ind></Atom>
 </Rulebase>
 </Assert>
