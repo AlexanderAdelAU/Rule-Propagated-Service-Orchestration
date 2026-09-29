@@ -1,0 +1,79 @@
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - Parsed 119 unique events (filtered 0 duplicates)
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - === PASS 1: Generating raw segments ===
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator - FORK: Child 1000001 born at T_out_NS_Green (parent=1000000, placeId=P1_Place, time=1770275293777)
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator - FORK: Child 1000002 born at T_out_NS_Green (parent=1000000, placeId=P1_Place, time=1770275293861)
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator - FORK: Child 1000001 born at T_out_EW_Green (parent=1000000, placeId=P4_Place, time=1770275299391)
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator - FORK: Child 1000002 born at T_out_EW_Green (parent=1000000, placeId=P4_Place, time=1770275299461)
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator - FORK: Child 1000001 born at T_out_NS_Green (parent=1000000, placeId=P1_Place, time=1770275303770)
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator - FORK: Child 1000002 born at T_out_NS_Green (parent=1000000, placeId=P1_Place, time=1770275303847)
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator - FORK: Child 1000001 born at T_out_EW_Green (parent=1000000, placeId=P4_Place, time=1770275308789)
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator - FORK: Child 1000002 born at T_out_EW_Green (parent=1000000, placeId=P4_Place, time=1770275308854)
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator - Token 1000001 approach decision: isChild=true generatedEvent=true isReconstitutedParent=false isChildAtJoin=true
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator - Child at JOIN token 1000001 - calling generateChildApproachToJoin
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator - Generated TRAVELING_TO_NEXT_TIN for JOIN_SURVIVOR 1000001: T_out_NS_Green -> T_in_NS_Yellow (1770275294184-1770275294198)
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator - Generated JOIN_SURVIVOR approach: 1000001 atEG@1770275287635 travel@1770275287935 buffer@1770275288171-1770275293764 -> continues to place
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator - Generated BUFFERED_AT_TIN for JOIN destination: 1000001 at T_in_EW_Green (1770275298027-1770275298067)
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator - Token 1000002 approach decision: isChild=true generatedEvent=true isReconstitutedParent=false isChildAtJoin=true
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator - Child at JOIN token 1000002 - calling generateChildApproachToJoin
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator - PASS1: Generated rebirth TRAVELING_TO_NEXT_TIN for 1000002: T_out_NS_Green -> T_in_EW_Red_Hold (1770275293883-1770275294491) [will be synced in Pass 2]
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator - Generated child approach to JOIN: 1000002 atEG@1770275293228 travel@1770275293528 buffer@1770275293764-1770275293764 (consumed)
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator - Generated rebirth from subsequent JOIN: 1000002 consumed@1770275299131 reborn@1770275299461 -> T_in_NS_Red_Hold
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator - Generated rebirth from subsequent JOIN: 1000002 consumed@1770275303482 reborn@1770275303847 -> T_in_EW_Red_Hold
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator - Generated rebirth from subsequent JOIN: 1000002 consumed@1770275308528 reborn@1770275308854 -> T_in_NS_Red_Hold
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - Pass 1 complete: 148 raw segments generated
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - === PASS 2: Fork synchronization DISABLED (using real timestamps) ===
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator - POST-PROCESS: Added missing BUFFERED_AT_TIN for 1000002 at JOIN T_in_NS_Green (1770275300907-1770275303482)
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator - POST-PROCESS: Added missing BUFFERED_AT_TIN for 1000001 at JOIN T_in_NS_Green (1770275303426-1770275303475)
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator - POST-PROCESS: Added missing BUFFERED_AT_TIN for 1000001 at JOIN T_in_NS_Green (1770275309624-1770275310124)
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - POST-PROCESS: Added 3 missing buffer segments at JOINs
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - === Segment generation complete ===
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - Parsed 119 events, generated 151 segments
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - Time range: 1770275286685 - 1770275322896
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator - First 20 segments:
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator -   Segment[1000001 AT_EVENT_GENERATOR 1770275287635-1770275287935 null->null place=null]
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator -   Segment[1000001 TRAVELING_TO_TIN 1770275287935-1770275288171 TRAFFICLIGHT_EVENTGENERATOR->T_in_NS_Green place=P1_Place]
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator -   Segment[1000001 BUFFERED_AT_TIN 1770275288171-1770275293764 null->null place=P1_Place]
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator -   Segment[1000002 AT_EVENT_GENERATOR 1770275293228-1770275293528 null->null place=null]
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator -   Segment[1000002 TRAVELING_TO_TIN 1770275293528-1770275293764 TRAFFICLIGHT_EVENTGENERATOR->T_in_NS_Green place=P1_Place]
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator -   Segment[1000001 TRAVELING_TO_PLACE 1770275293764-1770275293884 T_in_NS_Green->P1_Place place=P1_Place]
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator -   Segment[1000002 BUFFERED_AT_TIN 1770275293764-1770275293764 null->null place=P1_Place]
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator -   Segment[1000002 CONSUMED 1770275293764-1770275293883 null->null place=P1_Place]
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator -   Segment[1000002 TRAVELING_TO_NEXT_TIN 1770275293883-1770275294491 T_out_NS_Green->T_in_EW_Red_Hold place=P3_Place]
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator -   Segment[1000001 AT_PLACE 1770275293884-1770275294104 null->null place=P1_Place]
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator -   Segment[1000001 TRAVELING_TO_TOUT 1770275294104-1770275294184 P1_Place->T_out_NS_Green place=P1_Place]
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator -   Segment[1000001 TRAVELING_TO_NEXT_TIN 1770275294184-1770275294198 T_out_NS_Green->T_in_NS_Yellow place=P2_Place]
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator -   Segment[1000001 BUFFERED_AT_TIN 1770275294198-1770275294247 null->null place=P2_Place]
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator -   Segment[1000001 AT_PLACE 1770275294247-1770275294466 null->null place=P2_Place]
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator -   Segment[1000001 TRAVELING_TO_TOUT 1770275294466-1770275294546 P2_Place->T_out_NS_Yellow place=P2_Place]
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator -   Segment[1000002 BUFFERED_AT_TIN 1770275294491-1770275294537 null->null place=P3_Place]
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator -   Segment[1000002 AT_PLACE 1770275294537-1770275294866 null->null place=P3_Place]
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator -   Segment[1000001 TRAVELING_TO_NEXT_TIN 1770275294546-1770275295026 T_out_NS_Yellow->T_in_NS_Yellow place=P2_Place]
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator -   Segment[1000002 TRAVELING_TO_TOUT 1770275294866-1770275294946 P3_Place->T_out_EW_Red_Hold place=P3_Place]
+DEBUG AWT-EventQueue-0 com.editor.TokenAnimator -   Segment[1000002 TRAVELING_TO_NEXT_TIN 1770275294946-1770275295421 T_out_EW_Red_Hold->T_in_EW_Red_Hold place=P3_Place]
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - 
+=== FINAL TOKEN LOCATIONS (at end time) ===
+INFO AWT-EventQueue-0 com.editor.TokenAnimator -   1000001: BUFFERED at T_in_NS_Green
+INFO AWT-EventQueue-0 com.editor.TokenAnimator -   1000002: BUFFERED at T_in_NS_Green
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - 
+=== LOCATION COUNTS ===
+INFO AWT-EventQueue-0 com.editor.TokenAnimator -   BUFFERED at T_in_NS_Green: 2 tokens
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - ========================
+
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - === TokenAnimator Topology ===
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - Event Generators: [TRAFFICLIGHT_EVENTGENERATOR]
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - EventGen -> T_in: {TRAFFICLIGHT_EVENTGENERATOR=T_in_NS_Green}
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - Places: [P2_Place, P5_Place, P4_Place, P3_Place, P6_Place, P1_Place]
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - Label -> Service: {P2_Place=P2_Place, NS_Green=P1_Place, NS_Yellow=P2_Place, P5_Place=P5_Place, P4_Place=P4_Place, EW_Yellow=P5_Place, P3_Place=P3_Place, P6_Place=P6_Place, P1_Place=P1_Place, EW_Red_Hold=P3_Place, NS_Red_Hold=P6_Place, EW_Green=P4_Place}
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - T_in transitions: [T_in_EW_Green, T_in_EW_Yellow, T_in_NS_Yellow, T_in_EW_Red_Hold, T_in_NS_Red_Hold, T_in_NS_Green]
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - Place -> T_in: {P2_Place=T_in_NS_Yellow, P5_Place=T_in_EW_Yellow, P4_Place=T_in_EW_Green, P3_Place=T_in_EW_Red_Hold, P6_Place=T_in_NS_Red_Hold, P1_Place=T_in_NS_Green}
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - Place -> T_out: {P2_Place=T_out_NS_Yellow, P5_Place=T_out_EW_Yellow, P4_Place=T_out_EW_Green, P3_Place=T_out_EW_Red_Hold, P6_Place=T_out_NS_Red_Hold, P1_Place=T_out_NS_Green}
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - T_out -> next T_in: {T_out_EW_Green=T_in_EW_Yellow, T_out_NS_Yellow=T_in_EW_Green, T_out_NS_Green=T_in_NS_Yellow, T_out_EW_Yellow=T_in_NS_Green, T_out_EW_Red_Hold=T_in_EW_Green, T_out_NS_Red_Hold=T_in_NS_Green}
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - T_out -> all T_ins (fork): {T_out_EW_Green=[T_in_EW_Yellow, T_in_NS_Red_Hold], T_out_NS_Yellow=[T_in_EW_Green], T_out_NS_Green=[T_in_NS_Yellow, T_in_EW_Red_Hold], T_out_EW_Yellow=[T_in_NS_Green], T_out_EW_Red_Hold=[T_in_EW_Green], T_out_NS_Red_Hold=[T_in_NS_Green]}
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - T_in <- all T_outs (join): {T_in_EW_Green=[T_out_NS_Yellow, T_out_EW_Red_Hold], T_in_EW_Yellow=[T_out_EW_Green, T_out_EW_Yellow], T_in_EW_Red_Hold=[T_out_EW_Red_Hold, T_out_NS_Green], T_in_NS_Yellow=[T_out_NS_Yellow, T_out_NS_Green], T_in_NS_Red_Hold=[T_out_EW_Green, T_out_NS_Red_Hold], T_in_NS_Green=[T_out_EW_Yellow, T_out_NS_Red_Hold]}
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - T_in -> Place: {T_in_EW_Green=P4_Place, T_in_EW_Yellow=P5_Place, T_in_NS_Yellow=P2_Place, T_in_EW_Red_Hold=P3_Place, T_in_NS_Red_Hold=P6_Place, T_in_NS_Green=P1_Place}
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - T_out -> Terminate: {}
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - Terminate nodes: []
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - EventGen implicit fork -> join: {}
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - EventGen fork child counts: {}
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - Implicit join T_ins: []
+INFO AWT-EventQueue-0 com.editor.TokenAnimator - Explicit join T_ins (JoinNode): [T_in_EW_Green, T_in_NS_Green]
