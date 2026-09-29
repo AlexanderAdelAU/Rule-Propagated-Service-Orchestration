@@ -437,105 +437,323 @@ public class TopologyBindingGenerator {
     }
 
     private List<String> extractJsonOperations(String block, String key) {
-        List<String> operations = new ArrayList<>();
-        String searchKey = "\"" + key + "\"";
-        int keyIndex = block.indexOf(searchKey);
-        if (keyIndex < 0) return operations;
-        
-        int colonIndex = block.indexOf(":", keyIndex);
-        if (colonIndex < 0) return operations;
-        
-        int valueStart = colonIndex + 1;
-        while (valueStart < block.length() && Character.isWhitespace(block.charAt(valueStart))) {
-            valueStart++;
-        }
-        
-        if (valueStart >= block.length()) return operations;
-        
-        char firstChar = block.charAt(valueStart);
-        
-        if (firstChar == '"') {
-            int endQuote = block.indexOf("\"", valueStart + 1);
-            if (endQuote > valueStart) {
-                operations.add(block.substring(valueStart + 1, endQuote));
-            }
-        } else if (firstChar == '[') {
-            int bracketEnd = block.indexOf("]", valueStart);
-            if (bracketEnd > valueStart) {
-                String arrayContent = block.substring(valueStart + 1, bracketEnd);
-                String[] parts = arrayContent.split(",");
-                for (String part : parts) {
-                    String trimmed = part.trim();
-                    if (trimmed.startsWith("\"") && trimmed.endsWith("\"")) {
-                        operations.add(trimmed.substring(1, trimmed.length() - 1));
-                    }
-                }
-            }
-        }
-        
-        return operations;
+    	List<String> operations = new ArrayList<>();
+    	String pattern = "\"" + key + "\":";
+    	int start = block.indexOf(pattern);
+    	if (start == -1) return operations;
+    	
+    	start = block.indexOf(":", start) + 1;
+    	while (start < block.length() && Character.isWhitespace(block.charAt(start))) start++;
+    	
+    	if (start >= block.length()) return operations;
+    	
+    	if (block.charAt(start) == '[') {
+    		// Array format - could be strings or objects
+    		start++; // skip '['
+    		StringBuilder arrayContent = new StringBuilder();
+    		int bracketCount = 1;
+    		
+    		while (start < block.length() && bracketCount > 0) {
+    			char c = block.charAt(start);
+    			if (c == '[') bracketCount++;
+    			else if (c == ']') bracketCount--;
+    			
+    			if (bracketCount > 0) {
+    				arrayContent.append(c);
+    			}
+    			start++;
+    		}
+    		
+    		String content = arrayContent.toString().trim();
+    		
+    		// Check if this is an object array (starts with '{') or string array
+    		if (content.startsWith("{")) {
+    			// Object array format: [{"name": "op1", ...}, {"name": "op2", ...}]
+    			// Extract only TOP-LEVEL "name" values from operation objects.
+    			// IMPORTANT: Strip out nested "arguments":[...] blocks first so that
+    			// argument names (e.g. "token") are not mistakenly picked up as operations.
+    			String contentWithoutArgs = removeNestedArgumentsBlocks(content);
+    			java.util.regex.Pattern namePattern = java.util.regex.Pattern.compile("\"name\"\\s*:\\s*\"([^\"]+)\"");
+    			java.util.regex.Matcher matcher = namePattern.matcher(contentWithoutArgs);
+    			
+    			while (matcher.find()) {
+    				String opName = matcher.group(1);
+    				operations.add(opName);
+    				logger.debug("Extracted operation name from object: " + opName);
+    			}
+    		} else {
+    			// Simple string array format: ["op1", "op2"]
+    			boolean inQuotes = false;
+    			StringBuilder currentOp = new StringBuilder();
+    			
+    			for (int i = 0; i < content.length(); i++) {
+    				char c = content.charAt(i);
+    				
+    				if (c == '"' && (i == 0 || content.charAt(i - 1) != '\\')) {
+    					if (inQuotes) {
+    						// End of string - add operation
+    						String op = currentOp.toString().trim();
+    						if (!op.isEmpty()) {
+    							operations.add(op);
+    						}
+    						currentOp = new StringBuilder();
+    					}
+    					inQuotes = !inQuotes;
+    				} else if (inQuotes) {
+    					currentOp.append(c);
+    				}
+    			}
+    		}
+    	} else if (block.charAt(start) == '"') {
+    		// Single string format: "operation"
+    		String singleOp = extractJsonValue(block, key);
+    		if (singleOp != null && !singleOp.trim().isEmpty()) {
+    			operations.add(singleOp.trim());
+    		}
+    	}
+    	
+    	return operations;
     }
 
+    /**
+     * Extract argument names from operations array in JSON.
+     * Parses the "arguments" array within each operation object.
+     * 
+     * Example JSON structure:
+     * "operations": [
+     *   {
+     *     "name": "processToken",
+     *     "arguments": [
+     *       {"name": "token_branch1", "type": "String"},
+     *       {"name": "token_branch2", "type": "String"}
+     *     ]
+     *   }
+     * ]
+     * 
+     * @param block The JSON block containing the operations
+     * @param operationName The operation name to find arguments for
+     * @return List of argument names (may be empty if not found)
+     */
     private List<String> extractOperationArguments(String block, String operationName) {
-        List<String> arguments = new ArrayList<>();
-        
-        String argsKey = "\"" + operationName + "_args\"";
-        int keyIndex = block.indexOf(argsKey);
-        if (keyIndex < 0) {
-            argsKey = "\"args\"";
-            keyIndex = block.indexOf(argsKey);
-        }
-        if (keyIndex < 0) return arguments;
-        
-        int colonIndex = block.indexOf(":", keyIndex);
-        if (colonIndex < 0) return arguments;
-        
-        int bracketStart = block.indexOf("[", colonIndex);
-        if (bracketStart < 0) return arguments;
-        
-        int bracketEnd = block.indexOf("]", bracketStart);
-        if (bracketEnd < 0) return arguments;
-        
-        String arrayContent = block.substring(bracketStart + 1, bracketEnd);
-        String[] parts = arrayContent.split(",");
-        for (String part : parts) {
-            String trimmed = part.trim();
-            if (trimmed.startsWith("\"") && trimmed.endsWith("\"")) {
-                arguments.add(trimmed.substring(1, trimmed.length() - 1));
-            }
-        }
-        
-        return arguments;
+    	List<String> argumentNames = new ArrayList<>();
+    	
+    	// Find the operations array
+    	int opsStart = block.indexOf("\"operations\"");
+    	if (opsStart == -1) return argumentNames;
+    	
+    	// Find the opening bracket of operations array
+    	int arrayStart = block.indexOf("[", opsStart);
+    	if (arrayStart == -1) return argumentNames;
+    	
+    	// Find matching closing bracket
+    	int bracketCount = 1;
+    	int pos = arrayStart + 1;
+    	int arrayEnd = -1;
+    	
+    	while (pos < block.length() && bracketCount > 0) {
+    		char c = block.charAt(pos);
+    		if (c == '[') bracketCount++;
+    		else if (c == ']') {
+    			bracketCount--;
+    			if (bracketCount == 0) arrayEnd = pos;
+    		}
+    		pos++;
+    	}
+    	
+    	if (arrayEnd == -1) return argumentNames;
+    	
+    	String operationsContent = block.substring(arrayStart + 1, arrayEnd);
+    	
+    	// Find the operation object with matching name
+    	String searchPattern = "\"name\":\\s*\"" + operationName + "\"";
+    	java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(searchPattern);
+    	java.util.regex.Matcher matcher = pattern.matcher(operationsContent);
+    	
+    	if (!matcher.find()) return argumentNames;
+    	
+    	// Find the arguments array for this operation
+    	int opNamePos = matcher.start();
+    	int argsStart = operationsContent.indexOf("\"arguments\"", opNamePos);
+    	if (argsStart == -1) return argumentNames;
+    	
+    	// Find the opening bracket of arguments array
+    	int argsArrayStart = operationsContent.indexOf("[", argsStart);
+    	if (argsArrayStart == -1) return argumentNames;
+    	
+    	// Find matching closing bracket for arguments
+    	bracketCount = 1;
+    	pos = argsArrayStart + 1;
+    	int argsArrayEnd = -1;
+    	
+    	while (pos < operationsContent.length() && bracketCount > 0) {
+    		char c = operationsContent.charAt(pos);
+    		if (c == '[') bracketCount++;
+    		else if (c == ']') {
+    			bracketCount--;
+    			if (bracketCount == 0) argsArrayEnd = pos;
+    		}
+    		pos++;
+    	}
+    	
+    	if (argsArrayEnd == -1) return argumentNames;
+    	
+    	String argumentsContent = operationsContent.substring(argsArrayStart + 1, argsArrayEnd);
+    	
+    	// Extract all "name" values from arguments
+    	java.util.regex.Pattern argNamePattern = java.util.regex.Pattern.compile("\"name\"\\s*:\\s*\"([^\"]+)\"");
+    	java.util.regex.Matcher argMatcher = argNamePattern.matcher(argumentsContent);
+    	
+    	while (argMatcher.find()) {
+    		String argName = argMatcher.group(1);
+    		argumentNames.add(argName);
+    		logger.debug("Found argument: " + argName + " for operation: " + operationName);
+    	}
+    	
+    	return argumentNames;
     }
 
+    /**
+     * Remove all "arguments":[...] blocks from a JSON string so that
+     * regex matches on "name" fields only hit top-level operation names,
+     * not argument names nested inside the arguments arrays.
+     * 
+     * Handles nested brackets correctly (e.g. arrays within argument objects).
+     * 
+     * @param content The JSON content from the operations array
+     * @return The same content with all "arguments":[...] blocks replaced with empty string
+     */
+    private String removeNestedArgumentsBlocks(String content) {
+    	StringBuilder result = new StringBuilder();
+    	int i = 0;
+    	
+    	while (i < content.length()) {
+    		// Look for "arguments" key
+    		int argsKeyStart = content.indexOf("\"arguments\"", i);
+    		
+    		if (argsKeyStart == -1) {
+    			// No more arguments blocks - append rest and done
+    			result.append(content.substring(i));
+    			break;
+    		}
+    		
+    		// Append everything before this "arguments" key
+    		result.append(content, i, argsKeyStart);
+    		
+    		// Find the '[' that starts the arguments array value
+    		int bracketStart = content.indexOf("[", argsKeyStart);
+    		if (bracketStart == -1) {
+    			// Malformed - no array bracket found, append rest and done
+    			result.append(content.substring(argsKeyStart));
+    			break;
+    		}
+    		
+    		// Find the matching ']' using bracket counting
+    		int bracketCount = 1;
+    		int pos = bracketStart + 1;
+    		while (pos < content.length() && bracketCount > 0) {
+    			char c = content.charAt(pos);
+    			if (c == '[') bracketCount++;
+    			else if (c == ']') bracketCount--;
+    			pos++;
+    		}
+    		
+    		// Skip past the entire "arguments":[...] block
+    		i = pos;
+    	}
+    	
+    	return result.toString();
+    }
+
+    /**
+     * 
+     * Expected JSON format:
+     * "operations": [
+     *   {
+     *     "name": "processClinicalDecision",
+     *     "returnAttribute": "diagnosisResults",
+     *     "arguments": [...]
+     *   }
+     * ]
+     * 
+     * @param block The JSON block containing the operations array
+     * @param operationName The operation name to find returnAttribute for
+     * @return The return attribute name, or null if not specified
+     */
     private String extractOperationReturnAttribute(String block, String operationName) {
-        String returnKey = "\"" + operationName + "_return\"";
-        int keyIndex = block.indexOf(returnKey);
-        if (keyIndex < 0) {
-            returnKey = "\"returnAttribute\"";
-            keyIndex = block.indexOf(returnKey);
-        }
-        if (keyIndex < 0) return null;
-        
-        int colonIndex = block.indexOf(":", keyIndex);
-        if (colonIndex < 0) return null;
-        
-        int valueStart = colonIndex + 1;
-        while (valueStart < block.length() && Character.isWhitespace(block.charAt(valueStart))) {
-            valueStart++;
-        }
-        
-        if (valueStart < block.length() && block.charAt(valueStart) == '"') {
-            int endQuote = block.indexOf("\"", valueStart + 1);
-            if (endQuote > valueStart) {
-                return block.substring(valueStart + 1, endQuote);
-            }
-        }
-        
-        return null;
+    	// Find the operations array
+    	int opsStart = block.indexOf("\"operations\"");
+    	if (opsStart == -1) return null;
+    	
+    	// Find the opening bracket of operations array
+    	int arrayStart = block.indexOf("[", opsStart);
+    	if (arrayStart == -1) return null;
+    	
+    	// Find matching closing bracket
+    	int bracketCount = 1;
+    	int pos = arrayStart + 1;
+    	int arrayEnd = -1;
+    	
+    	while (pos < block.length() && bracketCount > 0) {
+    		char c = block.charAt(pos);
+    		if (c == '[') bracketCount++;
+    		else if (c == ']') {
+    			bracketCount--;
+    			if (bracketCount == 0) arrayEnd = pos;
+    		}
+    		pos++;
+    	}
+    	
+    	if (arrayEnd == -1) return null;
+    	
+    	String operationsContent = block.substring(arrayStart + 1, arrayEnd);
+    	
+    	// Find the operation object with matching name
+    	String searchPattern = "\"name\"\\s*:\\s*\"" + operationName + "\"";
+    	java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(searchPattern);
+    	java.util.regex.Matcher matcher = pattern.matcher(operationsContent);
+    	
+    	if (!matcher.find()) return null;
+    	
+    	// Find the returnAttribute for this operation
+    	// Look for "returnAttribute" : "value" pattern after the operation name
+    	int opNamePos = matcher.start();
+    	
+    	// Find the end of this operation object (next '}' at same level)
+    	int braceCount = 0;
+    	int opStart = operationsContent.lastIndexOf("{", opNamePos);
+    	int opEnd = -1;
+    	
+    	for (int i = opStart; i < operationsContent.length(); i++) {
+    		char c = operationsContent.charAt(i);
+    		if (c == '{') braceCount++;
+    		else if (c == '}') {
+    			braceCount--;
+    			if (braceCount == 0) {
+    				opEnd = i;
+    				break;
+    			}
+    		}
+    	}
+    	
+    	if (opEnd == -1) return null;
+    	
+    	String opContent = operationsContent.substring(opStart, opEnd + 1);
+    	
+    	// Extract returnAttribute value
+    	java.util.regex.Pattern returnAttrPattern = java.util.regex.Pattern.compile(
+    		"\"returnAttribute\"\\s*:\\s*\"([^\"]+)\"");
+    	java.util.regex.Matcher returnMatcher = returnAttrPattern.matcher(opContent);
+    	
+    	if (returnMatcher.find()) {
+    		String returnAttr = returnMatcher.group(1);
+    		logger.debug("Found returnAttribute: " + returnAttr + " for operation: " + operationName);
+    		return returnAttr;
+    	}
+    	
+    	return null;
     }
 
-    // ========================================================================
+// ========================================================================
     // PETRINET BINDING GENERATION
     // ========================================================================
 
@@ -716,7 +934,15 @@ public class TopologyBindingGenerator {
     private String determineReturnAttributeForService(ServiceNode serviceNode) {
         logger.info("RETURN-ATTR: Determining return attribute for service: " + serviceNode.service);
         
-        // Find outgoing transition
+                // An explicit business contract always wins over topology inference.
+        String explicitReturnAttribute = serviceNode.attributes.get("returnAttribute");
+        if (explicitReturnAttribute != null && !explicitReturnAttribute.isEmpty()) {
+            logger.info("RETURN-ATTR: Using explicit returnAttribute='" + explicitReturnAttribute +
+                "' for " + serviceNode.service);
+            return explicitReturnAttribute;
+        }
+        
+// Find outgoing transition
         TransitionNode outgoingTransition = null;
         for (WorkflowEdge edge : workflowModel.getWorkflowEdges()) {
             if (edge.fromNode.equals(serviceNode.nodeId)) {

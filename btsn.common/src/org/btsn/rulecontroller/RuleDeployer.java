@@ -3467,7 +3467,15 @@ public class RuleDeployer {
 		logger.info("RETURN-ATTR: Determining return attribute for service: " + serviceNode.service + 
 		           " (nodeId=" + serviceNode.nodeId + ")");
 		
-		// Find outgoing transition from this service (service -> T_out)
+				// An explicit business contract always wins over topology inference.
+		String explicitReturnAttribute = serviceNode.attributes.get("returnAttribute");
+		if (explicitReturnAttribute != null && !explicitReturnAttribute.isEmpty()) {
+			logger.info("RETURN-ATTR: Using explicit returnAttribute='" + explicitReturnAttribute +
+			           "' for " + serviceNode.service);
+			return explicitReturnAttribute;
+		}
+		
+// Find outgoing transition from this service (service -> T_out)
 		TransitionNode outgoingTransition = null;
 		for (WorkflowEdge edge : workflowModel.getWorkflowEdges()) {
 			if (edge.fromNode.equals(serviceNode.nodeId)) {
