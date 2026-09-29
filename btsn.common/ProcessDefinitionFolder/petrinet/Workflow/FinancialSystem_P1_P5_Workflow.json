@@ -1,0 +1,540 @@
+{
+  "processType": "PetriNet",
+  "mapping": {
+    "sourceModel": "FinancialSystem.json",
+    "description": "Business-role mapping onto generic stochastic Petri net places; no handler/runtime changes required.",
+    "roles": {
+      "Validation": "P1_Place",
+      "CreditCheck": "P2_Place",
+      "FraudCheck": "P3_Place",
+      "Underwriting": "P4_Place",
+      "Decision": "P5_Place"
+    }
+  },
+  "elements": [
+    {
+      "id": "APPLICATION_SUBMITTED",
+      "type": "EVENT_GENERATOR",
+      "x": 30,
+      "y": 200,
+      "width": 24,
+      "height": 60,
+      "label": "Application Submitted",
+      "rotation": 0,
+      "generator_rate": "1000",
+      "token_version": "v001"
+    },
+    {
+      "id": "T_in_Validation",
+      "type": "TRANSITION",
+      "x": 110,
+      "y": 190,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Validation",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "Validation",
+      "type": "PLACE",
+      "x": 175,
+      "y": 195,
+      "width": 50,
+      "height": 50,
+      "label": "Validation",
+      "service": "P1_Place",
+      "mapped_place": "P1",
+      "business_role": "Validation",
+      "operations": [
+        {
+          "name": "processToken",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_Validation",
+      "type": "TRANSITION",
+      "x": 270,
+      "y": 190,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Validation",
+      "rotation": 0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_CreditCheck",
+      "type": "TRANSITION",
+      "x": 370,
+      "y": 130,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_CreditCheck",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "CreditCheck",
+      "type": "PLACE",
+      "x": 430,
+      "y": 135,
+      "width": 50,
+      "height": 50,
+      "label": "Credit Check",
+      "service": "P2_Place",
+      "mapped_place": "P2",
+      "business_role": "CreditCheck",
+      "operations": [
+        {
+          "name": "processToken",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_CreditCheck",
+      "type": "TRANSITION",
+      "x": 520,
+      "y": 130,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_CreditCheck",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_FraudCheck",
+      "type": "TRANSITION",
+      "x": 370,
+      "y": 270,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_FraudCheck",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "FraudCheck",
+      "type": "PLACE",
+      "x": 430,
+      "y": 275,
+      "width": 50,
+      "height": 50,
+      "label": "Fraud Check",
+      "service": "P3_Place",
+      "mapped_place": "P3",
+      "business_role": "FraudCheck",
+      "operations": [
+        {
+          "name": "processToken",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_FraudCheck",
+      "type": "TRANSITION",
+      "x": 520,
+      "y": 270,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_FraudCheck",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_Underwriting",
+      "type": "TRANSITION",
+      "x": 620,
+      "y": 200,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Underwriting",
+      "rotation": 0,
+      "node_type": "JoinNode",
+      "node_value": "JOIN_NODE",
+      "transition_type": "T_in",
+      "buffer": "20"
+    },
+    {
+      "id": "Underwriting",
+      "type": "PLACE",
+      "x": 680,
+      "y": 205,
+      "width": 50,
+      "height": 50,
+      "label": "Underwriting",
+      "service": "P4_Place",
+      "mapped_place": "P4",
+      "business_role": "Underwriting",
+      "operations": [
+        {
+          "name": "processToken",
+          "arguments": [
+            {
+              "name": "token_branch1",
+              "type": "String",
+              "value": "String",
+              "required": false
+            },
+            {
+              "name": "token_branch2",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_Underwriting",
+      "type": "TRANSITION",
+      "x": 770,
+      "y": 200,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Underwriting",
+      "rotation": 0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_Decision",
+      "type": "TRANSITION",
+      "x": 870,
+      "y": 200,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Decision",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "Decision",
+      "type": "PLACE",
+      "x": 855,
+      "y": 295,
+      "width": 50,
+      "height": 50,
+      "label": "Decision",
+      "service": "P5_Place",
+      "mapped_place": "P5",
+      "business_role": "Decision",
+      "operations": [
+        {
+          "name": "processToken",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_Decision",
+      "type": "TRANSITION",
+      "x": 870,
+      "y": 390,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Decision",
+      "rotation": 0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "Terminate_Invalid",
+      "type": "TRANSITION",
+      "x": 270,
+      "y": 350,
+      "width": 20,
+      "height": 60,
+      "label": "Invalid Application",
+      "rotation": 0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    },
+    {
+      "id": "Terminate_Declined",
+      "type": "TRANSITION",
+      "x": 770,
+      "y": 350,
+      "width": 20,
+      "height": 60,
+      "label": "Declined Application",
+      "rotation": 0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "APPLICATION_SUBMITTED",
+      "target": "T_in_Validation",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Validation",
+      "target": "Validation",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Validation",
+      "target": "T_out_Validation",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_Validation",
+      "target": "T_in_CreditCheck",
+      "label": "valid",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "true",
+      "endpoint": "processToken",
+      "business_decision_value": "valid"
+    },
+    {
+      "source": "T_out_Validation",
+      "target": "T_in_FraudCheck",
+      "label": "valid",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "true",
+      "endpoint": "processToken",
+      "business_decision_value": "valid"
+    },
+    {
+      "source": "T_out_Validation",
+      "target": "Terminate_Invalid",
+      "label": "invalid",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "false",
+      "endpoint": "",
+      "business_decision_value": "invalid"
+    },
+    {
+      "source": "T_in_CreditCheck",
+      "target": "CreditCheck",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "CreditCheck",
+      "target": "T_out_CreditCheck",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_CreditCheck",
+      "target": "T_in_Underwriting",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_FraudCheck",
+      "target": "FraudCheck",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "FraudCheck",
+      "target": "T_out_FraudCheck",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_FraudCheck",
+      "target": "T_in_Underwriting",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Underwriting",
+      "target": "Underwriting",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Underwriting",
+      "target": "T_out_Underwriting",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_Underwriting",
+      "target": "T_in_Decision",
+      "label": "approved / conditional",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "true",
+      "endpoint": "processToken",
+      "business_decision_values": [
+        "approved",
+        "conditional"
+      ]
+    },
+    {
+      "source": "T_out_Underwriting",
+      "target": "Terminate_Declined",
+      "label": "declined",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "false",
+      "endpoint": "",
+      "business_decision_value": "declined"
+    },
+    {
+      "source": "T_in_Decision",
+      "target": "Decision",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Decision",
+      "target": "T_out_Decision",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    }
+  ],
+  "textElements": [
+    {
+      "x": 390,
+      "y": 50,
+      "text": "Loan Application Processing Workflow — mapped to generic P1-P5",
+      "fontSize": 16,
+      "fontStyle": 1,
+      "color": -16777216
+    },
+    {
+      "x": 145,
+      "y": 165,
+      "text": "Validation → P1",
+      "fontSize": 10,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 400,
+      "y": 105,
+      "text": "Credit Check → P2",
+      "fontSize": 10,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 400,
+      "y": 345,
+      "text": "Fraud Check → P3",
+      "fontSize": 10,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 650,
+      "y": 175,
+      "text": "Underwriting → P4 (JOIN)",
+      "fontSize": 10,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 825,
+      "y": 275,
+      "text": "Decision → P5",
+      "fontSize": 10,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 150,
+      "y": 380,
+      "text": "Invalid applications terminated",
+      "fontSize": 10,
+      "fontStyle": 2,
+      "color": -16777216
+    },
+    {
+      "x": 650,
+      "y": 380,
+      "text": "Declined applications terminated",
+      "fontSize": 10,
+      "fontStyle": 2,
+      "color": -16777216
+    }
+  ]
+}
