@@ -1,6 +1,8 @@
 package org.btsn.places;
 
 import org.btsn.base.BaseStochasticPetriNetPlace;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 /**
  * P1_Place - Stochastic Petri Net Place
@@ -91,5 +93,71 @@ public class P5_Place extends BaseStochasticPetriNetPlace {
      */
     public P5_Place(String sequenceID, int capacity, long processingDelayMs) {
         super(sequenceID, PLACE_IDENTIFIER, capacity, processingDelayMs);
+    }
+
+    /**
+     * FinancialSystem role: final lending decision.
+     * Input: underwritingResults JSON business object.
+     * Output: decisionResults JSON business object.
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public String processToken(String underwritingResults) {
+        GuardMode previousMode = getGuardMode();
+        try {
+            setGuardMode(GuardMode.ALWAYS_TRUE);
+            super.processToken(underwritingResults);
+        } finally {
+            setGuardMode(previousMode);
+        }
+
+        String applicationId = textValue(underwritingResults, "application_id", "APP-UNKNOWN");
+        String decision = textValue(underwritingResults, "underwriting_decision", "conditional");
+
+        JSONObject result = new JSONObject();
+        result.put("application_id", applicationId);
+        result.put("final_decision", decision);
+        result.put("status", "complete");
+
+        JSONObject response = new JSONObject();
+        response.put("decisionResults", result);
+        return response.toJSONString();
+    }
+
+    private static JSONObject parseObject(String json) {
+        if (json == null) return new JSONObject();
+        try {
+            Object parsed = new JSONParser().parse(json);
+            return parsed instanceof JSONObject ? (JSONObject) parsed : new JSONObject();
+        } catch (Exception e) {
+            return new JSONObject();
+        }
+    }
+
+    private static Object findValue(JSONObject object, String key) {
+        if (object == null) return null;
+        if (object.containsKey(key)) return object.get(key);
+        for (Object value : object.values()) {
+            if (value instanceof JSONObject) {
+                Object found = findValue((JSONObject) value, key);
+                if (found != null) return found;
+            }
+        }
+        return null;
+    }
+
+    private static String textValue(String json, String key, String defaultValue) {
+        Object value = findValue(parseObject(json), key);
+        return value == null ? defaultValue : value.toString();
+    }
+
+    private static double numberValue(String json, String key, double defaultValue) {
+        String value = textValue(json, key, null);
+        if (value == null) return defaultValue;
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 }

@@ -67,6 +67,8 @@
 	<property name="target.operation" value="processToken" />
 	<property name="token.expire" value="120000" />
 	<property name="event.generator.id" value="EVENT_GENERATOR" />
+	<!-- Financial application data carried by the entry token's JSON data object -->
+	<property name="financial.token.data" value="application_id=APP001,annual_income=85000,requested_amount=25000,credit_score=720,fraud_risk=low" />
 	
 	<!-- TOKEN MODE SELECTION: 1=EDGE_NODE (default), 2=JOIN_NODE -->
 	<property name="mode" value="1" />
@@ -563,6 +565,7 @@
 			<arg value="-tokens" /><arg value="${token.count}" />
 			<arg value="-expire" /><arg value="${token.expire}" />
 			<arg value="-generator" /><arg value="${event.generator.id}" />
+			<arg value="-data" /><arg value="${financial.token.data}" />
 			<arg value="-skipdeploy" />
 		</java>
 	</target>

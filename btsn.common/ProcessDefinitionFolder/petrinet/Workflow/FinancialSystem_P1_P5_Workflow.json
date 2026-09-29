@@ -1,16 +1,5 @@
 {
   "processType": "PetriNet",
-  "mapping": {
-    "sourceModel": "FinancialSystem.json",
-    "description": "Business-role mapping onto generic stochastic Petri net places; no handler/runtime changes required.",
-    "roles": {
-      "Validation": "P1_Place",
-      "CreditCheck": "P2_Place",
-      "FraudCheck": "P3_Place",
-      "Underwriting": "P4_Place",
-      "Decision": "P5_Place"
-    }
-  },
   "elements": [
     {
       "id": "APPLICATION_SUBMITTED",
@@ -47,11 +36,10 @@
       "height": 50,
       "label": "Validation",
       "service": "P1_Place",
-      "mapped_place": "P1",
-      "business_role": "Validation",
       "operations": [
         {
           "name": "processToken",
+          "returnAttribute": "validationResults",
           "arguments": [
             {
               "name": "token",
@@ -99,14 +87,13 @@
       "height": 50,
       "label": "Credit Check",
       "service": "P2_Place",
-      "mapped_place": "P2",
-      "business_role": "CreditCheck",
       "operations": [
         {
           "name": "processToken",
+          "returnAttribute": "creditCheckResults",
           "arguments": [
             {
-              "name": "token",
+              "name": "validationResults",
               "type": "String",
               "value": "String",
               "required": false
@@ -151,14 +138,13 @@
       "height": 50,
       "label": "Fraud Check",
       "service": "P3_Place",
-      "mapped_place": "P3",
-      "business_role": "FraudCheck",
       "operations": [
         {
           "name": "processToken",
+          "returnAttribute": "fraudCheckResults",
           "arguments": [
             {
-              "name": "token",
+              "name": "validationResults",
               "type": "String",
               "value": "String",
               "required": false
@@ -203,20 +189,19 @@
       "height": 50,
       "label": "Underwriting",
       "service": "P4_Place",
-      "mapped_place": "P4",
-      "business_role": "Underwriting",
       "operations": [
         {
           "name": "processToken",
+          "returnAttribute": "underwritingResults",
           "arguments": [
             {
-              "name": "token_branch1",
+              "name": "creditCheckResults",
               "type": "String",
               "value": "String",
               "required": false
             },
             {
-              "name": "token_branch2",
+              "name": "fraudCheckResults",
               "type": "String",
               "value": "String",
               "required": false
@@ -261,14 +246,13 @@
       "height": 50,
       "label": "Decision",
       "service": "P5_Place",
-      "mapped_place": "P5",
-      "business_role": "Decision",
       "operations": [
         {
           "name": "processToken",
+          "returnAttribute": "decisionResults",
           "arguments": [
             {
-              "name": "token",
+              "name": "underwritingResults",
               "type": "String",
               "value": "String",
               "required": false
@@ -347,27 +331,24 @@
       "target": "T_in_CreditCheck",
       "label": "valid",
       "guardCondition": "DECISION_EQUAL_TO",
-      "decision_value": "true",
-      "endpoint": "processToken",
-      "business_decision_value": "valid"
+      "decision_value": "valid",
+      "endpoint": "processToken"
     },
     {
       "source": "T_out_Validation",
       "target": "T_in_FraudCheck",
       "label": "valid",
       "guardCondition": "DECISION_EQUAL_TO",
-      "decision_value": "true",
-      "endpoint": "processToken",
-      "business_decision_value": "valid"
+      "decision_value": "valid",
+      "endpoint": "processToken"
     },
     {
       "source": "T_out_Validation",
       "target": "Terminate_Invalid",
       "label": "invalid",
       "guardCondition": "DECISION_EQUAL_TO",
-      "decision_value": "false",
-      "endpoint": "",
-      "business_decision_value": "invalid"
+      "decision_value": "invalid",
+      "endpoint": ""
     },
     {
       "source": "T_in_CreditCheck",
@@ -436,23 +417,26 @@
     {
       "source": "T_out_Underwriting",
       "target": "T_in_Decision",
-      "label": "approved / conditional",
+      "label": "approved",
       "guardCondition": "DECISION_EQUAL_TO",
-      "decision_value": "true",
-      "endpoint": "processToken",
-      "business_decision_values": [
-        "approved",
-        "conditional"
-      ]
+      "decision_value": "approved",
+      "endpoint": "processToken"
+    },
+    {
+      "source": "T_out_Underwriting",
+      "target": "T_in_Decision",
+      "label": "conditional",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "conditional",
+      "endpoint": "processToken"
     },
     {
       "source": "T_out_Underwriting",
       "target": "Terminate_Declined",
       "label": "declined",
       "guardCondition": "DECISION_EQUAL_TO",
-      "decision_value": "false",
-      "endpoint": "",
-      "business_decision_value": "declined"
+      "decision_value": "declined",
+      "endpoint": ""
     },
     {
       "source": "T_in_Decision",
