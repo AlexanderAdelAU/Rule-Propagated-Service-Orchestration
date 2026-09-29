@@ -1,5 +1,32 @@
-INFO ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Completed callNextOperation for MonitorService, published=true
-INFO ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Successfully published to MonitorService via EventPublisher
-ERROR ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceThread - monitorIncomingEvents: false
-DEBUG ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Cleaned up join 1000000
-DEBUG ServiceThread-P4_CollectorService-14103 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Service P4_CollectorService sequence ID: 1000000 complete.
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - GENEALOGY: Recorded fork 1000000 -> 1000002 via T_out_P4_Place (workflowBase=1000000)
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Parent 1000000 already marked as consumed at T_out_P4_Place
+DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_out_P4 token=1000002 eventType=FORK
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - FORK: Child token 1000002 created from parent 1000000 at T_out_P4
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: FORK 1000000 -> child 1000002 at P4_Place
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Token 1000002 exiting place: P4_Place -> P6_Place [arc=token]
+DEBUG ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote transition firing: T_out_P4 token=1000002 eventType=EXIT
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.PetriNetInstrumentationHelper - Recorded transition: T_out_P4 (ForkNode) token=1000002 P4_Place -> P6_Place [EXIT] arc=token
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - PETRI-NET: Token 1000002 EXIT from P4_Place -> P6_Place.processToken [arc=token]
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ROUTING: Token 1000002 -> 'token' (explicit) to P6_Place.processToken
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - FORK: Routed to P6_Place via activeService on 192.168.1.152:4006 (no T_out record)
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.TransitionHandler - FORK: Parallel routing complete - 2 child tokens created
+ERROR ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - monitorIncomingEvents: true
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - TIMING: Using EventReactor arrival time=1772849741855 for seqID=1000002
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - WRITE: Using captured workflowStartTime=1772849702938 for seqID=1000002
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - === SERVICE TIMING RECORD ===
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Sequence ID: 1000002
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Service: P4_Place
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Operation: processToken
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Arrival Time (EventReactor): 1772849741855
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Invocation Time: 1772849742230
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Publish Time: 1772849742811
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Workflow Start Time: 1772849702938
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   MARKING: Buffer=0, Total=1, Capacity=50
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ==============================
+INFO ServiceThread-P4_Place-14004 org.btsn.derby.Analysis.BuildServiceAnalysisDatabase - Wrote service timing record for sequenceID: 1000002
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Queue Time (including priority queue): 375ms
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Service Time: 581ms
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Total Time: 956ms
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread -   Buffer Utilization: 0.0%
+INFO ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Service P4_Place sequence ID: 1000001 complete.
+DEBUG ServiceThread-P4_Place-14004 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Cleaned up join 1000000
