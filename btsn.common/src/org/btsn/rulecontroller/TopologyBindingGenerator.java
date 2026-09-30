@@ -282,6 +282,20 @@ public class TopologyBindingGenerator {
                 attributes.put("operations", String.join(",", operationsList));
             }
             
+            // Preserve canonical-binding metadata for every operation exposed by
+            // the same physical service. Primary keys remain for compatibility.
+            for (String operationName : operationsList) {
+                List<String> argsForOperation = extractOperationArguments(block, operationName);
+                if (!argsForOperation.isEmpty()) {
+                    attributes.put("operationArguments." + operationName,
+                                   String.join(",", argsForOperation));
+                }
+                String returnForOperation = extractOperationReturnAttribute(block, operationName);
+                if (returnForOperation != null && !returnForOperation.isEmpty()) {
+                    attributes.put("returnAttribute." + operationName, returnForOperation);
+                }
+            }
+            
             ServiceNode serviceNode = new ServiceNode(id, service, primaryOperation, attributes);
             workflowModel.addServiceNode(serviceNode);
             logger.debug("Parsed Place: " + id + " -> " + service + ":" + primaryOperation);
@@ -811,6 +825,26 @@ public class TopologyBindingGenerator {
                 generateCanonicalBindingFile(bindingsBasePath, serviceNode.service, 
                     serviceNode.operation, joinInputCount, argumentNames, returnAttribute);
                 
+                // A PLACE may expose several methods on one physical service.
+                // Keep all canonicalBinding atoms in the same service binding file.
+                String operationsCsv = serviceNode.attributes.get("operations");
+                if (operationsCsv != null && !operationsCsv.isEmpty()) {
+                    for (String operationName : operationsCsv.split(",")) {
+                        operationName = operationName.trim();
+                        if (operationName.isEmpty() || operationName.equals(serviceNode.operation)) {
+                            continue;
+                        }
+                        List<String> secondaryArgs = null;
+                        String argsCsv = serviceNode.attributes.get("operationArguments." + operationName);
+                        if (argsCsv != null && !argsCsv.isEmpty()) {
+                            secondaryArgs = Arrays.asList(argsCsv.split(","));
+                        }
+                        String secondaryReturn = serviceNode.attributes.get("returnAttribute." + operationName);
+                        appendCanonicalOperationBinding(bindingsBasePath, serviceNode.service,
+                            operationName, joinInputCount, secondaryArgs, secondaryReturn);
+                    }
+                }
+                
                 String folderName = serviceNode.service.contains("_") 
                     ? serviceNode.service.substring(0, serviceNode.service.indexOf("_"))
                     : serviceNode.service;
@@ -1121,6 +1155,55 @@ public class TopologyBindingGenerator {
         }
         
         logger.debug("Successfully wrote canonical binding file: " + fullPath);
+    }
+
+    private void appendCanonicalOperationBinding(String basePath, String serviceName,
+            String operationName, int inputCount, List<String> argumentNames,
+            String returnAttribute) throws IOException {
+        String folderName = serviceName.contains("_")
+            ? serviceName.substring(0, serviceName.indexOf("_")) : serviceName;
+        File bindingFile = new File(basePath + "/" + folderName,
+            serviceName + "-CanonicalBindings.ruleml.xml");
+        boolean hasExplicitArgs = argumentNames != null && !argumentNames.isEmpty();
+        
+        logger.info("Appending canonical binding for " + serviceName + "." + operationName);
+        try (PrintWriter pw = new PrintWriter(new FileWriter(bindingFile, true))) {
+            pw.println();
+            pw.println("<!-- Additional operation: " + operationName + " -->");
+            if (hasExplicitArgs) {
+                String returnAttr = (returnAttribute != null && !returnAttribute.isEmpty())
+                    ? returnAttribute
+                    : (argumentNames.size() == 1 ? argumentNames.get(0) : "token");
+                for (String argName : argumentNames) {
+                    pw.println("<Atom>");
+                    pw.println("\t<Rel>canonicalBinding</Rel>");
+                    pw.println("\t<Ind>" + operationName + "</Ind>");
+                    pw.println("\t<Ind>" + returnAttr + "</Ind>");
+                    pw.println("\t<Ind>" + argName.trim() + "</Ind>");
+                    pw.println("</Atom>");
+                }
+            } else if (inputCount <= 1) {
+                String outputAttr = (returnAttribute != null && !returnAttribute.isEmpty())
+                    ? returnAttribute : "token";
+                pw.println("<Atom>");
+                pw.println("\t<Rel>canonicalBinding</Rel>");
+                pw.println("\t<Ind>" + operationName + "</Ind>");
+                pw.println("\t<Ind>" + outputAttr + "</Ind>");
+                pw.println("\t<Ind>token</Ind>");
+                pw.println("</Atom>");
+            } else {
+                String outputAttr = (returnAttribute != null && !returnAttribute.isEmpty())
+                    ? returnAttribute : "token";
+                for (int i = 1; i <= inputCount; i++) {
+                    pw.println("<Atom>");
+                    pw.println("\t<Rel>canonicalBinding</Rel>");
+                    pw.println("\t<Ind>" + operationName + "</Ind>");
+                    pw.println("\t<Ind>" + outputAttr + "</Ind>");
+                    pw.println("\t<Ind>token_" + i + "</Ind>");
+                    pw.println("</Atom>");
+                }
+            }
+        }
     }
 
     private void appendBindingsToServiceRuleml(List<String> bindingFilePaths) throws IOException {
