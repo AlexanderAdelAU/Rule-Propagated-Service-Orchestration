@@ -38,6 +38,7 @@ public class P2_Place extends BaseBusinessPetriNetPlace {
         result.put("annual_income", annualIncome);
         result.put("requested_amount", requestedAmount);
         result.put("credit_status", creditStatus);
+        result.put("routing_decision", routingDecision("loan"));
 
         return businessResult("creditCheckResults", result);
     }
@@ -74,6 +75,7 @@ public class P2_Place extends BaseBusinessPetriNetPlace {
         result.put("amount_to_income_ratio", amountToIncomeRatio);
         result.put("affordability_status", affordabilityStatus);
         result.put("status", "complete");
+        result.put("routing_decision", routingDecision("prescreen_complete"));
 
         return businessResult("affordabilityAssessmentResults", result);
     }

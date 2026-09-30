@@ -69,6 +69,8 @@ public class P1_Place extends BaseBusinessPetriNetPlace {
         result.put("credit_score", creditScore);
         result.put("fraud_risk", fraudRisk);
         result.put("identity_status", identityStatus);
+        result.put("routing_decision", routingDecision(
+                "verified".equalsIgnoreCase(identityStatus) ? "prescreen" : "unverified"));
 
         return businessResult("identityVerificationResults", result);
     }

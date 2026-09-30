@@ -36,8 +36,9 @@
 
 	<!-- Process names for each phase -->
 	<property name="init.process.name" value="petrinet/Initializers/P1_P2_P3_P4_P5_Initialization" />
-	<property name="workflow1.process.name" value="petrinet/Workflow/FinancialSystem_P1_P5_Workflow" />
-	<property name="workflow2.process.name" value="petrinet/Workflow/FinancialPreScreen_P1_P2_Workflow" />
+	<!-- Both event-generator JVMs deploy/fire against ONE concurrent topology. -->
+	<property name="workflow1.process.name" value="petrinet/Workflow/FinancialSystem_Stage3_Concurrent_Workflow" />
+	<property name="workflow2.process.name" value="petrinet/Workflow/FinancialSystem_Stage3_Concurrent_Workflow" />
 	<property name="collector.process.name" value="petrinet/Collectors/P1_P2_P3_P4_P5_Collector" />
 
 	<!-- Phase 1: Initialization parameters (v999 = admin/non-instrumented) -->
@@ -486,7 +487,7 @@
 				</java>
 
 				<!-- Deploy Workflow 2: Financial Pre-Screen (v002) -->
-				<echo message="[DEPLOY 2/2] Deploying ${workflow2.process.name} for ${workflow2.version} (P1_EVENTGENERATOR)..." />
+				<echo message="[DEPLOY 2/2] Deploying ${workflow2.process.name} for ${workflow2.version} (PRESCREEN_SUBMITTED)..." />
 				<java classname="${token.generator.class}" 
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
