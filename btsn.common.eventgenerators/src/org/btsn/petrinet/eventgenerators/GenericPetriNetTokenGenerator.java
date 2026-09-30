@@ -174,6 +174,7 @@ public class GenericPetriNetTokenGenerator {
 	private static int numberOfTokens = 10;  // How many tokens to generate (default: 10, override with -tokens)
 	private static long timeToExpire = 120000;  // Token validity window in ms (default: 120000, override with -expire)
 	private static String tokenData = "";  // Optional custom data (use -data)
+	private static String triggerFileOverride = null;  // Optional experiment-specific trigger schedule
 	private static String processName = null;  // REQUIRED: Workflow name (REQUIRED: -process)
 	
 	// Fork mode settings
@@ -236,6 +237,7 @@ public class GenericPetriNetTokenGenerator {
 		System.out.println("Starting SequenceID: " + sequenceID);
 		System.out.println("Token Expiry: " + timeToExpire + "ms");
 		System.out.println("Token Data: " + (tokenData.isEmpty() ? "(none)" : tokenData));
+		System.out.println("Trigger File: " + (triggerFileOverride == null ? "(version default)" : triggerFileOverride));
 		System.out.println("Skip Deploy: " + skipDeploy);
 		System.out.println("=====================================\n");
 
@@ -408,6 +410,14 @@ public class GenericPetriNetTokenGenerator {
 						System.out.println("  Parsed -data: " + tokenData);
 					}
 					break;
+				case "-triggerfile":
+				case "--triggerfile":
+					if (i + 1 < args.length) {
+						triggerFileOverride = args[++i];
+						System.out.println("  Parsed -triggerfile: " + triggerFileOverride);
+					}
+					break;
+					
 					
 				case "-noexit":
 				case "--noexit":
@@ -691,8 +701,18 @@ public class GenericPetriNetTokenGenerator {
 	private static void generateTokens() throws Exception {
 		String triggeringPath = new File("").getAbsolutePath() + "/EventTriggeringFile";
 		ParseCSV pcsv = new ParseCSV();
-		// Build CSV filename using the version parameter (e.g., v001 -> V001_EventTriggeringFile.csv)
-		String csvFilename = triggeringPath + "/" + ruleBaseVersion.toUpperCase() + "_EventTriggeringFile.csv";
+		// Use an explicit schedule when supplied (for controlled experiments).
+		// Otherwise preserve the historical version-based trigger-file behaviour.
+		String csvFilename;
+		if (triggerFileOverride != null && !triggerFileOverride.isEmpty()) {
+			File triggerFile = new File(triggerFileOverride);
+			if (!triggerFile.isAbsolute()) {
+				triggerFile = new File(triggeringPath, triggerFileOverride);
+			}
+			csvFilename = triggerFile.getAbsolutePath();
+		} else {
+			csvFilename = triggeringPath + "/" + ruleBaseVersion.toUpperCase() + "_EventTriggeringFile.csv";
+		}
 		System.out.println("Loading trigger file: " + csvFilename);
 		
 		TreeMap<Integer, Integer> tokenSequence = pcsv.parseCSV(csvFilename);
