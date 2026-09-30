@@ -847,10 +847,13 @@ class TransitionHandler {
             val = serviceResult.getResult();
             logger.info("ORCHESTRATOR: Service returned: " + (val != null ? val : "null"));
 
-            // PETRI NET: Record token termination
-            serviceThread.instrumentTokenTerminate(serviceThread.getSequenceID(), serviceThread.getServiceName(), "TerminateNode");
+            // PETRI NET: Record termination against the actual token that entered this place.
+            // sequenceID may be normalized to the workflow base for service invocation,
+            // while phaseSequenceID preserves the post-fork/post-join identity used at T_in.
+            int terminatingTokenId = serviceThread.getPhaseSequenceID();
+            serviceThread.instrumentTokenTerminate(terminatingTokenId, serviceThread.getServiceName(), "TerminateNode");
 
-            logger.info("ORCHESTRATOR: Token " + serviceThread.getSequenceID() + " terminated after " + service + "." + operation);
+            logger.info("ORCHESTRATOR: Token " + terminatingTokenId + " terminated after " + service + "." + operation);
 
         } catch (Exception e) {
             e.printStackTrace();
