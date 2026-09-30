@@ -7,8 +7,8 @@
 		
 		Two independent Financial workflows execute concurrently against ONE set
 		of physical services. v001 runs the full loan workflow. v002 runs a separate
-		pre-screen workflow that binds different operations on the same P1/P2
-		service processes. Both generators use synchronized Stage-3 trigger files
+		pre-screen workflow with its own propagated topology while sharing the same
+		P1/P2 service operations. Both generators use synchronized Stage-3 trigger files
 		to create deliberate, reproducible contention.
 	</description>
 
@@ -36,9 +36,9 @@
 
 	<!-- Process names for each phase -->
 	<property name="init.process.name" value="petrinet/Initializers/P1_P2_P3_P4_P5_Initialization" />
-	<!-- Both event-generator JVMs deploy/fire against ONE concurrent topology. -->
-	<property name="workflow1.process.name" value="petrinet/Workflow/FinancialSystem_Stage3_Concurrent_Workflow" />
-	<property name="workflow2.process.name" value="petrinet/Workflow/FinancialSystem_Stage3_Concurrent_Workflow" />
+	<!-- Each workflow has its own topology/rule version; physical services remain shared. -->
+	<property name="workflow1.process.name" value="petrinet/Workflow/FinancialSystem_P1_P5_Workflow" />
+	<property name="workflow2.process.name" value="petrinet/Workflow/FinancialSystem_Stage3_PreScreen_Workflow" />
 	<property name="collector.process.name" value="petrinet/Collectors/P1_P2_P3_P4_P5_Collector" />
 
 	<!-- Phase 1: Initialization parameters (v999 = admin/non-instrumented) -->
@@ -66,12 +66,12 @@
 
 	<!-- ======================================================================= -->
 	<!-- WORKFLOW 2: Financial Pre-Screen (v002)                                 -->
-	<!-- Same physical P1/P2 services, different business operations.            -->
+	<!-- Same physical P1/P2 services and operations; independent v002 topology. -->
 	<!-- ======================================================================= -->
 	<property name="workflow2.version" value="v002" />
 	<property name="workflow2.generator.id" value="PRESCREEN_SUBMITTED" />
 	<property name="workflow2.target.place" value="P1_Place" />
-	<property name="workflow2.target.operation" value="verifyApplicantIdentity" />
+	<property name="workflow2.target.operation" value="processToken" />
 	<property name="workflow2.token.count" value="10" />
 	<property name="workflow2.token.expire" value="120000" />
 	<property name="workflow2.trigger.file" value="Stage3_V002_Concurrent.csv" />
@@ -469,7 +469,7 @@
 				<echo message="" />
 				<echo message="Workflows:" />
 				<echo message="  ${workflow1.process.name} (${workflow1.version}): APPLICATION_SUBMITTED -> P1.processToken -> P2/P3 -> P4 -> P5" />
-				<echo message="  ${workflow2.process.name} (${workflow2.version}): PRESCREEN_SUBMITTED -> P1.verifyApplicantIdentity -> P2.assessAffordability" />
+				<echo message="  ${workflow2.process.name} (${workflow2.version}): PRESCREEN_SUBMITTED -> P1.processToken -> P2.processToken -> Monitor" />
 				<echo message="" />
 
 				<!-- Deploy Workflow 1: Full Loan Application (v001) -->
@@ -523,7 +523,7 @@
 						<arg value="-skipDeploy" />
 					</java>
 
-					<!-- v002 pre-screen using different operations on shared P1/P2 -->
+					<!-- v002 pre-screen: independent topology using the same shared P1/P2 operations -->
 					<java classname="${token.generator.class}" 
 					      fork="true" dir="${generator.project.dir}" failonerror="true">
 						<classpath refid="generator.classpath" />
