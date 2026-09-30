@@ -639,8 +639,10 @@ private String extractServiceContextFromToken(String token) {
             "  AND t_out.transitionId = ? " +
             "  AND t_out.timestamp >= t_in.timestamp " +
             "WHERE t_in.transitionId = ? " +
+            "  AND t_in.eventType = 'ENTER' " +
             "  AND t_in.ruleVersion = ? " +
             "  AND t_out.ruleVersion = ? " +
+            "  AND t_out.eventType IN ('EXIT', 'TERMINATE') " +
             "  AND NOT EXISTS ( " +
             "      SELECT 1 FROM " + TRANSITION_FIRINGS_TABLE + " t_between " +
             "      WHERE t_between.tokenId = t_in.tokenId " +
@@ -807,8 +809,10 @@ private String extractServiceContextFromToken(String token) {
             "  AND t_out.transitionId = ? " +
             "  AND t_out.timestamp >= t_in.timestamp " +
             "WHERE t_in.transitionId = ? " +
+            "  AND t_in.eventType = 'ENTER' " +
             "  AND t_in.ruleVersion = ? " +
             "  AND t_out.ruleVersion = ? " +
+            "  AND t_out.eventType IN ('EXIT', 'TERMINATE') " +
             "  AND NOT EXISTS ( " +
             "      SELECT 1 FROM " + TRANSITION_FIRINGS_TABLE + " t_between " +
             "      WHERE t_between.tokenId = t_in.tokenId " +
