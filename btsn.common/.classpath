@@ -25,6 +25,5 @@
 	<classpathentry kind="lib" path="lib/jackson-core-2.17.1.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-module-jaxb-annotations-2.17.1.jar"/>
 	<classpathentry kind="lib" path="lib/pdfbox-app-3.0.5.jar"/>
-	<classpathentry kind="lib" path="C:/Development-Thesis/java libraries/itextpdf-5.5.13.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
