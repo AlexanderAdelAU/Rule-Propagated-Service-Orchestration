@@ -85,7 +85,7 @@
       "y": 135,
       "width": 50,
       "height": 50,
-      "label": "Credit Check",
+      "label": "CreditCheck",
       "service": "P2_Place",
       "operations": [
         {
@@ -136,7 +136,7 @@
       "y": 275,
       "width": 50,
       "height": 50,
-      "label": "Fraud Check",
+      "label": "FraudCheck",
       "service": "P3_Place",
       "operations": [
         {
