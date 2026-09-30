@@ -633,41 +633,396 @@ public class PetriNetAnalyzer {
     }
     
     /**
-     * Get workflow throughput (tokens per second)
+     * Get canonical workflow completion throughput.
+     *
+     * Throughput is completed workflow instances divided by the observation
+     * window from the first GENERATED root to the last canonical completion.
      */
     public double getWorkflowThroughput(int workflowBase) {
-        String sql = 
-            "SELECT COUNT(*) as tokenCount, " +
-            "       MAX(timestamp) - MIN(timestamp) as duration " +
-            "FROM CONSOLIDATED_TRANSITION_FIRINGS " +
-            "WHERE workflowBase = ? " +
-            "  AND transitionId LIKE 'T_out_%'";
-        
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setInt(1, workflowBase);
-            ResultSet rs = pstmt.executeQuery();
-            
-            if (rs.next()) {
-                int tokenCount = rs.getInt("tokenCount");
-                long duration = rs.getLong("duration");
-                
-                if (duration > 0) {
-                    double throughput = (tokenCount * 1000.0) / duration; // tokens per second
-                    logger.info("Workflow throughput: " + 
-                               String.format("%.2f", throughput) + " tokens/sec");
-                    return throughput;
-                }
+        CanonicalWorkflowAnalysis canonical = analyzeCanonicalWorkflows(workflowBase);
+        long firstGenerated = Long.MAX_VALUE;
+        long lastCompleted = Long.MIN_VALUE;
+        int timedCompletions = 0;
+
+        for (WorkflowInstanceSummary instance : canonical.instances.values()) {
+            if (instance.generatedAt > 0) {
+                firstGenerated = Math.min(firstGenerated, instance.generatedAt);
             }
-            
-        } catch (SQLException e) {
-            logger.error("Error calculating throughput", e);
+            if (instance.completedAt > 0) {
+                lastCompleted = Math.max(lastCompleted, instance.completedAt);
+                timedCompletions++;
+            }
         }
-        
+
+        if (timedCompletions > 0 && firstGenerated != Long.MAX_VALUE && lastCompleted > firstGenerated) {
+            long duration = lastCompleted - firstGenerated;
+            double throughput = (timedCompletions * 1000.0) / duration;
+            logger.info("Canonical workflow throughput: " +
+                        String.format("%.3f", throughput) + " workflows/sec");
+            return throughput;
+        }
+
         return 0.0;
     }
-    
+
+    // =============================================================================
+    // STAGE 2 - TEMPORAL ANALYSIS
+    // =============================================================================
+
+    /**
+     * Analyze temporal behaviour using the Stage-1 canonical workflow model.
+     *
+     * Workflow latency is GENERATED -> canonical completion.
+     * Place residence is ENTER -> EXIT/TERMINATE.
+     * Queue/service timing comes from SERVICECONTRIBUTION.
+     * Join synchronization is measured separately from place residence.
+     */
+    public TemporalAnalysis analyzeTemporal(int workflowBase) {
+        TemporalAnalysis analysis = new TemporalAnalysis();
+        analysis.workflowBase = workflowBase;
+
+        CanonicalWorkflowAnalysis canonical = analyzeCanonicalWorkflows(workflowBase);
+        analysis.expectedCompletedWorkflows = canonical.completedWorkflows;
+
+        ArrayList<Long> workflowLatencies = new ArrayList<>();
+        ArrayList<Long> generatedTimes = new ArrayList<>();
+        long firstGenerated = Long.MAX_VALUE;
+        long lastCompleted = Long.MIN_VALUE;
+
+        for (WorkflowInstanceSummary instance : canonical.instances.values()) {
+            if (instance.generatedAt > 0) {
+                generatedTimes.add(instance.generatedAt);
+                firstGenerated = Math.min(firstGenerated, instance.generatedAt);
+            }
+            if (instance.generatedAt > 0 && instance.completedAt > 0) {
+                workflowLatencies.add(instance.completedAt - instance.generatedAt);
+                lastCompleted = Math.max(lastCompleted, instance.completedAt);
+            }
+        }
+
+        analysis.workflowLatency = buildTimingDistribution(workflowLatencies);
+
+        Collections.sort(generatedTimes);
+        ArrayList<Long> generationInterArrivals = new ArrayList<>();
+        for (int i = 1; i < generatedTimes.size(); i++) {
+            generationInterArrivals.add(generatedTimes.get(i) - generatedTimes.get(i - 1));
+        }
+        analysis.generationInterArrival = buildTimingDistribution(generationInterArrivals);
+
+        if (analysis.workflowLatency.samples > 0 &&
+            firstGenerated != Long.MAX_VALUE &&
+            lastCompleted > firstGenerated) {
+            analysis.observationWindowMs = lastCompleted - firstGenerated;
+            analysis.completionThroughputPerSecond =
+                (analysis.workflowLatency.samples * 1000.0) / analysis.observationWindowMs;
+        }
+
+        Map<String, ArrayList<Long>> residenceByPlace = new TreeMap<>();
+        for (TokenPath tokenPath : getTokenPaths(workflowBase)) {
+            residenceByPlace
+                .computeIfAbsent(tokenPath.placeName, k -> new ArrayList<>())
+                .add(tokenPath.residenceTime);
+        }
+        for (Map.Entry<String, ArrayList<Long>> entry : residenceByPlace.entrySet()) {
+            analysis.placeResidence.put(entry.getKey(), buildTimingDistribution(entry.getValue()));
+        }
+
+        try (Connection conn = getConnection()) {
+            ArrayList<ServiceContribution> contributions = new ArrayList<>();
+            String timingSql =
+                "SELECT WORKFLOWBASE, SEQUENCEID, ARRIVALTIME, QUEUETIME, SERVICETIME, " +
+                "       TOTALTIME, BUFFERSIZE " +
+                "FROM SERVICECONTRIBUTION " +
+                "WHERE WORKFLOWBASE = ? " +
+                "ORDER BY ARRIVALTIME";
+            try (PreparedStatement pstmt = conn.prepareStatement(timingSql)) {
+                pstmt.setInt(1, workflowBase);
+                ResultSet rs = pstmt.executeQuery();
+                while (rs.next()) {
+                    ServiceContribution sc = new ServiceContribution();
+                    sc.workflowBase = rs.getLong("WORKFLOWBASE");
+                    sc.sequenceId = rs.getInt("SEQUENCEID");
+                    sc.arrivalTime = rs.getLong("ARRIVALTIME");
+                    sc.queueTime = rs.getLong("QUEUETIME");
+                    sc.serviceTime = rs.getLong("SERVICETIME");
+                    sc.totalTime = rs.getLong("TOTALTIME");
+                    sc.bufferSize = rs.getInt("BUFFERSIZE");
+                    contributions.add(sc);
+                }
+            }
+
+            correlatePlaceNames(conn, contributions);
+
+            Map<String, ArrayList<Long>> queueByPlace = new TreeMap<>();
+            Map<String, ArrayList<Long>> serviceByPlace = new TreeMap<>();
+            Map<String, ArrayList<Long>> totalByPlace = new TreeMap<>();
+
+            for (ServiceContribution sc : contributions) {
+                if (sc.placeName == null) {
+                    analysis.unmatchedServiceTimingSamples++;
+                    continue;
+                }
+                queueByPlace.computeIfAbsent(sc.placeName, k -> new ArrayList<>()).add(sc.queueTime);
+                serviceByPlace.computeIfAbsent(sc.placeName, k -> new ArrayList<>()).add(sc.serviceTime);
+                totalByPlace.computeIfAbsent(sc.placeName, k -> new ArrayList<>()).add(sc.totalTime);
+            }
+
+            Set<String> timedPlaces = new HashSet<>();
+            timedPlaces.addAll(queueByPlace.keySet());
+            timedPlaces.addAll(serviceByPlace.keySet());
+            timedPlaces.addAll(totalByPlace.keySet());
+
+            for (String place : timedPlaces) {
+                ServiceTimingSummary summary = new ServiceTimingSummary();
+                summary.placeName = place;
+                summary.queueTime = buildTimingDistribution(
+                    queueByPlace.getOrDefault(place, new ArrayList<Long>()));
+                summary.serviceTime = buildTimingDistribution(
+                    serviceByPlace.getOrDefault(place, new ArrayList<Long>()));
+                summary.totalTime = buildTimingDistribution(
+                    totalByPlace.getOrDefault(place, new ArrayList<Long>()));
+                analysis.serviceTiming.put(place, summary);
+            }
+
+            Map<Integer, Integer> parentByChild = new HashMap<>();
+            String genealogySql =
+                "SELECT DISTINCT parentTokenId, childTokenId " +
+                "FROM CONSOLIDATED_TOKEN_GENEALOGY " +
+                "WHERE workflowBase = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(genealogySql)) {
+                pstmt.setInt(1, workflowBase);
+                ResultSet rs = pstmt.executeQuery();
+                while (rs.next()) {
+                    parentByChild.put(rs.getInt("childTokenId"), rs.getInt("parentTokenId"));
+                }
+            }
+
+            Map<String, JoinTemporalAccumulator> joinGroups = new HashMap<>();
+            String joinSql =
+                "SELECT tokenId, transitionId, timestamp, toPlace, eventType " +
+                "FROM CONSOLIDATED_TRANSITION_FIRINGS " +
+                "WHERE workflowBase = ? " +
+                "  AND eventType IN ('BUFFERED', 'ENTER', 'JOIN_CONSUMED') " +
+                "ORDER BY timestamp";
+            try (PreparedStatement pstmt = conn.prepareStatement(joinSql)) {
+                pstmt.setInt(1, workflowBase);
+                ResultSet rs = pstmt.executeQuery();
+                while (rs.next()) {
+                    int tokenId = rs.getInt("tokenId");
+                    int root = resolveRootToken(tokenId, parentByChild);
+                    String transitionId = rs.getString("transitionId");
+                    String eventType = rs.getString("eventType");
+                    String key = root + "|" + transitionId;
+
+                    JoinTemporalAccumulator acc =
+                        joinGroups.computeIfAbsent(key, k -> new JoinTemporalAccumulator());
+                    acc.transitionId = transitionId;
+
+                    long timestamp = rs.getLong("timestamp");
+                    if ("BUFFERED".equals(eventType)) {
+                        acc.bufferedTokens.add(tokenId);
+                        acc.firstBuffered = Math.min(acc.firstBuffered, timestamp);
+                        acc.lastBuffered = Math.max(acc.lastBuffered, timestamp);
+                        String place = rs.getString("toPlace");
+                        if (place != null && !"JOIN_CONSUMED".equals(place)) {
+                            acc.placeName = place;
+                        }
+                    } else if ("ENTER".equals(eventType)) {
+                        if (acc.enterAt == 0 || timestamp < acc.enterAt) {
+                            acc.enterAt = timestamp;
+                        }
+                        String place = rs.getString("toPlace");
+                        if (place != null && !"JOIN_CONSUMED".equals(place)) {
+                            acc.placeName = place;
+                        }
+                    } else if ("JOIN_CONSUMED".equals(eventType)) {
+                        acc.consumedCount++;
+                    }
+                }
+            }
+
+            Map<String, ArrayList<Long>> waitByJoin = new TreeMap<>();
+            Map<String, ArrayList<Long>> skewByJoin = new TreeMap<>();
+            Map<String, String> placeByJoin = new HashMap<>();
+
+            for (JoinTemporalAccumulator acc : joinGroups.values()) {
+                if (acc.consumedCount == 0 ||
+                    acc.bufferedTokens.size() < 2 ||
+                    acc.firstBuffered == Long.MAX_VALUE ||
+                    acc.lastBuffered == Long.MIN_VALUE ||
+                    acc.enterAt == 0) {
+                    continue;
+                }
+
+                long wait = acc.enterAt - acc.firstBuffered;
+                long skew = acc.lastBuffered - acc.firstBuffered;
+                waitByJoin.computeIfAbsent(acc.transitionId, k -> new ArrayList<>()).add(wait);
+                skewByJoin.computeIfAbsent(acc.transitionId, k -> new ArrayList<>()).add(skew);
+                placeByJoin.put(acc.transitionId, acc.placeName);
+            }
+
+            for (String transitionId : waitByJoin.keySet()) {
+                JoinTimingSummary summary = new JoinTimingSummary();
+                summary.transitionId = transitionId;
+                summary.placeName = placeByJoin.get(transitionId);
+                summary.synchronizationWait = buildTimingDistribution(waitByJoin.get(transitionId));
+                summary.arrivalSkew = buildTimingDistribution(
+                    skewByJoin.getOrDefault(transitionId, new ArrayList<Long>()));
+                analysis.joinTiming.put(transitionId, summary);
+            }
+
+        } catch (SQLException e) {
+            logger.error("Error performing Stage-2 temporal analysis for workflowBase=" + workflowBase, e);
+        }
+
+        return analysis;
+    }
+
+    private TimingDistribution buildTimingDistribution(List<Long> values) {
+        TimingDistribution distribution = new TimingDistribution();
+        ArrayList<Long> valid = new ArrayList<>();
+
+        for (Long value : values) {
+            if (value == null || value < 0) {
+                distribution.invalidSamples++;
+            } else {
+                valid.add(value);
+            }
+        }
+
+        Collections.sort(valid);
+        distribution.samples = valid.size();
+        if (valid.isEmpty()) {
+            return distribution;
+        }
+
+        long total = 0;
+        for (long value : valid) {
+            total += value;
+        }
+
+        distribution.minMs = valid.get(0);
+        distribution.maxMs = valid.get(valid.size() - 1);
+        distribution.avgMs = (double) total / valid.size();
+        distribution.p50Ms = nearestRank(valid, 0.50);
+        distribution.p95Ms = nearestRank(valid, 0.95);
+        return distribution;
+    }
+
+    private long nearestRank(List<Long> sortedValues, double percentile) {
+        if (sortedValues.isEmpty()) {
+            return 0;
+        }
+        int rank = (int) Math.ceil(percentile * sortedValues.size());
+        int index = Math.max(0, Math.min(sortedValues.size() - 1, rank - 1));
+        return sortedValues.get(index);
+    }
+
+    public String generateTemporalReport(int workflowBase) {
+        TemporalAnalysis temporal = analyzeTemporal(workflowBase);
+        StringBuilder report = new StringBuilder();
+
+        report.append("=== STAGE 2 TEMPORAL ANALYSIS ===\n");
+        report.append("Workflow Base: ").append(workflowBase).append("\n\n");
+
+        report.append("1. END-TO-END WORKFLOW LATENCY\n");
+        report.append("   Canonical completed workflows: ")
+              .append(temporal.expectedCompletedWorkflows).append("\n");
+        report.append("   Timed completion samples:      ")
+              .append(temporal.workflowLatency.samples).append("\n");
+        if (temporal.workflowLatency.samples > 0) {
+            appendDistribution(report, "   Latency", temporal.workflowLatency);
+            report.append("   Observation window: ")
+                  .append(temporal.observationWindowMs).append("ms\n");
+            report.append("   Completion throughput: ")
+                  .append(String.format("%.3f", temporal.completionThroughputPerSecond))
+                  .append(" workflows/sec\n");
+        }
+        if (temporal.workflowLatency.samples != temporal.expectedCompletedWorkflows) {
+            report.append("   [WARN] Not every canonical completion has a usable completion timestamp\n");
+        }
+        report.append("\n");
+
+        report.append("2. WORKLOAD GENERATION\n");
+        appendDistribution(report, "   Root inter-arrival", temporal.generationInterArrival);
+        report.append("\n");
+
+        report.append("3. PLACE RESIDENCE DISTRIBUTIONS\n");
+        for (Map.Entry<String, TimingDistribution> entry : temporal.placeResidence.entrySet()) {
+            appendDistribution(report, "   " + entry.getKey(), entry.getValue());
+        }
+        report.append("\n");
+
+        report.append("4. SERVICE EXECUTION TIMING\n");
+        for (Map.Entry<String, ServiceTimingSummary> entry : temporal.serviceTiming.entrySet()) {
+            ServiceTimingSummary timing = entry.getValue();
+            report.append("   Place: ").append(entry.getKey()).append("\n");
+            appendDistribution(report, "     Queue", timing.queueTime);
+            appendDistribution(report, "     Service", timing.serviceTime);
+            appendDistribution(report, "     Total", timing.totalTime);
+        }
+        report.append("   Unmatched service timing samples: ")
+              .append(temporal.unmatchedServiceTimingSamples).append("\n\n");
+
+        report.append("5. JOIN SYNCHRONIZATION\n");
+        if (temporal.joinTiming.isEmpty()) {
+            report.append("   No completed joins observed\n");
+        } else {
+            for (JoinTimingSummary join : temporal.joinTiming.values()) {
+                report.append("   ").append(join.transitionId);
+                if (join.placeName != null) {
+                    report.append(" -> ").append(join.placeName);
+                }
+                report.append("\n");
+                appendDistribution(report, "     First-arrival to ENTER", join.synchronizationWait);
+                appendDistribution(report, "     Branch arrival skew", join.arrivalSkew);
+            }
+        }
+        report.append("\n");
+
+        int invalidSamples = temporal.workflowLatency.invalidSamples +
+                             temporal.generationInterArrival.invalidSamples;
+        for (TimingDistribution d : temporal.placeResidence.values()) {
+            invalidSamples += d.invalidSamples;
+        }
+        for (ServiceTimingSummary timing : temporal.serviceTiming.values()) {
+            invalidSamples += timing.queueTime.invalidSamples;
+            invalidSamples += timing.serviceTime.invalidSamples;
+            invalidSamples += timing.totalTime.invalidSamples;
+        }
+        for (JoinTimingSummary join : temporal.joinTiming.values()) {
+            invalidSamples += join.synchronizationWait.invalidSamples;
+            invalidSamples += join.arrivalSkew.invalidSamples;
+        }
+
+        report.append("6. TEMPORAL DATA QUALITY\n");
+        report.append("   Negative/invalid timing samples: ").append(invalidSamples).append("\n");
+        report.append("   Temporal result: ")
+              .append(invalidSamples == 0 &&
+                      temporal.workflowLatency.samples == temporal.expectedCompletedWorkflows &&
+                      temporal.unmatchedServiceTimingSamples == 0 ? "[OK]" : "[CHECK]")
+              .append("\n");
+        report.append("\n=== END STAGE 2 REPORT ===\n");
+
+        return report.toString();
+    }
+
+    private void appendDistribution(StringBuilder report, String label, TimingDistribution distribution) {
+        report.append(label)
+              .append(": n=").append(distribution.samples);
+        if (distribution.samples > 0) {
+            report.append(", avg=").append(String.format("%.1f", distribution.avgMs)).append("ms")
+                  .append(", p50=").append(distribution.p50Ms).append("ms")
+                  .append(", p95=").append(distribution.p95Ms).append("ms")
+                  .append(", min/max=").append(distribution.minMs)
+                  .append("/").append(distribution.maxMs).append("ms");
+        }
+        if (distribution.invalidSamples > 0) {
+            report.append(", invalid=").append(distribution.invalidSamples);
+        }
+        report.append("\n");
+    }
+
     // =============================================================================
     // MARKING ANALYSIS
     // =============================================================================
@@ -804,7 +1159,8 @@ public class PetriNetAnalyzer {
             "SELECT tokenId, timestamp, " +
             "       timestamp - LAG(timestamp, 1, timestamp) OVER (ORDER BY timestamp) as interArrival " +
             "FROM CONSOLIDATED_TRANSITION_FIRINGS " +
-            "WHERE transitionId = 'T_in_' || ? " +
+            "WHERE toPlace = ? " +
+            "  AND eventType = 'BUFFERED' " +
             "  AND workflowBase = ? " +
             "ORDER BY timestamp";
         
@@ -1908,7 +2264,10 @@ public class PetriNetAnalyzer {
                     WorkflowInstanceSummary instance = analysis.instances.get(root);
                     if (instance != null) {
                         instance.monitorAcknowledged = true;
-                        instance.completedAt = rs.getLong("arrivalTime");
+                        long completedAt = rs.getLong("arrivalTime");
+                        if (completedAt > 0 && (instance.completedAt == 0 || completedAt < instance.completedAt)) {
+                            instance.completedAt = completedAt;
+                        }
                         analysis.monitorAcknowledgedRoots.add(root);
                     }
                 }
@@ -1919,9 +2278,11 @@ public class PetriNetAnalyzer {
             // Explicit business TerminateNode paths are valid completion boundaries
             // for workflows such as invalid/declined branches.
             String terminateSql =
-                "SELECT DISTINCT tokenId FROM CONSOLIDATED_TRANSITION_FIRINGS " +
+                "SELECT tokenId, MIN(timestamp) AS terminatedAt " +
+                "FROM CONSOLIDATED_TRANSITION_FIRINGS " +
                 "WHERE workflowBase = ? " +
-                "  AND (eventType = 'TERMINATE' OR toPlace = 'TERMINATE')";
+                "  AND (eventType = 'TERMINATE' OR toPlace = 'TERMINATE') " +
+                "GROUP BY tokenId";
             try (PreparedStatement pstmt = conn.prepareStatement(terminateSql)) {
                 pstmt.setInt(1, workflowBase);
                 ResultSet rs = pstmt.executeQuery();
@@ -1930,6 +2291,10 @@ public class PetriNetAnalyzer {
                     WorkflowInstanceSummary instance = analysis.instances.get(root);
                     if (instance != null) {
                         instance.businessTerminated = true;
+                        long completedAt = rs.getLong("terminatedAt");
+                        if (completedAt > 0 && (instance.completedAt == 0 || completedAt < instance.completedAt)) {
+                            instance.completedAt = completedAt;
+                        }
                         analysis.businessTerminatedRoots.add(root);
                     }
                 }
@@ -2081,7 +2446,7 @@ public class PetriNetAnalyzer {
             report.append("   [WARN] ").append(negativePaths)
                   .append(" paths have negative residence time\n");
         }
-        report.append("   NOTE: timing distributions and workflow throughput are Stage-2 analysis.\n");
+        report.append("   NOTE: temporal distributions and canonical throughput are reported in Stage 2.\n");
         
         report.append("\n=== END REPORT ===\n");
         return report.toString();
@@ -2520,6 +2885,53 @@ public class PetriNetAnalyzer {
         public Map<String, Integer> placeExecutions = new TreeMap<>();
     }
     
+    public static class TimingDistribution {
+        public int samples;
+        public int invalidSamples;
+        public double avgMs;
+        public long p50Ms;
+        public long p95Ms;
+        public long minMs;
+        public long maxMs;
+    }
+
+    public static class ServiceTimingSummary {
+        public String placeName;
+        public TimingDistribution queueTime = new TimingDistribution();
+        public TimingDistribution serviceTime = new TimingDistribution();
+        public TimingDistribution totalTime = new TimingDistribution();
+    }
+
+    public static class JoinTimingSummary {
+        public String transitionId;
+        public String placeName;
+        public TimingDistribution synchronizationWait = new TimingDistribution();
+        public TimingDistribution arrivalSkew = new TimingDistribution();
+    }
+
+    public static class TemporalAnalysis {
+        public int workflowBase;
+        public int expectedCompletedWorkflows;
+        public long observationWindowMs;
+        public double completionThroughputPerSecond;
+        public int unmatchedServiceTimingSamples;
+        public TimingDistribution workflowLatency = new TimingDistribution();
+        public TimingDistribution generationInterArrival = new TimingDistribution();
+        public Map<String, TimingDistribution> placeResidence = new TreeMap<>();
+        public Map<String, ServiceTimingSummary> serviceTiming = new TreeMap<>();
+        public Map<String, JoinTimingSummary> joinTiming = new TreeMap<>();
+    }
+
+    private static class JoinTemporalAccumulator {
+        public String transitionId;
+        public String placeName;
+        public long firstBuffered = Long.MAX_VALUE;
+        public long lastBuffered = Long.MIN_VALUE;
+        public long enterAt;
+        public int consumedCount;
+        public Set<Integer> bufferedTokens = new HashSet<>();
+    }
+
     public static class TokenPath {
         public int tokenId;
         public String placeName;
@@ -2687,6 +3099,7 @@ public class PetriNetAnalyzer {
             // Print full report (now includes fork/join analysis)
             analyzer.printWorkflowReport(workflowBase);
             analyzer.printGenealogyReport(workflowBase);
+            System.out.println("\n" + analyzer.generateTemporalReport(workflowBase));
             
             // Get detailed token paths
             System.out.println("\n=== TOKEN PATHS ===");
