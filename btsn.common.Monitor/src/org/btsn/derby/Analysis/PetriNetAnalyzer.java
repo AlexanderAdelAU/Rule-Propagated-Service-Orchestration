@@ -1234,10 +1234,10 @@ public class PetriNetAnalyzer {
      * - v002 (workflowBase 2000000) = Low priority
      * - Higher priority tokens should have lower queue times when competing
      * 
-     * IMPORTANT: Forked tokens (join participants) are tracked separately because
-     * join completion semantics override priority - when a sibling arrives to
-     * complete a join, it gets fast-tracked regardless of priority. This is
-     * correct workflow behavior, not a priority violation.
+     * Fork-derived tokens are tracked separately for genealogy, but a fork-derived
+     * token that actually executes a business service is still a real queue sample.
+     * Stage-3 shared-service analysis therefore includes every logical service
+     * execution and scopes comparisons to the same physical place.
      * 
      * @return PriorityAnalysis containing cross-version comparison results
      */
@@ -1334,15 +1334,23 @@ public class PetriNetAnalyzer {
             // =========================================================================
             correlatePlaceNames(conn, allContributions);
             
-            // Build shared places map: place -> set of version numbers
+            // Build shared physical-place map and retain the logical input transition
+            // used by each version. Different transition IDs at the same physical place
+            // are direct evidence that one service process is playing different roles.
             for (ServiceContribution sc : allContributions) {
                 if (sc.placeName != null) {
                     analysis.placeToVersions
                         .computeIfAbsent(sc.placeName, k -> new HashSet<>())
                         .add(sc.versionNumber);
+                    if (sc.transitionId != null) {
+                        analysis.placeToVersionTransitions
+                            .computeIfAbsent(sc.placeName, k -> new HashMap<>())
+                            .computeIfAbsent(sc.versionNumber, k -> new HashSet<>())
+                            .add(sc.transitionId);
+                    }
                 }
             }
-            // Shared places = those with tokens from 2+ versions
+            // Shared places = physical services with traffic from 2+ versions.
             for (Map.Entry<String, Set<Integer>> entry : analysis.placeToVersions.entrySet()) {
                 if (entry.getValue().size() > 1) {
                     analysis.sharedPlaces.add(entry.getKey());
@@ -1351,27 +1359,27 @@ public class PetriNetAnalyzer {
             
             logger.info("Shared services (cross-version): " + analysis.sharedPlaces);
             
-            // Filter to root tokens at shared services only
-            ArrayList<ServiceContribution> sharedServiceRootContributions = new ArrayList<>();
-            for (ServiceContribution sc : rootTokenContributions) {
+            // Every logical service execution at a shared physical place is relevant.
+            // Do not discard fork-derived survivors: P2/P4/P5 executions remain real
+            // queue consumers even though their physical token IDs descend from a fork.
+            ArrayList<ServiceContribution> sharedServiceContributions = new ArrayList<>();
+            for (ServiceContribution sc : allContributions) {
                 if (sc.placeName != null && analysis.sharedPlaces.contains(sc.placeName)) {
-                    sharedServiceRootContributions.add(sc);
+                    sharedServiceContributions.add(sc);
                 }
             }
+            analysis.sharedServiceSamples = sharedServiceContributions.size();
             
-            // Find contention points - all tokens and root tokens separately (legacy)
+            // Legacy analyses are retained for comparison only.
             findContentionPoints(allContributions, analysis);
             findRootTokenContentionPoints(rootTokenContributions, analysis);
             
-            // NEW: Find contention points scoped to shared services
-            findSharedServiceContentionPoints(sharedServiceRootContributions, analysis);
+            // Stage 3 primary metric: simultaneous waiting at the SAME physical service.
+            findSharedServiceContentionPoints(sharedServiceContributions, analysis);
             
-            // Detect priority inversions - all tokens and root tokens separately (legacy)
             detectPriorityInversions(allContributions, analysis);
             detectRootTokenPriorityInversions(rootTokenContributions, analysis);
-            
-            // NEW: Detect inversions scoped to shared services
-            detectSharedServicePriorityInversions(sharedServiceRootContributions, analysis);
+            detectSharedServicePriorityInversions(analysis);
             
             // Calculate priority effectiveness
             calculatePriorityEffectiveness(analysis);
@@ -1410,12 +1418,13 @@ public class PetriNetAnalyzer {
         // the nearest earlier T_in event can attach later samples to an earlier
         // place. Order pairing preserves the token's actual execution sequence.
         String sql =
-            "SELECT DISTINCT workflowBase, tokenId, timestamp, toPlace " +
+            "SELECT DISTINCT workflowBase, tokenId, timestamp, toPlace, transitionId " +
             "FROM CONSOLIDATED_TRANSITION_FIRINGS " +
             "WHERE eventType = 'ENTER' " +
             "ORDER BY workflowBase, tokenId, timestamp";
         
         Map<String, ArrayList<String>> placeIndex = new HashMap<>();
+        Map<String, ArrayList<String>> transitionIndex = new HashMap<>();
         
         try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -1425,6 +1434,8 @@ public class PetriNetAnalyzer {
                 String key = wb + ":" + tokenId;
                 placeIndex.computeIfAbsent(key, k -> new ArrayList<>())
                           .add(rs.getString("toPlace"));
+                transitionIndex.computeIfAbsent(key, k -> new ArrayList<>())
+                               .add(rs.getString("transitionId"));
             }
         }
         
@@ -1441,6 +1452,7 @@ public class PetriNetAnalyzer {
             ArrayList<ServiceContribution> tokenContributions = entry.getValue();
             tokenContributions.sort((a, b) -> Long.compare(a.arrivalTime, b.arrivalTime));
             ArrayList<String> places = placeIndex.get(entry.getKey());
+            ArrayList<String> transitions = transitionIndex.get(entry.getKey());
             
             if (places == null || places.isEmpty()) {
                 unmatched += tokenContributions.size();
@@ -1449,7 +1461,11 @@ public class PetriNetAnalyzer {
             
             int pairCount = Math.min(tokenContributions.size(), places.size());
             for (int i = 0; i < pairCount; i++) {
-                tokenContributions.get(i).placeName = places.get(i);
+                ServiceContribution contribution = tokenContributions.get(i);
+                contribution.placeName = places.get(i);
+                if (transitions != null && i < transitions.size()) {
+                    contribution.transitionId = transitions.get(i);
+                }
                 matched++;
             }
             unmatched += tokenContributions.size() - pairCount;
@@ -1655,36 +1671,39 @@ public class PetriNetAnalyzer {
      * This eliminates false positives where v001 is at RadiologyService and v002
      * is at TriageService - they never actually compete in the same queue.
      */
-    private void findSharedServiceContentionPoints(ArrayList<ServiceContribution> sharedServiceRootContributions, PriorityAnalysis analysis) {
-        long WINDOW_MS = 1000;
-        
-        for (int i = 0; i < sharedServiceRootContributions.size(); i++) {
-            ServiceContribution sc1 = sharedServiceRootContributions.get(i);
+    private void findSharedServiceContentionPoints(ArrayList<ServiceContribution> sharedServiceContributions, PriorityAnalysis analysis) {
+        for (int i = 0; i < sharedServiceContributions.size(); i++) {
+            ServiceContribution sc1 = sharedServiceContributions.get(i);
             
-            for (int j = i + 1; j < sharedServiceRootContributions.size(); j++) {
-                ServiceContribution sc2 = sharedServiceRootContributions.get(j);
+            for (int j = i + 1; j < sharedServiceContributions.size(); j++) {
+                ServiceContribution sc2 = sharedServiceContributions.get(j);
                 
-                // Stop if we're past the time window
-                if (sc2.arrivalTime - sc1.arrivalTime > WINDOW_MS) {
-                    break;
+                if (sc1.versionNumber == sc2.versionNumber ||
+                    sc1.placeName == null || !sc1.placeName.equals(sc2.placeName)) {
+                    continue;
                 }
                 
-                // CRITICAL: Only compare tokens at the SAME place AND different versions
-                if (sc1.versionNumber != sc2.versionNumber && 
-                    sc1.placeName != null && sc1.placeName.equals(sc2.placeName) &&
-                    (sc1.bufferSize > 0 || sc2.bufferSize > 0)) {
-                    
+                ServiceContribution high = sc1.versionNumber < sc2.versionNumber ? sc1 : sc2;
+                ServiceContribution low = sc1.versionNumber < sc2.versionNumber ? sc2 : sc1;
+                long highStart = high.arrivalTime + high.queueTime;
+                long lowStart = low.arrivalTime + low.queueTime;
+                long laterArrival = Math.max(high.arrivalTime, low.arrivalTime);
+                long firstServiceStart = Math.min(highStart, lowStart);
+                
+                // A real scheduling contention point exists only when BOTH tokens
+                // had arrived before either one began service. At that instant the
+                // shared queue had a choice between versions.
+                if (laterArrival <= firstServiceStart) {
                     ContentionPoint cp = new ContentionPoint();
-                    cp.timestamp = sc1.arrivalTime;
-                    cp.highPriorityToken = (sc1.versionNumber < sc2.versionNumber) ? sc1 : sc2;
-                    cp.lowPriorityToken = (sc1.versionNumber < sc2.versionNumber) ? sc2 : sc1;
-                    cp.timeDelta = Math.abs(sc2.arrivalTime - sc1.arrivalTime);
-                    cp.highPriorityQueueTime = cp.highPriorityToken.queueTime;
-                    cp.lowPriorityQueueTime = cp.lowPriorityToken.queueTime;
-                    cp.priorityRespected = cp.highPriorityQueueTime <= cp.lowPriorityQueueTime;
-                    cp.involvesForkedToken = false;
-                    cp.sharedPlace = sc1.placeName;
-                    
+                    cp.timestamp = laterArrival;
+                    cp.highPriorityToken = high;
+                    cp.lowPriorityToken = low;
+                    cp.timeDelta = Math.abs(high.arrivalTime - low.arrivalTime);
+                    cp.highPriorityQueueTime = high.queueTime;
+                    cp.lowPriorityQueueTime = low.queueTime;
+                    cp.priorityRespected = highStart <= lowStart;
+                    cp.involvesForkedToken = high.isForkedToken || low.isForkedToken;
+                    cp.sharedPlace = high.placeName;
                     analysis.sharedServiceContentionPoints.add(cp);
                 }
             }
@@ -1692,35 +1711,21 @@ public class PetriNetAnalyzer {
     }
     
     /**
-     * Detect priority inversions scoped to SHARED SERVICES only.
-     * Only flags inversions where tokens from different versions were at the SAME place.
+     * Detect priority inversions only among proven same-queue contention points.
      */
-    private void detectSharedServicePriorityInversions(ArrayList<ServiceContribution> sharedServiceRootContributions, PriorityAnalysis analysis) {
-        ArrayList<ServiceContribution> byCompletion = new ArrayList<>(sharedServiceRootContributions);
-        byCompletion.sort((a, b) -> Long.compare(a.arrivalTime + a.totalTime, b.arrivalTime + b.totalTime));
-        
-        for (int i = 0; i < byCompletion.size(); i++) {
-            ServiceContribution completed = byCompletion.get(i);
-            long completionTime = completed.arrivalTime + completed.totalTime;
-            
-            for (ServiceContribution other : sharedServiceRootContributions) {
-                if (other == completed) continue;
-                
-                // CRITICAL: Same place + different version + temporal overlap
-                if (other.versionNumber < completed.versionNumber &&
-                    other.placeName != null && other.placeName.equals(completed.placeName) &&
-                    other.arrivalTime < completionTime &&
-                    (other.arrivalTime + other.totalTime) > completionTime) {
-                    
-                    PriorityInversion inv = new PriorityInversion();
-                    inv.highPriorityToken = other;
-                    inv.lowPriorityToken = completed;
-                    inv.inversionTime = completionTime - other.arrivalTime;
-                    inv.involvesForkedToken = false;
-                    
-                    analysis.sharedServiceInversions.add(inv);
-                }
+    private void detectSharedServicePriorityInversions(PriorityAnalysis analysis) {
+        for (ContentionPoint cp : analysis.sharedServiceContentionPoints) {
+            if (cp.priorityRespected) {
+                continue;
             }
+            PriorityInversion inv = new PriorityInversion();
+            inv.highPriorityToken = cp.highPriorityToken;
+            inv.lowPriorityToken = cp.lowPriorityToken;
+            long highStart = cp.highPriorityToken.arrivalTime + cp.highPriorityToken.queueTime;
+            long lowStart = cp.lowPriorityToken.arrivalTime + cp.lowPriorityToken.queueTime;
+            inv.inversionTime = Math.max(0, highStart - lowStart);
+            inv.involvesForkedToken = cp.involvesForkedToken;
+            analysis.sharedServiceInversions.add(inv);
         }
     }
     
@@ -1753,15 +1758,15 @@ public class PetriNetAnalyzer {
         PriorityAnalysis analysis = analyzePriority();
         StringBuilder report = new StringBuilder();
         
-        report.append("\n=== PRIORITY ANALYSIS REPORT ===\n\n");
+        report.append("\n=== STAGE 3 SHARED-SERVICE CONCURRENCY ANALYSIS ===\n\n");
         
         // 1. Sample breakdown
-        report.append("1. SAMPLE BREAKDOWN\n");
-        report.append("   Total samples: ").append(analysis.totalSamples).append("\n");
-        report.append("   Root tokens: ").append(analysis.rootTokenSamples)
-              .append(" (used for priority analysis)\n");
-        report.append("   Forked tokens: ").append(analysis.forkedTokenSamples)
-              .append(" (join participants - excluded from priority analysis)\n\n");
+        report.append("1. SERVICE EXECUTION SAMPLE BREAKDOWN\n");
+        report.append("   Total logical service executions: ").append(analysis.totalSamples).append("\n");
+        report.append("   Root-token executions:            ").append(analysis.rootTokenSamples).append("\n");
+        report.append("   Fork-derived executions:          ").append(analysis.forkedTokenSamples).append("\n");
+        report.append("   Shared-service executions:        ").append(analysis.sharedServiceSamples).append("\n");
+        report.append("   NOTE: fork-derived executions are included when they consume a shared service.\n\n");
         
         // 2. Shared services discovery
         report.append("2. SHARED SERVICES (Cross-Version Traffic)\n");
@@ -1778,6 +1783,15 @@ public class PetriNetAnalyzer {
                     versionList.append("v").append(String.format("%03d", v));
                 }
                 report.append("     ").append(place).append(": ").append(versionList).append("\n");
+                Map<Integer, Set<String>> roleMap = analysis.placeToVersionTransitions.get(place);
+                if (roleMap != null) {
+                    List<Integer> roleVersions = new ArrayList<>(roleMap.keySet());
+                    roleVersions.sort(Integer::compareTo);
+                    for (int version : roleVersions) {
+                        report.append("       v").append(String.format("%03d", version))
+                              .append(" logical T_in roles: ").append(roleMap.get(version)).append("\n");
+                    }
+                }
             }
             
             // Also show exclusive services for context
@@ -1792,16 +1806,16 @@ public class PetriNetAnalyzer {
         }
         report.append("\n");
         
-        // 3. Per-version statistics (root tokens only)
-        report.append("3. VERSION STATISTICS (Root Tokens Only)\n");
+        // 3. Per-version statistics across all logical service executions
+        report.append("3. VERSION STATISTICS (All Logical Service Executions)\n");
         report.append(String.format("   %-8s %-10s %-12s %-12s %-12s %-12s\n", 
             "Version", "Tokens", "Avg Queue", "Min Queue", "Max Queue", "Avg Service"));
         report.append("   " + "-".repeat(70) + "\n");
         
-        List<Integer> sortedVersions = new ArrayList<>(analysis.rootTokenStats.keySet());
+        List<Integer> sortedVersions = new ArrayList<>(analysis.versionStats.keySet());
         sortedVersions.sort(Integer::compareTo);
         for (int version : sortedVersions) {
-            VersionStats stats = analysis.rootTokenStats.get(version);
+            VersionStats stats = analysis.versionStats.get(version);
             report.append(String.format("   v%03d     %-10d %-12.1f %-12d %-12d %-12.1f\n",
                 version, stats.tokenCount, stats.avgQueueTime, 
                 stats.minQueueTime == Long.MAX_VALUE ? 0 : stats.minQueueTime, 
@@ -1810,7 +1824,7 @@ public class PetriNetAnalyzer {
         report.append("\n");
         
         // 4. SHARED SERVICE CONTENTION (primary metric)
-        report.append("4. SHARED SERVICE CONTENTION (Primary - Same Queue Only)\n");
+        report.append("4. SHARED SERVICE CONTENTION (Both Versions Waiting Before Service Start)\n");
         report.append("   Total contention points: ").append(analysis.sharedServiceContentionPoints.size()).append("\n");
         
         if (!analysis.sharedServiceContentionPoints.isEmpty()) {
@@ -1842,10 +1856,12 @@ public class PetriNetAnalyzer {
                         }
                         break;
                     }
-                    report.append(String.format("     v%03d (seq=%d, queue=%dms) vs v%03d (seq=%d, queue=%dms) %s\n",
-                        cp.highPriorityToken.versionNumber, cp.highPriorityToken.sequenceId, cp.highPriorityQueueTime,
-                        cp.lowPriorityToken.versionNumber, cp.lowPriorityToken.sequenceId, cp.lowPriorityQueueTime,
-                        cp.priorityRespected ? "[OK]" : "[INVERSION]"));
+                    long highStart = cp.highPriorityToken.arrivalTime + cp.highPriorityToken.queueTime;
+                    long lowStart = cp.lowPriorityToken.arrivalTime + cp.lowPriorityToken.queueTime;
+                    report.append(String.format("     v%03d (seq=%d, queue=%dms, start=%d) vs v%03d (seq=%d, queue=%dms, start=%d) %s\n",
+                        cp.highPriorityToken.versionNumber, cp.highPriorityToken.sequenceId, cp.highPriorityQueueTime, highStart,
+                        cp.lowPriorityToken.versionNumber, cp.lowPriorityToken.sequenceId, cp.lowPriorityQueueTime, lowStart,
+                        cp.priorityRespected ? "[ORDER RESPECTED]" : "[ORDER INVERSION]"));
                 }
             }
         } else if (!analysis.sharedPlaces.isEmpty()) {
@@ -1867,7 +1883,7 @@ public class PetriNetAnalyzer {
                     report.append("   ... and ").append(analysis.sharedServiceInversions.size() - 5).append(" more\n");
                     break;
                 }
-                report.append(String.format("   - [%s] v%03d token %d waited while v%03d token %d completed (inversion: %dms)\n",
+                report.append(String.format("   - [%s] v%03d token %d was already waiting when v%03d token %d started first (start-order inversion: %dms)\n",
                     inv.highPriorityToken.placeName,
                     inv.highPriorityToken.versionNumber, inv.highPriorityToken.sequenceId,
                     inv.lowPriorityToken.versionNumber, inv.lowPriorityToken.sequenceId,
@@ -1889,12 +1905,12 @@ public class PetriNetAnalyzer {
         report.append("   Inversions: ").append(analysis.rootTokenInversions.size()).append("\n");
         report.append("\n");
         
-        // 7. Join completions (informational)
-        report.append("7. JOIN COMPLETIONS (Excluded from Priority Analysis)\n");
-        report.append("   Forked tokens processed: ").append(analysis.joinCompletions.size()).append("\n");
+        // 7. Fork-derived service executions (informational)
+        report.append("7. FORK-DERIVED SERVICE EXECUTIONS\n");
+        report.append("   Fork-derived execution samples: ").append(analysis.joinCompletions.size()).append("\n");
         if (!analysis.joinCompletions.isEmpty()) {
-            report.append("   Note: Join participants are fast-tracked when siblings arrive.\n");
-            report.append("         This is correct workflow semantics, not a priority violation.\n");
+            report.append("   These are real business-service executions by descendant tokens.\n");
+            report.append("   They remain eligible for same-queue Stage-3 contention analysis.\n");
             
             // Show breakdown by version
             Map<Integer, Long> joinsByVersion = new HashMap<>();
@@ -1912,25 +1928,27 @@ public class PetriNetAnalyzer {
         }
         report.append("\n");
         
-        // 8. Verdict (based on shared service analysis - the accurate metric)
-        report.append("8. PRIORITY VERDICT (Based on Shared Service Analysis)\n");
+        // 8. Stage-3 evidence summary
+        report.append("8. STAGE 3 EVIDENCE SUMMARY\n");
         if (analysis.sharedPlaces.isEmpty()) {
-            report.append("   [INFO] No shared services - priority cannot be evaluated\n");
-            report.append("   Each version uses exclusive services with no queue contention\n");
+            report.append("   Shared-service concurrency: [NOT OBSERVED] no physical service saw multiple versions\n");
         } else if (analysis.sharedServiceContentionPoints.isEmpty()) {
-            report.append("   [INFO] No contention detected at shared services - priority not testable\n");
-        } else if (analysis.sharedServiceEffectiveness >= 0.9) {
-            report.append("   [PASS] Priority scheduling is working effectively (")
-                  .append(String.format("%.1f%%", analysis.sharedServiceEffectiveness * 100)).append(")\n");
-        } else if (analysis.sharedServiceEffectiveness >= 0.7) {
-            report.append("   [WARN] Priority scheduling is partially effective (")
-                  .append(String.format("%.1f%%", analysis.sharedServiceEffectiveness * 100)).append(")\n");
+            report.append("   Shared-service concurrency: [PARTIAL] shared services exist, but no simultaneous queue choice was observed\n");
         } else {
-            report.append("   [FAIL] Priority scheduling is not working as expected (")
-                  .append(String.format("%.1f%%", analysis.sharedServiceEffectiveness * 100)).append(")\n");
+            long respected = analysis.sharedServiceContentionPoints.stream()
+                .filter(cp -> cp.priorityRespected).count();
+            report.append("   Shared-service concurrency: [OBSERVED]\n");
+            report.append("   Shared physical services: ").append(analysis.sharedPlaces.size()).append("\n");
+            report.append("   Proven same-queue contention decisions: ")
+                  .append(analysis.sharedServiceContentionPoints.size()).append("\n");
+            report.append("   Lower-version start order respected: ")
+                  .append(respected).append("/").append(analysis.sharedServiceContentionPoints.size())
+                  .append(" (").append(String.format("%.1f%%", analysis.sharedServiceEffectiveness * 100)).append(")\n");
+            report.append("   Start-order inversions observed: ")
+                  .append(analysis.sharedServiceInversions.size()).append("\n");
         }
         
-        report.append("\n=== END PRIORITY REPORT ===\n");
+        report.append("\n=== END STAGE 3 REPORT ===\n");
         
         return report.toString();
     }
@@ -1955,14 +1973,15 @@ public class PetriNetAnalyzer {
         public long workflowBase;
         public int sequenceId;
         public String serviceName;
-        public String placeName;  // Actual Petri net service/place (e.g., RadiologyService)
+        public String placeName;  // Actual physical Petri-net service/place
+        public String transitionId;  // Logical T_in role used by this workflow at the place
         public long arrivalTime;
         public long queueTime;
         public long serviceTime;
         public long totalTime;
         public int bufferSize;
         public int versionNumber;  // Derived from serviceName
-        public boolean isForkedToken;  // True if this is a fork child (join participant)
+        public boolean isForkedToken;  // True if this executing token descends from a fork
         public int joinCount;  // Fork join count (2 = 2-way fork, etc.)
         public int branchNumber;  // Branch within the fork (1, 2, etc.)
     }
@@ -2030,8 +2049,10 @@ public class PetriNetAnalyzer {
         public double rootTokenQueueTimeAdvantage = 0;
         
         // Shared service analysis (scoped to services with cross-version traffic)
-        public Set<String> sharedPlaces = new HashSet<>();  // Places with tokens from 2+ versions
+        public Set<String> sharedPlaces = new HashSet<>();  // Physical places with traffic from 2+ versions
         public Map<String, Set<Integer>> placeToVersions = new HashMap<>();  // Place -> set of versions
+        public Map<String, Map<Integer, Set<String>>> placeToVersionTransitions = new HashMap<>();
+        public int sharedServiceSamples = 0;
         public ArrayList<ContentionPoint> sharedServiceContentionPoints = new ArrayList<>();
         public ArrayList<PriorityInversion> sharedServiceInversions = new ArrayList<>();
         public double sharedServiceEffectiveness = 0;
