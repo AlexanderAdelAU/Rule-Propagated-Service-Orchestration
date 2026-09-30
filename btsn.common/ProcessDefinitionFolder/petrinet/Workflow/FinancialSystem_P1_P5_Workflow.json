@@ -270,6 +270,56 @@
       "height": 60,
       "label": "T_out_Decision",
       "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_Monitor",
+      "type": "TRANSITION",
+      "x": 1010,
+      "y": 390,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Monitor",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "Monitor",
+      "type": "PLACE",
+      "x": 1070,
+      "y": 395,
+      "width": 50,
+      "height": 50,
+      "label": "Monitor",
+      "service": "MonitorService",
+      "operations": [
+        {
+          "name": "acknowledgeTokenArrival",
+          "arguments": [
+            {
+              "name": "decisionResults",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_Monitor",
+      "type": "TRANSITION",
+      "x": 1160,
+      "y": 390,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Monitor",
+      "rotation": 0,
       "node_type": "TerminateNode",
       "node_value": "TERMINATE_NODE",
       "transition_type": "T_out"
@@ -453,6 +503,30 @@
       "guardCondition": "",
       "decision_value": "",
       "endpoint": ""
+    },
+    {
+      "source": "T_out_Decision",
+      "target": "T_in_Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "acknowledgeTokenArrival"
+    },
+    {
+      "source": "T_in_Monitor",
+      "target": "Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Monitor",
+      "target": "T_out_Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
     }
   ],
   "textElements": [
@@ -518,6 +592,14 @@
       "text": "Declined applications terminated",
       "fontSize": 10,
       "fontStyle": 2,
+      "color": -16777216
+    },
+    {
+      "x": 1030,
+      "y": 365,
+      "text": "Workflow Monitor",
+      "fontSize": 10,
+      "fontStyle": 0,
       "color": -16777216
     }
   ]
