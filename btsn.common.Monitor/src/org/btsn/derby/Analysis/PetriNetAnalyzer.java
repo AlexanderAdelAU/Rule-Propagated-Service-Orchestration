@@ -683,6 +683,7 @@ public class PetriNetAnalyzer {
 
         CanonicalWorkflowAnalysis canonical = analyzeCanonicalWorkflows(workflowBase);
         analysis.expectedCompletedWorkflows = canonical.completedWorkflows;
+        analysis.expectedPlaceExecutions.putAll(canonical.placeExecutions);
 
         ArrayList<Long> workflowLatencies = new ArrayList<>();
         ArrayList<Long> generatedTimes = new ArrayList<>();
@@ -782,6 +783,21 @@ public class PetriNetAnalyzer {
                 summary.totalTime = buildTimingDistribution(
                     totalByPlace.getOrDefault(place, new ArrayList<Long>()));
                 analysis.serviceTiming.put(place, summary);
+            }
+
+            // Every logical ENTER should contribute exactly one service timing row.
+            // Treat any per-place count mismatch as a Stage-2 data-quality failure.
+            for (Map.Entry<String, Integer> expected : canonical.placeExecutions.entrySet()) {
+                ServiceTimingSummary summary = analysis.serviceTiming.get(expected.getKey());
+                int actual = summary == null ? 0 : summary.totalTime.samples;
+                if (actual != expected.getValue()) {
+                    analysis.serviceTimingCountMismatches++;
+                }
+            }
+            for (String timedPlace : analysis.serviceTiming.keySet()) {
+                if (!canonical.placeExecutions.containsKey(timedPlace)) {
+                    analysis.serviceTimingCountMismatches++;
+                }
             }
 
             Map<Integer, Integer> parentByChild = new HashMap<>();
@@ -960,9 +976,17 @@ public class PetriNetAnalyzer {
             appendDistribution(report, "     Queue", timing.queueTime);
             appendDistribution(report, "     Service", timing.serviceTime);
             appendDistribution(report, "     Total", timing.totalTime);
+            int expectedExecutions = temporal.expectedPlaceExecutions.getOrDefault(entry.getKey(), 0);
+            if (timing.totalTime.samples != expectedExecutions) {
+                report.append("     [WARN] timing samples=")
+                      .append(timing.totalTime.samples)
+                      .append(", logical executions=").append(expectedExecutions).append("\n");
+            }
         }
         report.append("   Unmatched service timing samples: ")
-              .append(temporal.unmatchedServiceTimingSamples).append("\n\n");
+              .append(temporal.unmatchedServiceTimingSamples).append("\n");
+        report.append("   Service timing/place-count mismatches: ")
+              .append(temporal.serviceTimingCountMismatches).append("\n\n");
 
         report.append("5. JOIN SYNCHRONIZATION\n");
         if (temporal.joinTiming.isEmpty()) {
@@ -1000,7 +1024,8 @@ public class PetriNetAnalyzer {
         report.append("   Temporal result: ")
               .append(invalidSamples == 0 &&
                       temporal.workflowLatency.samples == temporal.expectedCompletedWorkflows &&
-                      temporal.unmatchedServiceTimingSamples == 0 ? "[OK]" : "[CHECK]")
+                      temporal.unmatchedServiceTimingSamples == 0 &&
+                      temporal.serviceTimingCountMismatches == 0 ? "[OK]" : "[CHECK]")
               .append("\n");
         report.append("\n=== END STAGE 2 REPORT ===\n");
 
@@ -1376,67 +1401,62 @@ public class PetriNetAnalyzer {
      * the token was queued at when the SERVICECONTRIBUTION was recorded.
      */
     private void correlatePlaceNames(Connection conn, ArrayList<ServiceContribution> contributions) throws SQLException {
-        // Build lookup: (workflowBase, tokenId) -> sorted list of (timestamp, placeName)
-        // from T_in entries in CONSOLIDATED_TRANSITION_FIRINGS
-        String sql = 
-            "SELECT workflowBase, tokenId, timestamp, toPlace " +
+        // SERVICECONTRIBUTION stores workflow version in serviceName, not the
+        // physical place name. Reconstruct place identity by pairing each token's
+        // timing samples with its logical ENTER visits in execution order.
+        //
+        // This is intentionally one-to-one. A surviving fork token may visit
+        // several places (for example P2 -> P4 -> P5), so independently choosing
+        // the nearest earlier T_in event can attach later samples to an earlier
+        // place. Order pairing preserves the token's actual execution sequence.
+        String sql =
+            "SELECT DISTINCT workflowBase, tokenId, timestamp, toPlace " +
             "FROM CONSOLIDATED_TRANSITION_FIRINGS " +
-            "WHERE transitionId LIKE 'T_in_%' " +
+            "WHERE eventType = 'ENTER' " +
             "ORDER BY workflowBase, tokenId, timestamp";
         
-        // Key: "workflowBase:tokenId" -> list of (timestamp, placeName) pairs sorted by time
-        Map<String, ArrayList<long[]>> timestampIndex = new HashMap<>();
         Map<String, ArrayList<String>> placeIndex = new HashMap<>();
         
         try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
-            
             while (rs.next()) {
                 long wb = rs.getLong("workflowBase");
                 int tokenId = rs.getInt("tokenId");
-                long ts = rs.getLong("timestamp");
-                String place = rs.getString("toPlace");
-                
                 String key = wb + ":" + tokenId;
-                timestampIndex.computeIfAbsent(key, k -> new ArrayList<>()).add(new long[]{ts});
-                placeIndex.computeIfAbsent(key, k -> new ArrayList<>()).add(place);
+                placeIndex.computeIfAbsent(key, k -> new ArrayList<>())
+                          .add(rs.getString("toPlace"));
             }
         }
         
-        // For each ServiceContribution, find the closest T_in entry at or before arrivalTime
+        Map<String, ArrayList<ServiceContribution>> contributionIndex = new HashMap<>();
+        for (ServiceContribution sc : contributions) {
+            String key = sc.workflowBase + ":" + sc.sequenceId;
+            contributionIndex.computeIfAbsent(key, k -> new ArrayList<>()).add(sc);
+        }
+        
         int matched = 0;
         int unmatched = 0;
         
-        for (ServiceContribution sc : contributions) {
-            String key = sc.workflowBase + ":" + sc.sequenceId;
-            ArrayList<long[]> timestamps = timestampIndex.get(key);
-            ArrayList<String> places = placeIndex.get(key);
+        for (Map.Entry<String, ArrayList<ServiceContribution>> entry : contributionIndex.entrySet()) {
+            ArrayList<ServiceContribution> tokenContributions = entry.getValue();
+            tokenContributions.sort((a, b) -> Long.compare(a.arrivalTime, b.arrivalTime));
+            ArrayList<String> places = placeIndex.get(entry.getKey());
             
-            if (timestamps == null || timestamps.isEmpty()) {
-                unmatched++;
+            if (places == null || places.isEmpty()) {
+                unmatched += tokenContributions.size();
                 continue;
             }
             
-            // Find the last T_in entry at or before sc.arrivalTime
-            // timestamps are sorted ascending
-            String bestPlace = null;
-            for (int i = timestamps.size() - 1; i >= 0; i--) {
-                if (timestamps.get(i)[0] <= sc.arrivalTime) {
-                    bestPlace = places.get(i);
-                    break;
-                }
+            int pairCount = Math.min(tokenContributions.size(), places.size());
+            for (int i = 0; i < pairCount; i++) {
+                tokenContributions.get(i).placeName = places.get(i);
+                matched++;
             }
-            
-            if (bestPlace == null) {
-                // Fallback: use first entry (token may have arrived before T_in was recorded)
-                bestPlace = places.get(0);
-            }
-            
-            sc.placeName = bestPlace;
-            matched++;
+            unmatched += tokenContributions.size() - pairCount;
         }
         
-        logger.info("Place correlation: " + matched + " matched, " + unmatched + " unmatched out of " + contributions.size());
+        logger.info("Place correlation: " + matched + " matched, " + unmatched +
+                    " unmatched out of " + contributions.size());
     }
     
     /**
@@ -2915,8 +2935,10 @@ public class PetriNetAnalyzer {
         public long observationWindowMs;
         public double completionThroughputPerSecond;
         public int unmatchedServiceTimingSamples;
+        public int serviceTimingCountMismatches;
         public TimingDistribution workflowLatency = new TimingDistribution();
         public TimingDistribution generationInterArrival = new TimingDistribution();
+        public Map<String, Integer> expectedPlaceExecutions = new TreeMap<>();
         public Map<String, TimingDistribution> placeResidence = new TreeMap<>();
         public Map<String, ServiceTimingSummary> serviceTiming = new TreeMap<>();
         public Map<String, JoinTimingSummary> joinTiming = new TreeMap<>();
