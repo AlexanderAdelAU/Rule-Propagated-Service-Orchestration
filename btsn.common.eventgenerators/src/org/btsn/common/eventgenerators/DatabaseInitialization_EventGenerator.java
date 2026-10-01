@@ -121,7 +121,7 @@ public class DatabaseInitialization_EventGenerator {
         System.out.println("Transition Token: " + initToken);
         
         String xmlPayload = buildServicePayload(targetServiceName, serviceOperation, 
-            resolvedServiceChannel, resolvedServicePort, initToken);
+            resolvedServiceChannel, resolvedServicePort, initToken, sequenceID);
 
         // STEP 3: Deploy process rules (if not skipped)
         Long timeToCommit = 0L;
@@ -385,7 +385,7 @@ public class DatabaseInitialization_EventGenerator {
      * Build service payload XML
      */
     private static String buildServicePayload(String serviceName, String serviceOperation, 
-            String resolvedChannel, String resolvedPort, String attributeValue) throws IOException {
+            String resolvedChannel, String resolvedPort, String attributeValue, int sequenceID) throws IOException {
         
         System.out.println("Building payload for " + serviceName);
 
@@ -393,9 +393,15 @@ public class DatabaseInitialization_EventGenerator {
         String payLoadPath = appBase.getAbsolutePath() + "/Payload";
         payLoadVersionPath = appBase.getAbsolutePath() + "/" + ruleBaseVersion + "/";
         CreateDirectory.createDirectory(payLoadVersionPath);
-        CopyFile.copyfile(payLoadPath + "/payLoad.xml", payLoadVersionPath + "/payload.xml");
 
-        String currentXmlPayload = StringFileIO.readFileAsString(payLoadVersionPath + "/payload.xml");
+        // Each initialization generator is a separate JVM. Never share one scratch
+        // payload.xml between concurrent generators: copying and reading the same file
+        // can expose a partially-written XML document. Use a per-event scratch file.
+        String scratchFileName = serviceName.toLowerCase() + "_" + sequenceID + "_payload_template.xml";
+        String scratchFilePath = payLoadVersionPath + "/" + scratchFileName;
+        CopyFile.copyfile(payLoadPath + "/payLoad.xml", scratchFilePath);
+
+        String currentXmlPayload = StringFileIO.readFileAsString(scratchFilePath);
 
         currentXmlPayload = XPathHelper.modifyXMLItem(currentXmlPayload, 
             "//payload/service/serviceName/text()", serviceName);
