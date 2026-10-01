@@ -9,7 +9,6 @@ import java.net.InetAddress;
 import org.btsn.json.jsonLibrary;
 import org.btsn.rulecontroller.RuleDeployer;
 import org.btsn.utils.BuildRuleBase;
-import org.btsn.utils.CopyFile;
 import org.btsn.utils.CreateDirectory;
 import org.btsn.utils.OOjdrewAPI;
 import org.btsn.utils.StringFileIO;
@@ -121,7 +120,7 @@ public class DatabaseInitialization_EventGenerator {
         System.out.println("Transition Token: " + initToken);
         
         String xmlPayload = buildServicePayload(targetServiceName, serviceOperation, 
-            resolvedServiceChannel, resolvedServicePort, initToken, sequenceID);
+            resolvedServiceChannel, resolvedServicePort, initToken);
 
         // STEP 3: Deploy process rules (if not skipped)
         Long timeToCommit = 0L;
@@ -385,7 +384,7 @@ public class DatabaseInitialization_EventGenerator {
      * Build service payload XML
      */
     private static String buildServicePayload(String serviceName, String serviceOperation, 
-            String resolvedChannel, String resolvedPort, String attributeValue, int sequenceID) throws IOException {
+            String resolvedChannel, String resolvedPort, String attributeValue) throws IOException {
         
         System.out.println("Building payload for " + serviceName);
 
@@ -394,14 +393,9 @@ public class DatabaseInitialization_EventGenerator {
         payLoadVersionPath = appBase.getAbsolutePath() + "/" + ruleBaseVersion + "/";
         CreateDirectory.createDirectory(payLoadVersionPath);
 
-        // Each initialization generator is a separate JVM. Never share one scratch
-        // payload.xml between concurrent generators: copying and reading the same file
-        // can expose a partially-written XML document. Use a per-event scratch file.
-        String scratchFileName = serviceName.toLowerCase() + "_" + sequenceID + "_payload_template.xml";
-        String scratchFilePath = payLoadVersionPath + "/" + scratchFileName;
-        CopyFile.copyfile(payLoadPath + "/payLoad.xml", scratchFilePath);
-
-        String currentXmlPayload = StringFileIO.readFileAsString(scratchFilePath);
+        // The template is immutable. Build this event entirely in memory so
+        // concurrent generator JVMs never share a mutable construction file.
+        String currentXmlPayload = StringFileIO.readFileAsString(payLoadPath + "/payLoad.xml");
 
         currentXmlPayload = XPathHelper.modifyXMLItem(currentXmlPayload, 
             "//payload/service/serviceName/text()", serviceName);
