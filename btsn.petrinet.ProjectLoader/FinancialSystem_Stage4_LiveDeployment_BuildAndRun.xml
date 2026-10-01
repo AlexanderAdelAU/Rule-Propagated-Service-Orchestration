@@ -385,9 +385,9 @@
 					<arg value="-tokens" /><arg value="0" />
 				</java>
 
-				<!-- Fire initialization tokens in PARALLEL -->
-				<echo message="Firing initialization tokens in PARALLEL..." />
-				<parallel>
+				<!-- Fire initialization tokens SEQUENTIALLY: DatabaseInitialization_EventGenerator\n\t\t\t\t     uses a shared RuleFolder.v999/payload.xml scratch file. -->
+				<echo message="Firing initialization tokens SEQUENTIALLY (avoids shared v999 payload scratch-file collision)..." />
+				<sequential>
 					<java classname="${init.event.generator.class}" 
 					      fork="true" dir="${generator.project.dir}" failonerror="true">
 						<classpath refid="generator.classpath" />
@@ -454,7 +454,7 @@
 						<arg value="-tokens" /><arg value="1" />
 						<arg value="-skipDeploy" />
 					</java>
-				</parallel>
+				</sequential>
 
 				<echo message="=== Phase 1 Complete ===" />
 				<sleep seconds="${phase.delay.seconds}" />
