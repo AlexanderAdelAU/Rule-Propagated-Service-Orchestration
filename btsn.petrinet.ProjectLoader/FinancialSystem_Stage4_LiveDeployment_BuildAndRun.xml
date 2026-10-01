@@ -92,7 +92,7 @@
 	<property name="service.startup.seconds" value="3" />
 	<property name="phase.delay.seconds" value="5" />
 	<property name="deploy.wait.seconds" value="3" />
-	<property name="live.deploy.delay.seconds" value="1" />
+	<property name="v001.fire.delay.seconds" value="3" />
 	<property name="workflow.drain.seconds" value="12" />
 
 	<!-- Base directories -->
@@ -461,7 +461,7 @@
 
 				<!-- ======================================================= -->
 				<!-- PHASE 2: LIVE PROCESS INTRODUCTION                       -->
-				<!-- v001 active -> deploy/commit v002 -> start v002          -->
+				<!-- start v002 deployment -> start v001 while deploy is active -> commit/start v002          -->
 				<!-- ======================================================= -->
 				<echo message="" />
 				<echo message="===============================================" />
@@ -485,30 +485,8 @@
 				<echo message="[DEPLOY v001] Commitment complete. v002 has NOT been deployed." />
 
 				<parallel>
-					<!-- Branch A: v001 begins executing immediately. -->
+					<!-- Branch A: start v002 deployment first. -->
 					<sequential>
-						<tstamp><format property="stage4.v001.fire.time" pattern="yyyy-MM-dd HH:mm:ss.SSS" /></tstamp>
-						<echo message="[STAGE4 MARKER] v001 firing started at ${stage4.v001.fire.time}" />
-						<java classname="${token.generator.class}" fork="true" dir="${generator.project.dir}" failonerror="true">
-							<classpath refid="generator.classpath" />
-							<arg value="-version" /><arg value="${workflow1.version}" />
-							<arg value="-process" /><arg value="${workflow1.process.name}" />
-							<arg value="-place" /><arg value="${workflow1.target.place}" />
-							<arg value="-operation" /><arg value="${workflow1.target.operation}" />
-							<arg value="-tokens" /><arg value="${workflow1.token.count}" />
-							<arg value="-expire" /><arg value="${workflow1.token.expire}" />
-							<arg value="-generator" /><arg value="${workflow1.generator.id}" />
-							<arg value="-data" /><arg value="${workflow1.token.data}" />
-							<arg value="-triggerfile" /><arg value="${workflow1.trigger.file}" />
-							<arg value="-skipDeploy" />
-						</java>
-						<tstamp><format property="stage4.v001.generator.complete.time" pattern="yyyy-MM-dd HH:mm:ss.SSS" /></tstamp>
-						<echo message="[STAGE4 MARKER] v001 generator completed at ${stage4.v001.generator.complete.time}" />
-					</sequential>
-
-					<!-- Branch B: deploy v002 after v001 is already active. -->
-					<sequential>
-						<sleep seconds="${live.deploy.delay.seconds}" />
 						<tstamp><format property="stage4.v002.deploy.start.time" pattern="yyyy-MM-dd HH:mm:ss.SSS" /></tstamp>
 						<echo message="[STAGE4 MARKER] v002 deployment started at ${stage4.v002.deploy.start.time}" />
 						<java classname="${token.generator.class}" fork="true" dir="${generator.project.dir}" failonerror="true">
@@ -541,8 +519,29 @@
 						<tstamp><format property="stage4.v002.generator.complete.time" pattern="yyyy-MM-dd HH:mm:ss.SSS" /></tstamp>
 						<echo message="[STAGE4 MARKER] v002 generator completed at ${stage4.v002.generator.complete.time}" />
 					</sequential>
-				</parallel>
 
+					<!-- Branch B: begin v001 while v002 deployment is still in progress. -->
+					<sequential>
+						<sleep seconds="${v001.fire.delay.seconds}" />
+						<tstamp><format property="stage4.v001.fire.time" pattern="yyyy-MM-dd HH:mm:ss.SSS" /></tstamp>
+						<echo message="[STAGE4 MARKER] v001 firing started at ${stage4.v001.fire.time}" />
+						<java classname="${token.generator.class}" fork="true" dir="${generator.project.dir}" failonerror="true">
+							<classpath refid="generator.classpath" />
+							<arg value="-version" /><arg value="${workflow1.version}" />
+							<arg value="-process" /><arg value="${workflow1.process.name}" />
+							<arg value="-place" /><arg value="${workflow1.target.place}" />
+							<arg value="-operation" /><arg value="${workflow1.target.operation}" />
+							<arg value="-tokens" /><arg value="${workflow1.token.count}" />
+							<arg value="-expire" /><arg value="${workflow1.token.expire}" />
+							<arg value="-generator" /><arg value="${workflow1.generator.id}" />
+							<arg value="-data" /><arg value="${workflow1.token.data}" />
+							<arg value="-triggerfile" /><arg value="${workflow1.trigger.file}" />
+							<arg value="-skipDeploy" />
+						</java>
+						<tstamp><format property="stage4.v001.generator.complete.time" pattern="yyyy-MM-dd HH:mm:ss.SSS" /></tstamp>
+						<echo message="[STAGE4 MARKER] v001 generator completed at ${stage4.v001.generator.complete.time}" />
+					</sequential>
+				</parallel>
 				<echo message="=== Stage 4 generators complete; draining shared queues for ${workflow.drain.seconds}s ===" />
 				<sleep seconds="${workflow.drain.seconds}" />
 
@@ -670,7 +669,7 @@
 		<echo message="" />
 		<echo message="EXECUTION PATTERN:" />
 		<echo message="  Phase 1: Load P1-P5 + Monitor ONCE, initialize databases" />
-		<echo message="  Phase 2: Commit v001 -> start v001 -> deploy/commit v002 live -> start v002" />
+		<echo message="  Phase 2: Commit v001 -> start v002 deployment -> start v001 during deploy -> start v002 after commit" />
 		<echo message="  Phase 3: Collect data from all services" />
 		<echo message="" />
 		<echo message="USAGE:" />
