@@ -34,7 +34,7 @@
       "y": 195,
       "width": 50,
       "height": 50,
-      "label": "P1 Shared Financial Service",
+      "label": "Validation",
       "service": "P1_Place",
       "operations": [
         {
@@ -85,7 +85,7 @@
       "y": 195,
       "width": 50,
       "height": 50,
-      "label": "P2 Shared Financial Service",
+      "label": "CreditCheck",
       "service": "P2_Place",
       "operations": [
         {
@@ -136,7 +136,7 @@
       "y": 195,
       "width": 50,
       "height": 50,
-      "label": "Workflow Monitor",
+      "label": "Monitor",
       "service": "MonitorService",
       "operations": [
         {
@@ -265,7 +265,7 @@
     {
       "x": 230,
       "y": 70,
-      "text": "Stage 3 v002 Financial Pre-Screen — independent topology on shared P1/P2",
+      "text": "v002 Financial Pre-Screen — independent topology on shared P1/P2",
       "fontSize": 14,
       "fontStyle": 1,
       "color": -16777216
