@@ -15,6 +15,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 import org.apache.derby.jdbc.EmbeddedDriver;
+import org.btsn.constants.VersionConstants;
 import org.btsn.utils.OOjdrewAPI;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -210,6 +211,9 @@ public abstract class BaseCollectorService {
 
     private List<ServiceTiming> readServiceTimingDataByVersion(String version) {
         List<ServiceTiming> timings = new ArrayList<>();
+
+        int workflowBase = VersionConstants.getWorkflowBase(version);
+        int workflowRangeEnd = VersionConstants.getVersionRangeEnd(workflowBase);
         
         // CORRECTED: Query actual columns from SERVICEMEASUREMENTS table
         // Calculate derived metrics (queueTime, serviceTime, totalTime) from timestamps
@@ -219,12 +223,15 @@ public abstract class BaseCollectorService {
             "       workflowStartTime, bufferSize, maxQueueCapacity, totalMarking " +
             "FROM " + SERVICE_MEASUREMENTS_TABLE + " " +
             "WHERE serviceName = ? " +
+            "  AND sequenceID >= ? AND sequenceID < ? " +
             "ORDER BY workflowStartTime, sequenceID";
         
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, placeName);
+            pstmt.setInt(2, workflowBase);
+            pstmt.setInt(3, workflowRangeEnd);
             
             ResultSet rs = pstmt.executeQuery();
             
@@ -524,19 +531,23 @@ private String extractServiceContextFromToken(String token) {
     
     private List<ServiceMarking> readServiceMarkingDataByVersion(String version) {
         List<ServiceMarking> markings = new ArrayList<>();
+
+        int workflowBase = VersionConstants.getWorkflowBase(version);
+        int workflowRangeEnd = VersionConstants.getVersionRangeEnd(workflowBase);
         
         String sql = 
             "SELECT sequenceId, serviceName, operation, arrivalTime, invocationTime, " +
             "       publishTime, workflowStartTime, bufferSize, maxQueueCapacity, totalMarking " +
             "FROM " + SERVICE_MEASUREMENTS_TABLE + " " +
             "WHERE serviceName = ? " +
+            "  AND sequenceID >= ? AND sequenceID < ? " +
             "ORDER BY workflowStartTime, sequenceId";
         
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-           // pstmt.setString(1, version);
             pstmt.setString(1, placeName);
+            pstmt.setInt(2, workflowBase);
+            pstmt.setInt(3, workflowRangeEnd);
             
             ResultSet rs = pstmt.executeQuery();
             
