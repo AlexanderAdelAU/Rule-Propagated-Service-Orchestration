@@ -1,0 +1,298 @@
+{
+  "processType": "PetriNet",
+  "elements": [
+    {
+      "id": "PRESCREEN_SUBMITTED",
+      "type": "EVENT_GENERATOR",
+      "x": 30,
+      "y": 175,
+      "width": 24,
+      "height": 60,
+      "label": "Pre-Screen Submitted",
+      "rotation": 0,
+      "generator_rate": "1000",
+      "token_version": "v002"
+    },
+    {
+      "id": "T_in_Validation",
+      "type": "TRANSITION",
+      "x": 110,
+      "y": 190,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Validation",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "Validation",
+      "type": "PLACE",
+      "x": 175,
+      "y": 195,
+      "width": 50,
+      "height": 50,
+      "label": "Validation",
+      "service": "P1_Place",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "validationResults",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_Validation",
+      "type": "TRANSITION",
+      "x": 270,
+      "y": 190,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Validation",
+      "rotation": 0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_CreditCheck",
+      "type": "TRANSITION",
+      "x": 370,
+      "y": 190,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_CreditCheck",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "CreditCheck",
+      "type": "PLACE",
+      "x": 430,
+      "y": 195,
+      "width": 50,
+      "height": 50,
+      "label": "CreditCheck",
+      "service": "P2_Place",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "creditCheckResults",
+          "arguments": [
+            {
+              "name": "validationResults",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_CreditCheck",
+      "type": "TRANSITION",
+      "x": 520,
+      "y": 190,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_CreditCheck",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_Monitor",
+      "type": "TRANSITION",
+      "x": 620,
+      "y": 190,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Monitor",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "Monitor",
+      "type": "PLACE",
+      "x": 680,
+      "y": 195,
+      "width": 50,
+      "height": 50,
+      "label": "Monitor",
+      "service": "MonitorService",
+      "operations": [
+        {
+          "name": "acknowledgeTokenArrival",
+          "arguments": [
+            {
+              "name": "creditCheckResults",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_Monitor",
+      "type": "TRANSITION",
+      "x": 770,
+      "y": 190,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Monitor",
+      "rotation": 0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "Terminate_Invalid",
+      "type": "TRANSITION",
+      "x": 270,
+      "y": 300,
+      "width": 20,
+      "height": 60,
+      "label": "Invalid Pre-Screen",
+      "rotation": 0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "PRESCREEN_SUBMITTED",
+      "target": "T_in_Validation",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Validation",
+      "target": "Validation",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Validation",
+      "target": "T_out_Validation",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_Validation",
+      "target": "T_in_CreditCheck",
+      "label": "valid",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "valid",
+      "endpoint": "processToken"
+    },
+    {
+      "source": "T_out_Validation",
+      "target": "Terminate_Invalid",
+      "label": "invalid",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "invalid",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_CreditCheck",
+      "target": "CreditCheck",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "CreditCheck",
+      "target": "T_out_CreditCheck",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_CreditCheck",
+      "target": "T_in_Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "acknowledgeTokenArrival"
+    },
+    {
+      "source": "T_in_Monitor",
+      "target": "Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Monitor",
+      "target": "T_out_Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    }
+  ],
+  "textElements": [
+    {
+      "x": 230,
+      "y": 70,
+      "text": "v002 Financial Pre-Screen — independent topology on shared P1/P2",
+      "fontSize": 14,
+      "fontStyle": 1,
+      "color": -16777216
+    },
+    {
+      "x": 145,
+      "y": 165,
+      "text": "Pre-Screen Validation → P1",
+      "fontSize": 10,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 400,
+      "y": 165,
+      "text": "Pre-Screen Credit Check → P2",
+      "fontSize": 10,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 625,
+      "y": 165,
+      "text": "Monitor",
+      "fontSize": 10,
+      "fontStyle": 0,
+      "color": -16777216
+    }
+  ]
+}

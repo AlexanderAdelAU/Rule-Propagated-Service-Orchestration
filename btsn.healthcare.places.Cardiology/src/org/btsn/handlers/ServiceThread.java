@@ -1143,6 +1143,8 @@ class ServiceThread implements Runnable {
 	    
 	    // Use the lowest child token ID for continuation
 	    sequenceID = continuingTokenId;
+	    // After synchronization, the survivor is the token occupying the place.
+	    phaseSequenceID = continuingTokenId;
 	    headerMap.put("sequenceId", Integer.toString(continuingTokenId));
 	    
 	    // Record join completion - continuing token ENTERS, others CONSUMED

@@ -80,33 +80,23 @@ public class PetriNetAnalyzer {
     public ArrayList<TokenPath> verifyTokenCompleteness(int workflowBase) {
         ArrayList<TokenPath> incompletePaths = new ArrayList<>();
         
-        // Find entries that don't have a corresponding exit AFTER them
-        // DERBY FIX: Use CAST() for string concatenation
-        // FIX: Exclude tokens that terminated normally (routed to TERMINATE)
-        // NOTE: Check BOTH tables for TERMINATE records (Monitor writes to TRANSITION_FIRINGS)
+        // This is an event-pairing diagnostic, not workflow completeness.
+        // A logical place execution begins only at ENTER. BUFFERED is queue state.
+        // Match the subsequent exit by physical place name instead of constructing
+        // T_out_<toPlace>, because topology labels (P1) and service names
+        // (P1_Place) intentionally differ.
         String sql = 
             "SELECT t_in.tokenId, t_in.timestamp as entryTime, t_in.toPlace " +
             "FROM CONSOLIDATED_TRANSITION_FIRINGS t_in " +
             "WHERE t_in.workflowBase = ? " +
-            "  AND t_in.transitionId LIKE 'T_in_%' " +
+            "  AND t_in.eventType = 'ENTER' " +
             "  AND NOT EXISTS ( " +
             "      SELECT 1 FROM CONSOLIDATED_TRANSITION_FIRINGS t_out " +
             "      WHERE t_out.tokenId = t_in.tokenId " +
             "        AND t_out.workflowBase = t_in.workflowBase " +
-            "        AND t_out.transitionId = CAST('T_out_' || t_in.toPlace AS VARCHAR(100)) " +
+            "        AND t_out.fromPlace = t_in.toPlace " +
+            "        AND t_out.eventType IN ('EXIT', 'TERMINATE') " +
             "        AND t_out.timestamp >= t_in.timestamp " +
-            "  ) " +
-            "  AND NOT EXISTS ( " +
-            "      SELECT 1 FROM CONSOLIDATED_TRANSITION_FIRINGS t_term " +
-            "      WHERE t_term.tokenId = t_in.tokenId " +
-            "        AND t_term.workflowBase = t_in.workflowBase " +
-            "        AND t_term.toPlace = 'TERMINATE' " +
-            "  ) " +
-            "  AND NOT EXISTS ( " +
-            "      SELECT 1 FROM TRANSITION_FIRINGS t_term_raw " +
-            "      WHERE t_term_raw.tokenId = t_in.tokenId " +
-            "        AND t_term_raw.workflowBase = t_in.workflowBase " +
-            "        AND t_term_raw.toPlace = 'TERMINATE' " +
             "  ) " +
             "ORDER BY t_in.tokenId, t_in.timestamp";
         
@@ -120,17 +110,17 @@ public class PetriNetAnalyzer {
                 TokenPath path = new TokenPath();
                 path.tokenId = rs.getInt("tokenId");
                 path.entryTime = rs.getLong("entryTime");
-                path.exitTime = 0; // Incomplete
+                path.exitTime = 0;
                 path.placeName = rs.getString("toPlace");
                 incompletePaths.add(path);
             }
             
-            logger.info("Token completeness check: " + 
-                       (incompletePaths.isEmpty() ? "All tokens complete" : 
-                        incompletePaths.size() + " incomplete tokens found"));
+            logger.info("Place ENTER/EXIT pairing check: " + 
+                       (incompletePaths.isEmpty() ? "all ENTER events paired" : 
+                        incompletePaths.size() + " unpaired ENTER events found"));
             
         } catch (SQLException e) {
-            logger.error("Error checking token completeness", e);
+            logger.error("Error checking place event pairing", e);
         }
         
         return incompletePaths;
@@ -147,29 +137,27 @@ public class PetriNetAnalyzer {
     public ArrayList<Integer> getTerminatedTokens(int workflowBase) {
         ArrayList<Integer> terminatedTokens = new ArrayList<>();
         
-        // Check both tables for TERMINATE records using UNION
+        // Only consolidated business-place events belong to the analyzed workflow.
+        // The Monitor's raw TRANSITION_FIRINGS table also contains collection/admin
+        // operations such as writeCollectorData and must not be interpreted as
+        // business workflow termination.
         String sql = 
-            "SELECT DISTINCT tokenId FROM (" +
-            "  SELECT tokenId FROM CONSOLIDATED_TRANSITION_FIRINGS " +
-            "  WHERE workflowBase = ? AND toPlace = 'TERMINATE' " +
-            "  UNION " +
-            "  SELECT tokenId FROM TRANSITION_FIRINGS " +
-            "  WHERE workflowBase = ? AND toPlace = 'TERMINATE' " +
-            ") AS terminated " +
+            "SELECT DISTINCT tokenId FROM CONSOLIDATED_TRANSITION_FIRINGS " +
+            "WHERE workflowBase = ? " +
+            "  AND (eventType = 'TERMINATE' OR toPlace = 'TERMINATE') " +
             "ORDER BY tokenId";
         
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setInt(1, workflowBase);
-            pstmt.setInt(2, workflowBase);
             ResultSet rs = pstmt.executeQuery();
             
             while (rs.next()) {
                 terminatedTokens.add(rs.getInt("tokenId"));
             }
             
-            logger.info("Found " + terminatedTokens.size() + " terminated tokens (checked both tables)");
+            logger.info("Found " + terminatedTokens.size() + " business TERMINATE events");
             
         } catch (SQLException e) {
             logger.error("Error getting terminated tokens", e);
@@ -196,9 +184,6 @@ public class PetriNetAnalyzer {
     public ArrayList<TokenPath> getTokenPaths(int workflowBase) {
         ArrayList<TokenPath> paths = new ArrayList<>();
         
-        // FIXED: Pair each entry with its corresponding NEXT exit
-        // The NOT EXISTS clause ensures we pick the first exit after each entry
-        // DERBY FIX: Use CAST() for string concatenation to avoid VARCHAR/LONG VARCHAR error
         String sql = 
             "SELECT t_in.tokenId, t_in.toPlace, " +
             "       t_in.timestamp as entryTime, " +
@@ -207,15 +192,17 @@ public class PetriNetAnalyzer {
             "JOIN CONSOLIDATED_TRANSITION_FIRINGS t_out " +
             "  ON t_in.tokenId = t_out.tokenId " +
             "  AND t_in.workflowBase = t_out.workflowBase " +
-            "  AND t_out.transitionId = CAST('T_out_' || t_in.toPlace AS VARCHAR(100)) " +
+            "  AND t_out.fromPlace = t_in.toPlace " +
+            "  AND t_out.eventType IN ('EXIT', 'TERMINATE') " +
             "  AND t_out.timestamp >= t_in.timestamp " +
             "WHERE t_in.workflowBase = ? " +
-            "  AND t_in.transitionId LIKE 'T_in_%' " +
+            "  AND t_in.eventType = 'ENTER' " +
             "  AND NOT EXISTS ( " +
             "      SELECT 1 FROM CONSOLIDATED_TRANSITION_FIRINGS t_between " +
             "      WHERE t_between.tokenId = t_in.tokenId " +
             "        AND t_between.workflowBase = t_in.workflowBase " +
-            "        AND t_between.transitionId = t_out.transitionId " +
+            "        AND t_between.fromPlace = t_in.toPlace " +
+            "        AND t_between.eventType IN ('EXIT', 'TERMINATE') " +
             "        AND t_between.timestamp > t_in.timestamp " +
             "        AND t_between.timestamp < t_out.timestamp " +
             "  ) " +
@@ -237,12 +224,11 @@ public class PetriNetAnalyzer {
                 paths.add(path);
             }
             
-            logger.info("Retrieved " + paths.size() + " token paths for workflowBase=" + workflowBase);
+            logger.info("Retrieved " + paths.size() + " logical place paths for workflowBase=" + workflowBase);
             
-            // Sanity check for negative residence times (should not happen with fix)
             long negativeCount = paths.stream().filter(p -> p.residenceTime < 0).count();
             if (negativeCount > 0) {
-                logger.warn("WARNING: Found " + negativeCount + " paths with negative residence time - check data integrity");
+                logger.warn("WARNING: Found " + negativeCount + " paths with negative residence time");
             }
             
         } catch (SQLException e) {
@@ -582,41 +568,10 @@ public class PetriNetAnalyzer {
      * instead of relying on pre-computed (potentially incorrect) values.
      */
     public PlaceStatistics getPlaceStatistics(String placeName, int workflowBase) {
-        PlaceStatistics stats = new PlaceStatistics();
-        stats.placeName = placeName;
-        
-        // First try the pre-computed table
-        String sql = 
-            "SELECT tokenCount, avgResidenceTime, minResidenceTime, maxResidenceTime " +
-            "FROM CONSOLIDATED_PLACE_STATISTICS " +
-            "WHERE placeName = ? " +
-            "  AND workflowBase = ?";
-        
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setString(1, placeName);
-            pstmt.setInt(2, workflowBase);
-            ResultSet rs = pstmt.executeQuery();
-            
-            if (rs.next()) {
-                stats.tokenCount = rs.getInt("tokenCount");
-                stats.avgResidenceTime = rs.getDouble("avgResidenceTime");
-                stats.minResidenceTime = rs.getLong("minResidenceTime");
-                stats.maxResidenceTime = rs.getLong("maxResidenceTime");
-            } else {
-                // Fallback: compute from transition firings with corrected query
-                stats = computePlaceStatisticsFromFirings(placeName, workflowBase);
-            }
-            
-            logger.info("Place " + placeName + " statistics: " + 
-                       stats.tokenCount + " tokens, avg=" + 
-                       String.format("%.1f", stats.avgResidenceTime) + "ms");
-            
-        } catch (SQLException e) {
-            logger.error("Error calculating place statistics", e);
-        }
-        
+        PlaceStatistics stats = computePlaceStatisticsFromFirings(placeName, workflowBase);
+        logger.info("Place " + placeName + " statistics: " +
+                   stats.tokenCount + " paired logical visits, avg=" +
+                   String.format("%.1f", stats.avgResidenceTime) + "ms");
         return stats;
     }
     
@@ -631,8 +586,6 @@ public class PetriNetAnalyzer {
         PlaceStatistics stats = new PlaceStatistics();
         stats.placeName = placeName;
         
-        // Use corrected pairing logic to compute statistics
-        // DERBY FIX: Use CAST() for all string concatenations to avoid VARCHAR/LONG VARCHAR comparison error
         String sql = 
             "SELECT COUNT(*) as tokenCount, " +
             "       AVG(t_out.timestamp - t_in.timestamp) as avgResidence, " +
@@ -642,16 +595,18 @@ public class PetriNetAnalyzer {
             "JOIN CONSOLIDATED_TRANSITION_FIRINGS t_out " +
             "  ON t_in.tokenId = t_out.tokenId " +
             "  AND t_in.workflowBase = t_out.workflowBase " +
-            "  AND t_out.transitionId = CAST('T_out_' || t_in.toPlace AS VARCHAR(100)) " +
+            "  AND t_out.fromPlace = t_in.toPlace " +
+            "  AND t_out.eventType IN ('EXIT', 'TERMINATE') " +
             "  AND t_out.timestamp >= t_in.timestamp " +
             "WHERE t_in.workflowBase = ? " +
             "  AND t_in.toPlace = ? " +
-            "  AND t_in.transitionId = CAST('T_in_' || ? AS VARCHAR(100)) " +
+            "  AND t_in.eventType = 'ENTER' " +
             "  AND NOT EXISTS ( " +
             "      SELECT 1 FROM CONSOLIDATED_TRANSITION_FIRINGS t_between " +
             "      WHERE t_between.tokenId = t_in.tokenId " +
             "        AND t_between.workflowBase = t_in.workflowBase " +
-            "        AND t_between.transitionId = t_out.transitionId " +
+            "        AND t_between.fromPlace = t_in.toPlace " +
+            "        AND t_between.eventType IN ('EXIT', 'TERMINATE') " +
             "        AND t_between.timestamp > t_in.timestamp " +
             "        AND t_between.timestamp < t_out.timestamp " +
             "  )";
@@ -661,7 +616,6 @@ public class PetriNetAnalyzer {
             
             pstmt.setInt(1, workflowBase);
             pstmt.setString(2, placeName);
-            pstmt.setString(3, placeName);
             ResultSet rs = pstmt.executeQuery();
             
             if (rs.next()) {
@@ -672,48 +626,428 @@ public class PetriNetAnalyzer {
             }
             
         } catch (SQLException e) {
-            logger.error("Error computing place statistics from firings", e);
+            logger.error("Error computing place statistics from lifecycle events", e);
         }
         
         return stats;
     }
     
     /**
-     * Get workflow throughput (tokens per second)
+     * Get canonical workflow completion throughput.
+     *
+     * Throughput is completed workflow instances divided by the observation
+     * window from the first GENERATED root to the last canonical completion.
      */
     public double getWorkflowThroughput(int workflowBase) {
-        String sql = 
-            "SELECT COUNT(*) as tokenCount, " +
-            "       MAX(timestamp) - MIN(timestamp) as duration " +
-            "FROM CONSOLIDATED_TRANSITION_FIRINGS " +
-            "WHERE workflowBase = ? " +
-            "  AND transitionId LIKE 'T_out_%'";
-        
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setInt(1, workflowBase);
-            ResultSet rs = pstmt.executeQuery();
-            
-            if (rs.next()) {
-                int tokenCount = rs.getInt("tokenCount");
-                long duration = rs.getLong("duration");
-                
-                if (duration > 0) {
-                    double throughput = (tokenCount * 1000.0) / duration; // tokens per second
-                    logger.info("Workflow throughput: " + 
-                               String.format("%.2f", throughput) + " tokens/sec");
-                    return throughput;
-                }
+        CanonicalWorkflowAnalysis canonical = analyzeCanonicalWorkflows(workflowBase);
+        long firstGenerated = Long.MAX_VALUE;
+        long lastCompleted = Long.MIN_VALUE;
+        int timedCompletions = 0;
+
+        for (WorkflowInstanceSummary instance : canonical.instances.values()) {
+            if (instance.generatedAt > 0) {
+                firstGenerated = Math.min(firstGenerated, instance.generatedAt);
             }
-            
-        } catch (SQLException e) {
-            logger.error("Error calculating throughput", e);
+            if (instance.completedAt > 0) {
+                lastCompleted = Math.max(lastCompleted, instance.completedAt);
+                timedCompletions++;
+            }
         }
-        
+
+        if (timedCompletions > 0 && firstGenerated != Long.MAX_VALUE && lastCompleted > firstGenerated) {
+            long duration = lastCompleted - firstGenerated;
+            double throughput = (timedCompletions * 1000.0) / duration;
+            logger.info("Canonical workflow throughput: " +
+                        String.format("%.3f", throughput) + " workflows/sec");
+            return throughput;
+        }
+
         return 0.0;
     }
-    
+
+    // =============================================================================
+    // STAGE 2 - TEMPORAL ANALYSIS
+    // =============================================================================
+
+    /**
+     * Analyze temporal behaviour using the Stage-1 canonical workflow model.
+     *
+     * Workflow latency is GENERATED -> canonical completion.
+     * Place residence is ENTER -> EXIT/TERMINATE.
+     * Queue/service timing comes from SERVICECONTRIBUTION.
+     * Join synchronization is measured separately from place residence.
+     */
+    public TemporalAnalysis analyzeTemporal(int workflowBase) {
+        TemporalAnalysis analysis = new TemporalAnalysis();
+        analysis.workflowBase = workflowBase;
+
+        CanonicalWorkflowAnalysis canonical = analyzeCanonicalWorkflows(workflowBase);
+        analysis.expectedCompletedWorkflows = canonical.completedWorkflows;
+        analysis.expectedPlaceExecutions.putAll(canonical.placeExecutions);
+
+        ArrayList<Long> workflowLatencies = new ArrayList<>();
+        ArrayList<Long> generatedTimes = new ArrayList<>();
+        long firstGenerated = Long.MAX_VALUE;
+        long lastCompleted = Long.MIN_VALUE;
+
+        for (WorkflowInstanceSummary instance : canonical.instances.values()) {
+            if (instance.generatedAt > 0) {
+                generatedTimes.add(instance.generatedAt);
+                firstGenerated = Math.min(firstGenerated, instance.generatedAt);
+            }
+            if (instance.generatedAt > 0 && instance.completedAt > 0) {
+                workflowLatencies.add(instance.completedAt - instance.generatedAt);
+                lastCompleted = Math.max(lastCompleted, instance.completedAt);
+            }
+        }
+
+        analysis.workflowLatency = buildTimingDistribution(workflowLatencies);
+
+        Collections.sort(generatedTimes);
+        ArrayList<Long> generationInterArrivals = new ArrayList<>();
+        for (int i = 1; i < generatedTimes.size(); i++) {
+            generationInterArrivals.add(generatedTimes.get(i) - generatedTimes.get(i - 1));
+        }
+        analysis.generationInterArrival = buildTimingDistribution(generationInterArrivals);
+
+        if (analysis.workflowLatency.samples > 0 &&
+            firstGenerated != Long.MAX_VALUE &&
+            lastCompleted > firstGenerated) {
+            analysis.observationWindowMs = lastCompleted - firstGenerated;
+            analysis.completionThroughputPerSecond =
+                (analysis.workflowLatency.samples * 1000.0) / analysis.observationWindowMs;
+        }
+
+        Map<String, ArrayList<Long>> residenceByPlace = new TreeMap<>();
+        for (TokenPath tokenPath : getTokenPaths(workflowBase)) {
+            residenceByPlace
+                .computeIfAbsent(tokenPath.placeName, k -> new ArrayList<>())
+                .add(tokenPath.residenceTime);
+        }
+        for (Map.Entry<String, ArrayList<Long>> entry : residenceByPlace.entrySet()) {
+            analysis.placeResidence.put(entry.getKey(), buildTimingDistribution(entry.getValue()));
+        }
+
+        try (Connection conn = getConnection()) {
+            ArrayList<ServiceContribution> contributions = new ArrayList<>();
+            String timingSql =
+                "SELECT WORKFLOWBASE, SEQUENCEID, ARRIVALTIME, QUEUETIME, SERVICETIME, " +
+                "       TOTALTIME, BUFFERSIZE " +
+                "FROM SERVICECONTRIBUTION " +
+                "WHERE WORKFLOWBASE = ? " +
+                "ORDER BY ARRIVALTIME";
+            try (PreparedStatement pstmt = conn.prepareStatement(timingSql)) {
+                pstmt.setInt(1, workflowBase);
+                ResultSet rs = pstmt.executeQuery();
+                while (rs.next()) {
+                    ServiceContribution sc = new ServiceContribution();
+                    sc.workflowBase = rs.getLong("WORKFLOWBASE");
+                    sc.sequenceId = rs.getInt("SEQUENCEID");
+                    sc.arrivalTime = rs.getLong("ARRIVALTIME");
+                    sc.queueTime = rs.getLong("QUEUETIME");
+                    sc.serviceTime = rs.getLong("SERVICETIME");
+                    sc.totalTime = rs.getLong("TOTALTIME");
+                    sc.bufferSize = rs.getInt("BUFFERSIZE");
+                    contributions.add(sc);
+                }
+            }
+
+            correlatePlaceNames(conn, contributions);
+
+            Map<String, ArrayList<Long>> queueByPlace = new TreeMap<>();
+            Map<String, ArrayList<Long>> serviceByPlace = new TreeMap<>();
+            Map<String, ArrayList<Long>> totalByPlace = new TreeMap<>();
+
+            for (ServiceContribution sc : contributions) {
+                if (sc.placeName == null) {
+                    analysis.unmatchedServiceTimingSamples++;
+                    continue;
+                }
+                queueByPlace.computeIfAbsent(sc.placeName, k -> new ArrayList<>()).add(sc.queueTime);
+                serviceByPlace.computeIfAbsent(sc.placeName, k -> new ArrayList<>()).add(sc.serviceTime);
+                totalByPlace.computeIfAbsent(sc.placeName, k -> new ArrayList<>()).add(sc.totalTime);
+            }
+
+            Set<String> timedPlaces = new HashSet<>();
+            timedPlaces.addAll(queueByPlace.keySet());
+            timedPlaces.addAll(serviceByPlace.keySet());
+            timedPlaces.addAll(totalByPlace.keySet());
+
+            for (String place : timedPlaces) {
+                ServiceTimingSummary summary = new ServiceTimingSummary();
+                summary.placeName = place;
+                summary.queueTime = buildTimingDistribution(
+                    queueByPlace.getOrDefault(place, new ArrayList<Long>()));
+                summary.serviceTime = buildTimingDistribution(
+                    serviceByPlace.getOrDefault(place, new ArrayList<Long>()));
+                summary.totalTime = buildTimingDistribution(
+                    totalByPlace.getOrDefault(place, new ArrayList<Long>()));
+                analysis.serviceTiming.put(place, summary);
+            }
+
+            // Every logical ENTER should contribute exactly one service timing row.
+            // Treat any per-place count mismatch as a Stage-2 data-quality failure.
+            for (Map.Entry<String, Integer> expected : canonical.placeExecutions.entrySet()) {
+                ServiceTimingSummary summary = analysis.serviceTiming.get(expected.getKey());
+                int actual = summary == null ? 0 : summary.totalTime.samples;
+                if (actual != expected.getValue()) {
+                    analysis.serviceTimingCountMismatches++;
+                }
+            }
+            for (String timedPlace : analysis.serviceTiming.keySet()) {
+                if (!canonical.placeExecutions.containsKey(timedPlace)) {
+                    analysis.serviceTimingCountMismatches++;
+                }
+            }
+
+            Map<Integer, Integer> parentByChild = new HashMap<>();
+            String genealogySql =
+                "SELECT DISTINCT parentTokenId, childTokenId " +
+                "FROM CONSOLIDATED_TOKEN_GENEALOGY " +
+                "WHERE workflowBase = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(genealogySql)) {
+                pstmt.setInt(1, workflowBase);
+                ResultSet rs = pstmt.executeQuery();
+                while (rs.next()) {
+                    parentByChild.put(rs.getInt("childTokenId"), rs.getInt("parentTokenId"));
+                }
+            }
+
+            Map<String, JoinTemporalAccumulator> joinGroups = new HashMap<>();
+            String joinSql =
+                "SELECT tokenId, transitionId, timestamp, toPlace, eventType " +
+                "FROM CONSOLIDATED_TRANSITION_FIRINGS " +
+                "WHERE workflowBase = ? " +
+                "  AND eventType IN ('BUFFERED', 'ENTER', 'JOIN_CONSUMED') " +
+                "ORDER BY timestamp";
+            try (PreparedStatement pstmt = conn.prepareStatement(joinSql)) {
+                pstmt.setInt(1, workflowBase);
+                ResultSet rs = pstmt.executeQuery();
+                while (rs.next()) {
+                    int tokenId = rs.getInt("tokenId");
+                    int root = resolveRootToken(tokenId, parentByChild);
+                    String transitionId = rs.getString("transitionId");
+                    String eventType = rs.getString("eventType");
+                    String key = root + "|" + transitionId;
+
+                    JoinTemporalAccumulator acc =
+                        joinGroups.computeIfAbsent(key, k -> new JoinTemporalAccumulator());
+                    acc.transitionId = transitionId;
+
+                    long timestamp = rs.getLong("timestamp");
+                    if ("BUFFERED".equals(eventType)) {
+                        acc.bufferedTokens.add(tokenId);
+                        acc.firstBuffered = Math.min(acc.firstBuffered, timestamp);
+                        acc.lastBuffered = Math.max(acc.lastBuffered, timestamp);
+                        String place = rs.getString("toPlace");
+                        if (place != null && !"JOIN_CONSUMED".equals(place)) {
+                            acc.placeName = place;
+                        }
+                    } else if ("ENTER".equals(eventType)) {
+                        if (acc.enterAt == 0 || timestamp < acc.enterAt) {
+                            acc.enterAt = timestamp;
+                        }
+                        String place = rs.getString("toPlace");
+                        if (place != null && !"JOIN_CONSUMED".equals(place)) {
+                            acc.placeName = place;
+                        }
+                    } else if ("JOIN_CONSUMED".equals(eventType)) {
+                        acc.consumedCount++;
+                    }
+                }
+            }
+
+            Map<String, ArrayList<Long>> waitByJoin = new TreeMap<>();
+            Map<String, ArrayList<Long>> skewByJoin = new TreeMap<>();
+            Map<String, String> placeByJoin = new HashMap<>();
+
+            for (JoinTemporalAccumulator acc : joinGroups.values()) {
+                if (acc.consumedCount == 0 ||
+                    acc.bufferedTokens.size() < 2 ||
+                    acc.firstBuffered == Long.MAX_VALUE ||
+                    acc.lastBuffered == Long.MIN_VALUE ||
+                    acc.enterAt == 0) {
+                    continue;
+                }
+
+                long wait = acc.enterAt - acc.firstBuffered;
+                long skew = acc.lastBuffered - acc.firstBuffered;
+                waitByJoin.computeIfAbsent(acc.transitionId, k -> new ArrayList<>()).add(wait);
+                skewByJoin.computeIfAbsent(acc.transitionId, k -> new ArrayList<>()).add(skew);
+                placeByJoin.put(acc.transitionId, acc.placeName);
+            }
+
+            for (String transitionId : waitByJoin.keySet()) {
+                JoinTimingSummary summary = new JoinTimingSummary();
+                summary.transitionId = transitionId;
+                summary.placeName = placeByJoin.get(transitionId);
+                summary.synchronizationWait = buildTimingDistribution(waitByJoin.get(transitionId));
+                summary.arrivalSkew = buildTimingDistribution(
+                    skewByJoin.getOrDefault(transitionId, new ArrayList<Long>()));
+                analysis.joinTiming.put(transitionId, summary);
+            }
+
+        } catch (SQLException e) {
+            logger.error("Error performing Stage-2 temporal analysis for workflowBase=" + workflowBase, e);
+        }
+
+        return analysis;
+    }
+
+    private TimingDistribution buildTimingDistribution(List<Long> values) {
+        TimingDistribution distribution = new TimingDistribution();
+        ArrayList<Long> valid = new ArrayList<>();
+
+        for (Long value : values) {
+            if (value == null || value < 0) {
+                distribution.invalidSamples++;
+            } else {
+                valid.add(value);
+            }
+        }
+
+        Collections.sort(valid);
+        distribution.samples = valid.size();
+        if (valid.isEmpty()) {
+            return distribution;
+        }
+
+        long total = 0;
+        for (long value : valid) {
+            total += value;
+        }
+
+        distribution.minMs = valid.get(0);
+        distribution.maxMs = valid.get(valid.size() - 1);
+        distribution.avgMs = (double) total / valid.size();
+        distribution.p50Ms = nearestRank(valid, 0.50);
+        distribution.p95Ms = nearestRank(valid, 0.95);
+        return distribution;
+    }
+
+    private long nearestRank(List<Long> sortedValues, double percentile) {
+        if (sortedValues.isEmpty()) {
+            return 0;
+        }
+        int rank = (int) Math.ceil(percentile * sortedValues.size());
+        int index = Math.max(0, Math.min(sortedValues.size() - 1, rank - 1));
+        return sortedValues.get(index);
+    }
+
+    public String generateTemporalReport(int workflowBase) {
+        TemporalAnalysis temporal = analyzeTemporal(workflowBase);
+        StringBuilder report = new StringBuilder();
+
+        report.append("=== STAGE 2 TEMPORAL ANALYSIS ===\n");
+        report.append("Workflow Base: ").append(workflowBase).append("\n\n");
+
+        report.append("1. END-TO-END WORKFLOW LATENCY\n");
+        report.append("   Canonical completed workflows: ")
+              .append(temporal.expectedCompletedWorkflows).append("\n");
+        report.append("   Timed completion samples:      ")
+              .append(temporal.workflowLatency.samples).append("\n");
+        if (temporal.workflowLatency.samples > 0) {
+            appendDistribution(report, "   Latency", temporal.workflowLatency);
+            report.append("   Observation window: ")
+                  .append(temporal.observationWindowMs).append("ms\n");
+            report.append("   Completion throughput: ")
+                  .append(String.format("%.3f", temporal.completionThroughputPerSecond))
+                  .append(" workflows/sec\n");
+        }
+        if (temporal.workflowLatency.samples != temporal.expectedCompletedWorkflows) {
+            report.append("   [WARN] Not every canonical completion has a usable completion timestamp\n");
+        }
+        report.append("\n");
+
+        report.append("2. WORKLOAD GENERATION\n");
+        appendDistribution(report, "   Root inter-arrival", temporal.generationInterArrival);
+        report.append("\n");
+
+        report.append("3. PLACE RESIDENCE DISTRIBUTIONS\n");
+        for (Map.Entry<String, TimingDistribution> entry : temporal.placeResidence.entrySet()) {
+            appendDistribution(report, "   " + entry.getKey(), entry.getValue());
+        }
+        report.append("\n");
+
+        report.append("4. SERVICE EXECUTION TIMING\n");
+        for (Map.Entry<String, ServiceTimingSummary> entry : temporal.serviceTiming.entrySet()) {
+            ServiceTimingSummary timing = entry.getValue();
+            report.append("   Place: ").append(entry.getKey()).append("\n");
+            appendDistribution(report, "     Queue", timing.queueTime);
+            appendDistribution(report, "     Service", timing.serviceTime);
+            appendDistribution(report, "     Total", timing.totalTime);
+            int expectedExecutions = temporal.expectedPlaceExecutions.getOrDefault(entry.getKey(), 0);
+            if (timing.totalTime.samples != expectedExecutions) {
+                report.append("     [WARN] timing samples=")
+                      .append(timing.totalTime.samples)
+                      .append(", logical executions=").append(expectedExecutions).append("\n");
+            }
+        }
+        report.append("   Unmatched service timing samples: ")
+              .append(temporal.unmatchedServiceTimingSamples).append("\n");
+        report.append("   Service timing/place-count mismatches: ")
+              .append(temporal.serviceTimingCountMismatches).append("\n\n");
+
+        report.append("5. JOIN SYNCHRONIZATION\n");
+        if (temporal.joinTiming.isEmpty()) {
+            report.append("   No completed joins observed\n");
+        } else {
+            for (JoinTimingSummary join : temporal.joinTiming.values()) {
+                report.append("   ").append(join.transitionId);
+                if (join.placeName != null) {
+                    report.append(" -> ").append(join.placeName);
+                }
+                report.append("\n");
+                appendDistribution(report, "     First-arrival to ENTER", join.synchronizationWait);
+                appendDistribution(report, "     Branch arrival skew", join.arrivalSkew);
+            }
+        }
+        report.append("\n");
+
+        int invalidSamples = temporal.workflowLatency.invalidSamples +
+                             temporal.generationInterArrival.invalidSamples;
+        for (TimingDistribution d : temporal.placeResidence.values()) {
+            invalidSamples += d.invalidSamples;
+        }
+        for (ServiceTimingSummary timing : temporal.serviceTiming.values()) {
+            invalidSamples += timing.queueTime.invalidSamples;
+            invalidSamples += timing.serviceTime.invalidSamples;
+            invalidSamples += timing.totalTime.invalidSamples;
+        }
+        for (JoinTimingSummary join : temporal.joinTiming.values()) {
+            invalidSamples += join.synchronizationWait.invalidSamples;
+            invalidSamples += join.arrivalSkew.invalidSamples;
+        }
+
+        report.append("6. TEMPORAL DATA QUALITY\n");
+        report.append("   Negative/invalid timing samples: ").append(invalidSamples).append("\n");
+        report.append("   Temporal result: ")
+              .append(invalidSamples == 0 &&
+                      temporal.workflowLatency.samples == temporal.expectedCompletedWorkflows &&
+                      temporal.unmatchedServiceTimingSamples == 0 &&
+                      temporal.serviceTimingCountMismatches == 0 ? "[OK]" : "[CHECK]")
+              .append("\n");
+        report.append("\n=== END STAGE 2 REPORT ===\n");
+
+        return report.toString();
+    }
+
+    private void appendDistribution(StringBuilder report, String label, TimingDistribution distribution) {
+        report.append(label)
+              .append(": n=").append(distribution.samples);
+        if (distribution.samples > 0) {
+            report.append(", avg=").append(String.format("%.1f", distribution.avgMs)).append("ms")
+                  .append(", p50=").append(distribution.p50Ms).append("ms")
+                  .append(", p95=").append(distribution.p95Ms).append("ms")
+                  .append(", min/max=").append(distribution.minMs)
+                  .append("/").append(distribution.maxMs).append("ms");
+        }
+        if (distribution.invalidSamples > 0) {
+            report.append(", invalid=").append(distribution.invalidSamples);
+        }
+        report.append("\n");
+    }
+
     // =============================================================================
     // MARKING ANALYSIS
     // =============================================================================
@@ -850,7 +1184,8 @@ public class PetriNetAnalyzer {
             "SELECT tokenId, timestamp, " +
             "       timestamp - LAG(timestamp, 1, timestamp) OVER (ORDER BY timestamp) as interArrival " +
             "FROM CONSOLIDATED_TRANSITION_FIRINGS " +
-            "WHERE transitionId = 'T_in_' || ? " +
+            "WHERE toPlace = ? " +
+            "  AND eventType = 'BUFFERED' " +
             "  AND workflowBase = ? " +
             "ORDER BY timestamp";
         
@@ -899,10 +1234,10 @@ public class PetriNetAnalyzer {
      * - v002 (workflowBase 2000000) = Low priority
      * - Higher priority tokens should have lower queue times when competing
      * 
-     * IMPORTANT: Forked tokens (join participants) are tracked separately because
-     * join completion semantics override priority - when a sibling arrives to
-     * complete a join, it gets fast-tracked regardless of priority. This is
-     * correct workflow behavior, not a priority violation.
+     * Fork-derived tokens are tracked separately for genealogy, but a fork-derived
+     * token that actually executes a business service is still a real queue sample.
+     * Stage-3 shared-service analysis therefore includes every logical service
+     * execution and scopes comparisons to the same physical place.
      * 
      * @return PriorityAnalysis containing cross-version comparison results
      */
@@ -999,15 +1334,23 @@ public class PetriNetAnalyzer {
             // =========================================================================
             correlatePlaceNames(conn, allContributions);
             
-            // Build shared places map: place -> set of version numbers
+            // Build shared physical-place map and retain the logical input transition
+            // used by each version. Different transition IDs at the same physical place
+            // are direct evidence that one service process is playing different roles.
             for (ServiceContribution sc : allContributions) {
                 if (sc.placeName != null) {
                     analysis.placeToVersions
                         .computeIfAbsent(sc.placeName, k -> new HashSet<>())
                         .add(sc.versionNumber);
+                    if (sc.transitionId != null) {
+                        analysis.placeToVersionTransitions
+                            .computeIfAbsent(sc.placeName, k -> new HashMap<>())
+                            .computeIfAbsent(sc.versionNumber, k -> new HashSet<>())
+                            .add(sc.transitionId);
+                    }
                 }
             }
-            // Shared places = those with tokens from 2+ versions
+            // Shared places = physical services with traffic from 2+ versions.
             for (Map.Entry<String, Set<Integer>> entry : analysis.placeToVersions.entrySet()) {
                 if (entry.getValue().size() > 1) {
                     analysis.sharedPlaces.add(entry.getKey());
@@ -1016,27 +1359,27 @@ public class PetriNetAnalyzer {
             
             logger.info("Shared services (cross-version): " + analysis.sharedPlaces);
             
-            // Filter to root tokens at shared services only
-            ArrayList<ServiceContribution> sharedServiceRootContributions = new ArrayList<>();
-            for (ServiceContribution sc : rootTokenContributions) {
+            // Every logical service execution at a shared physical place is relevant.
+            // Do not discard fork-derived survivors: P2/P4/P5 executions remain real
+            // queue consumers even though their physical token IDs descend from a fork.
+            ArrayList<ServiceContribution> sharedServiceContributions = new ArrayList<>();
+            for (ServiceContribution sc : allContributions) {
                 if (sc.placeName != null && analysis.sharedPlaces.contains(sc.placeName)) {
-                    sharedServiceRootContributions.add(sc);
+                    sharedServiceContributions.add(sc);
                 }
             }
+            analysis.sharedServiceSamples = sharedServiceContributions.size();
             
-            // Find contention points - all tokens and root tokens separately (legacy)
+            // Legacy analyses are retained for comparison only.
             findContentionPoints(allContributions, analysis);
             findRootTokenContentionPoints(rootTokenContributions, analysis);
             
-            // NEW: Find contention points scoped to shared services
-            findSharedServiceContentionPoints(sharedServiceRootContributions, analysis);
+            // Stage 3 primary metric: simultaneous waiting at the SAME physical service.
+            findSharedServiceContentionPoints(sharedServiceContributions, analysis);
             
-            // Detect priority inversions - all tokens and root tokens separately (legacy)
             detectPriorityInversions(allContributions, analysis);
             detectRootTokenPriorityInversions(rootTokenContributions, analysis);
-            
-            // NEW: Detect inversions scoped to shared services
-            detectSharedServicePriorityInversions(sharedServiceRootContributions, analysis);
+            detectSharedServicePriorityInversions(analysis);
             
             // Calculate priority effectiveness
             calculatePriorityEffectiveness(analysis);
@@ -1066,67 +1409,70 @@ public class PetriNetAnalyzer {
      * the token was queued at when the SERVICECONTRIBUTION was recorded.
      */
     private void correlatePlaceNames(Connection conn, ArrayList<ServiceContribution> contributions) throws SQLException {
-        // Build lookup: (workflowBase, tokenId) -> sorted list of (timestamp, placeName)
-        // from T_in entries in CONSOLIDATED_TRANSITION_FIRINGS
-        String sql = 
-            "SELECT workflowBase, tokenId, timestamp, toPlace " +
+        // SERVICECONTRIBUTION stores workflow version in serviceName, not the
+        // physical place name. Reconstruct place identity by pairing each token's
+        // timing samples with its logical ENTER visits in execution order.
+        //
+        // This is intentionally one-to-one. A surviving fork token may visit
+        // several places (for example P2 -> P4 -> P5), so independently choosing
+        // the nearest earlier T_in event can attach later samples to an earlier
+        // place. Order pairing preserves the token's actual execution sequence.
+        String sql =
+            "SELECT DISTINCT workflowBase, tokenId, timestamp, toPlace, transitionId " +
             "FROM CONSOLIDATED_TRANSITION_FIRINGS " +
-            "WHERE transitionId LIKE 'T_in_%' " +
+            "WHERE eventType = 'ENTER' " +
             "ORDER BY workflowBase, tokenId, timestamp";
         
-        // Key: "workflowBase:tokenId" -> list of (timestamp, placeName) pairs sorted by time
-        Map<String, ArrayList<long[]>> timestampIndex = new HashMap<>();
         Map<String, ArrayList<String>> placeIndex = new HashMap<>();
+        Map<String, ArrayList<String>> transitionIndex = new HashMap<>();
         
         try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
-            
             while (rs.next()) {
                 long wb = rs.getLong("workflowBase");
                 int tokenId = rs.getInt("tokenId");
-                long ts = rs.getLong("timestamp");
-                String place = rs.getString("toPlace");
-                
                 String key = wb + ":" + tokenId;
-                timestampIndex.computeIfAbsent(key, k -> new ArrayList<>()).add(new long[]{ts});
-                placeIndex.computeIfAbsent(key, k -> new ArrayList<>()).add(place);
+                placeIndex.computeIfAbsent(key, k -> new ArrayList<>())
+                          .add(rs.getString("toPlace"));
+                transitionIndex.computeIfAbsent(key, k -> new ArrayList<>())
+                               .add(rs.getString("transitionId"));
             }
         }
         
-        // For each ServiceContribution, find the closest T_in entry at or before arrivalTime
+        Map<String, ArrayList<ServiceContribution>> contributionIndex = new HashMap<>();
+        for (ServiceContribution sc : contributions) {
+            String key = sc.workflowBase + ":" + sc.sequenceId;
+            contributionIndex.computeIfAbsent(key, k -> new ArrayList<>()).add(sc);
+        }
+        
         int matched = 0;
         int unmatched = 0;
         
-        for (ServiceContribution sc : contributions) {
-            String key = sc.workflowBase + ":" + sc.sequenceId;
-            ArrayList<long[]> timestamps = timestampIndex.get(key);
-            ArrayList<String> places = placeIndex.get(key);
+        for (Map.Entry<String, ArrayList<ServiceContribution>> entry : contributionIndex.entrySet()) {
+            ArrayList<ServiceContribution> tokenContributions = entry.getValue();
+            tokenContributions.sort((a, b) -> Long.compare(a.arrivalTime, b.arrivalTime));
+            ArrayList<String> places = placeIndex.get(entry.getKey());
+            ArrayList<String> transitions = transitionIndex.get(entry.getKey());
             
-            if (timestamps == null || timestamps.isEmpty()) {
-                unmatched++;
+            if (places == null || places.isEmpty()) {
+                unmatched += tokenContributions.size();
                 continue;
             }
             
-            // Find the last T_in entry at or before sc.arrivalTime
-            // timestamps are sorted ascending
-            String bestPlace = null;
-            for (int i = timestamps.size() - 1; i >= 0; i--) {
-                if (timestamps.get(i)[0] <= sc.arrivalTime) {
-                    bestPlace = places.get(i);
-                    break;
+            int pairCount = Math.min(tokenContributions.size(), places.size());
+            for (int i = 0; i < pairCount; i++) {
+                ServiceContribution contribution = tokenContributions.get(i);
+                contribution.placeName = places.get(i);
+                if (transitions != null && i < transitions.size()) {
+                    contribution.transitionId = transitions.get(i);
                 }
+                matched++;
             }
-            
-            if (bestPlace == null) {
-                // Fallback: use first entry (token may have arrived before T_in was recorded)
-                bestPlace = places.get(0);
-            }
-            
-            sc.placeName = bestPlace;
-            matched++;
+            unmatched += tokenContributions.size() - pairCount;
         }
         
-        logger.info("Place correlation: " + matched + " matched, " + unmatched + " unmatched out of " + contributions.size());
+        logger.info("Place correlation: " + matched + " matched, " + unmatched +
+                    " unmatched out of " + contributions.size());
     }
     
     /**
@@ -1325,36 +1671,39 @@ public class PetriNetAnalyzer {
      * This eliminates false positives where v001 is at RadiologyService and v002
      * is at TriageService - they never actually compete in the same queue.
      */
-    private void findSharedServiceContentionPoints(ArrayList<ServiceContribution> sharedServiceRootContributions, PriorityAnalysis analysis) {
-        long WINDOW_MS = 1000;
-        
-        for (int i = 0; i < sharedServiceRootContributions.size(); i++) {
-            ServiceContribution sc1 = sharedServiceRootContributions.get(i);
+    private void findSharedServiceContentionPoints(ArrayList<ServiceContribution> sharedServiceContributions, PriorityAnalysis analysis) {
+        for (int i = 0; i < sharedServiceContributions.size(); i++) {
+            ServiceContribution sc1 = sharedServiceContributions.get(i);
             
-            for (int j = i + 1; j < sharedServiceRootContributions.size(); j++) {
-                ServiceContribution sc2 = sharedServiceRootContributions.get(j);
+            for (int j = i + 1; j < sharedServiceContributions.size(); j++) {
+                ServiceContribution sc2 = sharedServiceContributions.get(j);
                 
-                // Stop if we're past the time window
-                if (sc2.arrivalTime - sc1.arrivalTime > WINDOW_MS) {
-                    break;
+                if (sc1.versionNumber == sc2.versionNumber ||
+                    sc1.placeName == null || !sc1.placeName.equals(sc2.placeName)) {
+                    continue;
                 }
                 
-                // CRITICAL: Only compare tokens at the SAME place AND different versions
-                if (sc1.versionNumber != sc2.versionNumber && 
-                    sc1.placeName != null && sc1.placeName.equals(sc2.placeName) &&
-                    (sc1.bufferSize > 0 || sc2.bufferSize > 0)) {
-                    
+                ServiceContribution high = sc1.versionNumber < sc2.versionNumber ? sc1 : sc2;
+                ServiceContribution low = sc1.versionNumber < sc2.versionNumber ? sc2 : sc1;
+                long highStart = high.arrivalTime + high.queueTime;
+                long lowStart = low.arrivalTime + low.queueTime;
+                long laterArrival = Math.max(high.arrivalTime, low.arrivalTime);
+                long firstServiceStart = Math.min(highStart, lowStart);
+                
+                // A real scheduling contention point exists only when BOTH tokens
+                // had arrived before either one began service. At that instant the
+                // shared queue had a choice between versions.
+                if (laterArrival <= firstServiceStart) {
                     ContentionPoint cp = new ContentionPoint();
-                    cp.timestamp = sc1.arrivalTime;
-                    cp.highPriorityToken = (sc1.versionNumber < sc2.versionNumber) ? sc1 : sc2;
-                    cp.lowPriorityToken = (sc1.versionNumber < sc2.versionNumber) ? sc2 : sc1;
-                    cp.timeDelta = Math.abs(sc2.arrivalTime - sc1.arrivalTime);
-                    cp.highPriorityQueueTime = cp.highPriorityToken.queueTime;
-                    cp.lowPriorityQueueTime = cp.lowPriorityToken.queueTime;
-                    cp.priorityRespected = cp.highPriorityQueueTime <= cp.lowPriorityQueueTime;
-                    cp.involvesForkedToken = false;
-                    cp.sharedPlace = sc1.placeName;
-                    
+                    cp.timestamp = laterArrival;
+                    cp.highPriorityToken = high;
+                    cp.lowPriorityToken = low;
+                    cp.timeDelta = Math.abs(high.arrivalTime - low.arrivalTime);
+                    cp.highPriorityQueueTime = high.queueTime;
+                    cp.lowPriorityQueueTime = low.queueTime;
+                    cp.priorityRespected = highStart <= lowStart;
+                    cp.involvesForkedToken = high.isForkedToken || low.isForkedToken;
+                    cp.sharedPlace = high.placeName;
                     analysis.sharedServiceContentionPoints.add(cp);
                 }
             }
@@ -1362,35 +1711,21 @@ public class PetriNetAnalyzer {
     }
     
     /**
-     * Detect priority inversions scoped to SHARED SERVICES only.
-     * Only flags inversions where tokens from different versions were at the SAME place.
+     * Detect priority inversions only among proven same-queue contention points.
      */
-    private void detectSharedServicePriorityInversions(ArrayList<ServiceContribution> sharedServiceRootContributions, PriorityAnalysis analysis) {
-        ArrayList<ServiceContribution> byCompletion = new ArrayList<>(sharedServiceRootContributions);
-        byCompletion.sort((a, b) -> Long.compare(a.arrivalTime + a.totalTime, b.arrivalTime + b.totalTime));
-        
-        for (int i = 0; i < byCompletion.size(); i++) {
-            ServiceContribution completed = byCompletion.get(i);
-            long completionTime = completed.arrivalTime + completed.totalTime;
-            
-            for (ServiceContribution other : sharedServiceRootContributions) {
-                if (other == completed) continue;
-                
-                // CRITICAL: Same place + different version + temporal overlap
-                if (other.versionNumber < completed.versionNumber &&
-                    other.placeName != null && other.placeName.equals(completed.placeName) &&
-                    other.arrivalTime < completionTime &&
-                    (other.arrivalTime + other.totalTime) > completionTime) {
-                    
-                    PriorityInversion inv = new PriorityInversion();
-                    inv.highPriorityToken = other;
-                    inv.lowPriorityToken = completed;
-                    inv.inversionTime = completionTime - other.arrivalTime;
-                    inv.involvesForkedToken = false;
-                    
-                    analysis.sharedServiceInversions.add(inv);
-                }
+    private void detectSharedServicePriorityInversions(PriorityAnalysis analysis) {
+        for (ContentionPoint cp : analysis.sharedServiceContentionPoints) {
+            if (cp.priorityRespected) {
+                continue;
             }
+            PriorityInversion inv = new PriorityInversion();
+            inv.highPriorityToken = cp.highPriorityToken;
+            inv.lowPriorityToken = cp.lowPriorityToken;
+            long highStart = cp.highPriorityToken.arrivalTime + cp.highPriorityToken.queueTime;
+            long lowStart = cp.lowPriorityToken.arrivalTime + cp.lowPriorityToken.queueTime;
+            inv.inversionTime = Math.max(0, highStart - lowStart);
+            inv.involvesForkedToken = cp.involvesForkedToken;
+            analysis.sharedServiceInversions.add(inv);
         }
     }
     
@@ -1423,15 +1758,15 @@ public class PetriNetAnalyzer {
         PriorityAnalysis analysis = analyzePriority();
         StringBuilder report = new StringBuilder();
         
-        report.append("\n=== PRIORITY ANALYSIS REPORT ===\n\n");
+        report.append("\n=== STAGE 3 SHARED-SERVICE CONCURRENCY ANALYSIS ===\n\n");
         
         // 1. Sample breakdown
-        report.append("1. SAMPLE BREAKDOWN\n");
-        report.append("   Total samples: ").append(analysis.totalSamples).append("\n");
-        report.append("   Root tokens: ").append(analysis.rootTokenSamples)
-              .append(" (used for priority analysis)\n");
-        report.append("   Forked tokens: ").append(analysis.forkedTokenSamples)
-              .append(" (join participants - excluded from priority analysis)\n\n");
+        report.append("1. SERVICE EXECUTION SAMPLE BREAKDOWN\n");
+        report.append("   Total logical service executions: ").append(analysis.totalSamples).append("\n");
+        report.append("   Root-token executions:            ").append(analysis.rootTokenSamples).append("\n");
+        report.append("   Fork-derived executions:          ").append(analysis.forkedTokenSamples).append("\n");
+        report.append("   Shared-service executions:        ").append(analysis.sharedServiceSamples).append("\n");
+        report.append("   NOTE: fork-derived executions are included when they consume a shared service.\n\n");
         
         // 2. Shared services discovery
         report.append("2. SHARED SERVICES (Cross-Version Traffic)\n");
@@ -1448,6 +1783,15 @@ public class PetriNetAnalyzer {
                     versionList.append("v").append(String.format("%03d", v));
                 }
                 report.append("     ").append(place).append(": ").append(versionList).append("\n");
+                Map<Integer, Set<String>> roleMap = analysis.placeToVersionTransitions.get(place);
+                if (roleMap != null) {
+                    List<Integer> roleVersions = new ArrayList<>(roleMap.keySet());
+                    roleVersions.sort(Integer::compareTo);
+                    for (int version : roleVersions) {
+                        report.append("       v").append(String.format("%03d", version))
+                              .append(" logical T_in roles: ").append(roleMap.get(version)).append("\n");
+                    }
+                }
             }
             
             // Also show exclusive services for context
@@ -1462,16 +1806,16 @@ public class PetriNetAnalyzer {
         }
         report.append("\n");
         
-        // 3. Per-version statistics (root tokens only)
-        report.append("3. VERSION STATISTICS (Root Tokens Only)\n");
+        // 3. Per-version statistics across all logical service executions
+        report.append("3. VERSION STATISTICS (All Logical Service Executions)\n");
         report.append(String.format("   %-8s %-10s %-12s %-12s %-12s %-12s\n", 
             "Version", "Tokens", "Avg Queue", "Min Queue", "Max Queue", "Avg Service"));
         report.append("   " + "-".repeat(70) + "\n");
         
-        List<Integer> sortedVersions = new ArrayList<>(analysis.rootTokenStats.keySet());
+        List<Integer> sortedVersions = new ArrayList<>(analysis.versionStats.keySet());
         sortedVersions.sort(Integer::compareTo);
         for (int version : sortedVersions) {
-            VersionStats stats = analysis.rootTokenStats.get(version);
+            VersionStats stats = analysis.versionStats.get(version);
             report.append(String.format("   v%03d     %-10d %-12.1f %-12d %-12d %-12.1f\n",
                 version, stats.tokenCount, stats.avgQueueTime, 
                 stats.minQueueTime == Long.MAX_VALUE ? 0 : stats.minQueueTime, 
@@ -1480,7 +1824,7 @@ public class PetriNetAnalyzer {
         report.append("\n");
         
         // 4. SHARED SERVICE CONTENTION (primary metric)
-        report.append("4. SHARED SERVICE CONTENTION (Primary - Same Queue Only)\n");
+        report.append("4. SHARED SERVICE CONTENTION (Both Versions Waiting Before Service Start)\n");
         report.append("   Total contention points: ").append(analysis.sharedServiceContentionPoints.size()).append("\n");
         
         if (!analysis.sharedServiceContentionPoints.isEmpty()) {
@@ -1512,10 +1856,12 @@ public class PetriNetAnalyzer {
                         }
                         break;
                     }
-                    report.append(String.format("     v%03d (seq=%d, queue=%dms) vs v%03d (seq=%d, queue=%dms) %s\n",
-                        cp.highPriorityToken.versionNumber, cp.highPriorityToken.sequenceId, cp.highPriorityQueueTime,
-                        cp.lowPriorityToken.versionNumber, cp.lowPriorityToken.sequenceId, cp.lowPriorityQueueTime,
-                        cp.priorityRespected ? "[OK]" : "[INVERSION]"));
+                    long highStart = cp.highPriorityToken.arrivalTime + cp.highPriorityToken.queueTime;
+                    long lowStart = cp.lowPriorityToken.arrivalTime + cp.lowPriorityToken.queueTime;
+                    report.append(String.format("     v%03d (seq=%d, queue=%dms, start=%d) vs v%03d (seq=%d, queue=%dms, start=%d) %s\n",
+                        cp.highPriorityToken.versionNumber, cp.highPriorityToken.sequenceId, cp.highPriorityQueueTime, highStart,
+                        cp.lowPriorityToken.versionNumber, cp.lowPriorityToken.sequenceId, cp.lowPriorityQueueTime, lowStart,
+                        cp.priorityRespected ? "[ORDER RESPECTED]" : "[ORDER INVERSION]"));
                 }
             }
         } else if (!analysis.sharedPlaces.isEmpty()) {
@@ -1537,7 +1883,7 @@ public class PetriNetAnalyzer {
                     report.append("   ... and ").append(analysis.sharedServiceInversions.size() - 5).append(" more\n");
                     break;
                 }
-                report.append(String.format("   - [%s] v%03d token %d waited while v%03d token %d completed (inversion: %dms)\n",
+                report.append(String.format("   - [%s] v%03d token %d was already waiting when v%03d token %d started first (start-order inversion: %dms)\n",
                     inv.highPriorityToken.placeName,
                     inv.highPriorityToken.versionNumber, inv.highPriorityToken.sequenceId,
                     inv.lowPriorityToken.versionNumber, inv.lowPriorityToken.sequenceId,
@@ -1559,12 +1905,12 @@ public class PetriNetAnalyzer {
         report.append("   Inversions: ").append(analysis.rootTokenInversions.size()).append("\n");
         report.append("\n");
         
-        // 7. Join completions (informational)
-        report.append("7. JOIN COMPLETIONS (Excluded from Priority Analysis)\n");
-        report.append("   Forked tokens processed: ").append(analysis.joinCompletions.size()).append("\n");
+        // 7. Fork-derived service executions (informational)
+        report.append("7. FORK-DERIVED SERVICE EXECUTIONS\n");
+        report.append("   Fork-derived execution samples: ").append(analysis.joinCompletions.size()).append("\n");
         if (!analysis.joinCompletions.isEmpty()) {
-            report.append("   Note: Join participants are fast-tracked when siblings arrive.\n");
-            report.append("         This is correct workflow semantics, not a priority violation.\n");
+            report.append("   These are real business-service executions by descendant tokens.\n");
+            report.append("   They remain eligible for same-queue Stage-3 contention analysis.\n");
             
             // Show breakdown by version
             Map<Integer, Long> joinsByVersion = new HashMap<>();
@@ -1582,25 +1928,27 @@ public class PetriNetAnalyzer {
         }
         report.append("\n");
         
-        // 8. Verdict (based on shared service analysis - the accurate metric)
-        report.append("8. PRIORITY VERDICT (Based on Shared Service Analysis)\n");
+        // 8. Stage-3 evidence summary
+        report.append("8. STAGE 3 EVIDENCE SUMMARY\n");
         if (analysis.sharedPlaces.isEmpty()) {
-            report.append("   [INFO] No shared services - priority cannot be evaluated\n");
-            report.append("   Each version uses exclusive services with no queue contention\n");
+            report.append("   Shared-service concurrency: [NOT OBSERVED] no physical service saw multiple versions\n");
         } else if (analysis.sharedServiceContentionPoints.isEmpty()) {
-            report.append("   [INFO] No contention detected at shared services - priority not testable\n");
-        } else if (analysis.sharedServiceEffectiveness >= 0.9) {
-            report.append("   [PASS] Priority scheduling is working effectively (")
-                  .append(String.format("%.1f%%", analysis.sharedServiceEffectiveness * 100)).append(")\n");
-        } else if (analysis.sharedServiceEffectiveness >= 0.7) {
-            report.append("   [WARN] Priority scheduling is partially effective (")
-                  .append(String.format("%.1f%%", analysis.sharedServiceEffectiveness * 100)).append(")\n");
+            report.append("   Shared-service concurrency: [PARTIAL] shared services exist, but no simultaneous queue choice was observed\n");
         } else {
-            report.append("   [FAIL] Priority scheduling is not working as expected (")
-                  .append(String.format("%.1f%%", analysis.sharedServiceEffectiveness * 100)).append(")\n");
+            long respected = analysis.sharedServiceContentionPoints.stream()
+                .filter(cp -> cp.priorityRespected).count();
+            report.append("   Shared-service concurrency: [OBSERVED]\n");
+            report.append("   Shared physical services: ").append(analysis.sharedPlaces.size()).append("\n");
+            report.append("   Proven same-queue contention decisions: ")
+                  .append(analysis.sharedServiceContentionPoints.size()).append("\n");
+            report.append("   Lower-version start order respected: ")
+                  .append(respected).append("/").append(analysis.sharedServiceContentionPoints.size())
+                  .append(" (").append(String.format("%.1f%%", analysis.sharedServiceEffectiveness * 100)).append(")\n");
+            report.append("   Start-order inversions observed: ")
+                  .append(analysis.sharedServiceInversions.size()).append("\n");
         }
         
-        report.append("\n=== END PRIORITY REPORT ===\n");
+        report.append("\n=== END STAGE 3 REPORT ===\n");
         
         return report.toString();
     }
@@ -1625,14 +1973,15 @@ public class PetriNetAnalyzer {
         public long workflowBase;
         public int sequenceId;
         public String serviceName;
-        public String placeName;  // Actual Petri net service/place (e.g., RadiologyService)
+        public String placeName;  // Actual physical Petri-net service/place
+        public String transitionId;  // Logical T_in role used by this workflow at the place
         public long arrivalTime;
         public long queueTime;
         public long serviceTime;
         public long totalTime;
         public int bufferSize;
         public int versionNumber;  // Derived from serviceName
-        public boolean isForkedToken;  // True if this is a fork child (join participant)
+        public boolean isForkedToken;  // True if this executing token descends from a fork
         public int joinCount;  // Fork join count (2 = 2-way fork, etc.)
         public int branchNumber;  // Branch within the fork (1, 2, etc.)
     }
@@ -1700,8 +2049,10 @@ public class PetriNetAnalyzer {
         public double rootTokenQueueTimeAdvantage = 0;
         
         // Shared service analysis (scoped to services with cross-version traffic)
-        public Set<String> sharedPlaces = new HashSet<>();  // Places with tokens from 2+ versions
+        public Set<String> sharedPlaces = new HashSet<>();  // Physical places with traffic from 2+ versions
         public Map<String, Set<Integer>> placeToVersions = new HashMap<>();  // Place -> set of versions
+        public Map<String, Map<Integer, Set<String>>> placeToVersionTransitions = new HashMap<>();
+        public int sharedServiceSamples = 0;
         public ArrayList<ContentionPoint> sharedServiceContentionPoints = new ArrayList<>();
         public ArrayList<PriorityInversion> sharedServiceInversions = new ArrayList<>();
         public double sharedServiceEffectiveness = 0;
@@ -1722,6 +2073,310 @@ public class PetriNetAnalyzer {
         }
     }
     
+
+    // =============================================================================
+    // CANONICAL WORKFLOW RECONSTRUCTION
+    // =============================================================================
+    
+    /**
+     * Reconstruct logical workflow instances from the event stream.
+     *
+     * workflowBase identifies the deployed version range, not an individual
+     * business transaction. A workflow instance is rooted at a GENERATED token.
+     * Fork descendants are mapped back to that root through explicit genealogy.
+     *
+     * This is the authoritative Stage-1 correctness view. BUFFERED is queue state,
+     * ENTER is one logical place execution, JOIN_CONSUMED is a consumed branch,
+     * and workflow completion is an explicit business TERMINATE or a successful
+     * MonitorService.acknowledgeTokenArrival service execution.
+     */
+    public CanonicalWorkflowAnalysis analyzeCanonicalWorkflows(int workflowBase) {
+        CanonicalWorkflowAnalysis analysis = new CanonicalWorkflowAnalysis();
+        analysis.workflowBase = workflowBase;
+        
+        Map<Integer, Integer> parentByChild = new HashMap<>();
+        Map<Integer, Set<Integer>> childrenByParent = new HashMap<>();
+        Map<Integer, Set<String>> enterTransitionsByToken = new HashMap<>();
+        Map<Integer, Set<String>> consumedTransitionsByToken = new HashMap<>();
+        Map<Integer, Long> generatedAt = new TreeMap<>();
+        
+        try (Connection conn = getConnection()) {
+            // 1. Workflow instances are born at GENERATED events.
+            String generatedSql =
+                "SELECT tokenId, MIN(timestamp) AS generatedAt " +
+                "FROM CONSOLIDATED_TRANSITION_FIRINGS " +
+                "WHERE workflowBase = ? AND eventType = 'GENERATED' " +
+                "GROUP BY tokenId ORDER BY tokenId";
+            try (PreparedStatement pstmt = conn.prepareStatement(generatedSql)) {
+                pstmt.setInt(1, workflowBase);
+                ResultSet rs = pstmt.executeQuery();
+                while (rs.next()) {
+                    int root = rs.getInt("tokenId");
+                    long timestamp = rs.getLong("generatedAt");
+                    generatedAt.put(root, timestamp);
+                    analysis.generatedRoots.add(root);
+                    WorkflowInstanceSummary instance = new WorkflowInstanceSummary();
+                    instance.rootTokenId = root;
+                    instance.generatedAt = timestamp;
+                    instance.members.add(root);
+                    analysis.instances.put(root, instance);
+                }
+            }
+            
+            // 2. Explicit fork genealogy defines family membership. DISTINCT is
+            // required because more than one collector may observe the same relation.
+            try {
+                String genealogySql =
+                    "SELECT DISTINCT parentTokenId, childTokenId " +
+                    "FROM CONSOLIDATED_TOKEN_GENEALOGY " +
+                    "WHERE workflowBase = ?";
+                try (PreparedStatement pstmt = conn.prepareStatement(genealogySql)) {
+                    pstmt.setInt(1, workflowBase);
+                    ResultSet rs = pstmt.executeQuery();
+                    while (rs.next()) {
+                        int parent = rs.getInt("parentTokenId");
+                        int child = rs.getInt("childTokenId");
+                        parentByChild.put(child, parent);
+                        childrenByParent.computeIfAbsent(parent, k -> new HashSet<>()).add(child);
+                    }
+                }
+            } catch (SQLException e) {
+                logger.warn("Canonical reconstruction: genealogy table unavailable: " + e.getMessage());
+            }
+            
+            Set<Integer> distinctChildren = new HashSet<>();
+            for (Map.Entry<Integer, Set<Integer>> entry : childrenByParent.entrySet()) {
+                distinctChildren.addAll(entry.getValue());
+                int root = resolveRootToken(entry.getKey(), parentByChild);
+                WorkflowInstanceSummary instance = analysis.instances.get(root);
+                for (int child : entry.getValue()) {
+                    int childRoot = resolveRootToken(child, parentByChild);
+                    if (childRoot != root || !analysis.generatedRoots.contains(childRoot)) {
+                        analysis.orphanForkChildren++;
+                    } else if (instance != null) {
+                        instance.members.add(child);
+                    }
+                }
+            }
+            analysis.forkFamilies = childrenByParent.size();
+            analysis.forkChildren = distinctChildren.size();
+            
+            // 3. ENTER, not BUFFERED, is one logical service/place execution.
+            // SELECT DISTINCT protects the reconstruction if a collector payload
+            // is accidentally ingested more than once.
+            Set<String> seenVisits = new HashSet<>();
+            String enterSql =
+                "SELECT DISTINCT tokenId, toPlace, transitionId, timestamp " +
+                "FROM CONSOLIDATED_TRANSITION_FIRINGS " +
+                "WHERE workflowBase = ? AND eventType = 'ENTER' " +
+                "ORDER BY timestamp";
+            try (PreparedStatement pstmt = conn.prepareStatement(enterSql)) {
+                pstmt.setInt(1, workflowBase);
+                ResultSet rs = pstmt.executeQuery();
+                while (rs.next()) {
+                    int tokenId = rs.getInt("tokenId");
+                    String place = rs.getString("toPlace");
+                    String transition = rs.getString("transitionId");
+                    long timestamp = rs.getLong("timestamp");
+                    
+                    enterTransitionsByToken.computeIfAbsent(tokenId, k -> new HashSet<>()).add(transition);
+                    
+                    String visitKey = tokenId + "|" + place + "|" + timestamp;
+                    if (!seenVisits.add(visitKey)) {
+                        continue;
+                    }
+                    
+                    int root = resolveRootToken(tokenId, parentByChild);
+                    WorkflowInstanceSummary instance = analysis.instances.get(root);
+                    if (instance == null) {
+                        analysis.unassignedPlaceVisits++;
+                        continue;
+                    }
+                    
+                    instance.members.add(tokenId);
+                    instance.placeExecutions.put(place,
+                        instance.placeExecutions.getOrDefault(place, 0) + 1);
+                    analysis.placeExecutions.put(place,
+                        analysis.placeExecutions.getOrDefault(place, 0) + 1);
+                }
+            }
+            
+            // 4. JOIN_CONSUMED closes a branch. A successful join requires every
+            // child of the fork to be accounted for at the same T_in transition,
+            // with one continuation ENTER (or a parent ENTER for reset semantics).
+            String consumedSql =
+                "SELECT DISTINCT tokenId, transitionId " +
+                "FROM CONSOLIDATED_TRANSITION_FIRINGS " +
+                "WHERE workflowBase = ? AND eventType = 'JOIN_CONSUMED'";
+            try (PreparedStatement pstmt = conn.prepareStatement(consumedSql)) {
+                pstmt.setInt(1, workflowBase);
+                ResultSet rs = pstmt.executeQuery();
+                while (rs.next()) {
+                    int tokenId = rs.getInt("tokenId");
+                    String transition = rs.getString("transitionId");
+                    consumedTransitionsByToken.computeIfAbsent(tokenId, k -> new HashSet<>()).add(transition);
+                }
+            }
+            
+            for (Map.Entry<Integer, Set<Integer>> fork : childrenByParent.entrySet()) {
+                int parent = fork.getKey();
+                Set<Integer> children = fork.getValue();
+                Set<String> candidateJoinTransitions = new HashSet<>();
+                for (int child : children) {
+                    Set<String> transitions = consumedTransitionsByToken.get(child);
+                    if (transitions != null) {
+                        candidateJoinTransitions.addAll(transitions);
+                    }
+                }
+                
+                boolean joined = false;
+                for (String transition : candidateJoinTransitions) {
+                    int accountedChildren = 0;
+                    boolean continuationObserved = false;
+                    Set<Integer> participantRoots = new HashSet<>();
+                    
+                    for (int child : children) {
+                        boolean consumed = consumedTransitionsByToken
+                            .getOrDefault(child, Collections.emptySet()).contains(transition);
+                        boolean entered = enterTransitionsByToken
+                            .getOrDefault(child, Collections.emptySet()).contains(transition);
+                        if (consumed || entered) {
+                            accountedChildren++;
+                            participantRoots.add(resolveRootToken(child, parentByChild));
+                        }
+                        if (entered) {
+                            continuationObserved = true;
+                        }
+                    }
+                    
+                    if (enterTransitionsByToken.getOrDefault(parent, Collections.emptySet()).contains(transition)) {
+                        continuationObserved = true;
+                        participantRoots.add(resolveRootToken(parent, parentByChild));
+                    }
+                    
+                    if (participantRoots.size() > 1) {
+                        analysis.joinFamilyViolations++;
+                    }
+                    
+                    if (accountedChildren == children.size() && continuationObserved) {
+                        joined = true;
+                        break;
+                    }
+                }
+                
+                if (joined) {
+                    analysis.successfulJoins++;
+                }
+            }
+            
+            // 5. Record business hand-off to the Monitor separately from actual
+            // acknowledgement. An EXIT to Monitor proves publication intent; the
+            // service timing row proves acknowledgeTokenArrival actually executed.
+            String handoffSql =
+                "SELECT DISTINCT tokenId FROM CONSOLIDATED_TRANSITION_FIRINGS " +
+                "WHERE workflowBase = ? AND eventType = 'EXIT' AND toPlace = 'MonitorService'";
+            try (PreparedStatement pstmt = conn.prepareStatement(handoffSql)) {
+                pstmt.setInt(1, workflowBase);
+                ResultSet rs = pstmt.executeQuery();
+                while (rs.next()) {
+                    int tokenId = rs.getInt("tokenId");
+                    int root = resolveRootToken(tokenId, parentByChild);
+                    WorkflowInstanceSummary instance = analysis.instances.get(root);
+                    if (instance != null) {
+                        instance.monitorHandoff = true;
+                        analysis.monitorHandoffRoots.add(root);
+                    }
+                }
+            }
+            
+            // SERVICEMEASUREMENTS is local to MonitorService and includes the
+            // operation name, so it cleanly excludes writeCollectorData/admin traffic.
+            String ackSql =
+                "SELECT sequenceID, MIN(arrivalTime) AS arrivalTime " +
+                "FROM SERVICEMEASUREMENTS " +
+                "WHERE serviceName = 'MonitorService' " +
+                "  AND operation = 'acknowledgeTokenArrival' " +
+                "GROUP BY sequenceID";
+            try (PreparedStatement pstmt = conn.prepareStatement(ackSql)) {
+                ResultSet rs = pstmt.executeQuery();
+                while (rs.next()) {
+                    int tokenId = rs.getInt("sequenceID");
+                    int root = resolveRootToken(tokenId, parentByChild);
+                    WorkflowInstanceSummary instance = analysis.instances.get(root);
+                    if (instance != null) {
+                        instance.monitorAcknowledged = true;
+                        long completedAt = rs.getLong("arrivalTime");
+                        if (completedAt > 0 && (instance.completedAt == 0 || completedAt < instance.completedAt)) {
+                            instance.completedAt = completedAt;
+                        }
+                        analysis.monitorAcknowledgedRoots.add(root);
+                    }
+                }
+            } catch (SQLException e) {
+                logger.warn("Canonical reconstruction: Monitor acknowledgement timing unavailable: " + e.getMessage());
+            }
+            
+            // Explicit business TerminateNode paths are valid completion boundaries
+            // for workflows such as invalid/declined branches.
+            String terminateSql =
+                "SELECT tokenId, MIN(timestamp) AS terminatedAt " +
+                "FROM CONSOLIDATED_TRANSITION_FIRINGS " +
+                "WHERE workflowBase = ? " +
+                "  AND (eventType = 'TERMINATE' OR toPlace = 'TERMINATE') " +
+                "GROUP BY tokenId";
+            try (PreparedStatement pstmt = conn.prepareStatement(terminateSql)) {
+                pstmt.setInt(1, workflowBase);
+                ResultSet rs = pstmt.executeQuery();
+                while (rs.next()) {
+                    int root = resolveRootToken(rs.getInt("tokenId"), parentByChild);
+                    WorkflowInstanceSummary instance = analysis.instances.get(root);
+                    if (instance != null) {
+                        instance.businessTerminated = true;
+                        long completedAt = rs.getLong("terminatedAt");
+                        if (completedAt > 0 && (instance.completedAt == 0 || completedAt < instance.completedAt)) {
+                            instance.completedAt = completedAt;
+                        }
+                        analysis.businessTerminatedRoots.add(root);
+                    }
+                }
+            }
+            
+        } catch (SQLException e) {
+            logger.error("Error reconstructing canonical workflows for workflowBase=" + workflowBase, e);
+        }
+        
+        analysis.generatedWorkflows = analysis.generatedRoots.size();
+        analysis.monitorHandoffs = analysis.monitorHandoffRoots.size();
+        analysis.monitorAcknowledgements = analysis.monitorAcknowledgedRoots.size();
+        analysis.businessTerminations = analysis.businessTerminatedRoots.size();
+        
+        analysis.completedRoots.addAll(analysis.monitorAcknowledgedRoots);
+        analysis.completedRoots.addAll(analysis.businessTerminatedRoots);
+        analysis.completedWorkflows = analysis.completedRoots.size();
+        
+        analysis.incompleteRoots.addAll(analysis.generatedRoots);
+        analysis.incompleteRoots.removeAll(analysis.completedRoots);
+        analysis.incompleteWorkflows = analysis.incompleteRoots.size();
+        
+        logger.info("Canonical reconstruction: generated=" + analysis.generatedWorkflows +
+            ", completed=" + analysis.completedWorkflows +
+            ", monitorAck=" + analysis.monitorAcknowledgements +
+            ", forks=" + analysis.forkFamilies +
+            ", joins=" + analysis.successfulJoins +
+            ", orphanChildren=" + analysis.orphanForkChildren);
+        
+        return analysis;
+    }
+    
+    private int resolveRootToken(int tokenId, Map<Integer, Integer> parentByChild) {
+        int current = tokenId;
+        Set<Integer> seen = new HashSet<>();
+        while (parentByChild.containsKey(current) && seen.add(current)) {
+            current = parentByChild.get(current);
+        }
+        return current;
+    }
+    
     // =============================================================================
     // SUMMARY REPORTS
     // =============================================================================
@@ -1731,93 +2386,110 @@ public class PetriNetAnalyzer {
      */
     public String generateWorkflowReport(int workflowBase) {
         StringBuilder report = new StringBuilder();
+        CanonicalWorkflowAnalysis canonical = analyzeCanonicalWorkflows(workflowBase);
         
         report.append("=== PETRI NET ANALYSIS REPORT ===\n");
         report.append("Workflow Base: ").append(workflowBase).append("\n\n");
         
-        // 1. Fork/Join Analysis (do this first to filter incomplete tokens)
+        report.append("1. CANONICAL WORKFLOW RECONSTRUCTION\n");
+        report.append("   Generated workflows:       ").append(canonical.generatedWorkflows).append("\n");
+        report.append("   Completed workflows:       ").append(canonical.completedWorkflows).append("\n");
+        report.append("   Monitor handoffs:          ").append(canonical.monitorHandoffs).append("\n");
+        report.append("   Monitor acknowledgements:  ").append(canonical.monitorAcknowledgements).append("\n");
+        report.append("   Business terminations:     ").append(canonical.businessTerminations).append("\n");
+        report.append("   Fork families:             ").append(canonical.forkFamilies).append("\n");
+        report.append("   Fork children:             ").append(canonical.forkChildren).append("\n");
+        report.append("   Successful joins:          ").append(canonical.successfulJoins).append("\n");
+        report.append("   Orphan fork children:      ").append(canonical.orphanForkChildren).append("\n");
+        report.append("   Unassigned place visits:   ").append(canonical.unassignedPlaceVisits).append("\n");
+        report.append("   Join-family violations:    ").append(canonical.joinFamilyViolations).append("\n");
+        report.append("   Incomplete workflows:      ").append(canonical.incompleteWorkflows).append("\n");
+        if (!canonical.incompleteRoots.isEmpty()) {
+            report.append("     Incomplete roots: ").append(canonical.incompleteRoots).append("\n");
+        }
+        
+        boolean canonicalOk = canonical.generatedWorkflows > 0 &&
+                              canonical.incompleteWorkflows == 0 &&
+                              canonical.orphanForkChildren == 0 &&
+                              canonical.unassignedPlaceVisits == 0 &&
+                              canonical.joinFamilyViolations == 0;
+        report.append("   Structural result:         ")
+              .append(canonicalOk ? "[OK]" : "[CHECK]")
+              .append("\n\n");
+        
+        report.append("2. LOGICAL PLACE EXECUTIONS\n");
+        if (canonical.placeExecutions.isEmpty()) {
+            report.append("   No ENTER events reconstructed\n");
+        } else {
+            for (Map.Entry<String, Integer> entry : canonical.placeExecutions.entrySet()) {
+                report.append("   ").append(entry.getKey()).append(": ")
+                      .append(entry.getValue()).append(" executions\n");
+            }
+        }
+        report.append("\n");
+        
         ForkJoinAnalysis forkJoin = analyzeForkJoin(workflowBase);
-        report.append("1. FORK/JOIN ANALYSIS\n");
-        if (forkJoin.totalForks == 0) {
-            report.append("   No fork/join patterns detected\n");
-        } else {
-            report.append("   Total Forks: ").append(forkJoin.totalForks).append("\n");
-            report.append("   Successful Joins: ").append(forkJoin.successfulJoins).append("\n");
-            report.append("   Forked Tokens: ").append(forkJoin.forkedTokens.size()).append("\n");
-            
-            // Show fork groups
-            for (ForkGroup group : forkJoin.forkGroups) {
-                report.append("   Fork from ").append(group.parentTokenId)
-                      .append(" -> ").append(group.childTokenIds)
-                      .append(group.joinSuccessful ? " [JOINED]" : " [INCOMPLETE]").append("\n");
-            }
+        report.append("3. FORK/JOIN DETAIL\n");
+        report.append("   Forks detected (legacy cross-check): ").append(forkJoin.totalForks).append("\n");
+        report.append("   Joins detected (legacy cross-check): ").append(forkJoin.successfulJoins).append("\n");
+        for (ForkGroup group : forkJoin.forkGroups) {
+            report.append("   Fork from ").append(group.parentTokenId)
+                  .append(" -> ").append(group.childTokenIds)
+                  .append(group.joinSuccessful ? " [JOINED]" : " [INCOMPLETE]").append("\n");
         }
         report.append("\n");
         
-        // 2. Token completeness (excluding correctly joined tokens and terminated tokens)
-        ArrayList<TokenPath> rawIncomplete = verifyTokenCompleteness(workflowBase);
-        ArrayList<TokenPath> actualIncomplete = getActualIncompleteTokens(workflowBase);
-        ArrayList<Integer> terminatedTokens = getTerminatedTokens(workflowBase);
-        
-        report.append("2. TOKEN COMPLETENESS\n");
-        if (actualIncomplete.isEmpty()) {
-            report.append("   [OK] All tokens completed successfully\n");
-        } else {
-            report.append("   [FAIL] ").append(actualIncomplete.size()).append(" incomplete tokens found\n");
-            for (TokenPath path : actualIncomplete) {
-                report.append("     - Token ").append(path.tokenId)
-                      .append(" stuck at ").append(path.placeName).append("\n");
-            }
-        }
-        if (rawIncomplete.size() > actualIncomplete.size()) {
-            int joinedCount = rawIncomplete.size() - actualIncomplete.size();
-            report.append("   (").append(joinedCount).append(" tokens consumed by joins - this is correct)\n");
-        }
-        if (!terminatedTokens.isEmpty()) {
-            report.append("   [INFO] ").append(terminatedTokens.size()).append(" tokens terminated early (routed to TERMINATE)\n");
-            report.append("     Terminated tokens: ").append(terminatedTokens).append("\n");
+        // Event pairing is an instrumentation-quality diagnostic only. It does
+        // not decide logical workflow completion.
+        ArrayList<TokenPath> unpaired = verifyTokenCompleteness(workflowBase);
+        report.append("4. INSTRUMENTATION CONSISTENCY\n");
+        report.append("   Unpaired place ENTER events: ").append(unpaired.size()).append("\n");
+        for (TokenPath path : unpaired) {
+            report.append("     - Token ").append(path.tokenId)
+                  .append(" entered ").append(path.placeName)
+                  .append(" without a same-token EXIT/TERMINATE\n");
         }
         report.append("\n");
         
-        // 3. Throughput
-        double throughput = getWorkflowThroughput(workflowBase);
-        report.append("3. THROUGHPUT\n");
-        report.append("   ").append(String.format("%.2f", throughput)).append(" tokens/second\n\n");
-        
-        // 4. Get all places and analyze each
-        report.append("4. PLACE STATISTICS\n");
+        report.append("5. PLACE RESIDENCE SAMPLES\n");
         ArrayList<String> places = getAllPlaces(workflowBase);
         for (String place : places) {
             PlaceStatistics stats = getPlaceStatistics(place, workflowBase);
+            int logicalExecutions = canonical.placeExecutions.getOrDefault(place, 0);
             report.append("   Place: ").append(place).append("\n");
-            report.append("     Tokens: ").append(stats.tokenCount).append("\n");
-            report.append("     Avg residence: ").append(String.format("%.1f", stats.avgResidenceTime)).append("ms\n");
-            report.append("     Min/Max: ").append(stats.minResidenceTime)
-                  .append("/").append(stats.maxResidenceTime).append("ms\n");
+            report.append("     Logical executions: ").append(logicalExecutions).append("\n");
+            report.append("     Paired timing samples: ").append(stats.tokenCount).append("\n");
+            if (stats.tokenCount > 0) {
+                report.append("     Avg residence: ").append(String.format("%.1f", stats.avgResidenceTime)).append("ms\n");
+                report.append("     Min/Max: ").append(stats.minResidenceTime)
+                      .append("/").append(stats.maxResidenceTime).append("ms\n");
+            }
+            if (stats.tokenCount != logicalExecutions) {
+                report.append("     [WARN] execution/timing-sample mismatch - inspect token identity\n");
+            }
         }
         report.append("\n");
         
-        // 5. Capacity verification
-        report.append("5. CAPACITY VERIFICATION\n");
+        report.append("6. CAPACITY VERIFICATION\n");
         for (String place : places) {
-            boolean bounded = verifyBoundedCapacity(place, workflowBase, 50); // Assuming capacity=50
+            boolean bounded = verifyBoundedCapacity(place, workflowBase, 50);
             report.append("   ").append(place).append(": ")
                   .append(bounded ? "[OK] BOUNDED" : "[FAIL] EXCEEDED").append("\n");
         }
         
-        // 6. Data quality check
-        report.append("\n6. DATA QUALITY\n");
+        report.append("\n7. DATA QUALITY\n");
         ArrayList<TokenPath> allPaths = getTokenPaths(workflowBase);
         long negativePaths = allPaths.stream().filter(p -> p.residenceTime < 0).count();
+        report.append("   Reconstructed place paths: ").append(allPaths.size()).append("\n");
         if (negativePaths == 0) {
-            report.append("   [OK] All residence times are non-negative\n");
+            report.append("   [OK] All paired residence times are non-negative\n");
         } else {
             report.append("   [WARN] ").append(negativePaths)
-                  .append(" paths have negative residence time - check data integrity\n");
+                  .append(" paths have negative residence time\n");
         }
+        report.append("   NOTE: temporal distributions and canonical throughput are reported in Stage 2.\n");
         
         report.append("\n=== END REPORT ===\n");
-        
         return report.toString();
     }
     
@@ -2219,6 +2891,90 @@ public class PetriNetAnalyzer {
     // DATA CLASSES
     // =============================================================================
     
+    public static class CanonicalWorkflowAnalysis {
+        public int workflowBase;
+        public int generatedWorkflows;
+        public int completedWorkflows;
+        public int incompleteWorkflows;
+        public int monitorHandoffs;
+        public int monitorAcknowledgements;
+        public int businessTerminations;
+        public int forkFamilies;
+        public int forkChildren;
+        public int successfulJoins;
+        public int orphanForkChildren;
+        public int unassignedPlaceVisits;
+        public int joinFamilyViolations;
+        public Map<String, Integer> placeExecutions = new TreeMap<>();
+        public Map<Integer, WorkflowInstanceSummary> instances = new TreeMap<>();
+        public Set<Integer> generatedRoots = new HashSet<>();
+        public Set<Integer> monitorHandoffRoots = new HashSet<>();
+        public Set<Integer> monitorAcknowledgedRoots = new HashSet<>();
+        public Set<Integer> businessTerminatedRoots = new HashSet<>();
+        public Set<Integer> completedRoots = new HashSet<>();
+        public Set<Integer> incompleteRoots = new HashSet<>();
+    }
+    
+    public static class WorkflowInstanceSummary {
+        public int rootTokenId;
+        public long generatedAt;
+        public long completedAt;
+        public boolean monitorHandoff;
+        public boolean monitorAcknowledged;
+        public boolean businessTerminated;
+        public Set<Integer> members = new HashSet<>();
+        public Map<String, Integer> placeExecutions = new TreeMap<>();
+    }
+    
+    public static class TimingDistribution {
+        public int samples;
+        public int invalidSamples;
+        public double avgMs;
+        public long p50Ms;
+        public long p95Ms;
+        public long minMs;
+        public long maxMs;
+    }
+
+    public static class ServiceTimingSummary {
+        public String placeName;
+        public TimingDistribution queueTime = new TimingDistribution();
+        public TimingDistribution serviceTime = new TimingDistribution();
+        public TimingDistribution totalTime = new TimingDistribution();
+    }
+
+    public static class JoinTimingSummary {
+        public String transitionId;
+        public String placeName;
+        public TimingDistribution synchronizationWait = new TimingDistribution();
+        public TimingDistribution arrivalSkew = new TimingDistribution();
+    }
+
+    public static class TemporalAnalysis {
+        public int workflowBase;
+        public int expectedCompletedWorkflows;
+        public long observationWindowMs;
+        public double completionThroughputPerSecond;
+        public int unmatchedServiceTimingSamples;
+        public int serviceTimingCountMismatches;
+        public TimingDistribution workflowLatency = new TimingDistribution();
+        public TimingDistribution generationInterArrival = new TimingDistribution();
+        public Map<String, Integer> expectedPlaceExecutions = new TreeMap<>();
+        public Map<String, TimingDistribution> placeResidence = new TreeMap<>();
+        public Map<String, ServiceTimingSummary> serviceTiming = new TreeMap<>();
+        public Map<String, JoinTimingSummary> joinTiming = new TreeMap<>();
+    }
+
+    private static class JoinTemporalAccumulator {
+        public String transitionId;
+        public String placeName;
+        public long firstBuffered = Long.MAX_VALUE;
+        public long lastBuffered = Long.MIN_VALUE;
+        public long enterAt;
+        public int consumedCount;
+        public Set<Integer> bufferedTokens = new HashSet<>();
+    }
+
     public static class TokenPath {
         public int tokenId;
         public String placeName;
@@ -2386,6 +3142,7 @@ public class PetriNetAnalyzer {
             // Print full report (now includes fork/join analysis)
             analyzer.printWorkflowReport(workflowBase);
             analyzer.printGenealogyReport(workflowBase);
+            System.out.println("\n" + analyzer.generateTemporalReport(workflowBase));
             
             // Get detailed token paths
             System.out.println("\n=== TOKEN PATHS ===");

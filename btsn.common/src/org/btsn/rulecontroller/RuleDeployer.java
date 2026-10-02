@@ -430,6 +430,20 @@ public class RuleDeployer {
 	                        multiOpServices.put(id, new ArrayList<>(operationsList)); 
 	                    }
 	                    
+	                    // Preserve method-specific canonical metadata for all methods on
+	                    // this physical service, not only the first operation.
+	                    for (String operationName : operationsList) {
+	                        List<String> argsForOperation = extractOperationArguments(block, operationName);
+	                        if (!argsForOperation.isEmpty()) {
+	                            attributes.put("operationArguments." + operationName,
+	                                           String.join(",", argsForOperation));
+	                        }
+	                        String returnForOperation = extractOperationReturnAttribute(block, operationName);
+	                        if (returnForOperation != null && !returnForOperation.isEmpty()) {
+	                            attributes.put("returnAttribute." + operationName, returnForOperation);
+	                        }
+	                    }
+	                    
 	                    ServiceNode serviceNode = new ServiceNode(id, service, primaryOperation, attributes);
 	                    workflowModel.addServiceNode(serviceNode);
 	                    
@@ -1713,8 +1727,23 @@ public class RuleDeployer {
 	            for (String operation : multiOpServices.get(serviceNode.nodeId)) {
 	                logger.info("=== DEPLOYING: " + serviceNode.service + ":" + operation + " ===");
 	                try {
-	                    // Create a temporary service node for this specific operation
-	                    ServiceNode opNode = new ServiceNode(serviceNode.nodeId, serviceNode.service, operation, serviceNode.attributes);
+	                    // Create a temporary service node with the metadata belonging to
+	                    // this specific operation on the shared physical service.
+	                    Map<String, String> operationAttributes = new HashMap<>(serviceNode.attributes);
+	                    String operationArgs = serviceNode.attributes.get("operationArguments." + operation);
+	                    if (operationArgs != null) {
+	                        operationAttributes.put("operationArguments", operationArgs);
+	                    } else {
+	                        operationAttributes.remove("operationArguments");
+	                    }
+	                    String operationReturn = serviceNode.attributes.get("returnAttribute." + operation);
+	                    if (operationReturn != null) {
+	                        operationAttributes.put("returnAttribute", operationReturn);
+	                    } else {
+	                        operationAttributes.remove("returnAttribute");
+	                    }
+	                    ServiceNode opNode = new ServiceNode(serviceNode.nodeId, serviceNode.service,
+	                                                         operation, operationAttributes);
 	                    deployServiceNode(opNode);
 	                    deployedCount++;
 	                    logger.info("Successfully deployed: " + serviceNode.service + ":" + operation);
@@ -3343,6 +3372,24 @@ public class RuleDeployer {
 				generateCanonicalBindingFile(bindingsBasePath, serviceNode.service, 
 				                              serviceNode.operation, joinInputCount, argumentNames, returnAttribute);
 				
+				String operationsCsv = serviceNode.attributes.get("operations");
+				if (operationsCsv != null && !operationsCsv.isEmpty()) {
+					for (String operationName : operationsCsv.split(",")) {
+						operationName = operationName.trim();
+						if (operationName.isEmpty() || operationName.equals(serviceNode.operation)) {
+							continue;
+						}
+						List<String> secondaryArgs = null;
+						String argsCsv = serviceNode.attributes.get("operationArguments." + operationName);
+						if (argsCsv != null && !argsCsv.isEmpty()) {
+							secondaryArgs = Arrays.asList(argsCsv.split(","));
+						}
+						String secondaryReturn = serviceNode.attributes.get("returnAttribute." + operationName);
+						appendCanonicalOperationBinding(bindingsBasePath, serviceNode.service,
+							operationName, joinInputCount, secondaryArgs, secondaryReturn);
+					}
+				}
+				
 				// Track the generated file path (normalized)
 				String folderName = serviceNode.service.contains("_") 
 				                    ? serviceNode.service.substring(0, serviceNode.service.indexOf("_"))
@@ -3467,7 +3514,15 @@ public class RuleDeployer {
 		logger.info("RETURN-ATTR: Determining return attribute for service: " + serviceNode.service + 
 		           " (nodeId=" + serviceNode.nodeId + ")");
 		
-		// Find outgoing transition from this service (service -> T_out)
+				// An explicit business contract always wins over topology inference.
+		String explicitReturnAttribute = serviceNode.attributes.get("returnAttribute");
+		if (explicitReturnAttribute != null && !explicitReturnAttribute.isEmpty()) {
+			logger.info("RETURN-ATTR: Using explicit returnAttribute='" + explicitReturnAttribute +
+			           "' for " + serviceNode.service);
+			return explicitReturnAttribute;
+		}
+		
+// Find outgoing transition from this service (service -> T_out)
 		TransitionNode outgoingTransition = null;
 		for (WorkflowEdge edge : workflowModel.getWorkflowEdges()) {
 			if (edge.fromNode.equals(serviceNode.nodeId)) {
@@ -3943,6 +3998,55 @@ public class RuleDeployer {
 		}
 		
 		logger.debug("Successfully wrote canonical binding file: " + fullPath);
+	}
+
+	private void appendCanonicalOperationBinding(String basePath, String serviceName,
+			String operationName, int inputCount, List<String> argumentNames,
+			String returnAttribute) throws IOException {
+		String folderName = serviceName.contains("_")
+			? serviceName.substring(0, serviceName.indexOf("_")) : serviceName;
+		File bindingFile = new File(new File(basePath, folderName),
+			serviceName + "-CanonicalBindings.ruleml.xml");
+		boolean hasExplicitArgs = argumentNames != null && !argumentNames.isEmpty();
+		
+		logger.info("Appending canonical binding for " + serviceName + "." + operationName);
+		try (PrintWriter pw = new PrintWriter(new FileWriter(bindingFile, true))) {
+			pw.println();
+			pw.println("<!-- Additional operation: " + operationName + " -->");
+			if (hasExplicitArgs) {
+				String returnAttr = (returnAttribute != null && !returnAttribute.isEmpty())
+					? returnAttribute
+					: (argumentNames.size() == 1 ? argumentNames.get(0) : "token");
+				for (String argName : argumentNames) {
+					pw.println("<Atom>");
+					pw.println("\t<Rel>canonicalBinding</Rel>");
+					pw.println("\t<Ind>" + operationName + "</Ind>");
+					pw.println("\t<Ind>" + returnAttr + "</Ind>");
+					pw.println("\t<Ind>" + argName.trim() + "</Ind>");
+					pw.println("</Atom>");
+				}
+			} else if (inputCount <= 1) {
+				String outputAttr = (returnAttribute != null && !returnAttribute.isEmpty())
+					? returnAttribute : "token";
+				pw.println("<Atom>");
+				pw.println("\t<Rel>canonicalBinding</Rel>");
+				pw.println("\t<Ind>" + operationName + "</Ind>");
+				pw.println("\t<Ind>" + outputAttr + "</Ind>");
+				pw.println("\t<Ind>token</Ind>");
+				pw.println("</Atom>");
+			} else {
+				String outputAttr = (returnAttribute != null && !returnAttribute.isEmpty())
+					? returnAttribute : "token";
+				for (int i = 1; i <= inputCount; i++) {
+					pw.println("<Atom>");
+					pw.println("\t<Rel>canonicalBinding</Rel>");
+					pw.println("\t<Ind>" + operationName + "</Ind>");
+					pw.println("\t<Ind>" + outputAttr + "</Ind>");
+					pw.println("\t<Ind>token_" + i + "</Ind>");
+					pw.println("</Atom>");
+				}
+			}
+		}
 	}
 
 	/**

@@ -9,7 +9,6 @@ import java.net.InetAddress;
 import org.btsn.json.jsonLibrary;
 import org.btsn.rulecontroller.RuleDeployer;
 import org.btsn.utils.BuildRuleBase;
-import org.btsn.utils.CopyFile;
 import org.btsn.utils.CreateDirectory;
 import org.btsn.utils.OOjdrewAPI;
 import org.btsn.utils.StringFileIO;
@@ -393,9 +392,10 @@ public class DatabaseInitialization_EventGenerator {
         String payLoadPath = appBase.getAbsolutePath() + "/Payload";
         payLoadVersionPath = appBase.getAbsolutePath() + "/" + ruleBaseVersion + "/";
         CreateDirectory.createDirectory(payLoadVersionPath);
-        CopyFile.copyfile(payLoadPath + "/payLoad.xml", payLoadVersionPath + "/payload.xml");
 
-        String currentXmlPayload = StringFileIO.readFileAsString(payLoadVersionPath + "/payload.xml");
+        // The template is immutable. Build this event entirely in memory so
+        // concurrent generator JVMs never share a mutable construction file.
+        String currentXmlPayload = StringFileIO.readFileAsString(payLoadPath + "/payLoad.xml");
 
         currentXmlPayload = XPathHelper.modifyXMLItem(currentXmlPayload, 
             "//payload/service/serviceName/text()", serviceName);

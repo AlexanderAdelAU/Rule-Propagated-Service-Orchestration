@@ -1,1 +1,22 @@
 /.metadata/
+
+# Eclipse / Java build products
+**/bin/
+**/target/
+
+# Runtime logs and captured service output
+**/*.log
+**/*.log.*
+**/*.out
+**/*.out.*
+**/*.out.txt
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+
+# Generated FinancialSystem workflow-routing rules
+btsn.petrinet.places.p*/RuleFolder.v001/processToken/
+btsn.petrinet.places.p*/RuleFolder.v002/processToken/
+btsn.common.Monitor/RuleFolder.v001/acknowledgeTokenArrival/
+btsn.common.Monitor/RuleFolder.v002/acknowledgeTokenArrival/

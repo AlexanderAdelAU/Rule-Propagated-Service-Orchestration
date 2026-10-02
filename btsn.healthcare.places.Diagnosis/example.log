@@ -1,5 +1,0 @@
-INFO ServiceThread-Diagnosis_CollectorService-12203 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Completed callNextOperation for MonitorService, published=true
-INFO ServiceThread-Diagnosis_CollectorService-12203 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Successfully published to MonitorService via EventPublisher
-ERROR ServiceThread-Diagnosis_CollectorService-12203 org.btsn.handlers.ServiceThread - monitorIncomingEvents: false
-DEBUG ServiceThread-Diagnosis_CollectorService-12203 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Cleaned up join 3000000
-DEBUG ServiceThread-Diagnosis_CollectorService-12203 org.btsn.handlers.ServiceThread - ORCHESTRATOR: Service Diagnosis_CollectorService sequence ID: 3000000 complete.
