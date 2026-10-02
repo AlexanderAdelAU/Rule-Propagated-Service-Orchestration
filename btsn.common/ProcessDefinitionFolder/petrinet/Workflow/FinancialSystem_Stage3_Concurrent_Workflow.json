@@ -34,24 +34,12 @@
       "y": 195,
       "width": 50,
       "height": 50,
-      "label": "P1 Shared Financial Service",
+      "label": "Validation",
       "service": "P1_Place",
       "operations": [
         {
           "name": "processToken",
           "returnAttribute": "validationResults",
-          "arguments": [
-            {
-              "name": "token",
-              "type": "String",
-              "value": "String",
-              "required": false
-            }
-          ]
-        },
-        {
-          "name": "verifyApplicantIdentity",
-          "returnAttribute": "identityVerificationResults",
           "arguments": [
             {
               "name": "token",
@@ -97,7 +85,7 @@
       "y": 135,
       "width": 50,
       "height": 50,
-      "label": "P2 Shared Financial Service",
+      "label": "CreditCheck",
       "service": "P2_Place",
       "operations": [
         {
@@ -106,18 +94,6 @@
           "arguments": [
             {
               "name": "validationResults",
-              "type": "String",
-              "value": "String",
-              "required": false
-            }
-          ]
-        },
-        {
-          "name": "assessAffordability",
-          "returnAttribute": "affordabilityAssessmentResults",
-          "arguments": [
-            {
-              "name": "identityVerificationResults",
               "type": "String",
               "value": "String",
               "required": false
@@ -394,7 +370,7 @@
       "label": "v001",
       "guardCondition": "",
       "decision_value": "",
-      "endpoint": ""
+      "endpoint": "processToken"
     },
     {
       "source": "T_in_Validation",
@@ -570,7 +546,7 @@
       "label": "v002",
       "guardCondition": "",
       "decision_value": "",
-      "endpoint": ""
+      "endpoint": "processToken"
     },
     {
       "source": "T_out_Validation",
@@ -578,7 +554,7 @@
       "label": "prescreen",
       "guardCondition": "DECISION_EQUAL_TO",
       "decision_value": "prescreen",
-      "endpoint": "assessAffordability"
+      "endpoint": "processToken"
     },
     {
       "source": "T_out_CreditCheck",
@@ -673,7 +649,7 @@
     {
       "x": 95,
       "y": 100,
-      "text": "Two event generators -> same P1/P2 physical services -> different methods",
+      "text": "Two event generators -> same P1/P2 physical services -> same operations, different topology",
       "fontSize": 11,
       "fontStyle": 2,
       "color": -16777216
