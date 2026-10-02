@@ -1,1 +1,16 @@
 /.metadata/
+
+# Eclipse / Java build products
+**/bin/
+**/target/
+
+# Runtime logs and captured service output
+**/*.log
+**/*.log.*
+**/*.out
+**/*.out.*
+**/*.out.txt
+
+# OS/editor noise
+.DS_Store
+Thumbs.db

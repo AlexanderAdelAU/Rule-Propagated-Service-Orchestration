@@ -232,7 +232,32 @@
 		<echo message="Previous output files cleaned" />
 	</target>
 
-	<target name="generate-workflow-bindings" description="Generate canonical bindings for both workflows">
+
+	<target name="clean-generated-workflow-rules" description="Remove generated v001/v002 process-routing rules before regeneration">
+		<echo message="=== Removing previously generated workflow-routing rules ===" />
+
+		<!-- v001 full workflow: P1-P5 plus Monitor -->
+		<delete dir="${p1.project.dir}/RuleFolder.${workflow1.version}/processToken" quiet="true" failonerror="false" />
+		<delete dir="${p2.project.dir}/RuleFolder.${workflow1.version}/processToken" quiet="true" failonerror="false" />
+		<delete dir="${p3.project.dir}/RuleFolder.${workflow1.version}/processToken" quiet="true" failonerror="false" />
+		<delete dir="${p4.project.dir}/RuleFolder.${workflow1.version}/processToken" quiet="true" failonerror="false" />
+		<delete dir="${p5.project.dir}/RuleFolder.${workflow1.version}/processToken" quiet="true" failonerror="false" />
+		<delete dir="${monitor.project.dir}/RuleFolder.${workflow1.version}/acknowledgeTokenArrival" quiet="true" failonerror="false" />
+
+		<!-- v002 pre-screen workflow: shared P1/P2 plus Monitor.
+		     P3-P5 v002 processToken folders are also removed so stale topology
+		     cannot survive from an earlier experiment. -->
+		<delete dir="${p1.project.dir}/RuleFolder.${workflow2.version}/processToken" quiet="true" failonerror="false" />
+		<delete dir="${p2.project.dir}/RuleFolder.${workflow2.version}/processToken" quiet="true" failonerror="false" />
+		<delete dir="${p3.project.dir}/RuleFolder.${workflow2.version}/processToken" quiet="true" failonerror="false" />
+		<delete dir="${p4.project.dir}/RuleFolder.${workflow2.version}/processToken" quiet="true" failonerror="false" />
+		<delete dir="${p5.project.dir}/RuleFolder.${workflow2.version}/processToken" quiet="true" failonerror="false" />
+		<delete dir="${monitor.project.dir}/RuleFolder.${workflow2.version}/acknowledgeTokenArrival" quiet="true" failonerror="false" />
+
+		<echo message="Generated workflow-routing rules removed; current process JSON must regenerate them." />
+	</target>
+
+	<target name="generate-workflow-bindings" depends="clean-generated-workflow-rules" description="Generate canonical bindings for both workflows">
 		<echo message="=== Generating Workflow 1 Bindings (${workflow1.process.name}) ===" />
 		<java classname="org.btsn.rulecontroller.TopologyBindingGenerator" 
 		      classpathref="generator.classpath"
