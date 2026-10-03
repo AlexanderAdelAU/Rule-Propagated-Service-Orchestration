@@ -176,6 +176,7 @@ public class GenericPetriNetTokenGenerator {
 	private static String tokenData = "";  // Optional custom data (use -data)
 	private static String triggerFileOverride = null;  // Optional experiment-specific trigger schedule
 	private static String processName = null;  // REQUIRED: Workflow name (REQUIRED: -process)
+	private static String infrastructureDefinitionName = null;  // Optional deployment mapping
 	
 	// Fork mode settings
 	private static boolean forkMode = false;  // Enable fork injection mode
@@ -218,6 +219,7 @@ public class GenericPetriNetTokenGenerator {
 		System.out.println("Event Generator ID: " + eventGeneratorId);
 		System.out.println("Target Place: " + targetPlaceName);
 		System.out.println("Service Operation: " + serviceOperation);
+		System.out.println("Infrastructure Definition: " + (infrastructureDefinitionName == null ? "(none)" : infrastructureDefinitionName));
 		
 		if (forkMode) {
 			System.out.println("MODE: FORK_NODE");
@@ -266,7 +268,7 @@ public class GenericPetriNetTokenGenerator {
 				
 				RuleDeployer ruleDeployer = null;
 				try {
-					ruleDeployer = new RuleDeployer(processName, ruleBaseVersion);
+					ruleDeployer = new RuleDeployer(processName, ruleBaseVersion, infrastructureDefinitionName);
 				} catch (Throwable t) {
 					System.err.println("FATAL: RuleDeployer constructor threw exception!");
 					System.err.println("Exception: " + t.getClass().getName() + ": " + t.getMessage());
@@ -356,6 +358,14 @@ public class GenericPetriNetTokenGenerator {
 					if (i + 1 < args.length) {
 						processName = args[++i];
 						System.out.println("  Parsed -process: " + processName);
+					}
+					break;
+					
+				case "-infrastructure":
+				case "--infrastructure":
+					if (i + 1 < args.length) {
+						infrastructureDefinitionName = args[++i];
+						System.out.println("  Parsed -infrastructure: " + infrastructureDefinitionName);
 					}
 					break;
 					
