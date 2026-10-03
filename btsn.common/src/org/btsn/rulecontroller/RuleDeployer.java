@@ -373,36 +373,37 @@ public class RuleDeployer {
 				infrastructureFile.getAbsolutePath());
 		}
 
-		try {
-			String json = StringFileIO.readFileAsString(infrastructureFile.getAbsolutePath());
-			String definitionType = extractJsonValue(json, "definitionType");
-			if (!"Infrastructure".equalsIgnoreCase(definitionType)) {
-				throw new RuleDeployerException("Not an Infrastructure definition: " +
-					infrastructureFile.getAbsolutePath());
+		String json = StringFileIO.readFileAsString(infrastructureFile.getAbsolutePath());
+		if (json == null) {
+			throw new RuleDeployerException("Failed to read infrastructure definition: " +
+				infrastructureFile.getAbsolutePath());
+		}
+
+		String definitionType = extractJsonValue(json, "definitionType");
+		if (!"Infrastructure".equalsIgnoreCase(definitionType)) {
+			throw new RuleDeployerException("Not an Infrastructure definition: " +
+				infrastructureFile.getAbsolutePath());
+		}
+
+		String capabilitiesSection = extractJsonSection(json, "\"capabilities\"");
+		for (String block : splitJsonObjects(capabilitiesSection)) {
+			String node = extractJsonValue(block, "node");
+			String service = extractJsonValue(block, "service");
+			String operation = extractJsonValue(block, "operation");
+			if (node == null || node.isEmpty() || service == null || service.isEmpty() ||
+				operation == null || operation.isEmpty()) {
+				continue;
 			}
 
-			String capabilitiesSection = extractJsonSection(json, "\"capabilities\"");
-			for (String block : splitJsonObjects(capabilitiesSection)) {
-				String node = extractJsonValue(block, "node");
-				String service = extractJsonValue(block, "service");
-				String operation = extractJsonValue(block, "operation");
-				if (node == null || node.isEmpty() || service == null || service.isEmpty() ||
-					operation == null || operation.isEmpty()) {
-					continue;
-				}
+			DeploymentBinding binding = new DeploymentBinding(node, service, operation);
+			deploymentBindings.put(deploymentKey(service, operation), binding);
+			logger.info("INFRASTRUCTURE MAP: " + service + "." + operation + " -> " +
+				node + " (" + binding.runtimeService + ")");
+		}
 
-				DeploymentBinding binding = new DeploymentBinding(node, service, operation);
-				deploymentBindings.put(deploymentKey(service, operation), binding);
-				logger.info("INFRASTRUCTURE MAP: " + service + "." + operation + " -> " +
-					node + " (" + binding.runtimeService + ")");
-			}
-
-			if (deploymentBindings.isEmpty()) {
-				throw new RuleDeployerException("Infrastructure definition contains no usable capabilities: " +
-					infrastructureFile.getAbsolutePath());
-			}
-		} catch (IOException e) {
-			throw new RuleDeployerException("Failed to load infrastructure definition: " + e.getMessage(), e);
+		if (deploymentBindings.isEmpty()) {
+			throw new RuleDeployerException("Infrastructure definition contains no usable capabilities: " +
+				infrastructureFile.getAbsolutePath());
 		}
 	}
 
