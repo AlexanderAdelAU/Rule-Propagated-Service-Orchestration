@@ -131,6 +131,8 @@ public class RuleDeployer {
 	// Instance variables
 	private final String buildVersion;
 	private final String processName;
+	private final String infrastructureDefinitionName;
+	private final Map<String, DeploymentBinding> deploymentBindings = new HashMap<>();
 	private String ruleChannel;
 	private String rulePort;
 	private Integer serviceOperationPairCount = 0;
@@ -187,13 +189,41 @@ public class RuleDeployer {
 		}
 	}
 
-	public RuleDeployer(String processName, String buildVersion) {
-	    this.buildVersion = buildVersion;
-	    this.processName = processName;
-	    startCommitmentListener(); // Added this line
-	//    logger.setLevel(org.apache.log4j.Level.ERROR);  // ADD THIS LINE
-	    logger.info("JSON-Based RuleDeployer initialized for process: " + processName + " version: " + buildVersion);
 
+	private static class DeploymentBinding {
+		final String node;
+		final String businessService;
+		final String operation;
+		final String runtimeService;
+
+		DeploymentBinding(String node, String businessService, String operation) {
+			this.node = node;
+			this.businessService = businessService;
+			this.operation = operation;
+			this.runtimeService = runtimeServiceForNode(node);
+		}
+	}
+
+	private static String runtimeServiceForNode(String node) {
+		if (node != null && node.matches("P\\d+")) {
+			return node + "_Place";
+		}
+		return node;
+	}
+
+	public RuleDeployer(String processName, String buildVersion) {
+		this(processName, buildVersion, null);
+	}
+
+	public RuleDeployer(String processName, String buildVersion, String infrastructureDefinitionName) {
+		this.buildVersion = buildVersion;
+		this.processName = processName;
+		this.infrastructureDefinitionName = infrastructureDefinitionName;
+		startCommitmentListener();
+		logger.info("JSON-Based RuleDeployer initialized for process: " + processName + " version: " + buildVersion);
+		if (infrastructureDefinitionName != null && !infrastructureDefinitionName.trim().isEmpty()) {
+			logger.info("Infrastructure definition: " + infrastructureDefinitionName);
+		}
 	}
 
 	/**
@@ -305,6 +335,7 @@ public class RuleDeployer {
 			String jsonFileName = jsonFile.getAbsolutePath();
 			
 			if (jsonFile.exists()) {
+				loadInfrastructureDefinition(commonPath);
 				logger.info("Loading JSON workflow from: " + jsonFileName);
 				String jsonContent = StringFileIO.readFileAsString(jsonFileName);
 				logger.info("Successfully loaded JSON workflow: " + jsonContent.length() + " characters");
@@ -323,6 +354,76 @@ public class RuleDeployer {
 		}
 	}
 	
+
+	private void loadInfrastructureDefinition(String commonPath) throws RuleDeployerException {
+		deploymentBindings.clear();
+		if (infrastructureDefinitionName == null || infrastructureDefinitionName.trim().isEmpty()) {
+			return;
+		}
+
+		String definitionName = infrastructureDefinitionName.trim();
+		if (definitionName.toLowerCase(Locale.ROOT).endsWith(".json")) {
+			definitionName = definitionName.substring(0, definitionName.length() - 5);
+		}
+
+		File infrastructureFile = new File(commonPath + "/" + Config.PROCESS_DEFINITION_FOLDER + "/" +
+			definitionName + ".json");
+		if (!infrastructureFile.exists()) {
+			throw new RuleDeployerException("Infrastructure definition not found: " +
+				infrastructureFile.getAbsolutePath());
+		}
+
+		try {
+			String json = StringFileIO.readFileAsString(infrastructureFile.getAbsolutePath());
+			String definitionType = extractJsonValue(json, "definitionType");
+			if (!"Infrastructure".equalsIgnoreCase(definitionType)) {
+				throw new RuleDeployerException("Not an Infrastructure definition: " +
+					infrastructureFile.getAbsolutePath());
+			}
+
+			String capabilitiesSection = extractJsonSection(json, "\"capabilities\"");
+			for (String block : splitJsonObjects(capabilitiesSection)) {
+				String node = extractJsonValue(block, "node");
+				String service = extractJsonValue(block, "service");
+				String operation = extractJsonValue(block, "operation");
+				if (node == null || node.isEmpty() || service == null || service.isEmpty() ||
+					operation == null || operation.isEmpty()) {
+					continue;
+				}
+
+				DeploymentBinding binding = new DeploymentBinding(node, service, operation);
+				deploymentBindings.put(deploymentKey(service, operation), binding);
+				logger.info("INFRASTRUCTURE MAP: " + service + "." + operation + " -> " +
+					node + " (" + binding.runtimeService + ")");
+			}
+
+			if (deploymentBindings.isEmpty()) {
+				throw new RuleDeployerException("Infrastructure definition contains no usable capabilities: " +
+					infrastructureFile.getAbsolutePath());
+			}
+		} catch (IOException e) {
+			throw new RuleDeployerException("Failed to load infrastructure definition: " + e.getMessage(), e);
+		}
+	}
+
+	private String deploymentKey(String service, String operation) {
+		return service + "\u0000" + operation;
+	}
+
+	private DeploymentBinding requireDeploymentBinding(String service, String operation)
+			throws RuleDeployerException {
+		if (deploymentBindings.isEmpty()) {
+			return null;
+		}
+
+		DeploymentBinding binding = deploymentBindings.get(deploymentKey(service, operation));
+		if (binding == null) {
+			throw new RuleDeployerException("No infrastructure mapping for " + service + "." + operation +
+				" in " + infrastructureDefinitionName);
+		}
+		return binding;
+	}
+
 	/**
 	 * Parse JSON workflow file from Petri net editor
 	 */
@@ -397,6 +498,18 @@ public class RuleDeployer {
 	                if (service != null && !service.isEmpty() && !operationsList.isEmpty()) {
 	                    // Use first operation as the primary operation for the ServiceNode
 	                    String primaryOperation = operationsList.get(0);
+	                    String businessService = service;
+	                    DeploymentBinding primaryBinding = requireDeploymentBinding(businessService, primaryOperation);
+	                    String runtimeService = primaryBinding != null ? primaryBinding.runtimeService : businessService;
+
+	                    // A single PLACE cannot span physical infrastructure nodes.
+	                    for (String operationName : operationsList) {
+	                        DeploymentBinding operationBinding = requireDeploymentBinding(businessService, operationName);
+	                        if (operationBinding != null && !runtimeService.equals(operationBinding.runtimeService)) {
+	                            throw new RuleDeployerException("Operations on PLACE '" + id +
+	                                "' map to different infrastructure nodes. Split them into separate PLACE nodes.");
+	                        }
+	                    }
 	                    
 	                    // Extract arguments for the primary operation from the JSON
 	                    List<String> operationArguments = extractOperationArguments(block, primaryOperation);
@@ -407,7 +520,11 @@ public class RuleDeployer {
 	                    // Build attributes map for ServiceNode
 	                    Map<String, String> attributes = new HashMap<>();
 	                    attributes.put("label", label != null ? label : "");
-	                    attributes.put("service", service);
+	                    attributes.put("service", runtimeService);
+	                    attributes.put("businessService", businessService);
+	                    if (primaryBinding != null) {
+	                        attributes.put("infrastructureNode", primaryBinding.node);
+	                    }
 	                    attributes.put("operation", primaryOperation);
 	                    
 	                    // Store operation arguments as comma-separated string
@@ -444,7 +561,7 @@ public class RuleDeployer {
 	                        }
 	                    }
 	                    
-	                    ServiceNode serviceNode = new ServiceNode(id, service, primaryOperation, attributes);
+	                    ServiceNode serviceNode = new ServiceNode(id, runtimeService, primaryOperation, attributes);
 	                    workflowModel.addServiceNode(serviceNode);
 	                    
 	                    String opsDisplay = operationsList.size() > 1 ? 
@@ -1623,17 +1740,11 @@ public class RuleDeployer {
 	 */
 	private int deployValidatedWorkflow() throws RuleDeployerException {
 		try {
-			// Phase 4a: Generate canonical bindings based on processType
-			// This must happen BEFORE rule deployment so BuildRuleBase can include them
-			// Note: buildPetriNetJoinSlotAssignments is called internally by generatePetriNetCanonicalBindings
+			// Canonical bindings are build-time artefacts. Runtime deployment consumes
+			// the existing bindings and must never rewrite them.
 			if ("PetriNet".equalsIgnoreCase(this.processType)) {
-				// PetriNet mode: Always generate bindings from topology
-				// Uses token_branch1, token_branch2, etc. for JoinNodes
-				generatePetriNetCanonicalBindings();
-			} else if ("SOA".equalsIgnoreCase(this.processType)) {
-				// SOA mode: Only generate bindings if arguments are specified in JSON
-				// If no arguments in JSON, leave existing binding files untouched
-				generateSOACanonicalBindingsIfSpecified();
+				// Join-slot assignments are in-memory routing metadata only.
+				buildPetriNetJoinSlotAssignments();
 			}
 			
 			// Deploy service nodes defined in JSON file
