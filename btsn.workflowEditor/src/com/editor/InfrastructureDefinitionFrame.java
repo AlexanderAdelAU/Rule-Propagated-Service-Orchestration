@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.List;
+import java.util.prefs.Preferences;
 
 /**
  * Defines workflow-specific infrastructure capabilities.
@@ -21,6 +22,9 @@ public class InfrastructureDefinitionFrame extends JFrame {
     private final JTable capabilityTable = new JTable(capabilityModel);
     private final JTable argumentTable = new JTable(argumentModel);
     private final TitledBorder argumentsBorder = BorderFactory.createTitledBorder("Arguments - select a capability");
+    private static final String PREF_DEFINITION_DIR = "infrastructureDefinitionDir";
+    private static final String PREF_BINDINGS_DIR = "canonicalBindingsDir";
+    private final Preferences preferences = Preferences.userNodeForPackage(InfrastructureDefinitionFrame.class);
     private File currentFile;
 
     public InfrastructureDefinitionFrame() {
@@ -153,9 +157,9 @@ public class InfrastructureDefinitionFrame extends JFrame {
     }
 
     private void saveDefinition() {
-        JFileChooser chooser = new JFileChooser();
+        JFileChooser chooser = createRememberingChooser(PREF_DEFINITION_DIR, null);
         chooser.setDialogTitle("Save infrastructure definition");
-        chooser.setSelectedFile(currentFile != null ? currentFile : new File("InfrastructureDefinition.json"));
+        chooser.setSelectedFile(currentFile != null ? currentFile : new File(chooser.getCurrentDirectory(), "InfrastructureDefinition.json"));
         if (chooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
         File file = chooser.getSelectedFile();
         if (!file.getName().toLowerCase(Locale.ROOT).endsWith(".json")) {
@@ -164,14 +168,15 @@ public class InfrastructureDefinitionFrame extends JFrame {
         try {
             Files.write(file.toPath(), toJson().getBytes(StandardCharsets.UTF_8));
             currentFile = file;
-            JOptionPane.showMessageDialog(this, "Saved " + file.getName());
+            rememberDirectory(PREF_DEFINITION_DIR, file.getParentFile());
+            JOptionPane.showMessageDialog(this, "Saved infrastructure definition to:\n" + file.getAbsolutePath());
         } catch (IOException ex) {
             showError("Could not save definition", ex);
         }
     }
 
     private void loadDefinition() {
-        JFileChooser chooser = new JFileChooser();
+        JFileChooser chooser = createRememberingChooser(PREF_DEFINITION_DIR, null);
         chooser.setDialogTitle("Load infrastructure definition");
         if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return;
         try {
@@ -179,7 +184,8 @@ public class InfrastructureDefinitionFrame extends JFrame {
             String json = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
             parseJson(json);
             currentFile = file;
-            JOptionPane.showMessageDialog(this, "Loaded " + file.getName());
+            rememberDirectory(PREF_DEFINITION_DIR, file.getParentFile());
+            JOptionPane.showMessageDialog(this, "Loaded infrastructure definition from:\n" + file.getAbsolutePath());
         } catch (Exception ex) {
             showError("Could not load definition", ex);
         }
@@ -319,22 +325,36 @@ public class InfrastructureDefinitionFrame extends JFrame {
             return;
         }
 
-        JFileChooser chooser = new JFileChooser();
+        File defaultBindingsDir = rememberedDirectory(PREF_BINDINGS_DIR);
+        if (defaultBindingsDir == null) {
+            defaultBindingsDir = findRepositoryBindingsDirectory();
+        }
+
+        JFileChooser chooser = createRememberingChooser(PREF_BINDINGS_DIR, defaultBindingsDir);
         chooser.setDialogTitle("Select ServiceAttributeBindings directory");
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        if (chooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
+        if (defaultBindingsDir != null && defaultBindingsDir.isDirectory()) {
+            chooser.setSelectedFile(defaultBindingsDir);
+        }
+        if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return;
 
         try {
             File base = chooser.getSelectedFile();
+            rememberDirectory(PREF_BINDINGS_DIR, base);
             Map<String, List<Capability>> byService = new LinkedHashMap<>();
             for (Capability c : capabilities) {
                 byService.computeIfAbsent(c.service, k -> new ArrayList<>()).add(c);
             }
+            List<File> generatedFiles = new ArrayList<>();
             for (Map.Entry<String, List<Capability>> entry : byService.entrySet()) {
-                writeBindingFile(base, entry.getKey(), entry.getValue());
+                generatedFiles.add(writeBindingFile(base, entry.getKey(), entry.getValue()));
             }
-            JOptionPane.showMessageDialog(this,
-                "Generated " + byService.size() + " canonical binding file(s).");
+            StringBuilder message = new StringBuilder();
+            message.append("Generated ").append(generatedFiles.size()).append(" canonical binding file(s):");
+            for (File generated : generatedFiles) {
+                message.append("\n\n").append(generated.getAbsolutePath());
+            }
+            JOptionPane.showMessageDialog(this, message.toString());
         } catch (IOException ex) {
             showError("Could not generate canonical bindings", ex);
         }
@@ -361,7 +381,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
         return errors;
     }
 
-    private void writeBindingFile(File base, String service, List<Capability> caps) throws IOException {
+    private File writeBindingFile(File base, String service, List<Capability> caps) throws IOException {
         String folder = service.contains("_") ? service.substring(0, service.indexOf('_')) : service;
         File dir = new File(base, folder);
         if (!dir.exists() && !dir.mkdirs()) throw new IOException("Cannot create " + dir);
@@ -391,6 +411,50 @@ public class InfrastructureDefinitionFrame extends JFrame {
                 }
             }
         }
+        return out;
+    }
+
+    private JFileChooser createRememberingChooser(String preferenceKey, File preferredDirectory) {
+        File directory = rememberedDirectory(preferenceKey);
+        if (directory == null) {
+            directory = preferredDirectory;
+        }
+        if (directory != null && directory.isDirectory()) {
+            return new JFileChooser(directory);
+        }
+        return new JFileChooser();
+    }
+
+    private void rememberDirectory(String preferenceKey, File directory) {
+        if (directory != null && directory.isDirectory()) {
+            preferences.put(preferenceKey, directory.getAbsolutePath());
+        }
+    }
+
+    private File rememberedDirectory(String preferenceKey) {
+        String path = preferences.get(preferenceKey, null);
+        if (path == null || path.trim().isEmpty()) return null;
+        File directory = new File(path);
+        return directory.isDirectory() ? directory : null;
+    }
+
+    private File findRepositoryBindingsDirectory() {
+        File current = new File(System.getProperty("user.dir", ".")).getAbsoluteFile();
+        File cursor = current;
+        for (int depth = 0; cursor != null && depth < 8; depth++, cursor = cursor.getParentFile()) {
+            File direct = new File(cursor, "btsn.common" + File.separator + "ServiceAttributeBindings");
+            if (direct.isDirectory()) return direct;
+
+            File sibling = new File(cursor, ".." + File.separator + "btsn.common" +
+                File.separator + "ServiceAttributeBindings");
+            try {
+                sibling = sibling.getCanonicalFile();
+            } catch (IOException ignored) {
+                sibling = sibling.getAbsoluteFile();
+            }
+            if (sibling.isDirectory()) return sibling;
+        }
+        return null;
     }
 
     private String xml(String s) {
