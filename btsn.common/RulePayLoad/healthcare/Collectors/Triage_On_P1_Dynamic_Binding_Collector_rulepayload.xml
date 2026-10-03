@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><rulepayload xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="rulepayload.xsd">
+	<header>
+		<timestamp>2012-01-02T20:05:05.491+10:30</timestamp>
+		<ruleFileName>ThisServiceControlNode</ruleFileName>
+		<ruleBaseVersion>v999</ruleBaseVersion>
+		<ruleBaseCommitment>2</ruleBaseCommitment>
+	</header>
+	<targetservice>
+		<serviceName>MonitorService</serviceName>
+		<operationName>writeCollectorData</operationName>
+	</targetservice>
+	<rulefiledata><data><![CDATA[<Atom><Rel>NodeType</Rel><Ind>TerminateNode</Ind></Atom>]]></data>
+	</rulefiledata>
+</rulepayload>

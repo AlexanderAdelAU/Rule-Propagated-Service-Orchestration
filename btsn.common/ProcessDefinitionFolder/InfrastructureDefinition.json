@@ -1,0 +1,14 @@
+{
+  "definitionType": "Infrastructure",
+  "capabilities": [
+    {
+      "node": "P1",
+      "service": "ValidationService",
+      "operation": "processToken",
+      "returnAttribute": "validationResults",
+      "arguments": [
+        {"name": "token", "type": "String", "value": "String", "required": false}
+      ]
+    }
+  ]
+}
