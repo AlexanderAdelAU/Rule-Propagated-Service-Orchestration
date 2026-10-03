@@ -2651,7 +2651,12 @@ class ServiceThread implements Runnable {
 	 */
 	void callNextOperation(String val, int solutionIndex, boolean expired, int branchNumber) {
 		if (nextServiceCollection.isEmpty()) {
-			logger.info("ORCHESTRATOR: WORKFLOW TERMINATION - No next services configured");
+			// A workflow with no downstream route has reached its business end.
+			// Termination is local runtime semantics; it does not require MonitorService.
+			int terminatingTokenId = "JoinNode".equals(nodeType) ? sequenceID : phaseSequenceID;
+			logger.info("ORCHESTRATOR: WORKFLOW TERMINATION - No next services configured; token " +
+				terminatingTokenId + " terminates at " + serviceName);
+			instrumentTokenTerminate(terminatingTokenId, serviceName, nodeType);
 			return;
 		}
 
@@ -2768,7 +2773,10 @@ class ServiceThread implements Runnable {
 		outgoingXMLPayLoad = xph.modifyMultipleXMLItems(outgoingXMLPayLoad, "//monitorData/*", monitorDataMap);
 
 		if (nextServiceName.equals("null") || nextOperationName.equals("null")) {
-			logger.info("ORCHESTRATOR: WORKFLOW TERMINATION - Next service is null");
+			int terminatingTokenId = "JoinNode".equals(nodeType) ? sequenceID : phaseSequenceID;
+			logger.info("ORCHESTRATOR: WORKFLOW TERMINATION - Next service is null; token " +
+				terminatingTokenId + " terminates at " + serviceName);
+			instrumentTokenTerminate(terminatingTokenId, serviceName, nodeType);
 			return;
 		}
 

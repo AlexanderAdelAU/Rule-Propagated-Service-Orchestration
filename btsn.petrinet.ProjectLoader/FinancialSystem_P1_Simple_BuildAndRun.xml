@@ -15,7 +15,7 @@
 		  Mode 2 (JOIN_NODE): Join token firing - two tokens injected with paired IDs
 		                      Uses -joinargs to specify paired token IDs (e.g., 1000001,1000002)
 
-		Services (P1, Monitor) start once and remain running throughout all phases.
+		P1 starts for normal execution. Monitor is optional and is only started when metrics are requested.
 		The workflow names the business service ValidationService; FinancialSystem_Infrastructure
 		maps that business operation onto the physical P1 runtime service.
 	</description>
@@ -32,7 +32,7 @@
 	<!-- ======================================================================= -->
 
 	<property name="p1.mode"      value="local" />
-	<property name="monitor.mode" value="local" />
+	<property name="monitor.mode" value="off" />
 
 	<!-- ======================================================================= -->
 	<!-- PROPERTIES                                                              -->
@@ -153,6 +153,7 @@
 		<!-- Resolve boolean properties from mode settings -->
 		<condition property="p1.is.local"><equals arg1="${p1.mode}" arg2="local" /></condition>
 		<condition property="monitor.is.local"><equals arg1="${monitor.mode}" arg2="local" /></condition>
+		<condition property="monitor.enabled"><not><equals arg1="${monitor.mode}" arg2="off" /></not></condition>
 
 		<!-- Display deployment configuration -->
 		<echo message="" />
@@ -259,7 +260,7 @@
 			</java>
 
 			<!-- Start Monitor Service -->
-			<echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local" />
+			<echo message="  [monitor] Not launched locally (${monitor.mode})" unless:set="monitor.is.local" />
 			<java jvm="java.exe" classname="${service.loader.class}" if:set="monitor.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${monitor.project.dir}" output="${monitor.output.file}">
@@ -295,7 +296,7 @@
 				</java>
 
 				<!-- Trigger Monitor Initialization -->
-				<java classname="${init.event.generator.class}" 
+				<java classname="${init.event.generator.class}" if:set="monitor.enabled"
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
 					<arg value="-service" /><arg value="Monitor_InitializationService" />
@@ -475,6 +476,8 @@
 		<echo message="DEPLOYMENT MODES (per service):" />
 		<echo message="  -D&lt;service&gt;.mode=local           Launch service on this machine (default)" />
 		<echo message="  -D&lt;service&gt;.mode=remote          Service runs on another machine (skip launch)" />
+		<echo message="  -Dmonitor.mode=off                    Do not start/use Monitor (default for this test)" />
+		<echo message="  -Dmonitor.mode=local                  Start Monitor when end-to-end metrics are required" />
 		<echo message="" />
 		<echo message="  Services: p1, monitor" />
 		<echo message="" />
