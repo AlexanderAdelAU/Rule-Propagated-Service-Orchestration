@@ -2,6 +2,7 @@ package com.editor;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -19,6 +20,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
     private final ArgumentModel argumentModel = new ArgumentModel();
     private final JTable capabilityTable = new JTable(capabilityModel);
     private final JTable argumentTable = new JTable(argumentModel);
+    private final TitledBorder argumentsBorder = BorderFactory.createTitledBorder("Arguments - select a capability");
     private File currentFile;
 
     public InfrastructureDefinitionFrame() {
@@ -52,7 +54,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
         capabilitiesPanel.add(capButtons, BorderLayout.SOUTH);
 
         JPanel argsPanel = new JPanel(new BorderLayout(4, 4));
-        argsPanel.setBorder(BorderFactory.createTitledBorder("Arguments for selected operation"));
+        argsPanel.setBorder(argumentsBorder);
         argsPanel.add(new JScrollPane(argumentTable), BorderLayout.CENTER);
         JPanel argButtons = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton addArgument = new JButton("Add argument");
@@ -81,7 +83,9 @@ public class InfrastructureDefinitionFrame extends JFrame {
         capabilityTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 int row = capabilityTable.getSelectedRow();
-                argumentModel.setCapability(row >= 0 ? capabilities.get(row) : null);
+                Capability selected = row >= 0 ? capabilities.get(row) : null;
+                argumentModel.setCapability(selected);
+                updateArgumentsTitle(selected);
             }
         });
 
@@ -100,6 +104,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
                 capabilities.remove(row);
                 capabilityModel.fireTableDataChanged();
                 argumentModel.setCapability(null);
+                updateArgumentsTitle(null);
             }
         });
 
@@ -125,6 +130,18 @@ public class InfrastructureDefinitionFrame extends JFrame {
         save.addActionListener(e -> saveDefinition());
         load.addActionListener(e -> loadDefinition());
         generate.addActionListener(e -> generateBindings());
+    }
+
+    private void updateArgumentsTitle(Capability c) {
+        if (c == null) {
+            argumentsBorder.setTitle("Arguments - select a capability");
+        } else {
+            String node = blank(c.node) ? "<node>" : c.node;
+            String service = blank(c.service) ? "<service>" : c.service;
+            String operation = blank(c.operation) ? "<operation>" : c.operation;
+            argumentsBorder.setTitle("Arguments for " + node + " / " + service + " / " + operation);
+        }
+        repaint();
     }
 
     private String nextNodeName() {
@@ -328,13 +345,17 @@ public class InfrastructureDefinitionFrame extends JFrame {
         if (capabilities.isEmpty()) errors.add("No capabilities have been defined.");
         for (int i = 0; i < capabilities.size(); i++) {
             Capability c = capabilities.get(i);
-            String p = "Row " + (i + 1) + ": ";
-            if (blank(c.node)) errors.add(p + "Node is required.");
-            if (blank(c.service)) errors.add(p + "Service is required.");
-            if (blank(c.operation)) errors.add(p + "Operation is required.");
-            if (blank(c.returnAttribute)) errors.add(p + "Return Attribute is required.");
+            String identity = (blank(c.node) ? "<node>" : c.node) + " / " +
+                              (blank(c.service) ? "<service>" : c.service) + " / " +
+                              (blank(c.operation) ? "<operation>" : c.operation) + ": ";
+            if (blank(c.node)) errors.add(identity + "Node is required.");
+            if (blank(c.service)) errors.add(identity + "Service is required.");
+            if (blank(c.operation)) errors.add(identity + "Operation is required.");
+            if (blank(c.returnAttribute)) errors.add(identity + "Return Attribute is required.");
             for (int a = 0; a < c.arguments.size(); a++) {
-                if (blank(c.arguments.get(a).name)) errors.add(p + "Argument " + (a + 1) + " needs a name.");
+                if (blank(c.arguments.get(a).name)) {
+                    errors.add(identity + "Argument " + (a + 1) + " needs a name.");
+                }
             }
         }
         return errors;
