@@ -42,7 +42,8 @@
 	<property name="rule.version" value="v001" />
 
 	<!-- Process names for each phase -->
-	<property name="init.process.name" value="petrinet/Initializers/P1_Initialization" />
+	<property name="init.process.p1.only" value="petrinet/Initializers/P1_Only_Initialization" />
+	<property name="init.process.with.monitor" value="petrinet/Initializers/P1_Initialization" />
 	<property name="workflow.process.name" value="FinancialSystem_P1_Simple" />
 	<property name="infrastructure.definition.name" value="FinancialSystem_Infrastructure" />
 	<property name="collector.process.name" value="petrinet/Collectors/P1_Collector" />
@@ -155,11 +156,18 @@
 		<condition property="monitor.is.local"><equals arg1="${monitor.mode}" arg2="local" /></condition>
 		<condition property="monitor.enabled"><not><equals arg1="${monitor.mode}" arg2="off" /></not></condition>
 
+		<!-- Use a P1-only initialization topology unless Monitor is explicitly enabled. -->
+		<condition property="init.process.name" value="${init.process.with.monitor}">
+			<isset property="monitor.enabled" />
+		</condition>
+		<property name="init.process.name" value="${init.process.p1.only}" />
+
 		<!-- Display deployment configuration -->
 		<echo message="" />
 		<echo message="  Deployment Configuration:" />
 		<echo message="    P1:      ${p1.mode}" />
 		<echo message="    Monitor: ${monitor.mode}" />
+		<echo message="    Initialization: ${init.process.name}" />
 		<echo message="" />
 	</target>
 
