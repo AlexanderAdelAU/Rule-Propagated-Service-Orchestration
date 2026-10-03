@@ -27,13 +27,13 @@
       "transition_type": "Other"
     },
     {
-      "id": "P3",
+      "id": "P1",
       "type": "PLACE",
       "x": 195,
       "y": 195,
       "width": 50,
       "height": 50,
-      "label": "P3",
+      "label": "P1",
       "service": "ValidationService",
       "operations": [
         {
@@ -58,14 +58,14 @@
   "arrows": [
     {
       "source": "T2",
-      "target": "P3",
+      "target": "P1",
       "label": "",
       "guardCondition": "",
       "decision_value": "",
       "endpoint": ""
     },
     {
-      "source": "P3",
+      "source": "P1",
       "target": "T4",
       "label": "",
       "guardCondition": "",
