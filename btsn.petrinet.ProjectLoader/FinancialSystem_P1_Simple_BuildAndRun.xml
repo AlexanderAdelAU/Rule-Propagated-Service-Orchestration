@@ -15,7 +15,7 @@
 		  Mode 2 (JOIN_NODE): Join token firing - two tokens injected with paired IDs
 		                      Uses -joinargs to specify paired token IDs (e.g., 1000001,1000002)
 
-		P1 starts for normal execution. Monitor is optional and is only started when metrics are requested.
+		P1 and Monitor start once and remain running through initialization, workflow execution and collection. Monitor is infrastructure/observation only; it is not part of the active business-token route.
 		The workflow names the business service ValidationService; FinancialSystem_Infrastructure
 		maps that business operation onto the physical P1 runtime service.
 	</description>
@@ -32,7 +32,7 @@
 	<!-- ======================================================================= -->
 
 	<property name="p1.mode"      value="local" />
-	<property name="monitor.mode" value="off" />
+	<property name="monitor.mode" value="local" />
 
 	<!-- ======================================================================= -->
 	<!-- PROPERTIES                                                              -->
@@ -42,8 +42,7 @@
 	<property name="rule.version" value="v001" />
 
 	<!-- Process names for each phase -->
-	<property name="init.process.p1.only" value="petrinet/Initializers/P1_Only_Initialization" />
-	<property name="init.process.with.monitor" value="petrinet/Initializers/P1_Initialization" />
+	<property name="init.process.name" value="petrinet/Initializers/P1_Initialization" />
 	<property name="workflow.process.name" value="FinancialSystem_P1_Simple" />
 	<property name="infrastructure.definition.name" value="FinancialSystem_Infrastructure" />
 	<property name="collector.process.name" value="petrinet/Collectors/P1_Collector" />
@@ -154,13 +153,6 @@
 		<!-- Resolve boolean properties from mode settings -->
 		<condition property="p1.is.local"><equals arg1="${p1.mode}" arg2="local" /></condition>
 		<condition property="monitor.is.local"><equals arg1="${monitor.mode}" arg2="local" /></condition>
-		<condition property="monitor.enabled"><not><equals arg1="${monitor.mode}" arg2="off" /></not></condition>
-
-		<!-- Use a P1-only initialization topology unless Monitor is explicitly enabled. -->
-		<condition property="init.process.name" value="${init.process.with.monitor}">
-			<isset property="monitor.enabled" />
-		</condition>
-		<property name="init.process.name" value="${init.process.p1.only}" />
 
 		<!-- Display deployment configuration -->
 		<echo message="" />
@@ -304,7 +296,7 @@
 				</java>
 
 				<!-- Trigger Monitor Initialization -->
-				<java classname="${init.event.generator.class}" if:set="monitor.enabled"
+				<java classname="${init.event.generator.class}"
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
 					<arg value="-service" /><arg value="Monitor_InitializationService" />
@@ -484,8 +476,7 @@
 		<echo message="DEPLOYMENT MODES (per service):" />
 		<echo message="  -D&lt;service&gt;.mode=local           Launch service on this machine (default)" />
 		<echo message="  -D&lt;service&gt;.mode=remote          Service runs on another machine (skip launch)" />
-		<echo message="  -Dmonitor.mode=off                    Do not start/use Monitor (default for this test)" />
-		<echo message="  -Dmonitor.mode=local                  Start Monitor when end-to-end metrics are required" />
+		<echo message="  Monitor remains running for initialization and collection; it is not in the active workflow token route." />
 		<echo message="" />
 		<echo message="  Services: p1, monitor" />
 		<echo message="" />
