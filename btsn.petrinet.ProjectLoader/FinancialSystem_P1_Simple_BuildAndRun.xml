@@ -413,7 +413,7 @@
 			</java>
 
 			<!-- Start Monitor Service -->
-			<echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local" />
+			<echo message="  [monitor] Not launched locally (${monitor.mode})" unless:set="monitor.is.local" />
 			<java jvm="java.exe" classname="${service.loader.class}" if:set="monitor.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${monitor.project.dir}" output="${monitor.output.file}">
