@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="service-deployment" default="package" basedir=".">
+    <property name="python" value="python3"/>
+    <target name="package" description="Build independent service JARs and deployment ZIP">
+        <exec executable="${python}" failonerror="true">
+            <arg value="${basedir}/build_services.py"/>
+        </exec>
+    </target>
+    <target name="check" depends="package" description="Invoke implementations from packaged JARs">
+        <exec executable="${python}" failonerror="true">
+            <arg value="${basedir}/tests/check_packaged_services.py"/>
+        </exec>
+        <exec executable="${python}" failonerror="true">
+            <arg value="${basedir}/../btsn.common/tests/run_capability_resolver_checks.py"/>
+            <arg value="--service-bundle"/>
+            <arg value="${basedir}/target/deployment"/>
+        </exec>
+    </target>
+</project>

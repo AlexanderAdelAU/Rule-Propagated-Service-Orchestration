@@ -62,9 +62,10 @@ also remain unchanged in common; the host code refers to none of them.
 Every `ServiceThread.java`, all other existing infrastructure handlers, Monitor,
 business implementations, workflow definitions, existing deployment definitions
 and the Stage-5 launcher remain byte-for-byte unchanged from the recovery
-baseline. Resolver and helper code are unchanged from `47ecac4`. All `build.xml`
-files are unchanged. Service JAR packaging remains deferred for discussion
-after the completed six-host cleanup.
+baseline. Resolver and helper code are unchanged from `47ecac4`. All existing `build.xml`
+files are unchanged. Independent service JAR packaging is now provided
+by `../btsn.services`; see its `README.md` for the build and deployment contract.
+The existing host builds and launcher have not yet been switched to these JARs.
 
 All common and P1–P6 Java sources compiled with Java 15 compatibility. Run the
 isolated invocation checks with Java 15+ and Python:
@@ -99,7 +100,11 @@ completions with no incomplete workflows. Check structural and temporal reports,
 Monitor/chart data and the existing priority observations. The live regression
 must be repeated after the step-1 placeholder cleanup before accepting that
 change. The configured application is a regression workload; it does not define
-the host architecture. Work pauses after step 1 for the packaging discussion.
+the host architecture. The reported live cleanup regression completed both
+versions with structural and temporal checks passing. Service packaging adds
+isolated JAR checks and reruns the invocation checks using only packaged service
+implementations; adopting the JARs in the network launcher remains a separate
+integration step.
 
 The frozen infrastructure check is:
 

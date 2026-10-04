@@ -129,10 +129,14 @@ application.
 
 The following changes are deliberately outside this branch-stabilization step:
 
-- separate `btsn.business.financial` Eclipse/deployment project or JAR
-- automated deployment packaging of capability modules per physical node
+- moving implementation sources into separate Eclipse projects
+- integration of independent service JARs into host deployment and launchers
 - modification of the per-node JAR build files
 
-Work pauses after the uniform P1-P6 host cleanup for discussion of these deployment
-and packaging changes. The business implementations remain in `btsn.common`
-for this step.
+`../btsn.services` now builds one deployment JAR per catalogue implementation,
+alongside shared service support and runtime libraries. Its packaging inventory
+also includes the independently preserved stochastic implementation. All services
+use the same packaging mechanism, independent of application and physical host.
+Implementation sources remain in `btsn.common`; existing host builds and the live
+launcher still use their current classpaths. See `../btsn.services/README.md` for
+build commands, packaged invocation checks and the remaining integration work.

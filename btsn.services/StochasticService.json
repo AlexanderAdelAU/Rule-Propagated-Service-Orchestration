@@ -1,0 +1,13 @@
+{
+  "purpose": "Packaging inventory only; this does not activate or place a service.",
+  "services": [
+    {
+      "service": "StochasticPlaceService",
+      "implementationClass": "org.btsn.services.StochasticPlaceService",
+      "operation": "processToken",
+      "inputs": ["token"],
+      "returnAttribute": "token",
+      "status": "preserved-unbound"
+    }
+  ]
+}

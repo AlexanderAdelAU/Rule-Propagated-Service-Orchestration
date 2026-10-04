@@ -4,12 +4,17 @@ Run from any directory: python btsn.common/tests/run_capability_resolver_checks.
 Requires Java 15+ with the jdk.compiler module; no Ant or external downloads.
 """
 import os
+import argparse
 from pathlib import Path
 import subprocess
 import tempfile
 
 
 root = Path(__file__).resolve().parents[2]
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--service-bundle", type=Path,
+                    help="Load service implementations exclusively from deployment JARs")
+args = parser.parse_args()
 common = root / "btsn.common"
 libraries = os.pathsep.join(str(path) for path in (common / "lib").glob("*.jar"))
 sources = [
@@ -25,6 +30,16 @@ sources = [
     *sorted((common / "src/org/btsn/business/financial").glob("*.java")),
     common / "tests/org/btsn/invocation/BusinessCapabilityResolverTest.java",
 ]
+if args.service_bundle:
+    bundle = args.service_bundle.resolve()
+    service_sources = {"business", "base", "logger", "services"}
+    sources = [p for p in sources if not (p.is_relative_to(common / "src") and
+               (p.relative_to(common / "src").parts[2] in service_sources or
+                p.name in {"JsonResponseBuilder.java", "JsonTokenParser.java"}))]
+    jars = sorted((bundle / "services").glob("*.jar")) + sorted((bundle / "lib").glob("*.jar"))
+    if not jars:
+        raise SystemExit("No deployment JARs found")
+    libraries = os.pathsep.join(map(str, jars))
 # Deliberately exclude all P1-P6 placeholder classes: the resolver must invoke
 # business implementations without a physical adapter available as a fallback.
 
@@ -47,3 +62,5 @@ with tempfile.TemporaryDirectory(prefix="capability-check-") as temporary:
                     str(common)], cwd=work, check=True)
 print("PASS: all six synchronized invocation boundaries compile")
 print("PASS: metadata-selected implementations execute on all six host identities with all placeholders absent")
+if args.service_bundle:
+    print("PASS: service implementations loaded exclusively from deployment JARs")

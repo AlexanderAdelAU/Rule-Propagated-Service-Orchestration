@@ -1,0 +1,12 @@
+{
+  "sourceRoot": "../btsn.common/src",
+  "catalogues": [
+    "../btsn.common/BusinessServiceDefinitions/FinancialSystem.json",
+    "StochasticService.json"
+  ],
+  "runtimeLibraries": [
+    "../btsn.common/lib/json-simple-1.1.1.jar",
+    "../btsn.common/lib/log4j-1.2.16.jar"
+  ],
+  "javaRelease": 15
+}
