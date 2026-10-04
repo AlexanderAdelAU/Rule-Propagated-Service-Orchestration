@@ -76,10 +76,11 @@ identities.
 
 ## Current physical host placeholders
 
-The P1-P5 place classes are retained physical host placeholders with their
-existing one-String constructor signatures. Business-specific operation methods,
-delegates, imports and business-base inheritance have been removed. The names
-remain available as deployment/routing identities.
+All P1-P6 place classes are retained physical host placeholders with their
+existing constructor signatures. Concrete service dependencies, operation
+methods, delegates, imports and service-base inheritance have been removed.
+The names remain available as deployment/routing identities. This host contract
+is independent of this application's selected capabilities.
 
 The generic `ServiceHelper` invocation boundary resolves their configured runtime
 operations directly to the logical Financial business-service implementations.
@@ -87,6 +88,9 @@ Its metadata selection is `BusinessServiceDefinitions/Deployment.json`; the
 resolver is `org.btsn.invocation.BusinessCapabilityResolver`. The orchestration
 agent and every `ServiceThread.java` remain unchanged from the recovery baseline.
 See `InvocationBoundaryResolver.md` for validation and deployment details.
+The formerly inherited stochastic implementation is preserved independently as
+`org.btsn.services.StochasticPlaceService`, with its runtime identity supplied by
+the caller. It can be selected through the same metadata boundary on any host.
 
 ## Acceptance / regression test
 
@@ -128,8 +132,7 @@ The following changes are deliberately outside this branch-stabilization step:
 - separate `btsn.business.financial` Eclipse/deployment project or JAR
 - automated deployment packaging of capability modules per physical node
 - modification of the per-node JAR build files
-- separate treatment of P6's stochastic simulation service
 
-Work pauses after the P1-P5 adapter cleanup for discussion of these deployment
+Work pauses after the uniform P1-P6 host cleanup for discussion of these deployment
 and packaging changes. The business implementations remain in `btsn.common`
 for this step.

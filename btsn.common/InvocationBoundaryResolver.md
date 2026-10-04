@@ -45,18 +45,26 @@ identical small changes in the six P1–P6 `ServiceHelper.java` copies. Its live
 Stage-5 run completed v001 15/15 and v002 40/40 with structural and temporal
 results `[OK]`. The analyzer retained five P1 start-order inversion observations.
 
-Step 1 now removes the business-specific delegates from P1–P5. Their place
-classes and existing one-String constructor signatures remain as inert physical
-host placeholders. They have no business imports, operation methods or business
-base-class inheritance. Validation, Credit Check, Fraud Check, Underwriting,
-Decision and the two preserved-unbound implementations remain intact in common.
+Step 1 removes concrete service implementation dependencies from all six hosts.
+P1–P6 place classes and their existing constructor signatures remain as inert
+physical host placeholders. They have no imports, operation methods or service
+implementation inheritance. The same rule applies regardless of the service
+selected in deployment metadata.
+
+The service implementation formerly inherited by P6 is preserved outside the
+host as `org.btsn.services.StochasticPlaceService`. It uses the unchanged
+`BaseStochasticPetriNetPlace` processing code and accepts a caller-supplied
+runtime identity, capacity and delay. Its three-String constructor works with
+the invocation boundary's existing constructor contract. No physical host name
+is compiled into that implementation. The existing Financial implementations
+also remain unchanged in common; the host code refers to none of them.
 
 Every `ServiceThread.java`, all other existing infrastructure handlers, Monitor,
 business implementations, workflow definitions, existing deployment definitions
 and the Stage-5 launcher remain byte-for-byte unchanged from the recovery
-baseline. Resolver and helper code are unchanged from `47ecac4`. P6's simulation
-class and all `build.xml` files are unchanged. Separate business JAR packaging
-and treatment of P6 remain deferred for discussion after step 1.
+baseline. Resolver and helper code are unchanged from `47ecac4`. All `build.xml`
+files are unchanged. Service JAR packaging remains deferred for discussion
+after the completed six-host cleanup.
 
 All common and P1–P6 Java sources compiled with Java 15 compatibility. Run the
 isolated invocation checks with Java 15+ and Python:
@@ -70,10 +78,13 @@ calls, equality with direct business-service results, timing enrichment,
 registered infrastructure operations, an arbitrary runtime service name and a
 replacement implementation selected solely by metadata. They also exercise
 missing, duplicate, conflicting, unbound and unavailable implementations.
-All P1–P5 placeholder classes are deliberately excluded from the test classpath,
-and their absence is checked before testing the complete business-call chain.
-Successful physical-identity invocations therefore prove that no old adapter is
-required by the invocation boundary.
+All P1–P6 placeholder classes are deliberately excluded from the test classpath,
+and their absence is checked. Identical synthetic capability metadata invokes
+the same implementation on each of the six host identities for both rulebase
+versions. The preserved stochastic implementation is also selected and invoked
+on every host identity, with its supplied identity verified in the result.
+Successful physical-identity invocations therefore prove that no physical
+adapter or application-specific host code is required by the invocation boundary.
 
 The standalone checks do not execute the networked queue/fork/join workflow.
 The live acceptance run remains:
@@ -87,7 +98,8 @@ and does not compile Java sources. Require v001 15/15 completions with 15 forks,
 completions with no incomplete workflows. Check structural and temporal reports,
 Monitor/chart data and the existing priority observations. The live regression
 must be repeated after the step-1 placeholder cleanup before accepting that
-change. Work pauses after step 1 for the packaging discussion.
+change. The configured application is a regression workload; it does not define
+the host architecture. Work pauses after step 1 for the packaging discussion.
 
 The frozen infrastructure check is:
 

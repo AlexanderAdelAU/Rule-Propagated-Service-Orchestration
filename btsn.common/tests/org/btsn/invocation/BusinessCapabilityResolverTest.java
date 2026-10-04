@@ -13,6 +13,7 @@ import org.btsn.business.financial.CreditCheckService;
 import org.btsn.business.financial.FraudCheckService;
 import org.btsn.business.financial.UnderwritingService;
 import org.btsn.business.financial.DecisionService;
+import org.btsn.services.StochasticPlaceService;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -77,14 +78,15 @@ public final class BusinessCapabilityResolverTest {
             equal(initializer, resolver.resolve(initializer, "purgeAndInitialize", "token", 1, "v999"));
             equal(collector, resolver.resolve(collector, "collectAllData", "token", 1, "v999"));
         }
-        // Invocation must succeed without any physical placeholder class on the classpath.
-        for (int i = 1; i <= 5; i++) {
+        // Invocation must succeed without any of the six physical placeholder classes on the classpath.
+        for (int i = 1; i <= 6; i++) {
             final String placeholder = "org.btsn.places.P" + i + "_Place";
             rejects(() -> Class.forName(placeholder), placeholder);
         }
         verifyBusinessResults();
         verifyMetadataFailures();
         verifyConfiguredImplementation();
+        verifyGenericHosts();
         System.out.println("PASS: " + checks + " capability/invocation checks");
     }
 
@@ -161,6 +163,82 @@ public final class BusinessCapabilityResolverTest {
         public String processToken(String token) {
             return "{\"validationResults\":{\"implementation\":\"from-config\"}}";
         }
+    }
+
+    /** Exercise exactly the same invocation boundary on every physical host identity. */
+    private static void verifyGenericHosts() throws Exception {
+        String originalCommon = System.getProperty("btsn.common.dir");
+        try {
+            for (int i = 1; i <= 6; i++) {
+                String runtime = "P" + i + "_Place";
+                Path metadata = hostFixture(runtime, "echo", "result", "payload", EchoService.class.getName());
+                System.setProperty("btsn.common.dir", metadata.toString());
+                for (String version : Arrays.asList("v001", "v002")) {
+                    String response = new ServiceHelper().process("1000000", "org.btsn.places." + runtime, "echo",
+                            new ArrayList<String>(Arrays.asList("{\"value\":\"from-metadata\"}")), "result", version).getResult();
+                    JSONObject body = (JSONObject) parse(response).get("result");
+                    equal("from-metadata", ((JSONObject) body.get("payload")).get("value"));
+                    equal("configured-implementation", body.get("implementation"));
+                }
+
+                // The preserved service is also selected solely by metadata on every host.
+                metadata = hostFixture(runtime, "processToken", "token", "token", StochasticPlaceService.class.getName());
+                System.setProperty("btsn.common.dir", metadata.toString());
+                String token = "{\"tokenId\":\"example\",\"version\":\"v001\",\"notAfter\":"
+                        + (System.currentTimeMillis() + 60000) + "}";
+                String response = new ServiceHelper().process("1000000", "org.btsn.places." + runtime, "processToken",
+                        new ArrayList<String>(Arrays.asList(token)), "token", "v001").getResult();
+                JSONObject body = (JSONObject) parse(response).get("token");
+                equal("COMPLETED", body.get("status"));
+                equal(runtime, ((JSONObject) body.get("data")).get("place"));
+            }
+            StochasticPlaceService configured = new StochasticPlaceService("1000000", "arbitrary-location", 3, 0);
+            equal(3, configured.getCapacity());
+            equal("arbitrary-location", configured.getPlaceIdentifier());
+            equal(0, configured.getMarking());
+        } finally {
+            System.setProperty("btsn.common.dir", originalCommon);
+        }
+    }
+
+    public static final class EchoService {
+        @SuppressWarnings("unchecked")
+        public String echo(String payload) throws Exception {
+            JSONObject body = new JSONObject();
+            body.put("payload", parse(payload));
+            body.put("implementation", "configured-implementation");
+            JSONObject response = new JSONObject();
+            response.put("result", body);
+            return response.toJSONString();
+        }
+    }
+
+    private static Path hostFixture(String runtime, String operation, String output, String input, String implementation)
+            throws Exception {
+        Path metadata = Files.createTempDirectory(Paths.get("").toAbsolutePath(), "host-metadata-");
+        Files.createDirectories(metadata.resolve("BusinessServiceDefinitions"));
+        Files.writeString(metadata.resolve("BusinessServiceDefinitions/Deployment.json"),
+                "{\"catalog\":\"catalog.json\",\"infrastructure\":\"deployment.json\","
+                + "\"deploymentRules\":\"facts.xml\",\"directServiceRules\":[]}");
+        Files.writeString(metadata.resolve("catalog.json"), "{\"services\":[{\"service\":\"ConfiguredCapability\","
+                + "\"operation\":\"" + operation + "\",\"implementationClass\":\"" + implementation + "\","
+                + "\"returnAttribute\":\"" + output + "\",\"inputs\":[\"" + input + "\"],\"status\":\"active\"}]}");
+        Files.writeString(metadata.resolve("deployment.json"), "{\"definitionType\":\"Infrastructure\","
+                + "\"nodes\":[{\"node\":\"configured-node\",\"channel\":\"fixture\",\"address\":\"127.0.0.1\"}],"
+                + "\"capabilities\":[{\"node\":\"configured-node\",\"service\":\"ConfiguredCapability\","
+                + "\"operation\":\"" + operation + "\",\"basePort\":7000,\"returnAttribute\":\"" + output + "\","
+                + "\"arguments\":[{\"name\":\"" + input + "\",\"type\":\"String\"}]}]}");
+        Files.writeString(metadata.resolve("facts.xml"), "<Atom><Rel>boundChannel</Rel><Ind>fixture</Ind><Ind>127.0.0.1</Ind></Atom>"
+                + "<Atom><Rel>activeService</Rel><Ind>" + runtime + "</Ind><Ind>" + operation
+                + "</Ind><Ind>fixture</Ind><Ind>7000</Ind></Atom>");
+        for (String version : Arrays.asList("v001", "v002")) {
+            Path installed = Paths.get("RuleFolder." + version, operation, "Service.ruleml");
+            Files.createDirectories(installed.getParent());
+            Files.writeString(installed, "<Assert><Rulebase><Atom><Rel>localDefined</Rel><Ind>ConfiguredCapability</Ind></Atom>"
+                    + "<Atom><Rel>canonicalBinding</Rel><Ind>" + operation + "</Ind><Ind>" + output
+                    + "</Ind><Ind>" + input + "</Ind></Atom></Rulebase></Assert>");
+        }
+        return metadata;
     }
 
     private static String invoke(String service, String output, String... inputs) {
