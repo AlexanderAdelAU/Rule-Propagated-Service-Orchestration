@@ -5,9 +5,9 @@
 	<description>
 		RPSO Stage 5 - Priority Overtaking of Background Work
 
-        v002 represents a long-running background process on shared P1/P2 services.
-        It runs alone for 20 seconds before higher-priority v001 begins; v002
-        remains active after v001 has completed.
+        v002 is a normal 40-token background workflow on shared P1/P2 services,
+        using an ordinary irregular arrival schedule. It starts first; v001 begins
+        10 seconds later while v002 is still running.
         The experiment tests queue-level priority overtaking only: an already executing
         v002 operation is never interrupted. When a worker becomes free and both
         versions are waiting, v001 should dequeue first; when no v001 work is
@@ -75,7 +75,7 @@
 	<property name="workflow2.generator.id" value="PRESCREEN_SUBMITTED" />
 	<property name="workflow2.target.place" value="P1_Place" />
 	<property name="workflow2.target.operation" value="processToken" />
-	<property name="workflow2.token.count" value="60" />
+	<property name="workflow2.token.count" value="40" />
 	<property name="workflow2.token.expire" value="120000" />
 	<property name="workflow2.trigger.file" value="Stage5_V002_Background.csv" />
 	<property name="workflow2.token.data" value="application_id=PRESCREEN-STAGE5-BACKGROUND,annual_income=90000,requested_amount=22000,credit_score=680,fraud_risk=low" />
@@ -95,7 +95,7 @@
 	<property name="service.startup.seconds" value="3" />
 	<property name="phase.delay.seconds" value="5" />
 	<property name="deploy.wait.seconds" value="3" />
-	<property name="v001.fire.delay.seconds" value="20" />
+	<property name="v001.fire.delay.seconds" value="10" />
 	<property name="workflow.drain.seconds" value="25" />
 
 	<!-- Base directories -->
@@ -489,7 +489,7 @@
 
 				<!-- ======================================================= -->
 				<!-- PHASE 2: PRIORITY OVERTAKING                             -->
-				<!-- Long-running v002 starts first -> 20s established run -> v001 arrives -> both share P1/P2 -->
+				<!-- Normal v002 starts first -> 10s delay -> v001 arrives while v002 continues -> both share P1/P2 -->
 				<!-- ======================================================= -->
 				<echo message="" />
 				<echo message="===============================================" />
@@ -497,7 +497,7 @@
 				<echo message="===============================================" />
 				<echo message="Background process: ${workflow2.process.name} (${workflow2.version})" />
 				<echo message="Urgent process:     ${workflow1.process.name} (${workflow1.version})" />
-				<echo message="[STAGE5 ASSERTION] v002 has a 20s head start and remains long-running. Queue pre-emption only: in-service v002 completes; waiting v001 dequeues before waiting v002." />
+				<echo message="[STAGE5 ASSERTION] Normal v002 workload starts first; v001 starts 10s later. Queue pre-emption only: in-service v002 completes; waiting v001 dequeues before waiting v002." />
 
 				<!-- Commit both RuleBases before workload generation so this test isolates
 				     scheduler behaviour from deployment/commitment timing. -->
@@ -705,7 +705,7 @@
 		<echo message="" />
 		<echo message="EXECUTION PATTERN:" />
 		<echo message="  Phase 1: Load shared P1-P5 + observation Monitor ONCE, initialize databases" />
-		<echo message="  Phase 2: Commit both -> run v002 alone for 20s -> start v001 -> v001 overtakes waiting v002 only" />
+		<echo message="  Phase 2: Commit both -> start normal v002 workload -> 10s later start v001 -> observe shared queue ordering" />
 		<echo message="  Phase 3: Collect data from all services" />
 		<echo message="" />
 		<echo message="USAGE:" />
