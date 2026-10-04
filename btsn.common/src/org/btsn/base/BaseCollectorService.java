@@ -219,7 +219,7 @@ public abstract class BaseCollectorService {
         // Calculate derived metrics (queueTime, serviceTime, totalTime) from timestamps
         String sql = 
             "SELECT sequenceID, serviceName, operation, " +
-            "       arrivalTime, enqueueTime, dequeueTime, invocationTime, publishTime, " +
+            "       arrivalTime, invocationTime, publishTime, " +
             "       workflowStartTime, bufferSize, maxQueueCapacity, totalMarking " +
             "FROM " + SERVICE_MEASUREMENTS_TABLE + " " +
             "WHERE serviceName = ? " +
@@ -247,8 +247,6 @@ public abstract class BaseCollectorService {
                 long publish = rs.getLong("publishTime");
                 
                 timing.arrivalTime = arrival;
-                timing.enqueueTime = rs.getLong("enqueueTime");
-                timing.dequeueTime = rs.getLong("dequeueTime");
                 timing.workflowStartTime = rs.getLong("workflowStartTime");
                 timing.bufferSize = rs.getInt("bufferSize");
                 timing.maxQueueCapacity = rs.getInt("maxQueueCapacity");
@@ -900,8 +898,6 @@ private String extractServiceContextFromToken(String token) {
                 timingObj.put("serviceName", timing.serviceName);
                 timingObj.put("operation", timing.operation);
                 timingObj.put("arrivalTime", timing.arrivalTime);
-                timingObj.put("enqueueTime", timing.enqueueTime);
-                timingObj.put("dequeueTime", timing.dequeueTime);
                 timingObj.put("queueTime", timing.queueTime);
                 timingObj.put("serviceTime", timing.serviceTime);
                 timingObj.put("totalTime", timing.totalTime);
@@ -1324,8 +1320,6 @@ private String extractServiceContextFromToken(String token) {
         String serviceName;
         String operation;
         long arrivalTime;
-        long enqueueTime;
-        long dequeueTime;
         long queueTime;
         long serviceTime;
         long totalTime;

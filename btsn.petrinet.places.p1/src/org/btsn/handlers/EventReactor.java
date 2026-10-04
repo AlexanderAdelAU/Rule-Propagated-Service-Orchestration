@@ -698,16 +698,9 @@ public class EventReactor extends Thread {
 		// Add to processing queue
 		System.out.println("=== ADDING TO PROCESSING QUEUE ===");
 		System.out.println("About to add costKey " + costKey + " to costKeyTokenMap");
-
-		// OBSERVATION ONLY: timestamp the instant this token becomes eligible
-		// in the shared priority queue. It does not participate in ordering.
-		long queueEnqueueTime = System.currentTimeMillis();
-		monitorDataMap.put("queueEnqueueTime", Long.toString(queueEnqueueTime));
-		servicePacket = xph.modifyMultipleXMLItems(servicePacket, "//monitorData/*", monitorDataMap);
 		
 		costKeyTokenMap.put(costKey, servicePacket);
 		
-		System.out.println("QUEUE TIMING: enqueueTime=" + queueEnqueueTime + " costKey=" + costKey);
 		System.out.println("Successfully added to costKeyTokenMap");
 		System.out.println("costKeyTokenMap size after: " + costKeyTokenMap.size());
 		System.out.println("About to call notify() to wake up ServiceThread");
@@ -767,23 +760,7 @@ public class EventReactor extends Thread {
 		while (costKeyTokenMap.size() == 0)
 			wait();
 		costKey = costKeyTokenMap.firstKey();
-		String selectedPacket = costKeyTokenMap.remove(costKey);
-
-		// OBSERVATION ONLY: the token has now been selected/removed from the
-		// priority queue. From this point it is committed to the worker and is
-		// intentionally non-preemptable.
-		long queueDequeueTime = System.currentTimeMillis();
-		try {
-			TreeMap<String, String> selectedMonitorData =
-					xph.findMultipleXMLItems(selectedPacket, "//monitorData/*");
-			selectedMonitorData.put("queueDequeueTime", Long.toString(queueDequeueTime));
-			selectedPacket = xph.modifyMultipleXMLItems(
-					selectedPacket, "//monitorData/*", selectedMonitorData);
-		} catch (Exception e) {
-			System.err.println("QUEUE TIMING: unable to annotate dequeue time: " + e.getMessage());
-		}
-		System.out.println("QUEUE TIMING: dequeueTime=" + queueDequeueTime + " costKey=" + costKey);
-		dataMap.put(costKey, selectedPacket);
+		dataMap.put(costKey, costKeyTokenMap.remove(costKey));
 		return dataMap;
 	}
 
