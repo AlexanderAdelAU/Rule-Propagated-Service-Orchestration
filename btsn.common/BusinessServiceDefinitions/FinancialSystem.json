@@ -1,0 +1,69 @@
+{
+  "domain": "FinancialSystem",
+  "purpose": "Logical business capability catalog. Physical placement is defined separately by the Infrastructure Definition.",
+  "services": [
+    {
+      "service": "ValidationService",
+      "implementationClass": "org.btsn.business.financial.ValidationService",
+      "operation": "processToken",
+      "inputs": ["token"],
+      "returnAttribute": "validationResults",
+      "canonicalBinding": "ServiceAttributeBindings/ValidationService/ValidationService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "CreditCheckService",
+      "implementationClass": "org.btsn.business.financial.CreditCheckService",
+      "operation": "processToken",
+      "inputs": ["validationResults"],
+      "returnAttribute": "creditCheckResults",
+      "canonicalBinding": "ServiceAttributeBindings/CreditCheckService/CreditCheckService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "FraudCheckService",
+      "implementationClass": "org.btsn.business.financial.FraudCheckService",
+      "operation": "processToken",
+      "inputs": ["validationResults"],
+      "returnAttribute": "fraudCheckResults",
+      "canonicalBinding": "ServiceAttributeBindings/FraudCheckService/FraudCheckService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "UnderwritingService",
+      "implementationClass": "org.btsn.business.financial.UnderwritingService",
+      "operation": "processToken",
+      "inputs": ["creditCheckResults", "fraudCheckResults"],
+      "returnAttribute": "underwritingResults",
+      "canonicalBinding": "ServiceAttributeBindings/UnderwritingService/UnderwritingService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "DecisionService",
+      "implementationClass": "org.btsn.business.financial.DecisionService",
+      "operation": "processToken",
+      "inputs": ["underwritingResults"],
+      "returnAttribute": "decisionResults",
+      "canonicalBinding": "ServiceAttributeBindings/DecisionService/DecisionService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "IdentityVerificationService",
+      "implementationClass": "org.btsn.business.financial.IdentityVerificationService",
+      "operation": "verifyApplicantIdentity",
+      "inputs": ["token"],
+      "returnAttribute": "identityVerificationResults",
+      "canonicalBinding": null,
+      "status": "preserved-unbound"
+    },
+    {
+      "service": "AffordabilityAssessmentService",
+      "implementationClass": "org.btsn.business.financial.AffordabilityAssessmentService",
+      "operation": "assessAffordability",
+      "inputs": ["identityVerificationResults"],
+      "returnAttribute": "affordabilityAssessmentResults",
+      "canonicalBinding": null,
+      "status": "preserved-unbound"
+    }
+  ]
+}
