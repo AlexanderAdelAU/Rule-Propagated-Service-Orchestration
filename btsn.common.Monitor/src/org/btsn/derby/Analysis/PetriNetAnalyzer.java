@@ -1246,7 +1246,7 @@ public class PetriNetAnalyzer {
         
         // Query SERVICECONTRIBUTION for all versions, looking for overlapping time windows
         String sql = 
-            "SELECT WORKFLOWBASE, SEQUENCEID, SERVICENAME, ARRIVALTIME, QUEUETIME, " +
+            "SELECT WORKFLOWBASE, SEQUENCEID, SERVICENAME, ARRIVALTIME, ENQUEUETIME, DEQUEUETIME, QUEUETIME, " +
             "       SERVICETIME, TOTALTIME, BUFFERSIZE " +
             "FROM SERVICECONTRIBUTION " +
             "WHERE SERVICENAME IN ('v001', 'v002', 'v003', 'v004', 'v005') " +
@@ -1266,6 +1266,8 @@ public class PetriNetAnalyzer {
                 sc.sequenceId = rs.getInt("SEQUENCEID");
                 sc.serviceName = rs.getString("SERVICENAME");
                 sc.arrivalTime = rs.getLong("ARRIVALTIME");
+                sc.enqueueTime = rs.getLong("ENQUEUETIME");
+                sc.dequeueTime = rs.getLong("DEQUEUETIME");
                 sc.queueTime = rs.getLong("QUEUETIME");
                 sc.serviceTime = rs.getLong("SERVICETIME");
                 sc.totalTime = rs.getLong("TOTALTIME");
@@ -1685,29 +1687,57 @@ public class PetriNetAnalyzer {
                 
                 ServiceContribution high = sc1.versionNumber < sc2.versionNumber ? sc1 : sc2;
                 ServiceContribution low = sc1.versionNumber < sc2.versionNumber ? sc2 : sc1;
-                long highStart = high.arrivalTime + high.queueTime;
-                long lowStart = low.arrivalTime + low.queueTime;
-                long laterArrival = Math.max(high.arrivalTime, low.arrivalTime);
-                long firstServiceStart = Math.min(highStart, lowStart);
-                
-                // A real scheduling contention point exists only when BOTH tokens
-                // had arrived before either one began service. At that instant the
-                // shared queue had a choice between versions.
-                if (laterArrival <= firstServiceStart) {
+
+                long highEnqueue = schedulerEnqueueTime(high);
+                long lowEnqueue = schedulerEnqueueTime(low);
+                long highDequeue = schedulerDequeueTime(high);
+                long lowDequeue = schedulerDequeueTime(low);
+                long laterEnqueue = Math.max(highEnqueue, lowEnqueue);
+                long firstDequeue = Math.min(highDequeue, lowDequeue);
+
+                // A true queue decision exists only while both tokens are eligible.
+                // Once dequeued, a token is committed to the worker and is not
+                // execution-preempted by a later higher-priority arrival.
+                if (laterEnqueue <= firstDequeue) {
                     ContentionPoint cp = new ContentionPoint();
-                    cp.timestamp = laterArrival;
+                    cp.timestamp = laterEnqueue;
                     cp.highPriorityToken = high;
                     cp.lowPriorityToken = low;
-                    cp.timeDelta = Math.abs(high.arrivalTime - low.arrivalTime);
-                    cp.highPriorityQueueTime = high.queueTime;
-                    cp.lowPriorityQueueTime = low.queueTime;
-                    cp.priorityRespected = highStart <= lowStart;
+                    cp.timeDelta = Math.abs(highEnqueue - lowEnqueue);
+                    cp.highPriorityQueueTime = Math.max(0, highDequeue - highEnqueue);
+                    cp.lowPriorityQueueTime = Math.max(0, lowDequeue - lowEnqueue);
+                    cp.priorityRespected = highDequeue <= lowDequeue;
                     cp.involvesForkedToken = high.isForkedToken || low.isForkedToken;
                     cp.sharedPlace = high.placeName;
                     analysis.sharedServiceContentionPoints.add(cp);
+                    continue;
+                }
+
+                // Preserve visibility of the cases that the old invocation-time
+                // heuristic called inversions: the low-priority token had already
+                // been dequeued before the high-priority token became eligible.
+                long lowInvocation = low.arrivalTime + low.queueTime;
+                if (lowDequeue < highEnqueue && highEnqueue <= lowInvocation) {
+                    CommittedBeforePriorityArrival committed = new CommittedBeforePriorityArrival();
+                    committed.highPriorityToken = high;
+                    committed.lowPriorityToken = low;
+                    committed.lowDequeueTime = lowDequeue;
+                    committed.highEnqueueTime = highEnqueue;
+                    committed.commitLeadTime = Math.max(0, highEnqueue - lowDequeue);
+                    analysis.committedBeforeHigherPriorityArrival.add(committed);
                 }
             }
         }
+    }
+
+    private long schedulerEnqueueTime(ServiceContribution sc) {
+        return sc.enqueueTime > 0 ? sc.enqueueTime : sc.arrivalTime;
+    }
+
+    private long schedulerDequeueTime(ServiceContribution sc) {
+        // Backward-compatible fallback for historical rows without the new
+        // instrumentation: use the old invocation-time approximation.
+        return sc.dequeueTime > 0 ? sc.dequeueTime : (sc.arrivalTime + sc.queueTime);
     }
     
     /**
@@ -1721,8 +1751,8 @@ public class PetriNetAnalyzer {
             PriorityInversion inv = new PriorityInversion();
             inv.highPriorityToken = cp.highPriorityToken;
             inv.lowPriorityToken = cp.lowPriorityToken;
-            long highStart = cp.highPriorityToken.arrivalTime + cp.highPriorityToken.queueTime;
-            long lowStart = cp.lowPriorityToken.arrivalTime + cp.lowPriorityToken.queueTime;
+            long highStart = schedulerDequeueTime(cp.highPriorityToken);
+            long lowStart = schedulerDequeueTime(cp.lowPriorityToken);
             inv.inversionTime = Math.max(0, highStart - lowStart);
             inv.involvesForkedToken = cp.involvesForkedToken;
             analysis.sharedServiceInversions.add(inv);
@@ -1824,7 +1854,7 @@ public class PetriNetAnalyzer {
         report.append("\n");
         
         // 4. SHARED SERVICE CONTENTION (primary metric)
-        report.append("4. SHARED SERVICE CONTENTION (Both Versions Waiting Before Service Start)\n");
+        report.append("4. SHARED SERVICE QUEUE CONTENTION (Both Versions Eligible Before Dequeue)\n");
         report.append("   Total contention points: ").append(analysis.sharedServiceContentionPoints.size()).append("\n");
         
         if (!analysis.sharedServiceContentionPoints.isEmpty()) {
@@ -1856,12 +1886,12 @@ public class PetriNetAnalyzer {
                         }
                         break;
                     }
-                    long highStart = cp.highPriorityToken.arrivalTime + cp.highPriorityToken.queueTime;
-                    long lowStart = cp.lowPriorityToken.arrivalTime + cp.lowPriorityToken.queueTime;
-                    report.append(String.format("     v%03d (seq=%d, queue=%dms, start=%d) vs v%03d (seq=%d, queue=%dms, start=%d) %s\n",
+                    long highStart = schedulerDequeueTime(cp.highPriorityToken);
+                    long lowStart = schedulerDequeueTime(cp.lowPriorityToken);
+                    report.append(String.format("     v%03d (seq=%d, wait=%dms, dequeue=%d) vs v%03d (seq=%d, wait=%dms, dequeue=%d) %s\n",
                         cp.highPriorityToken.versionNumber, cp.highPriorityToken.sequenceId, cp.highPriorityQueueTime, highStart,
                         cp.lowPriorityToken.versionNumber, cp.lowPriorityToken.sequenceId, cp.lowPriorityQueueTime, lowStart,
-                        cp.priorityRespected ? "[ORDER RESPECTED]" : "[ORDER INVERSION]"));
+                        cp.priorityRespected ? "[DEQUEUE ORDER RESPECTED]" : "[TRUE QUEUE INVERSION]"));
                 }
             }
         } else if (!analysis.sharedPlaces.isEmpty()) {
@@ -1869,13 +1899,13 @@ public class PetriNetAnalyzer {
         }
         report.append("\n");
         
-        // 5. SHARED SERVICE INVERSIONS
-        report.append("5. SHARED SERVICE PRIORITY INVERSIONS\n");
+        // 5. SHARED SERVICE QUEUE PRIORITY
+        report.append("5. SHARED SERVICE QUEUE PRIORITY\n");
         if (analysis.sharedServiceInversions.isEmpty()) {
-            report.append("   [OK] No priority inversions at shared services\n");
+            report.append("   [OK] No true queue-priority inversions at shared services\n");
         } else {
             report.append("   [WARN] ").append(analysis.sharedServiceInversions.size())
-                  .append(" priority inversions at shared services\n");
+                  .append(" true queue-priority inversions at shared services\n");
             
             int shown = 0;
             for (PriorityInversion inv : analysis.sharedServiceInversions) {
@@ -1883,12 +1913,30 @@ public class PetriNetAnalyzer {
                     report.append("   ... and ").append(analysis.sharedServiceInversions.size() - 5).append(" more\n");
                     break;
                 }
-                report.append(String.format("   - [%s] v%03d token %d was already waiting when v%03d token %d started first (start-order inversion: %dms)\n",
+                report.append(String.format("   - [%s] v%03d token %d was queue-eligible when v%03d token %d dequeued first (true queue inversion: %dms)\n",
                     inv.highPriorityToken.placeName,
                     inv.highPriorityToken.versionNumber, inv.highPriorityToken.sequenceId,
                     inv.lowPriorityToken.versionNumber, inv.lowPriorityToken.sequenceId,
                     inv.inversionTime));
             }
+        }
+
+        report.append("   Already committed before higher-priority eligibility: ")
+              .append(analysis.committedBeforeHigherPriorityArrival.size()).append("\n");
+        int committedShown = 0;
+        for (CommittedBeforePriorityArrival committed : analysis.committedBeforeHigherPriorityArrival) {
+            if (committedShown++ >= 5) {
+                report.append("   ... and ")
+                      .append(analysis.committedBeforeHigherPriorityArrival.size() - 5)
+                      .append(" more\n");
+                break;
+            }
+            report.append(String.format(
+                "   - [%s] v%03d token %d dequeued %dms before v%03d token %d became queue-eligible [EXPECTED NON-PREEMPTIVE]\n",
+                committed.lowPriorityToken.placeName,
+                committed.lowPriorityToken.versionNumber, committed.lowPriorityToken.sequenceId,
+                committed.commitLeadTime,
+                committed.highPriorityToken.versionNumber, committed.highPriorityToken.sequenceId));
         }
         report.append("\n");
         
@@ -1941,10 +1989,12 @@ public class PetriNetAnalyzer {
             report.append("   Shared physical services: ").append(analysis.sharedPlaces.size()).append("\n");
             report.append("   Proven same-queue contention decisions: ")
                   .append(analysis.sharedServiceContentionPoints.size()).append("\n");
-            report.append("   Lower-version start order respected: ")
+            report.append("   Lower-version dequeue order respected: ")
                   .append(respected).append("/").append(analysis.sharedServiceContentionPoints.size())
                   .append(" (").append(String.format("%.1f%%", analysis.sharedServiceEffectiveness * 100)).append(")\n");
-            report.append("   Start-order inversions observed: ")
+            report.append("   Already-committed lower-priority executions: ")
+                  .append(analysis.committedBeforeHigherPriorityArrival.size()).append("\n");
+            report.append("   True queue inversions observed: ")
                   .append(analysis.sharedServiceInversions.size()).append("\n");
         }
         
@@ -1976,6 +2026,8 @@ public class PetriNetAnalyzer {
         public String placeName;  // Actual physical Petri-net service/place
         public String transitionId;  // Logical T_in role used by this workflow at the place
         public long arrivalTime;
+        public long enqueueTime;
+        public long dequeueTime;
         public long queueTime;
         public long serviceTime;
         public long totalTime;
@@ -2028,6 +2080,14 @@ public class PetriNetAnalyzer {
         public long inversionTime;
         public boolean involvesForkedToken;  // True if either token is a join participant
     }
+
+    public static class CommittedBeforePriorityArrival {
+        public ServiceContribution highPriorityToken;
+        public ServiceContribution lowPriorityToken;
+        public long lowDequeueTime;
+        public long highEnqueueTime;
+        public long commitLeadTime;
+    }
     
     /**
      * Complete priority analysis results
@@ -2055,6 +2115,7 @@ public class PetriNetAnalyzer {
         public int sharedServiceSamples = 0;
         public ArrayList<ContentionPoint> sharedServiceContentionPoints = new ArrayList<>();
         public ArrayList<PriorityInversion> sharedServiceInversions = new ArrayList<>();
+        public ArrayList<CommittedBeforePriorityArrival> committedBeforeHigherPriorityArrival = new ArrayList<>();
         public double sharedServiceEffectiveness = 0;
         public double sharedServiceQueueTimeAdvantage = 0;
         

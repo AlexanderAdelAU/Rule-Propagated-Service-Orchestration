@@ -436,6 +436,8 @@ public class BuildServiceAnalysisDatabase {
 				+ "serviceName VARCHAR(255), "
 				+ "operation VARCHAR(255), "
 				+ "arrivalTime BIGINT, "      // When event arrived at service
+				+ "enqueueTime BIGINT, "      // When token became eligible in priority queue
+				+ "dequeueTime BIGINT, "      // When worker selected/committed token
 				+ "invocationTime BIGINT, "   // When service started processing
 				+ "publishTime BIGINT, "      // When service published result
 				+ "workflowStartTime BIGINT, " // Original workflow start time
@@ -444,6 +446,8 @@ public class BuildServiceAnalysisDatabase {
 				+ "totalMarking INT"          // Petri Net: buffer + place (total marking)
 				+ ")";
 		manageTable(statement, SERVICE_MEASUREMENTS_TABLE, createServiceMeasurementsSQL);
+		ensureColumn(statement, SERVICE_MEASUREMENTS_TABLE, "enqueueTime", "BIGINT");
+		ensureColumn(statement, SERVICE_MEASUREMENTS_TABLE, "dequeueTime", "BIGINT");
 
 		// 2. PROCESSMEASUREMENTS - Token arrival tracking
 		String createProcessMeasurementsSQL = "CREATE TABLE " + PROCESS_MEASUREMENTS_TABLE + " ("
@@ -465,6 +469,8 @@ public class BuildServiceAnalysisDatabase {
 			+ "serviceName VARCHAR(255), "
 			+ "operation VARCHAR(255), "
 			+ "arrivalTime BIGINT, "
+			+ "enqueueTime BIGINT, "
+			+ "dequeueTime BIGINT, "
 			+ "queueTime BIGINT, "
 			+ "serviceTime BIGINT, "
 			+ "totalTime BIGINT, "
@@ -476,6 +482,8 @@ public class BuildServiceAnalysisDatabase {
 			+ "totalMarking INT"
 			+ ")";
 		manageTable(statement, SERVICE_CONTRIBUTION_TABLE, createServiceContributionSQL);
+		ensureColumn(statement, SERVICE_CONTRIBUTION_TABLE, "enqueueTime", "BIGINT");
+		ensureColumn(statement, SERVICE_CONTRIBUTION_TABLE, "dequeueTime", "BIGINT");
 
 		// 4. MARKINGS - Petri Net marking data for analysis
 		String createMarkingsSQL = "CREATE TABLE " + MARKINGS_TABLE + " ("
@@ -660,9 +668,9 @@ public class BuildServiceAnalysisDatabase {
 		}
 
 		String sql = "INSERT INTO " + SERVICE_MEASUREMENTS_TABLE
-				+ " (sequenceID, serviceName, operation, arrivalTime, invocationTime, publishTime, " 
+				+ " (sequenceID, serviceName, operation, arrivalTime, enqueueTime, dequeueTime, invocationTime, publishTime, " 
 				+ "workflowStartTime, bufferSize, maxQueueCapacity, totalMarking) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 		try (Connection conn = getConnection(); 
 			 PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -671,12 +679,14 @@ public class BuildServiceAnalysisDatabase {
 			pstmt.setString(2, serviceDataMap.get("serviceName"));
 			pstmt.setString(3, serviceDataMap.get("operation"));
 			pstmt.setLong(4, parseLongValue(serviceDataMap.get("arrivalTime"), 0L));
-			pstmt.setLong(5, parseLongValue(serviceDataMap.get("invocationTime"), 0L));
-			pstmt.setLong(6, parseLongValue(serviceDataMap.get("publishTime"), 0L));
-			pstmt.setLong(7, parseLongValue(serviceDataMap.get("workflowStartTime"), 0L));
-			pstmt.setInt(8, parseIntValue(serviceDataMap.get("bufferSize"), 0));
-			pstmt.setInt(9, parseIntValue(serviceDataMap.get("maxQueueCapacity"), 0));
-			pstmt.setInt(10, parseIntValue(serviceDataMap.get("totalMarking"), 0));
+			pstmt.setLong(5, parseLongValue(serviceDataMap.get("enqueueTime"), 0L));
+			pstmt.setLong(6, parseLongValue(serviceDataMap.get("dequeueTime"), 0L));
+			pstmt.setLong(7, parseLongValue(serviceDataMap.get("invocationTime"), 0L));
+			pstmt.setLong(8, parseLongValue(serviceDataMap.get("publishTime"), 0L));
+			pstmt.setLong(9, parseLongValue(serviceDataMap.get("workflowStartTime"), 0L));
+			pstmt.setInt(10, parseIntValue(serviceDataMap.get("bufferSize"), 0));
+			pstmt.setInt(11, parseIntValue(serviceDataMap.get("maxQueueCapacity"), 0));
+			pstmt.setInt(12, parseIntValue(serviceDataMap.get("totalMarking"), 0));
 
 			pstmt.executeUpdate();
 			
@@ -1035,6 +1045,10 @@ public class BuildServiceAnalysisDatabase {
 				record.add(rs.getInt("bufferSize"));           // 8
 				record.add(rs.getInt("maxQueueCapacity"));     // 9
 				record.add(rs.getInt("totalMarking"));         // 10
+				record.add(rs.getLong("enqueueTime"));          // 11
+				record.add(rs.getLong("dequeueTime"));          // 12
+				record.add(rs.getLong("enqueueTime"));          // 11
+				record.add(rs.getLong("dequeueTime"));          // 12
 
 				measurements.put(id, record);
 			}
@@ -1592,6 +1606,22 @@ public class BuildServiceAnalysisDatabase {
 			statement.execute(createSQL);
 			logger.info("Table " + tableName + " created successfully");
 		}
+	}
+
+	private void ensureColumn(Statement statement, String tableName, String columnName, String sqlType)
+			throws SQLException {
+		ResultSet rs = null;
+		try {
+			rs = statement.getConnection().getMetaData().getColumns(
+					null, null, tableName.toUpperCase(), columnName.toUpperCase());
+			if (rs.next()) {
+				return;
+			}
+		} finally {
+			closeResultSet(rs);
+		}
+		statement.execute("ALTER TABLE " + tableName + " ADD COLUMN " + columnName + " " + sqlType);
+		logger.info("Added instrumentation column " + tableName + "." + columnName);
 	}
 
 	// =========================================================================

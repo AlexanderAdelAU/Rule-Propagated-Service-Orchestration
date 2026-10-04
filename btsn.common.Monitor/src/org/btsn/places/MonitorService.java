@@ -254,6 +254,8 @@ public class MonitorService extends BaseStochasticPetriNetPlace {
 	                    String serviceName = getStringValue(record, "serviceName", place);
 	                    String operation = getStringValue(record, "operation", "processToken");
 	                    long arrivalTime = getLongValue(record, "arrivalTime", 0);
+	                    long enqueueTime = getLongValue(record, "enqueueTime", arrivalTime);
+	                    long dequeueTime = getLongValue(record, "dequeueTime", 0);
 	                    long queueTime = getLongValue(record, "queueTime", 0);
 	                    long serviceTime = getLongValue(record, "serviceTime", 0);
 	                    long totalTime = getLongValue(record, "totalTime", 0);
@@ -264,7 +266,7 @@ public class MonitorService extends BaseStochasticPetriNetPlace {
 	                    
 	                    // Write to database
 	                    writeServiceContribution(sequenceId, serviceName, operation, 
-	                                            arrivalTime, queueTime, serviceTime, totalTime, 
+	                                            arrivalTime, enqueueTime, dequeueTime, queueTime, serviceTime, totalTime, 
 	                                            workflowStartTime, bufferSize, maxQueueCapacity, totalMarking);
 	                    
 	                    recordCount++;
@@ -819,6 +821,8 @@ public class MonitorService extends BaseStochasticPetriNetPlace {
 				String serviceName = (String) metric.get("serviceName");
 				String operation = (String) metric.get("operation");
 				long arrivalTime = (Long) metric.get("arrivalTime");
+				long enqueueTime = metric.containsKey("enqueueTime") ? (Long) metric.get("enqueueTime") : arrivalTime;
+				long dequeueTime = metric.containsKey("dequeueTime") ? (Long) metric.get("dequeueTime") : 0L;
 				long queueTime = (Long) metric.get("queueTime");
 				long serviceTime = (Long) metric.get("serviceTime");
 				long totalRecordTime = (Long) metric.get("totalTime");
@@ -828,7 +832,7 @@ public class MonitorService extends BaseStochasticPetriNetPlace {
 					int totalMarking = metric.containsKey("totalMarking") ? ((Long) metric.get("totalMarking")).intValue() : 0;
 
 				try {
-					writeServiceContribution((int) sequenceId, serviceName, operation, arrivalTime, queueTime,
+					writeServiceContribution((int) sequenceId, serviceName, operation, arrivalTime, enqueueTime, dequeueTime, queueTime,
 							serviceTime, totalRecordTime, workflowStartTime, bufferSize, maxQueueCapacity, totalMarking);
 
 					totalQueueTime += queueTime;
@@ -1391,13 +1395,13 @@ public class MonitorService extends BaseStochasticPetriNetPlace {
 	 * calculation
 	 */
 	private void writeServiceContribution(int sequenceID, String serviceName, String operation, long arrivalTime,
-			long queueTime, long serviceTime, long totalTime, long workflowStartTime,
+			long enqueueTime, long dequeueTime, long queueTime, long serviceTime, long totalTime, long workflowStartTime,
 			int bufferSize, int maxQueueCapacity, int totalMarking) throws SQLException {
 
 		String sql = "INSERT INTO " + SERVICE_CONTRIBUTION_TABLE
-				+ " (workflowBase, sequenceID, serviceName, operation, arrivalTime, queueTime, serviceTime, totalTime, "
+				+ " (workflowBase, sequenceID, serviceName, operation, arrivalTime, enqueueTime, dequeueTime, queueTime, serviceTime, totalTime, "
 				+ "contributionPercent, workflowStartTime, analysisTime, bufferSize, maxQueueCapacity, totalMarking) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 		try (Connection connection = getConnection(); PreparedStatement pstmt = connection.prepareStatement(sql)) {
 
@@ -1411,15 +1415,17 @@ public class MonitorService extends BaseStochasticPetriNetPlace {
 			pstmt.setString(3, version);  // Write version instead of serviceName
 			pstmt.setString(4, operation);
 			pstmt.setLong(5, arrivalTime);
-			pstmt.setLong(6, queueTime);
-			pstmt.setLong(7, serviceTime);
-			pstmt.setLong(8, totalTime);
-			pstmt.setDouble(9, 0.0);
-			pstmt.setLong(10, workflowStartTime);
-			pstmt.setLong(11, System.currentTimeMillis());
-			pstmt.setInt(12, bufferSize);
-			pstmt.setInt(13, maxQueueCapacity);
-			pstmt.setInt(14, totalMarking);
+			pstmt.setLong(6, enqueueTime);
+			pstmt.setLong(7, dequeueTime);
+			pstmt.setLong(8, queueTime);
+			pstmt.setLong(9, serviceTime);
+			pstmt.setLong(10, totalTime);
+			pstmt.setDouble(11, 0.0);
+			pstmt.setLong(12, workflowStartTime);
+			pstmt.setLong(13, System.currentTimeMillis());
+			pstmt.setInt(14, bufferSize);
+			pstmt.setInt(15, maxQueueCapacity);
+			pstmt.setInt(16, totalMarking);
 
 			pstmt.executeUpdate();
 

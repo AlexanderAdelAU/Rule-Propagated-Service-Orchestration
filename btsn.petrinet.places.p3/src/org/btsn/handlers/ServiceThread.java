@@ -2831,6 +2831,17 @@ class ServiceThread implements Runnable {
 	                       taskArrivalTime + " for seqID=" + phaseSequenceID);
 	        }
 	        
+	        // Scheduler lifecycle timestamps are instrumentation only. They let
+	        // analysis distinguish queued work from work already committed to a
+	        // worker before a higher-priority token arrived.
+	        String queueEnqueueTime = monitorDataMap.get("queueEnqueueTime");
+	        String queueDequeueTime = monitorDataMap.get("queueDequeueTime");
+	        serviceMeasuresDBMap.put("enqueueTime",
+	                queueEnqueueTime != null ? queueEnqueueTime :
+	                (trueArrivalTime != null ? trueArrivalTime : Long.toString(taskArrivalTime)));
+	        serviceMeasuresDBMap.put("dequeueTime",
+	                queueDequeueTime != null ? queueDequeueTime : Long.toString(taskArrivalTime));
+
 	        serviceMeasuresDBMap.put("invocationTime", Long.toString(serviceInvocationTime));
 	        serviceMeasuresDBMap.put("publishTime", Long.toString(servicePublishTime));
 
@@ -2864,6 +2875,8 @@ class ServiceThread implements Runnable {
 	        logger.info("  Service: " + serviceName);
 	        logger.info("  Operation: " + operationName);
 	        logger.info("  Arrival Time (EventReactor): " + (trueArrivalTime != null ? trueArrivalTime : taskArrivalTime));
+	        logger.info("  Queue Enqueue Time: " + serviceMeasuresDBMap.get("enqueueTime"));
+	        logger.info("  Queue Dequeue/Commit Time: " + serviceMeasuresDBMap.get("dequeueTime"));
 	        logger.info("  Invocation Time: " + serviceInvocationTime);
 	        logger.info("  Publish Time: " + servicePublishTime);
 	        logger.info("  Workflow Start Time: " + currentWorkflowStartTime);
