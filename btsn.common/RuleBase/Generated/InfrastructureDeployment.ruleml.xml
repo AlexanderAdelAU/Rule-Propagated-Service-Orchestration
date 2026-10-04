@@ -10,6 +10,10 @@
 
 <!-- ValidationService.processToken -> P1 -->
 <Atom>
+    <Rel>localDefined</Rel>
+    <Ind>P1_Place</Ind>
+</Atom>
+<Atom>
     <Rel>activeService</Rel>
     <Ind>P1_Place</Ind>
     <Ind>processToken</Ind>

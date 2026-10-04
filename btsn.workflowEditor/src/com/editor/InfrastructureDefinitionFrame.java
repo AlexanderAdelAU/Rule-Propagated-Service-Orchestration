@@ -641,15 +641,28 @@ public class InfrastructureDefinitionFrame extends JFrame {
                 pw.println("</Atom>");
             }
 
+            Set<String> emittedRuntimeServices = new HashSet<>();
             for (Capability cap : capabilities) {
                 NodeNetwork n = findNode(cap.node);
                 if (n == null) continue;
+                String runtimeService = runtimeServiceForNode(cap.node);
                 pw.println();
                 pw.println("<!-- " + xml(cap.service) + "." + xml(cap.operation) +
                            " -> " + xml(cap.node) + " -->");
+
+                // CoreRuleBase derives serviceName(...) by joining localDefined(service)
+                // with activeService(service,...). The logical canonical binding remains
+                // owned by cap.service; localDefined here declares the physical runtime.
+                if (emittedRuntimeServices.add(runtimeService)) {
+                    pw.println("<Atom>");
+                    pw.println("    <Rel>localDefined</Rel>");
+                    pw.println("    <Ind>" + xml(runtimeService) + "</Ind>");
+                    pw.println("</Atom>");
+                }
+
                 pw.println("<Atom>");
                 pw.println("    <Rel>activeService</Rel>");
-                pw.println("    <Ind>" + xml(runtimeServiceForNode(cap.node)) + "</Ind>");
+                pw.println("    <Ind>" + xml(runtimeService) + "</Ind>");
                 pw.println("    <Ind>" + xml(cap.operation) + "</Ind>");
                 pw.println("    <Ind>" + xml(n.channel) + "</Ind>");
                 pw.println("    <Ind>" + cap.basePort + "</Ind>");
