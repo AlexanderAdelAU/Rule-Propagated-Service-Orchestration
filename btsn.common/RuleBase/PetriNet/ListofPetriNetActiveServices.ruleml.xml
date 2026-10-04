@@ -1,55 +1,9 @@
-<!-- List of service facts -->
-<!-- ActiveServices.ruleml.xml - loaded last or checked first -->
+<!-- Petri-net business activeService facts -->
+<!--
+    Business service deployment is generated from the active Infrastructure
+    Definition into RuleBase/Generated/InfrastructureDeployment.ruleml.xml.
 
-<!-- ================================================================ -->
-<!-- WORKFLOW PLACES                                                  -->
-<!-- ================================================================ -->
-
-<!-- P1 business activeService facts are generated from the active
-     Infrastructure Definition into RuleBase/Generated/InfrastructureDeployment.ruleml.xml.
-     Do not add P1 business operations here. -->
-
-<!-- P2 Place -->
-<Atom>
-    <Rel>activeService</Rel>
-    <Ind>P2_Place</Ind>              <!-- Service Name -->
-    <Ind>processToken</Ind>           <!-- Method -->
-    <Ind>ip0</Ind>
-    <Ind>4002</Ind>
-</Atom>
-<!-- Additional P2 business capability on the same physical service instance -->
-<Atom>
-    <Rel>activeService</Rel>
-    <Ind>P2_Place</Ind>
-    <Ind>assessAffordability</Ind>
-    <Ind>ip0</Ind>
-    <Ind>4002</Ind>
-</Atom><!-- P3 Place -->
-<Atom>
-    <Rel>activeService</Rel>
-    <Ind>P3_Place</Ind>              <!-- Service Name -->
-    <Ind>processToken</Ind>           <!-- Method -->
-    <Ind>ip0</Ind>
-    <Ind>4003</Ind>
-</Atom>
-<Atom>
-    <Rel>activeService</Rel>
-    <Ind>P4_Place</Ind>              <!-- Service Name -->
-    <Ind>processToken</Ind>           <!-- Method -->
-    <Ind>ip0</Ind>
-    <Ind>4004</Ind>
-</Atom>
-<Atom>
-    <Rel>activeService</Rel>
-    <Ind>P5_Place</Ind>              <!-- Service Name -->
-    <Ind>processToken</Ind>           <!-- Method -->
-    <Ind>ip0</Ind>
-    <Ind>4005</Ind>
-</Atom>
-<Atom>
-    <Rel>activeService</Rel>
-    <Ind>P6_Place</Ind>              <!-- Service Name -->
-    <Ind>processToken</Ind>           <!-- Method -->
-    <Ind>ip0</Ind>
-    <Ind>4006</Ind>
-</Atom>
+    Do not hand-maintain P1_Place/P2_Place/... business operation mappings here.
+    Initialization, collector and Monitor services remain in their dedicated
+    infrastructure rule files.
+-->
