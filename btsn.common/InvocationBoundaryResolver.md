@@ -68,10 +68,10 @@ by `../btsn.services`; see its `README.md` for the build and deployment contract
 The existing host builds and launcher have not yet been switched to these JARs.
 
 All common and P1–P6 Java sources compiled with Java 15 compatibility. Run the
-isolated invocation checks with Java 15+ and Python:
+isolated packaged invocation checks with Java 15+ and Ant:
 
 ```sh
-python btsn.common/tests/run_capability_resolver_checks.py
+ant -f btsn.services/build.xml clean check
 ```
 
 The checks cover both versioned invocation contracts, single-input and two-input

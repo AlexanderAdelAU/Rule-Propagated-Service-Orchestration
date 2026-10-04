@@ -5,17 +5,16 @@ hosts. Existing host `build.xml` files, handlers and `ServiceThread` are unchang
 Service identity and host placement remain separate: none of the generated service
 JARs belongs to a numbered host.
 
-From the repository root, with Python 3.9+ and a JDK 15+:
+From the repository root, with Ant 1.10.2+ running on a JDK 15+:
 
 ```sh
-python3 btsn.services/build_services.py
-python3 btsn.services/tests/check_packaged_services.py
-python3 btsn.common/tests/run_capability_resolver_checks.py --service-bundle btsn.services/target/deployment
+ant -f btsn.services/build.xml clean check
 ```
 
-Alternatively, `ant -f btsn.services/build.xml check` builds and runs both checks.
-Override the Python executable with `-Dpython=python` if needed. The Ant wrapper
-delegates to the same builder; Ant itself is not needed for the Python commands.
+Use `ant -f btsn.services/build.xml package` to build without running the checks.
+In Eclipse, run `btsn.services/build.xml` as an Ant Build and select `check` or
+`package`. The Ant JVM must be a JDK, so the Java compiler is available.
+No Python, Maven, Ivy, shell script or downloaded dependency is required.
 
 The output is `btsn.services/target/service-deployment.zip`, containing:
 
@@ -34,7 +33,15 @@ services, without interpreting the business domain or making host-placement
 decisions. The separate stochastic inventory is packaging data; it does not
 change active deployment metadata. The current inventory yields eight service
 JARs: seven catalogue implementations and the preserved stochastic implementation.
-Use `--config /path/to/packaging.json` for another inventory.
+Use `-Dpackaging.config=/path/to/packaging.json` for another inventory.
+
+Ant compiles the small Java inventory reader using the existing repository JSON
+library. The reader generates `target/service-tasks.xml`, with explicit native
+Ant tasks for every catalogue entry. Ant executes that generated build to compile
+selected implementations with `javac`, create their JARs with `jar`, copy runtime
+libraries with `copy`, and create the deployment bundle with `zip`. The reader
+handles metadata, dependency-boundary validation and checksums; it does not invoke
+an external build tool or create the archives itself.
 
 Compilation starts with only the selected implementation sources and declared
 libraries. Java follows their source dependencies; existing `bin` directories and
@@ -43,8 +50,9 @@ helpers, so installing several services does not duplicate their helper classes.
 Host handlers, invocation resolver and place adapters are rejected if compilation
 pulls them into the service dependency closure. Current implementations use only
 compile-time source dependencies; future reflection-only helpers or resources
-will need explicit packaging support. Class and archive output is reproducible
-for the same sources, compiler and dependency JARs.
+will need explicit packaging support. Archive timestamps are fixed. Repeat builds
+produce the same output for the same sources, compiler, Ant version, timezone and
+dependency JARs.
 
 To deploy, extract the bundle and add the selected service JAR to a generic host
 JVM's classpath. Keep `services/` and `lib/` beside each other: the JAR manifest
