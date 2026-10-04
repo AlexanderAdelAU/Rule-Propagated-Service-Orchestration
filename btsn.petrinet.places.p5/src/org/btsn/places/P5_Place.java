@@ -1,22 +1,16 @@
 package org.btsn.places;
 
-import org.btsn.base.BaseBusinessPetriNetPlace;
-import org.btsn.business.financial.DecisionService;
-
 /**
- * Physical P5 host adapter for the currently deployed DecisionService.
+ * Retained physical host placeholder.
+ *
+ * The generic orchestration agent uses this deployment identity in its rules.
+ * Business operations and implementation classes are supplied by deployment
+ * metadata and invoked through ServiceHelper. This class contains no business
+ * operations, delegates or business-base inheritance.
  */
-public class P5_Place extends BaseBusinessPetriNetPlace {
+public class P5_Place {
 
-    private static final String PLACE_IDENTIFIER = "P5";
-
-    private final DecisionService decisionService = new DecisionService();
-
+    /** Retains the existing constructor signature for the host placeholder. */
     public P5_Place(String sequenceID) {
-        super(sequenceID, PLACE_IDENTIFIER);
-    }
-
-    public String processToken(String underwritingResults) {
-        return decisionService.processToken(underwritingResults);
     }
 }

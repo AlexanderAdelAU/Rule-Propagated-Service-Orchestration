@@ -1,24 +1,16 @@
 package org.btsn.places;
 
-import org.btsn.base.BaseBusinessPetriNetPlace;
-import org.btsn.business.financial.UnderwritingService;
-
 /**
- * Physical P4 host adapter for the currently deployed UnderwritingService.
+ * Retained physical host placeholder.
  *
- * Join synchronization remains entirely in the orchestration infrastructure.
+ * The generic orchestration agent uses this deployment identity in its rules.
+ * Business operations and implementation classes are supplied by deployment
+ * metadata and invoked through ServiceHelper. This class contains no business
+ * operations, delegates or business-base inheritance.
  */
-public class P4_Place extends BaseBusinessPetriNetPlace {
+public class P4_Place {
 
-    private static final String PLACE_IDENTIFIER = "P4";
-
-    private final UnderwritingService underwritingService = new UnderwritingService();
-
+    /** Retains the existing constructor signature for the host placeholder. */
     public P4_Place(String sequenceID) {
-        super(sequenceID, PLACE_IDENTIFIER);
-    }
-
-    public String processToken(String creditCheckResults, String fraudCheckResults) {
-        return underwritingService.processToken(creditCheckResults, fraudCheckResults);
     }
 }

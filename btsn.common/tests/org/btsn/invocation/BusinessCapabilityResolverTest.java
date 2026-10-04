@@ -8,11 +8,11 @@ import java.util.Arrays;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Level;
 import org.btsn.handlers.ServiceHelper;
-import org.btsn.places.P1_Place;
-import org.btsn.places.P2_Place;
-import org.btsn.places.P3_Place;
-import org.btsn.places.P4_Place;
-import org.btsn.places.P5_Place;
+import org.btsn.business.financial.ValidationService;
+import org.btsn.business.financial.CreditCheckService;
+import org.btsn.business.financial.FraudCheckService;
+import org.btsn.business.financial.UnderwritingService;
+import org.btsn.business.financial.DecisionService;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -77,6 +77,11 @@ public final class BusinessCapabilityResolverTest {
             equal(initializer, resolver.resolve(initializer, "purgeAndInitialize", "token", 1, "v999"));
             equal(collector, resolver.resolve(collector, "collectAllData", "token", 1, "v999"));
         }
+        // Invocation must succeed without any physical placeholder class on the classpath.
+        for (int i = 1; i <= 5; i++) {
+            final String placeholder = "org.btsn.places.P" + i + "_Place";
+            rejects(() -> Class.forName(placeholder), placeholder);
+        }
         verifyBusinessResults();
         verifyMetadataFailures();
         verifyConfiguredImplementation();
@@ -87,15 +92,15 @@ public final class BusinessCapabilityResolverTest {
         String token = "{\"application_id\":\"TEST-LOAN\",\"annual_income\":85000,\"requested_amount\":25000,"
                 + "\"credit_score\":720,\"fraud_risk\":\"low\"}";
         String validation = invoke("P1_Place", RETURNS[0], token);
-        sameBusiness(new P1_Place("test").processToken(token), validation, RETURNS[0]);
+        sameBusiness(new ValidationService().processToken(token), validation, RETURNS[0]);
         String credit = invoke("P2_Place", RETURNS[1], validation);
-        sameBusiness(new P2_Place("test").processToken(validation), credit, RETURNS[1]);
+        sameBusiness(new CreditCheckService().processToken(validation), credit, RETURNS[1]);
         String fraud = invoke("P3_Place", RETURNS[2], validation);
-        sameBusiness(new P3_Place("test").processToken(validation), fraud, RETURNS[2]);
+        sameBusiness(new FraudCheckService().processToken(validation), fraud, RETURNS[2]);
         String underwriting = invoke("P4_Place", RETURNS[3], credit, fraud);
-        sameBusiness(new P4_Place("test").processToken(credit, fraud), underwriting, RETURNS[3]);
+        sameBusiness(new UnderwritingService().processToken(credit, fraud), underwriting, RETURNS[3]);
         String decision = invoke("P5_Place", RETURNS[4], underwriting);
-        sameBusiness(new P5_Place("test").processToken(underwriting), decision, RETURNS[4]);
+        sameBusiness(new DecisionService().processToken(underwriting), decision, RETURNS[4]);
         JSONObject result = (JSONObject) parse(decision).get(RETURNS[4]);
         equal(true, result.containsKey("original_token"));
         equal(true, result.containsKey("workflow_start_time"));

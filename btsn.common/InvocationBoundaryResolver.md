@@ -40,11 +40,23 @@ changing this metadata for this first candidate.
 
 ## Scope and verification
 
-Runtime changes are limited to the new common resolver and identical small
-changes in the six P1–P6 `ServiceHelper.java` copies. Every `ServiceThread.java`,
-all other existing infrastructure handlers, Monitor, business implementations,
-physical adapters, workflow definitions, existing deployment definitions and the
-Stage-5 launcher remain byte-for-byte unchanged from the recovery baseline.
+The resolver was introduced in `47ecac4` through the new common resolver and
+identical small changes in the six P1–P6 `ServiceHelper.java` copies. Its live
+Stage-5 run completed v001 15/15 and v002 40/40 with structural and temporal
+results `[OK]`. The analyzer retained five P1 start-order inversion observations.
+
+Step 1 now removes the business-specific delegates from P1–P5. Their place
+classes and existing one-String constructor signatures remain as inert physical
+host placeholders. They have no business imports, operation methods or business
+base-class inheritance. Validation, Credit Check, Fraud Check, Underwriting,
+Decision and the two preserved-unbound implementations remain intact in common.
+
+Every `ServiceThread.java`, all other existing infrastructure handlers, Monitor,
+business implementations, workflow definitions, existing deployment definitions
+and the Stage-5 launcher remain byte-for-byte unchanged from the recovery
+baseline. Resolver and helper code are unchanged from `47ecac4`. P6's simulation
+class and all `build.xml` files are unchanged. Separate business JAR packaging
+and treatment of P6 remain deferred for discussion after step 1.
 
 All common and P1–P6 Java sources compiled with Java 15 compatibility. Run the
 isolated invocation checks with Java 15+ and Python:
@@ -54,10 +66,14 @@ python btsn.common/tests/run_capability_resolver_checks.py
 ```
 
 The checks cover both versioned invocation contracts, single-input and two-input
-calls, equality with existing adapter business results, timing enrichment,
+calls, equality with direct business-service results, timing enrichment,
 registered infrastructure operations, an arbitrary runtime service name and a
 replacement implementation selected solely by metadata. They also exercise
 missing, duplicate, conflicting, unbound and unavailable implementations.
+All P1–P5 placeholder classes are deliberately excluded from the test classpath,
+and their absence is checked before testing the complete business-call chain.
+Successful physical-identity invocations therefore prove that no old adapter is
+required by the invocation boundary.
 
 The standalone checks do not execute the networked queue/fork/join workflow.
 The live acceptance run remains:
@@ -69,8 +85,9 @@ before running the unchanged launcher: it uses the existing `bin` directories
 and does not compile Java sources. Require v001 15/15 completions with 15 forks,
 15 successful joins and no orphan/incomplete workflows; require v002 40/40
 completions with no incomplete workflows. Check structural and temporal reports,
-Monitor/chart data and the existing priority observations. Do not remove the
-transitional adapters or merge this candidate until that regression passes.
+Monitor/chart data and the existing priority observations. The live regression
+must be repeated after the step-1 placeholder cleanup before accepting that
+change. Work pauses after step 1 for the packaging discussion.
 
 The frozen infrastructure check is:
 

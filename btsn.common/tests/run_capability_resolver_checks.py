@@ -16,12 +16,11 @@ sources = [
     common / "src/org/btsn/invocation/BusinessCapabilityResolver.java",
     common / "src/org/btsn/json/jsonLibrary.java",
     common / "src/org/btsn/business/BaseBusinessService.java",
-    common / "src/org/btsn/base/BaseBusinessPetriNetPlace.java",
     *sorted((common / "src/org/btsn/business/financial").glob("*.java")),
     common / "tests/org/btsn/invocation/BusinessCapabilityResolverTest.java",
 ]
-for index in range(1, 6):
-    sources.append(root / f"btsn.petrinet.places.p{index}/src/org/btsn/places/P{index}_Place.java")
+# Deliberately exclude all P1-P5 placeholder classes: the resolver must invoke
+# business implementations without a physical adapter available as a fallback.
 
 helpers = [root / f"btsn.petrinet.places.p{index}/src/org/btsn/handlers/ServiceHelper.java" for index in range(1, 7)]
 assert len({path.read_bytes() for path in helpers}) == 1, "P1-P6 ServiceHelper copies differ"
@@ -41,3 +40,4 @@ with tempfile.TemporaryDirectory(prefix="capability-check-") as temporary:
     subprocess.run(["java", "-cp", classpath, "org.btsn.invocation.BusinessCapabilityResolverTest",
                     str(common)], cwd=work, check=True)
 print("PASS: all six synchronized invocation boundaries compile")
+print("PASS: Financial invocation succeeds with P1-P5 placeholders absent from the test classpath")

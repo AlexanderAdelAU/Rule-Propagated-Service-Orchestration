@@ -1,8 +1,9 @@
 # Financial Application — Authoritative Artifacts
 
 This document identifies the authoritative Financial application artifacts for the
-`infrastructure-definition-editor` branch. It is descriptive only; no runtime
-component reads this file.
+`invocation-boundary-resolver` branch, which starts from the verified
+`4b8a2d01` recovery baseline. It is descriptive only; no runtime component reads
+this file.
 
 ## Active business workflows
 
@@ -73,14 +74,19 @@ Authoritative logical service contracts:
 Canonical contracts are attached to logical business services, not physical P-node
 identities.
 
-## Current physical host adapters
+## Current physical host placeholders
 
-The P1-P5 classes are transitional host adapters. Business decision logic has been
-extracted into the logical Financial business-service implementations above, while
-the current P classes retain their existing operation signatures for compatibility.
+The P1-P5 place classes are retained physical host placeholders with their
+existing one-String constructor signatures. Business-specific operation methods,
+delegates, imports and business-base inheritance have been removed. The names
+remain available as deployment/routing identities.
 
-The generic capability resolver that will remove explicit business-service names
-from P1-P5 is intentionally deferred to a later branch.
+The generic `ServiceHelper` invocation boundary resolves their configured runtime
+operations directly to the logical Financial business-service implementations.
+Its metadata selection is `BusinessServiceDefinitions/Deployment.json`; the
+resolver is `org.btsn.invocation.BusinessCapabilityResolver`. The orchestration
+agent and every `ServiceThread.java` remain unchanged from the recovery baseline.
+See `InvocationBoundaryResolver.md` for validation and deployment details.
 
 ## Acceptance / regression test
 
@@ -119,10 +125,11 @@ application.
 
 The following changes are deliberately outside this branch-stabilization step:
 
-- generic domain-neutral business capability resolver
-- removal of explicit Financial delegates from P1-P5
 - separate `btsn.business.financial` Eclipse/deployment project or JAR
 - automated deployment packaging of capability modules per physical node
+- modification of the per-node JAR build files
+- separate treatment of P6's stochastic simulation service
 
-Those changes should be made on a subsequent branch after this Financial baseline
-is frozen.
+Work pauses after the P1-P5 adapter cleanup for discussion of these deployment
+and packaging changes. The business implementations remain in `btsn.common`
+for this step.
