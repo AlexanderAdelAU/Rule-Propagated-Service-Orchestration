@@ -62,7 +62,7 @@
 	
 	<!-- TOKEN MODE SELECTION: 1=EDGE_NODE (single tokens), 2=JOIN_NODE (paired tokens) -->
 	<property name="mode" value="1" />
-	<property name="token.count" value="1" />
+	<property name="token.count" value="10" />
 	<property name="financial.token.data" value="application_id=APP001,annual_income=85000,requested_amount=25000,credit_score=720,fraud_risk=low" />
 	<property name="join.tokens" value="1000001,1000002" />
 	
@@ -485,7 +485,7 @@
 		<echo message="  -Dmode=1                               EDGE_NODE mode (default)" />
 		<echo message="  -Dmode=2                               JOIN_NODE mode" />
 		<echo message="  -Djoin.tokens=1000001,1000002          Join token IDs" />
-		<echo message="  -Dtoken.count=1                        Tokens for EDGE_NODE mode" />
+		<echo message="  -Dtoken.count=10                       Tokens for EDGE_NODE mode" />
 		<echo message="  -Dtarget.place=P1_Place                Target place name" />
 		<echo message="  -Dtarget.operation=processToken        Service operation" />
 		<echo message="  -Devent.generator.id=EG1               Event generator ID" />

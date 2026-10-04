@@ -705,6 +705,15 @@ public class RuleDeployer {
 	    xmlrulePayload = XPathHelper.modifyXMLItem(xmlrulePayload,
 	            "//rulepayload/targetservice/operationName/text()", ruleTarget.operation);
 
+	    // Keep the logical business contract distinct from the physical runtime target.
+	    // The RuleHandler uses this to load the canonical binding produced by the
+	    // Infrastructure Definition rather than a legacy P1_Place/P2_Place binding.
+	    String businessService = ruleTarget.attributes.get("businessService");
+	    if (businessService == null || businessService.trim().isEmpty()) {
+	        businessService = ruleTarget.service;
+	    }
+	    xmlrulePayload = addBusinessServiceToPayload(xmlrulePayload, businessService);
+
 	    // Update buffer value
 	    String bufferValue = findBufferForService(ruleTarget);
 	    if (bufferValue != null) {
@@ -718,6 +727,40 @@ public class RuleDeployer {
 
 	    return xmlrulePayload;
 	}
+	/**
+	 * Add or update the logical business service in a deployment payload.
+	 * Older payload templates do not contain this element, so insert it when needed.
+	 */
+	private String addBusinessServiceToPayload(String xmlPayload, String businessService) {
+	    if (xmlPayload == null || businessService == null || businessService.trim().isEmpty()) {
+	        return xmlPayload;
+	    }
+
+	    try {
+	        if (xmlPayload.contains("<businessService>")) {
+	            return XPathHelper.modifyXMLItem(xmlPayload,
+	                "//rulepayload/targetservice/businessService/text()", businessService);
+	        }
+
+	        String operationCloseTag = "</operationName>";
+	        int insertPos = xmlPayload.indexOf(operationCloseTag);
+	        if (insertPos < 0) {
+	            logger.warn("Could not add businessService to rule payload: operationName element not found");
+	            return xmlPayload;
+	        }
+
+	        insertPos += operationCloseTag.length();
+	        String escaped = businessService.replace("&", "&amp;")
+	            .replace("<", "&lt;").replace(">", "&gt;")
+	            .replace("\"", "&quot;").replace("'", "&apos;");
+	        String businessElement = "\n\t\t<businessService>" + escaped + "</businessService>";
+	        return xmlPayload.substring(0, insertPos) + businessElement + xmlPayload.substring(insertPos);
+	    } catch (Exception e) {
+	        logger.error("Error adding businessService to rule payload: " + e.getMessage(), e);
+	        return xmlPayload;
+	    }
+	}
+
 	/**
 	 * Find buffer value from incoming T_in or Other transition to a service
 	 * NEW METHOD: Searches for buffer attribute in transitions feeding this service

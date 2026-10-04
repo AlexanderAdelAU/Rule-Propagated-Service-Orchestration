@@ -157,6 +157,12 @@ public class RuleHandler {
                     "//rulepayload/targetservice/serviceName/text()");
             String operationName = XPathHelper.findXMLItem(incomingXMLrulePayLoad,
                     "//rulepayload/targetservice/operationName/text()");
+            String businessServiceName = XPathHelper.findXMLItem(incomingXMLrulePayLoad,
+                    "//rulepayload/targetservice/businessService/text()");
+            if (businessServiceName == null || businessServiceName.trim().isEmpty() ||
+                    "null".equalsIgnoreCase(businessServiceName.trim())) {
+                businessServiceName = serviceName;
+            }
 
             System.out.println("Received rule payload packet.....for operation: " + operationName
                     + incomingXMLrulePayLoad);
@@ -185,7 +191,9 @@ public class RuleHandler {
             String cdata = XPathHelper.findXMLItem(incomingXMLrulePayLoad, xmlPath);
             StringFileIO.writeStringToFile(cdata, operationRulePath + "/" + ruleFileName, cdata.length());
 
-            BuildRuleBase.buildOperationRuleBase(serviceName, operationName, ruleBaseVersion);
+            System.out.println("Using canonical contract from business service: " + businessServiceName +
+                    " (runtime target: " + serviceName + ")");
+            BuildRuleBase.buildOperationRuleBase(serviceName, businessServiceName, operationName, ruleBaseVersion);
 
             // FIXED: Send commitment with version and count
          //   String commitmentMessage = "CONFIRMED:" + ruleBaseVersion + ":" + commitmentCount;

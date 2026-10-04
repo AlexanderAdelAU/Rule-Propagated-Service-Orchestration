@@ -81,6 +81,15 @@ public class BuildRuleBase {
 	 */
 	static public boolean buildOperationRuleBase(String serviceName, String operationName, String lbuildVersion)
 			throws java.io.IOException {
+		return buildOperationRuleBase(serviceName, serviceName, operationName, lbuildVersion);
+	}
+
+	/**
+	 * Build an operation rule base for a physical runtime service while loading
+	 * the canonical contract from its logical business service.
+	 */
+	static public boolean buildOperationRuleBase(String serviceName, String bindingServiceName,
+			String operationName, String lbuildVersion) throws java.io.IOException {
 
 		buildVersion = lbuildVersion;
 
@@ -95,16 +104,25 @@ public class BuildRuleBase {
 		File commonBase = new File("../");
 		String commonPath = commonBase.getCanonicalPath();
 
-		// Find the binding file for this service
-		File bindingFile = findServiceBindingFile(serviceName, commonPath);
-		
+		String contractService = (bindingServiceName == null || bindingServiceName.trim().isEmpty())
+				? serviceName : bindingServiceName.trim();
+
+		// Physical execution and logical contract ownership are deliberately separate.
+		File bindingFile = findServiceBindingFile(contractService, commonPath);
 		if (bindingFile == null) {
-			// Create a minimal binding file to keep things running
+			if (!contractService.equals(serviceName)) {
+				throw new IOException("Canonical binding not found for logical business service: " +
+					contractService + " (runtime target " + serviceName + ")");
+			}
+
+			// Legacy/admin services retain the historical minimal-binding fallback.
 			bindingFile = createMinimalBindingFile(serviceName, commonPath);
 			if (bindingFile == null) {
 				throw new IOException("Could not find or create binding file for: " + serviceName);
 			}
 		}
+		System.out.println("Contract binding service: " + contractService +
+			" (runtime service: " + serviceName + ")");
 
 		// Search only the RuleBase directory (and its subdirectories)
 		File ruleBaseDir = new File(commonPath + "/btsn.common/RuleBase");

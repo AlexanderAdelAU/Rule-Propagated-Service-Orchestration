@@ -8,6 +8,7 @@
 	<targetservice>
 		<serviceName>P1</serviceName>
 		<operationName>processToken</operationName>
+		<businessService>P1</businessService>
 	</targetservice>
 	<rulefiledata><data><![CDATA[<Atom><Rel>NodeType</Rel><Ind>EdgeNode</Ind></Atom>]]></data>
 	</rulefiledata>
