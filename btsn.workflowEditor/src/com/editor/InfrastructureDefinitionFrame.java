@@ -27,8 +27,8 @@ public class InfrastructureDefinitionFrame extends JFrame {
     private final JTable argumentTable = new JTable(argumentModel);
     private final TitledBorder argumentsBorder = BorderFactory.createTitledBorder("Arguments - select a capability");
     private static final String PREF_DEFINITION_DIR = "infrastructureDefinitionDir";
-    private static final String PREF_BINDINGS_DIR = "canonicalBindingsDir";
     private final Preferences preferences = Preferences.userNodeForPackage(InfrastructureDefinitionFrame.class);
+    private final JLabel statusLabel = new JLabel(" ");
     private File currentFile;
 
     public InfrastructureDefinitionFrame() {
@@ -92,11 +92,16 @@ public class InfrastructureDefinitionFrame extends JFrame {
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton load = new JButton("Load...");
         JButton save = new JButton("Save...");
-        JButton generate = new JButton("Generate Configuration...");
+        JButton generate = new JButton("Generate Configuration");
         actions.add(load);
         actions.add(save);
         actions.add(generate);
-        root.add(actions, BorderLayout.SOUTH);
+
+        JPanel footer = new JPanel(new BorderLayout(6, 0));
+        statusLabel.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 4));
+        footer.add(statusLabel, BorderLayout.CENTER);
+        footer.add(actions, BorderLayout.EAST);
+        root.add(footer, BorderLayout.SOUTH);
 
         setContentPane(root);
 
@@ -262,7 +267,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
             Files.write(file.toPath(), toJson().getBytes(StandardCharsets.UTF_8));
             currentFile = file;
             rememberDirectory(PREF_DEFINITION_DIR, file.getParentFile());
-            JOptionPane.showMessageDialog(this, "Saved infrastructure definition to:\n" + file.getAbsolutePath());
+            setStatus("Definition saved: " + file.getAbsolutePath(), file.getAbsolutePath());
         } catch (IOException ex) {
             showError("Could not save definition", ex);
         }
@@ -278,7 +283,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
             parseJson(json);
             currentFile = file;
             rememberDirectory(PREF_DEFINITION_DIR, file.getParentFile());
-            JOptionPane.showMessageDialog(this, "Loaded infrastructure definition from:\n" + file.getAbsolutePath());
+            setStatus("Definition loaded: " + file.getAbsolutePath(), file.getAbsolutePath());
         } catch (Exception ex) {
             showError("Could not load definition", ex);
         }
@@ -466,45 +471,39 @@ public class InfrastructureDefinitionFrame extends JFrame {
             return;
         }
 
-        File defaultBindingsDir = rememberedDirectory(PREF_BINDINGS_DIR);
-        if (defaultBindingsDir == null) {
-            defaultBindingsDir = findRepositoryBindingsDirectory();
+        File base = findRepositoryBindingsDirectory();
+        if (base == null || !base.isDirectory()) {
+            JOptionPane.showMessageDialog(this,
+                "Could not locate btsn.common/ServiceAttributeBindings automatically.",
+                "Configuration output directory not found", JOptionPane.ERROR_MESSAGE);
+            return;
         }
-
-        JFileChooser chooser = createRememberingChooser(PREF_BINDINGS_DIR, defaultBindingsDir);
-        chooser.setDialogTitle("Select ServiceAttributeBindings directory");
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        if (defaultBindingsDir != null && defaultBindingsDir.isDirectory()) {
-            chooser.setSelectedFile(defaultBindingsDir);
-        }
-        if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return;
 
         try {
-            File base = chooser.getSelectedFile();
-            rememberDirectory(PREF_BINDINGS_DIR, base);
             Map<String, List<Capability>> byService = new LinkedHashMap<>();
-            for (Capability c : capabilities) {
-                byService.computeIfAbsent(c.service, k -> new ArrayList<>()).add(c);
+            for (Capability cap : capabilities) {
+                byService.computeIfAbsent(cap.service, k -> new ArrayList<>()).add(cap);
             }
+
             List<File> generatedFiles = new ArrayList<>();
             for (Map.Entry<String, List<Capability>> entry : byService.entrySet()) {
                 generatedFiles.add(writeBindingFile(base, entry.getKey(), entry.getValue()));
             }
             File deploymentFile = writeDeploymentFile(base);
 
-            StringBuilder message = new StringBuilder();
-            message.append("Generated ").append(generatedFiles.size()).append(" canonical binding file(s):");
+            StringBuilder details = new StringBuilder();
+            details.append("Canonical bindings:");
             for (File generated : generatedFiles) {
-                message.append("\n\n").append(generated.getAbsolutePath());
+                details.append("\n").append(generated.getAbsolutePath());
             }
-            message.append("\n\nGenerated active infrastructure deployment:\n")
-                   .append(deploymentFile.getAbsolutePath());
-            JOptionPane.showMessageDialog(this, message.toString());
+            details.append("\nDeployment:\n").append(deploymentFile.getAbsolutePath());
+
+            setStatus("Configuration generated automatically under " +
+                base.getParentFile().getAbsolutePath(), details.toString());
         } catch (IOException ex) {
             showError("Could not generate infrastructure configuration", ex);
         }
     }
-
     private List<String> validateDefinition() {
         List<String> errors = new ArrayList<>();
         if (nodes.isEmpty()) errors.add("No physical nodes have been defined.");
@@ -715,6 +714,11 @@ public class InfrastructureDefinitionFrame extends JFrame {
 
     private boolean blank(String s) {
         return s == null || s.trim().isEmpty();
+    }
+
+    private void setStatus(String text, String details) {
+        statusLabel.setText(text);
+        statusLabel.setToolTipText("<html>" + xml(details).replace("\n", "<br>") + "</html>");
     }
 
     private void showError(String message, Exception ex) {
