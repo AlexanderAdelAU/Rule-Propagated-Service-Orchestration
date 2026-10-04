@@ -20,3 +20,55 @@
     <Ind>ip0</Ind>
     <Ind>4001</Ind>
 </Atom>
+
+<!-- CreditCheckService.processToken -> P2 -->
+<Atom>
+    <Rel>localDefined</Rel>
+    <Ind>P2_Place</Ind>
+</Atom>
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>P2_Place</Ind>
+    <Ind>processToken</Ind>
+    <Ind>ip0</Ind>
+    <Ind>4002</Ind>
+</Atom>
+
+<!-- FraudCheckService.processToken -> P3 -->
+<Atom>
+    <Rel>localDefined</Rel>
+    <Ind>P3_Place</Ind>
+</Atom>
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>P3_Place</Ind>
+    <Ind>processToken</Ind>
+    <Ind>ip0</Ind>
+    <Ind>4003</Ind>
+</Atom>
+
+<!-- UnderwritingService.processToken -> P4 -->
+<Atom>
+    <Rel>localDefined</Rel>
+    <Ind>P4_Place</Ind>
+</Atom>
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>P4_Place</Ind>
+    <Ind>processToken</Ind>
+    <Ind>ip0</Ind>
+    <Ind>4004</Ind>
+</Atom>
+
+<!-- DecisionService.processToken -> P5 -->
+<Atom>
+    <Rel>localDefined</Rel>
+    <Ind>P5_Place</Ind>
+</Atom>
+<Atom>
+    <Rel>activeService</Rel>
+    <Ind>P5_Place</Ind>
+    <Ind>processToken</Ind>
+    <Ind>ip0</Ind>
+    <Ind>4005</Ind>
+</Atom>

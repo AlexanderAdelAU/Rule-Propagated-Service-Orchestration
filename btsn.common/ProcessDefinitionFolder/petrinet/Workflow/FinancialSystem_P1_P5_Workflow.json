@@ -35,7 +35,7 @@
       "width": 50,
       "height": 50,
       "label": "Validation",
-      "service": "P1_Place",
+      "service": "ValidationService",
       "operations": [
         {
           "name": "processToken",
@@ -86,7 +86,7 @@
       "width": 50,
       "height": 50,
       "label": "CreditCheck",
-      "service": "P2_Place",
+      "service": "CreditCheckService",
       "operations": [
         {
           "name": "processToken",
@@ -137,7 +137,7 @@
       "width": 50,
       "height": 50,
       "label": "FraudCheck",
-      "service": "P3_Place",
+      "service": "FraudCheckService",
       "operations": [
         {
           "name": "processToken",
@@ -188,7 +188,7 @@
       "width": 50,
       "height": 50,
       "label": "Underwriting",
-      "service": "P4_Place",
+      "service": "UnderwritingService",
       "operations": [
         {
           "name": "processToken",
@@ -245,7 +245,7 @@
       "width": 50,
       "height": 50,
       "label": "Decision",
-      "service": "P5_Place",
+      "service": "DecisionService",
       "operations": [
         {
           "name": "processToken",
@@ -533,7 +533,7 @@
     {
       "x": 390,
       "y": 50,
-      "text": "Loan Application Processing Workflow — mapped to generic P1-P5",
+      "text": "Loan Application Processing Workflow — infrastructure independent",
       "fontSize": 16,
       "fontStyle": 1,
       "color": -16777216
@@ -541,7 +541,7 @@
     {
       "x": 145,
       "y": 165,
-      "text": "Validation → P1",
+      "text": "ValidationService",
       "fontSize": 10,
       "fontStyle": 0,
       "color": -16777216
@@ -549,7 +549,7 @@
     {
       "x": 400,
       "y": 105,
-      "text": "Credit Check → P2",
+      "text": "CreditCheckService",
       "fontSize": 10,
       "fontStyle": 0,
       "color": -16777216
@@ -557,7 +557,7 @@
     {
       "x": 400,
       "y": 345,
-      "text": "Fraud Check → P3",
+      "text": "FraudCheckService",
       "fontSize": 10,
       "fontStyle": 0,
       "color": -16777216
@@ -565,7 +565,7 @@
     {
       "x": 650,
       "y": 175,
-      "text": "Underwriting → P4 (JOIN)",
+      "text": "UnderwritingService (JOIN)",
       "fontSize": 10,
       "fontStyle": 0,
       "color": -16777216
@@ -573,7 +573,7 @@
     {
       "x": 825,
       "y": 275,
-      "text": "Decision → P5",
+      "text": "DecisionService",
       "fontSize": 10,
       "fontStyle": 0,
       "color": -16777216

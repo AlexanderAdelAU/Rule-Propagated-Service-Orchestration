@@ -213,9 +213,22 @@ public class InfrastructureDefinitionFrame extends JFrame {
 
         NodeNetwork node = new NodeNetwork();
         node.node = "P" + number;
-        node.channel = "ip" + (number - 1);
-        node.portStart = 4001 + ((number - 1) * 100);
-        node.portEnd = node.portStart + 98;
+
+        // Physical nodes default to the same host.  The Infrastructure
+        // Definition Editor can then redistribute individual nodes by
+        // changing their channel/address without touching the business
+        // workflow or its canonical contracts.
+        if (!nodes.isEmpty()) {
+            NodeNetwork defaultHost = nodes.get(0);
+            node.channel = defaultHost.channel;
+            node.address = defaultHost.address;
+            node.portStart = defaultHost.portStart;
+            node.portEnd = defaultHost.portEnd;
+        } else {
+            node.channel = "ip0";
+            node.portStart = 4001;
+            node.portEnd = 4099;
+        }
         return node;
     }
 
