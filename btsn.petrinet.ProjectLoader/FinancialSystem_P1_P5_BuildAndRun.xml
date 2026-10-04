@@ -3,7 +3,7 @@
 <project name="FinancialSystem_P1_P5_BuildAndRun" default="run-complete-workflow" basedir="."
 	    xmlns:if="ant:if" xmlns:unless="ant:unless">
 	<description>
-		Financial System business workflow mapped onto generic stochastic Petri places P1-P5.
+		Financial System business workflow uses logical services; the Infrastructure Definition maps them onto generic stochastic Petri places P1-P5.
 
 		Business-role mapping:
 		  Validation   -> P1_Place
@@ -12,7 +12,7 @@
 		  Underwriting -> P4_Place (JoinNode, two inputs)
 		  Decision     -> P5_Place
 
-		The handler/runtime infrastructure is unchanged. Workflow behaviour is supplied
+		The handler/runtime nodes remain generic. Workflow behaviour is supplied
 		through generated bindings and propagated rule sets.
 
 		Phases:
@@ -49,6 +49,7 @@
 	<!-- Process names for each phase -->
 	<property name="init.process.name" value="petrinet/Initializers/P1_P2_P3_P4_P5_Initialization" />
 	<property name="workflow.process.name" value="petrinet/Workflow/FinancialSystem_P1_P5_Workflow" />
+	<property name="infrastructure.definition.name" value="FinancialSystem_Infrastructure" />
 	<property name="collector.process.name" value="petrinet/Collectors/P1_P2_P3_P4_P5_Collector" />
 
 	<!-- Phase 1: Initialization parameters (v999 = admin/non-instrumented) -->
@@ -439,6 +440,7 @@
 					<classpath refid="generator.classpath" />
 					<arg value="-version" /><arg value="${rule.version}" />
 					<arg value="-process" /><arg value="${workflow.process.name}" />
+			<arg value="-infrastructure" /><arg value="${infrastructure.definition.name}" />
 					<arg value="-place" /><arg value="${target.place}" />
 					<arg value="-operation" /><arg value="${target.operation}" />
 					<arg value="-tokens" /><arg value="0" />
@@ -560,6 +562,7 @@
 			<classpath refid="generator.classpath" />
 			<arg value="-version" /><arg value="${rule.version}" />
 			<arg value="-process" /><arg value="${workflow.process.name}" />
+			<arg value="-infrastructure" /><arg value="${infrastructure.definition.name}" />
 			<arg value="-place" /><arg value="${target.place}" />
 			<arg value="-operation" /><arg value="${target.operation}" />
 			<arg value="-tokens" /><arg value="${token.count}" />
@@ -578,6 +581,7 @@
 			<classpath refid="generator.classpath" />
 			<arg value="-version" /><arg value="${rule.version}" />
 			<arg value="-process" /><arg value="${workflow.process.name}" />
+			<arg value="-infrastructure" /><arg value="${infrastructure.definition.name}" />
 			<arg value="-place" /><arg value="${target.place}" />
 			<arg value="-operation" /><arg value="${target.operation}" />
 			<arg value="-expire" /><arg value="${token.expire}" />
@@ -668,6 +672,7 @@
 					<classpath refid="generator.classpath" />
 					<arg value="-version" /><arg value="${rule.version}" />
 					<arg value="-process" /><arg value="${workflow.process.name}" />
+			<arg value="-infrastructure" /><arg value="${infrastructure.definition.name}" />
 					<arg value="-place" /><arg value="${target.place}" />
 					<arg value="-operation" /><arg value="${target.operation}" />
 					<arg value="-tokens" /><arg value="0" />
