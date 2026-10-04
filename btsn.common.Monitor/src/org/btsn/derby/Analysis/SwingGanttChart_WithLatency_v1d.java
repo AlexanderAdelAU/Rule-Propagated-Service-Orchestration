@@ -907,6 +907,9 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         long totalQueueTime = 0;
         long totalServiceTime = 0;
         int serviceCount = 0;
+        // Earliest real workflow start seen in SERVICECONTRIBUTION.
+        // Used to preserve chronology when PROCESSMEASUREMENTS is empty.
+        long workflowStartTime = Long.MAX_VALUE;
         
         // Track services by fork number for parallel execution analysis
         Map<Integer, List<ServiceTiming>> forkGroups = new HashMap<>();
@@ -1001,7 +1004,8 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
                               "WORKFLOWBASE, " +
                               "SEQUENCEID, " +
                               "QUEUETIME, " +
-                              "SERVICETIME " +
+                              "SERVICETIME, " +
+                              "WORKFLOWSTARTTIME " +
                               "FROM SERVICECONTRIBUTION";
                 
                 System.out.println("Loading SERVICECONTRIBUTION data...");
@@ -1012,6 +1016,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
                     int workflowBase = rs.getInt("WORKFLOWBASE");
                     long queueTime = Math.max(0, rs.getLong("QUEUETIME"));
                     long serviceTime = Math.max(0, rs.getLong("SERVICETIME"));
+                    long workflowStartTime = rs.getLong("WORKFLOWSTARTTIME");
                     
                     // Calculate base sequenceID
                     int baseSequenceId = (sequenceId / 1000) * 1000;
@@ -1021,6 +1026,10 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
                     if (aggregate == null) {
                         aggregate = new WorkflowAggregate(baseSequenceId, workflowBase);
                         contributionMap.put(baseSequenceId, aggregate);
+                    }
+
+                    if (workflowStartTime > 0 && workflowStartTime < aggregate.workflowStartTime) {
+                        aggregate.workflowStartTime = workflowStartTime;
                     }
                     
                     aggregate.addService(sequenceId, queueTime, serviceTime);
@@ -1046,7 +1055,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
                               "TOKENARRIVALTIME, WORKFLOWSTARTTIME, ELAPSEDTIME " +
                               "FROM PROCESSMEASUREMENTS " +
                               "WHERE serviceName IS NOT NULL " +
-                              "ORDER BY id";
+                              "ORDER BY WORKFLOWSTARTTIME, TOKENARRIVALTIME, id";
                 
                 System.out.println("Loading PROCESSMEASUREMENTS for arrival order...");
                 rs = stmt.executeQuery(query);
@@ -1129,9 +1138,15 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
                 tasks.clear();
                 uniqueServices.clear();
                 
-                // Sort workflows by baseSequenceId for consistent ordering
+                // PROCESSMEASUREMENTS may be empty after unified collection. In that
+                // case SERVICECONTRIBUTION still carries the real workflow start time.
+                // Preserve chronology instead of sorting by sequence ID (which would
+                // always group v001 before v002 regardless of when they ran).
                 List<WorkflowAggregate> sortedWorkflows = new ArrayList<>(contributionMap.values());
-                sortedWorkflows.sort((a, b) -> Integer.compare(a.baseSequenceId, b.baseSequenceId));
+                sortedWorkflows.sort((a, b) -> {
+                    int timeOrder = Long.compare(a.workflowStartTime, b.workflowStartTime);
+                    return timeOrder != 0 ? timeOrder : Integer.compare(a.baseSequenceId, b.baseSequenceId);
+                });
                 
                 int syntheticId = 1;
                 for (WorkflowAggregate aggregate : sortedWorkflows) {
@@ -1413,7 +1428,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         g2.setFont(new Font("Arial", Font.BOLD, Math.round(12 * fontScaleFactor)));
         String xLabel = sortByDuration ? 
             "Workflow Duration (sorted by total elapsed time)" :
-            "Workflow Completion Order (relative to first arrival)";
+            "Workflow Arrival Order (chronological)";
         FontMetrics xfm = g2.getFontMetrics();
         int xLabelWidth = xfm.stringWidth(xLabel);
         g2.drawString(xLabel, (getWidth() - xLabelWidth) / 2, topMargin + chartHeight + Math.round(40 * fontScaleFactor));
@@ -1825,7 +1840,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         JMenu xAxisMenu = new JMenu("X-Axis Order");
         ButtonGroup xAxisGroup = new ButtonGroup();
         
-        JRadioButtonMenuItem completionOrderItem = new JRadioButtonMenuItem("By Completion Order");
+        JRadioButtonMenuItem completionOrderItem = new JRadioButtonMenuItem("By Arrival Order");
         completionOrderItem.setSelected(true);
         completionOrderItem.addActionListener(e -> chart.setSortByDuration(false));
         xAxisGroup.add(completionOrderItem);
