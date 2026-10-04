@@ -7,9 +7,10 @@
 
         v002 represents dense background work already executing on shared P1/P2
         services. Higher-priority v001 work begins later and at a slower rate.
-        The experiment tests queue-level priority overtaking: when both versions
-        are waiting for the same shared service, v001 should start first; when no
-        v001 work is waiting, v002 should continue to make progress.
+        The experiment tests queue-level priority overtaking only: an already executing
+        v002 operation is never interrupted. When a worker becomes free and both
+        versions are waiting, v001 should dequeue first; when no v001 work is
+        waiting, v002 should continue to make progress.
 	</description>
 
 	<!-- ======================================================================= -->
@@ -39,6 +40,7 @@
 	<!-- Each workflow has its own topology/rule version; physical services remain shared. -->
 	<property name="workflow1.process.name" value="petrinet/Workflow/FinancialSystem_P1_P5_Workflow" />
 	<property name="workflow2.process.name" value="petrinet/Workflow/FinancialSystem_Stage3_PreScreen_Workflow" />
+	<property name="infrastructure.definition.name" value="FinancialSystem_Infrastructure" />
 	<property name="collector.process.name" value="petrinet/Collectors/P1_P2_P3_P4_P5_Collector" />
 
 	<!-- Phase 1: Initialization parameters (v999 = admin/non-instrumented) -->
@@ -237,15 +239,14 @@
 	<target name="clean-generated-workflow-rules" description="Remove generated v001/v002 process-routing rules before regeneration">
 		<echo message="=== Removing previously generated workflow-routing rules ===" />
 
-		<!-- v001 full workflow: P1-P5 plus Monitor -->
+		<!-- v001 full workflow: business route mapped to P1-P5; Monitor is observation infrastructure -->
 		<delete dir="${p1.project.dir}/RuleFolder.${workflow1.version}/processToken" quiet="true" failonerror="false" />
 		<delete dir="${p2.project.dir}/RuleFolder.${workflow1.version}/processToken" quiet="true" failonerror="false" />
 		<delete dir="${p3.project.dir}/RuleFolder.${workflow1.version}/processToken" quiet="true" failonerror="false" />
 		<delete dir="${p4.project.dir}/RuleFolder.${workflow1.version}/processToken" quiet="true" failonerror="false" />
 		<delete dir="${p5.project.dir}/RuleFolder.${workflow1.version}/processToken" quiet="true" failonerror="false" />
-		<delete dir="${monitor.project.dir}/RuleFolder.${workflow1.version}/acknowledgeTokenArrival" quiet="true" failonerror="false" />
 
-		<!-- v002 pre-screen workflow: shared P1/P2 plus Monitor.
+		<!-- v002 pre-screen workflow: logical Validation/CreditCheck mapped to shared P1/P2.
 		     P3-P5 v002 processToken folders are also removed so stale topology
 		     cannot survive from an earlier experiment. -->
 		<delete dir="${p1.project.dir}/RuleFolder.${workflow2.version}/processToken" quiet="true" failonerror="false" />
@@ -253,7 +254,6 @@
 		<delete dir="${p3.project.dir}/RuleFolder.${workflow2.version}/processToken" quiet="true" failonerror="false" />
 		<delete dir="${p4.project.dir}/RuleFolder.${workflow2.version}/processToken" quiet="true" failonerror="false" />
 		<delete dir="${p5.project.dir}/RuleFolder.${workflow2.version}/processToken" quiet="true" failonerror="false" />
-		<delete dir="${monitor.project.dir}/RuleFolder.${workflow2.version}/acknowledgeTokenArrival" quiet="true" failonerror="false" />
 
 		<echo message="Generated workflow-routing rules removed; current process JSON must regenerate them." />
 	</target>
@@ -320,7 +320,7 @@
 		<echo message="    1. ${workflow1.process.name} (${workflow1.version}): ${workflow1.token.count} tokens" />
 		<echo message="    2. ${workflow2.process.name} (${workflow2.version}): ${workflow2.token.count} tokens" />
 		<echo message="" />
-		<echo message="  Priority model: v001 higher priority than v002" />
+		<echo message="  Priority model: v001 overtakes queued v002 only; executing v002 is never interrupted" />
 		<echo message="================================================================" />
 
 		<parallel>
@@ -496,6 +496,7 @@
 				<echo message="===============================================" />
 				<echo message="Background process: ${workflow2.process.name} (${workflow2.version})" />
 				<echo message="Urgent process:     ${workflow1.process.name} (${workflow1.version})" />
+				<echo message="[STAGE5 ASSERTION] Queue pre-emption only: in-service v002 completes; waiting v001 dequeues before waiting v002." />
 
 				<!-- Commit both RuleBases before workload generation so this test isolates
 				     scheduler behaviour from deployment/commitment timing. -->
@@ -504,6 +505,7 @@
 					<classpath refid="generator.classpath" />
 					<arg value="-version" /><arg value="${workflow1.version}" />
 					<arg value="-process" /><arg value="${workflow1.process.name}" />
+					<arg value="-infrastructure" /><arg value="${infrastructure.definition.name}" />
 					<arg value="-place" /><arg value="${workflow1.target.place}" />
 					<arg value="-operation" /><arg value="${workflow1.target.operation}" />
 					<arg value="-tokens" /><arg value="0" />
@@ -517,6 +519,7 @@
 					<classpath refid="generator.classpath" />
 					<arg value="-version" /><arg value="${workflow2.version}" />
 					<arg value="-process" /><arg value="${workflow2.process.name}" />
+					<arg value="-infrastructure" /><arg value="${infrastructure.definition.name}" />
 					<arg value="-place" /><arg value="${workflow2.target.place}" />
 					<arg value="-operation" /><arg value="${workflow2.target.operation}" />
 					<arg value="-tokens" /><arg value="0" />
@@ -535,6 +538,7 @@
 							<classpath refid="generator.classpath" />
 							<arg value="-version" /><arg value="${workflow2.version}" />
 							<arg value="-process" /><arg value="${workflow2.process.name}" />
+					<arg value="-infrastructure" /><arg value="${infrastructure.definition.name}" />
 							<arg value="-place" /><arg value="${workflow2.target.place}" />
 							<arg value="-operation" /><arg value="${workflow2.target.operation}" />
 							<arg value="-tokens" /><arg value="${workflow2.token.count}" />
@@ -558,6 +562,7 @@
 							<classpath refid="generator.classpath" />
 							<arg value="-version" /><arg value="${workflow1.version}" />
 							<arg value="-process" /><arg value="${workflow1.process.name}" />
+					<arg value="-infrastructure" /><arg value="${infrastructure.definition.name}" />
 							<arg value="-place" /><arg value="${workflow1.target.place}" />
 							<arg value="-operation" /><arg value="${workflow1.target.operation}" />
 							<arg value="-tokens" /><arg value="${workflow1.token.count}" />
@@ -692,14 +697,14 @@
 		<echo message="PRIORITY-OVERTAKING WORKFLOWS:" />
 		<echo message="" />
 		<echo message="  Workflow 1: ${workflow1.process.name} (${workflow1.version})" />
-		<echo message="    EVENT_GENERATOR -> P1 -> [P2, P3] -> P4 -> Monitor" />
+		<echo message="    ValidationService -> [CreditCheckService, FraudCheckService] -> UnderwritingService -> DecisionService -> TERMINATE" />
 		<echo message="" />
 		<echo message="  Workflow 2: ${workflow2.process.name} (${workflow2.version})" />
-		<echo message="    P1_EVENTGENERATOR -> P1 -> P2 -> Monitor" />
+		<echo message="    ValidationService -> CreditCheckService -> TERMINATE" />
 		<echo message="" />
 		<echo message="EXECUTION PATTERN:" />
-		<echo message="  Phase 1: Load P1-P5 + Monitor ONCE, initialize databases" />
-		<echo message="  Phase 2: Commit both -> start dense v002 background -> start slower v001 urgent work 2s later" />
+		<echo message="  Phase 1: Load shared P1-P5 + observation Monitor ONCE, initialize databases" />
+		<echo message="  Phase 2: Commit both -> build v002 queue -> start v001 2s later -> v001 overtakes waiting v002 only" />
 		<echo message="  Phase 3: Collect data from all services" />
 		<echo message="" />
 		<echo message="USAGE:" />
