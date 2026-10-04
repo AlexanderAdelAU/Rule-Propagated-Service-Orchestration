@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.btsn.json.jsonLibrary;
+import org.btsn.invocation.BusinessCapabilityResolver;
 import org.json.simple.JSONObject;
 
 /**
@@ -34,6 +35,7 @@ import org.json.simple.JSONObject;
  */
 public class ServiceHelper {
 	private static final Logger logger = Logger.getLogger(ServiceHelper.class);
+	private BusinessCapabilityResolver capabilityResolver;
 	
 	private static final ThreadLocal<String> returnType = new ThreadLocal<>();
 
@@ -118,6 +120,11 @@ public class ServiceHelper {
 	 */
 	public ServiceResult process(String sequenceID, String service, String operation, 
 	                            ArrayList<?> inputArgs, String outputAttributeName) {
+		return processWithVersion(sequenceID, service, operation, inputArgs, outputAttributeName, null);
+	}
+
+	private ServiceResult processWithVersion(String sequenceID, String service, String operation,
+	                                         ArrayList<?> inputArgs, String outputAttributeName, String ruleBaseVersion) {
 		String returnTypeStr = null;
 		TokenMetadata metadata = null;
 		
@@ -179,7 +186,7 @@ public class ServiceHelper {
 			           " with " + cleanedArguments.size() + " CLEAN business data arguments");
 			
 			// FIX: Invoke service with ALL CLEAN data arguments (supports JOIN with multiple inputs)
-			String serviceResult = invokeServiceMethod(sequenceID, service, operation, cleanedArguments, outputAttributeName);
+			String serviceResult = invokeServiceMethod(sequenceID, service, operation, cleanedArguments, outputAttributeName, ruleBaseVersion);
 			
 			// Capture service end time
 			long serviceEndTime = System.currentTimeMillis();
@@ -214,13 +221,13 @@ public class ServiceHelper {
 	 */
 	public ServiceResult process(String sequenceID, String service, String operation, 
 	                            ArrayList<?> inputArgs, String outputAttributeName, String buildVersion) {
-		// buildVersion is preserved for constructor patterns but outputAttributeName takes precedence
+		// Preserve the selected rulebase version for invocation contract validation
 		// If outputAttributeName is null or "null", try to infer it
 		String effectiveOutputAttr = outputAttributeName;
 		if (effectiveOutputAttr == null || "null".equals(effectiveOutputAttr)) {
 			effectiveOutputAttr = inferOutputAttributeName(operation);
 		}
-		return process(sequenceID, service, operation, inputArgs, effectiveOutputAttr);
+		return processWithVersion(sequenceID, service, operation, inputArgs, effectiveOutputAttr, buildVersion);
 	}
 
 	// ========================================================================
@@ -500,13 +507,19 @@ public class ServiceHelper {
 	 */
 	private String invokeServiceMethod(String sequenceID, String service, 
 	                                   String operation, ArrayList<String> cleanedArguments,
-	                                   String buildVersion) 
+	                                   String buildVersion, String ruleBaseVersion)
 			throws Exception {
 		
 		logger.debug("INVOKE: Reflecting on " + service + "." + operation);
 		logger.debug("INVOKE: Looking for method with " + cleanedArguments.size() + " String parameters");
 		
-		Class<?> serviceClass = Class.forName(service);
+		if (capabilityResolver == null) {
+			capabilityResolver = BusinessCapabilityResolver.forCurrentDeployment();
+		}
+		String implementationClass = capabilityResolver.resolve(service, operation, buildVersion,
+		        cleanedArguments.size(), ruleBaseVersion);
+		logger.info("CAPABILITY RESOLVED: " + service + "." + operation + " -> " + implementationClass);
+		Class<?> serviceClass = Class.forName(implementationClass);
 		
 		// Check for singleton pattern first
 		Object serviceInstance = null;
