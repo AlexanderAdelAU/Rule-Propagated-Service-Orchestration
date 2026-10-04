@@ -5,8 +5,9 @@
 	<description>
 		RPSO Stage 5 - Priority Overtaking of Background Work
 
-        v002 represents dense background work already executing on shared P1/P2
-        services. Higher-priority v001 work begins later and at a slower rate.
+        v002 represents a long-running background process on shared P1/P2 services.
+        It runs alone for 20 seconds before higher-priority v001 begins; v002
+        remains active after v001 has completed.
         The experiment tests queue-level priority overtaking only: an already executing
         v002 operation is never interrupted. When a worker becomes free and both
         versions are waiting, v001 should dequeue first; when no v001 work is
@@ -94,7 +95,7 @@
 	<property name="service.startup.seconds" value="3" />
 	<property name="phase.delay.seconds" value="5" />
 	<property name="deploy.wait.seconds" value="3" />
-	<property name="v001.fire.delay.seconds" value="2" />
+	<property name="v001.fire.delay.seconds" value="20" />
 	<property name="workflow.drain.seconds" value="25" />
 
 	<!-- Base directories -->
@@ -488,7 +489,7 @@
 
 				<!-- ======================================================= -->
 				<!-- PHASE 2: PRIORITY OVERTAKING                             -->
-				<!-- v002 background first -> later v001 urgent arrivals -> both share P1/P2 -->
+				<!-- Long-running v002 starts first -> 20s established run -> v001 arrives -> both share P1/P2 -->
 				<!-- ======================================================= -->
 				<echo message="" />
 				<echo message="===============================================" />
@@ -496,7 +497,7 @@
 				<echo message="===============================================" />
 				<echo message="Background process: ${workflow2.process.name} (${workflow2.version})" />
 				<echo message="Urgent process:     ${workflow1.process.name} (${workflow1.version})" />
-				<echo message="[STAGE5 ASSERTION] Queue pre-emption only: in-service v002 completes; waiting v001 dequeues before waiting v002." />
+				<echo message="[STAGE5 ASSERTION] v002 has a 20s head start and remains long-running. Queue pre-emption only: in-service v002 completes; waiting v001 dequeues before waiting v002." />
 
 				<!-- Commit both RuleBases before workload generation so this test isolates
 				     scheduler behaviour from deployment/commitment timing. -->
@@ -704,7 +705,7 @@
 		<echo message="" />
 		<echo message="EXECUTION PATTERN:" />
 		<echo message="  Phase 1: Load shared P1-P5 + observation Monitor ONCE, initialize databases" />
-		<echo message="  Phase 2: Commit both -> build v002 queue -> start v001 2s later -> v001 overtakes waiting v002 only" />
+		<echo message="  Phase 2: Commit both -> run v002 alone for 20s -> start v001 -> v001 overtakes waiting v002 only" />
 		<echo message="  Phase 3: Collect data from all services" />
 		<echo message="" />
 		<echo message="USAGE:" />
