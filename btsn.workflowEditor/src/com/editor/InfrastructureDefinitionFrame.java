@@ -243,6 +243,13 @@ public class InfrastructureDefinitionFrame extends JFrame {
     }
 
     private void saveDefinition() {
+        List<String> errors = validateDefinition();
+        if (!errors.isEmpty()) {
+            JOptionPane.showMessageDialog(this, String.join("\n", errors),
+                "Invalid infrastructure definition", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         JFileChooser chooser = createRememberingChooser(PREF_DEFINITION_DIR, null);
         chooser.setDialogTitle("Save infrastructure definition");
         chooser.setSelectedFile(currentFile != null ? currentFile : new File(chooser.getCurrentDirectory(), "InfrastructureDefinition.json"));
@@ -494,7 +501,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
                    .append(deploymentFile.getAbsolutePath());
             JOptionPane.showMessageDialog(this, message.toString());
         } catch (IOException ex) {
-            showError("Could not generate canonical bindings", ex);
+            showError("Could not generate infrastructure configuration", ex);
         }
     }
 
