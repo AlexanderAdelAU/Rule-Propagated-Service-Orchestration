@@ -13,7 +13,8 @@
 		  Decision     -> P5_Place
 
 		The handler/runtime nodes remain generic. Workflow behaviour is supplied
-		through generated bindings and propagated rule sets.
+		through generated bindings and propagated rule sets. Monitor remains a
+		separate infrastructure/observation service and is not on the business-token route.
 
 		Phases:
 		  Phase 1: Initialize databases for P1-P5 and Monitor
