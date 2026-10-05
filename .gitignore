@@ -5,6 +5,7 @@
 **/target/
 
 # Runtime logs and captured service output
+**/*.running
 **/*.log
 **/*.log.*
 **/*.out

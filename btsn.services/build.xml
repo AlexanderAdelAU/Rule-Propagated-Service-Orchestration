@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="service-deployment" default="distribution" basedir=".">
-    <import file="manual-distribution.xml"/>
+<project name="service-deployment" default="package" basedir=".">
     <!-- Ant 1.10.2+ running on JDK 15+. No external build tool is invoked. -->
     <property name="packaging.config" location="packaging.json"/>
     <property name="target.dir" location="target"/>
