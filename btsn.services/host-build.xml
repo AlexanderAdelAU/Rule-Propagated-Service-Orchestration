@@ -45,10 +45,7 @@
             </manifest>
         </jar>
     </target>
-    <target name="jar" depends="prepare,jar-only" description="Build the generic host JAR and its service dependencies"/>
-    <target name="release" description="Build portable two-JAR ZIP with manual startup commands">
-        <ant antfile="${services.dir}/build.xml" target="distribution" inheritall="false"/>
-        <mkdir dir="${host.target}"/>
-        <copy file="${service.target}/btsn-services.zip" todir="${host.target}"/>
-    </target>
+    <target name="jar" depends="place-release" description="Build only this numbered place's portable executable JAR and ZIP"/>
+    <import file="place-release.xml"/>
+    <target name="release" depends="place-release" description="Build only this numbered place's executable JAR and portable ZIP"/>
 </project>
