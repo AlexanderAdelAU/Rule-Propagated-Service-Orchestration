@@ -1690,9 +1690,9 @@ public class PetriNetAnalyzer {
                 long laterArrival = Math.max(high.arrivalTime, low.arrivalTime);
                 long firstServiceStart = Math.min(highStart, lowStart);
                 
-                // A real scheduling contention point exists only when BOTH tokens
-                // had arrived before either one began service. At that instant the
-                // shared queue had a choice between versions.
+                // Candidate overlap: BOTH tokens arrived before either invocation.
+                // Invocation follows dequeue and rule processing; these timestamps
+                // do not prove both tokens were queued at the dequeue decision.
                 if (laterArrival <= firstServiceStart) {
                     ContentionPoint cp = new ContentionPoint();
                     cp.timestamp = laterArrival;
@@ -1711,7 +1711,7 @@ public class PetriNetAnalyzer {
     }
     
     /**
-     * Detect priority inversions only among proven same-queue contention points.
+     * Detect invocation-order inversions among same-place overlap candidates.
      */
     private void detectSharedServicePriorityInversions(PriorityAnalysis analysis) {
         for (ContentionPoint cp : analysis.sharedServiceContentionPoints) {
@@ -1824,8 +1824,8 @@ public class PetriNetAnalyzer {
         report.append("\n");
         
         // 4. SHARED SERVICE CONTENTION (primary metric)
-        report.append("4. SHARED SERVICE CONTENTION (Both Versions Waiting Before Service Start)\n");
-        report.append("   Total contention points: ").append(analysis.sharedServiceContentionPoints.size()).append("\n");
+        report.append("4. SHARED SERVICE CONTENTION CANDIDATES (Both Arrived Before Invocation)\n");
+        report.append("   Total candidate comparisons: ").append(analysis.sharedServiceContentionPoints.size()).append("\n");
         
         if (!analysis.sharedServiceContentionPoints.isEmpty()) {
             long respected = analysis.sharedServiceContentionPoints.stream().filter(cp -> cp.priorityRespected).count();
@@ -1870,12 +1870,15 @@ public class PetriNetAnalyzer {
         report.append("\n");
         
         // 5. SHARED SERVICE INVERSIONS
-        report.append("5. SHARED SERVICE PRIORITY INVERSIONS\n");
+        report.append("5. SHARED SERVICE PRIORITY INVERSION CANDIDATES\n");
+        report.append("   [NOTE] Arrival is recorded before queue insertion; invocation is recorded after dequeue and rule processing.\n");
+        report.append("   A lower-priority token can be dequeued before the higher-priority token enters the queue, yet be invoked after its arrival.\n");
+        report.append("   Queue insertion/dequeue timestamps are not recorded here; these candidates do not prove a scheduling violation.\n");
         if (analysis.sharedServiceInversions.isEmpty()) {
-            report.append("   [OK] No priority inversions at shared services\n");
+            report.append("   [OK] No invocation-order inversion candidates at shared services\n");
         } else {
             report.append("   [WARN] ").append(analysis.sharedServiceInversions.size())
-                  .append(" priority inversions at shared services\n");
+                  .append(" invocation-order inversion candidates at shared services\n");
             
             int shown = 0;
             for (PriorityInversion inv : analysis.sharedServiceInversions) {
@@ -1883,7 +1886,7 @@ public class PetriNetAnalyzer {
                     report.append("   ... and ").append(analysis.sharedServiceInversions.size() - 5).append(" more\n");
                     break;
                 }
-                report.append(String.format("   - [%s] v%03d token %d was already waiting when v%03d token %d started first (start-order inversion: %dms)\n",
+                report.append(String.format("   - [%s] v%03d token %d arrived before v%03d token %d was invoked first (invocation-order difference: %dms; dequeue order unrecorded)\n",
                     inv.highPriorityToken.placeName,
                     inv.highPriorityToken.versionNumber, inv.highPriorityToken.sequenceId,
                     inv.lowPriorityToken.versionNumber, inv.lowPriorityToken.sequenceId,
@@ -1933,18 +1936,18 @@ public class PetriNetAnalyzer {
         if (analysis.sharedPlaces.isEmpty()) {
             report.append("   Shared-service concurrency: [NOT OBSERVED] no physical service saw multiple versions\n");
         } else if (analysis.sharedServiceContentionPoints.isEmpty()) {
-            report.append("   Shared-service concurrency: [PARTIAL] shared services exist, but no simultaneous queue choice was observed\n");
+            report.append("   Shared-service concurrency: [PARTIAL] shared services exist, but no arrival-to-invocation overlap was observed\n");
         } else {
             long respected = analysis.sharedServiceContentionPoints.stream()
                 .filter(cp -> cp.priorityRespected).count();
             report.append("   Shared-service concurrency: [OBSERVED]\n");
             report.append("   Shared physical services: ").append(analysis.sharedPlaces.size()).append("\n");
-            report.append("   Proven same-queue contention decisions: ")
+            report.append("   Same-place overlap candidate comparisons: ")
                   .append(analysis.sharedServiceContentionPoints.size()).append("\n");
             report.append("   Lower-version start order respected: ")
                   .append(respected).append("/").append(analysis.sharedServiceContentionPoints.size())
                   .append(" (").append(String.format("%.1f%%", analysis.sharedServiceEffectiveness * 100)).append(")\n");
-            report.append("   Start-order inversions observed: ")
+            report.append("   Invocation-order inversion candidates: ")
                   .append(analysis.sharedServiceInversions.size()).append("\n");
         }
         
