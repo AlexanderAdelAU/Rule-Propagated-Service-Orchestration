@@ -17,15 +17,7 @@
 	<!-- ======================================================================= -->
 	<!-- DEPLOYMENT CONFIGURATION                                                -->
 	<!-- ======================================================================= -->
-	<!-- Ant contacts independently running receivers; it never starts the hosts. -->
-	<property file="deployment.properties" />
-	<property name="deployment.port" value="41000" />
-	<property name="p1.deployment.host" value="127.0.0.1" />
-	<property name="p2.deployment.host" value="127.0.0.1" />
-	<property name="p3.deployment.host" value="127.0.0.1" />
-	<property name="p4.deployment.host" value="127.0.0.1" />
-	<property name="p5.deployment.host" value="127.0.0.1" />
-	<property name="monitor.deployment.host" value="127.0.0.1" />
+	<!-- Services and threads are started manually from the distribution ZIP. -->
 
 	<!-- ======================================================================= -->
 	<!-- PROPERTIES                                                              -->
@@ -200,26 +192,6 @@
 		<ant antfile="${services.project.dir}/build.xml" target="build-workflow-runtime" inheritall="false" />
 	</target>
 
-	<target name="deploy-services" depends="rebuild-service-ruleml">
-		<fail unless="deployment.token">Set deployment.token in deployment.properties or with -Ddeployment.token</fail>
-		<ant antfile="${services.project.dir}/build.xml" target="remote-bundle" inheritall="false" />
-		<macrodef name="deploy-service">
-			<attribute name="component"/><attribute name="host"/>
-			<sequential>
-				<java classname="org.btsn.deployment.DeploymentClient" fork="true" failonerror="true">
-					<classpath><pathelement location="${services.project.dir}/target/btsn-deployment-host.jar"/></classpath>
-					<arg value="@{host}"/><arg value="${deployment.port}"/><arg value="${deployment.token}"/>
-					<arg file="${services.project.dir}/target/remote-service-deployment.zip"/><arg value="@{component}"/><arg value="${workflow1.version}"/>
-				</java>
-			</sequential>
-		</macrodef>
-		<deploy-service component="p1" host="${p1.deployment.host}"/>
-		<deploy-service component="p2" host="${p2.deployment.host}"/>
-		<deploy-service component="p3" host="${p3.deployment.host}"/>
-		<deploy-service component="p4" host="${p4.deployment.host}"/>
-		<deploy-service component="p5" host="${p5.deployment.host}"/>
-		<deploy-service component="monitor" host="${monitor.deployment.host}"/>
-	</target>
 
 	<target name="create-output-directory">
 		<mkdir dir="${output.dir}" />
@@ -309,7 +281,7 @@
 	<!-- MAIN WORKFLOW TARGET                                                    -->
 	<!-- ======================================================================= -->
 
-	<target name="run-complete-workflow" depends="create-output-directory,clean-output,deploy-services"
+	<target name="run-complete-workflow" depends="create-output-directory,clean-output,rebuild-service-ruleml"
 	        description="Run priority-overtaking experiment with background v002 and later urgent v001 work">
 
 		<echo message="================================================================" />
@@ -323,7 +295,7 @@
 		<echo message="  Priority model: v001 overtakes queued v002 only; executing v002 is never interrupted" />
 		<echo message="================================================================" />
 
-		<!-- Services have acknowledged startup on their receiving hosts. -->
+		<echo message="Using manually started services; Ant deploys rules and sends tokens only." />
 			<sequential>
 				<echo message="Waiting ${service.startup.seconds}s for services to start..." />
 				<sleep seconds="${service.startup.seconds}" />
@@ -618,7 +590,7 @@
 				<echo message="  P5: ${p5.output.file}" />
 				<echo message="  Monitor: ${monitor.output.file}" />
 				<echo message="" />
-				<echo message="Services remain running on their receivers after Ant completes." />
+				<echo message="Services remain running independently after Ant completes." />
 			</sequential>
 	</target>
 
@@ -650,12 +622,7 @@
 		<echo message="  ant run-complete-workflow        Run complete workflow" />
 		<echo message="  ant help                         Show this help" />
 		<echo message="" />
-		<echo message="DEPLOYMENT RECEIVERS (already running):" />
-		<echo message="  -D&lt;service&gt;.deployment.host=IP  Receiver address (p1-p5, monitor)" />
-		<echo message="  -Ddeployment.port=41000 -Ddeployment.token=TOKEN" />
-		<echo message="" />
-		<echo message="  Services: p1, p2, p3, p4, p5, monitor" />
-		<echo message="" />
+		<echo message="Start services manually with launch.bat or launch.sh from the distribution ZIP before running Ant." />
 		<echo message="CONFIGURABLE PARAMETERS:" />
 		<echo message="  -Dworkflow1.token.count=15       Tokens via EVENT_GENERATOR (workflow1)" />
 		<echo message="  -Dworkflow2.token.count=60       Tokens via P1_EVENTGENERATOR (workflow2)" />

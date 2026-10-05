@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="btsn.petrinet.places.p1" default="release" basedir=".">
     <property name="host.artifact" value="btsn.petrinet.places.p1"/>
-    <property name="deployment.component" value="p1"/>
     <import file="../btsn.services/host-build.xml"/>
 </project>

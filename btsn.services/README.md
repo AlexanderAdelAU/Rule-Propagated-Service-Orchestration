@@ -80,99 +80,90 @@ are left untouched and are absent from the new launch classpaths. Common runtime
 libraries already supplied by the service bundle are excluded from the old
 library path to avoid duplicate copies.
 
-Each host JAR is created at `btsn.petrinet.places.pN/target/btsn.petrinet.places.pN.jar`.
-Its manifest points to the shared infrastructure, service JARs and libraries in
-the existing repository layout. The `release` target builds these artifacts;
-it does not create a standalone host distribution ZIP.
+## Manual two-JAR distribution
 
-The Stage-5 launcher builds the packaged runtime and generates the rules, uploads
-a self-contained package to each configured receiver, and sends an explicit start
-request before sending initialization or workflow tokens. It does not launch the
-receiver. The workflow definitions, routing, timings and token counts are unchanged.
-
-## Remote deployment and startup
-
-Build the receiver and the deployable package with Ant:
+Build from the service project:
 
 ```sh
-ant -f btsn.services/build.xml remote-bundle
+ant -f btsn.services/build.xml distribution
 ```
 
-The outputs are `target/btsn-deployment-host.jar` (the independent receiver) and
-`target/remote-service-deployment.zip` (service runtime JARs, business JARs,
-libraries, metadata, loader queries and rules). No source files or Eclipse
-`bin` directories are needed at the destination.
-
-Install the receiver JAR on each destination once and run it independently of Ant:
+Or use the existing numbered project's release build, for example:
 
 ```sh
-java -jar btsn-deployment-host.jar 0.0.0.0 41000 /srv/btsn/deployments YOUR_TOKEN
+ant -f btsn.petrinet.places.p1/build.xml release
+ant -f btsn.petrinet.places.p2/build.xml release
 ```
 
-Use an appropriate local directory on Windows instead of `/srv/btsn/deployments`.
-The receiver waits for deployment requests and remains running when an Ant run
-finishes. Ant does not start, stop or restart that receiver. If your currently
-running host software has no deployment endpoint, installing this receiver is
-required; a build cannot add an endpoint to an existing JVM remotely.
+Every numbered project imports the same build. Its release target creates
+`target/btsn-services.zip`. The service project also writes that ZIP to
+`btsn.services/target/btsn-services.zip`. The service project's default target is
+now `distribution`.
 
-Deploy and start P1 using that already running receiver:
+Copy the ZIP to the remote machine and unzip it. It contains exactly two JAR files:
+
+| File | Purpose |
+| --- | --- |
+| `btsn-business-services.jar` | All packaged business implementations and their shared service helpers; starts the selected place worker |
+| `btsn-infrastructure.jar` | Existing generic handlers, shared infrastructure, third-party libraries and Monitor runtime; starts initialization/collection or Monitor services |
+
+Both are executable. Keep them together and run, from the unzipped directory:
 
 ```sh
-ant -f btsn.services/build.xml deploy-start -Ddeployment.host=DESTINATION_IP -Ddeployment.port=41000 -Ddeployment.token=YOUR_TOKEN -Ddeployment.component=p1 -Ddeployment.version=v001
+java -jar btsn-infrastructure.jar p1
+java -jar btsn-business-services.jar p1
 ```
 
-Use `p2` through `p6`, or `monitor`, with the same command. The numbered project's
-`run` target also delegates to this deployment mechanism; supply the same host,
-port and token properties.
+Run those two commands in separate terminals. Alternatively, `launch.bat p1`
+opens both on Windows; `sh launch.sh p1` starts both on Linux/macOS. Substitute
+`p2` through `p6` for the selected place. `launch.bat monitor` or
+`sh launch.sh monitor` starts Monitor from the infrastructure JAR. Separate
+`launch-business` and `launch-infrastructure` scripts are also included.
+Each command accepts an optional startup rule version, such as `p1 v001`.
+The destination needs Java 15+ and a writable unzipped directory; it needs neither
+Ant nor the source repository.
 
-The receiver checks the upload checksum, stores and extracts the received package,
-then starts a **service JVM** from those received JARs. That JVM calls the unchanged
-`ServiceLoader`, which constructs the existing rule handlers and `ServiceThread`
-workers. Business implementations execute through the unchanged `ServiceHelper`
-when tokens arrive. Business implementation classes are not themselves Java threads.
-The independently running receiver is never relaunched by a deployment request.
+The startup commands call the unchanged `ServiceLoader`. Business startup selects
+the place's existing worker; infrastructure startup selects initialization and
+collection services. `ServiceThread` and `ServiceHelper` are unchanged. Business
+implementation objects are instantiated through the existing helper as tokens
+arrive, inside the worker started by the business command.
 
-Startup is acknowledged only after the launcher and its workers report successful
-startup. Upload, authentication or startup failures fail the Ant run before tokens
-are sent. Repeating a start request for the same running component/version/package
-returns `ALREADY RUNNING`; it does not start another copy. A request to replace a
-running component with a different package/version is rejected; it does not silently
-stop or replace that service. Receiver logs and service output files are stored in
-the receiver's deployment directory, not the development repository.
+Runtime libraries and the existing component runtimes are embedded in the
+infrastructure JAR and unpacked locally on first startup. This preserves each
+component's original handlers, including Monitor, without merging different
+classes with the same Java name. Business implementations are combined into the
+business JAR and are not embedded in the infrastructure runtime. The ZIP also
+contains configuration files and startup commands, following the original P1/P2
+release ZIP approach. There is no receiver or remote JAR upload/start mechanism.
 
-For Stage 5, put the following properties in
-`btsn.petrinet.ProjectLoader/deployment.properties` (or supply them with `-D`):
+Initial deployment definitions and rules are under `config`. Configure their
+channel addresses for the destination before first startup, and use the same
+mapping in the development project. Runtime working directories and databases
+are under `.run/business` and `.run/infrastructure`; received process rules and
+data are preserved between starts. Editing the initial config after first start
+does not overwrite these existing runtime directories; stop services and update
+their working configuration when changing deployment settings.
 
-```properties
-deployment.token=YOUR_TOKEN
-deployment.port=41000
-p1.deployment.host=DESTINATION_IP
-p2.deployment.host=DESTINATION_IP
-p3.deployment.host=DESTINATION_IP
-p4.deployment.host=DESTINATION_IP
-p5.deployment.host=DESTINATION_IP
-monitor.deployment.host=DESTINATION_IP
-```
+Wait for the existing launcher and service threads to finish startup. Operations
+must be declared by the existing `activeService` deployment rules. A place with
+no bound business operation does not acquire one merely because its JAR is present.
+All six places use identical startup logic and configuration rules.
 
-Configure the existing infrastructure definition's channel addresses for the actual
-service destinations as well: the receiver address controls package transfer, while
-workflow channel addresses control token and rule delivery. Those are distinct
-settings. Stage 5 deploys P1-P5 and Monitor; P6 uses the same deployment mechanism.
+Then run the normal business-process deployment Ant build. The Stage-5 launcher
+now deploys rules and sends initialization, workflow and collector tokens to the
+already running services. It does not start, stop or restart those services.
+Its workflow definitions, token counts, timings and rule-deployment mechanism
+remain unchanged. Service output is in the consoles on the machine running them.
 
-The implementation sources remain in `btsn.common/src`; the uploaded package
-contains compiled JARs only. All business identity and placement comes from the
-existing deployment metadata and rules, not receiver code.
-
-Validate real upload and service startup with:
+Validate the copied ZIP's startup and invocation boundaries with:
 
 ```sh
-ant -f btsn.services/build.xml check-remote
+ant -f btsn.services/build.xml check-distribution
 ```
 
-This launches a test receiver JVM containing only the receiver JAR, transfers the
-package over a socket, starts all six places and Monitor from received files,
-checks duplicate starts and rejected uploads, and runs the existing 108 invocation
-checks for each place against the received JARs. It also checks class origins to
-exclude accidental use of development classes. The test stops only its own test
-receiver and services at completion. It does not constitute a test across real LAN
-machines; run Stage 5 with the actual destination addresses for that validation.
+The test extracts the ZIP outside the repository to a directory with spaces,
+starts the executable JARs, checks business/infrastructure worker separation and
+Monitor startup, and runs the existing 108 invocation checks for every numbered
+place using only the copied artifacts. These are local isolated-process checks;
+actual LAN process deployment must be validated with the destination addresses.
