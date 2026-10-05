@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="P1_P2_P3_P4_BuildAndRun" default="run-complete-workflow" basedir=".">
+<project name="P1_P2_P3_P4_BuildAndRun" default="run-complete-workflow" basedir="." xmlns:if="ant:if" xmlns:unless="ant:unless">
 	<description>
 		P1_P2_P3_P4 Fork Petri Net - Complete Workflow with Initialization and Collection
 		
@@ -159,6 +159,20 @@
 	<!-- UTILITY TARGETS                                                         -->
 	<!-- ======================================================================= -->
 
+	<property name="p1.mode" value="auto" />
+	<property name="p2.mode" value="auto" />
+	<property name="p3.mode" value="auto" />
+	<property name="p4.mode" value="auto" />
+	<property name="monitor.mode" value="auto" />
+	<import file="../btsn.services/auto-deployment.xml" />
+	<target name="resolve-deployment-modes" depends="detect-local-channel">
+		<resolve-local-launch component="p1" mode="${p1.mode}" />
+		<resolve-local-launch component="p2" mode="${p2.mode}" />
+		<resolve-local-launch component="p3" mode="${p3.mode}" />
+		<resolve-local-launch component="p4" mode="${p4.mode}" />
+		<resolve-local-launch component="monitor" mode="${monitor.mode}" />
+	</target>
+
 	<target name="clean-output" description="Clean previous output files">
 		<delete file="${p1.output.file}" quiet="true" />
 		<delete file="${p2.output.file}" quiet="true" />
@@ -199,7 +213,7 @@
 	<!-- MAIN TARGET: COMPLETE WORKFLOW                                          -->
 	<!-- ======================================================================= -->
 
-	<target name="run-complete-workflow" depends="clean-output,rebuild-service-ruleml" 
+	<target name="run-complete-workflow" depends="resolve-deployment-modes,clean-output,rebuild-service-ruleml"
 	        description="Run complete P1_P2_P3_P4 workflow with init, execution and collection (DEFAULT)">
 		<echo message="" />
 		<echo message="================================================================" />
@@ -216,7 +230,7 @@
 			<!-- Start P1-P4 Services -->
 			<java jvm="java.exe" classname="${service.loader.class}" 
 			      fork="true" timeout="600000" 
-			      dir="${p1.project.dir}" output="${p1.output.file}">
+			      dir="${p1.project.dir}" output="${p1.output.file}" if:set="p1.is.local">
 				<classpath refid="p1.classpath" />
 				<arg value="${p1.project.dir}" />
 				<arg value="-version" /><arg value="${rule.version}" />
@@ -224,7 +238,7 @@
 
 			<java jvm="java.exe" classname="${service.loader.class}" 
 			      fork="true" timeout="600000" 
-			      dir="${p2.project.dir}" output="${p2.output.file}">
+			      dir="${p2.project.dir}" output="${p2.output.file}" if:set="p2.is.local">
 				<classpath refid="p2.classpath" />
 				<arg value="${p2.project.dir}" />
 				<arg value="-version" /><arg value="${rule.version}" />
@@ -232,7 +246,7 @@
 
 			<java jvm="java.exe" classname="${service.loader.class}" 
 			      fork="true" timeout="600000" 
-			      dir="${p3.project.dir}" output="${p3.output.file}">
+			      dir="${p3.project.dir}" output="${p3.output.file}" if:set="p3.is.local">
 				<classpath refid="p3.classpath" />
 				<arg value="${p3.project.dir}" />
 				<arg value="-version" /><arg value="${rule.version}" />
@@ -240,7 +254,7 @@
 
 			<java jvm="java.exe" classname="${service.loader.class}" 
 			      fork="true" timeout="600000" 
-			      dir="${p4.project.dir}" output="${p4.output.file}">
+			      dir="${p4.project.dir}" output="${p4.output.file}" if:set="p4.is.local">
 				<classpath refid="p4.classpath" />
 				<arg value="${p4.project.dir}" />
 				<arg value="-version" /><arg value="${rule.version}" />
@@ -249,7 +263,7 @@
 			<!-- Start Monitor Service -->
 			<java jvm="java.exe" classname="${service.loader.class}" 
 			      fork="true" timeout="600000" 
-			      dir="${monitor.project.dir}" output="${monitor.output.file}">
+			      dir="${monitor.project.dir}" output="${monitor.output.file}" if:set="monitor.is.local">
 				<classpath refid="monitor.classpath" />
 				<arg value="${monitor.project.dir}" />
 				<arg value="-version" /><arg value="${rule.version}" />
@@ -490,7 +504,7 @@
 	<!-- WORKFLOW-ONLY TARGET (skip init/collect)                               -->
 	<!-- ======================================================================= -->
 
-	<target name="run-workflow-only" depends="clean-output,rebuild-service-ruleml" 
+	<target name="run-workflow-only" depends="resolve-deployment-modes,clean-output,rebuild-service-ruleml"
 	        description="Run only the workflow phase (skip init and collect)">
 		<echo message="" />
 		<echo message="================================================================" />
@@ -505,7 +519,7 @@
 			<!-- Start all services -->
 			<java jvm="java.exe" classname="${service.loader.class}" 
 			      fork="true" timeout="600000" 
-			      dir="${p1.project.dir}" output="${p1.output.file}">
+			      dir="${p1.project.dir}" output="${p1.output.file}" if:set="p1.is.local">
 				<classpath refid="p1.classpath" />
 				<arg value="${p1.project.dir}" />
 				<arg value="-version" /><arg value="${rule.version}" />
@@ -513,7 +527,7 @@
 
 			<java jvm="java.exe" classname="${service.loader.class}" 
 			      fork="true" timeout="600000" 
-			      dir="${p2.project.dir}" output="${p2.output.file}">
+			      dir="${p2.project.dir}" output="${p2.output.file}" if:set="p2.is.local">
 				<classpath refid="p2.classpath" />
 				<arg value="${p2.project.dir}" />
 				<arg value="-version" /><arg value="${rule.version}" />
@@ -521,7 +535,7 @@
 
 			<java jvm="java.exe" classname="${service.loader.class}" 
 			      fork="true" timeout="600000" 
-			      dir="${p3.project.dir}" output="${p3.output.file}">
+			      dir="${p3.project.dir}" output="${p3.output.file}" if:set="p3.is.local">
 				<classpath refid="p3.classpath" />
 				<arg value="${p3.project.dir}" />
 				<arg value="-version" /><arg value="${rule.version}" />
@@ -529,7 +543,7 @@
 
 			<java jvm="java.exe" classname="${service.loader.class}" 
 			      fork="true" timeout="600000" 
-			      dir="${p4.project.dir}" output="${p4.output.file}">
+			      dir="${p4.project.dir}" output="${p4.output.file}" if:set="p4.is.local">
 				<classpath refid="p4.classpath" />
 				<arg value="${p4.project.dir}" />
 				<arg value="-version" /><arg value="${rule.version}" />
@@ -537,7 +551,7 @@
 
 			<java jvm="java.exe" classname="${service.loader.class}" 
 			      fork="true" timeout="600000" 
-			      dir="${monitor.project.dir}" output="${monitor.output.file}">
+			      dir="${monitor.project.dir}" output="${monitor.output.file}" if:set="monitor.is.local">
 				<classpath refid="monitor.classpath" />
 				<arg value="${monitor.project.dir}" />
 				<arg value="-version" /><arg value="${rule.version}" />

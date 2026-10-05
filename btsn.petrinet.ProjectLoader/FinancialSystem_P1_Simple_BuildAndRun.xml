@@ -31,8 +31,8 @@
 	<!-- Override from command line: ant -Dp1.mode=remote                         -->
 	<!-- ======================================================================= -->
 
-	<property name="p1.mode"      value="local" />
-	<property name="monitor.mode" value="local" />
+	<property name="p1.mode"      value="auto" />
+	<property name="monitor.mode" value="auto" />
 
 	<!-- ======================================================================= -->
 	<!-- PROPERTIES                                                              -->
@@ -149,16 +149,18 @@
 	<!-- DEPLOYMENT MODE RESOLUTION                                              -->
 	<!-- ======================================================================= -->
 
-	<target name="resolve-deployment-modes">
+	<import file="../btsn.services/auto-deployment.xml" />
+
+	<target name="resolve-deployment-modes" depends="detect-local-channel">
 		<!-- Resolve boolean properties from mode settings -->
-		<condition property="p1.is.local"><equals arg1="${p1.mode}" arg2="local" /></condition>
-		<condition property="monitor.is.local"><equals arg1="${monitor.mode}" arg2="local" /></condition>
+		<resolve-local-launch component="p1" mode="${p1.mode}" />
+		<resolve-local-launch component="monitor" mode="${monitor.mode}" />
 
 		<!-- Display deployment configuration -->
 		<echo message="" />
 		<echo message="  Deployment Configuration:" />
-		<echo message="    P1:      ${p1.mode}" />
-		<echo message="    Monitor: ${monitor.mode}" />
+		<echo message="    P1:      ${p1.resolved.mode}" />
+		<echo message="    Monitor: ${monitor.resolved.mode}" />
 		<echo message="    Initialization: ${init.process.name}" />
 		<echo message="" />
 	</target>
@@ -260,7 +262,7 @@
 			</java>
 
 			<!-- Start Monitor Service -->
-			<echo message="  [monitor] Not launched locally (${monitor.mode})" unless:set="monitor.is.local" />
+			<echo message="  [monitor] Not launched locally (${monitor.resolved.mode})" unless:set="monitor.is.local" />
 			<java jvm="java.exe" classname="${service.loader.class}" if:set="monitor.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${monitor.project.dir}" output="${monitor.output.file}">
@@ -413,7 +415,7 @@
 			</java>
 
 			<!-- Start Monitor Service -->
-			<echo message="  [monitor] Not launched locally (${monitor.mode})" unless:set="monitor.is.local" />
+			<echo message="  [monitor] Not launched locally (${monitor.resolved.mode})" unless:set="monitor.is.local" />
 			<java jvm="java.exe" classname="${service.loader.class}" if:set="monitor.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${monitor.project.dir}" output="${monitor.output.file}">
@@ -474,7 +476,8 @@
 		<echo message="  ant help                   Show this help" />
 		<echo message="" />
 		<echo message="DEPLOYMENT MODES (per service):" />
-		<echo message="  -D&lt;service&gt;.mode=local           Launch service on this machine (default)" />
+		<echo message="  Default: auto - launch locally when ip0 belongs to this machine; otherwise use manually started services." />
+		<echo message="  -D&lt;service&gt;.mode=local           Launch service on this machine (override)" />
 		<echo message="  -D&lt;service&gt;.mode=remote          Service runs on another machine (skip launch)" />
 		<echo message="  Monitor remains running for initialization and collection; it is not in the active workflow token route." />
 		<echo message="" />

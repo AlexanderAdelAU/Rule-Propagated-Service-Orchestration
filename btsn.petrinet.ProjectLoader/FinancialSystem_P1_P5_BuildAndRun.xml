@@ -33,12 +33,12 @@
 	<!-- Workflow business roles are mapped separately in the workflow JSON.     -->
 	<!-- ======================================================================= -->
 
-	<property name="p1.mode"      value="local" />
-	<property name="p2.mode"      value="local" />
-	<property name="p3.mode"      value="local" />
-	<property name="p4.mode"      value="local" />
-	<property name="p5.mode"      value="local" />
-	<property name="monitor.mode" value="local" />
+	<property name="p1.mode"      value="auto" />
+	<property name="p2.mode"      value="auto" />
+	<property name="p3.mode"      value="auto" />
+	<property name="p4.mode"      value="auto" />
+	<property name="p5.mode"      value="auto" />
+	<property name="monitor.mode" value="auto" />
 
 	<!-- ======================================================================= -->
 	<!-- PROPERTIES                                                              -->
@@ -198,22 +198,24 @@
 	<!-- DEPLOYMENT MODE RESOLUTION                                              -->
 	<!-- ======================================================================= -->
 
-	<target name="resolve-deployment-modes">
-		<condition property="p1.is.local"><equals arg1="${p1.mode}" arg2="local" /></condition>
-		<condition property="p2.is.local"><equals arg1="${p2.mode}" arg2="local" /></condition>
-		<condition property="p3.is.local"><equals arg1="${p3.mode}" arg2="local" /></condition>
-		<condition property="p4.is.local"><equals arg1="${p4.mode}" arg2="local" /></condition>
-		<condition property="p5.is.local"><equals arg1="${p5.mode}" arg2="local" /></condition>
-		<condition property="monitor.is.local"><equals arg1="${monitor.mode}" arg2="local" /></condition>
+	<import file="../btsn.services/auto-deployment.xml" />
+
+	<target name="resolve-deployment-modes" depends="detect-local-channel">
+		<resolve-local-launch component="p1" mode="${p1.mode}" />
+		<resolve-local-launch component="p2" mode="${p2.mode}" />
+		<resolve-local-launch component="p3" mode="${p3.mode}" />
+		<resolve-local-launch component="p4" mode="${p4.mode}" />
+		<resolve-local-launch component="p5" mode="${p5.mode}" />
+		<resolve-local-launch component="monitor" mode="${monitor.mode}" />
 
 		<echo message="" />
 		<echo message="  Deployment Configuration:" />
-		<echo message="    P1:      ${p1.mode}" />
-		<echo message="    P2:      ${p2.mode}" />
-		<echo message="    P3:      ${p3.mode}" />
-		<echo message="    P4:      ${p4.mode}" />
-		<echo message="    P5:      ${p5.mode}" />
-		<echo message="    Monitor: ${monitor.mode}" />
+		<echo message="    P1:      ${p1.resolved.mode}" />
+		<echo message="    P2:      ${p2.resolved.mode}" />
+		<echo message="    P3:      ${p3.resolved.mode}" />
+		<echo message="    P4:      ${p4.resolved.mode}" />
+		<echo message="    P5:      ${p5.resolved.mode}" />
+		<echo message="    Monitor: ${monitor.resolved.mode}" />
 		<echo message="" />
 	</target>
 

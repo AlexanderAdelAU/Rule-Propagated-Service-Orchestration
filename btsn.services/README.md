@@ -96,5 +96,22 @@ this remains the existing in-process invocation, not a separate business-service
 program. Remote runtimes must be started manually. Portable packaging does not
 replace this development workflow.
 
+All PN BuildAndRun launchers now default to `auto`: the build reads the active
+`boundChannel(ip0, address)` fact from
+`btsn.common/RuleBase/Generated/InfrastructureDeployment.ruleml.xml` and compares
+it with the machine's network interfaces. Loopback or an address assigned to
+this machine starts the existing local runtime; any other address skips startup
+and assumes that the remote runtime was started manually. It does not send a
+remote start request. `p1.mode` through `p6.mode` and `monitor.mode` still accept
+explicit `local` or `remote` overrides where those components occur in a workflow.
+The build prints the address and each component's launch decision. Missing or
+conflicting ip0 facts fail the build rather than guessing a destination.
+
+`auto-deployment.xml` is a Java/Ant build helper, independent of business
+catalogues. Run its default check target to verify address and rule parsing.
+Only the launcher decision changes; handlers, token scheduling, service
+invocation and process deployment keep their existing behaviour. Healthcare
+launchers have not been migrated to this check.
+
 The abandoned aggregate two-JAR distribution and its launch commands have been
 removed. Active infrastructure handlers and healthcare projects are preserved.
