@@ -17,7 +17,20 @@
 	<!-- ======================================================================= -->
 	<!-- DEPLOYMENT CONFIGURATION                                                -->
 	<!-- ======================================================================= -->
-	<!-- Services and threads are started manually from the distribution ZIP. -->
+	<!-- Service deployment modes:                                                -->
+	<!--   local  = launch service process on THIS machine                       -->
+	<!--   remote = service runs on ANOTHER machine (skip launch, still send     -->
+	<!--            events to it for init/workflow/collection phases)             -->
+	<!--                                                                         -->
+	<!-- Override from command line: ant -Dp1.mode=remote -Dp2.mode=remote        -->
+	<!-- ======================================================================= -->
+
+	<property name="p1.mode"      value="local" />
+	<property name="p2.mode"      value="local" />
+	<property name="p3.mode"      value="local" />
+	<property name="p4.mode"      value="local" />
+	<property name="p5.mode"      value="local" />
+	<property name="monitor.mode" value="local" />
 
 	<!-- ======================================================================= -->
 	<!-- PROPERTIES                                                              -->
@@ -192,6 +205,30 @@
 		<ant antfile="${services.project.dir}/build.xml" target="build-workflow-runtime" inheritall="false" />
 	</target>
 
+	<target name="resolve-deployment-modes">
+		<!-- Resolve boolean properties from mode settings -->
+		<condition property="p1.is.local"><equals arg1="${p1.mode}" arg2="local" /></condition>
+		<condition property="p2.is.local"><equals arg1="${p2.mode}" arg2="local" /></condition>
+		<condition property="p3.is.local"><equals arg1="${p3.mode}" arg2="local" /></condition>
+		<condition property="p4.is.local"><equals arg1="${p4.mode}" arg2="local" /></condition>
+		<condition property="p5.is.local"><equals arg1="${p5.mode}" arg2="local" /></condition>
+		<condition property="monitor.is.local"><equals arg1="${monitor.mode}" arg2="local" /></condition>
+
+		<!-- Display deployment configuration -->
+		<echo message="" />
+		<echo message="  Deployment Configuration:" />
+		<echo message="    P1:      ${p1.mode}" />
+		<echo message="    P2:      ${p2.mode}" />
+		<echo message="    P3:      ${p3.mode}" />
+		<echo message="    P4:      ${p4.mode}" />
+		<echo message="    P5:      ${p5.mode}" />
+		<echo message="    Monitor: ${monitor.mode}" />
+		<echo message="" />
+	</target>
+
+	<!-- ======================================================================= -->
+	<!-- UTILITY TARGETS                                                         -->
+	<!-- ======================================================================= -->
 
 	<target name="create-output-directory">
 		<mkdir dir="${output.dir}" />
@@ -281,7 +318,7 @@
 	<!-- MAIN WORKFLOW TARGET                                                    -->
 	<!-- ======================================================================= -->
 
-	<target name="run-complete-workflow" depends="create-output-directory,clean-output,rebuild-service-ruleml"
+	<target name="run-complete-workflow" depends="resolve-deployment-modes,create-output-directory,clean-output,rebuild-service-ruleml"
 	        description="Run priority-overtaking experiment with background v002 and later urgent v001 work">
 
 		<echo message="================================================================" />
@@ -295,7 +332,68 @@
 		<echo message="  Priority model: v001 overtakes queued v002 only; executing v002 is never interrupted" />
 		<echo message="================================================================" />
 
-		<echo message="Using manually started services; Ant deploys rules and sends tokens only." />
+		<parallel>
+			<!-- ============================================================= -->
+			<!-- PARALLEL: Start all 5 services (ONCE)                         -->
+			<!-- ============================================================= -->
+
+			<!-- P1 Service -->
+			<echo message="  [p1] Skipping - running on remote host" unless:set="p1.is.local" />
+			<java classname="${service.loader.class}" fork="true" if:set="p1.is.local"
+			      dir="${p1.project.dir}" output="${p1.output.file}">
+				<classpath refid="p1.classpath" />
+				<arg value="${p1.project.dir}" />
+				<arg value="-version" /><arg value="${workflow1.version}" />
+			</java>
+
+			<!-- P2 Service -->
+			<echo message="  [p2] Skipping - running on remote host" unless:set="p2.is.local" />
+			<java classname="${service.loader.class}" fork="true" if:set="p2.is.local"
+			      dir="${p2.project.dir}" output="${p2.output.file}">
+				<classpath refid="p2.classpath" />
+				<arg value="${p2.project.dir}" />
+				<arg value="-version" /><arg value="${workflow1.version}" />
+			</java>
+
+			<!-- P3 Service -->
+			<echo message="  [p3] Skipping - running on remote host" unless:set="p3.is.local" />
+			<java classname="${service.loader.class}" fork="true" if:set="p3.is.local"
+			      dir="${p3.project.dir}" output="${p3.output.file}">
+				<classpath refid="p3.classpath" />
+				<arg value="${p3.project.dir}" />
+				<arg value="-version" /><arg value="${workflow1.version}" />
+			</java>
+
+			<!-- P4 Service -->
+			<echo message="  [p4] Skipping - running on remote host" unless:set="p4.is.local" />
+			<java classname="${service.loader.class}" fork="true" if:set="p4.is.local"
+			      dir="${p4.project.dir}" output="${p4.output.file}">
+				<classpath refid="p4.classpath" />
+				<arg value="${p4.project.dir}" />
+				<arg value="-version" /><arg value="${workflow1.version}" />
+			</java>
+
+			<!-- P5 Service -->
+			<echo message="  [p5] Skipping - running on remote host" unless:set="p5.is.local" />
+			<java classname="${service.loader.class}" fork="true" if:set="p5.is.local"
+			      dir="${p5.project.dir}" output="${p5.output.file}">
+				<classpath refid="p5.classpath" />
+				<arg value="${p5.project.dir}" />
+				<arg value="-version" /><arg value="${workflow1.version}" />
+			</java>
+
+			<!-- Monitor Service -->
+			<echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local" />
+			<java classname="${service.loader.class}" fork="true" if:set="monitor.is.local"
+			      dir="${monitor.project.dir}" output="${monitor.output.file}">
+				<classpath refid="monitor.classpath" />
+				<arg value="${monitor.project.dir}" />
+				<arg value="-version" /><arg value="${workflow1.version}" />
+			</java>
+
+			<!-- ============================================================= -->
+			<!-- SEQUENTIAL: Execute phases in order                           -->
+			<!-- ============================================================= -->
 			<sequential>
 				<echo message="Waiting ${service.startup.seconds}s for services to start..." />
 				<sleep seconds="${service.startup.seconds}" />
@@ -590,8 +688,9 @@
 				<echo message="  P5: ${p5.output.file}" />
 				<echo message="  Monitor: ${monitor.output.file}" />
 				<echo message="" />
-				<echo message="Services remain running independently after Ant completes." />
+				<echo message="Services are still running. Press Ctrl+C to stop." />
 			</sequential>
+		</parallel>
 	</target>
 
 	<!-- ======================================================================= -->
@@ -622,7 +721,12 @@
 		<echo message="  ant run-complete-workflow        Run complete workflow" />
 		<echo message="  ant help                         Show this help" />
 		<echo message="" />
-		<echo message="Start services manually with launch.bat or launch.sh from the distribution ZIP before running Ant." />
+		<echo message="DEPLOYMENT MODES (per service):" />
+		<echo message="  -D&lt;service&gt;.mode=local           Launch service on this machine (default)" />
+		<echo message="  -D&lt;service&gt;.mode=remote          Service runs on another machine (skip launch)" />
+		<echo message="" />
+		<echo message="  Services: p1, p2, p3, p4, p5, monitor" />
+		<echo message="" />
 		<echo message="CONFIGURABLE PARAMETERS:" />
 		<echo message="  -Dworkflow1.token.count=15       Tokens via EVENT_GENERATOR (workflow1)" />
 		<echo message="  -Dworkflow2.token.count=60       Tokens via P1_EVENTGENERATOR (workflow2)" />
