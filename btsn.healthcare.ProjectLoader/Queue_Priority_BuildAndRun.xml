@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Controlled_Queue_Priority" default="run" basedir=".">
+    <description>Exercise the packaged P1 UDP priority queue with one controlled worker and an observed backlog.</description>
+    <property name="services.dir" location="../btsn.services"/>
+    <property name="common.dir" location="../btsn.common"/>
+    <property name="probe.dir" location="target/queue-priority"/>
+    <property name="probe.repeats" value="3"/>
+    <property name="probe.port" value="0"/>
+    <property name="java.release" value="15"/>
+    <target name="prepare">
+        <ant antfile="${services.dir}/build.xml" target="runtime" inheritall="false"/>
+        <ant antfile="../btsn.petrinet.places.p1/build.xml" target="jar-only" inheritall="false"/>
+        <mkdir dir="${probe.dir}/classes"/>
+        <mkdir dir="${probe.dir}/runtime/ServiceLoaderQueries"/>
+        <copy file="../btsn.petrinet.places.p1/ServiceLoaderQueries/loaderSettings.xml"
+              tofile="${probe.dir}/runtime/ServiceLoaderQueries/loaderSettings.xml"/>
+        <path id="probe.classpath">
+            <pathelement location="${probe.dir}/classes"/>
+            <pathelement location="../btsn.petrinet.places.p1/target/btsn.petrinet.places.p1.jar"/>
+            <pathelement location="${common.dir}/target/host-runtime/btsn-infrastructure.jar"/>
+            <fileset dir="${services.dir}/target/deployment/services" includes="*.jar"/>
+            <fileset dir="${services.dir}/target/deployment/lib" includes="*.jar"/>
+            <fileset dir="${common.dir}/lib" includes="*.jar" excludesfile="${services.dir}/target/runtime-library-excludes.txt"/>
+        </path>
+        <javac srcdir="tests" destdir="${probe.dir}/classes" release="${java.release}"
+               includeantruntime="false" encoding="UTF-8" includes="org/btsn/handlers/QueuePriorityProbe.java">
+            <classpath refid="probe.classpath"/>
+        </javac>
+    </target>
+    <target name="run" depends="prepare" description="Assert priority overtaking and produce CSV, HTML and SVG timelines">
+        <java classname="org.btsn.handlers.QueuePriorityProbe" fork="true" failonerror="true"
+              dir="${probe.dir}/runtime" timeout="60000" maxmemory="128m">
+            <classpath refid="probe.classpath"/>
+            <arg file="${probe.dir}"/><arg value="${probe.repeats}"/><arg value="${probe.port}"/>
+        </java>
+        <echo message="Results: ${probe.dir}/run-1/timeline.html (also timeline.svg, tokens.csv, queue.csv, report.txt)"/>
+    </target>
+    <target name="help" description="Explain the isolated priority experiment">
+        <echo message="Run this file with Ant. One occupied worker; four v003, two v002, then two v001 tokens queued before release."/>
+        <echo message="Override -Dprobe.repeats=3 or -Dprobe.port=0 (an automatically selected loopback UDP port)."/>
+        <echo message="This tests the production queue with a controlled consumer; it does not execute healthcare business rules or collectors."/>
+    </target>
+</project>

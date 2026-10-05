@@ -65,6 +65,25 @@
             <arg file="${common.dir}"/>
         </java>
     </target>
+    <target name="check-measured-timeline" depends="jar" description="Check absolute workflow timing with serial, fork/join and incomplete observation fixtures">
+        <delete dir="target/measured-timeline-check"/>
+        <mkdir dir="target/measured-timeline-check/classes"/>
+        <mkdir dir="target/measured-timeline-check/runtime"/>
+        <path id="measured.timeline.check.classpath">
+            <path refid="runtime.classpath"/>
+            <pathelement location="../btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+            <pathelement location="target/measured-timeline-check/classes"/>
+        </path>
+        <javac srcdir="../btsn.common.Monitor/tests" destdir="target/measured-timeline-check/classes"
+               includes="MeasuredWorkflowTimelineCheck.java" release="${java.release}" includeantruntime="false" encoding="UTF-8">
+            <classpath refid="measured.timeline.check.classpath"/>
+        </javac>
+        <java classname="org.btsn.derby.Analysis.MeasuredWorkflowTimelineCheck" fork="true" failonerror="true"
+              dir="target/measured-timeline-check/runtime" maxmemory="128m">
+            <classpath refid="measured.timeline.check.classpath"/>
+            <jvmarg value="-Djava.awt.headless=true"/>
+        </java>
+    </target>
     <target name="check-healthcare-names" depends="jar" description="Read-only naming check after the default ten-patient healthcare run">
         <mkdir dir="target/healthcare-names-check/classes"/>
         <path id="healthcare.names.check.classpath">

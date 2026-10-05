@@ -13,6 +13,7 @@ JDK 15+. Paths resolve from the build file's directory, including `ProcessTests`
 | `Emergency_Department_BuildAndRun.xml` | Initialize P1–P6 and Monitor, run ten patients, collect observations |
 | `Federated_Radiology_BuildAndRun.xml` | Initialize P4 and Monitor, run federated requests, collect observations |
 | `Triple_Workflow_Emergencey_Department_Concurrent.xml` | Run the patient, canary and federated workflows concurrently and collect all three versions |
+| `Queue_Priority_BuildAndRun.xml` | Run three isolated, controlled queue-priority experiments and write evidence and timelines |
 | `ProcessTests/Triage_Initializer.xml` | Start configured P1 and Monitor components and initialize their databases |
 | `ProcessTests/Triage_Workflow.xml` | Start configured P1 and Monitor components, execute ten triage requests and collect observations; initialization is optional |
 | `ProcessTests/Triage_Collector.xml` | Start configured P1 and Monitor components and collect existing v001, v002 and v003 measurements |
@@ -58,3 +59,68 @@ or a comma-separated list) and `collector.operation`. `init.version` and
 
 The launcher changes leave execution handlers, scheduling and business logic
 unchanged. Shared `btsn.services` build organisation remains a separate cleanup.
+
+## Controlled queue-priority experiment
+
+Run **`Queue_Priority_BuildAndRun.xml`** as an Ant Build. It builds the current
+service/infrastructure JARs and generic P1 JAR, then exercises P1's unchanged
+`EventReactor` through real loopback UDP packets. It has its own copied loader
+settings and output directory; it does not initialize or write healthcare or
+Monitor databases, deploy rules, or execute clinical business operations.
+
+The test uses one controlled consumer in place of the full `ServiceThread`.
+It proves the production queue's selection policy under a known backlog, rather
+than claiming an end-to-end healthcare priority result. All tokens share one
+reactor, port and synthetic `controlledWork` operation. Completed-join priority
+is excluded: every probe token is a normal root token.
+
+1. A v003 blocker starts and waits on a bounded gate.
+2. Four more v003 tokens are submitted, then two v002, then two v001. Each token
+   is acknowledged by observed queue admission before the next is sent.
+3. The gate opens only after all eight token identities are confirmed waiting.
+4. The blocker finishes; both v001 tokens must execute next, followed by v002,
+   then v003. Within each version, lower sequence IDs must run first even though
+   they arrived in reverse order. The queue must drain with no lost tokens.
+
+This is priority overtaking of **waiting** work. The scheduler does not interrupt
+the running operation. Eight queued tokens are enough to prove contention;
+filling the configured capacity of 50 would add rejection risk without improving
+the ordering evidence. Failure to reach a gate or the expected order fails Ant.
+
+The default is three runs. Set `-Dprobe.repeats=10` for more repetitions or
+`-Dprobe.port=0` to select an available loopback UDP port (the default). The JVM
+and its worker/UDP resources stop when the test finishes; no external host is
+needed. Each run writes the following under `target/queue-priority/run-N/`:
+
+| Output | Meaning |
+|---|---|
+| `report.txt` | PASS evidence, exact arrival/execution orders and release time |
+| `tokens.csv` | Monotonic timestamps for admission, dequeue and controlled execution |
+| `queue.csv` | Observed waiting-queue occupancy after admission/dequeue |
+| `timeline.html`, `timeline.svg` | One row per token, arrival order, horizontal waiting/execution intervals on a common millisecond axis; blocker-release line and queue-occupancy plot |
+
+Enqueue timestamps bracket admission from immediately before the synchronized
+production method; CSV queue wait is therefore an upper bound including admission
+overhead. The graph's grey interval extends to execution start and also includes
+the small dequeue-to-start dispatch interval. This distinction is recorded rather
+than calling those timestamps exact internal enqueue instants. Coloured intervals
+measure controlled work, not clinical service execution.
+
+## Measured workflow graph
+
+After collecting a real healthcare run, open the existing Monitor timing chart
+and select **View > Measured Workflow Timeline**. The new view uses the analyzer's
+canonical root families: one row per GENERATED workflow, from its generation
+timestamp to its canonical completion timestamp, on a shared absolute time axis.
+For healthcare, the completion boundary is the business TerminateNode; older
+Monitor-ending workflows retain the analyzer's successful Monitor boundary.
+Fork children do not become additional workflows. Incomplete or invalid-timestamp
+rows have no fabricated duration. Administration (v999) is omitted.
+
+The previous normalised chart remains a diagnostic for **independent maximum
+visit queue/service timings**. Its labels and report now state that the maximum
+values can come from different visits, and their ratio is not a workflow wait
+fraction. The measured timeline avoids estimating a critical path or adding
+parallel branch times.
+
+Regression check: `ant -f btsn.services/workflow-runtime.xml check-measured-timeline`.

@@ -162,6 +162,9 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         
         // Generate report header
         report.append("WORKFLOW SUMMARY REPORT\n");
+        report.append("Queue/service columns are independent per-visit maxima; their sum and ratio are diagnostics, not workflow latency or wait fraction.\n");
+        report.append("Use View > Measured Workflow Timeline for observed generation-to-completion durations.\n");
+        report.append("Rows without visit measurements retain the legacy ELAPSEDTIME service-column fallback; no queue fraction is available for those rows.\n");
         report.append("Generated: ").append(new java.util.Date()).append("\n");
         report.append("=" .repeat(120)).append("\n\n");
         
@@ -186,7 +189,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             
             report.append("-".repeat(120)).append("\n");
             report.append(String.format("%-15s %-12s %-20s %-20s %-15s %-15s%n",
-                "Base SeqID", "Services", "Total Queue (ms)", "Total Service (ms)", "Total (ms)", "Queue Ratio"));
+                "Base SeqID", "Services", "Max Queue (ms)", "Max Service (ms)", "Maxima Sum (ms)", "Maxima Ratio"));
             report.append("-".repeat(120)).append("\n");
             
             long totalQueue = 0;
@@ -212,7 +215,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             long versionTotal = totalQueue + totalService;
             double versionRatio = versionTotal > 0 ? (double)totalQueue / versionTotal * 100 : 0;
             report.append(String.format("%-15s %-20d %-20d %-15d %.1f%%%n",
-                version + " TOTAL:",
+                version + " SUM OF MAXIMA:",
                 totalQueue,
                 totalService,
                 versionTotal,
@@ -643,9 +646,8 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             writer.println();
             writer.println("\\end{tikzpicture}");
             String caption = displayByVersion ? 
-                "Time for Token to Complete Workflow Timeline by Version" : 
-                "Time for Token to Complete Workflow Timeline by Service";
-            if (showQueueTime) caption += " (with Queue Time)";
+                "Normalised maximum visit timings by version" :
+                "Normalised maximum visit timings by service";
             writer.println("\\caption{" + caption + "}");
             writer.println("\\label{fig:gantt-chart}");
             writer.println("\\end{figure}");
@@ -680,13 +682,13 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
     public void exportToLaTeXTable(String filename) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
             
-            writer.println("% Task data table for LaTeX");
+            writer.println("% Independent maximum visit timings, not workflow latency or critical path");
             writer.println("% Add to preamble: \\usepackage{booktabs}");
             writer.println("% Add to preamble: \\usepackage{longtable} % for long tables");
             writer.println();
             writer.println("\\begin{longtable}{cccccc}");
             writer.println("\\toprule");
-            writer.println("ID & Workflow Version & Version & Sequence ID & Processing Time (ms) & Queue Time (ms) \\\\");
+            writer.println("ID & Workflow Version & Version & Sequence ID & Max Visit Service (ms) & Max Visit Queue (ms) \\\\");
             writer.println("\\midrule");
             writer.println("\\endhead");
             
@@ -703,7 +705,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             }
             
             writer.println("\\bottomrule");
-            writer.println("\\caption{Workflow Execution Data}");
+            writer.println("\\caption{Independent Maximum Visit Timings}");
             writer.println("\\label{tab:service-data}");
             writer.println("\\end{longtable}");
             
@@ -935,9 +937,10 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         }
         
         /**
-         * Calculate critical path assuming parallel execution of different forks
+         * Maximum observed queue and service duration across individual visits.
+         * These independent maxima do not constitute a workflow critical path.
          */
-        void calculateCriticalPath() {
+        void calculateVisitMaxima() {
             long maxForkQueue = 0;
             long maxForkService = 0;
             
@@ -946,7 +949,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
                 long forkQueue = 0;
                 long forkService = 0;
                 
-                // Within a fork group, take the max (longest path in that parallel section)
+                // Retain each independent visit maximum within this fork group.
                 for (ServiceTiming timing : forkServices) {
                     if (timing.queueTime > forkQueue) {
                         forkQueue = timing.queueTime;
@@ -956,7 +959,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
                     }
                 }
                 
-                // Across different forks (parallel sections), take max as critical path
+                // Independent per-visit maxima; no path reconstruction is implied.
                 if (forkQueue > maxForkQueue) {
                     maxForkQueue = forkQueue;
                 }
@@ -1038,9 +1041,9 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
                 }
                 rs.close();
                 
-                // Calculate critical path for each workflow
+                // Calculate diagnostic visit maxima, not workflow elapsed durations.
                 for (WorkflowAggregate aggregate : contributionMap.values()) {
-                    aggregate.calculateCriticalPath();
+                    aggregate.calculateVisitMaxima();
                 }
                 
                 System.out.println("Aggregated " + contributionMap.size() + " workflows from SERVICECONTRIBUTION");
@@ -1300,8 +1303,8 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         // Draw title
         g2.setFont(titleFont);
         String title = displayByVersion ?
-            "Relative Time for Token to Complete Workflow by Version (Linear Scale)" :
-            "Relative Time for Token to Complete Workflow (Linear Scale)";
+            "Maximum Visit Timing by Version (Normalised Bars)" :
+            "Maximum Visit Timing (Normalised Bars)";
         FontMetrics fm = g2.getFontMetrics(titleFont);
         int titleWidth = fm.stringWidth(title);
         g2.drawString(title, (getWidth() - titleWidth) / 2, Math.round(30 * fontScaleFactor));
@@ -1313,8 +1316,8 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             int legendX = leftMargin;
 
             g2.setColor(Color.BLACK);
-            g2.drawString("Queue Time: ", legendX, legendY);
-            legendX += 70;
+            g2.drawString("Maxima ratio: ", legendX, legendY);
+            legendX += 85;
 
             if (colorCodeQueueTime) {
                 g2.setColor(new Color(0, 200, 0, 60));
@@ -1606,9 +1609,9 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             "Workflow version: " + version,
             "Seq ID: " + task.sequenceId,
             "Total Duration: " + task.elapsedTime + " ms",
-            "Processing Time: " + task.processingTime + " ms",
-            "Queue Time: " + task.queueTime + " ms",
-            String.format("Wait Ratio: %.1f%%", waitRatio),
+            (task.serviceCount > 0 ? "Maximum Visit Service Time: " : "Legacy Elapsed Fallback: ") + task.processingTime + " ms",
+            "Maximum Visit Queue Time: " + task.queueTime + " ms",
+            String.format("Independent maxima ratio: %.1f%% (not workflow wait)", waitRatio),
             "Completion Order: #" + task.id
         };
         
@@ -1632,7 +1635,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         g2.fillRoundRect(x, y, tooltipWidth, tooltipHeight, 5, 5);
         
         for (int i = 0; i < lines.length; i++) {
-            if (lines[i].startsWith("Queue Time:")) {
+            if (lines[i].startsWith("Maximum Visit Queue Time:")) {
                 if (task.queueTime > 5000) {
                     g2.setColor(new Color(255, 100, 100));
                 } else if (task.queueTime > 2000) {
@@ -1683,7 +1686,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
     // Export methods removed for brevity - can be added back with linear scaling
     
     public static void createAndShowGUI(SwingGanttChart_WithLatency_v1d chart) {
-        JFrame frame = new JFrame("Service Performance Gantt Chart (Linear Scale)");
+        JFrame frame = new JFrame("Service Visit Timing Diagnostics");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         JMenuBar menuBar = new JMenuBar();
@@ -1808,6 +1811,10 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         
         // ===== COMPLETE VIEW MENU =====
         JMenu viewMenu = new JMenu("View");
+        JMenuItem measuredTimelineItem = new JMenuItem("Measured Workflow Timeline...");
+        measuredTimelineItem.addActionListener(e -> MeasuredWorkflowTimeline.showWindow());
+        viewMenu.add(measuredTimelineItem);
+        viewMenu.addSeparator();
         
         JMenu queueMenu = new JMenu("Queue Time Display");
         JCheckBoxMenuItem showQueueItem = new JCheckBoxMenuItem("Show Queue Time");
