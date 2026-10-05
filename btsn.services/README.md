@@ -85,34 +85,94 @@ Its manifest points to the shared infrastructure, service JARs and libraries in
 the existing repository layout. The `release` target builds these artifacts;
 it does not create a standalone host distribution ZIP.
 
-The existing Stage-5 launcher now builds this packaged runtime before generating
-rules, and uses the JARs rather than `bin` directories for hosts, Monitor and
-event generators. Its process definitions, timings, routing, remote/local mode
-selection and existing service-start behaviour remain unchanged.
+The Stage-5 launcher builds the packaged runtime and generates the rules, uploads
+a self-contained package to each configured receiver, and sends an explicit start
+request before sending initialization or workflow tokens. It does not launch the
+receiver. The workflow definitions, routing, timings and token counts are unchanged.
 
-To launch an individual host in the same layout:
+## Remote deployment and startup
+
+Build the receiver and the deployable package with Ant:
 
 ```sh
-ant -f btsn.petrinet.places.p1/build.xml run
+ant -f btsn.services/build.xml remote-bundle
 ```
 
-Every P1–P6 host uses the same build and launch mechanism. `ServiceHelper` loads
-the metadata-selected implementation from the classpath and constructs an
-instance through its existing invocation code when processing a token. This
-does not introduce a separate remotely started business-service thread.
+The outputs are `target/btsn-deployment-host.jar` (the independent receiver) and
+`target/remote-service-deployment.zip` (service runtime JARs, business JARs,
+libraries, metadata, loader queries and rules). No source files or Eclipse
+`bin` directories are needed at the destination.
 
-Catalogue status is informational for packaging. Activating or placing a service
-still requires the existing deployment configuration and rule contracts. Copying
-a JAR does not activate it, and the bundle is not an executable host JAR.
+Install the receiver JAR on each destination once and run it independently of Ant:
 
-The implementation sources remain in `btsn.common/src` during this packaging step.
-The new launch classpaths contain the packaged artifacts without duplicate
-service implementations from old outputs. Existing running JVMs are not modified
-by the build; remote/local launch behaviour is still controlled by the existing
-launcher. Copying the ZIP alone does not change a running JVM's classpath.
+```sh
+java -jar btsn-deployment-host.jar 0.0.0.0 41000 /srv/btsn/deployments YOUR_TOKEN
+```
 
-Validation loads each implementation in a fresh JVM with only its own JAR and
-manifest dependencies, invokes its declared operation and checks other service
-implementations are absent. The resolver regression separately invokes packaged
-implementations across all six host identities, with no place adapters or service
-source classes on its classpath.
+Use an appropriate local directory on Windows instead of `/srv/btsn/deployments`.
+The receiver waits for deployment requests and remains running when an Ant run
+finishes. Ant does not start, stop or restart that receiver. If your currently
+running host software has no deployment endpoint, installing this receiver is
+required; a build cannot add an endpoint to an existing JVM remotely.
+
+Deploy and start P1 using that already running receiver:
+
+```sh
+ant -f btsn.services/build.xml deploy-start -Ddeployment.host=DESTINATION_IP -Ddeployment.port=41000 -Ddeployment.token=YOUR_TOKEN -Ddeployment.component=p1 -Ddeployment.version=v001
+```
+
+Use `p2` through `p6`, or `monitor`, with the same command. The numbered project's
+`run` target also delegates to this deployment mechanism; supply the same host,
+port and token properties.
+
+The receiver checks the upload checksum, stores and extracts the received package,
+then starts a **service JVM** from those received JARs. That JVM calls the unchanged
+`ServiceLoader`, which constructs the existing rule handlers and `ServiceThread`
+workers. Business implementations execute through the unchanged `ServiceHelper`
+when tokens arrive. Business implementation classes are not themselves Java threads.
+The independently running receiver is never relaunched by a deployment request.
+
+Startup is acknowledged only after the launcher and its workers report successful
+startup. Upload, authentication or startup failures fail the Ant run before tokens
+are sent. Repeating a start request for the same running component/version/package
+returns `ALREADY RUNNING`; it does not start another copy. A request to replace a
+running component with a different package/version is rejected; it does not silently
+stop or replace that service. Receiver logs and service output files are stored in
+the receiver's deployment directory, not the development repository.
+
+For Stage 5, put the following properties in
+`btsn.petrinet.ProjectLoader/deployment.properties` (or supply them with `-D`):
+
+```properties
+deployment.token=YOUR_TOKEN
+deployment.port=41000
+p1.deployment.host=DESTINATION_IP
+p2.deployment.host=DESTINATION_IP
+p3.deployment.host=DESTINATION_IP
+p4.deployment.host=DESTINATION_IP
+p5.deployment.host=DESTINATION_IP
+monitor.deployment.host=DESTINATION_IP
+```
+
+Configure the existing infrastructure definition's channel addresses for the actual
+service destinations as well: the receiver address controls package transfer, while
+workflow channel addresses control token and rule delivery. Those are distinct
+settings. Stage 5 deploys P1-P5 and Monitor; P6 uses the same deployment mechanism.
+
+The implementation sources remain in `btsn.common/src`; the uploaded package
+contains compiled JARs only. All business identity and placement comes from the
+existing deployment metadata and rules, not receiver code.
+
+Validate real upload and service startup with:
+
+```sh
+ant -f btsn.services/build.xml check-remote
+```
+
+This launches a test receiver JVM containing only the receiver JAR, transfers the
+package over a socket, starts all six places and Monitor from received files,
+checks duplicate starts and rejected uploads, and runs the existing 108 invocation
+checks for each place against the received JARs. It also checks class origins to
+exclude accidental use of development classes. The test stops only its own test
+receiver and services at completion. It does not constitute a test across real LAN
+machines; run Stage 5 with the actual destination addresses for that validation.

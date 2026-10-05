@@ -17,20 +17,15 @@
 	<!-- ======================================================================= -->
 	<!-- DEPLOYMENT CONFIGURATION                                                -->
 	<!-- ======================================================================= -->
-	<!-- Service deployment modes:                                                -->
-	<!--   local  = launch service process on THIS machine                       -->
-	<!--   remote = service runs on ANOTHER machine (skip launch, still send     -->
-	<!--            events to it for init/workflow/collection phases)             -->
-	<!--                                                                         -->
-	<!-- Override from command line: ant -Dp1.mode=remote -Dp2.mode=remote        -->
-	<!-- ======================================================================= -->
-
-	<property name="p1.mode"      value="local" />
-	<property name="p2.mode"      value="local" />
-	<property name="p3.mode"      value="local" />
-	<property name="p4.mode"      value="local" />
-	<property name="p5.mode"      value="local" />
-	<property name="monitor.mode" value="local" />
+	<!-- Ant contacts independently running receivers; it never starts the hosts. -->
+	<property file="deployment.properties" />
+	<property name="deployment.port" value="41000" />
+	<property name="p1.deployment.host" value="127.0.0.1" />
+	<property name="p2.deployment.host" value="127.0.0.1" />
+	<property name="p3.deployment.host" value="127.0.0.1" />
+	<property name="p4.deployment.host" value="127.0.0.1" />
+	<property name="p5.deployment.host" value="127.0.0.1" />
+	<property name="monitor.deployment.host" value="127.0.0.1" />
 
 	<!-- ======================================================================= -->
 	<!-- PROPERTIES                                                              -->
@@ -205,30 +200,26 @@
 		<ant antfile="${services.project.dir}/build.xml" target="build-workflow-runtime" inheritall="false" />
 	</target>
 
-	<target name="resolve-deployment-modes">
-		<!-- Resolve boolean properties from mode settings -->
-		<condition property="p1.is.local"><equals arg1="${p1.mode}" arg2="local" /></condition>
-		<condition property="p2.is.local"><equals arg1="${p2.mode}" arg2="local" /></condition>
-		<condition property="p3.is.local"><equals arg1="${p3.mode}" arg2="local" /></condition>
-		<condition property="p4.is.local"><equals arg1="${p4.mode}" arg2="local" /></condition>
-		<condition property="p5.is.local"><equals arg1="${p5.mode}" arg2="local" /></condition>
-		<condition property="monitor.is.local"><equals arg1="${monitor.mode}" arg2="local" /></condition>
-
-		<!-- Display deployment configuration -->
-		<echo message="" />
-		<echo message="  Deployment Configuration:" />
-		<echo message="    P1:      ${p1.mode}" />
-		<echo message="    P2:      ${p2.mode}" />
-		<echo message="    P3:      ${p3.mode}" />
-		<echo message="    P4:      ${p4.mode}" />
-		<echo message="    P5:      ${p5.mode}" />
-		<echo message="    Monitor: ${monitor.mode}" />
-		<echo message="" />
+	<target name="deploy-services" depends="rebuild-service-ruleml">
+		<fail unless="deployment.token">Set deployment.token in deployment.properties or with -Ddeployment.token</fail>
+		<ant antfile="${services.project.dir}/build.xml" target="remote-bundle" inheritall="false" />
+		<macrodef name="deploy-service">
+			<attribute name="component"/><attribute name="host"/>
+			<sequential>
+				<java classname="org.btsn.deployment.DeploymentClient" fork="true" failonerror="true">
+					<classpath><pathelement location="${services.project.dir}/target/btsn-deployment-host.jar"/></classpath>
+					<arg value="@{host}"/><arg value="${deployment.port}"/><arg value="${deployment.token}"/>
+					<arg file="${services.project.dir}/target/remote-service-deployment.zip"/><arg value="@{component}"/><arg value="${workflow1.version}"/>
+				</java>
+			</sequential>
+		</macrodef>
+		<deploy-service component="p1" host="${p1.deployment.host}"/>
+		<deploy-service component="p2" host="${p2.deployment.host}"/>
+		<deploy-service component="p3" host="${p3.deployment.host}"/>
+		<deploy-service component="p4" host="${p4.deployment.host}"/>
+		<deploy-service component="p5" host="${p5.deployment.host}"/>
+		<deploy-service component="monitor" host="${monitor.deployment.host}"/>
 	</target>
-
-	<!-- ======================================================================= -->
-	<!-- UTILITY TARGETS                                                         -->
-	<!-- ======================================================================= -->
 
 	<target name="create-output-directory">
 		<mkdir dir="${output.dir}" />
@@ -318,7 +309,7 @@
 	<!-- MAIN WORKFLOW TARGET                                                    -->
 	<!-- ======================================================================= -->
 
-	<target name="run-complete-workflow" depends="resolve-deployment-modes,create-output-directory,clean-output,rebuild-service-ruleml"
+	<target name="run-complete-workflow" depends="create-output-directory,clean-output,deploy-services"
 	        description="Run priority-overtaking experiment with background v002 and later urgent v001 work">
 
 		<echo message="================================================================" />
@@ -332,68 +323,7 @@
 		<echo message="  Priority model: v001 overtakes queued v002 only; executing v002 is never interrupted" />
 		<echo message="================================================================" />
 
-		<parallel>
-			<!-- ============================================================= -->
-			<!-- PARALLEL: Start all 5 services (ONCE)                         -->
-			<!-- ============================================================= -->
-
-			<!-- P1 Service -->
-			<echo message="  [p1] Skipping - running on remote host" unless:set="p1.is.local" />
-			<java classname="${service.loader.class}" fork="true" if:set="p1.is.local"
-			      dir="${p1.project.dir}" output="${p1.output.file}">
-				<classpath refid="p1.classpath" />
-				<arg value="${p1.project.dir}" />
-				<arg value="-version" /><arg value="${workflow1.version}" />
-			</java>
-
-			<!-- P2 Service -->
-			<echo message="  [p2] Skipping - running on remote host" unless:set="p2.is.local" />
-			<java classname="${service.loader.class}" fork="true" if:set="p2.is.local"
-			      dir="${p2.project.dir}" output="${p2.output.file}">
-				<classpath refid="p2.classpath" />
-				<arg value="${p2.project.dir}" />
-				<arg value="-version" /><arg value="${workflow1.version}" />
-			</java>
-
-			<!-- P3 Service -->
-			<echo message="  [p3] Skipping - running on remote host" unless:set="p3.is.local" />
-			<java classname="${service.loader.class}" fork="true" if:set="p3.is.local"
-			      dir="${p3.project.dir}" output="${p3.output.file}">
-				<classpath refid="p3.classpath" />
-				<arg value="${p3.project.dir}" />
-				<arg value="-version" /><arg value="${workflow1.version}" />
-			</java>
-
-			<!-- P4 Service -->
-			<echo message="  [p4] Skipping - running on remote host" unless:set="p4.is.local" />
-			<java classname="${service.loader.class}" fork="true" if:set="p4.is.local"
-			      dir="${p4.project.dir}" output="${p4.output.file}">
-				<classpath refid="p4.classpath" />
-				<arg value="${p4.project.dir}" />
-				<arg value="-version" /><arg value="${workflow1.version}" />
-			</java>
-
-			<!-- P5 Service -->
-			<echo message="  [p5] Skipping - running on remote host" unless:set="p5.is.local" />
-			<java classname="${service.loader.class}" fork="true" if:set="p5.is.local"
-			      dir="${p5.project.dir}" output="${p5.output.file}">
-				<classpath refid="p5.classpath" />
-				<arg value="${p5.project.dir}" />
-				<arg value="-version" /><arg value="${workflow1.version}" />
-			</java>
-
-			<!-- Monitor Service -->
-			<echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local" />
-			<java classname="${service.loader.class}" fork="true" if:set="monitor.is.local"
-			      dir="${monitor.project.dir}" output="${monitor.output.file}">
-				<classpath refid="monitor.classpath" />
-				<arg value="${monitor.project.dir}" />
-				<arg value="-version" /><arg value="${workflow1.version}" />
-			</java>
-
-			<!-- ============================================================= -->
-			<!-- SEQUENTIAL: Execute phases in order                           -->
-			<!-- ============================================================= -->
+		<!-- Services have acknowledged startup on their receiving hosts. -->
 			<sequential>
 				<echo message="Waiting ${service.startup.seconds}s for services to start..." />
 				<sleep seconds="${service.startup.seconds}" />
@@ -688,9 +618,8 @@
 				<echo message="  P5: ${p5.output.file}" />
 				<echo message="  Monitor: ${monitor.output.file}" />
 				<echo message="" />
-				<echo message="Services are still running. Press Ctrl+C to stop." />
+				<echo message="Services remain running on their receivers after Ant completes." />
 			</sequential>
-		</parallel>
 	</target>
 
 	<!-- ======================================================================= -->
@@ -721,9 +650,9 @@
 		<echo message="  ant run-complete-workflow        Run complete workflow" />
 		<echo message="  ant help                         Show this help" />
 		<echo message="" />
-		<echo message="DEPLOYMENT MODES (per service):" />
-		<echo message="  -D&lt;service&gt;.mode=local           Launch service on this machine (default)" />
-		<echo message="  -D&lt;service&gt;.mode=remote          Service runs on another machine (skip launch)" />
+		<echo message="DEPLOYMENT RECEIVERS (already running):" />
+		<echo message="  -D&lt;service&gt;.deployment.host=IP  Receiver address (p1-p5, monitor)" />
+		<echo message="  -Ddeployment.port=41000 -Ddeployment.token=TOKEN" />
 		<echo message="" />
 		<echo message="  Services: p1, p2, p3, p4, p5, monitor" />
 		<echo message="" />

@@ -47,11 +47,15 @@
     </target>
     <target name="jar" depends="prepare,jar-only" description="Build the generic host JAR and its service dependencies"/>
     <target name="release" depends="jar" description="Build host JAR in the existing repository runtime layout"/>
-    <target name="run" depends="jar" description="Launch this host with packaged service implementations">
-        <java classname="org.btsn.handlers.ServiceLoader" fork="true" failonerror="true" dir="${basedir}">
-            <classpath refid="host.runtime.classpath"/>
-            <sysproperty key="btsn.common.dir" value="${common.dir}"/>
-            <arg file="${basedir}"/><arg line="${service.args}"/>
-        </java>
+    <target name="run" description="Deploy and request service startup on an independently running receiver">
+        <fail unless="deployment.host">Set deployment.host to the receiver address</fail>
+        <fail unless="deployment.port">Set deployment.port to the receiver port</fail>
+        <fail unless="deployment.token">Set deployment.token to the receiver token</fail>
+        <ant antfile="${services.dir}/build.xml" target="deploy-start" inheritall="false">
+            <property name="deployment.host" value="${deployment.host}"/>
+            <property name="deployment.port" value="${deployment.port}"/>
+            <property name="deployment.token" value="${deployment.token}"/>
+            <property name="deployment.component" value="${deployment.component}"/>
+        </ant>
     </target>
 </project>
