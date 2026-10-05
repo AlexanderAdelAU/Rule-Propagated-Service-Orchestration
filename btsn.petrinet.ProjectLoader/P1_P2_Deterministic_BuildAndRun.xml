@@ -6,7 +6,11 @@
     <property name="model.runtime.dir" location="${services.project.dir}/target/petrinet-model-runtime"/>
     <property name="common.project.dir" location="${model.runtime.dir}/btsn.common"/>
     <property name="generator.project.dir" location="${model.runtime.dir}/btsn.common.eventgenerators"/>
-    <property name="monitor.project.dir" location="${model.runtime.dir}/btsn.common.Monitor"/>
+    <property name="monitor.project.dir" location="${source.root}/btsn.common.Monitor"/>
+    <property name="output.dir" location="."/>
+    <property name="p1.output.file" location="${output.dir}/P1_Place.out.txt"/>
+    <property name="p2.output.file" location="${output.dir}/P2_Place.out.txt"/>
+    <property name="monitor.output.file" location="${output.dir}/MonitorService.out.txt"/>
     <property name="local.channel.rules" location="${common.project.dir}/RuleBase/Generated/InfrastructureDeployment.ruleml.xml"/>
     <property name="rule.version" value="v001"/>
     <property name="token.outcome" value="true"/>
@@ -46,8 +50,8 @@
             <equals arg1="${token.outcome}" arg2="true"/><equals arg1="${token.outcome}" arg2="false"/>
         </or></not></condition></fail>
         <ant antfile="${services.project.dir}/build.xml" target="build-workflow-runtime" inheritall="false"/>
-        <!-- Keep source Financial settings, rules and databases separate from this run. -->
-        <mkdir dir="${model.runtime.dir}/logs"/>
+        <!-- Keep source deployment metadata separate; Monitor uses its usual working directory. -->
+        <mkdir dir="${output.dir}"/>
         <copy todir="${common.project.dir}">
             <fileset dir="${source.root}/btsn.common" includes="RuleBase/**,RulePayLoad/**,ServiceAttributeBindings/**,BusinessServiceDefinitions/**,ProcessDefinitionFolder/**,PayLoad/**"/>
         </copy>
@@ -75,7 +79,7 @@
         <attribute name="number"/>
         <sequential>
             <java classname="org.btsn.handlers.ServiceLoader" fork="true" if:set="p@{number}.is.local"
-                  dir="${model.runtime.dir}/btsn.petrinet.places.p@{number}" output="${model.runtime.dir}/logs/P@{number}_Place.out.txt">
+                  dir="${model.runtime.dir}/btsn.petrinet.places.p@{number}" output="${output.dir}/P@{number}_Place.out.txt" failonerror="true">
                 <classpath><path refid="model.dependencies"/>
                     <pathelement location="${source.root}/btsn.petrinet.places.p@{number}/target/btsn.petrinet.places.p@{number}.jar"/>
                 </classpath>
@@ -115,7 +119,7 @@
         <parallel>
             <launch-model-place number="1"/>
             <launch-model-place number="2"/>
-            <java classname="org.btsn.handlers.ServiceLoader" fork="true" if:set="monitor.is.local" dir="${monitor.project.dir}" output="${model.runtime.dir}/logs/MonitorService.out.txt">
+            <java classname="org.btsn.handlers.ServiceLoader" fork="true" if:set="monitor.is.local" dir="${monitor.project.dir}" output="${monitor.output.file}" failonerror="true">
                 <classpath refid="monitor.classpath"/><arg file="${monitor.project.dir}"/><arg value="-version"/><arg value="${rule.version}"/>
             </java>
             <sequential>

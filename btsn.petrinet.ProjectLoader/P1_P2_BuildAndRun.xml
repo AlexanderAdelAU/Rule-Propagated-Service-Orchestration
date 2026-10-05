@@ -18,6 +18,24 @@
 		Services (P1, P2, Monitor) start once and remain running throughout all phases.
 	</description>
 
+    <!-- Preserve this launcher's phases and output paths; select plain model services. -->
+    <property name="source.root" location=".."/>
+    <property name="services.project.dir" location="../btsn.services"/>
+    <property name="model.runtime.dir" location="${services.project.dir}/target/petrinet-model-runtime"/>
+    <property name="common.project.dir" location="${model.runtime.dir}/btsn.common"/>
+    <property name="generator.project.dir" location="${model.runtime.dir}/btsn.common.eventgenerators"/>
+    <property name="p1.project.dir" location="${model.runtime.dir}/btsn.petrinet.places.p1"/>
+    <property name="p2.project.dir" location="${model.runtime.dir}/btsn.petrinet.places.p2"/>
+    <property name="class.dir" location="${source.root}/btsn.common/target/host-runtime/btsn-infrastructure.jar"/>
+    <property name="lib.dir" location="${source.root}/btsn.common/lib"/>
+    <property name="p1.bin.dir" location="${source.root}/btsn.petrinet.places.p1/target/btsn.petrinet.places.p1.jar"/>
+    <property name="p2.bin.dir" location="${source.root}/btsn.petrinet.places.p2/target/btsn.petrinet.places.p2.jar"/>
+    <property name="monitor.bin.dir" location="${source.root}/btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+    <property name="generator.bin.dir" location="${source.root}/btsn.common.eventgenerators/target/jar-runtime/btsn-eventgenerators.jar"/>
+    <property name="workflow.process.name" value="petrinet/Workflow/P1_P2_Deterministic_Workflow"/>
+    <property name="local.channel.rules" location="${common.project.dir}/RuleBase/Generated/InfrastructureDeployment.ruleml.xml"/>
+    <property name="token.outcome" value="true"/>
+
 	<!-- ======================================================================= -->
 	<!-- DEPLOYMENT CONFIGURATION                                                -->
 	<!-- ======================================================================= -->
@@ -129,9 +147,11 @@
 	<!-- ======================================================================= -->
 
 	<path id="common.classpath">
-		<fileset dir="${lib.dir}" erroronmissingdir="false">
+		<fileset dir="${lib.dir}" erroronmissingdir="false" excludesfile="${services.project.dir}/target/runtime-library-excludes.txt">
 			<include name="*.jar" />
 		</fileset>
+        <fileset dir="${services.project.dir}/target/deployment/services" includes="*.jar"/>
+        <fileset dir="${services.project.dir}/target/deployment/lib" includes="*.jar"/>
 		<pathelement location="${class.dir}" />
 	</path>
 
@@ -159,9 +179,9 @@
 	<!-- DEPLOYMENT MODE RESOLUTION                                              -->
 	<!-- ======================================================================= -->
 
-	<import file="../btsn.services/auto-deployment.xml" />
+	<import file="P1_P2_Deterministic_BuildAndRun.xml" />
 
-	<target name="resolve-deployment-modes" depends="detect-local-channel">
+	<target name="resolve-deployment-modes" depends="prepare-runtime,detect-local-channel">
 		<!-- Resolve boolean properties from mode settings -->
 		<resolve-local-launch component="p1" mode="${p1.mode}" />
 		<resolve-local-launch component="p2" mode="${p2.mode}" />
@@ -187,7 +207,7 @@
 		<echo message="Previous output files cleaned" />
 	</target>
 
-	<target name="generate-workflow-bindings" description="Generate canonical bindings from workflow JSON">
+	<target name="generate-workflow-bindings" depends="prepare-runtime" description="Generate canonical bindings from workflow JSON">
 		<echo message="=== Generating Workflow Bindings ===" />
 		<java classname="org.btsn.rulecontroller.TopologyBindingGenerator" 
 		      classpathref="generator.classpath"
@@ -226,11 +246,13 @@
 			<classpath refid="generator.classpath" />
 			<arg value="-version" /><arg value="${rule.version}" />
 			<arg value="-process" /><arg value="${workflow.process.name}" />
+            <arg value="-infrastructure"/><arg value="PetriNetModels_Infrastructure"/>
 			<arg value="-place" /><arg value="${target.place}" />
 			<arg value="-operation" /><arg value="${target.operation}" />
 			<arg value="-tokens" /><arg value="${token.count}" />
 			<arg value="-expire" /><arg value="${token.expire}" />
 			<arg value="-generator" /><arg value="${event.generator.id}" />
+            <arg value="-data"/><arg value="outcome=${token.outcome}"/>
 			<arg value="-skipdeploy" />
 		</java>
 	</target>
@@ -243,10 +265,12 @@
 			<classpath refid="generator.classpath" />
 			<arg value="-version" /><arg value="${rule.version}" />
 			<arg value="-process" /><arg value="${workflow.process.name}" />
+            <arg value="-infrastructure"/><arg value="PetriNetModels_Infrastructure"/>
 			<arg value="-place" /><arg value="${target.place}" />
 			<arg value="-operation" /><arg value="${target.operation}" />
 			<arg value="-expire" /><arg value="${token.expire}" />
 			<arg value="-generator" /><arg value="${event.generator.id}" />
+            <arg value="-data"/><arg value="outcome=${token.outcome}"/>
 			<arg value="-joinargs" /><arg value="${join.tokens}" />
 			<arg value="-skipdeploy" />
 		</java>
@@ -271,7 +295,7 @@
 		<parallel>
 			<!-- Start P1 Service -->
 			<echo message="  [p1] Skipping - running on remote host" unless:set="p1.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p1.is.local"
+			<java failonerror="true" classname="${service.loader.class}" if:set="p1.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p1.project.dir}" output="${p1.output.file}">
 				<classpath refid="p1.classpath" />
@@ -282,7 +306,7 @@
 
 			<!-- Start P2 Service -->
 			<echo message="  [p2] Skipping - running on remote host" unless:set="p2.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p2.is.local"
+			<java failonerror="true" classname="${service.loader.class}" if:set="p2.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p2.project.dir}" output="${p2.output.file}">
 				<classpath refid="p2.classpath" />
@@ -293,7 +317,7 @@
 
 			<!-- Start Monitor Service -->
 			<echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="monitor.is.local"
+			<java failonerror="true" classname="${service.loader.class}" if:set="monitor.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${monitor.project.dir}" output="${monitor.output.file}">
 				<classpath refid="monitor.classpath" />
@@ -376,11 +400,13 @@
 					<classpath refid="generator.classpath" />
 					<arg value="-version" /><arg value="${rule.version}" />
 					<arg value="-process" /><arg value="${workflow.process.name}" />
+            <arg value="-infrastructure"/><arg value="PetriNetModels_Infrastructure"/>
 					<arg value="-place" /><arg value="${target.place}" />
 					<arg value="-operation" /><arg value="${target.operation}" />
 					<arg value="-tokens" /><arg value="0" />
 					<arg value="-expire" /><arg value="${token.expire}" />
 					<arg value="-generator" /><arg value="${event.generator.id}" />
+            <arg value="-data"/><arg value="outcome=${token.outcome}"/>
 				</java>
 
 				<!-- Fire tokens based on mode -->
@@ -462,7 +488,7 @@
 		<parallel>
 			<!-- Start services -->
 			<echo message="  [p1] Skipping - running on remote host" unless:set="p1.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p1.is.local"
+			<java failonerror="true" classname="${service.loader.class}" if:set="p1.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p1.project.dir}" output="${p1.output.file}">
 				<classpath refid="p1.classpath" />
@@ -472,7 +498,7 @@
 			</java>
 
 			<echo message="  [p2] Skipping - running on remote host" unless:set="p2.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p2.is.local"
+			<java failonerror="true" classname="${service.loader.class}" if:set="p2.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p2.project.dir}" output="${p2.output.file}">
 				<classpath refid="p2.classpath" />
@@ -482,7 +508,7 @@
 			</java>
 
 			<echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="monitor.is.local"
+			<java failonerror="true" classname="${service.loader.class}" if:set="monitor.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${monitor.project.dir}" output="${monitor.output.file}">
 				<classpath refid="monitor.classpath" />
@@ -501,11 +527,13 @@
 					<classpath refid="generator.classpath" />
 					<arg value="-version" /><arg value="${rule.version}" />
 					<arg value="-process" /><arg value="${workflow.process.name}" />
+            <arg value="-infrastructure"/><arg value="PetriNetModels_Infrastructure"/>
 					<arg value="-place" /><arg value="${target.place}" />
 					<arg value="-operation" /><arg value="${target.operation}" />
 					<arg value="-tokens" /><arg value="0" />
 					<arg value="-expire" /><arg value="${token.expire}" />
 					<arg value="-generator" /><arg value="${event.generator.id}" />
+            <arg value="-data"/><arg value="outcome=${token.outcome}"/>
 				</java>
 
 				<!-- Fire tokens based on mode -->

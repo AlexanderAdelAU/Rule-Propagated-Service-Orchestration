@@ -1,7 +1,7 @@
 # Running raw Petri-net models
 
-Run `btsn.petrinet.ProjectLoader/P1_P2_Deterministic_BuildAndRun.xml` as an
-Ant Build in Eclipse, using its default `run` target. It builds the JARs, prepares
+Run `btsn.petrinet.ProjectLoader/P1_P2_BuildAndRun.xml` as an
+Ant Build in Eclipse, using its default `run-complete-workflow` target. It builds the JARs, prepares
 the model configuration, checks ip0, launches local P1/P2 and Monitor when
 appropriate, initializes the databases, deploys the process, sends ten tokens
 and requests collection. Remote hosts must already be running with matching
@@ -23,10 +23,17 @@ model. Execution, queueing and elapsed times are recorded by the existing
 platform. The launcher's waits allow startup, deployment and collection to finish;
 they do not add a delay inside the service operation.
 
-Run the `analyse` target in the same Ant file after collection to inspect actual
-measurements. Logs and working configuration are under
-`btsn.services/target/petrinet-model-runtime`. Source Financial deployment
-settings and databases remain separate; its launcher uses its existing profile.
+The original output files are written to `btsn.petrinet.ProjectLoader`:
+`P1_Place.out.txt`, `P2_Place.out.txt` and `MonitorService.out.txt`.
+Monitor uses its usual `btsn.common.Monitor/ServiceAnalysisDataBase` database,
+so the usual analyser and charts read this run's collected measurements.
+The `analyse` target in this Ant file reads that same database.
+As in the original launcher, initialization purges the selected P1/P2 and
+Monitor databases before the run. This replaces Monitor's previous results.
+P1/P2 working configuration remains under
+`btsn.services/target/petrinet-model-runtime`; source deployment metadata is
+unchanged. `P1_P2_Deterministic_BuildAndRun.xml` remains an alternative launcher
+with the same output and Monitor database locations.
 
 The model address settings are in
 `btsn.common/ProcessDefinitionFolder/PetriNetModels_Infrastructure.json` and
