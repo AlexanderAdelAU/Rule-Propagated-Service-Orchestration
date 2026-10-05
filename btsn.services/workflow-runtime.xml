@@ -28,4 +28,21 @@
         <build-component directory="../btsn.common.Monitor" artifact="btsn-monitor"/>
         <build-component directory="../btsn.common.eventgenerators" artifact="btsn-eventgenerators"/>
     </target>
+    <target name="check-analysis" depends="jar" description="Check recorded-event reconstruction of single and double joins">
+        <delete dir="target/analysis-check"/>
+        <mkdir dir="target/analysis-check/classes"/>
+        <mkdir dir="target/analysis-check/runtime"/>
+        <path id="analysis.check.classpath">
+            <path refid="runtime.classpath"/>
+            <pathelement location="../btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+            <pathelement location="target/analysis-check/classes"/>
+        </path>
+        <javac srcdir="../btsn.common.Monitor/tests" destdir="target/analysis-check/classes"
+               includes="DoubleJoinAnalysisCheck.java" release="${java.release}" includeantruntime="false" encoding="UTF-8">
+            <classpath refid="analysis.check.classpath"/>
+        </javac>
+        <java classname="DoubleJoinAnalysisCheck" fork="true" failonerror="true" dir="target/analysis-check/runtime" maxmemory="128m">
+            <classpath refid="analysis.check.classpath"/>
+        </java>
+    </target>
 </project>

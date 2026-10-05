@@ -1,6 +1,6 @@
 {
   "domain": "PetriNetModels",
-  "purpose": "Deterministic token operations. The platform records actual runtime measurements.",
+  "purpose": "Plain services for the existing six-place double join.",
   "services": [
     {
       "service": "BooleanTokenService",
@@ -14,17 +14,6 @@
       "status": "active"
     },
     {
-      "service": "ForwardTokenService",
-      "implementationClass": "org.btsn.services.ForwardTokenService",
-      "operation": "processToken",
-      "inputs": [
-        "token"
-      ],
-      "returnAttribute": "token",
-      "canonicalBinding": "ServiceAttributeBindings/ForwardTokenService/ForwardTokenService-CanonicalBindings.ruleml.xml",
-      "status": "active"
-    },
-    {
       "service": "BranchTwoTokenService",
       "implementationClass": "org.btsn.services.BranchTwoTokenService",
       "operation": "processToken",
@@ -33,7 +22,7 @@
       ],
       "returnAttribute": "token_branch2",
       "canonicalBinding": "ServiceAttributeBindings/BranchTwoTokenService/BranchTwoTokenService-CanonicalBindings.ruleml.xml",
-      "status": "preserved-unbound"
+      "status": "active"
     },
     {
       "service": "BranchOneTokenService",
@@ -44,7 +33,7 @@
       ],
       "returnAttribute": "token_branch1",
       "canonicalBinding": "ServiceAttributeBindings/BranchOneTokenService/BranchOneTokenService-CanonicalBindings.ruleml.xml",
-      "status": "preserved-unbound"
+      "status": "active"
     },
     {
       "service": "MergeTokenService",
@@ -56,7 +45,7 @@
       ],
       "returnAttribute": "token_branch2",
       "canonicalBinding": "ServiceAttributeBindings/MergeTokenService/MergeTokenService-CanonicalBindings.ruleml.xml",
-      "status": "preserved-unbound"
+      "status": "active"
     },
     {
       "service": "SideTokenService",
@@ -67,7 +56,7 @@
       ],
       "returnAttribute": "token_branch1",
       "canonicalBinding": "ServiceAttributeBindings/SideTokenService/SideTokenService-CanonicalBindings.ruleml.xml",
-      "status": "preserved-unbound"
+      "status": "active"
     },
     {
       "service": "FinalMergeTokenService",
@@ -79,7 +68,7 @@
       ],
       "returnAttribute": "token",
       "canonicalBinding": "ServiceAttributeBindings/FinalMergeTokenService/FinalMergeTokenService-CanonicalBindings.ruleml.xml",
-      "status": "preserved-unbound"
+      "status": "active"
     }
   ]
 }

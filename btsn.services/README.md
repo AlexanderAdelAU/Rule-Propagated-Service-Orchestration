@@ -50,10 +50,10 @@ The output is `btsn.services/target/service-deployment.zip`, containing:
 release. The builder reads every catalogue entry, including preserved unbound
 services, without interpreting the business domain or making host-placement
 decisions. The separate stochastic inventory is packaging data; it does not
-change active deployment metadata. The current inventory yields ten service
-JARs: seven Financial implementations, two deterministic model implementations
+change active deployment metadata. The current inventory yields fifteen service
+JARs: seven Financial implementations, seven deterministic model implementations
 and the preserved stochastic implementation. See [PETRINET_MODELS.md](PETRINET_MODELS.md)
-for the two-place model using actual platform measurements.
+for the two-place and six-place double-join models using actual platform measurements.
 Use `-Dpackaging.config=/path/to/packaging.json` for another inventory.
 
 Ant compiles the small Java inventory reader using the existing repository JSON

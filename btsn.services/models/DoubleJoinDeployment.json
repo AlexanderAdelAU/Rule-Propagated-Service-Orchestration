@@ -1,0 +1,9 @@
+{
+  "catalog": "BusinessServiceDefinitions/DoubleJoinModels.json",
+  "infrastructure": "ProcessDefinitionFolder/DoubleJoinModels_Infrastructure.json",
+  "deploymentRules": "RuleBase/Generated/InfrastructureDeployment.ruleml.xml",
+  "directServiceRules": [
+    "RuleBase/PetriNet/ListofPetriNetInitializationServices.ruleml.xml",
+    "RuleBase/PetriNet/ListofPetrinetCollectorServices.ruleml.xml"
+  ]
+}

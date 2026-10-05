@@ -179,7 +179,7 @@
 	<!-- DEPLOYMENT MODE RESOLUTION                                              -->
 	<!-- ======================================================================= -->
 
-	<import file="P1_P2_Deterministic_BuildAndRun.xml" />
+	<import file="../btsn.services/model-runtime.xml" />
 
 	<target name="resolve-deployment-modes" depends="prepare-runtime,detect-local-channel">
 		<!-- Resolve boolean properties from mode settings -->

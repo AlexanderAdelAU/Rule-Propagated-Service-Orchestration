@@ -1,6 +1,7 @@
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 
 /** Check the JAR contract with both outcomes and unrelated token data. */
@@ -28,7 +29,17 @@ public class DeterministicModelServiceCheck {
         } catch (InvocationTargetException expected) {
             check(expected.getCause() instanceof IllegalArgumentException, "Unexpected validation error");
         }
-        System.out.println("PASS: true/false, token preservation and invalid outcome checked using packaged services");
+        for (String[] contract : new String[][]{{"MergeTokenService", "token_branch2"}, {"FinalMergeTokenService", "token"}}) {
+            Object merger = Class.forName("org.btsn.services." + contract[0]).getConstructor().newInstance();
+            String response = (String) merger.getClass().getMethod("processToken", String.class, String.class)
+                    .invoke(merger, "{\"branch\":\"first\",\"value\":42}", "{\"branch\":\"second\",\"value\":73}");
+            JSONObject result = (JSONObject) ((JSONObject) new JSONParser().parse(response)).get(contract[1]);
+            JSONArray branches = (JSONArray) result.get("branches");
+            check(branches.size() == 2, "Join operation lost a branch");
+            check(Long.valueOf(42).equals(((JSONObject) branches.get(0)).get("value")), "First branch data lost");
+            check(Long.valueOf(73).equals(((JSONObject) branches.get(1)).get("value")), "Second branch data lost");
+        }
+        System.out.println("PASS: true/false, token and join data preservation, and invalid outcome checked using packaged services");
     }
     private static void check(boolean condition, String message) {
         if (!condition) throw new AssertionError(message);

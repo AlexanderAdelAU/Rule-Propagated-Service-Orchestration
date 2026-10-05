@@ -348,7 +348,7 @@ public class PetriNetAnalyzer {
             analysis.totalForks = analysis.forkGroups.size();
             
             logger.info("Fork/Join analysis: " + analysis.totalForks + " forks, " + 
-                       analysis.successfulJoins + " successful joins");
+                       analysis.successfulJoins + " joined fork families");
             
         } catch (SQLException e) {
             logger.error("Error analyzing fork/join", e);
@@ -2204,9 +2204,9 @@ public class PetriNetAnalyzer {
                 }
             }
             
-            // 4. JOIN_CONSUMED closes a branch. A successful join requires every
-            // child of the fork to be accounted for at the same T_in transition,
-            // with one continuation ENTER (or a parent ENTER for reset semantics).
+            // 4. Count each observed join transition, including partial joins of a
+            // larger fork family. JOIN_CONSUMED plus a continuation ENTER
+            // accounts for the participating branches, not every original sibling.
             String consumedSql =
                 "SELECT DISTINCT tokenId, transitionId " +
                 "FROM CONSOLIDATED_TRANSITION_FIRINGS " +
@@ -2221,6 +2221,7 @@ public class PetriNetAnalyzer {
                 }
             }
             
+            Set<String> completedJoinKeys = new HashSet<>();
             for (Map.Entry<Integer, Set<Integer>> fork : childrenByParent.entrySet()) {
                 int parent = fork.getKey();
                 Set<Integer> children = fork.getValue();
@@ -2232,7 +2233,6 @@ public class PetriNetAnalyzer {
                     }
                 }
                 
-                boolean joined = false;
                 for (String transition : candidateJoinTransitions) {
                     int accountedChildren = 0;
                     boolean continuationObserved = false;
@@ -2252,7 +2252,8 @@ public class PetriNetAnalyzer {
                         }
                     }
                     
-                    if (enterTransitionsByToken.getOrDefault(parent, Collections.emptySet()).contains(transition)) {
+                    boolean parentEntered = enterTransitionsByToken.getOrDefault(parent, Collections.emptySet()).contains(transition);
+                    if (parentEntered) {
                         continuationObserved = true;
                         participantRoots.add(resolveRootToken(parent, parentByChild));
                     }
@@ -2261,14 +2262,12 @@ public class PetriNetAnalyzer {
                         analysis.joinFamilyViolations++;
                     }
                     
-                    if (accountedChildren == children.size() && continuationObserved) {
-                        joined = true;
-                        break;
+                    int participants = accountedChildren + (parentEntered ? 1 : 0);
+                    String joinKey = resolveRootToken(parent, parentByChild) + "|" + transition;
+                    if (participants >= 2 && continuationObserved && participantRoots.size() == 1
+                            && completedJoinKeys.add(joinKey)) {
+                        analysis.successfulJoins++;
                     }
-                }
-                
-                if (joined) {
-                    analysis.successfulJoins++;
                 }
             }
             
@@ -2434,7 +2433,7 @@ public class PetriNetAnalyzer {
         ForkJoinAnalysis forkJoin = analyzeForkJoin(workflowBase);
         report.append("3. FORK/JOIN DETAIL\n");
         report.append("   Forks detected (legacy cross-check): ").append(forkJoin.totalForks).append("\n");
-        report.append("   Joins detected (legacy cross-check): ").append(forkJoin.successfulJoins).append("\n");
+        report.append("   Joined fork families (legacy cross-check): ").append(forkJoin.successfulJoins).append("\n");
         for (ForkGroup group : forkJoin.forkGroups) {
             report.append("   Fork from ").append(group.parentTokenId)
                   .append(" -> ").append(group.childTokenIds)

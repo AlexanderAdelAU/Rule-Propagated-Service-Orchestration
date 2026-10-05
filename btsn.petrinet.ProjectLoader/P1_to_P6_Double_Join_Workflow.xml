@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="TrafficLight_BuildAndRun" default="run-complete-workflow" basedir="."
+<project name="P1_to_P6_Double_Join_Workflow" default="run-complete-workflow" basedir="."
 	    xmlns:if="ant:if" xmlns:unless="ant:unless">
 	<description>
-		Traffic Light Petri Net - Complete Workflow with Initialization and Collection
+		P1-P6 Double Join Petri Net - Complete Workflow with Initialization and Collection
 		
 		Phases:
 		  Phase 1: Initialize Databases (purgeAndInitialize) for P1-P6 and Monitor
@@ -12,11 +12,38 @@
 		
 		TOKEN MODES:
 		  Mode 1 (EDGE_NODE): Normal token firing - single tokens injected at P1
-		  Mode 2 (JOIN_NODE): Join token firing - two tokens injected to initiate traffic lights
+		  Mode 2 (JOIN_NODE): Join token firing - two tokens injected with paired token IDs
 		                      Uses -joinargs to specify paired token IDs (e.g., 1000001,1000002)
 		
 		Services (P1-P6, Monitor) start once and remain running throughout all phases.
 	</description>
+
+    <!-- Current JAR runtime; model configuration is separate from source deployment metadata. -->
+    <property name="source.root" location=".."/>
+    <property name="services.project.dir" location="../btsn.services"/>
+    <property name="model.runtime.dir" location="${services.project.dir}/target/double-join-model-runtime"/>
+    <property name="common.project.dir" location="${model.runtime.dir}/btsn.common"/>
+    <property name="generator.project.dir" location="${model.runtime.dir}/btsn.common.eventgenerators"/>
+    <property name="class.dir" location="${source.root}/btsn.common/target/host-runtime/btsn-infrastructure.jar"/>
+    <property name="lib.dir" location="${source.root}/btsn.common/lib"/>
+    <property name="generator.bin.dir" location="${source.root}/btsn.common.eventgenerators/target/jar-runtime/btsn-eventgenerators.jar"/>
+    <property name="monitor.bin.dir" location="${source.root}/btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+    <property name="model.profile.file" location="${services.project.dir}/models/DoubleJoinDeployment.json"/>
+    <property name="model.rules.file" location="${services.project.dir}/models/DoubleJoinInfrastructure.ruleml.xml"/>
+    <property name="local.channel.rules" location="${common.project.dir}/RuleBase/Generated/InfrastructureDeployment.ruleml.xml"/>
+    <property name="token.outcome" value="true"/>
+    <property name="p1.project.dir" location="${model.runtime.dir}/btsn.petrinet.places.p1"/>
+    <property name="p1.bin.dir" location="${source.root}/btsn.petrinet.places.p1/target/btsn.petrinet.places.p1.jar"/>
+    <property name="p2.project.dir" location="${model.runtime.dir}/btsn.petrinet.places.p2"/>
+    <property name="p2.bin.dir" location="${source.root}/btsn.petrinet.places.p2/target/btsn.petrinet.places.p2.jar"/>
+    <property name="p3.project.dir" location="${model.runtime.dir}/btsn.petrinet.places.p3"/>
+    <property name="p3.bin.dir" location="${source.root}/btsn.petrinet.places.p3/target/btsn.petrinet.places.p3.jar"/>
+    <property name="p4.project.dir" location="${model.runtime.dir}/btsn.petrinet.places.p4"/>
+    <property name="p4.bin.dir" location="${source.root}/btsn.petrinet.places.p4/target/btsn.petrinet.places.p4.jar"/>
+    <property name="p5.project.dir" location="${model.runtime.dir}/btsn.petrinet.places.p5"/>
+    <property name="p5.bin.dir" location="${source.root}/btsn.petrinet.places.p5/target/btsn.petrinet.places.p5.jar"/>
+    <property name="p6.project.dir" location="${model.runtime.dir}/btsn.petrinet.places.p6"/>
+    <property name="p6.bin.dir" location="${source.root}/btsn.petrinet.places.p6/target/btsn.petrinet.places.p6.jar"/>
 
 	<!-- ======================================================================= -->
 	<!-- DEPLOYMENT CONFIGURATION                                                -->
@@ -153,9 +180,11 @@
 	<!-- ======================================================================= -->
 
 	<path id="common.classpath">
-		<fileset dir="${lib.dir}" erroronmissingdir="false">
+		<fileset dir="${lib.dir}" erroronmissingdir="false" excludesfile="${services.project.dir}/target/runtime-library-excludes.txt">
 			<include name="*.jar" />
 		</fileset>
+        <fileset dir="${services.project.dir}/target/deployment/services" includes="*.jar"/>
+        <fileset dir="${services.project.dir}/target/deployment/lib" includes="*.jar"/>
 		<pathelement location="${class.dir}" />
 	</path>
 
@@ -203,9 +232,9 @@
 	<!-- DEPLOYMENT MODE RESOLUTION                                              -->
 	<!-- ======================================================================= -->
 
-	<import file="../btsn.services/auto-deployment.xml" />
+	<import file="../btsn.services/model-runtime.xml" />
 
-	<target name="resolve-deployment-modes" depends="detect-local-channel">
+	<target name="resolve-deployment-modes" depends="prepare-runtime,detect-local-channel">
 		<!-- Resolve boolean properties from mode settings -->
 		<resolve-local-launch component="p1" mode="${p1.mode}" />
 		<resolve-local-launch component="p2" mode="${p2.mode}" />
@@ -243,7 +272,7 @@
 		<echo message="Previous output files cleaned" />
 	</target>
 
-	<target name="generate-workflow-bindings" description="Generate canonical bindings from workflow JSON">
+	<target name="generate-workflow-bindings" depends="prepare-runtime" description="Generate canonical bindings from workflow JSON">
 		<echo message="=== Generating Workflow Bindings ===" />
 		<java classname="org.btsn.rulecontroller.TopologyBindingGenerator" 
 		      classpathref="generator.classpath"
@@ -275,10 +304,10 @@
 	<!-- ======================================================================= -->
 
 	<target name="run-complete-workflow" depends="resolve-deployment-modes,clean-output,rebuild-service-ruleml" 
-	        description="Run complete Traffic Light workflow with init, execution and collection (DEFAULT)">
+	        description="Run complete P1-P6 Double Join workflow with init, execution and collection (DEFAULT)">
 		<echo message="" />
 		<echo message="================================================================" />
-		<echo message="  TRAFFIC LIGHT PETRI NET - COMPLETE WORKFLOW                  " />
+		<echo message="  P1-P6 DOUBLE JOIN PETRI NET - COMPLETE WORKFLOW                  " />
 		<echo message="================================================================" />
 		<echo message="  Version: ${rule.version}" />
 		<echo message="  Mode: ${token.mode}" />
@@ -290,7 +319,7 @@
 		<parallel>
 			<!-- Start P1-P6 Services -->
 			<echo message="  [p1] Skipping - running on remote host" unless:set="p1.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p1.is.local"
+			<java failonerror="true" classname="${service.loader.class}" if:set="p1.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p1.project.dir}" output="${p1.output.file}">
 				<classpath refid="p1.classpath" />
@@ -299,7 +328,7 @@
 			</java>
 
 			<echo message="  [p2] Skipping - running on remote host" unless:set="p2.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p2.is.local"
+			<java failonerror="true" classname="${service.loader.class}" if:set="p2.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p2.project.dir}" output="${p2.output.file}">
 				<classpath refid="p2.classpath" />
@@ -308,7 +337,7 @@
 			</java>
 
 			<echo message="  [p3] Skipping - running on remote host" unless:set="p3.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p3.is.local"
+			<java failonerror="true" classname="${service.loader.class}" if:set="p3.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p3.project.dir}" output="${p3.output.file}">
 				<classpath refid="p3.classpath" />
@@ -317,7 +346,7 @@
 			</java>
 
 			<echo message="  [p4] Skipping - running on remote host" unless:set="p4.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p4.is.local"
+			<java failonerror="true" classname="${service.loader.class}" if:set="p4.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p4.project.dir}" output="${p4.output.file}">
 				<classpath refid="p4.classpath" />
@@ -326,7 +355,7 @@
 			</java>
 
 			<echo message="  [p5] Skipping - running on remote host" unless:set="p5.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p5.is.local"
+			<java failonerror="true" classname="${service.loader.class}" if:set="p5.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p5.project.dir}" output="${p5.output.file}">
 				<classpath refid="p5.classpath" />
@@ -335,7 +364,7 @@
 			</java>
 
 			<echo message="  [p6] Skipping - running on remote host" unless:set="p6.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p6.is.local"
+			<java failonerror="true" classname="${service.loader.class}" if:set="p6.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p6.project.dir}" output="${p6.output.file}">
 				<classpath refid="p6.classpath" />
@@ -345,7 +374,7 @@
 
 			<!-- Start Monitor Service -->
 			<echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="monitor.is.local"
+			<java failonerror="true" classname="${service.loader.class}" if:set="monitor.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${monitor.project.dir}" output="${monitor.output.file}">
 				<classpath refid="monitor.classpath" />
@@ -474,11 +503,13 @@
 					<classpath refid="generator.classpath" />
 					<arg value="-version" /><arg value="${rule.version}" />
 					<arg value="-process" /><arg value="${workflow.process.name}" />
+            <arg value="-infrastructure"/><arg value="DoubleJoinModels_Infrastructure"/>
 					<arg value="-place" /><arg value="${target.place}" />
 					<arg value="-operation" /><arg value="${target.operation}" />
 					<arg value="-tokens" /><arg value="0" />
 					<arg value="-expire" /><arg value="${token.expire}" />
 					<arg value="-generator" /><arg value="${event.generator.id}" />
+            <arg value="-data"/><arg value="outcome=${token.outcome}"/>
 				</java>
 
 				<!-- Fire tokens based on mode -->
@@ -588,7 +619,7 @@
 				<!-- ======================================================= -->
 				<echo message="" />
 				<echo message="================================================================" />
-				<echo message="        TRAFFIC LIGHT WORKFLOW COMPLETED SUCCESSFULLY          " />
+				<echo message="        P1-P6 DOUBLE JOIN WORKFLOW COMPLETED SUCCESSFULLY          " />
 				<echo message="================================================================" />
 				<echo message="" />
 				<echo message="Output files:" />
@@ -612,11 +643,13 @@
 			<classpath refid="generator.classpath" />
 			<arg value="-version" /><arg value="${rule.version}" />
 			<arg value="-process" /><arg value="${workflow.process.name}" />
+            <arg value="-infrastructure"/><arg value="DoubleJoinModels_Infrastructure"/>
 			<arg value="-place" /><arg value="${target.place}" />
 			<arg value="-operation" /><arg value="${target.operation}" />
 			<arg value="-tokens" /><arg value="${token.count}" />
 			<arg value="-expire" /><arg value="${token.expire}" />
 			<arg value="-generator" /><arg value="${event.generator.id}" />
+            <arg value="-data"/><arg value="outcome=${token.outcome}"/>
 			<arg value="-skipdeploy" />
 		</java>
 	</target>
@@ -629,10 +662,12 @@
 			<classpath refid="generator.classpath" />
 			<arg value="-version" /><arg value="${rule.version}" />
 			<arg value="-process" /><arg value="${workflow.process.name}" />
+            <arg value="-infrastructure"/><arg value="DoubleJoinModels_Infrastructure"/>
 			<arg value="-place" /><arg value="${target.place}" />
 			<arg value="-operation" /><arg value="${target.operation}" />
 			<arg value="-expire" /><arg value="${token.expire}" />
 			<arg value="-generator" /><arg value="${event.generator.id}" />
+            <arg value="-data"/><arg value="outcome=${token.outcome}"/>
 			<arg value="-joinargs" /><arg value="${join.tokens}" />
 			<arg value="-skipdeploy" />
 		</java>
@@ -646,7 +681,7 @@
 	        description="Run only the workflow phase (skip init and collect)">
 		<echo message="" />
 		<echo message="================================================================" />
-		<echo message="  TRAFFIC LIGHT PETRI NET - WORKFLOW ONLY                      " />
+		<echo message="  P1-P6 DOUBLE JOIN PETRI NET - WORKFLOW ONLY                      " />
 		<echo message="================================================================" />
 		<echo message="  Mode: ${token.mode}" />
 		<echo message="  Target: ${target.place}:${target.operation}" />
@@ -655,7 +690,7 @@
 		<parallel>
 			<!-- Start all services -->
 			<echo message="  [p1] Skipping - running on remote host" unless:set="p1.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p1.is.local"
+			<java failonerror="true" classname="${service.loader.class}" if:set="p1.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p1.project.dir}" output="${p1.output.file}">
 				<classpath refid="p1.classpath" />
@@ -664,7 +699,7 @@
 			</java>
 
 			<echo message="  [p2] Skipping - running on remote host" unless:set="p2.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p2.is.local"
+			<java failonerror="true" classname="${service.loader.class}" if:set="p2.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p2.project.dir}" output="${p2.output.file}">
 				<classpath refid="p2.classpath" />
@@ -673,7 +708,7 @@
 			</java>
 
 			<echo message="  [p3] Skipping - running on remote host" unless:set="p3.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p3.is.local"
+			<java failonerror="true" classname="${service.loader.class}" if:set="p3.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p3.project.dir}" output="${p3.output.file}">
 				<classpath refid="p3.classpath" />
@@ -682,7 +717,7 @@
 			</java>
 
 			<echo message="  [p4] Skipping - running on remote host" unless:set="p4.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p4.is.local"
+			<java failonerror="true" classname="${service.loader.class}" if:set="p4.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p4.project.dir}" output="${p4.output.file}">
 				<classpath refid="p4.classpath" />
@@ -691,7 +726,7 @@
 			</java>
 
 			<echo message="  [p5] Skipping - running on remote host" unless:set="p5.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p5.is.local"
+			<java failonerror="true" classname="${service.loader.class}" if:set="p5.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p5.project.dir}" output="${p5.output.file}">
 				<classpath refid="p5.classpath" />
@@ -700,7 +735,7 @@
 			</java>
 
 			<echo message="  [p6] Skipping - running on remote host" unless:set="p6.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p6.is.local"
+			<java failonerror="true" classname="${service.loader.class}" if:set="p6.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${p6.project.dir}" output="${p6.output.file}">
 				<classpath refid="p6.classpath" />
@@ -709,7 +744,7 @@
 			</java>
 
 			<echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="monitor.is.local"
+			<java failonerror="true" classname="${service.loader.class}" if:set="monitor.is.local"
 			      fork="true" timeout="600000" 
 			      dir="${monitor.project.dir}" output="${monitor.output.file}">
 				<classpath refid="monitor.classpath" />
@@ -727,11 +762,13 @@
 					<classpath refid="generator.classpath" />
 					<arg value="-version" /><arg value="${rule.version}" />
 					<arg value="-process" /><arg value="${workflow.process.name}" />
+            <arg value="-infrastructure"/><arg value="DoubleJoinModels_Infrastructure"/>
 					<arg value="-place" /><arg value="${target.place}" />
 					<arg value="-operation" /><arg value="${target.operation}" />
 					<arg value="-tokens" /><arg value="0" />
 					<arg value="-expire" /><arg value="${token.expire}" />
 					<arg value="-generator" /><arg value="${event.generator.id}" />
+            <arg value="-data"/><arg value="outcome=${token.outcome}"/>
 				</java>
 
 				<!-- Fire tokens based on mode -->
@@ -750,15 +787,15 @@
 	<target name="help" description="Display usage information">
 		<echo message="" />
 		<echo message="================================================================" />
-		<echo message="  Traffic Light Petri Net - Complete Workflow                  " />
+		<echo message="  P1-P6 Double Join Petri Net - Complete Workflow                  " />
 		<echo message="================================================================" />
 		<echo message="" />
 		<echo message="TOKEN MODES:" />
 		<echo message="  Mode 1 (EDGE_NODE): Single token injection" />
-		<echo message="  Mode 2 (JOIN_NODE): Paired join tokens (default)" />
+		<echo message="  Mode 2 (JOIN_NODE): Paired join tokens" />
 		<echo message="" />
 		<echo message="USAGE:" />
-		<echo message="  ant                        Run complete workflow (default, JOIN_NODE)" />
+		<echo message="  ant                        Run complete workflow (default, EDGE_NODE)" />
 		<echo message="  ant run-complete-workflow  Run complete workflow" />
 		<echo message="  ant run-workflow-only      Skip init/collect phases" />
 		<echo message="  ant help                   Show this help" />
@@ -773,7 +810,7 @@
 		<echo message="CONFIGURABLE PARAMETERS:" />
 		<echo message="  -Drule.version=v001                    Rule base version" />
 		<echo message="  -Dmode=1                               EDGE_NODE mode" />
-		<echo message="  -Dmode=2                               JOIN_NODE mode (default)" />
+		<echo message="  -Dmode=2                               JOIN_NODE mode" />
 		<echo message="  -Djoin.tokens=1000001,1000002          Join token IDs" />
 		<echo message="  -Dtoken.count=1                        Tokens for EDGE_NODE mode" />
 		<echo message="  -Devent.generator.id=EVENT_GENERATOR  Event generator ID" />
@@ -781,7 +818,7 @@
 		<echo message="  -Dworkflow.completion.seconds=5       Wait time after firing tokens" />
 		<echo message="" />
 		<echo message="EXAMPLES:" />
-		<echo message="  ant                                    (JOIN_NODE with default tokens)" />
+		<echo message="  ant                                    (EDGE_NODE with 10 tokens)" />
 		<echo message="  ant -Dmode=1 -Dtoken.count=5           (EDGE_NODE with 5 tokens)" />
 		<echo message="  ant -Djoin.tokens=2000001,2000002      (JOIN_NODE with custom IDs)" />
 		<echo message="" />

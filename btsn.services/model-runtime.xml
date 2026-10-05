@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="petri-net-model-runtime" default="prepare-runtime" basedir="." xmlns:if="ant:if" xmlns:unless="ant:unless">
+    <description>Shared Ant build support imported by the model launchers.</description>
+    <property name="source.root" location=".."/>
+    <property name="services.project.dir" location="../btsn.services"/>
+    <property name="model.runtime.dir" location="${services.project.dir}/target/petrinet-model-runtime"/>
+    <property name="common.project.dir" location="${model.runtime.dir}/btsn.common"/>
+    <property name="generator.project.dir" location="${model.runtime.dir}/btsn.common.eventgenerators"/>
+    <property name="monitor.project.dir" location="${source.root}/btsn.common.Monitor"/>
+    <property name="output.dir" location="."/>
+    <property name="p1.output.file" location="${output.dir}/P1_Place.out.txt"/>
+    <property name="p2.output.file" location="${output.dir}/P2_Place.out.txt"/>
+    <property name="monitor.output.file" location="${output.dir}/MonitorService.out.txt"/>
+    <property name="local.channel.rules" location="${common.project.dir}/RuleBase/Generated/InfrastructureDeployment.ruleml.xml"/>
+    <property name="rule.version" value="v001"/>
+    <property name="token.outcome" value="true"/>
+    <property name="token.count" value="10"/>
+    <property name="p1.mode" value="auto"/>
+    <property name="p2.mode" value="auto"/>
+    <property name="monitor.mode" value="auto"/>
+    <property name="service.startup.seconds" value="3"/>
+    <property name="phase.delay.seconds" value="3"/>
+    <property name="workflow.drain.seconds" value="10"/>
+    <property name="workflow.process.name" value="petrinet/Workflow/P1_P2_Deterministic_Workflow"/>
+    <property name="model.profile.file" location="${services.project.dir}/models/Deployment.json"/>
+    <property name="model.rules.file" location="${services.project.dir}/models/InfrastructureDeployment.ruleml.xml"/>
+    <import file="auto-deployment.xml"/>
+    <path id="model.dependencies">
+        <pathelement location="${source.root}/btsn.common/target/host-runtime/btsn-infrastructure.jar"/>
+        <fileset dir="${source.root}/btsn.common/lib" includes="*.jar" excludesfile="${services.project.dir}/target/runtime-library-excludes.txt"/>
+        <fileset dir="${services.project.dir}/target/deployment/lib" includes="*.jar"/>
+        <fileset dir="${services.project.dir}/target/deployment/services" includes="*.jar"/>
+    </path>
+    <path id="generator.classpath">
+        <path refid="model.dependencies"/>
+        <pathelement location="${source.root}/btsn.common.eventgenerators/target/jar-runtime/btsn-eventgenerators.jar"/>
+    </path>
+    <path id="monitor.classpath">
+        <path refid="model.dependencies"/>
+        <pathelement location="${source.root}/btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+    </path>
+    <macrodef name="copy-model-component">
+        <attribute name="directory"/>
+        <sequential>
+            <copy todir="${model.runtime.dir}/@{directory}">
+                <fileset dir="${source.root}/@{directory}" includes="ServiceLoaderQueries/**,resources/**,PayLoad/**,TokenFormats/**,EventTriggeringFile/**"/>
+            </copy>
+        </sequential>
+    </macrodef>
+    <target name="prepare-runtime" description="Build JARs and prepare a separate model configuration">
+        <fail message="token.outcome must be true or false"><condition><not><or>
+            <equals arg1="${token.outcome}" arg2="true"/><equals arg1="${token.outcome}" arg2="false"/>
+        </or></not></condition></fail>
+        <ant antfile="${services.project.dir}/build.xml" target="build-workflow-runtime" inheritall="false"/>
+        <!-- Keep source deployment metadata separate; Monitor uses its usual working directory. -->
+        <mkdir dir="${output.dir}"/>
+        <copy todir="${common.project.dir}">
+            <fileset dir="${source.root}/btsn.common" includes="RuleBase/**,RulePayLoad/**,ServiceAttributeBindings/**,BusinessServiceDefinitions/**,ProcessDefinitionFolder/**,PayLoad/**"/>
+        </copy>
+        <copy file="${model.profile.file}" tofile="${common.project.dir}/BusinessServiceDefinitions/Deployment.json" overwrite="true"/>
+        <copy file="${model.rules.file}" tofile="${local.channel.rules}" overwrite="true"/>
+        <copy-model-component directory="btsn.petrinet.places.p1"/>
+        <copy-model-component directory="btsn.petrinet.places.p2"/>
+        <copy-model-component directory="btsn.petrinet.places.p3"/>
+        <copy-model-component directory="btsn.petrinet.places.p4"/>
+        <copy-model-component directory="btsn.petrinet.places.p5"/>
+        <copy-model-component directory="btsn.petrinet.places.p6"/>
+        <copy-model-component directory="btsn.common.eventgenerators"/>
+        <!-- The existing admin generators use this spelling, including on Linux. -->
+        <copy file="${source.root}/btsn.common.eventgenerators/PayLoad/payload.xml" tofile="${generator.project.dir}/Payload/payLoad.xml"/>
+        <java classname="org.btsn.rulecontroller.TopologyBindingGenerator" fork="true" failonerror="true" dir="${common.project.dir}">
+            <classpath refid="generator.classpath"/><arg value="${workflow.process.name}"/><arg value="${rule.version}"/>
+        </java>
+        <java classname="org.btsn.utils.BuildMasterServiceRuleBase" fork="true" failonerror="true" dir="${common.project.dir}">
+            <classpath refid="generator.classpath"/><arg value="${rule.version}"/><arg value="ALL"/>
+        </java>
+    </target>
+    <target name="analyse" description="Analyse the collected real measurements from the last model run">
+        <java classname="org.btsn.derby.Analysis.PetriNetAnalyzer" fork="true" failonerror="true" maxmemory="128m" dir="${monitor.project.dir}">
+            <classpath refid="monitor.classpath"/><arg value="--all"/>
+        </java>
+    </target>
+</project>

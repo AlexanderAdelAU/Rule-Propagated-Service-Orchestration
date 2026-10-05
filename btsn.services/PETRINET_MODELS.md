@@ -32,8 +32,8 @@ As in the original launcher, initialization purges the selected P1/P2 and
 Monitor databases before the run. This replaces Monitor's previous results.
 P1/P2 working configuration remains under
 `btsn.services/target/petrinet-model-runtime`; source deployment metadata is
-unchanged. `P1_P2_Deterministic_BuildAndRun.xml` remains an alternative launcher
-with the same output and Monitor database locations.
+unchanged. Both model launchers import `btsn.services/model-runtime.xml` for
+shared build support.
 
 The model address settings are in
 `btsn.common/ProcessDefinitionFolder/PetriNetModels_Infrastructure.json` and
@@ -45,3 +45,35 @@ invocation mechanism and introduces no additional deployment protocol.
 For an isolated JAR contract check, select `check-model-services` in
 `btsn.services/build.xml`. The legacy stochastic implementation remains packaged
 for existing models but is not selected by this model.
+
+## Six-place double join
+
+Run `btsn.petrinet.ProjectLoader/P1_to_P6_Double_Join_Workflow.xml` using its
+default target. It builds the current JARs, checks ip0, starts local P1-P6 and
+Monitor when appropriate, initializes, deploys, sends ten tokens and collects
+from all six places. The seven `.out.txt` files remain beside that launcher;
+Monitor uses its usual database and analyser.
+
+The existing true route forks into P2, P3 and P5. P4 joins P2/P3, then P6 joins
+P4/P5 and terminates the business token. Monitor observes collected data outside
+the token path. The existing false route terminates at P1. `token.outcome`
+defaults to `true`. Service implementations preserve the incoming branch data;
+the platform performs both joins and measures actual execution.
+The single-path P1 input is an edge transition; the duplicate generator arrow
+and its erroneous input-join label have been corrected.
+
+| Place | Logical service | Input attributes | Return attribute |
+| --- | --- | --- | --- |
+| P1 | BooleanTokenService | token | token |
+| P2 | BranchTwoTokenService | token | token_branch2 |
+| P3 | BranchOneTokenService | token | token_branch1 |
+| P4 | MergeTokenService | token_branch1, token_branch2 | token_branch2 |
+| P5 | SideTokenService | token | token_branch1 |
+| P6 | FinalMergeTokenService | token_branch1, token_branch2 | token |
+
+The branch slots follow the incoming arc order in the existing model. The model
+address settings are `DoubleJoinModels_Infrastructure.json` in the common
+process definitions and `btsn.services/models/DoubleJoinInfrastructure.ruleml.xml`.
+Keep their ip0 addresses consistent. Working place configuration is under
+`btsn.services/target/double-join-model-runtime`. Stop locally launched hosts
+before starting another run using these ports.
