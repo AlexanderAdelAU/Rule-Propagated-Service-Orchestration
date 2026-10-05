@@ -16,6 +16,13 @@ In Eclipse, run `btsn.services/build.xml` as an Ant Build and select `check` or
 `package`. The Ant JVM must be a JDK, so the Java compiler is available.
 No Python, Maven, Ivy, shell script or downloaded dependency is required.
 
+After pulling the branch, import the new project into your existing Eclipse
+workspace: **File → Import → General → Existing Projects into Workspace**.
+Select the repository root, select `btsn.services`, and leave **Copy projects into
+workspace** unchecked. Keep the existing `btsn.common` project imported; the
+packaging reader uses its JSON library. Expand `btsn.services`, right-click its
+`build.xml`, and choose **Run As → Ant Build…** to select `clean` and `check`.
+
 The output is `btsn.services/target/service-deployment.zip`, containing:
 
 | Location | Contents |
