@@ -679,10 +679,10 @@
 		<echo message="    PATIENT_ARRIVAL -> Triage -> [Lab, Cardio, Radiology] -> Diagnosis -> Treatment -> Terminate" />
 		<echo message="" />
 		<echo message="  Workflow 2: ${workflow2.process.name} (${canary.version})" />
-		<echo message="    CANARY_TEST -> Triage -> Monitor (test/canary tokens)" />
+		<echo message="    CANARY_TEST -> Triage -> Terminate (test/canary tokens)" />
 		<echo message="" />
 		<echo message="  Workflow 3: ${workflow3.process.name} (${federated.version})" />
-		<echo message="    FEDERATED_RADIOLOGY_REQUEST -> Radiology -> Monitor (bypasses Triage)" />
+		<echo message="    FEDERATED_RADIOLOGY_REQUEST -> Radiology -> Terminate (bypasses Triage)" />
 		<echo message="" />
 		<echo message="EXECUTION PATTERN:" />
 		<echo message="  Phase 1: Load services ONCE, Initialize databases (parallel)" />

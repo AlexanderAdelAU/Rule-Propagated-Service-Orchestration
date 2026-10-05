@@ -7,8 +7,7 @@ workflow, sends ten tokens and collects measurements. Remote hosts are assumed
 to have been started manually. The normal launcher output files and Monitor
 database are retained.
 
-The same architecture is used by `Triage_CanaryTest_BuildAndRun.xml`,
-`Federated_Radiology_BuildAndRun.xml`, and
+The same architecture is used by `Federated_Radiology_BuildAndRun.xml` and
 `Triple_Workflow_Emergencey_Department_Concurrent.xml` in that folder.
 The concurrent launcher preserves v003 patients, v002 canaries and v001
 federated requests, then collects all three versions with v999 admin tokens.
@@ -58,9 +57,12 @@ deployment facts) alongside the numbered place configuration. Invocation uses
 the existing ServiceHelper in the PN JVM; these JARs do not start separate
 business-service JVMs or provide remote upload/start commands.
 
-The old healthcare host project folders, combined legacy diagram and
-`ProcessTests` launchers remain for later cleanup; use the four migrated
-launchers above. They are not used to compile or launch this runtime.
+The six old healthcare host project folders and the standalone canary launcher
+have been removed. The three `ProcessTests` launchers now use generic P1,
+packaged TriageService and shared Monitor/event-generator JARs as well.
+See [the healthcare launcher guide](../btsn.healthcare.ProjectLoader/README.md)
+for their defaults and phase-only targets. The canary workflow definition is
+retained for the concurrent launcher.
 
 Run `btsn.services/build.xml` with `check-healthcare-services` to check the
 packaged healthcare contracts, direct route and federated audit fields. Use

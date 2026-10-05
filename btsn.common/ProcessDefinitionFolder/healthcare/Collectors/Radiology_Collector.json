@@ -1,5 +1,5 @@
 {
-   "processType":"SOA",
+  "processType": "SOA",
   "elements": [
     {
       "id": "COLLECTION_GENERATOR",
@@ -86,19 +86,6 @@
       "transition_type": "T_out"
     },
     {
-      "id": "Terminate",
-      "type": "TRANSITION",
-      "x": 330,
-      "y": 570,
-      "width": 20,
-      "height": 60,
-      "label": "Terminate",
-      "rotation": 90.0,
-      "node_type": "TerminateNode",
-      "node_value": "TERMINATE_NODE",
-      "transition_type": "Other"
-    },
-    {
       "id": "T_out_Monitor",
       "type": "TRANSITION",
       "x": 210,
@@ -107,8 +94,8 @@
       "height": 60,
       "label": "T_out_Monitor",
       "rotation": 90.0,
-      "node_type": "EdgeNode",
-      "node_value": "EDGE_NODE",
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
       "transition_type": "T_out"
     }
   ],
@@ -156,14 +143,6 @@
     {
       "source": "Monitor",
       "target": "T_out_Monitor",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
-    },
-    {
-      "source": "T_out_Monitor",
-      "target": "Terminate",
       "label": "",
       "guardCondition": "",
       "decision_value": "",

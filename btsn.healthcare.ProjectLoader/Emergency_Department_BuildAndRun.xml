@@ -211,7 +211,7 @@
 		<echo message="================================================================" />
 		<echo message="  Rule Version: ${rule.version}" />
 		<echo message="  Tokens: ${token.count}" />
-		<echo message="  Flow: Triage -> [Lab, Cardio, Radiology] -> Diagnosis -> Treatment -> Monitor" />
+		<echo message="  Flow: Triage -> [Lab, Cardio, Radiology] -> Diagnosis -> Treatment -> Terminate" />
 		<echo message="================================================================" />
 
 		<parallel>
@@ -404,7 +404,7 @@
 				<echo message="    PHASE 2: PATIENT WORKFLOW EXECUTION        " />
 				<echo message="===============================================" />
 				<echo message="Tokens: ${token.count}, Target: ${target.service}" />
-				<echo message="Flow: Triage -> [Lab, Cardio, Radiology] -> Diagnosis -> Treatment -> Monitor" />
+				<echo message="Flow: Triage -> [Lab, Cardio, Radiology] -> Diagnosis -> Treatment -> Terminate" />
 				<echo message="" />
 
 				<!-- Deploy Workflow rules (tokens=0, with commitment port) -->
@@ -573,7 +573,7 @@
 		<echo message="================================================================" />
 		<echo message="" />
 		<echo message="WORKFLOW TOPOLOGY:" />
-		<echo message="  Triage -> Fork(Lab, Cardio, Radiology) -> Join -> Diagnosis -> Treatment -> Monitor" />
+		<echo message="  Triage -> Fork(Lab, Cardio, Radiology) -> Join -> Diagnosis -> Treatment -> Terminate" />
 		<echo message="" />
 		<echo message="EXECUTION PATTERN:" />
 		<echo message="  Phase 1: Load services ONCE, Initialize databases (parallel)" />

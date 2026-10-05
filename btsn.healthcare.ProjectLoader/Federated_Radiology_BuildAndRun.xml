@@ -429,7 +429,7 @@
 		<echo message="" />
 		<echo message="CONFIGURABLE PARAMETERS:" />
 		<echo message="  -Drule.version=v002              Rule base version" />
-		<echo message="  -Dtarget.place=RadiologyService  Target service name" />
+		<echo message="  -Dtarget.place=P4_Place          Orchestration host" />
 		<echo message="  -Dtarget.operation=federatedRadiologyRequest  Service operation" />
 		<echo message="  -Dtoken.count=10                 Number of tokens to generate" />
 		<echo message="  -Dphase.delay.seconds=5          Delay between phases" />

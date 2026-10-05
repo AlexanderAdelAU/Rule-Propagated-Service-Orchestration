@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Shared by the three triage process launchers in this directory. -->
+<project name="healthcare-triage-runtime" basedir="."
+         xmlns:if="ant:if" xmlns:unless="ant:unless">
+    <!-- Ant resolves these locations against the importing launcher's basedir. -->
+    <property name="source.root" location="../.."/>
+    <property name="services.project.dir" location="${source.root}/btsn.services"/>
+    <property name="local.channel.project.dir" location="${services.project.dir}"/>
+    <property name="healthcare.runtime.dir" location="${services.project.dir}/target/healthcare-runtime"/>
+    <property name="output.dir" location="."/>
+    <property name="triage.project.dir" location="${healthcare.runtime.dir}/btsn.petrinet.places.p1"/>
+    <property name="triage.output.file" location="${output.dir}/TriageService.out.txt"/>
+    <property name="monitor.output.file" location="${output.dir}/MonitorService.out.txt"/>
+    <property name="triage.mode" value="auto"/>
+    <property name="monitor.mode" value="auto"/>
+    <property name="rule.version" value="v001"/>
+    <property name="init.version" value="v999"/>
+    <property name="collector.version" value="v999"/>
+    <property name="query.version" value="${rule.version}"/>
+    <property name="init.process.name" value="healthcare/Initializers/Triage_Initialization"/>
+    <property name="workflow.process.name" value="healthcare/Workflow/Triage_Workflow"/>
+    <property name="collector.process.name" value="healthcare/Collectors/Triage_Collector"/>
+    <property name="db.init.operation" value="purgeAndInitialize"/>
+    <property name="target.place" value="P1_Place"/>
+    <property name="target.operation" value="processTriageAssessment"/>
+    <property name="collector.operation" value="collectAllData"/>
+    <property name="sequence.id.init.triage" value="999010000"/>
+    <property name="sequence.id.init.monitor" value="999070000"/>
+    <property name="sequence.id.collect.triage" value="999010000"/>
+    <property name="token.count" value="10"/>
+    <property name="token.expire" value="120000"/>
+    <property name="event.generator.id" value="TRIAGE_REQUEST"/>
+    <property name="patient.id" value="P_Triage"/>
+    <property name="provider.id" value="RN001"/>
+    <property name="token.data" value="patientId=${patient.id},providerId=${provider.id}"/>
+    <property name="service.startup.seconds" value="5"/>
+    <property name="init.delay.seconds" value="3"/>
+    <property name="phase.delay.seconds" value="5"/>
+    <property name="collector.delay.seconds" value="3"/>
+    <property name="service.loader.class" value="org.btsn.handlers.ServiceLoader"/>
+    <property name="init.event.generator.class" value="org.btsn.common.eventgenerators.DatabaseInitialization_EventGenerator"/>
+    <property name="token.generator.class" value="org.btsn.healthcare.eventgenerators.GenericHealthcareTokenGenerator"/>
+    <property name="collector.event.generator.class" value="org.btsn.common.eventgenerators.Common_Collector_EventGenerator"/>
+    <import file="../../btsn.services/healthcare-runtime.xml"/>
+
+    <path id="triage.classpath">
+        <path refid="healthcare.dependencies"/>
+        <pathelement location="${source.root}/btsn.petrinet.places.p1/target/btsn.petrinet.places.p1.jar"/>
+    </path>
+    <path id="monitor.classpath">
+        <path refid="healthcare.dependencies"/>
+        <pathelement location="${source.root}/btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+    </path>
+    <path id="generator.classpath">
+        <path refid="healthcare.dependencies"/>
+        <pathelement location="${source.root}/btsn.common.eventgenerators/target/jar-runtime/btsn-eventgenerators.jar"/>
+    </path>
+
+    <target name="validate-environment" depends="prepare-runtime"
+            description="Build and validate the packaged healthcare runtime">
+        <fail message="Missing generic P1 host JAR">
+            <condition><not><available file="${source.root}/btsn.petrinet.places.p1/target/btsn.petrinet.places.p1.jar"/></not></condition>
+        </fail>
+        <fail message="TriageService cannot be loaded from the packaged classpath">
+            <condition><not><available classname="org.btsn.business.healthcare.TriageService" classpathref="triage.classpath"/></not></condition>
+        </fail>
+        <fail message="Monitor ServiceLoader cannot be loaded from the packaged classpath">
+            <condition><not><available classname="${service.loader.class}" classpathref="monitor.classpath"/></not></condition>
+        </fail>
+        <fail message="Missing healthcare workflow definition: ${workflow.process.name}">
+            <condition><not><available file="${common.project.dir}/ProcessDefinitionFolder/${workflow.process.name}.json"/></not></condition>
+        </fail>
+        <echo message="TriageService: packaged business implementation on P1; Monitor: observation infrastructure"/>
+    </target>
+    <target name="resolve-deployment-modes" depends="validate-environment,detect-local-channel">
+        <resolve-local-launch component="triage" mode="${triage.mode}"/>
+        <resolve-local-launch component="monitor" mode="${monitor.mode}"/>
+    </target>
+    <target name="clean-output" description="Remove previous process-test output files">
+        <delete file="${triage.output.file}" quiet="true"/>
+        <delete file="${monitor.output.file}" quiet="true"/>
+    </target>
+
+    <macrodef name="start-triage">
+        <sequential>
+            <echo message="Triage host is already running remotely" unless:set="triage.is.local"/>
+            <java classname="${service.loader.class}" fork="true" failonerror="true" if:set="triage.is.local"
+                  dir="${triage.project.dir}" output="${triage.output.file}">
+                <classpath refid="triage.classpath"/>
+                <arg file="${triage.project.dir}"/><arg value="-version"/><arg value="${rule.version}"/>
+            </java>
+        </sequential>
+    </macrodef>
+    <macrodef name="start-triage-monitor">
+        <sequential>
+            <echo message="Monitor is already running remotely" unless:set="monitor.is.local"/>
+            <java classname="${service.loader.class}" fork="true" failonerror="true" if:set="monitor.is.local"
+                  dir="${monitor.project.dir}" output="${monitor.output.file}">
+                <classpath refid="monitor.classpath"/>
+                <arg file="${monitor.project.dir}"/><arg value="-version"/><arg value="${rule.version}"/>
+            </java>
+        </sequential>
+    </macrodef>
+    <macrodef name="run-triage-phases">
+        <element name="phases" implicit="true"/>
+        <sequential>
+            <!-- Prepare once before the parallel section; no parallel rebuilds. -->
+            <parallel>
+                <sequential><start-triage/></sequential>
+                <sequential><start-triage-monitor/></sequential>
+                <sequential>
+                    <sleep seconds="${service.startup.seconds}"/>
+                    <phases/>
+                    <echo message="Phases complete. Locally launched services remain running; stop this Ant run to end them."/>
+                </sequential>
+            </parallel>
+        </sequential>
+    </macrodef>
+    <macrodef name="triage-init-event">
+        <attribute name="service"/><attribute name="sequence"/>
+        <attribute name="tokens" default="1"/><attribute name="deployment-argument" default="-skipDeploy"/>
+        <sequential>
+            <java classname="${init.event.generator.class}" fork="true" failonerror="true" dir="${generator.project.dir}">
+                <classpath refid="generator.classpath"/>
+                <arg value="-service"/><arg value="@{service}"/>
+                <arg value="-operation"/><arg value="${db.init.operation}"/>
+                <arg value="-version"/><arg value="${init.version}"/>
+                <arg value="-process"/><arg value="${init.process.name}"/>
+                <arg value="-sequenceId"/><arg value="@{sequence}"/>
+                <arg value="-tokens"/><arg value="@{tokens}"/>
+                <arg line="@{deployment-argument}"/>
+            </java>
+        </sequential>
+    </macrodef>
+    <macrodef name="initialize-triage">
+        <sequential>
+            <triage-init-event service="P1_InitializationService" sequence="${sequence.id.init.triage}" tokens="0" deployment-argument=""/>
+            <triage-init-event service="P1_InitializationService" sequence="${sequence.id.init.triage}"/>
+            <sleep seconds="${init.delay.seconds}"/>
+            <triage-init-event service="Monitor_InitializationService" sequence="${sequence.id.init.monitor}"/>
+            <sleep seconds="${phase.delay.seconds}"/>
+        </sequential>
+    </macrodef>
+    <macrodef name="triage-workflow-event">
+        <attribute name="tokens"/><attribute name="deployment-argument" default=""/>
+        <sequential>
+            <java classname="${token.generator.class}" fork="true" failonerror="true" dir="${generator.project.dir}">
+                <classpath refid="generator.classpath"/>
+                <arg value="-version"/><arg value="${rule.version}"/>
+                <arg value="-process"/><arg value="${workflow.process.name}"/>
+                <arg value="-service"/><arg value="${target.place}"/>
+                <arg value="-operation"/><arg value="${target.operation}"/>
+                <arg value="-tokens"/><arg value="@{tokens}"/>
+                <arg value="-expire"/><arg value="${token.expire}"/>
+                <arg value="-generator"/><arg value="${event.generator.id}"/>
+                <arg value="-data"/><arg value="${token.data}"/>
+                <arg value="-infrastructure"/><arg value="Healthcare_Infrastructure"/>
+                <arg value="-format-service"/><arg value="TriageService"/>
+                <arg line="@{deployment-argument}"/>
+            </java>
+        </sequential>
+    </macrodef>
+    <macrodef name="execute-triage-workflow">
+        <sequential>
+            <triage-workflow-event tokens="0"/>
+            <triage-workflow-event tokens="${token.count}" deployment-argument="-skipdeploy"/>
+            <sleep seconds="${phase.delay.seconds}"/>
+        </sequential>
+    </macrodef>
+    <macrodef name="collect-triage">
+        <sequential>
+            <java classname="${collector.event.generator.class}" fork="true" failonerror="true" dir="${generator.project.dir}">
+                <classpath refid="generator.classpath"/>
+                <arg value="-service"/><arg value="P1_CollectorService"/>
+                <arg value="-operation"/><arg value="${collector.operation}"/>
+                <arg value="-version"/><arg value="${collector.version}"/>
+                <arg value="-process"/><arg value="${collector.process.name}"/>
+                <arg value="-queryVersion"/><arg value="${query.version}"/>
+                <arg value="-sequenceId"/><arg value="${sequence.id.collect.triage}"/>
+            </java>
+            <sleep seconds="${collector.delay.seconds}"/>
+        </sequential>
+    </macrodef>
+    <target name="load-triage-service" depends="resolve-deployment-modes" description="Start only the configured generic P1 host">
+        <start-triage/>
+    </target>
+    <target name="load-monitor-service" depends="resolve-deployment-modes" description="Start only the configured Monitor">
+        <start-triage-monitor/>
+    </target>
+    <target name="runtime-help">
+        <echo message="Build only: validate-environment; analysis after collection: analyse"/>
+        <echo message="Deployment: -Dtriage.mode=auto|local|remote -Dmonitor.mode=auto|local|remote"/>
+        <echo message="auto starts a component only when its configured ip0 address belongs to this machine."/>
+        <echo message="Phase-only targets send events to already running components."/>
+    </target>
+</project>
