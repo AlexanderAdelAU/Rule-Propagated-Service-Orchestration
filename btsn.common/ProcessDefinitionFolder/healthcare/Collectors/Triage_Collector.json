@@ -50,7 +50,7 @@
       "width": 50,
       "height": 50,
       "label": "Triage",
-      "service": "Triage_CollectorService",
+      "service": "P1_CollectorService",
       "operations": [
         {
           "name": "collectAllData"

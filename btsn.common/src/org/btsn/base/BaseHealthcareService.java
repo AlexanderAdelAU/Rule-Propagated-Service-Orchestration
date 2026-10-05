@@ -44,6 +44,7 @@ public abstract class BaseHealthcareService {
      * Main processing method - template method pattern
      * Each service implements processServiceSpecificAssessment()
      */
+    @SuppressWarnings("unchecked")
     public String processAssessment(String inputData) {
         System.out.printf("[%s] Processing assessment for sequence %s with data: %s\n", 
             placeId, sequenceID, inputData);
@@ -69,7 +70,17 @@ public abstract class BaseHealthcareService {
                 .build();
             
             System.out.printf("[%s] Assessment completed successfully\n", placeId);
-            return jsonResponse;
+            // Publish the logical result contract; the host supplies runtime metadata.
+            org.json.simple.JSONObject response = (org.json.simple.JSONObject)
+                new org.json.simple.parser.JSONParser().parse(jsonResponse);
+            org.json.simple.JSONObject assessmentResult = (org.json.simple.JSONObject) response.get(placeId);
+            for (String field : new String[]{"tokenId", "version", "notAfter", "currentPlace",
+                    "placeId", "sequenceId", "marking", "executionTime", "workflow_start_time"}) {
+                assessmentResult.remove(field);
+            }
+            org.json.simple.JSONObject businessResponse = new org.json.simple.JSONObject();
+            businessResponse.put(getServiceResultsKey(), assessmentResult);
+            return businessResponse.toJSONString();
             
         } catch (Exception e) {
             String errorJson = responseBuilder.createErrorResponse(

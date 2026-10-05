@@ -77,24 +77,37 @@ public final class ServiceInventory {
         }
         Files.writeString(target.resolve("runtime-library-excludes.txt"),
             libraryNames.stream().sorted().collect(Collectors.joining("\n", "", "\n")));
-        Set<String> names = new HashSet<>(), implementations = new HashSet<>();
+        Set<String> capabilities = new HashSet<>();
+        java.util.Map<String, String> names = new LinkedHashMap<>(), implementations = new LinkedHashMap<>();
         StringBuilder includes = new StringBuilder(), excludes = new StringBuilder(), jars = new StringBuilder();
         JSONArray index = new JSONArray();
         for (Object entry : services) {
             JSONObject service = (JSONObject) entry;
             String name = (String) service.get("service"), implementation = (String) service.get("implementationClass");
-            if (name == null || !name.matches("[A-Za-z_][A-Za-z0-9_]*") || !names.add(name)) throw new IllegalArgumentException("Invalid or duplicate service: " + name);
-            if (implementation == null || !implementation.matches("[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)+") || !implementations.add(implementation))
+            String operation = (String) service.get("operation");
+            if (name == null || !name.matches("[A-Za-z_][A-Za-z0-9_]*")
+                    || operation == null || !operation.matches("[A-Za-z_][A-Za-z0-9_]*")
+                    || !capabilities.add(name + "." + operation))
+                throw new IllegalArgumentException("Invalid or duplicate capability: " + name + "." + operation);
+            if (implementation == null || !implementation.matches("[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)+"))
                 throw new IllegalArgumentException("Invalid or duplicate implementation: " + implementation);
+            String existing = names.putIfAbsent(name, implementation);
+            if (existing != null && !existing.equals(implementation))
+                throw new IllegalArgumentException("Conflicting implementations for service: " + name);
+            String owner = implementations.putIfAbsent(implementation, name);
+            if (owner != null && !owner.equals(name))
+                throw new IllegalArgumentException("Implementation assigned to different services: " + implementation);
             String classPath = implementation.replace('.', '/');
             if (!Files.isRegularFile(sources.resolve(classPath + ".java"))) throw new IllegalArgumentException("Missing implementation: " + implementation);
-            includes.append("<include name=\"").append(xml(classPath)).append(".java\"/>\n");
-            excludes.append("<exclude name=\"").append(xml(classPath)).append(".class\"/>")
-                .append("<exclude name=\"").append(xml(classPath)).append("$*.class\"/>\n");
-            jars.append("<jar destfile=\"${bundle}/services/").append(xml(name)).append(".jar\" modificationtime=\"315532800000\">\n")
-                .append("<fileset dir=\"${classes}\"><include name=\"").append(xml(classPath)).append(".class\"/>")
-                .append("<include name=\"").append(xml(classPath)).append("$*.class\"/></fileset>\n")
-                .append("<manifest><attribute name=\"Class-Path\" value=\"").append(xml(dependencies)).append("\"/></manifest></jar>\n");
+            if (existing == null) {
+                includes.append("<include name=\"").append(xml(classPath)).append(".java\"/>\n");
+                excludes.append("<exclude name=\"").append(xml(classPath)).append(".class\"/>")
+                    .append("<exclude name=\"").append(xml(classPath)).append("$*.class\"/>\n");
+                jars.append("<jar destfile=\"${bundle}/services/").append(xml(name)).append(".jar\" modificationtime=\"315532800000\">\n")
+                    .append("<fileset dir=\"${classes}\"><include name=\"").append(xml(classPath)).append(".class\"/>")
+                    .append("<include name=\"").append(xml(classPath)).append("$*.class\"/></fileset>\n")
+                    .append("<manifest><attribute name=\"Class-Path\" value=\"").append(xml(dependencies)).append("\"/></manifest></jar>\n");
+            }
             JSONObject packaged = new JSONObject(new LinkedHashMap<>(service));
             packaged.put("jar", "services/" + name + ".jar");
             packaged.put("runtimeDependencies", runtimeDependencies);
@@ -141,7 +154,8 @@ public final class ServiceInventory {
               </target>
               <target name="check">
                 <mkdir dir="test-classes"/>
-                <javac srcdir="%s" destdir="test-classes" release="%s" includeantruntime="false" encoding="UTF-8">
+                <javac srcdir="%s" destdir="test-classes" release="%s" includeantruntime="false" encoding="UTF-8"
+                       includes="PackagedServiceCheck.java,PackagedBundleCheck.java">
                   <classpath refid="tools"/>
                 </javac>
                 <java classname="PackagedBundleCheck" fork="true" failonerror="true">
@@ -154,7 +168,7 @@ public final class ServiceInventory {
                 xml(sources), xml(sources), xml(config.get("javaRelease")), includes, excludes, jars, copyLibraries,
                 xml(project.resolve("tests")), xml(config.get("javaRelease")));
         Files.writeString(target.resolve("service-tasks.xml"), build);
-        System.out.println("Generated native Ant tasks for " + services.size() + " services");
+        System.out.println("Generated native Ant tasks for " + names.size() + " service JARs and " + services.size() + " operations");
     }
 
     private static void checkClasses(Path classes) throws Exception {

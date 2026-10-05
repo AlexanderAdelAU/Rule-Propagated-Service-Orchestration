@@ -50,7 +50,7 @@
       "width": 50,
       "height": 50,
       "label": "Triage_Init",
-      "service": "Triage_InitializationService",
+      "service": "P1_InitializationService",
       "operations": [
         {
           "name": "purgeAndInitialize"

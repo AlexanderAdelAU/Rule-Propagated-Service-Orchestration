@@ -55,6 +55,23 @@
         <ant antfile="../btsn.petrinet.places.p5/build.xml" target="jar-only" inheritall="false"/>
         <ant antfile="../btsn.petrinet.places.p6/build.xml" target="jar-only" inheritall="false"/>
     </target>
+    <target name="check-healthcare-services" depends="package" description="Check healthcare results, direct treatment and federated audit fields using JARs">
+        <mkdir dir="${target.dir}/healthcare-check"/>
+        <delete dir="${target.dir}/healthcare-check/runtime"/>
+        <mkdir dir="${target.dir}/healthcare-check/runtime"/>
+        <path id="healthcare.check.classpath">
+            <pathelement location="${target.dir}/healthcare-check"/>
+            <fileset dir="${target.dir}/deployment/services" includes="*.jar"/>
+            <fileset dir="${target.dir}/deployment/lib" includes="*.jar"/>
+        </path>
+        <javac srcdir="tests" destdir="${target.dir}/healthcare-check" includes="HealthcareServiceCheck.java"
+               release="${java.release}" includeantruntime="false" encoding="UTF-8">
+            <classpath refid="healthcare.check.classpath"/>
+        </javac>
+        <java classname="HealthcareServiceCheck" fork="true" failonerror="true" maxmemory="128m" dir="${target.dir}/healthcare-check/runtime">
+            <classpath refid="healthcare.check.classpath"/>
+        </java>
+    </target>
     <target name="build-workflow-runtime" depends="build-hosts" description="Build packaged hosts, Monitor and event generators">
         <ant antfile="workflow-runtime.xml" target="jar" inheritall="false"/>
     </target>

@@ -1,4 +1,4 @@
-package org.btsn.places;
+package org.btsn.business.healthcare;
 
 import org.btsn.base.BaseHealthcareService;
 import org.btsn.base.BaseServiceAssessment;
@@ -160,28 +160,17 @@ public class RadiologyService extends BaseHealthcareService {
             long federatedTimestamp = System.currentTimeMillis();
             String federatedId = "FED_" + getSequenceID() + "_" + (federatedTimestamp % 10000);
             
-            // Parse existing result and add federated fields
-            if (serviceResult.startsWith("{") && serviceResult.endsWith("}")) {
-                // Remove closing brace and add federated metadata
-                String enhanced = serviceResult.substring(0, serviceResult.length() - 1);
-                enhanced += ",\"federated_request_id\":\"" + federatedId + "\"";
-                enhanced += ",\"external_hospital\":\"" + (externalHospital != null ? externalHospital : "UNKNOWN") + "\"";
-                enhanced += ",\"federated_timestamp\":" + federatedTimestamp;
-                enhanced += ",\"cross_facility_audit\":true";
-                enhanced += ",\"result_routing\":\"return_to_origin\"";
-                enhanced += "}";
-                
-                System.out.printf("[%s] 📋 Added federated metadata: ID=%s, Hospital=%s\n", 
-                    getPlaceId(), federatedId, externalHospital);
-                
-                return enhanced;
-            } else {
-                // If not JSON, wrap it
-                return "{" + serviceResult + 
-                       ",\"federated_request_id\":\"" + federatedId + "\"" +
-                       ",\"external_hospital\":\"" + (externalHospital != null ? externalHospital : "UNKNOWN") + "\"" +
-                       "}";
-            }
+            // Audit fields belong to the declared business result and survive host enrichment.
+            org.json.simple.JSONObject response = (org.json.simple.JSONObject)
+                new org.json.simple.parser.JSONParser().parse(serviceResult);
+            org.json.simple.JSONObject result = (org.json.simple.JSONObject) response.get(getServiceResultsKey());
+            if (result == null) throw new IllegalArgumentException("Missing radiology result");
+            result.put("federated_request_id", federatedId);
+            result.put("external_hospital", externalHospital != null ? externalHospital : "UNKNOWN");
+            result.put("federated_timestamp", federatedTimestamp);
+            result.put("cross_facility_audit", true);
+            result.put("result_routing", "return_to_origin");
+            return response.toJSONString();
             
         } catch (Exception e) {
             System.err.printf("[%s] Error enhancing result for federation: %s\n", getPlaceId(), e.getMessage());

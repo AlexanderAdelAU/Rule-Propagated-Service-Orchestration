@@ -8,7 +8,7 @@
     <Rel>canonicalBinding</Rel>
     <Ind>processClinicalDecision</Ind>
     <Ind>diagnosisResults</Ind> <!-- This is the attribute returned -->
-    <Ind>cardiologyResults</Ind> <!-- This is the attribute needed -->
+    <Ind>radiologyResults</Ind> <!-- This is the attribute needed -->
 </Atom>
 <Atom>
     <Rel>canonicalBinding</Rel>
@@ -20,5 +20,5 @@
     <Rel>canonicalBinding</Rel>
     <Ind>processClinicalDecision</Ind>
     <Ind>diagnosisResults</Ind> <!-- This is the attribute returned -->
-    <Ind>radiologyResults</Ind> <!-- This is the attribute needed -->
+    <Ind>cardiologyResults</Ind> <!-- This is the attribute needed -->
 </Atom>

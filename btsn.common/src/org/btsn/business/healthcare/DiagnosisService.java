@@ -1,4 +1,4 @@
-package org.btsn.places;
+package org.btsn.business.healthcare;
 
 import org.btsn.base.BaseHealthcareService;
 import org.btsn.base.BaseServiceAssessment;

@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="Triage_Monitor_Behavior_POC" default="run-complete-workflow" basedir="."
+<project name="Triage_Canary_Workflow" default="run-complete-workflow" basedir="."
 	    xmlns:if="ant:if" xmlns:unless="ant:unless">
+	<property name="source.root" location=".."/>
+	<property name="services.project.dir" location="${source.root}/btsn.services"/>
+	<property name="healthcare.runtime.dir" location="${services.project.dir}/target/healthcare-runtime"/>
 	<description>
-		Triage_Monitor Behavior POC - Complete Workflow with Collectors
-		Tests configurable place behaviors (RANDOM guard on P1, ALWAYS_TRUE on Monitor)
+		Triage Canary Workflow - Complete Workflow with Collectors
 		
 		Phases:
 		  Phase 1: Initialize Databases (purgeAndInitialize)
 		  Phase 2: Execute Workflow (generate and process tokens)
 		  Phase 3: Collect Performance Data
 
-		Services (Triage, Monitor) start once and remain running throughout all phases.
+		Generic P1 and Monitor start once and remain running throughout all phases.
 	</description>
 
 	<!-- ======================================================================= -->
@@ -25,8 +27,8 @@
 	<!-- Override from command line: ant -Dtriage.mode=remote                     -->
 	<!-- ======================================================================= -->
 
-	<property name="triage.mode"  value="local" />
-	<property name="monitor.mode" value="local" />
+	<property name="triage.mode"  value="auto" />
+	<property name="monitor.mode" value="auto" />
 
 	<!-- ======================================================================= -->
 	<!-- PROPERTIES                                                              -->
@@ -43,12 +45,12 @@
 	<!-- Phase 1: Initialization parameters (v999 = admin/non-instrumented) -->
 	<property name="init.version" value="v999" />
 	<property name="db.init.operation" value="purgeAndInitialize" />
-	<property name="sequence.id.init.triage" value="999000000" />
-	<property name="sequence.id.init.monitor" value="999600000" />
+	<property name="sequence.id.init.triage" value="999010000" />
+	<property name="sequence.id.init.monitor" value="999070000" />
 	<property name="init.delay.seconds" value="3" />
 
 	<!-- Phase 2: Workflow parameters -->
-	<property name="target.place" value="TriageService" />
+	<property name="target.place" value="P1_Place" />
 	<property name="target.operation" value="processTriageAssessment" />
 	<property name="token.count" value="10" />
 	<property name="token.expire" value="120000" />
@@ -71,15 +73,13 @@
 	<property name="healthcare.root.dir" location="../" />
 
 	<!-- Common project -->
-	<property name="common.project.dir" location="${healthcare.root.dir}/btsn.common" />
 	<property name="lib.dir" location="${common.project.dir}/lib" />
-	<property name="class.dir" location="${common.project.dir}/bin" />
-	<property name="common.src.dir" location="${common.project.dir}/src" />
+
+
 
 	<!-- Event Generators project -->
-	<property name="generator.project.dir" location="${healthcare.root.dir}/btsn.common.eventgenerators" />
-	<property name="generator.src.dir" location="${generator.project.dir}/src" />
-	<property name="generator.bin.dir" location="${generator.project.dir}/bin" />
+
+
 
 	<!-- Output directory -->
 	<property name="output.dir" location="${build.file.dir}" />
@@ -87,14 +87,13 @@
 	<property name="monitor.output.file" location="${output.dir}/MonitorService.out.txt" />
 
 	<!-- Triage Service -->
-	<property name="Triage.project.dir" location="${healthcare.root.dir}/btsn.healthcare.places.Triage" />
-	<property name="Triage.bin.dir" location="${Triage.project.dir}/bin" />
-	<property name="Triage.src.dir" location="${Triage.project.dir}/src" />
+	<property name="Triage.project.dir" location="${healthcare.runtime.dir}/btsn.petrinet.places.p1" />
+
+
 
 	<!-- Monitor Service -->
-	<property name="monitor.project.dir" location="${healthcare.root.dir}/btsn.common.Monitor" />
-	<property name="monitor.bin.dir" location="${monitor.project.dir}/bin" />
-	<property name="monitor.src.dir" location="${monitor.project.dir}/src" />
+
+
 
 	<!-- Java Classes -->
 	<property name="service.loader.class" value="org.btsn.handlers.ServiceLoader" />
@@ -106,36 +105,22 @@
 	<!-- CLASSPATHS                                                              -->
 	<!-- ======================================================================= -->
 
-	<path id="common.classpath">
-		<fileset dir="${lib.dir}" erroronmissingdir="false">
-			<include name="*.jar" />
-		</fileset>
-		<pathelement location="${class.dir}" />
-	</path>
+	<path id="common.classpath"><path refid="healthcare.dependencies"/></path>
 
-	<path id="Triage.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${Triage.bin.dir}" />
-	</path>
+	<path id="Triage.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.petrinet.places.p1/target/btsn.petrinet.places.p1.jar"/></path>
 
-	<path id="monitor.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${monitor.bin.dir}" />
-	</path>
+	<path id="monitor.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/></path>
 
-	<path id="generator.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${generator.bin.dir}" />
-	</path>
+	<path id="generator.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.common.eventgenerators/target/jar-runtime/btsn-eventgenerators.jar"/></path>
 
 	<!-- ======================================================================= -->
 	<!-- DEPLOYMENT MODE RESOLUTION                                              -->
 	<!-- ======================================================================= -->
 
-	<target name="resolve-deployment-modes">
+	<target name="resolve-deployment-modes" depends="prepare-runtime,detect-local-channel">
 		<!-- Resolve boolean properties from mode settings -->
-		<condition property="triage.is.local"><equals arg1="${triage.mode}" arg2="local" /></condition>
-		<condition property="monitor.is.local"><equals arg1="${monitor.mode}" arg2="local" /></condition>
+		<resolve-local-launch component="triage" mode="${triage.mode}"/>
+		<resolve-local-launch component="monitor" mode="${monitor.mode}"/>
 
 		<!-- Display deployment configuration -->
 		<echo message="" />
@@ -155,7 +140,7 @@
 		<echo message="Previous output files cleaned" />
 	</target>
 
-	<target name="generate-workflow-bindings" description="Generate canonical bindings from workflow JSON">
+	<target depends="prepare-runtime" name="generate-workflow-bindings" description="Generate canonical bindings from workflow JSON">
 		<echo message="=== Generating Workflow Bindings ===" />
 		<java classname="org.btsn.rulecontroller.TopologyBindingGenerator" 
 		      classpathref="generator.classpath"
@@ -187,10 +172,10 @@
 	<!-- ======================================================================= -->
 
 	<target name="run-complete-workflow" depends="resolve-deployment-modes,clean-output,rebuild-service-ruleml" 
-	        description="Run complete Triage_Monitor Behavior POC workflow">
+	        description="Run complete Triage Canary Workflow workflow">
 		<echo message="" />
 		<echo message="================================================================" />
-		<echo message="  TRIAGE_MONITOR BEHAVIOR POC - COMPLETE WORKFLOW              " />
+		<echo message="  TRIAGE CANARY WORKFLOW - COMPLETE WORKFLOW              " />
 		<echo message="================================================================" />
 		<echo message="  Version: ${rule.version}" />
 		<echo message="  Token Count: ${token.count}" />
@@ -202,9 +187,9 @@
 		<parallel>
 			<!-- Start Triage Service (runs continuously) -->
 			<echo message="  [triage] Skipping - running on remote host" unless:set="triage.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="triage.is.local"
+			<java classname="${service.loader.class}" if:set="triage.is.local"
 			      fork="true" timeout="600000" 
-			      dir="${Triage.project.dir}" output="${Triage.output.file}">
+			      dir="${Triage.project.dir}" output="${Triage.output.file}" failonerror="true">
 				<classpath refid="Triage.classpath" />
 				<arg value="${Triage.project.dir}" />
 				<arg value="-version" />
@@ -213,9 +198,9 @@
 
 			<!-- Start Monitor Service (runs continuously) -->
 			<echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="monitor.is.local"
+			<java classname="${service.loader.class}" if:set="monitor.is.local"
 			      fork="true" timeout="600000" 
-			      dir="${monitor.project.dir}" output="${monitor.output.file}">
+			      dir="${monitor.project.dir}" output="${monitor.output.file}" failonerror="true">
 				<classpath refid="monitor.classpath" />
 				<arg value="${monitor.project.dir}" />
 				<arg value="-version" />
@@ -241,7 +226,7 @@
 				<java classname="${init.event.generator.class}" 
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
-					<arg value="-service" /><arg value="Triage_InitializationService" />
+					<arg value="-service" /><arg value="P1_InitializationService" />
 					<arg value="-operation" /><arg value="${db.init.operation}" />
 					<arg value="-version" /><arg value="${init.version}" />
 					<arg value="-process" /><arg value="${init.process.name}" />
@@ -272,12 +257,10 @@
 				<!-- ======================================================= -->
 				<echo message="" />
 				<echo message="===============================================" />
-				<echo message="    PHASE 2: WORKFLOW EXECUTION (BEHAVIOR POC) " />
+				<echo message="    PHASE 2: WORKFLOW EXECUTION " />
 				<echo message="===============================================" />
 				<echo message="Tokens: ${token.count}" />
 				<echo message="Target: ${target.place}:${target.operation}" />
-				<echo message="Triage Guard: RANDOM (70% pass rate)" />
-				<echo message="Monitor Guard: ALWAYS_TRUE" />
 
 				<!-- Deploy Workflow rules (tokens=0) -->
 				<echo message="Deploying Workflow rules with behavior configuration..." />
@@ -290,7 +273,8 @@
 					<arg value="-operation" /><arg value="${target.operation}" />
 					<arg value="-tokens" /><arg value="0" />
 					<arg value="-expire" /><arg value="${token.expire}" />
-					<arg value="-generator" /><arg value="${event.generator.id}" />
+					<arg value="-generator" /><arg value="${event.generator.id}" />					<arg value="-infrastructure"/><arg value="Healthcare_Infrastructure"/>
+					<arg value="-format-service"/><arg value="TriageService"/>
 				</java>
 
 				<!-- Execute Workflow (fire tokens) -->
@@ -305,7 +289,8 @@
 					<arg value="-tokens" /><arg value="${token.count}" />
 					<arg value="-expire" /><arg value="${token.expire}" />
 					<arg value="-generator" /><arg value="${event.generator.id}" />
-					<arg value="-skipdeploy" />
+					<arg value="-skipdeploy" />					<arg value="-infrastructure"/><arg value="Healthcare_Infrastructure"/>
+					<arg value="-format-service"/><arg value="TriageService"/>
 				</java>
 				<echo message="=== Phase 2 Complete ===" />
 				<sleep seconds="${phase.delay.seconds}" />
@@ -319,11 +304,11 @@
 				<echo message="===============================================" />
 
 				<!-- Triage Collection (with deployment) -->
-				<echo message="Collecting from Triage_CollectorService..." />
+				<echo message="Collecting from P1_CollectorService..." />
 				<java classname="${collector.event.generator.class}" 
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
-					<arg value="-service" /><arg value="Triage_CollectorService" />
+					<arg value="-service" /><arg value="P1_CollectorService" />
 					<arg value="-operation" /><arg value="${collector.operation}" />
 					<arg value="-version" /><arg value="${collector.version}" />
 					<arg value="-process" /><arg value="${collector.process.name}" />
@@ -338,18 +323,14 @@
 				<!-- ======================================================= -->
 				<echo message="" />
 				<echo message="================================================================" />
-				<echo message="        TRIAGE_MONITOR BEHAVIOR POC COMPLETED SUCCESSFULLY     " />
+				<echo message="        TRIAGE CANARY WORKFLOW COMPLETED SUCCESSFULLY     " />
 				<echo message="================================================================" />
 				<echo message="" />
-				<echo message="BEHAVIOR TEST RESULTS:" />
-				<echo message="  - Triage Guard (RANDOM 70%): Check logs for pass/fail ratio" />
-				<echo message="  - Monitor Guard (ALWAYS_TRUE): All tokens should pass" />
 				<echo message="" />
 				<echo message="Output files:" />
 				<echo message="  Triage: ${Triage.output.file}" />
 				<echo message="  Monitor: ${monitor.output.file}" />
 				<echo message="" />
-				<echo message="Look for 'PN_BEHAVIOR' in logs to verify behavior execution." />
 				<echo message="" />
 				<echo message="Services are still running. Press Ctrl+C to stop." />
 			</sequential>
@@ -364,16 +345,16 @@
 	        description="Run only the workflow phase (skip init and collect)">
 		<echo message="" />
 		<echo message="================================================================" />
-		<echo message="  TRIAGE_MONITOR BEHAVIOR POC - WORKFLOW ONLY                  " />
+		<echo message="  TRIAGE CANARY WORKFLOW - WORKFLOW ONLY                  " />
 		<echo message="================================================================" />
 		<echo message="  Target: ${target.place}:${target.operation}" />
 
 		<parallel>
 			<!-- Start services -->
 			<echo message="  [triage] Skipping - running on remote host" unless:set="triage.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="triage.is.local"
+			<java classname="${service.loader.class}" if:set="triage.is.local"
 			      fork="true" timeout="600000" 
-			      dir="${Triage.project.dir}" output="${Triage.output.file}">
+			      dir="${Triage.project.dir}" output="${Triage.output.file}" failonerror="true">
 				<classpath refid="Triage.classpath" />
 				<arg value="${Triage.project.dir}" />
 				<arg value="-version" />
@@ -381,9 +362,9 @@
 			</java>
 
 			<echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="monitor.is.local"
+			<java classname="${service.loader.class}" if:set="monitor.is.local"
 			      fork="true" timeout="600000" 
-			      dir="${monitor.project.dir}" output="${monitor.output.file}">
+			      dir="${monitor.project.dir}" output="${monitor.output.file}" failonerror="true">
 				<classpath refid="monitor.classpath" />
 				<arg value="${monitor.project.dir}" />
 				<arg value="-version" />
@@ -404,7 +385,8 @@
 					<arg value="-operation" /><arg value="${target.operation}" />
 					<arg value="-tokens" /><arg value="0" />
 					<arg value="-expire" /><arg value="${token.expire}" />
-					<arg value="-generator" /><arg value="${event.generator.id}" />
+					<arg value="-generator" /><arg value="${event.generator.id}" />					<arg value="-infrastructure"/><arg value="Healthcare_Infrastructure"/>
+					<arg value="-format-service"/><arg value="TriageService"/>
 				</java>
 
 				<!-- Fire tokens -->
@@ -419,7 +401,8 @@
 					<arg value="-tokens" /><arg value="${token.count}" />
 					<arg value="-expire" /><arg value="${token.expire}" />
 					<arg value="-generator" /><arg value="${event.generator.id}" />
-					<arg value="-skipdeploy" />
+					<arg value="-skipdeploy" />					<arg value="-infrastructure"/><arg value="Healthcare_Infrastructure"/>
+					<arg value="-format-service"/><arg value="TriageService"/>
 				</java>
 
 				<echo message="Workflow running. Waiting ${workflow.completion.seconds} seconds..." />
@@ -436,7 +419,7 @@
 	<target name="help" description="Display usage information">
 		<echo message="" />
 		<echo message="================================================================" />
-		<echo message="  Triage_Monitor Behavior POC Workflow                         " />
+		<echo message="  Triage Canary Workflow Workflow                         " />
 		<echo message="================================================================" />
 		<echo message="" />
 		<echo message="USAGE:" />
@@ -446,7 +429,7 @@
 		<echo message="  ant help                   Show this help" />
 		<echo message="" />
 		<echo message="DEPLOYMENT MODES (per service):" />
-		<echo message="  -D&lt;service&gt;.mode=local           Launch service on this machine (default)" />
+		<echo message="  -D&lt;service&gt;.mode=local           Force launch on this machine" />
 		<echo message="  -D&lt;service&gt;.mode=remote          Service runs on another machine (skip launch)" />
 		<echo message="" />
 		<echo message="  Services: triage, monitor" />
@@ -460,10 +443,8 @@
 		<echo message="  -Dquery.version=v001             Version(s) to collect data from" />
 		<echo message="  -Dworkflow.completion.seconds=5  Wait time after firing tokens" />
 		<echo message="" />
-		<echo message="BEHAVIOR CONFIGURATION (in Triage_Monitor_Behavior_POC.json):" />
-		<echo message="  Triage Place:  guardMode=RANDOM, guardProbability=0.7" />
-		<echo message="  Monitor Place: guardMode=ALWAYS_TRUE" />
 		<echo message="" />
 	</target>
 
+	<import file="../btsn.services/healthcare-runtime.xml"/>
 </project>

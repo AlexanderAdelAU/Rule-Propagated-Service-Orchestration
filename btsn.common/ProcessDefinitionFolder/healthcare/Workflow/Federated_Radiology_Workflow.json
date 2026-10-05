@@ -1,5 +1,5 @@
 {
-   "processType":"SOA",
+  "processType": "SOA",
   "elements": [
     {
       "id": "T_in_Radiology",
@@ -9,7 +9,7 @@
       "width": 20,
       "height": 60,
       "label": "T_in_Radiology",
-      "rotation": 0.0,
+      "rotation": 0,
       "node_type": "EdgeNode",
       "node_value": "EDGE_NODE",
       "transition_type": "T_in",
@@ -27,7 +27,16 @@
       "service": "RadiologyService",
       "operations": [
         {
-          "name": "federatedRadiologyRequest"
+          "name": "federatedRadiologyRequest",
+          "returnAttribute": "radiologyResults",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
         }
       ],
       "fill_color": "#99FF66",
@@ -41,57 +50,11 @@
       "width": 20,
       "height": 60,
       "label": "T_out_Radiology",
-      "rotation": 0.0,
-      "node_type": "EdgeNode",
-      "node_value": "EDGE_NODE",
-      "transition_type": "T_out",
-      "fill_color": "#FFCC00"
-    },
-    {
-      "id": "T_in_Monitor",
-      "type": "TRANSITION",
-      "x": 450,
-      "y": 110,
-      "width": 20,
-      "height": 60,
-      "label": "T_in_Monitor",
-      "rotation": 0.0,
-      "node_type": "EdgeNode",
-      "node_value": "EDGE_NODE",
-      "transition_type": "T_in",
-      "buffer": "10",
-      "fill_color": "#CCCCCC"
-    },
-    {
-      "id": "Monitor",
-      "type": "PLACE",
-      "x": 515,
-      "y": 115,
-      "width": 50,
-      "height": 50,
-      "label": "Monitor",
-      "service": "MonitorService",
-      "operations": [
-        {
-          "name": "acknowledgeTokenArrival"
-        }
-      ],
-      "fill_color": "#99FF66",
-      "border_color": "#000000"
-    },
-    {
-      "id": "T_out_Monitor",
-      "type": "TRANSITION",
-      "x": 610,
-      "y": 110,
-      "width": 20,
-      "height": 60,
-      "label": "T_out_Monitor",
-      "rotation": 0.0,
+      "rotation": 0,
       "node_type": "TerminateNode",
       "node_value": "TERMINATE_NODE",
       "transition_type": "T_out",
-      "fill_color": "#FF9999"
+      "fill_color": "#FFCC00"
     },
     {
       "id": "FEDERATED_RADIOLOGY_REQUEST",
@@ -101,7 +64,7 @@
       "width": 24,
       "height": 60,
       "label": "FEDERATED_RADIOLOGY_REQUEST",
-      "rotation": 0.0,
+      "rotation": 0,
       "generator_rate": "1000",
       "token_version": "v001"
     }
@@ -124,30 +87,6 @@
       "endpoint": ""
     },
     {
-      "source": "T_in_Monitor",
-      "target": "Monitor",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
-    },
-    {
-      "source": "Monitor",
-      "target": "T_out_Monitor",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
-    },
-    {
-      "source": "T_out_Radiology",
-      "target": "T_in_Monitor",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
-    },
-    {
       "source": "FEDERATED_RADIOLOGY_REQUEST",
       "target": "T_in_Radiology",
       "label": "",
@@ -155,7 +94,10 @@
       "decision_value": "",
       "endpoint": "",
       "waypoints": [
-        {"x": 140, "y": 140}
+        {
+          "x": 140,
+          "y": 140
+        }
       ]
     }
   ],

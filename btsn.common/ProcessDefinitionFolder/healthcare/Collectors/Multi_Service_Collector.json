@@ -106,7 +106,7 @@
       "width": 50,
       "height": 50,
       "label": "Triage",
-      "service": "Triage_CollectorService",
+      "service": "P1_CollectorService",
       "operations": [
         {
           "name": "collectAllData"
@@ -121,7 +121,7 @@
       "width": 50,
       "height": 50,
       "label": "Laboratory",
-      "service": "Laboratory_CollectorService",
+      "service": "P2_CollectorService",
       "operations": [
         {
           "name": "collectAllData"
@@ -136,7 +136,7 @@
       "width": 50,
       "height": 50,
       "label": "Radiology",
-      "service": "Radiology_CollectorService",
+      "service": "P4_CollectorService",
       "operations": [
         {
           "name": "collectAllData"
@@ -151,7 +151,7 @@
       "width": 50,
       "height": 50,
       "label": "Cardiology",
-      "service": "Cardiology_CollectorService",
+      "service": "P3_CollectorService",
       "operations": [
         {
           "name": "collectAllData"
@@ -166,7 +166,7 @@
       "width": 50,
       "height": 50,
       "label": "Diagnosis",
-      "service": "Diagnosis_CollectorService",
+      "service": "P5_CollectorService",
       "operations": [
         {
           "name": "collectAllData"
@@ -181,7 +181,7 @@
       "width": 50,
       "height": 50,
       "label": "Treatment",
-      "service": "Treatment_CollectorService",
+      "service": "P6_CollectorService",
       "operations": [
         {
           "name": "collectAllData"

@@ -3,11 +3,13 @@
   "catalogues": [
     "../btsn.common/BusinessServiceDefinitions/FinancialSystem.json",
     "StochasticService.json",
-    "../btsn.common/BusinessServiceDefinitions/PetriNetModels.json"
+    "../btsn.common/BusinessServiceDefinitions/PetriNetModels.json",
+    "../btsn.common/BusinessServiceDefinitions/Healthcare.json"
   ],
   "runtimeLibraries": [
     "../btsn.common/lib/json-simple-1.1.1.jar",
-    "../btsn.common/lib/log4j-1.2.16.jar"
+    "../btsn.common/lib/log4j-1.2.16.jar",
+    "../btsn.common/lib/derby.jar"
   ],
   "javaRelease": 15
 }

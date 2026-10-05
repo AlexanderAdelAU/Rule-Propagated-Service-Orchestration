@@ -13,7 +13,11 @@ public class PackagedServiceCheck {
             Constructor<?> constructor = implementation.getConstructor(String.class, String.class, String.class);
             service = constructor.newInstance("1000000", "independent-host", "deployment-check");
         } catch (NoSuchMethodException noContextConstructor) {
-            service = implementation.getConstructor().newInstance();
+            try {
+                service = implementation.getConstructor(String.class).newInstance("1000000");
+            } catch (NoSuchMethodException noSequenceConstructor) {
+                service = implementation.getConstructor().newInstance();
+            }
         }
         int arity = Integer.parseInt(args[3]);
         Class<?>[] types = new Class<?>[arity];
@@ -21,7 +25,7 @@ public class PackagedServiceCheck {
         Object[] inputs = new Object[arity];
         Arrays.fill(inputs, "{\"tokenId\":\"example\",\"version\":\"v001\",\"notAfter\":"
                 + (System.currentTimeMillis() + 60000)
-                + ",\"application_id\":\"APP-001\",\"annual_income\":85000,\"requested_amount\":15000,\"credit_score\":720,\"fraud_risk\":\"low\"}");
+                + ",\"application_id\":\"APP-001\",\"annual_income\":85000,\"requested_amount\":15000,\"credit_score\":720,\"fraud_risk\":\"low\",\"patientId\":\"PAT-001\",\"condition\":\"chest pain\"}");
         Object output = implementation.getMethod(args[2], types).invoke(service, inputs);
         if (!(output instanceof String) || !((String) output).startsWith("{")) {
             throw new AssertionError("Service did not return JSON: " + output);

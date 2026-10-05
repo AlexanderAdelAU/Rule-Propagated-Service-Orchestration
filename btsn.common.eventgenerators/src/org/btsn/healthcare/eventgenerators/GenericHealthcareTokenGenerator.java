@@ -169,6 +169,8 @@ public class GenericHealthcareTokenGenerator {
 	// Token format settings
 	private static String tokenFormatsFolder = "TokenFormats";  // Relative to btsn.common
 	private static JSONObject loadedTokenFormat = null;  // Loaded format from JSON file
+	private static String infrastructureDefinitionName = null;
+	private static String tokenFormatService = null;
 	private static String dataVariant = null;  // Optional variant to use (e.g., "chest_pain")
 	
 	// OPTIMIZATION: Reuse UDP socket
@@ -224,6 +226,7 @@ public class GenericHealthcareTokenGenerator {
 			// and collect from shared services used by ALL workflows.
 			// ============================================================================
 			if (!skipDeploy) {
+				new org.btsn.rulecontroller.TopologyBindingGenerator(processName, ruleBaseVersion).generate();
 				System.out.println("=== Building Rule Base for " + ruleBaseVersion + " ===");
 				boolean ruleBaseBuilt = BuildRuleBase.buildRuleBase(ruleBaseVersion, true);
 				if (!ruleBaseBuilt) {
@@ -254,7 +257,7 @@ public class GenericHealthcareTokenGenerator {
 
 			// STEP 1.5: Load token format for target service
 			System.out.println("=== Loading Token Format ===");
-			loadTokenFormat(targetPlaceName);
+			loadTokenFormat(tokenFormatService == null ? targetPlaceName : tokenFormatService);
 			System.out.println("=== Token Format Loaded ===\n");
 
 			// STEP 2: Deploy process rules (unless skipped)
@@ -263,7 +266,7 @@ public class GenericHealthcareTokenGenerator {
 				
 				RuleDeployer ruleDeployer = null;
 				try {
-					ruleDeployer = new RuleDeployer(processName, ruleBaseVersion);
+					ruleDeployer = new RuleDeployer(processName, ruleBaseVersion, infrastructureDefinitionName);
 				} catch (Throwable t) {
 					System.err.println("FATAL: RuleDeployer constructor threw exception!");
 					System.err.println("Exception: " + t.getClass().getName() + ": " + t.getMessage());
@@ -398,6 +401,13 @@ public class GenericHealthcareTokenGenerator {
 					}
 					break;
 					
+				case "-infrastructure":
+				case "--infrastructure":
+					if (i + 1 < args.length) infrastructureDefinitionName = args[++i];
+					break;
+				case "-format-service":
+					if (i + 1 < args.length) tokenFormatService = args[++i];
+					break;
 				case "-data":
 				case "--data":
 					if (i + 1 < args.length) {

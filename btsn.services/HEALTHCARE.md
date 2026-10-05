@@ -1,0 +1,73 @@
+# Healthcare on generic PN hosts
+
+Run `btsn.healthcare.ProjectLoader/Emergency_Department_BuildAndRun.xml` as an
+Ant Build in Eclipse. Its default target builds the current JARs, checks `ip0`,
+starts local PN hosts and Monitor, initializes databases, deploys the patient
+workflow, sends ten tokens and collects measurements. Remote hosts are assumed
+to have been started manually. The normal launcher output files and Monitor
+database are retained.
+
+The same architecture is used by `Triage_CanaryTest_BuildAndRun.xml`,
+`Federated_Radiology_BuildAndRun.xml`, and
+`Triple_Workflow_Emergencey_Department_Concurrent.xml` in that folder.
+The concurrent launcher preserves v003 patients, v002 canaries and v001
+federated requests, then collects all three versions with v999 admin tokens.
+
+| Generic host | Logical service | Operations | Return attribute |
+|---|---|---|---|
+| P1 | TriageService | processTriageAssessment | triageResults |
+| P2 | LaboratoryService | processLabRequest | laboratoryResults |
+| P3 | CardiologyService | processCardiacAssessment | cardiologyResults |
+| P4 | RadiologyService | processImagingRequest; federatedRadiologyRequest | radiologyResults |
+| P5 | DiagnosisService | processClinicalDecision | diagnosisResults |
+| P6 | TreatmentService | executeTreatmentPlan; executeDirectTreatment | treatmentResults |
+
+Business implementations are in `btsn.common/src/org/btsn/business/healthcare`,
+packaged exclusively into the six corresponding JARs under
+`btsn.services/target/deployment/services`. A service with several operations
+still produces one JAR. The shared service support and Derby library accompany
+those JARs in `target/deployment/lib`. The infrastructure JAR excludes these
+implementations and their business base classes. No execution handler changed.
+
+`Healthcare.json` defines logical contracts; `Healthcare_Infrastructure.json`
+maps them to hosts and ports. `healthcare-runtime.xml` builds a separate runtime
+configuration under `btsn.services/target/healthcare-runtime`; it leaves the
+source Financial deployment selection intact. The healthcare token generator
+accepts `-infrastructure Healthcare_Infrastructure` and `-format-service` to keep
+healthcare input formats independent of physical host names. It generates
+canonical bindings before deploying each workflow version.
+
+The Diagnosis signature receives radiology, laboratory and cardiology results
+in that order. Its join arcs and explicit arguments follow that order. Treatment
+retains both its diagnosis input and its direct triage input. Monitor receives
+collected observations outside the patient-token path; terminal transitions
+finish the patient, canary and federated workflows.
+
+The response base now uses the declared logical result attribute and lets the
+host supply runtime metadata. Federated audit fields are inside
+`radiologyResults` so host enrichment preserves them. Clinical assessment logic,
+including the existing random triage bypass and generated clinical readings,
+is preserved. No artificial processing delay was added.
+
+For manual deployment, build each numbered place using its own `build.xml`,
+and build the business JARs using `btsn.services/build.xml`. Install the selected
+service JARs and their support libraries on the host classpath before starting
+it. Use the prepared healthcare sibling `btsn.common` configuration (including
+`BusinessServiceDefinitions/Deployment.json` and the generated healthcare
+deployment facts) alongside the numbered place configuration. Invocation uses
+the existing ServiceHelper in the PN JVM; these JARs do not start separate
+business-service JVMs or provide remote upload/start commands.
+
+The old healthcare host project folders, combined legacy diagram and
+`ProcessTests` launchers remain for later cleanup; use the four migrated
+launchers above. They are not used to compile or launch this runtime.
+
+Run `btsn.services/build.xml` with `check-healthcare-services` to check the
+packaged healthcare contracts, direct route and federated audit fields. Use
+the migrated launcher's `analyse` target to read the usual Monitor database.
+
+Stage 3 currently groups traffic by physical service name. P4's imaging and
+federated methods have different ports and queues; a P4 cross-version comparison
+therefore does not establish competition for one queue. Invocation-order
+candidates, including those at P1, do not prove dequeue-order violations.
+Queue-priority verification remains a separate test.

@@ -50,7 +50,7 @@
       "width": 50,
       "height": 50,
       "label": "Radiology",
-      "service": "Radiology_CollectorService",
+      "service": "P4_CollectorService",
       "operations": [
         {
           "name": "collectAllData"

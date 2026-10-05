@@ -50,7 +50,7 @@ The output is `btsn.services/target/service-deployment.zip`, containing:
 release. The builder reads every catalogue entry, including preserved unbound
 services, without interpreting the business domain or making host-placement
 decisions. The separate stochastic inventory is packaging data; it does not
-change active deployment metadata. The current inventory yields fifteen service
+change active deployment metadata. The current inventory yields twenty-one service
 JARs: seven Financial implementations, seven deterministic model implementations
 and the preserved stochastic implementation. See [PETRINET_MODELS.md](PETRINET_MODELS.md)
 for the two-place and six-place double-join models using actual platform measurements.
@@ -112,8 +112,8 @@ conflicting ip0 facts fail the build rather than guessing a destination.
 `auto-deployment.xml` is a Java/Ant build helper, independent of business
 catalogues. Run its default check target to verify address and rule parsing.
 Only the launcher decision changes; handlers, token scheduling, service
-invocation and process deployment keep their existing behaviour. Healthcare
-launchers have not been migrated to this check.
+invocation and process deployment keep their existing behaviour. The healthcare
+launchers also use this check; see [HEALTHCARE.md](HEALTHCARE.md).
 
 The abandoned aggregate two-JAR distribution and its launch commands have been
 removed. Active infrastructure handlers and healthcare projects are preserved.

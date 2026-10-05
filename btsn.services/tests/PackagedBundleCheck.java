@@ -50,10 +50,13 @@ public final class PackagedBundleCheck {
                 "PackagedServiceCheck", service.get("implementationClass").toString(), jar.toString(),
                 service.get("operation").toString(), Integer.toString(((JSONArray) service.get("inputs")).size()),
                 service.get("returnAttribute").toString()));
-            for (Object other : services) if (other != entry) command.add(((JSONObject) other).get("implementationClass").toString());
+            for (Object other : services) {
+                String otherClass = ((JSONObject) other).get("implementationClass").toString();
+                if (!otherClass.equals(service.get("implementationClass"))) command.add(otherClass);
+            }
             int status = new ProcessBuilder(command).directory(bundle.toFile()).inheritIO().start().waitFor();
             if (status != 0) throw new AssertionError("Isolated JAR invocation failed: " + service.get("service"));
         }
-        System.out.println("PASS: checksums, unique classes and all " + services.size() + " isolated service JARs");
+        System.out.println("PASS: checksums, unique classes and all " + services.size() + " isolated service operations");
     }
 }

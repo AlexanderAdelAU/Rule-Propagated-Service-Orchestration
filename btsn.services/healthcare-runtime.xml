@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="healthcare-jar-runtime" default="prepare-runtime" basedir=".">
+    <description>Build support for healthcare workflows on the generic PN hosts.</description>
+    <property name="source.root" location=".."/>
+    <property name="services.project.dir" location="${source.root}/btsn.services"/>
+    <property name="healthcare.runtime.dir" location="${services.project.dir}/target/healthcare-runtime"/>
+    <property name="common.project.dir" location="${healthcare.runtime.dir}/btsn.common"/>
+    <property name="generator.project.dir" location="${healthcare.runtime.dir}/btsn.common.eventgenerators"/>
+    <property name="monitor.project.dir" location="${source.root}/btsn.common.Monitor"/>
+    <property name="local.channel.rules" location="${common.project.dir}/RuleBase/Generated/InfrastructureDeployment.ruleml.xml"/>
+    <property name="rule.version" value="v001"/>
+    <property name="patient.version" value="v003"/>
+    <property name="canary.version" value="v002"/>
+    <property name="federated.version" value="v001"/>
+    <import file="auto-deployment.xml"/>
+    <path id="healthcare.dependencies">
+        <pathelement location="${source.root}/btsn.common/target/host-runtime/btsn-infrastructure.jar"/>
+        <fileset dir="${source.root}/btsn.common/lib" includes="*.jar" excludesfile="${services.project.dir}/target/runtime-library-excludes.txt"/>
+        <fileset dir="${services.project.dir}/target/deployment/lib" includes="*.jar"/>
+        <fileset dir="${services.project.dir}/target/deployment/services" includes="*.jar"/>
+    </path>
+    <macrodef name="copy-healthcare-component">
+        <attribute name="directory"/>
+        <sequential>
+            <copy todir="${healthcare.runtime.dir}/@{directory}">
+                <fileset dir="${source.root}/@{directory}" includes="ServiceLoaderQueries/**,resources/**,PayLoad/**,TokenFormats/**,EventTriggeringFile/**"/>
+            </copy>
+        </sequential>
+    </macrodef>
+    <macrodef name="build-healthcare-master">
+        <attribute name="version"/>
+        <sequential>
+            <java classname="org.btsn.utils.BuildMasterServiceRuleBase" fork="true" failonerror="true" dir="${common.project.dir}">
+                <classpath>
+                    <path refid="healthcare.dependencies"/>
+                    <pathelement location="${source.root}/btsn.common.eventgenerators/target/jar-runtime/btsn-eventgenerators.jar"/>
+                </classpath>
+                <arg value="@{version}"/><arg value="ALL"/>
+            </java>
+        </sequential>
+    </macrodef>
+    <target name="prepare-runtime" description="Build service and infrastructure JARs; select healthcare deployment metadata">
+        <ant antfile="${services.project.dir}/build.xml" target="build-workflow-runtime" inheritall="false"/>
+        <mkdir dir="${output.dir}"/>
+        <copy todir="${common.project.dir}">
+            <fileset dir="${source.root}/btsn.common" includes="RuleBase/**,RulePayLoad/**,ServiceAttributeBindings/**,BusinessServiceDefinitions/**,ProcessDefinitionFolder/**,PayLoad/**"/>
+        </copy>
+        <copy file="${services.project.dir}/healthcare/Deployment.json" tofile="${common.project.dir}/BusinessServiceDefinitions/Deployment.json" overwrite="true"/>
+        <copy file="${services.project.dir}/healthcare/InfrastructureDeployment.ruleml.xml" tofile="${local.channel.rules}" overwrite="true"/>
+        <copy-healthcare-component directory="btsn.petrinet.places.p1"/>
+        <copy-healthcare-component directory="btsn.petrinet.places.p2"/>
+        <copy-healthcare-component directory="btsn.petrinet.places.p3"/>
+        <copy-healthcare-component directory="btsn.petrinet.places.p4"/>
+        <copy-healthcare-component directory="btsn.petrinet.places.p5"/>
+        <copy-healthcare-component directory="btsn.petrinet.places.p6"/>
+        <copy-healthcare-component directory="btsn.common.eventgenerators"/>
+        <copy file="${source.root}/btsn.common.eventgenerators/PayLoad/payload.xml" tofile="${generator.project.dir}/Payload/payLoad.xml"/>
+        <build-healthcare-master version="${rule.version}"/>
+        <build-healthcare-master version="${canary.version}"/>
+        <build-healthcare-master version="${patient.version}"/>
+        <build-healthcare-master version="${federated.version}"/>
+        <build-healthcare-master version="v999"/>
+    </target>
+    <target name="analyse" description="Analyse the healthcare measurements in the usual Monitor database">
+        <java classname="org.btsn.derby.Analysis.PetriNetAnalyzer" fork="true" failonerror="true" maxmemory="128m" dir="${monitor.project.dir}">
+            <classpath>
+                <path refid="healthcare.dependencies"/>
+                <pathelement location="${source.root}/btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+            </classpath>
+            <arg value="--all"/>
+        </java>
+    </target>
+</project>
