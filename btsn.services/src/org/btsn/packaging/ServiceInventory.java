@@ -75,6 +75,8 @@ public final class ServiceInventory {
             libraryPath.append("<pathelement location=\"").append(xml(library)).append("\"/>");
             copyLibraries.append("<copy file=\"").append(xml(library)).append("\" todir=\"${bundle}/lib\"/>\n");
         }
+        Files.writeString(target.resolve("runtime-library-excludes.txt"),
+            libraryNames.stream().sorted().collect(Collectors.joining("\n", "", "\n")));
         Set<String> names = new HashSet<>(), implementations = new HashSet<>();
         StringBuilder includes = new StringBuilder(), excludes = new StringBuilder(), jars = new StringBuilder();
         JSONArray index = new JSONArray();
@@ -107,7 +109,8 @@ public final class ServiceInventory {
             + "Add selected JARs to the generic host JVM classpath; manifests supply support libraries.\n"
             + "Host infrastructure, logging configuration, resolver metadata and rules are supplied separately.\n"
             + "Packaging does not activate or place services. Remove duplicate implementation classes from the host classpath.\n"
-            + "Restart the host JVM after classpath changes. Java " + config.get("javaRelease") + "+ required.\n");
+            + "The Ant host launcher supplies these JARs on its classpath; ServiceHelper instantiates the configured class for each invocation.\n"
+            + "Java " + config.get("javaRelease") + "+ required.\n");
         String build = """
             <?xml version="1.0" encoding="UTF-8"?>
             <project name="catalogue-service-tasks" default="package" basedir="%s">
@@ -155,13 +158,18 @@ public final class ServiceInventory {
     }
 
     private static void checkClasses(Path classes) throws Exception {
+        Set<String> sources = new java.util.TreeSet<>();
         try (Stream<Path> files = Files.walk(classes)) {
             for (Path path : files.filter(Files::isRegularFile).collect(Collectors.toList())) {
                 String name = classes.relativize(path).toString().replace('\\', '/');
                 if (name.startsWith("org/btsn/handlers/") || name.startsWith("org/btsn/invocation/") || name.startsWith("org/btsn/places/"))
                     throw new IllegalStateException("Service depends on host infrastructure: " + name);
+                if (name.endsWith(".class")) {
+                    sources.add(name.substring(0, name.length() - 6).split("\\$")[0] + ".java");
+                }
             }
         }
+        Files.writeString(classes.getParent().resolve("service-source-excludes.txt"), String.join("\n", sources) + "\n");
     }
 
     private static void checksums(Path bundle) throws Exception {

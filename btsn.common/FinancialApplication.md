@@ -130,13 +130,13 @@ application.
 The following changes are deliberately outside this branch-stabilization step:
 
 - moving implementation sources into separate Eclipse projects
-- integration of independent service JARs into host deployment and launchers
-- modification of the per-node JAR build files
 
 `../btsn.services` now builds one deployment JAR per catalogue implementation,
 alongside shared service support and runtime libraries. Its packaging inventory
 also includes the independently preserved stochastic implementation. All services
 use the same packaging mechanism, independent of application and physical host.
-Implementation sources remain in `btsn.common`; existing host builds and the live
-launcher still use their current classpaths. See `../btsn.services/README.md` for
-build commands, packaged invocation checks and the remaining integration work.
+Implementation sources remain in `btsn.common`. All six host builds now import
+the same generic Ant build, and the Stage-5 launcher compiles and uses the
+independent service JARs and shared infrastructure without `bin` directories on
+its classpaths. No handler or service implementation changes are involved.
+See `../btsn.services/README.md` for build commands and packaged host checks.

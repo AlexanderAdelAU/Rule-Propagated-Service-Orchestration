@@ -35,8 +35,8 @@ metadata without a versioned-rulebase check. The six-argument overload used by
 The default common directory is `../btsn.common`, matching the existing project
 layout. A host with another layout can set `-Dbtsn.common.dir=<common-directory>`.
 Deploy the manifest and all selected metadata/rule files alongside the common
-classes. Resolver instances retain a deployment snapshot; restart services after
-changing this metadata for this first candidate.
+classes. Resolver instances retain a deployment snapshot. JAR integration does
+not change the resolver's existing lifecycle or metadata-loading behaviour.
 
 ## Scope and verification
 
@@ -59,13 +59,13 @@ the invocation boundary's existing constructor contract. No physical host name
 is compiled into that implementation. The existing Financial implementations
 also remain unchanged in common; the host code refers to none of them.
 
-Every `ServiceThread.java`, all other existing infrastructure handlers, Monitor,
-business implementations, workflow definitions, existing deployment definitions
-and the Stage-5 launcher remain byte-for-byte unchanged from the recovery
-baseline. Resolver and helper code are unchanged from `47ecac4`. All existing `build.xml`
-files are unchanged. Independent service JAR packaging is now provided
-by `../btsn.services`; see its `README.md` for the build and deployment contract.
-The existing host builds and launcher have not yet been switched to these JARs.
+Every `ServiceThread.java`, all other existing infrastructure handlers, Monitor
+source code, business implementations, workflow definitions and existing
+deployment definitions remain byte-for-byte unchanged from the accepted cleanup.
+Resolver and helper code are unchanged from `47ecac4`. P1–P6 build files now
+import the same generic Ant host build. The Stage-5 launcher builds and uses
+independent service and infrastructure JARs instead of Eclipse `bin` directories.
+See `../btsn.services/README.md` for the build and deployment contract.
 
 All common and P1–P6 Java sources compiled with Java 15 compatibility. Run the
 isolated packaged invocation checks with Java 15+ and Ant:
@@ -92,9 +92,8 @@ The live acceptance run remains:
 
 `btsn.petrinet.ProjectLoader/FinancialSystem_Stage5_PriorityPreemption_BuildAndRun.xml`
 
-After pulling, clean/rebuild `btsn.common` and the service projects in Eclipse
-before running the unchanged launcher: it uses the existing `bin` directories
-and does not compile Java sources. Require v001 15/15 completions with 15 forks,
+After pulling, run the existing Stage-5 launcher as an Ant Build: it now compiles
+the runtime and puts service JARs on the host classpaths. Require v001 15/15 completions with 15 forks,
 15 successful joins and no orphan/incomplete workflows; require v002 40/40
 completions with no incomplete workflows. Check structural and temporal reports,
 Monitor/chart data and the existing priority observations. The live regression
@@ -103,8 +102,10 @@ change. The configured application is a regression workload; it does not define
 the host architecture. The reported live cleanup regression completed both
 versions with structural and temporal checks passing. Service packaging adds
 isolated JAR checks and reruns the invocation checks using only packaged service
-implementations; adopting the JARs in the network launcher remains a separate
-integration step.
+implementations. `ant -f btsn.services/build.xml check-hosts` additionally runs
+all 108 checks through each actual host JAR and verifies implementation/helper
+origins and absence of duplicate class resources. The network regression must
+also be repeated with the new launcher classpaths.
 
 The frozen infrastructure check is:
 

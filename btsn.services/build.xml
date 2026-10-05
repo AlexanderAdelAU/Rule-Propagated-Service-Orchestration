@@ -28,6 +28,69 @@
         <ant antfile="${target.dir}/service-tasks.xml" target="package" inheritall="false"/>
         <echo>Deployment bundle: ${target.dir}/service-deployment.zip</echo>
     </target>
+    <target name="runtime" depends="package" description="Build shared host infrastructure without embedded service classes">
+        <ant antfile="infrastructure.xml" target="jar" inheritall="false"/>
+    </target>
+    <target name="build-hosts" depends="runtime" description="Build all six generic hosts against the same service JARs">
+        <ant antfile="../btsn.petrinet.places.p1/build.xml" target="jar-only" inheritall="false"/>
+        <ant antfile="../btsn.petrinet.places.p2/build.xml" target="jar-only" inheritall="false"/>
+        <ant antfile="../btsn.petrinet.places.p3/build.xml" target="jar-only" inheritall="false"/>
+        <ant antfile="../btsn.petrinet.places.p4/build.xml" target="jar-only" inheritall="false"/>
+        <ant antfile="../btsn.petrinet.places.p5/build.xml" target="jar-only" inheritall="false"/>
+        <ant antfile="../btsn.petrinet.places.p6/build.xml" target="jar-only" inheritall="false"/>
+    </target>
+    <target name="build-workflow-runtime" depends="build-hosts" description="Build packaged hosts, Monitor and event generators">
+        <ant antfile="workflow-runtime.xml" target="jar" inheritall="false"/>
+    </target>
+    <target name="check-hosts" depends="build-workflow-runtime" description="Verify real host JAR classpaths and invoke services on every host">
+        <delete dir="${target.dir}/host-check"/>
+        <mkdir dir="${target.dir}/host-check/classes"/>
+        <mkdir dir="${target.dir}/host-check/empty-sourcepath"/>
+        <path id="host.check.dependencies">
+            <pathelement location="${common.dir}/target/host-runtime/btsn-infrastructure.jar"/>
+            <fileset dir="${target.dir}/deployment/services" includes="*.jar"/>
+            <fileset dir="${target.dir}/deployment/lib" includes="*.jar"/>
+            <fileset dir="${common.dir}/lib" includes="*.jar" excludesfile="${target.dir}/runtime-library-excludes.txt"/>
+        </path>
+        <javac destdir="${target.dir}/host-check/classes" release="${java.release}"
+               sourcepath="${target.dir}/host-check/empty-sourcepath" includeantruntime="false" encoding="UTF-8">
+            <src path="tests"/><src path="${common.dir}/tests"/>
+            <include name="HostClasspathCheck.java"/>
+            <include name="org/btsn/invocation/BusinessCapabilityResolverTest.java"/>
+            <classpath>
+                <pathelement location="../btsn.petrinet.places.p1/target/btsn.petrinet.places.p1.jar"/>
+                <path refid="host.check.dependencies"/>
+            </classpath>
+        </javac>
+        <macrodef name="check-host">
+            <attribute name="number"/>
+            <sequential>
+                <mkdir dir="${target.dir}/host-check/p@{number}"/>
+                <java classname="HostClasspathCheck" fork="true" failonerror="true">
+                    <classpath>
+                        <pathelement location="${target.dir}/host-check/classes"/>
+                        <pathelement location="../btsn.petrinet.places.p@{number}/target/btsn.petrinet.places.p@{number}.jar"/>
+                        <path refid="host.check.dependencies"/>
+                    </classpath>
+                    <arg file="${target.dir}/deployment"/>
+                    <arg file="../btsn.petrinet.places.p@{number}/target/btsn.petrinet.places.p@{number}.jar"/>
+                    <arg file="${common.dir}/target/host-runtime/btsn-infrastructure.jar"/>
+                </java>
+                <java classname="org.btsn.invocation.BusinessCapabilityResolverTest" fork="true" failonerror="true"
+                      dir="${target.dir}/host-check/p@{number}">
+                    <classpath>
+                        <pathelement location="${target.dir}/host-check/classes"/>
+                        <pathelement location="../btsn.petrinet.places.p@{number}/target/btsn.petrinet.places.p@{number}.jar"/>
+                        <path refid="host.check.dependencies"/>
+                    </classpath>
+                    <arg file="${common.dir}"/>
+                    <arg value="org.btsn.places.P@{number}_Place"/>
+                </java>
+            </sequential>
+        </macrodef>
+        <check-host number="1"/><check-host number="2"/><check-host number="3"/>
+        <check-host number="4"/><check-host number="5"/><check-host number="6"/>
+    </target>
     <target name="check" depends="package" description="Check isolated JARs and all six invocation boundaries">
         <ant antfile="${target.dir}/service-tasks.xml" target="check" inheritall="false"/>
         <antcall target="check-resolver"/>

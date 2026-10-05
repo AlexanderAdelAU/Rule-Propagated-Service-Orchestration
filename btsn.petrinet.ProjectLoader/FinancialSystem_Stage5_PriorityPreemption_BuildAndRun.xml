@@ -105,7 +105,9 @@
 	<!-- Common project -->
 	<property name="common.project.dir" location="${petrinet.root.dir}/btsn.common" />
 	<property name="lib.dir" location="${common.project.dir}/lib" />
-	<property name="class.dir" location="${common.project.dir}/bin" />
+	<property name="class.dir" location="${common.project.dir}/target/host-runtime/btsn-infrastructure.jar" />
+	<property name="services.project.dir" location="${petrinet.root.dir}/btsn.services" />
+	<property name="service.bundle.dir" location="${services.project.dir}/target/deployment" />
 	<property name="common.src.dir" location="${common.project.dir}/src" />
 
 	<!-- Output directory -->
@@ -119,27 +121,27 @@
 
 	<!-- P1-P5 Services -->
 	<property name="p1.project.dir" location="${petrinet.root.dir}/btsn.petrinet.places.p1" />
-	<property name="p1.bin.dir" location="${p1.project.dir}/bin" />
+	<property name="p1.host.jar" location="${p1.project.dir}/target/btsn.petrinet.places.p1.jar" />
 
 	<property name="p2.project.dir" location="${petrinet.root.dir}/btsn.petrinet.places.p2" />
-	<property name="p2.bin.dir" location="${p2.project.dir}/bin" />
+	<property name="p2.host.jar" location="${p2.project.dir}/target/btsn.petrinet.places.p2.jar" />
 
 	<property name="p3.project.dir" location="${petrinet.root.dir}/btsn.petrinet.places.p3" />
-	<property name="p3.bin.dir" location="${p3.project.dir}/bin" />
+	<property name="p3.host.jar" location="${p3.project.dir}/target/btsn.petrinet.places.p3.jar" />
 
 	<property name="p4.project.dir" location="${petrinet.root.dir}/btsn.petrinet.places.p4" />
-	<property name="p4.bin.dir" location="${p4.project.dir}/bin" />
+	<property name="p4.host.jar" location="${p4.project.dir}/target/btsn.petrinet.places.p4.jar" />
 
 	<property name="p5.project.dir" location="${petrinet.root.dir}/btsn.petrinet.places.p5" />
-	<property name="p5.bin.dir" location="${p5.project.dir}/bin" />
+	<property name="p5.host.jar" location="${p5.project.dir}/target/btsn.petrinet.places.p5.jar" />
 
 	<!-- Monitor Service -->
 	<property name="monitor.project.dir" location="${petrinet.root.dir}/btsn.common.Monitor" />
-	<property name="monitor.bin.dir" location="${monitor.project.dir}/bin" />
+	<property name="monitor.runtime.jar" location="${monitor.project.dir}/target/jar-runtime/btsn-monitor.jar" />
 
 	<!-- Event Generators -->
 	<property name="generator.project.dir" location="${petrinet.root.dir}/btsn.common.eventgenerators" />
-	<property name="generator.bin.dir" location="${generator.project.dir}/bin" />
+	<property name="generator.runtime.jar" location="${generator.project.dir}/target/jar-runtime/btsn-eventgenerators.jar" />
 
 	<!-- Java Classes -->
 	<property name="service.loader.class" value="org.btsn.handlers.ServiceLoader" />
@@ -152,50 +154,56 @@
 	<!-- ======================================================================= -->
 
 	<path id="common.classpath">
-		<fileset dir="${lib.dir}" erroronmissingdir="false">
+		<fileset dir="${lib.dir}" erroronmissingdir="false" excludesfile="${services.project.dir}/target/runtime-library-excludes.txt">
 			<include name="*.jar" />
 		</fileset>
 		<pathelement location="${class.dir}" />
+		<fileset dir="${service.bundle.dir}/services" includes="*.jar" />
+		<fileset dir="${service.bundle.dir}/lib" includes="*.jar" />
 	</path>
 
 	<path id="p1.classpath">
 		<path refid="common.classpath" />
-		<pathelement location="${p1.bin.dir}" />
+		<pathelement location="${p1.host.jar}" />
 	</path>
 
 	<path id="p2.classpath">
 		<path refid="common.classpath" />
-		<pathelement location="${p2.bin.dir}" />
+		<pathelement location="${p2.host.jar}" />
 	</path>
 
 	<path id="p3.classpath">
 		<path refid="common.classpath" />
-		<pathelement location="${p3.bin.dir}" />
+		<pathelement location="${p3.host.jar}" />
 	</path>
 
 	<path id="p4.classpath">
 		<path refid="common.classpath" />
-		<pathelement location="${p4.bin.dir}" />
+		<pathelement location="${p4.host.jar}" />
 	</path>
 
 	<path id="p5.classpath">
 		<path refid="common.classpath" />
-		<pathelement location="${p5.bin.dir}" />
+		<pathelement location="${p5.host.jar}" />
 	</path>
 
 	<path id="monitor.classpath">
 		<path refid="common.classpath" />
-		<pathelement location="${monitor.bin.dir}" />
+		<pathelement location="${monitor.runtime.jar}" />
 	</path>
 
 	<path id="generator.classpath">
 		<path refid="common.classpath" />
-		<pathelement location="${generator.bin.dir}" />
+		<pathelement location="${generator.runtime.jar}" />
 	</path>
 
 	<!-- ======================================================================= -->
 	<!-- DEPLOYMENT MODE RESOLUTION                                              -->
 	<!-- ======================================================================= -->
+
+	<target name="build-runtime" description="Build host infrastructure and independently packaged services">
+		<ant antfile="${services.project.dir}/build.xml" target="build-workflow-runtime" inheritall="false" />
+	</target>
 
 	<target name="resolve-deployment-modes">
 		<!-- Resolve boolean properties from mode settings -->
@@ -259,7 +267,7 @@
 		<echo message="Generated workflow-routing rules removed; current process JSON must regenerate them." />
 	</target>
 
-	<target name="generate-workflow-bindings" depends="clean-generated-workflow-rules" description="Generate canonical bindings for both workflows">
+	<target name="generate-workflow-bindings" depends="build-runtime,clean-generated-workflow-rules" description="Generate canonical bindings for both workflows">
 		<echo message="=== Generating Workflow 1 Bindings (${workflow1.process.name}) ===" />
 		<java classname="org.btsn.rulecontroller.TopologyBindingGenerator" 
 		      classpathref="generator.classpath"

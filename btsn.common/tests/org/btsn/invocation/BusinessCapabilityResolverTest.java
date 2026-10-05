@@ -78,10 +78,16 @@ public final class BusinessCapabilityResolverTest {
             equal(initializer, resolver.resolve(initializer, "purgeAndInitialize", "token", 1, "v999"));
             equal(collector, resolver.resolve(collector, "collectAllData", "token", 1, "v999"));
         }
-        // Invocation must succeed without any of the six physical placeholder classes on the classpath.
+        // Isolated checks exclude all placeholders. A packaged-host check may
+        // contain its own inert placeholder, which still supplies no operations.
         for (int i = 1; i <= 6; i++) {
             final String placeholder = "org.btsn.places.P" + i + "_Place";
-            rejects(() -> Class.forName(placeholder), placeholder);
+            if (args.length > 1 && placeholder.equals(args[1])) {
+                Class<?> type = Class.forName(placeholder);
+                equal(true, type.getSuperclass() == Object.class && type.getDeclaredMethods().length == 0);
+            } else {
+                rejects(() -> Class.forName(placeholder), placeholder);
+            }
         }
         verifyBusinessResults();
         verifyMetadataFailures();
