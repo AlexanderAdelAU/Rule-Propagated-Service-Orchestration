@@ -99,6 +99,7 @@ public class BuildServiceAnalysisDatabase {
 		SERVICE_MEASUREMENTS_TABLE,
 		PROCESS_MEASUREMENTS_TABLE,
 		SERVICE_CONTRIBUTION_TABLE,
+		ServiceDisplayNames.TABLE,
 		MARKINGS_TABLE,
 		// Consolidated Petri Net tables
 		CONSOLIDATED_TRANSITION_FIRINGS_TABLE,
@@ -414,7 +415,7 @@ public class BuildServiceAnalysisDatabase {
 				// Create local Petri Net tables
 				createLocalPetriNetTables(statement);
 				
-				logger.info("Database initialization complete - 13 tables (4 core + 5 consolidated PN + 3 local PN + 1 event) created/verified");
+				logger.info("Database initialization complete - 14 tables (4 core + 1 business identity + 5 consolidated PN + 3 local PN + 1 event) created/verified");
 
 			} finally {
 				closeStatement(statement);
@@ -476,6 +477,7 @@ public class BuildServiceAnalysisDatabase {
 			+ "totalMarking INT"
 			+ ")";
 		manageTable(statement, SERVICE_CONTRIBUTION_TABLE, createServiceContributionSQL);
+		manageTable(statement, ServiceDisplayNames.TABLE, ServiceDisplayNames.CREATE_TABLE);
 
 		// 4. MARKINGS - Petri Net marking data for analysis
 		String createMarkingsSQL = "CREATE TABLE " + MARKINGS_TABLE + " ("

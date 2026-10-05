@@ -66,6 +66,21 @@ Run `btsn.services/build.xml` with `check-healthcare-services` to check the
 packaged healthcare contracts, direct route and federated audit fields. Use
 the migrated launcher's `analyse` target to read the usual Monitor database.
 
+The analyser and spatial view display logical business service names. Physical
+PN identities remain the keys for topology, capacity and timing calculations;
+reports and spatial tooltips show them separately as orchestration locations.
+Collectors include the business identity selected by the installed operation
+rules, and Monitor stores it with the execution's version, operation and place.
+The Gantt chart still groups complete workflows by version; its tooltips list
+the business services visited by that workflow.
+
+Already-collected healthcare runs can display names without rerunning: an
+operation is resolved only when the available catalogues identify one logical
+service. Ambiguous older operations retain their physical labels. Captured
+identities take precedence and remain usable after deployment metadata changes.
+Run `btsn.services/workflow-runtime.xml` with `check-service-names` for isolated
+checks of these labels and preservation of the original measurement values.
+
 Stage 3 currently groups traffic by physical service name. P4's imaging and
 federated methods have different ports and queues; a P4 cross-version comparison
 therefore does not establish competition for one queue. Invocation-order

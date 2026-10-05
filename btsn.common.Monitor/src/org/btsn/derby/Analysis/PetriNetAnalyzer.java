@@ -934,7 +934,17 @@ public class PetriNetAnalyzer {
         return sortedValues.get(index);
     }
 
+    public ServiceDisplayNames getServiceDisplayNames() {
+        try (Connection conn = getConnection()) {
+            return ServiceDisplayNames.load(conn);
+        } catch (SQLException e) {
+            logger.warn("Business display names unavailable: " + e.getMessage());
+            return ServiceDisplayNames.empty();
+        }
+    }
+
     public String generateTemporalReport(int workflowBase) {
+        ServiceDisplayNames names = getServiceDisplayNames();
         TemporalAnalysis temporal = analyzeTemporal(workflowBase);
         StringBuilder report = new StringBuilder();
 
@@ -965,14 +975,15 @@ public class PetriNetAnalyzer {
 
         report.append("3. PLACE RESIDENCE DISTRIBUTIONS\n");
         for (Map.Entry<String, TimingDistribution> entry : temporal.placeResidence.entrySet()) {
-            appendDistribution(report, "   " + entry.getKey(), entry.getValue());
+            appendDistribution(report, "   " + names.describe(workflowBase, entry.getKey()), entry.getValue());
         }
         report.append("\n");
 
         report.append("4. SERVICE EXECUTION TIMING\n");
         for (Map.Entry<String, ServiceTimingSummary> entry : temporal.serviceTiming.entrySet()) {
             ServiceTimingSummary timing = entry.getValue();
-            report.append("   Place: ").append(entry.getKey()).append("\n");
+            report.append("   Service: ").append(names.label(workflowBase, entry.getKey())).append("\n");
+            report.append("     Orchestration place: ").append(entry.getKey()).append("\n");
             appendDistribution(report, "     Queue", timing.queueTime);
             appendDistribution(report, "     Service", timing.serviceTime);
             appendDistribution(report, "     Total", timing.totalTime);
@@ -995,7 +1006,7 @@ public class PetriNetAnalyzer {
             for (JoinTimingSummary join : temporal.joinTiming.values()) {
                 report.append("   ").append(join.transitionId);
                 if (join.placeName != null) {
-                    report.append(" -> ").append(join.placeName);
+                    report.append(" -> ").append(names.describe(workflowBase, join.placeName));
                 }
                 report.append("\n");
                 appendDistribution(report, "     First-arrival to ENTER", join.synchronizationWait);
@@ -1755,6 +1766,7 @@ public class PetriNetAnalyzer {
      * Generate priority analysis report
      */
     public String generatePriorityReport() {
+        ServiceDisplayNames names = getServiceDisplayNames();
         PriorityAnalysis analysis = analyzePriority();
         StringBuilder report = new StringBuilder();
         
@@ -1774,7 +1786,7 @@ public class PetriNetAnalyzer {
             report.append("   [INFO] No shared services detected - each version uses exclusive services\n");
             report.append("   Priority contention cannot be measured without shared services\n");
         } else {
-            report.append("   Shared services: ").append(analysis.sharedPlaces).append("\n");
+            report.append("   Shared services:\n");
             for (String place : analysis.sharedPlaces) {
                 Set<Integer> versions = analysis.placeToVersions.get(place);
                 StringBuilder versionList = new StringBuilder();
@@ -1782,7 +1794,7 @@ public class PetriNetAnalyzer {
                     if (versionList.length() > 0) versionList.append(", ");
                     versionList.append("v").append(String.format("%03d", v));
                 }
-                report.append("     ").append(place).append(": ").append(versionList).append("\n");
+                report.append("     ").append(names.laneDescription(place, -1)).append(": ").append(versionList).append("\n");
                 Map<Integer, Set<String>> roleMap = analysis.placeToVersionTransitions.get(place);
                 if (roleMap != null) {
                     List<Integer> roleVersions = new ArrayList<>(roleMap.keySet());
@@ -1799,7 +1811,7 @@ public class PetriNetAnalyzer {
             for (Map.Entry<String, Set<Integer>> entry : analysis.placeToVersions.entrySet()) {
                 if (entry.getValue().size() == 1) {
                     int version = entry.getValue().iterator().next();
-                    report.append("     ").append(entry.getKey())
+                    report.append("     ").append(names.laneDescription(entry.getKey(), -1))
                           .append(": v").append(String.format("%03d", version)).append(" only\n");
                 }
             }
@@ -1843,7 +1855,7 @@ public class PetriNetAnalyzer {
                 byPlace.computeIfAbsent(cp.sharedPlace, k -> new ArrayList<>()).add(cp);
             }
             for (Map.Entry<String, List<ContentionPoint>> entry : byPlace.entrySet()) {
-                report.append("   [").append(entry.getKey()).append("] ");
+                report.append("   [").append(names.laneDescription(entry.getKey(), -1)).append("] ");
                 List<ContentionPoint> cps = entry.getValue();
                 long placeRespected = cps.stream().filter(cp -> cp.priorityRespected).count();
                 report.append(placeRespected).append("/").append(cps.size()).append(" respected\n");
@@ -1852,7 +1864,7 @@ public class PetriNetAnalyzer {
                 for (ContentionPoint cp : cps) {
                     if (shown++ >= 3) {
                         if (cps.size() > 3) {
-                            report.append("     ... and ").append(cps.size() - 3).append(" more at ").append(entry.getKey()).append("\n");
+                            report.append("     ... and ").append(cps.size() - 3).append(" more at ").append(names.laneDescription(entry.getKey(), -1)).append("\n");
                         }
                         break;
                     }
@@ -1887,7 +1899,7 @@ public class PetriNetAnalyzer {
                     break;
                 }
                 report.append(String.format("   - [%s] v%03d token %d arrived before v%03d token %d was invoked first (invocation-order difference: %dms; dequeue order unrecorded)\n",
-                    inv.highPriorityToken.placeName,
+                    names.laneDescription(inv.highPriorityToken.placeName, -1),
                     inv.highPriorityToken.versionNumber, inv.highPriorityToken.sequenceId,
                     inv.lowPriorityToken.versionNumber, inv.lowPriorityToken.sequenceId,
                     inv.inversionTime));
@@ -2387,6 +2399,7 @@ public class PetriNetAnalyzer {
      * Generate comprehensive workflow analysis report
      */
     public String generateWorkflowReport(int workflowBase) {
+        ServiceDisplayNames names = getServiceDisplayNames();
         StringBuilder report = new StringBuilder();
         CanonicalWorkflowAnalysis canonical = analyzeCanonicalWorkflows(workflowBase);
         
@@ -2424,7 +2437,7 @@ public class PetriNetAnalyzer {
             report.append("   No ENTER events reconstructed\n");
         } else {
             for (Map.Entry<String, Integer> entry : canonical.placeExecutions.entrySet()) {
-                report.append("   ").append(entry.getKey()).append(": ")
+                report.append("   ").append(names.describe(workflowBase, entry.getKey())).append(": ")
                       .append(entry.getValue()).append(" executions\n");
             }
         }
@@ -2448,7 +2461,7 @@ public class PetriNetAnalyzer {
         report.append("   Unpaired place ENTER events: ").append(unpaired.size()).append("\n");
         for (TokenPath path : unpaired) {
             report.append("     - Token ").append(path.tokenId)
-                  .append(" entered ").append(path.placeName)
+                  .append(" entered ").append(names.describe(workflowBase, path.placeName))
                   .append(" without a same-token EXIT/TERMINATE\n");
         }
         report.append("\n");
@@ -2458,7 +2471,7 @@ public class PetriNetAnalyzer {
         for (String place : places) {
             PlaceStatistics stats = getPlaceStatistics(place, workflowBase);
             int logicalExecutions = canonical.placeExecutions.getOrDefault(place, 0);
-            report.append("   Place: ").append(place).append("\n");
+            report.append("   Service/place: ").append(names.describe(workflowBase, place)).append("\n");
             report.append("     Logical executions: ").append(logicalExecutions).append("\n");
             report.append("     Paired timing samples: ").append(stats.tokenCount).append("\n");
             if (stats.tokenCount > 0) {
@@ -2475,7 +2488,7 @@ public class PetriNetAnalyzer {
         report.append("6. CAPACITY VERIFICATION\n");
         for (String place : places) {
             boolean bounded = verifyBoundedCapacity(place, workflowBase, 50);
-            report.append("   ").append(place).append(": ")
+            report.append("   ").append(names.describe(workflowBase, place)).append(": ")
                   .append(bounded ? "[OK] BOUNDED" : "[FAIL] EXCEEDED").append("\n");
         }
         
@@ -2490,6 +2503,9 @@ public class PetriNetAnalyzer {
                   .append(" paths have negative residence time\n");
         }
         report.append("   NOTE: temporal distributions and canonical throughput are reported in Stage 2.\n");
+        if (names.inferredExecutions() > 0) {
+            report.append("   NOTE: older records lack captured business identities; unambiguous operation names are resolved from available catalogues.\n");
+        }
         
         report.append("\n=== END REPORT ===\n");
         return report.toString();
@@ -3148,9 +3164,10 @@ public class PetriNetAnalyzer {
             
             // Get detailed token paths
             System.out.println("\n=== TOKEN PATHS ===");
+            ServiceDisplayNames names = analyzer.getServiceDisplayNames();
             ArrayList<TokenPath> paths = analyzer.getTokenPaths(workflowBase);
             for (TokenPath path : paths) {
-                System.out.println("Token " + path.tokenId + " at " + path.placeName + 
+                System.out.println("Token " + path.tokenId + " at " + names.describe(workflowBase, path.placeName) +
                                  ": residence=" + path.residenceTime + "ms");
             }
             

@@ -45,4 +45,41 @@
             <classpath refid="analysis.check.classpath"/>
         </java>
     </target>
+    <target name="check-service-names" depends="jar" description="Check business labels without changing physical identities or measurements">
+        <delete dir="target/service-names-check"/>
+        <mkdir dir="target/service-names-check/classes"/>
+        <mkdir dir="target/service-names-check/runtime"/>
+        <path id="service.names.check.classpath">
+            <path refid="runtime.classpath"/>
+            <pathelement location="../btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+            <pathelement location="target/service-names-check/classes"/>
+        </path>
+        <javac srcdir="../btsn.common.Monitor/tests" destdir="target/service-names-check/classes"
+               includes="ServiceNamingAnalysisCheck.java" release="${java.release}" includeantruntime="false" encoding="UTF-8">
+            <classpath refid="service.names.check.classpath"/>
+        </javac>
+        <java classname="org.btsn.derby.Analysis.ServiceNamingAnalysisCheck" fork="true" failonerror="true"
+              dir="target/service-names-check/runtime" maxmemory="128m">
+            <classpath refid="service.names.check.classpath"/>
+            <jvmarg value="-Djava.awt.headless=true"/>
+            <arg file="${common.dir}"/>
+        </java>
+    </target>
+    <target name="check-healthcare-names" depends="jar" description="Read-only naming check after the default ten-patient healthcare run">
+        <mkdir dir="target/healthcare-names-check/classes"/>
+        <path id="healthcare.names.check.classpath">
+            <path refid="runtime.classpath"/>
+            <pathelement location="../btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+            <pathelement location="target/healthcare-names-check/classes"/>
+        </path>
+        <javac srcdir="../btsn.common.Monitor/tests" destdir="target/healthcare-names-check/classes"
+               includes="ServiceNamingRuntimeCheck.java" release="${java.release}" includeantruntime="false" encoding="UTF-8">
+            <classpath refid="healthcare.names.check.classpath"/>
+        </javac>
+        <java classname="org.btsn.derby.Analysis.ServiceNamingRuntimeCheck" fork="true" failonerror="true"
+              dir="../btsn.common.Monitor" maxmemory="128m">
+            <classpath refid="healthcare.names.check.classpath"/>
+            <jvmarg value="-Djava.awt.headless=true"/>
+        </java>
+    </target>
 </project>

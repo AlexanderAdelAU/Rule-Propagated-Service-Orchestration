@@ -80,6 +80,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         int sequenceId;
         long processingTime;
         long queueTime;
+        String businessServices = "Unresolved";
         int serviceCount;  // Number of services in this workflow
         long elapsedTime;  // Total workflow duration from PROCESSMEASUREMENTS
         
@@ -577,7 +578,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             writer.println("% Draw axes");
             writer.printf("\\draw[->] (0,0) -- (%d,0) node[right] {Execution Order};\n", safeMaxId + 2);
             writer.printf("\\draw[->] (0,0) -- (0,%d) node[above] {%s};\n", 
-                displayGroups.size() + 1, displayByVersion ? "Versions" : "Services");
+                displayGroups.size() + 1, "Workflow versions");
             writer.println();
             
             writer.println("% Draw grid");
@@ -685,7 +686,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             writer.println();
             writer.println("\\begin{longtable}{cccccc}");
             writer.println("\\toprule");
-            writer.println("ID & Service & Version & Sequence ID & Processing Time (ms) & Queue Time (ms) \\\\");
+            writer.println("ID & Workflow Version & Version & Sequence ID & Processing Time (ms) & Queue Time (ms) \\\\");
             writer.println("\\midrule");
             writer.println("\\endhead");
             
@@ -988,6 +989,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             DriverManager.registerDriver(new EmbeddedDriver());
             conn = DriverManager.getConnection(DB_URL);
             stmt = conn.createStatement();
+            ServiceDisplayNames names = ServiceDisplayNames.load(conn);
             
             tasks.clear();
             uniqueServices.clear();
@@ -1101,6 +1103,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
                     long elapsedTime = rs.getLong("ELAPSEDTIME");
                     
                     Task task = new Task(id, version, sequenceId, processingTime);
+                    task.businessServices = names.familyServices(sequenceId);
                     task.queueTime = queueTime;
                     task.serviceCount = (aggregate != null) ? aggregate.serviceCount : 0;
                     task.elapsedTime = elapsedTime;
@@ -1153,6 +1156,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
                     String version = VersionConstants.getVersionFromSequenceId(aggregate.baseSequenceId);
                     
                     Task task = new Task(syntheticId, version, aggregate.baseSequenceId, aggregate.totalServiceTime);
+                    task.businessServices = names.familyServices(aggregate.baseSequenceId);
                     task.queueTime = aggregate.totalQueueTime;
                     task.serviceCount = aggregate.serviceCount;
                     tasks.add(task);
@@ -1209,7 +1213,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
                 }
                 
                 System.out.println("Loaded " + tasks.size() + " tasks from database");
-                System.out.println("Found " + uniqueServices.size() + " unique services: " + uniqueServices);
+                System.out.println("Found " + uniqueServices.size() + " workflow versions: " + uniqueServices);
                 System.out.println("Max queue time: " + maxQueueTime + " ms");
                 
                 this.maxId = Math.max(tasks.size() + 1, 1);
@@ -1598,8 +1602,8 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             (double)task.queueTime / (task.queueTime + task.processingTime) * 100 : 0;
         
         String[] lines = {
-            task.service,
-            "Version: " + version,
+            "Business services: " + task.businessServices,
+            "Workflow version: " + version,
             "Seq ID: " + task.sequenceId,
             "Total Duration: " + task.elapsedTime + " ms",
             "Processing Time: " + task.processingTime + " ms",

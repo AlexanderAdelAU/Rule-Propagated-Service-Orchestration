@@ -166,6 +166,16 @@ public final class BusinessCapabilityResolver {
         return capability.implementationClass;
     }
 
+    /** Observation metadata only; uses the same installed contract as invocation. */
+    public String logicalService(String service, String operation, String ruleBaseVersion) throws Exception {
+        String identity = service.substring(service.lastIndexOf('.') + 1);
+        Capability capability = runtimeBindings.get(key(identity, operation));
+        if (capability == null) capability = logicalBindings.get(key(identity, operation));
+        if (capability == null) return null; // Infrastructure has no business label.
+        resolve(service, operation, capability.returnAttribute, capability.inputs.size(), ruleBaseVersion);
+        return capability.logicalService;
+    }
+
     private static final class Capability {
         final String logicalService;
         final String operation;

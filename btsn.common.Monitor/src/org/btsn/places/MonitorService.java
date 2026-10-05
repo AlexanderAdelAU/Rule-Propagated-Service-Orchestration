@@ -267,6 +267,14 @@ public class MonitorService extends BaseStochasticPetriNetPlace {
 	                                            arrivalTime, queueTime, serviceTime, totalTime, 
 	                                            workflowStartTime, bufferSize, maxQueueCapacity, totalMarking);
 	                    
+	                    String logical = getStringValue(record, "logicalService", "");
+	                    if (!logical.isEmpty()) {
+	                        try (Connection connection = getConnection()) {
+	                            org.btsn.derby.Analysis.ServiceDisplayNames.record(connection,
+	                                VersionConstants.getWorkflowBase(VersionConstants.getVersionFromSequenceId(sequenceId)),
+	                                sequenceId, place, operation, arrivalTime, logical);
+	                        }
+	                    }
 	                    recordCount++;
 	                }
 	            }

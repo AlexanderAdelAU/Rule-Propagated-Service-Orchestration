@@ -16,6 +16,7 @@ import java.net.InetAddress;
 
 import org.apache.derby.jdbc.EmbeddedDriver;
 import org.btsn.constants.VersionConstants;
+import org.btsn.invocation.BusinessCapabilityResolver;
 import org.btsn.utils.OOjdrewAPI;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -877,6 +878,15 @@ private String extractServiceContextFromToken(String token) {
     // =============================================================================
 
     private String buildPerformanceDataResponse(List<ServiceTiming> timingData, List<ServiceMarking> markingData, String token) {
+        // Freeze the installed business identity alongside each collected execution.
+        // Version names and physical places in existing measurement fields stay intact.
+        BusinessCapabilityResolver identities = null;
+        Map<String, String> businessNames = new HashMap<>();
+        try {
+            identities = BusinessCapabilityResolver.forCurrentDeployment();
+        } catch (Exception e) {
+            System.err.println("Business labels unavailable during collection: " + e.getMessage());
+        }
         JSONObject response = new JSONObject();
         response.put("reportingService", getCollectorName());
         response.put("monitoredPlace", placeName);
@@ -897,6 +907,21 @@ private String extractServiceContextFromToken(String token) {
                 timingObj.put("sequenceId", timing.sequenceId);
                 timingObj.put("serviceName", timing.serviceName);
                 timingObj.put("operation", timing.operation);
+                if (identities != null) {
+                    String timingVersion = VersionConstants.getVersionFromSequenceId(Math.toIntExact(timing.sequenceId));
+                    String identityKey = timingVersion + ":" + timing.operation;
+                    if (!businessNames.containsKey(identityKey)) {
+                        String logical = null;
+                        try {
+                            logical = identities.logicalService(placeName, timing.operation, timingVersion);
+                        } catch (Exception e) {
+                            System.err.println("Unresolved business label for " + identityKey + ": " + e.getMessage());
+                        }
+                        businessNames.put(identityKey, logical);
+                    }
+                    String logical = businessNames.get(identityKey);
+                    if (logical != null) timingObj.put("logicalService", logical);
+                }
                 timingObj.put("arrivalTime", timing.arrivalTime);
                 timingObj.put("queueTime", timing.queueTime);
                 timingObj.put("serviceTime", timing.serviceTime);
