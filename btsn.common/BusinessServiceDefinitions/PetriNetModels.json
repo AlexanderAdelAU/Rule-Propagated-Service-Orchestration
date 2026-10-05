@@ -1,0 +1,28 @@
+{
+  "domain": "PetriNetModels",
+  "purpose": "Deterministic token operations. The platform records actual runtime measurements.",
+  "services": [
+    {
+      "service": "BooleanTokenService",
+      "implementationClass": "org.btsn.services.BooleanTokenService",
+      "operation": "processToken",
+      "inputs": [
+        "token"
+      ],
+      "returnAttribute": "token",
+      "canonicalBinding": "ServiceAttributeBindings/BooleanTokenService/BooleanTokenService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "ForwardTokenService",
+      "implementationClass": "org.btsn.services.ForwardTokenService",
+      "operation": "processToken",
+      "inputs": [
+        "token"
+      ],
+      "returnAttribute": "token",
+      "canonicalBinding": "ServiceAttributeBindings/ForwardTokenService/ForwardTokenService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    }
+  ]
+}

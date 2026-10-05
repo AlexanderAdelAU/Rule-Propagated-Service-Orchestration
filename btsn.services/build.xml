@@ -32,6 +32,21 @@
     <target name="runtime" depends="package" description="Build shared host infrastructure without embedded service classes">
         <ant antfile="infrastructure.xml" target="jar" inheritall="false"/>
     </target>
+    <target name="check-model-services" depends="package" description="Check deterministic model outcomes using packaged service JARs">
+        <mkdir dir="${target.dir}/model-check"/>
+        <path id="model.check.classpath">
+            <pathelement location="${target.dir}/model-check"/>
+            <fileset dir="${target.dir}/deployment/services" includes="*.jar"/>
+            <fileset dir="${target.dir}/deployment/lib" includes="*.jar"/>
+        </path>
+        <javac srcdir="tests" destdir="${target.dir}/model-check" includes="DeterministicModelServiceCheck.java"
+               release="${java.release}" includeantruntime="false" encoding="UTF-8">
+            <classpath refid="model.check.classpath"/>
+        </javac>
+        <java classname="DeterministicModelServiceCheck" fork="true" failonerror="true">
+            <classpath refid="model.check.classpath"/>
+        </java>
+    </target>
     <target name="build-hosts" depends="runtime" description="Build all six generic hosts against the same service JARs">
         <ant antfile="../btsn.petrinet.places.p1/build.xml" target="jar-only" inheritall="false"/>
         <ant antfile="../btsn.petrinet.places.p2/build.xml" target="jar-only" inheritall="false"/>

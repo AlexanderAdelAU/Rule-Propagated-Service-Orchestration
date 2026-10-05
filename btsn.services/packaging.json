@@ -2,7 +2,8 @@
   "sourceRoot": "../btsn.common/src",
   "catalogues": [
     "../btsn.common/BusinessServiceDefinitions/FinancialSystem.json",
-    "StochasticService.json"
+    "StochasticService.json",
+    "../btsn.common/BusinessServiceDefinitions/PetriNetModels.json"
   ],
   "runtimeLibraries": [
     "../btsn.common/lib/json-simple-1.1.1.jar",

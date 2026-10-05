@@ -1,0 +1,51 @@
+{
+  "definitionType": "Infrastructure",
+  "nodes": [
+    {
+      "node": "P1",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "portStart": 4001,
+      "portEnd": 4099
+    },
+    {
+      "node": "P2",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "portStart": 4001,
+      "portEnd": 4099
+    }
+  ],
+  "capabilities": [
+    {
+      "node": "P1",
+      "service": "BooleanTokenService",
+      "operation": "processToken",
+      "returnAttribute": "token",
+      "basePort": 4001,
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ]
+    },
+    {
+      "node": "P2",
+      "service": "ForwardTokenService",
+      "operation": "processToken",
+      "returnAttribute": "token",
+      "basePort": 4002,
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ]
+    }
+  ]
+}

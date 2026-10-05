@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="P1-P2-deterministic-model" default="run" basedir="." xmlns:if="ant:if" xmlns:unless="ant:unless">
+    <description>Run real tokens through P1 and P2, with deterministic outcomes and actual platform measurements.</description>
+    <property name="source.root" location=".."/>
+    <property name="services.project.dir" location="../btsn.services"/>
+    <property name="model.runtime.dir" location="${services.project.dir}/target/petrinet-model-runtime"/>
+    <property name="common.project.dir" location="${model.runtime.dir}/btsn.common"/>
+    <property name="generator.project.dir" location="${model.runtime.dir}/btsn.common.eventgenerators"/>
+    <property name="monitor.project.dir" location="${model.runtime.dir}/btsn.common.Monitor"/>
+    <property name="local.channel.rules" location="${common.project.dir}/RuleBase/Generated/InfrastructureDeployment.ruleml.xml"/>
+    <property name="rule.version" value="v001"/>
+    <property name="token.outcome" value="true"/>
+    <property name="token.count" value="10"/>
+    <property name="p1.mode" value="auto"/>
+    <property name="p2.mode" value="auto"/>
+    <property name="monitor.mode" value="auto"/>
+    <property name="service.startup.seconds" value="3"/>
+    <property name="phase.delay.seconds" value="3"/>
+    <property name="workflow.drain.seconds" value="10"/>
+    <property name="workflow.process.name" value="petrinet/Workflow/P1_P2_Deterministic_Workflow"/>
+    <import file="../btsn.services/auto-deployment.xml"/>
+    <path id="model.dependencies">
+        <pathelement location="${source.root}/btsn.common/target/host-runtime/btsn-infrastructure.jar"/>
+        <fileset dir="${source.root}/btsn.common/lib" includes="*.jar" excludesfile="${services.project.dir}/target/runtime-library-excludes.txt"/>
+        <fileset dir="${services.project.dir}/target/deployment/lib" includes="*.jar"/>
+        <fileset dir="${services.project.dir}/target/deployment/services" includes="*.jar"/>
+    </path>
+    <path id="generator.classpath">
+        <path refid="model.dependencies"/>
+        <pathelement location="${source.root}/btsn.common.eventgenerators/target/jar-runtime/btsn-eventgenerators.jar"/>
+    </path>
+    <path id="monitor.classpath">
+        <path refid="model.dependencies"/>
+        <pathelement location="${source.root}/btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+    </path>
+    <macrodef name="copy-model-component">
+        <attribute name="directory"/>
+        <sequential>
+            <copy todir="${model.runtime.dir}/@{directory}">
+                <fileset dir="${source.root}/@{directory}" includes="ServiceLoaderQueries/**,resources/**,PayLoad/**,TokenFormats/**,EventTriggeringFile/**"/>
+            </copy>
+        </sequential>
+    </macrodef>
+    <target name="prepare-runtime" description="Build JARs and prepare a separate model configuration">
+        <fail message="token.outcome must be true or false"><condition><not><or>
+            <equals arg1="${token.outcome}" arg2="true"/><equals arg1="${token.outcome}" arg2="false"/>
+        </or></not></condition></fail>
+        <ant antfile="${services.project.dir}/build.xml" target="build-workflow-runtime" inheritall="false"/>
+        <!-- Keep source Financial settings, rules and databases separate from this run. -->
+        <mkdir dir="${model.runtime.dir}/logs"/>
+        <copy todir="${common.project.dir}">
+            <fileset dir="${source.root}/btsn.common" includes="RuleBase/**,RulePayLoad/**,ServiceAttributeBindings/**,BusinessServiceDefinitions/**,ProcessDefinitionFolder/**,PayLoad/**"/>
+        </copy>
+        <copy file="${services.project.dir}/models/Deployment.json" tofile="${common.project.dir}/BusinessServiceDefinitions/Deployment.json" overwrite="true"/>
+        <copy file="${services.project.dir}/models/InfrastructureDeployment.ruleml.xml" tofile="${local.channel.rules}" overwrite="true"/>
+        <copy-model-component directory="btsn.petrinet.places.p1"/>
+        <copy-model-component directory="btsn.petrinet.places.p2"/>
+        <copy-model-component directory="btsn.common.Monitor"/>
+        <copy-model-component directory="btsn.common.eventgenerators"/>
+        <!-- The existing admin generators use this spelling, including on Linux. -->
+        <copy file="${source.root}/btsn.common.eventgenerators/PayLoad/payload.xml" tofile="${generator.project.dir}/Payload/payLoad.xml"/>
+        <java classname="org.btsn.rulecontroller.TopologyBindingGenerator" fork="true" failonerror="true" dir="${common.project.dir}">
+            <classpath refid="generator.classpath"/><arg value="${workflow.process.name}"/><arg value="${rule.version}"/>
+        </java>
+        <java classname="org.btsn.utils.BuildMasterServiceRuleBase" fork="true" failonerror="true" dir="${common.project.dir}">
+            <classpath refid="generator.classpath"/><arg value="${rule.version}"/><arg value="ALL"/>
+        </java>
+    </target>
+    <target name="resolve-model-modes" depends="prepare-runtime,detect-local-channel">
+        <resolve-local-launch component="p1" mode="${p1.mode}"/>
+        <resolve-local-launch component="p2" mode="${p2.mode}"/>
+        <resolve-local-launch component="monitor" mode="${monitor.mode}"/>
+    </target>
+    <macrodef name="launch-model-place">
+        <attribute name="number"/>
+        <sequential>
+            <java classname="org.btsn.handlers.ServiceLoader" fork="true" if:set="p@{number}.is.local"
+                  dir="${model.runtime.dir}/btsn.petrinet.places.p@{number}" output="${model.runtime.dir}/logs/P@{number}_Place.out.txt">
+                <classpath><path refid="model.dependencies"/>
+                    <pathelement location="${source.root}/btsn.petrinet.places.p@{number}/target/btsn.petrinet.places.p@{number}.jar"/>
+                </classpath>
+                <arg file="${model.runtime.dir}/btsn.petrinet.places.p@{number}"/><arg value="-version"/><arg value="${rule.version}"/>
+            </java>
+            <echo message="P@{number}: using manually started remote host" unless:set="p@{number}.is.local"/>
+        </sequential>
+    </macrodef>
+    <macrodef name="initialize-model-host">
+        <attribute name="service"/><attribute name="sequence"/>
+        <sequential>
+            <java classname="org.btsn.common.eventgenerators.DatabaseInitialization_EventGenerator" fork="true" failonerror="true" dir="${generator.project.dir}">
+                <classpath refid="generator.classpath"/>
+                <arg value="-service"/><arg value="@{service}_InitializationService"/>
+                <arg value="-operation"/><arg value="purgeAndInitialize"/>
+                <arg value="-version"/><arg value="v999"/>
+                <arg value="-process"/><arg value="petrinet/Initializers/P1_P2_Initialization"/>
+                <arg value="-sequenceId"/><arg value="@{sequence}"/><arg value="-tokens"/><arg value="1"/>
+            </java>
+        </sequential>
+    </macrodef>
+    <macrodef name="collect-model-host">
+        <attribute name="number"/>
+        <sequential>
+            <java classname="org.btsn.common.eventgenerators.Common_Collector_EventGenerator" fork="true" failonerror="true" dir="${generator.project.dir}">
+                <classpath refid="generator.classpath"/>
+                <arg value="-service"/><arg value="P@{number}_CollectorService"/>
+                <arg value="-operation"/><arg value="collectAllData"/>
+                <arg value="-version"/><arg value="v999"/>
+                <arg value="-process"/><arg value="petrinet/Collectors/P1_P2_Collector"/>
+                <arg value="-queryVersion"/><arg value="${rule.version}"/>
+                <arg value="-sequenceId"/><arg value="9990@{number}0000"/>
+            </java>
+        </sequential>
+    </macrodef>
+    <target name="run" depends="resolve-model-modes" description="Initialize, deploy, run tokens and collect actual measurements">
+        <parallel>
+            <launch-model-place number="1"/>
+            <launch-model-place number="2"/>
+            <java classname="org.btsn.handlers.ServiceLoader" fork="true" if:set="monitor.is.local" dir="${monitor.project.dir}" output="${model.runtime.dir}/logs/MonitorService.out.txt">
+                <classpath refid="monitor.classpath"/><arg file="${monitor.project.dir}"/><arg value="-version"/><arg value="${rule.version}"/>
+            </java>
+            <sequential>
+                <sleep seconds="${service.startup.seconds}"/>
+                <initialize-model-host service="P1" sequence="999000000"/>
+                <initialize-model-host service="P2" sequence="999100000"/>
+                <initialize-model-host service="Monitor" sequence="999600000"/>
+                <sleep seconds="${phase.delay.seconds}"/>
+                <java classname="org.btsn.petrinet.eventgenerators.GenericPetriNetTokenGenerator" fork="true" failonerror="true" dir="${generator.project.dir}">
+                    <classpath refid="generator.classpath"/>
+                    <arg value="-version"/><arg value="${rule.version}"/>
+                    <arg value="-process"/><arg value="${workflow.process.name}"/>
+                    <arg value="-infrastructure"/><arg value="PetriNetModels_Infrastructure"/>
+                    <arg value="-place"/><arg value="P1_Place"/>
+                    <arg value="-operation"/><arg value="processToken"/>
+                    <arg value="-tokens"/><arg value="${token.count}"/>
+                    <arg value="-expire"/><arg value="120000"/>
+                    <arg value="-generator"/><arg value="P1_EVENTGENERATOR"/>
+                    <arg value="-data"/><arg value="outcome=${token.outcome}"/>
+                </java>
+                <sleep seconds="${workflow.drain.seconds}"/>
+                <collect-model-host number="1"/>
+                <sleep seconds="${phase.delay.seconds}"/>
+                <collect-model-host number="2"/>
+                <sleep seconds="${phase.delay.seconds}"/>
+                <echo>Model execution and collection requests finished. Outcome: ${token.outcome}. Hosts remain running; stop the Ant run to close locally launched hosts.</echo>
+            </sequential>
+        </parallel>
+    </target>
+    <target name="analyse" description="Analyse the collected real measurements from the last model run">
+        <java classname="org.btsn.derby.Analysis.PetriNetAnalyzer" fork="true" failonerror="true" maxmemory="128m" dir="${monitor.project.dir}">
+            <classpath refid="monitor.classpath"/><arg value="--all"/>
+        </java>
+    </target>
+</project>
