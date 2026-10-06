@@ -1,4 +1,5 @@
 {
+  "domain": "PetriNetModels",
   "purpose": "Packaging inventory only; this does not activate or place a service.",
   "services": [
     {

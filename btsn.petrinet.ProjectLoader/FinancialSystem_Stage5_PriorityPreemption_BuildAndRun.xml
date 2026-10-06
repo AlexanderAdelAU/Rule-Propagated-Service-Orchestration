@@ -158,7 +158,7 @@
 			<include name="*.jar" />
 		</fileset>
 		<pathelement location="${class.dir}" />
-		<fileset dir="${service.bundle.dir}/services" includes="*.jar" />
+		<fileset dir="${service.bundle.dir}/services" includes="**/*.jar" />
 		<fileset dir="${service.bundle.dir}/lib" includes="*.jar" />
 	</path>
 

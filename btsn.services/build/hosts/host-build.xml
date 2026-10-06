@@ -10,7 +10,7 @@
     <property name="service.args" value="-version v001"/>
     <path id="runtime.dependencies">
         <pathelement location="${common.dir}/target/host-runtime/btsn-infrastructure.jar"/>
-        <fileset dir="${service.target}/deployment/services" includes="*.jar"/>
+        <fileset dir="${service.target}/deployment/services" includes="**/*.jar"/>
         <fileset dir="${service.target}/deployment/lib" includes="*.jar"/>
         <fileset dir="${common.dir}/lib" includes="*.jar" excludesfile="${service.target}/runtime-library-excludes.txt"/>
     </path>

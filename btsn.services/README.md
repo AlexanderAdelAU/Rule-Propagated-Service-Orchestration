@@ -67,7 +67,9 @@ The output is `btsn.services/target/service-deployment.zip`, containing:
 
 | Location | Contents |
 | --- | --- |
-| `services/<service>.jar` | One implementation and its nested classes |
+| `services/healthcare/<service>.jar` | Six healthcare implementations |
+| `services/financial/<service>.jar` | Seven Financial implementations |
+| `services/models/<service>.jar` | Seven deterministic model implementations and the stochastic implementation |
 | `lib/service-support.jar` | Shared service helpers discovered through compilation |
 | `lib/*.jar` | Declared third-party runtime dependencies, copied without alteration |
 | `catalogues/*.json` | Packaging catalogue snapshots |
@@ -75,9 +77,22 @@ The output is `btsn.services/target/service-deployment.zip`, containing:
 | `SHA256SUMS` | Bundle file checksums |
 
 `packaging.json` selects source roots, catalogues, runtime libraries and Java
-release. The builder reads every catalogue entry, including preserved unbound
-services, without interpreting the business domain or making host-placement
-decisions. The separate stochastic inventory is packaging data; it does not
+release. Its `catalogueDomains` map assigns catalogue filenames to deployment
+folders. Without an override, the catalogue's `domain` is used in lowercase.
+Domain names must contain only letters, digits, underscores or hyphens and start
+with a letter. Several catalogues may share a domain; service identities remain
+unique across the complete inventory. Each indexed operation records its domain
+and `services/<domain>/<service>.jar` path. This grouping does not select a host,
+activate a service or change its invocation contract.
+
+Service manifests resolve the shared `lib/` directory from two levels below it.
+Keep the domain folders when deploying selected JARs. For a manual Java
+classpath, use an explicit JAR path or `services/healthcare/*`,
+`services/financial/*` or `services/models/*`. Java's `services/*` wildcard does
+not search these subdirectories. The Ant build and development launchers collect
+service JARs recursively and retain their existing deployment selection.
+
+The builder reads every catalogue entry, including preserved unbound services, without domain-specific business logic or host-placement decisions. The separate stochastic inventory is packaging data; it does not
 change active deployment metadata. The current inventory yields twenty-one service
 JARs: seven Financial implementations, seven deterministic model implementations,
 six healthcare implementations and the preserved stochastic implementation.

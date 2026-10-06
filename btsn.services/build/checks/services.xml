@@ -4,7 +4,7 @@
         <mkdir dir="${target.dir}/model-check"/>
         <path id="model.check.classpath">
             <pathelement location="${target.dir}/model-check"/>
-            <fileset dir="${target.dir}/deployment/services" includes="*.jar"/>
+            <fileset dir="${target.dir}/deployment/services" includes="**/*.jar"/>
             <fileset dir="${target.dir}/deployment/lib" includes="*.jar"/>
         </path>
         <javac srcdir="tests" destdir="${target.dir}/model-check" includes="DeterministicModelServiceCheck.java"
@@ -21,7 +21,7 @@
         <mkdir dir="${target.dir}/healthcare-check/runtime"/>
         <path id="healthcare.check.classpath">
             <pathelement location="${target.dir}/healthcare-check"/>
-            <fileset dir="${target.dir}/deployment/services" includes="*.jar"/>
+            <fileset dir="${target.dir}/deployment/services" includes="**/*.jar"/>
             <fileset dir="${target.dir}/deployment/lib" includes="*.jar"/>
         </path>
         <javac srcdir="tests" destdir="${target.dir}/healthcare-check" includes="HealthcareServiceCheck.java"
@@ -38,7 +38,7 @@
         <mkdir dir="${target.dir}/host-check/empty-sourcepath"/>
         <path id="host.check.dependencies">
             <pathelement location="${common.dir}/target/host-runtime/btsn-infrastructure.jar"/>
-            <fileset dir="${target.dir}/deployment/services" includes="*.jar"/>
+            <fileset dir="${target.dir}/deployment/services" includes="**/*.jar"/>
             <fileset dir="${target.dir}/deployment/lib" includes="*.jar"/>
             <fileset dir="${common.dir}/lib" includes="*.jar" excludesfile="${target.dir}/runtime-library-excludes.txt"/>
         </path>
@@ -90,7 +90,7 @@
         <mkdir dir="${target.dir}/resolver-check/classes"/>
         <mkdir dir="${target.dir}/resolver-check/empty-sourcepath"/>
         <path id="packaged.classpath">
-            <fileset dir="${target.dir}/deployment/services" includes="*.jar"/>
+            <fileset dir="${target.dir}/deployment/services" includes="**/*.jar"/>
             <fileset dir="${target.dir}/deployment/lib" includes="*.jar"/>
         </path>
         <path id="resolver.classpath">

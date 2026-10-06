@@ -20,7 +20,7 @@
             <pathelement location="${probe.dir}/classes"/>
             <pathelement location="../btsn.petrinet.places.p1/target/btsn.petrinet.places.p1.jar"/>
             <pathelement location="${common.dir}/target/host-runtime/btsn-infrastructure.jar"/>
-            <fileset dir="${services.dir}/target/deployment/services" includes="*.jar"/>
+            <fileset dir="${services.dir}/target/deployment/services" includes="**/*.jar"/>
             <fileset dir="${services.dir}/target/deployment/lib" includes="*.jar"/>
             <fileset dir="${common.dir}/lib" includes="*.jar" excludesfile="${services.dir}/target/runtime-library-excludes.txt"/>
         </path>

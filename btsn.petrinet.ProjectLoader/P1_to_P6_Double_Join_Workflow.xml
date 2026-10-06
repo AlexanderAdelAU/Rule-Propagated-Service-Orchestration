@@ -183,7 +183,7 @@
 		<fileset dir="${lib.dir}" erroronmissingdir="false" excludesfile="${services.project.dir}/target/runtime-library-excludes.txt">
 			<include name="*.jar" />
 		</fileset>
-        <fileset dir="${services.project.dir}/target/deployment/services" includes="*.jar"/>
+        <fileset dir="${services.project.dir}/target/deployment/services" includes="**/*.jar"/>
         <fileset dir="${services.project.dir}/target/deployment/lib" includes="*.jar"/>
 		<pathelement location="${class.dir}" />
 	</path>

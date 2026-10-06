@@ -6,6 +6,7 @@ import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -52,16 +53,26 @@ public final class ServiceInventory {
         // Native Ant deletes stale inventory before invoking this reader.
         Files.createDirectories(inventory.resolve("catalogues"));
         JSONArray services = new JSONArray();
+        JSONObject catalogueDomains = (JSONObject) config.getOrDefault("catalogueDomains", new JSONObject());
         Set<String> catalogueNames = new HashSet<>(), libraryNames = new HashSet<>();
         for (Object name : (JSONArray) config.get("catalogues")) {
             Path catalogue = resolve(configPath, name);
             if (!catalogueNames.add(catalogue.getFileName().toString())) throw new IllegalArgumentException("Duplicate catalogue filename");
             Files.write(inventory.resolve("catalogues").resolve(catalogue.getFileName()), Files.readAllBytes(catalogue));
-            services.addAll((JSONArray) read(catalogue).get("services"));
+            JSONObject catalogueData = read(catalogue);
+            Object selectedDomain = catalogueDomains.getOrDefault(catalogue.getFileName().toString(), catalogueData.get("domain"));
+            if (!(selectedDomain instanceof String)) throw new IllegalArgumentException("Missing packaging domain for catalogue: " + catalogue);
+            String domain = ((String) selectedDomain).toLowerCase(Locale.ROOT);
+            if (!domain.matches("[a-z][a-z0-9_-]*")) throw new IllegalArgumentException("Invalid packaging domain: " + selectedDomain);
+            for (Object entry : (JSONArray) catalogueData.get("services")) {
+                JSONObject service = new JSONObject(new LinkedHashMap<>((JSONObject) entry));
+                service.put("domain", domain);
+                services.add(service);
+            }
         }
         if (services.isEmpty()) throw new IllegalArgumentException("Empty service inventory");
         StringBuilder libraryPath = new StringBuilder(), copyLibraries = new StringBuilder();
-        String dependencies = "../lib/service-support.jar";
+        String dependencies = "../../lib/service-support.jar";
         JSONArray runtimeDependencies = new JSONArray();
         runtimeDependencies.add("lib/service-support.jar");
         for (Object name : (JSONArray) config.get("runtimeLibraries")) {
@@ -70,7 +81,7 @@ public final class ServiceInventory {
             if (!Files.isRegularFile(library)) throw new IllegalArgumentException("Missing library: " + library);
             if (!filename.matches("[A-Za-z0-9_.-]+") || !libraryNames.add(filename) || filename.equals("service-support.jar"))
                 throw new IllegalArgumentException("Invalid or duplicate library filename");
-            dependencies += " ../lib/" + filename;
+            dependencies += " ../../lib/" + filename;
             runtimeDependencies.add("lib/" + filename);
             libraryPath.append("<pathelement location=\"").append(xml(library)).append("\"/>");
             copyLibraries.append("<copy file=\"").append(xml(library)).append("\" todir=\"${bundle}/lib\"/>\n");
@@ -79,10 +90,12 @@ public final class ServiceInventory {
             libraryNames.stream().sorted().collect(Collectors.joining("\n", "", "\n")));
         Set<String> capabilities = new HashSet<>();
         java.util.Map<String, String> names = new LinkedHashMap<>(), implementations = new LinkedHashMap<>();
+        java.util.Map<String, String> serviceDomains = new LinkedHashMap<>();
         StringBuilder includes = new StringBuilder(), excludes = new StringBuilder(), jars = new StringBuilder();
         JSONArray index = new JSONArray();
         for (Object entry : services) {
             JSONObject service = (JSONObject) entry;
+            String domain = (String) service.get("domain");
             String name = (String) service.get("service"), implementation = (String) service.get("implementationClass");
             String operation = (String) service.get("operation");
             if (name == null || !name.matches("[A-Za-z_][A-Za-z0-9_]*")
@@ -94,6 +107,9 @@ public final class ServiceInventory {
             String existing = names.putIfAbsent(name, implementation);
             if (existing != null && !existing.equals(implementation))
                 throw new IllegalArgumentException("Conflicting implementations for service: " + name);
+            String existingDomain = serviceDomains.putIfAbsent(name, domain);
+            if (existingDomain != null && !existingDomain.equals(domain))
+                throw new IllegalArgumentException("Service assigned to different packaging domains: " + name);
             String owner = implementations.putIfAbsent(implementation, name);
             if (owner != null && !owner.equals(name))
                 throw new IllegalArgumentException("Implementation assigned to different services: " + implementation);
@@ -103,13 +119,14 @@ public final class ServiceInventory {
                 includes.append("<include name=\"").append(xml(classPath)).append(".java\"/>\n");
                 excludes.append("<exclude name=\"").append(xml(classPath)).append(".class\"/>")
                     .append("<exclude name=\"").append(xml(classPath)).append("$*.class\"/>\n");
-                jars.append("<jar destfile=\"${bundle}/services/").append(xml(name)).append(".jar\" modificationtime=\"315532800000\">\n")
+                jars.append("<mkdir dir=\"${bundle}/services/").append(xml(domain)).append("\"/>\n")
+                    .append("<jar destfile=\"${bundle}/services/").append(xml(domain)).append("/").append(xml(name)).append(".jar\" modificationtime=\"315532800000\">\n")
                     .append("<fileset dir=\"${classes}\"><include name=\"").append(xml(classPath)).append(".class\"/>")
                     .append("<include name=\"").append(xml(classPath)).append("$*.class\"/></fileset>\n")
                     .append("<manifest><attribute name=\"Class-Path\" value=\"").append(xml(dependencies)).append("\"/></manifest></jar>\n");
             }
             JSONObject packaged = new JSONObject(new LinkedHashMap<>(service));
-            packaged.put("jar", "services/" + name + ".jar");
+            packaged.put("jar", "services/" + domain + "/" + name + ".jar");
             packaged.put("runtimeDependencies", runtimeDependencies);
             index.add(packaged);
         }
@@ -118,7 +135,9 @@ public final class ServiceInventory {
         deployment.put("services", index);
         Files.writeString(inventory.resolve("deployment-index.json"), deployment.toJSONString() + "\n");
         Files.writeString(inventory.resolve("README.txt"), "Service deployment bundle\n\n"
-            + "Install selected services/<service>.jar together with lib/. Keep relative paths.\n"
+            + "Install selected services/<domain>/<service>.jar together with lib/. Keep relative paths.\n"
+            + "Domains organise catalogue inventory only; host placement remains in deployment metadata.\n"
+            + "Java classpath wildcards do not recurse: select JARs explicitly or use services/<domain>/*.\n"
             + "Add selected JARs to the generic host JVM classpath; manifests supply support libraries.\n"
             + "Host infrastructure, logging configuration, resolver metadata and rules are supplied separately.\n"
             + "Packaging does not activate or place services. Remove duplicate implementation classes from the host classpath.\n"

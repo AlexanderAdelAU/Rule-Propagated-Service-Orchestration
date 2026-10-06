@@ -4,7 +4,7 @@
     <property name="java.release" value="15"/>
     <path id="runtime.classpath">
         <pathelement location="${common.dir}/target/host-runtime/btsn-infrastructure.jar"/>
-        <fileset dir="target/deployment/services" includes="*.jar"/>
+        <fileset dir="target/deployment/services" includes="**/*.jar"/>
         <fileset dir="target/deployment/lib" includes="*.jar"/>
         <fileset dir="${common.dir}/lib" includes="*.jar" excludesfile="target/runtime-library-excludes.txt"/>
     </path>

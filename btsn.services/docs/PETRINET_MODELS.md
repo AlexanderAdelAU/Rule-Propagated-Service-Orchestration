@@ -1,5 +1,9 @@
 # Running raw Petri-net models
 
+Packaged deterministic and stochastic service JARs are grouped under
+`btsn.services/target/deployment/services/models`; shared support stays in
+`btsn.services/target/deployment/lib`. This grouping does not change host placement.
+
 Run `btsn.petrinet.ProjectLoader/P1_P2_BuildAndRun.xml` as an
 Ant Build in Eclipse, using its default `run-complete-workflow` target. It builds the JARs, prepares
 the model configuration, checks ip0, launches local P1/P2 and Monitor when

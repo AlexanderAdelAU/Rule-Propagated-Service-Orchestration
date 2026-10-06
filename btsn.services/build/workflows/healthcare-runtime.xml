@@ -17,7 +17,7 @@
         <pathelement location="${source.root}/btsn.common/target/host-runtime/btsn-infrastructure.jar"/>
         <fileset dir="${source.root}/btsn.common/lib" includes="*.jar" excludesfile="${services.project.dir}/target/runtime-library-excludes.txt"/>
         <fileset dir="${services.project.dir}/target/deployment/lib" includes="*.jar"/>
-        <fileset dir="${services.project.dir}/target/deployment/services" includes="*.jar"/>
+        <fileset dir="${services.project.dir}/target/deployment/services" includes="**/*.jar"/>
     </path>
     <macrodef name="copy-healthcare-component">
         <attribute name="directory"/>

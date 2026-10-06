@@ -25,10 +25,11 @@ public final class PackagedBundleCheck {
             if (!digest.toString().equals(parts[0])) throw new AssertionError("Checksum mismatch: " + parts[1]);
         }
         Set<String> seen = new HashSet<>();
+        Path serviceRoot = bundle.resolve("services");
         List<Path> jars;
         try (Stream<Path> paths = Files.walk(bundle)) {
             jars = paths.filter(p -> p.toString().endsWith(".jar"))
-                .filter(p -> p.getParent().getFileName().toString().equals("services") || p.getFileName().toString().equals("service-support.jar"))
+                .filter(p -> p.startsWith(serviceRoot) || p.equals(bundle.resolve("lib/service-support.jar")))
                 .sorted().collect(Collectors.toList());
         }
         for (Path path : jars) {
@@ -42,6 +43,33 @@ public final class PackagedBundleCheck {
         }
         JSONObject index = (JSONObject) new JSONParser().parse(Files.readString(bundle.resolve("deployment-index.json")));
         JSONArray services = (JSONArray) index.get("services");
+        Set<Path> indexedJars = new HashSet<>();
+        for (Object entry : services) {
+            JSONObject service = (JSONObject) entry;
+            String domain = (String) service.get("domain");
+            if (domain == null || !domain.matches("[a-z][a-z0-9_-]*")) throw new AssertionError("Invalid indexed domain: " + domain);
+            Path relative = Path.of(service.get("jar").toString());
+            if (!relative.equals(Path.of("services", domain, service.get("service") + ".jar")))
+                throw new AssertionError("Service JAR does not match its indexed domain: " + relative);
+            Path path = bundle.resolve(relative);
+            indexedJars.add(path);
+            Set<Path> expectedDependencies = new HashSet<>();
+            for (Object dependency : (JSONArray) service.get("runtimeDependencies"))
+                expectedDependencies.add(bundle.resolve(dependency.toString()).normalize());
+            try (JarFile jar = new JarFile(path.toFile())) {
+                String manifestPath = jar.getManifest().getMainAttributes().getValue("Class-Path");
+                Set<Path> actualDependencies = new HashSet<>();
+                for (String dependency : manifestPath.split("\\s+")) {
+                    Path resolved = path.getParent().resolve(dependency).normalize();
+                    if (!Files.isRegularFile(resolved)) throw new AssertionError("Missing manifest dependency: " + resolved);
+                    actualDependencies.add(resolved);
+                }
+                if (!actualDependencies.equals(expectedDependencies))
+                    throw new AssertionError("Manifest dependencies differ from deployment index: " + path);
+            }
+        }
+        Set<Path> deployedJars = jars.stream().filter(p -> p.startsWith(serviceRoot)).collect(Collectors.toSet());
+        if (!deployedJars.equals(indexedJars)) throw new AssertionError("Deployed service JARs differ from deployment index");
         String java = Path.of(System.getProperty("java.home"), "bin", System.getProperty("os.name").startsWith("Windows") ? "java.exe" : "java").toString();
         for (Object entry : services) {
             JSONObject service = (JSONObject) entry;
@@ -57,6 +85,6 @@ public final class PackagedBundleCheck {
             int status = new ProcessBuilder(command).directory(bundle.toFile()).inheritIO().start().waitFor();
             if (status != 0) throw new AssertionError("Isolated JAR invocation failed: " + service.get("service"));
         }
-        System.out.println("PASS: checksums, unique classes and all " + services.size() + " isolated service operations");
+        System.out.println("PASS: domain layout, manifest dependencies, checksums, unique classes and all " + services.size() + " isolated service operations");
     }
 }

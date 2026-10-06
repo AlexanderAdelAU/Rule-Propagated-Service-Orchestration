@@ -6,7 +6,7 @@
     <property name="java.release" value="15"/>
     <path id="compile.classpath">
         <fileset dir="${common.dir}/lib" includes="*.jar"/>
-        <fileset dir="${service.target}/deployment/services" includes="*.jar"/>
+        <fileset dir="${service.target}/deployment/services" includes="**/*.jar"/>
         <fileset dir="${service.target}/deployment/lib" includes="*.jar"/>
     </path>
     <target name="jar" description="Compile common infrastructure with service-owned sources excluded">

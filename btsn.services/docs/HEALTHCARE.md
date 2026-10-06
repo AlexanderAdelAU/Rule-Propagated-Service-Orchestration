@@ -23,7 +23,7 @@ federated requests, then collects all three versions with v999 admin tokens.
 
 Business implementations are in `btsn.common/src/org/btsn/business/healthcare`,
 packaged exclusively into the six corresponding JARs under
-`btsn.services/target/deployment/services`. A service with several operations
+`btsn.services/target/deployment/services/healthcare`. A service with several operations
 still produces one JAR. The shared service support and Derby library accompany
 those JARs in `target/deployment/lib`. The infrastructure JAR excludes these
 implementations and their business base classes. No execution handler changed.

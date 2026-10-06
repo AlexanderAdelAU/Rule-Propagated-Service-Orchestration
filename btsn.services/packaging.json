@@ -11,5 +11,11 @@
     "../btsn.common/lib/log4j-1.2.16.jar",
     "../btsn.common/lib/derby.jar"
   ],
-  "javaRelease": 15
+  "javaRelease": 15,
+  "catalogueDomains": {
+    "FinancialSystem.json": "financial",
+    "StochasticService.json": "models",
+    "PetriNetModels.json": "models",
+    "Healthcare.json": "healthcare"
+  }
 }
