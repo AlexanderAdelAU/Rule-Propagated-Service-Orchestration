@@ -59,12 +59,12 @@
         </copy>
         <copy file="${model.profile.file}" tofile="${common.project.dir}/BusinessServiceDefinitions/Deployment.json" overwrite="true"/>
         <copy file="${model.rules.file}" tofile="${local.channel.rules}" overwrite="true"/>
-        <copy-model-component directory="btsn.petrinet.places.p1"/>
-        <copy-model-component directory="btsn.petrinet.places.p2"/>
-        <copy-model-component directory="btsn.petrinet.places.p3"/>
-        <copy-model-component directory="btsn.petrinet.places.p4"/>
-        <copy-model-component directory="btsn.petrinet.places.p5"/>
-        <copy-model-component directory="btsn.petrinet.places.p6"/>
+        <copy-model-component directory="btsn.rpso.places.p1"/>
+        <copy-model-component directory="btsn.rpso.places.p2"/>
+        <copy-model-component directory="btsn.rpso.places.p3"/>
+        <copy-model-component directory="btsn.rpso.places.p4"/>
+        <copy-model-component directory="btsn.rpso.places.p5"/>
+        <copy-model-component directory="btsn.rpso.places.p6"/>
         <copy-model-component directory="btsn.common.eventgenerators"/>
         <!-- The existing admin generators use this spelling, including on Linux. -->
         <copy file="${source.root}/btsn.common.eventgenerators/PayLoad/payload.xml" tofile="${generator.project.dir}/Payload/payLoad.xml"/>

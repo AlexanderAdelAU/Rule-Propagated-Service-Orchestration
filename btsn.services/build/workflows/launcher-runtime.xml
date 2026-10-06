@@ -16,18 +16,18 @@
     <property name="monitor.runtime.jar" location="${source.root}/btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
     <property name="local.channel.project.dir" location="${services.project.dir}"/>
     <property name="local.channel.rules" location="${common.project.dir}/RuleBase/Generated/InfrastructureDeployment.ruleml.xml"/>
-    <property name="p1.project.dir" location="${launcher.runtime.dir}/btsn.petrinet.places.p1"/>
-    <property name="p2.project.dir" location="${launcher.runtime.dir}/btsn.petrinet.places.p2"/>
-    <property name="p3.project.dir" location="${launcher.runtime.dir}/btsn.petrinet.places.p3"/>
-    <property name="p4.project.dir" location="${launcher.runtime.dir}/btsn.petrinet.places.p4"/>
-    <property name="p5.project.dir" location="${launcher.runtime.dir}/btsn.petrinet.places.p5"/>
-    <property name="p6.project.dir" location="${launcher.runtime.dir}/btsn.petrinet.places.p6"/>
-    <property name="p1.host.jar" location="${source.root}/btsn.petrinet.places.p1/target/btsn.petrinet.places.p1.jar"/>
-    <property name="p2.host.jar" location="${source.root}/btsn.petrinet.places.p2/target/btsn.petrinet.places.p2.jar"/>
-    <property name="p3.host.jar" location="${source.root}/btsn.petrinet.places.p3/target/btsn.petrinet.places.p3.jar"/>
-    <property name="p4.host.jar" location="${source.root}/btsn.petrinet.places.p4/target/btsn.petrinet.places.p4.jar"/>
-    <property name="p5.host.jar" location="${source.root}/btsn.petrinet.places.p5/target/btsn.petrinet.places.p5.jar"/>
-    <property name="p6.host.jar" location="${source.root}/btsn.petrinet.places.p6/target/btsn.petrinet.places.p6.jar"/>
+    <property name="p1.project.dir" location="${launcher.runtime.dir}/btsn.rpso.places.p1"/>
+    <property name="p2.project.dir" location="${launcher.runtime.dir}/btsn.rpso.places.p2"/>
+    <property name="p3.project.dir" location="${launcher.runtime.dir}/btsn.rpso.places.p3"/>
+    <property name="p4.project.dir" location="${launcher.runtime.dir}/btsn.rpso.places.p4"/>
+    <property name="p5.project.dir" location="${launcher.runtime.dir}/btsn.rpso.places.p5"/>
+    <property name="p6.project.dir" location="${launcher.runtime.dir}/btsn.rpso.places.p6"/>
+    <property name="p1.host.jar" location="${source.root}/btsn.rpso.places.p1/target/btsn.rpso.places.p1.jar"/>
+    <property name="p2.host.jar" location="${source.root}/btsn.rpso.places.p2/target/btsn.rpso.places.p2.jar"/>
+    <property name="p3.host.jar" location="${source.root}/btsn.rpso.places.p3/target/btsn.rpso.places.p3.jar"/>
+    <property name="p4.host.jar" location="${source.root}/btsn.rpso.places.p4/target/btsn.rpso.places.p4.jar"/>
+    <property name="p5.host.jar" location="${source.root}/btsn.rpso.places.p5/target/btsn.rpso.places.p5.jar"/>
+    <property name="p6.host.jar" location="${source.root}/btsn.rpso.places.p6/target/btsn.rpso.places.p6.jar"/>
     <import file="auto-deployment.xml"/>
     <path id="common.classpath">
         <pathelement location="${infrastructure.jar}"/>
@@ -73,12 +73,12 @@
         </copy>
         <copy file="${launcher.profile.file}" tofile="${common.project.dir}/BusinessServiceDefinitions/Deployment.json" overwrite="true"/>
         <copy file="${launcher.rules.file}" tofile="${local.channel.rules}" overwrite="true"/>
-        <copy-launcher-component directory="btsn.petrinet.places.p1"/>
-        <copy-launcher-component directory="btsn.petrinet.places.p2"/>
-        <copy-launcher-component directory="btsn.petrinet.places.p3"/>
-        <copy-launcher-component directory="btsn.petrinet.places.p4"/>
-        <copy-launcher-component directory="btsn.petrinet.places.p5"/>
-        <copy-launcher-component directory="btsn.petrinet.places.p6"/>
+        <copy-launcher-component directory="btsn.rpso.places.p1"/>
+        <copy-launcher-component directory="btsn.rpso.places.p2"/>
+        <copy-launcher-component directory="btsn.rpso.places.p3"/>
+        <copy-launcher-component directory="btsn.rpso.places.p4"/>
+        <copy-launcher-component directory="btsn.rpso.places.p5"/>
+        <copy-launcher-component directory="btsn.rpso.places.p6"/>
         <copy-launcher-component directory="btsn.common.eventgenerators"/>
         <copy file="${source.root}/btsn.common.eventgenerators/PayLoad/payload.xml" tofile="${generator.project.dir}/Payload/payLoad.xml"/>
         <build-launcher-master version="v001"/>

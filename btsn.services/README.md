@@ -21,7 +21,7 @@ JARs belongs to a numbered host.
 | `build/workflows/` | Monitor/generator builds, local channel checks and runtime preparation |
 | `build/checks/` | Packaged-service, host-boundary and analysis regression targets |
 | `deployments/healthcare/` | Healthcare deployment profile and channel facts |
-| `deployments/models/` | Deterministic and double-join model deployment profiles |
+| `deployments/models/` | Deterministic, stochastic loop, fork, double-join and traffic-light deployment profiles |
 | `catalogues/` | Supplemental packaging inventory |
 | `src/`, `tests/` | Java build helpers and regression checks |
 | `docs/` | Healthcare, model and portable-release guides |

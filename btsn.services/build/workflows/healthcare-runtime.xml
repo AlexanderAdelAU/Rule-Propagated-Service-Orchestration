@@ -47,12 +47,12 @@
         </copy>
         <copy file="${services.project.dir}/deployments/healthcare/Deployment.json" tofile="${common.project.dir}/BusinessServiceDefinitions/Deployment.json" overwrite="true"/>
         <copy file="${services.project.dir}/deployments/healthcare/InfrastructureDeployment.ruleml.xml" tofile="${local.channel.rules}" overwrite="true"/>
-        <copy-healthcare-component directory="btsn.petrinet.places.p1"/>
-        <copy-healthcare-component directory="btsn.petrinet.places.p2"/>
-        <copy-healthcare-component directory="btsn.petrinet.places.p3"/>
-        <copy-healthcare-component directory="btsn.petrinet.places.p4"/>
-        <copy-healthcare-component directory="btsn.petrinet.places.p5"/>
-        <copy-healthcare-component directory="btsn.petrinet.places.p6"/>
+        <copy-healthcare-component directory="btsn.rpso.places.p1"/>
+        <copy-healthcare-component directory="btsn.rpso.places.p2"/>
+        <copy-healthcare-component directory="btsn.rpso.places.p3"/>
+        <copy-healthcare-component directory="btsn.rpso.places.p4"/>
+        <copy-healthcare-component directory="btsn.rpso.places.p5"/>
+        <copy-healthcare-component directory="btsn.rpso.places.p6"/>
         <copy-healthcare-component directory="btsn.common.eventgenerators"/>
         <copy file="${source.root}/btsn.common.eventgenerators/PayLoad/payload.xml" tofile="${generator.project.dir}/Payload/payLoad.xml"/>
         <build-healthcare-master version="${rule.version}"/>

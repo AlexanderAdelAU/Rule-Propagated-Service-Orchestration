@@ -28,7 +28,7 @@ sources = [
 # Deliberately exclude all P1-P6 placeholder classes: the resolver must invoke
 # business implementations without a physical adapter available as a fallback.
 
-helpers = [root / f"btsn.petrinet.places.p{index}/src/org/btsn/handlers/ServiceHelper.java" for index in range(1, 7)]
+helpers = [root / f"btsn.rpso.places.p{index}/src/org/btsn/handlers/ServiceHelper.java" for index in range(1, 7)]
 assert len({path.read_bytes() for path in helpers}) == 1, "P1-P6 ServiceHelper copies differ"
 with tempfile.TemporaryDirectory(prefix="capability-check-") as temporary:
     work = Path(temporary)

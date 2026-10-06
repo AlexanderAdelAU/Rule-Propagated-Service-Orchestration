@@ -129,22 +129,22 @@
 	<property name="monitor.output.file" location="${output.dir}/MonitorService_out.txt" />
 
 	<!-- Service Projects -->
-	<property name="triage.project.dir" location="${healthcare.runtime.dir}/btsn.petrinet.places.p1" />
+	<property name="triage.project.dir" location="${healthcare.runtime.dir}/btsn.rpso.places.p1" />
 
 
-	<property name="laboratory.project.dir" location="${healthcare.runtime.dir}/btsn.petrinet.places.p2" />
+	<property name="laboratory.project.dir" location="${healthcare.runtime.dir}/btsn.rpso.places.p2" />
 
 
-	<property name="radiology.project.dir" location="${healthcare.runtime.dir}/btsn.petrinet.places.p4" />
+	<property name="radiology.project.dir" location="${healthcare.runtime.dir}/btsn.rpso.places.p4" />
 
 
-	<property name="cardiology.project.dir" location="${healthcare.runtime.dir}/btsn.petrinet.places.p3" />
+	<property name="cardiology.project.dir" location="${healthcare.runtime.dir}/btsn.rpso.places.p3" />
 
 
-	<property name="diagnosis.project.dir" location="${healthcare.runtime.dir}/btsn.petrinet.places.p5" />
+	<property name="diagnosis.project.dir" location="${healthcare.runtime.dir}/btsn.rpso.places.p5" />
 
 
-	<property name="treatment.project.dir" location="${healthcare.runtime.dir}/btsn.petrinet.places.p6" />
+	<property name="treatment.project.dir" location="${healthcare.runtime.dir}/btsn.rpso.places.p6" />
 
 
 
@@ -164,17 +164,17 @@
 
 	<path id="common.classpath"><path refid="healthcare.dependencies"/></path>
 
-	<path id="triage.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.petrinet.places.p1/target/btsn.petrinet.places.p1.jar"/></path>
+	<path id="triage.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.rpso.places.p1/target/btsn.rpso.places.p1.jar"/></path>
 
-	<path id="laboratory.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.petrinet.places.p2/target/btsn.petrinet.places.p2.jar"/></path>
+	<path id="laboratory.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.rpso.places.p2/target/btsn.rpso.places.p2.jar"/></path>
 
-	<path id="radiology.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.petrinet.places.p4/target/btsn.petrinet.places.p4.jar"/></path>
+	<path id="radiology.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.rpso.places.p4/target/btsn.rpso.places.p4.jar"/></path>
 
-	<path id="cardiology.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.petrinet.places.p3/target/btsn.petrinet.places.p3.jar"/></path>
+	<path id="cardiology.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.rpso.places.p3/target/btsn.rpso.places.p3.jar"/></path>
 
-	<path id="diagnosis.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.petrinet.places.p5/target/btsn.petrinet.places.p5.jar"/></path>
+	<path id="diagnosis.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.rpso.places.p5/target/btsn.rpso.places.p5.jar"/></path>
 
-	<path id="treatment.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.petrinet.places.p6/target/btsn.petrinet.places.p6.jar"/></path>
+	<path id="treatment.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.rpso.places.p6/target/btsn.rpso.places.p6.jar"/></path>
 
 	<path id="monitor.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/></path>
 

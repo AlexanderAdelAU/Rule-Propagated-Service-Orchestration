@@ -88,7 +88,7 @@
 	<property name="monitor.output.file" location="${output.dir}/MonitorService.out.txt" />
 
 	<!-- Radiology Service -->
-	<property name="radiology.project.dir" location="${healthcare.runtime.dir}/btsn.petrinet.places.p4" />
+	<property name="radiology.project.dir" location="${healthcare.runtime.dir}/btsn.rpso.places.p4" />
 
 
 
@@ -108,7 +108,7 @@
 
 	<path id="common.classpath"><path refid="healthcare.dependencies"/></path>
 
-	<path id="radiology.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.petrinet.places.p4/target/btsn.petrinet.places.p4.jar"/></path>
+	<path id="radiology.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.rpso.places.p4/target/btsn.rpso.places.p4.jar"/></path>
 
 	<path id="monitor.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/></path>
 

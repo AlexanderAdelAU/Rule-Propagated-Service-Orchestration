@@ -188,7 +188,7 @@ The definition of service attributes is done on the basis *"if you want to talk 
 |---|---|
 | `btsn.common` | Shared infrastructure, rules, catalogues and business-service source |
 | `btsn.services` | Independent service JAR packaging and shared Ant build support |
-| `btsn.petrinet.places.p1` through `p6` | Generic numbered orchestration hosts |
+| `btsn.rpso.places.p1` through `p6` | Generic numbered orchestration hosts |
 | `btsn.common.Monitor` | Observation collection and analysis |
 | `btsn.common.eventgenerators` | Shared workflow and administration token generators |
 | `btsn.healthcare.ProjectLoader` | Healthcare build-and-run workflows and process tests |
@@ -216,7 +216,7 @@ ant -f btsn.services/build.xml clean check
 Build one generic host's executable JAR and portable ZIP with:
 
 ```sh
-ant -f btsn.petrinet.places.p1/build.xml
+ant -f btsn.rpso.places.p1/build.xml
 ```
 
 Each host's portable package contains its infrastructure and launch scripts.

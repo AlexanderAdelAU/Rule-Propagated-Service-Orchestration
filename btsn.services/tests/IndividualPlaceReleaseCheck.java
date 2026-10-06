@@ -15,7 +15,7 @@ public final class IndividualPlaceReleaseCheck {
     }
     private static void require(boolean ok, String message) { if (!ok) throw new AssertionError(message); }
     private static void check(Path repository, int number) throws Exception {
-        String artifact = "btsn.petrinet.places.p" + number;
+        String artifact = "btsn.rpso.places.p" + number;
         Path zip = repository.resolve(artifact + "/target/" + artifact + ".zip");
         Path root = Files.createTempDirectory("independent P" + number + " release ");
         try (ZipInputStream input = new ZipInputStream(Files.newInputStream(zip))) {
@@ -28,7 +28,7 @@ public final class IndividualPlaceReleaseCheck {
             }
         }
         for (int other = 1; other <= 6; other++) {
-            if (other != number) require(!Files.exists(root.resolve("btsn.petrinet.places.p" + other)), "Release contains another numbered place");
+            if (other != number) require(!Files.exists(root.resolve("btsn.rpso.places.p" + other)), "Release contains another numbered place");
         }
         Path work = root.resolve(artifact), jar = work.resolve(artifact + ".jar");
         try (JarFile input = new JarFile(jar.toFile())) {

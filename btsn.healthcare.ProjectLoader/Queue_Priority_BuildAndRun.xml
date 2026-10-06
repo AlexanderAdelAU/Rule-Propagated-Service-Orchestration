@@ -11,14 +11,14 @@
     <target name="prepare">
         <echo message="Controlled queue-priority probe: real P1 UDP queue, isolated worker and reports. Open the generated timeline; Monitor retains the previous healthcare data."/>
         <ant antfile="${services.dir}/build.xml" target="runtime" inheritall="false"/>
-        <ant antfile="../btsn.petrinet.places.p1/build.xml" target="jar-only" inheritall="false"/>
+        <ant antfile="../btsn.rpso.places.p1/build.xml" target="jar-only" inheritall="false"/>
         <mkdir dir="${probe.dir}/classes"/>
         <mkdir dir="${probe.dir}/runtime/ServiceLoaderQueries"/>
-        <copy file="../btsn.petrinet.places.p1/ServiceLoaderQueries/loaderSettings.xml"
+        <copy file="../btsn.rpso.places.p1/ServiceLoaderQueries/loaderSettings.xml"
               tofile="${probe.dir}/runtime/ServiceLoaderQueries/loaderSettings.xml"/>
         <path id="probe.classpath">
             <pathelement location="${probe.dir}/classes"/>
-            <pathelement location="../btsn.petrinet.places.p1/target/btsn.petrinet.places.p1.jar"/>
+            <pathelement location="../btsn.rpso.places.p1/target/btsn.rpso.places.p1.jar"/>
             <pathelement location="${common.dir}/target/host-runtime/btsn-infrastructure.jar"/>
             <fileset dir="${services.dir}/target/deployment/services" includes="**/*.jar"/>
             <fileset dir="${services.dir}/target/deployment/lib" includes="*.jar"/>
