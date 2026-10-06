@@ -27,6 +27,8 @@ import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
  * Class name retained for existing Monitor entry points and launchers.
  */
 public class SwingGanttChart_WithLatency_v1d extends JPanel {
+    private static final double BAR_SLOT_CENTER = 0.345;
+    private static final double BAR_SLOT_WIDTH = 0.225;
     
     private static final String PROTOCOL = "jdbc:derby:";
     private static final String DB_NAME = "ServiceAnalysisDataBase";
@@ -416,19 +418,21 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             if(lane==null) continue;
             double base=groups.size()-1-lane;
             double maximum=axisMaximum(groups.get(lane));
+            double barLeft=i+BAR_SLOT_CENTER-BAR_SLOT_WIDTH/2;
+            double barRight=i+BAR_SLOT_CENTER+BAR_SLOT_WIDTH/2;
             if(t.hasElapsedTime) {
                 double top=base+0.8*t.elapsedTime/maximum;
-                if(t.elapsedTime==0) w.printf(Locale.ROOT,"\\draw[lane%d,thick] (%.3f,%.3f)--(%.3f,%.3f);%n",lane,i+0.12,base,i+0.57,base);
-                else w.printf(Locale.ROOT,"\\filldraw[fill=lane%d,draw=lane%d] (%.3f,%.3f) rectangle (%.3f,%.3f);%n",lane,lane,i+0.12,base,i+0.57,top);
-            } else w.printf(Locale.ROOT,"\\node at (%.3f,%.3f) {$\\times$};%n",i+0.38,base);
+                if(t.elapsedTime==0) w.printf(Locale.ROOT,"\\draw[lane%d,thick] (%.3f,%.3f)--(%.3f,%.3f);%n",lane,barLeft,base,barRight,base);
+                else w.printf(Locale.ROOT,"\\filldraw[fill=lane%d,draw=lane%d] (%.3f,%.3f) rectangle (%.3f,%.3f);%n",lane,lane,barLeft,base,barRight,top);
+            } else w.printf(Locale.ROOT,"\\node at (%.3f,%.3f) {$\\times$};%n",i+BAR_SLOT_CENTER,base);
             if(t.hasQueueTime) {
                 long shown=queueDisplayValue(t,maximum);
                 double y=base+0.8*shown/maximum;
                 if(lightQueueBars) {
-                    if(shown==0) w.printf(Locale.ROOT,"\\draw[queue%d,thick] (%.3f,%.3f)--(%.3f,%.3f);%n",lane,i+0.12,base,i+0.57,base);
-                    else if(t.hasElapsedTime) w.printf(Locale.ROOT,"\\fill[queue%d] (%.3f,%.3f) rectangle (%.3f,%.3f);%n",lane,i+0.12,base,i+0.57,y);
-                    else w.printf(Locale.ROOT,"\\draw[queue%d,dashed] (%.3f,%.3f) rectangle (%.3f,%.3f);%n",lane,i+0.12,base,i+0.57,y);
-                    if(t.hasElapsedTime) w.printf(Locale.ROOT,"\\draw[lane%d] (%.3f,%.3f) rectangle (%.3f,%.3f);%n",lane,i+0.12,base,i+0.57,base+0.8*t.elapsedTime/maximum);
+                    if(shown==0) w.printf(Locale.ROOT,"\\draw[queue%d,thick] (%.3f,%.3f)--(%.3f,%.3f);%n",lane,barLeft,base,barRight,base);
+                    else if(t.hasElapsedTime) w.printf(Locale.ROOT,"\\fill[queue%d] (%.3f,%.3f) rectangle (%.3f,%.3f);%n",lane,barLeft,base,barRight,y);
+                    else w.printf(Locale.ROOT,"\\draw[queue%d,dashed] (%.3f,%.3f) rectangle (%.3f,%.3f);%n",lane,barLeft,base,barRight,y);
+                    if(t.hasElapsedTime) w.printf(Locale.ROOT,"\\draw[lane%d] (%.3f,%.3f) rectangle (%.3f,%.3f);%n",lane,barLeft,base,barRight,base+0.8*t.elapsedTime/maximum);
                 } else {
                     double x=i+0.82;
                     // Explicit diamond, with equal physical half-width/height across display ranges.
@@ -436,11 +440,11 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
                     double dx=radius*count/14.0,dy=radius/1.9;
                     w.printf(Locale.ROOT,"\\fill[black] (%.4f,%.4f)--(%.4f,%.4f)--(%.4f,%.4f)--(%.4f,%.4f)--cycle;%n",x-dx,y,x,y+dy,x+dx,y,x,y-dy);
                 }
-                if(t.queueTime>shown) w.printf(Locale.ROOT,"\\node[anchor=south] at (%.3f,%.3f) {$\\uparrow$};%n",i+(lightQueueBars?0.345:0.82),y);
+                if(t.queueTime>shown) w.printf(Locale.ROOT,"\\node[anchor=south] at (%.3f,%.3f) {$\\uparrow$};%n",i+(lightQueueBars?BAR_SLOT_CENTER:0.82),y);
             }
         }
         int step=Math.max(1,count/10);
-        for(int i=0;i<count;i+=step) w.printf(Locale.ROOT,"\\node[below] at (%.3f,-0.08) {%d};%n",i+0.38,i+1);
+        for(int i=0;i<count;i+=step) w.printf(Locale.ROOT,"\\node[below] at (%.3f,-0.08) {%d};%n",i+BAR_SLOT_CENTER,i+1);
         w.printf(Locale.ROOT,"\\node[below] at (%.3f,-0.25) {Workflow arrival order; elapsed / queue wait (ms)};%n",count/2.0);
         w.println("\\end{tikzpicture}");
         w.println("\\caption{"+escapeLatex(processDescription(false))+". "+workflowCaption()+" "+scaleDescription()+" Crosses indicate unavailable elapsed intervals; "+missingQueueLabel()+" indicates unavailable queue measurements. "+exceptionDescription()+" Arrival order uses GENERATED timestamps, or recorded starts for legacy rows.}");
@@ -717,8 +721,8 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         int lane(Task t) { return lanes.getOrDefault(displayByVersion?deriveVersion(t.sequenceId):t.service,0); }
         int baseline(int lane) { return top+(lane+1)*laneHeight-Math.round(15*fontScaleFactor); }
         int valueY(int lane,long value) { return baseline(lane)-(int)Math.round(value*plotHeight/maxima[lane]); }
-        int barX(int i) { return left+(int)Math.round((i+0.12)*slot); }
-        int barWidth() { return Math.max(1,(int)(slot*0.45)); }
+        int barX(int i) { return left+(int)Math.round((i+BAR_SLOT_CENTER)*slot)-barWidth()/2; }
+        int barWidth() { return Math.max(1,(int)(slot*BAR_SLOT_WIDTH)); }
         int queueBarX(int i) { return barX(i); }
         int queueBarWidth() { return barWidth(); }
         int diamondX(int i) { return left+(int)Math.round((i+0.82)*slot); }

@@ -165,7 +165,7 @@ public final class CombinedWorkflowMetricsCheck {
         long originalWait=forkTask.queueTime; forkTask.queueTime=300;
         check(panel.axisMaximum("v002")==250,"Oversized queue observation changed the workflow-duration scale");
         String capped=panel.generateLaTeXFigure();
-        check(capped.contains("\\fill[queue1] (2.120,4.000) rectangle (2.570,4.800)")
+        check(capped.contains("\\fill[queue1] (2.233,4.000) rectangle (2.457,4.800)")
                 &&capped.contains("\\uparrow")&&panel.generateWorkflowSummaryReport().contains("250 | 300"),
                 "Oversized queue shading expanded the elapsed bar or concealed the measured value");
         forkTask.queueTime=originalWait;
