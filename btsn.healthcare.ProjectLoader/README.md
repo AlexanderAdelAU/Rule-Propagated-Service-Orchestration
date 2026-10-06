@@ -134,29 +134,36 @@ in the familiar version lanes and chronological arrival positions:
 - Coloured bar height: measured GENERATED-to-canonical-completion elapsed time.
 - Black diamond beside each bar: maximum **observed service-visit queue wait**
   across that root family, including nested fork children.
-- **View > Queue Display > Lighter Queue Bars** replaces diamonds with narrower
-  bars in a lighter shade of the version colour. Each queue bar stands beside its
-  solid elapsed-time bar, from the same baseline on the same lane scale.
+- **View > Queue Display > Lower Queue Shading** replaces diamonds with a lighter
+  shade in the lower portion of the original elapsed-time bar, starting at its
+  baseline. The bar keeps its original total height.
   **Diamonds** restores the original presentation and remains the default.
-- Each version lane has its own labelled millisecond scale, so short-route versions
-  remain readable alongside longer routes. Both queue display styles within a lane
+- Each version lane runs from zero to its maximum measured workflow elapsed time,
+  so the tallest completed workflow fills that lane. Both queue display styles within a lane
   share that lane's scale. Read axis values when comparing absolute times across
   versions; equal bar heights in different lanes do not mean equal durations.
 - **View > Y-Axis Scale > Shared Milliseconds** restores one common scale when
   comparing absolute durations visually. **Scale Each Version** is the default.
 - Bar width indicates neither execution duration nor overlap; horizontal position
-  is arrival rank. Scale limits include both bars and queue markers and stay fixed
+  is arrival rank. Scale limits come from workflow elapsed times and stay fixed
   when limiting the displayed arrival range.
 
-The diamond or lighter queue bar is an independent measurement, not a stacked
-portion of the elapsed bar or a workflow waiting fraction. Parallel branch waits are not added, and queue maxima
-are not subtracted from elapsed time. Longer or shorter routes can change both
+The diamond or lighter lower shading marks an independent queue measurement.
+The shading overlays the original bar; it does not partition elapsed time into
+total waiting and measured service time. Parallel branch waits are not added,
+and queue maxima are not subtracted from elapsed time. Longer or shorter routes can change both
 metrics, so this figure alone does not prove priority ordering or queue pre-emption.
 
 An X on a lane baseline means the elapsed interval is unavailable (incomplete,
 invalid clock ordering, or legacy data without canonical events). Missing queue
 measurements have no queue glyph; valid zero waits have a diamond or a lighter
-horizontal line at the baseline, depending on the display mode.
+horizontal line at the baseline, depending on the display mode. Without measured
+elapsed time, the shading mode draws only a dashed queue outline and an X, rather
+than a filled workflow bar. Lanes without any completed duration use a labelled
+queue-only range (a 1 ms display range is used when all measured values are zero).
+A queue value beyond the bar or axis limit has an upward arrow; its full value
+remains in the tooltip and table. Such observations do not increase the duration
+axis or the original bar height.
 Exact repeated visit observations contribute once; null, negative or conflicting
 waits are excluded, with valid and invalid visit counts in tooltips and exports.
 A maximum may therefore describe only the valid observed visits. For old runs
@@ -176,10 +183,11 @@ For a paper, the suggested caption is:
 
 For the lighter bar presentation, use:
 
-> Solid bars show measured workflow elapsed time; lighter bars beside them show
-> maximum observed service-visit queue wait, including fork branches. Queue bars
-> do not represent total workflow waiting time. Each version uses its own
-> millisecond scale; compare axis values, not bar heights, across versions.
+> Bar height shows measured workflow elapsed time; lighter lower shading marks
+> maximum observed service-visit queue wait, including fork branches. Shading is an
+> overlay, not total workflow waiting time or a decomposition into waiting and
+> service time. Each version scales to its maximum measured workflow duration;
+> compare millisecond values across versions.
 
 Choose **View > Service Queue Timings** for measured waiting times at each shared
 host operation. Each operation has separate v001/v002/v003 comparisons on the same

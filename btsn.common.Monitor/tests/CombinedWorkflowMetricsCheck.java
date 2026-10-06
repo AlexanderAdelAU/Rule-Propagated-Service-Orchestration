@@ -76,9 +76,9 @@ public final class CombinedWorkflowMetricsCheck {
                 &&find(rows,5000000).validQueueVisits==1,"Legacy queue data acquired fabricated elapsed time");
         check(!find(rows,6000000).hasDuration()&&!find(rows,6000000).hasQueueMaximum(),"PROCESS-only legacy row became measured");
         SwingGanttChart_WithLatency_v1d panel=new SwingGanttChart_WithLatency_v1d();
-        check(panel.tasks.size()==9&&panel.axisMaximum()==500,"Panel scale omitted a marker or included an orphan");
+        check(panel.tasks.size()==9&&panel.axisMaximum()==400,"Panel scale omitted a marker or included an orphan");
         check(panel.axisMaximum("v001")==200&&panel.axisMaximum("v002")==250
-                &&panel.axisMaximum("v003")==500,"Lane scales merged versions or clipped queue markers");
+                &&panel.axisMaximum("v003")==400,"Queue observations changed the measured duration scale");
         double scale=panel.axisMaximum("v002"); panel.setMaxDisplayTasks(2);
         check(panel.axisMaximum("v002")==scale,"Display range changed a version's millisecond scale");
         panel.setMaxDisplayTasks(Integer.MAX_VALUE);
@@ -89,8 +89,8 @@ public final class CombinedWorkflowMetricsCheck {
         panel.exportToLaTeXTable("combined-workflow-table.tex");
         String figure=Files.readString(Path.of("combined-workflow-fixture.tex"));
         String table=Files.readString(Path.of("combined-workflow-table.tex"));
-        check(figure.contains(CombinedWorkflowMetrics.CAPTION)&&figure.contains("500")
-                &&figure.contains("Each version has its own millisecond scale")&&!figure.contains("All lanes share")&&figure.contains("\\fill[black]")
+        check(figure.contains(CombinedWorkflowMetrics.CAPTION)&&figure.contains("400")
+                &&figure.contains("Each version scales to its maximum measured workflow duration")&&!figure.contains("All lanes share")&&figure.contains("\\fill[black]")
                 &&figure.contains("$\\times$")&&!figure.contains("NaN"),"Vector export lost scale, glyphs or caption");
         check(table.contains("2000000 & v002 & 250 & 180 & 3 & 0")
                 &&table.contains("3001000 & v003 & 0 & 0 & 1 & 0")
@@ -102,10 +102,10 @@ public final class CombinedWorkflowMetricsCheck {
         int redHeight=longestColourRun(image,0xe74c3c),blueHeight=longestColourRun(image,0x3498db);
         check(redHeight==blueHeight&&redHeight>40,"Per-version bars did not fill equal relative axis ranges");
         panel.setIndependentLaneScales(false);
-        check(panel.axisMaximum("v001")==500&&panel.axisMaximum("v002")==500,"Shared mode did not use one absolute scale");
+        check(panel.axisMaximum("v001")==400&&panel.axisMaximum("v002")==400,"Shared mode did not use one absolute scale");
         String shared=panel.generateLaTeXFigure();
-        check(shared.contains("All versions share the same millisecond scale")
-                &&!shared.contains("Each version has its own millisecond scale"),"Shared export retained per-version caption");
+        check(shared.contains("All versions share the maximum measured workflow duration")
+                &&!shared.contains("Each version scales to its maximum measured workflow duration"),"Shared export retained per-version caption");
         Files.writeString(Path.of("combined-shared-scale-fixture.tex"),shared);
         BufferedImage sharedImage=new BufferedImage(panel.getWidth(),panel.getHeight(),BufferedImage.TYPE_INT_RGB);
         g=sharedImage.createGraphics(); panel.paint(g); g.dispose();
@@ -124,24 +124,30 @@ public final class CombinedWorkflowMetricsCheck {
         // Alternative queue bars retain measured values, axis ranges, zero and unknown semantics.
         panel.setLightQueueBars(true);
         check(panel.axisMaximum("v001")==200&&panel.axisMaximum("v002")==250
-                &&panel.axisMaximum("v003")==500,"Queue style changed axis ranges");
+                &&panel.axisMaximum("v003")==400,"Queue style changed axis ranges");
         String lightReport=panel.generateWorkflowSummaryReport();
-        check(lightReport.contains("lighter bars beside them")&&lightReport.contains("no lighter bar")
+        check(lightReport.contains("lighter lower shading")&&lightReport.contains("no lighter shading")
                 &&!lightReport.contains("diamonds"),"Queue bar summary retained diamond descriptions");
         check(lightReport.substring(lightReport.indexOf("Arrival | Root sequence"))
                 .equals(report.substring(report.indexOf("Arrival | Root sequence"))),"Queue style changed measured values");
         String lightFigure=panel.generateLaTeXFigure();
-        check(lightFigure.contains("\\definecolor{queue0}")&&lightFigure.contains("fill=queue1")
-                &&lightFigure.contains("\\draw[queue2,thick]")&&!lightFigure.contains("\\fill[black]")
+        check(lightFigure.contains("\\definecolor{queue0}")&&lightFigure.contains("\\fill[queue1]")
+                &&lightFigure.contains("\\draw[queue2,thick]")&&lightFigure.contains("dashed")&&lightFigure.contains("\\uparrow")&&!lightFigure.contains("\\fill[black]")
                 &&!lightFigure.contains("diamonds")&&!lightFigure.contains("NaN"),"Queue bar export lost shade/zero/caption or retained diamonds");
         Files.writeString(Path.of("combined-queue-bars-fixture.tex"),lightFigure);
         BufferedImage lightImage=new BufferedImage(panel.getWidth(),panel.getHeight(),BufferedImage.TYPE_INT_RGB);
         g=lightImage.createGraphics(); panel.paint(g); g.dispose();
         ImageIO.write(lightImage,"png",new File("combined-queue-bars-fixture.png"));
-        check(longestColourRun(lightImage,0xe74c3c)==redHeight&&longestColourRun(lightImage,0x3498db)==blueHeight,
-                "Queue style changed elapsed bar heights");
+        int darkRed=new java.awt.Color(0xe74c3c).darker().getRGB()&0xffffff;
+        int darkBlue=new java.awt.Color(0x3498db).darker().getRGB()&0xffffff;
+        check(longestColourRun(lightImage,darkRed)==longestColourRun(image,darkRed)
+                &&longestColourRun(lightImage,darkBlue)==longestColourRun(image,darkBlue),
+                "Lower queue shading changed the original bar outline height");
         int paleBlue=SwingGanttChart_WithLatency_v1d.queueBarColor(new java.awt.Color(0x3498db)).getRGB()&0xffffff;
         int paleGreen=SwingGanttChart_WithLatency_v1d.queueBarColor(new java.awt.Color(0x2ecc71)).getRGB()&0xffffff;
+        int[] blueBounds=colourColumns(image,0x3498db),shadeBounds=colourColumns(lightImage,paleBlue);
+        check(blueBounds[0]==shadeBounds[0]&&blueBounds[1]==shadeBounds[1],
+                "Queue shading is not aligned inside the original bar");
         int paleBlueHeight=longestColourRun(lightImage,paleBlue);
         check(paleBlueHeight>0&&Math.abs(paleBlueHeight/(double)blueHeight-180.0/250.0)<0.04,
                 "Lighter queue bar height does not encode the independent queue maximum");
@@ -155,9 +161,17 @@ public final class CombinedWorkflowMetricsCheck {
             if(t!=null&&t.sequenceId==3000000) lightIncomplete=true;
         }
         check(lightFork&&lightZero&&lightIncomplete,"Queue bar hover lost fork, measured zero or incomplete workflow");
+        SwingGanttChart_WithLatency_v1d.Task forkTask=panel.tasks.stream().filter(t->t.sequenceId==2000000).findFirst().orElseThrow();
+        long originalWait=forkTask.queueTime; forkTask.queueTime=300;
+        check(panel.axisMaximum("v002")==250,"Oversized queue observation changed the workflow-duration scale");
+        String capped=panel.generateLaTeXFigure();
+        check(capped.contains("\\fill[queue1] (2.120,4.000) rectangle (2.570,4.800)")
+                &&capped.contains("\\uparrow")&&panel.generateWorkflowSummaryReport().contains("250 | 300"),
+                "Oversized queue shading expanded the elapsed bar or concealed the measured value");
+        forkTask.queueTime=originalWait;
         panel.setIndependentLaneScales(false);
         Files.writeString(Path.of("combined-queue-bars-shared-fixture.tex"),panel.generateLaTeXFigure());
-        check(panel.generateLaTeXFigure().contains("All versions share the same millisecond scale"),
+        check(panel.generateLaTeXFigure().contains("All versions share the maximum measured workflow duration"),
                 "Queue bar export ignored shared mode");
         panel.setIndependentLaneScales(true); panel.setLightQueueBars(false);
         check(panel.generateLaTeXFigure().contains("\\fill[black]")&&panel.generateWorkflowSummaryReport().equals(report),
@@ -178,13 +192,19 @@ public final class CombinedWorkflowMetricsCheck {
         g=image.createGraphics(); panel.paint(g); g.dispose();
         ImageIO.write(image,"png",new File("combined-three-version-fixture.png"));
         panel.exportToLaTeX("combined-three-version-fixture.tex");
-        check(panel.axisMaximum("v001")==250&&panel.axisMaximum("v002")==500
-                &&panel.axisMaximum("v003")==2500,"Dense figure merged version scales or clipped durations");
+        check(panel.axisMaximum("v001")==219&&panel.axisMaximum("v002")==487
+                &&panel.axisMaximum("v003")==2414,"Dense figure did not scale to exact workflow maxima");
         panel.setLightQueueBars(true);
         g=image.createGraphics(); panel.paint(g); g.dispose();
         ImageIO.write(image,"png",new File("combined-three-version-queue-bars-fixture.png"));
         panel.exportToLaTeX("combined-three-version-queue-bars-fixture.tex");
-        System.out.println("PASS: measured serial/fork durations; nested genealogy queue maxima; no sum/fraction; duplicate/admin/orphan exclusion; incomplete/invalid/zero/legacy values; stable per-version/shared scales; normalized bar rendering; publication exports; diamond/light-bar switching, proportional queue heights, zero/incomplete hover and rendering");
+        System.out.println("PASS: measured serial/fork durations; nested genealogy queue maxima; no sum/fraction; duplicate/admin/orphan exclusion; incomplete/invalid/zero/legacy values; stable per-version/shared scales; normalized bar rendering; publication exports; diamond/lower-shading switching, unchanged outlines, aligned proportional shading, zero/incomplete hover and rendering");
+    }
+    private static int[] colourColumns(BufferedImage image,int colour) {
+        int min=image.getWidth(),max=-1;
+        for(int x=150;x<image.getWidth()-35;x++) for(int y=112;y<image.getHeight()-90;y++)
+            if((image.getRGB(x,y)&0xffffff)==colour) { min=Math.min(min,x); max=Math.max(max,x); }
+        return new int[]{min,max};
     }
     private static int longestColourRun(BufferedImage image,int colour) {
         int longest=0;
