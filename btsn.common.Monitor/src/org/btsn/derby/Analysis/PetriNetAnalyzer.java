@@ -348,7 +348,7 @@ public class PetriNetAnalyzer {
             analysis.totalForks = analysis.forkGroups.size();
             
             logger.info("Fork/Join analysis: " + analysis.totalForks + " forks, " + 
-                       analysis.successfulJoins + " successful joins");
+                       analysis.successfulJoins + " joined fork families");
             
         } catch (SQLException e) {
             logger.error("Error analyzing fork/join", e);
@@ -934,7 +934,17 @@ public class PetriNetAnalyzer {
         return sortedValues.get(index);
     }
 
+    public ServiceDisplayNames getServiceDisplayNames() {
+        try (Connection conn = getConnection()) {
+            return ServiceDisplayNames.load(conn);
+        } catch (SQLException e) {
+            logger.warn("Business display names unavailable: " + e.getMessage());
+            return ServiceDisplayNames.empty();
+        }
+    }
+
     public String generateTemporalReport(int workflowBase) {
+        ServiceDisplayNames names = getServiceDisplayNames();
         TemporalAnalysis temporal = analyzeTemporal(workflowBase);
         StringBuilder report = new StringBuilder();
 
@@ -965,14 +975,15 @@ public class PetriNetAnalyzer {
 
         report.append("3. PLACE RESIDENCE DISTRIBUTIONS\n");
         for (Map.Entry<String, TimingDistribution> entry : temporal.placeResidence.entrySet()) {
-            appendDistribution(report, "   " + entry.getKey(), entry.getValue());
+            appendDistribution(report, "   " + names.describe(workflowBase, entry.getKey()), entry.getValue());
         }
         report.append("\n");
 
         report.append("4. SERVICE EXECUTION TIMING\n");
         for (Map.Entry<String, ServiceTimingSummary> entry : temporal.serviceTiming.entrySet()) {
             ServiceTimingSummary timing = entry.getValue();
-            report.append("   Place: ").append(entry.getKey()).append("\n");
+            report.append("   Service: ").append(names.label(workflowBase, entry.getKey())).append("\n");
+            report.append("     Orchestration place: ").append(entry.getKey()).append("\n");
             appendDistribution(report, "     Queue", timing.queueTime);
             appendDistribution(report, "     Service", timing.serviceTime);
             appendDistribution(report, "     Total", timing.totalTime);
@@ -995,7 +1006,7 @@ public class PetriNetAnalyzer {
             for (JoinTimingSummary join : temporal.joinTiming.values()) {
                 report.append("   ").append(join.transitionId);
                 if (join.placeName != null) {
-                    report.append(" -> ").append(join.placeName);
+                    report.append(" -> ").append(names.describe(workflowBase, join.placeName));
                 }
                 report.append("\n");
                 appendDistribution(report, "     First-arrival to ENTER", join.synchronizationWait);
@@ -1690,9 +1701,9 @@ public class PetriNetAnalyzer {
                 long laterArrival = Math.max(high.arrivalTime, low.arrivalTime);
                 long firstServiceStart = Math.min(highStart, lowStart);
                 
-                // A real scheduling contention point exists only when BOTH tokens
-                // had arrived before either one began service. At that instant the
-                // shared queue had a choice between versions.
+                // Candidate overlap: BOTH tokens arrived before either invocation.
+                // Invocation follows dequeue and rule processing; these timestamps
+                // do not prove both tokens were queued at the dequeue decision.
                 if (laterArrival <= firstServiceStart) {
                     ContentionPoint cp = new ContentionPoint();
                     cp.timestamp = laterArrival;
@@ -1711,7 +1722,7 @@ public class PetriNetAnalyzer {
     }
     
     /**
-     * Detect priority inversions only among proven same-queue contention points.
+     * Detect invocation-order inversions among same-place overlap candidates.
      */
     private void detectSharedServicePriorityInversions(PriorityAnalysis analysis) {
         for (ContentionPoint cp : analysis.sharedServiceContentionPoints) {
@@ -1755,6 +1766,7 @@ public class PetriNetAnalyzer {
      * Generate priority analysis report
      */
     public String generatePriorityReport() {
+        ServiceDisplayNames names = getServiceDisplayNames();
         PriorityAnalysis analysis = analyzePriority();
         StringBuilder report = new StringBuilder();
         
@@ -1774,7 +1786,7 @@ public class PetriNetAnalyzer {
             report.append("   [INFO] No shared services detected - each version uses exclusive services\n");
             report.append("   Priority contention cannot be measured without shared services\n");
         } else {
-            report.append("   Shared services: ").append(analysis.sharedPlaces).append("\n");
+            report.append("   Shared services:\n");
             for (String place : analysis.sharedPlaces) {
                 Set<Integer> versions = analysis.placeToVersions.get(place);
                 StringBuilder versionList = new StringBuilder();
@@ -1782,7 +1794,7 @@ public class PetriNetAnalyzer {
                     if (versionList.length() > 0) versionList.append(", ");
                     versionList.append("v").append(String.format("%03d", v));
                 }
-                report.append("     ").append(place).append(": ").append(versionList).append("\n");
+                report.append("     ").append(names.laneDescription(place, -1)).append(": ").append(versionList).append("\n");
                 Map<Integer, Set<String>> roleMap = analysis.placeToVersionTransitions.get(place);
                 if (roleMap != null) {
                     List<Integer> roleVersions = new ArrayList<>(roleMap.keySet());
@@ -1799,7 +1811,7 @@ public class PetriNetAnalyzer {
             for (Map.Entry<String, Set<Integer>> entry : analysis.placeToVersions.entrySet()) {
                 if (entry.getValue().size() == 1) {
                     int version = entry.getValue().iterator().next();
-                    report.append("     ").append(entry.getKey())
+                    report.append("     ").append(names.laneDescription(entry.getKey(), -1))
                           .append(": v").append(String.format("%03d", version)).append(" only\n");
                 }
             }
@@ -1824,8 +1836,8 @@ public class PetriNetAnalyzer {
         report.append("\n");
         
         // 4. SHARED SERVICE CONTENTION (primary metric)
-        report.append("4. SHARED SERVICE CONTENTION (Both Versions Waiting Before Service Start)\n");
-        report.append("   Total contention points: ").append(analysis.sharedServiceContentionPoints.size()).append("\n");
+        report.append("4. SHARED SERVICE CONTENTION CANDIDATES (Both Arrived Before Invocation)\n");
+        report.append("   Total candidate comparisons: ").append(analysis.sharedServiceContentionPoints.size()).append("\n");
         
         if (!analysis.sharedServiceContentionPoints.isEmpty()) {
             long respected = analysis.sharedServiceContentionPoints.stream().filter(cp -> cp.priorityRespected).count();
@@ -1843,7 +1855,7 @@ public class PetriNetAnalyzer {
                 byPlace.computeIfAbsent(cp.sharedPlace, k -> new ArrayList<>()).add(cp);
             }
             for (Map.Entry<String, List<ContentionPoint>> entry : byPlace.entrySet()) {
-                report.append("   [").append(entry.getKey()).append("] ");
+                report.append("   [").append(names.laneDescription(entry.getKey(), -1)).append("] ");
                 List<ContentionPoint> cps = entry.getValue();
                 long placeRespected = cps.stream().filter(cp -> cp.priorityRespected).count();
                 report.append(placeRespected).append("/").append(cps.size()).append(" respected\n");
@@ -1852,7 +1864,7 @@ public class PetriNetAnalyzer {
                 for (ContentionPoint cp : cps) {
                     if (shown++ >= 3) {
                         if (cps.size() > 3) {
-                            report.append("     ... and ").append(cps.size() - 3).append(" more at ").append(entry.getKey()).append("\n");
+                            report.append("     ... and ").append(cps.size() - 3).append(" more at ").append(names.laneDescription(entry.getKey(), -1)).append("\n");
                         }
                         break;
                     }
@@ -1870,12 +1882,15 @@ public class PetriNetAnalyzer {
         report.append("\n");
         
         // 5. SHARED SERVICE INVERSIONS
-        report.append("5. SHARED SERVICE PRIORITY INVERSIONS\n");
+        report.append("5. SHARED SERVICE PRIORITY INVERSION CANDIDATES\n");
+        report.append("   [NOTE] Arrival is recorded before queue insertion; invocation is recorded after dequeue and rule processing.\n");
+        report.append("   A lower-priority token can be dequeued before the higher-priority token enters the queue, yet be invoked after its arrival.\n");
+        report.append("   Queue insertion/dequeue timestamps are not recorded here; these candidates do not prove a scheduling violation.\n");
         if (analysis.sharedServiceInversions.isEmpty()) {
-            report.append("   [OK] No priority inversions at shared services\n");
+            report.append("   [OK] No invocation-order inversion candidates at shared services\n");
         } else {
             report.append("   [WARN] ").append(analysis.sharedServiceInversions.size())
-                  .append(" priority inversions at shared services\n");
+                  .append(" invocation-order inversion candidates at shared services\n");
             
             int shown = 0;
             for (PriorityInversion inv : analysis.sharedServiceInversions) {
@@ -1883,8 +1898,8 @@ public class PetriNetAnalyzer {
                     report.append("   ... and ").append(analysis.sharedServiceInversions.size() - 5).append(" more\n");
                     break;
                 }
-                report.append(String.format("   - [%s] v%03d token %d was already waiting when v%03d token %d started first (start-order inversion: %dms)\n",
-                    inv.highPriorityToken.placeName,
+                report.append(String.format("   - [%s] v%03d token %d arrived before v%03d token %d was invoked first (invocation-order difference: %dms; dequeue order unrecorded)\n",
+                    names.laneDescription(inv.highPriorityToken.placeName, -1),
                     inv.highPriorityToken.versionNumber, inv.highPriorityToken.sequenceId,
                     inv.lowPriorityToken.versionNumber, inv.lowPriorityToken.sequenceId,
                     inv.inversionTime));
@@ -1933,18 +1948,18 @@ public class PetriNetAnalyzer {
         if (analysis.sharedPlaces.isEmpty()) {
             report.append("   Shared-service concurrency: [NOT OBSERVED] no physical service saw multiple versions\n");
         } else if (analysis.sharedServiceContentionPoints.isEmpty()) {
-            report.append("   Shared-service concurrency: [PARTIAL] shared services exist, but no simultaneous queue choice was observed\n");
+            report.append("   Shared-service concurrency: [PARTIAL] shared services exist, but no arrival-to-invocation overlap was observed\n");
         } else {
             long respected = analysis.sharedServiceContentionPoints.stream()
                 .filter(cp -> cp.priorityRespected).count();
             report.append("   Shared-service concurrency: [OBSERVED]\n");
             report.append("   Shared physical services: ").append(analysis.sharedPlaces.size()).append("\n");
-            report.append("   Proven same-queue contention decisions: ")
+            report.append("   Same-place overlap candidate comparisons: ")
                   .append(analysis.sharedServiceContentionPoints.size()).append("\n");
             report.append("   Lower-version start order respected: ")
                   .append(respected).append("/").append(analysis.sharedServiceContentionPoints.size())
                   .append(" (").append(String.format("%.1f%%", analysis.sharedServiceEffectiveness * 100)).append(")\n");
-            report.append("   Start-order inversions observed: ")
+            report.append("   Invocation-order inversion candidates: ")
                   .append(analysis.sharedServiceInversions.size()).append("\n");
         }
         
@@ -2201,9 +2216,9 @@ public class PetriNetAnalyzer {
                 }
             }
             
-            // 4. JOIN_CONSUMED closes a branch. A successful join requires every
-            // child of the fork to be accounted for at the same T_in transition,
-            // with one continuation ENTER (or a parent ENTER for reset semantics).
+            // 4. Count each observed join transition, including partial joins of a
+            // larger fork family. JOIN_CONSUMED plus a continuation ENTER
+            // accounts for the participating branches, not every original sibling.
             String consumedSql =
                 "SELECT DISTINCT tokenId, transitionId " +
                 "FROM CONSOLIDATED_TRANSITION_FIRINGS " +
@@ -2218,6 +2233,7 @@ public class PetriNetAnalyzer {
                 }
             }
             
+            Set<String> completedJoinKeys = new HashSet<>();
             for (Map.Entry<Integer, Set<Integer>> fork : childrenByParent.entrySet()) {
                 int parent = fork.getKey();
                 Set<Integer> children = fork.getValue();
@@ -2229,7 +2245,6 @@ public class PetriNetAnalyzer {
                     }
                 }
                 
-                boolean joined = false;
                 for (String transition : candidateJoinTransitions) {
                     int accountedChildren = 0;
                     boolean continuationObserved = false;
@@ -2249,7 +2264,8 @@ public class PetriNetAnalyzer {
                         }
                     }
                     
-                    if (enterTransitionsByToken.getOrDefault(parent, Collections.emptySet()).contains(transition)) {
+                    boolean parentEntered = enterTransitionsByToken.getOrDefault(parent, Collections.emptySet()).contains(transition);
+                    if (parentEntered) {
                         continuationObserved = true;
                         participantRoots.add(resolveRootToken(parent, parentByChild));
                     }
@@ -2258,14 +2274,12 @@ public class PetriNetAnalyzer {
                         analysis.joinFamilyViolations++;
                     }
                     
-                    if (accountedChildren == children.size() && continuationObserved) {
-                        joined = true;
-                        break;
+                    int participants = accountedChildren + (parentEntered ? 1 : 0);
+                    String joinKey = resolveRootToken(parent, parentByChild) + "|" + transition;
+                    if (participants >= 2 && continuationObserved && participantRoots.size() == 1
+                            && completedJoinKeys.add(joinKey)) {
+                        analysis.successfulJoins++;
                     }
-                }
-                
-                if (joined) {
-                    analysis.successfulJoins++;
                 }
             }
             
@@ -2385,6 +2399,7 @@ public class PetriNetAnalyzer {
      * Generate comprehensive workflow analysis report
      */
     public String generateWorkflowReport(int workflowBase) {
+        ServiceDisplayNames names = getServiceDisplayNames();
         StringBuilder report = new StringBuilder();
         CanonicalWorkflowAnalysis canonical = analyzeCanonicalWorkflows(workflowBase);
         
@@ -2422,7 +2437,7 @@ public class PetriNetAnalyzer {
             report.append("   No ENTER events reconstructed\n");
         } else {
             for (Map.Entry<String, Integer> entry : canonical.placeExecutions.entrySet()) {
-                report.append("   ").append(entry.getKey()).append(": ")
+                report.append("   ").append(names.describe(workflowBase, entry.getKey())).append(": ")
                       .append(entry.getValue()).append(" executions\n");
             }
         }
@@ -2431,7 +2446,7 @@ public class PetriNetAnalyzer {
         ForkJoinAnalysis forkJoin = analyzeForkJoin(workflowBase);
         report.append("3. FORK/JOIN DETAIL\n");
         report.append("   Forks detected (legacy cross-check): ").append(forkJoin.totalForks).append("\n");
-        report.append("   Joins detected (legacy cross-check): ").append(forkJoin.successfulJoins).append("\n");
+        report.append("   Joined fork families (legacy cross-check): ").append(forkJoin.successfulJoins).append("\n");
         for (ForkGroup group : forkJoin.forkGroups) {
             report.append("   Fork from ").append(group.parentTokenId)
                   .append(" -> ").append(group.childTokenIds)
@@ -2446,7 +2461,7 @@ public class PetriNetAnalyzer {
         report.append("   Unpaired place ENTER events: ").append(unpaired.size()).append("\n");
         for (TokenPath path : unpaired) {
             report.append("     - Token ").append(path.tokenId)
-                  .append(" entered ").append(path.placeName)
+                  .append(" entered ").append(names.describe(workflowBase, path.placeName))
                   .append(" without a same-token EXIT/TERMINATE\n");
         }
         report.append("\n");
@@ -2456,7 +2471,7 @@ public class PetriNetAnalyzer {
         for (String place : places) {
             PlaceStatistics stats = getPlaceStatistics(place, workflowBase);
             int logicalExecutions = canonical.placeExecutions.getOrDefault(place, 0);
-            report.append("   Place: ").append(place).append("\n");
+            report.append("   Service/place: ").append(names.describe(workflowBase, place)).append("\n");
             report.append("     Logical executions: ").append(logicalExecutions).append("\n");
             report.append("     Paired timing samples: ").append(stats.tokenCount).append("\n");
             if (stats.tokenCount > 0) {
@@ -2473,7 +2488,7 @@ public class PetriNetAnalyzer {
         report.append("6. CAPACITY VERIFICATION\n");
         for (String place : places) {
             boolean bounded = verifyBoundedCapacity(place, workflowBase, 50);
-            report.append("   ").append(place).append(": ")
+            report.append("   ").append(names.describe(workflowBase, place)).append(": ")
                   .append(bounded ? "[OK] BOUNDED" : "[FAIL] EXCEEDED").append("\n");
         }
         
@@ -2488,6 +2503,9 @@ public class PetriNetAnalyzer {
                   .append(" paths have negative residence time\n");
         }
         report.append("   NOTE: temporal distributions and canonical throughput are reported in Stage 2.\n");
+        if (names.inferredExecutions() > 0) {
+            report.append("   NOTE: older records lack captured business identities; unambiguous operation names are resolved from available catalogues.\n");
+        }
         
         report.append("\n=== END REPORT ===\n");
         return report.toString();
@@ -3146,9 +3164,10 @@ public class PetriNetAnalyzer {
             
             // Get detailed token paths
             System.out.println("\n=== TOKEN PATHS ===");
+            ServiceDisplayNames names = analyzer.getServiceDisplayNames();
             ArrayList<TokenPath> paths = analyzer.getTokenPaths(workflowBase);
             for (TokenPath path : paths) {
-                System.out.println("Token " + path.tokenId + " at " + path.placeName + 
+                System.out.println("Token " + path.tokenId + " at " + names.describe(workflowBase, path.placeName) +
                                  ": residence=" + path.residenceTime + "ms");
             }
             

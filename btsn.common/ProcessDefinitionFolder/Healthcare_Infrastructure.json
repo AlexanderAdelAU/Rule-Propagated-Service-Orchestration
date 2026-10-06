@@ -1,0 +1,181 @@
+{
+  "definitionType": "Infrastructure",
+  "nodes": [
+    {
+      "node": "P1",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "portStart": 4001,
+      "portEnd": 4099
+    },
+    {
+      "node": "P2",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "portStart": 4001,
+      "portEnd": 4099
+    },
+    {
+      "node": "P3",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "portStart": 4001,
+      "portEnd": 4099
+    },
+    {
+      "node": "P4",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "portStart": 4001,
+      "portEnd": 4099
+    },
+    {
+      "node": "P5",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "portStart": 4001,
+      "portEnd": 4099
+    },
+    {
+      "node": "P6",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "portStart": 4001,
+      "portEnd": 4099
+    }
+  ],
+  "capabilities": [
+    {
+      "node": "P1",
+      "service": "TriageService",
+      "operation": "processTriageAssessment",
+      "returnAttribute": "triageResults",
+      "basePort": 4001,
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ]
+    },
+    {
+      "node": "P2",
+      "service": "LaboratoryService",
+      "operation": "processLabRequest",
+      "returnAttribute": "laboratoryResults",
+      "basePort": 4002,
+      "arguments": [
+        {
+          "name": "triageResults",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ]
+    },
+    {
+      "node": "P3",
+      "service": "CardiologyService",
+      "operation": "processCardiacAssessment",
+      "returnAttribute": "cardiologyResults",
+      "basePort": 4003,
+      "arguments": [
+        {
+          "name": "triageResults",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ]
+    },
+    {
+      "node": "P4",
+      "service": "RadiologyService",
+      "operation": "processImagingRequest",
+      "returnAttribute": "radiologyResults",
+      "basePort": 4004,
+      "arguments": [
+        {
+          "name": "triageResults",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ]
+    },
+    {
+      "node": "P4",
+      "service": "RadiologyService",
+      "operation": "federatedRadiologyRequest",
+      "returnAttribute": "radiologyResults",
+      "basePort": 4007,
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ]
+    },
+    {
+      "node": "P5",
+      "service": "DiagnosisService",
+      "operation": "processClinicalDecision",
+      "returnAttribute": "diagnosisResults",
+      "basePort": 4005,
+      "arguments": [
+        {
+          "name": "radiologyResults",
+          "type": "String",
+          "value": "String",
+          "required": false
+        },
+        {
+          "name": "laboratoryResults",
+          "type": "String",
+          "value": "String",
+          "required": false
+        },
+        {
+          "name": "cardiologyResults",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ]
+    },
+    {
+      "node": "P6",
+      "service": "TreatmentService",
+      "operation": "executeTreatmentPlan",
+      "returnAttribute": "treatmentResults",
+      "basePort": 4006,
+      "arguments": [
+        {
+          "name": "diagnosisResults",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ]
+    },
+    {
+      "node": "P6",
+      "service": "TreatmentService",
+      "operation": "executeDirectTreatment",
+      "returnAttribute": "treatmentResults",
+      "basePort": 4008,
+      "arguments": [
+        {
+          "name": "triageResults",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ]
+    }
+  ]
+}

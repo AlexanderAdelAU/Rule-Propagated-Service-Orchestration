@@ -1,17 +1,17 @@
 {
+  "processType": "PetriNet",
   "elements": [
     {
-      "id": "Application Submitted",
-      "type": "TRANSITION",
-      "x": 110,
-      "y": 70,
-      "width": 20,
+      "id": "APPLICATION_SUBMITTED",
+      "type": "EVENT_GENERATOR",
+      "x": 30,
+      "y": 200,
+      "width": 24,
       "height": 60,
       "label": "Application Submitted",
-      "rotation": 0.0,
-      "node_type": "EdgeNode",
-      "node_value": "EDGE_NODE",
-      "transition_type": "Other"
+      "rotation": 0,
+      "generator_rate": "1000",
+      "token_version": "v001"
     },
     {
       "id": "T_in_Validation",
@@ -21,7 +21,7 @@
       "width": 20,
       "height": 60,
       "label": "T_in_Validation",
-      "rotation": 0.0,
+      "rotation": 0,
       "node_type": "EdgeNode",
       "node_value": "EDGE_NODE",
       "transition_type": "T_in",
@@ -36,7 +36,20 @@
       "height": 50,
       "label": "Validation",
       "service": "ValidationService",
-      "operations": ["processToken"]
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "validationResults",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "T_out_Validation",
@@ -46,7 +59,7 @@
       "width": 20,
       "height": 60,
       "label": "T_out_Validation",
-      "rotation": 0.0,
+      "rotation": 0,
       "node_type": "GatewayNode",
       "node_value": "GATEWAY_NODE",
       "transition_type": "T_out"
@@ -59,7 +72,7 @@
       "width": 20,
       "height": 60,
       "label": "T_in_CreditCheck",
-      "rotation": 0.0,
+      "rotation": 0,
       "node_type": "EdgeNode",
       "node_value": "EDGE_NODE",
       "transition_type": "T_in",
@@ -74,7 +87,20 @@
       "height": 50,
       "label": "CreditCheck",
       "service": "CreditCheckService",
-      "operations": ["processToken"]
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "creditCheckResults",
+          "arguments": [
+            {
+              "name": "validationResults",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "T_out_CreditCheck",
@@ -84,7 +110,7 @@
       "width": 20,
       "height": 60,
       "label": "T_out_CreditCheck",
-      "rotation": 0.0,
+      "rotation": 0,
       "node_type": "EdgeNode",
       "node_value": "EDGE_NODE",
       "transition_type": "T_out"
@@ -97,7 +123,7 @@
       "width": 20,
       "height": 60,
       "label": "T_in_FraudCheck",
-      "rotation": 0.0,
+      "rotation": 0,
       "node_type": "EdgeNode",
       "node_value": "EDGE_NODE",
       "transition_type": "T_in",
@@ -112,7 +138,20 @@
       "height": 50,
       "label": "FraudCheck",
       "service": "FraudCheckService",
-      "operations": ["processToken"]
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "fraudCheckResults",
+          "arguments": [
+            {
+              "name": "validationResults",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "T_out_FraudCheck",
@@ -122,7 +161,7 @@
       "width": 20,
       "height": 60,
       "label": "T_out_FraudCheck",
-      "rotation": 0.0,
+      "rotation": 0,
       "node_type": "EdgeNode",
       "node_value": "EDGE_NODE",
       "transition_type": "T_out"
@@ -135,7 +174,7 @@
       "width": 20,
       "height": 60,
       "label": "T_in_Underwriting",
-      "rotation": 0.0,
+      "rotation": 0,
       "node_type": "JoinNode",
       "node_value": "JOIN_NODE",
       "transition_type": "T_in",
@@ -150,7 +189,26 @@
       "height": 50,
       "label": "Underwriting",
       "service": "UnderwritingService",
-      "operations": ["processToken"]
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "underwritingResults",
+          "arguments": [
+            {
+              "name": "creditCheckResults",
+              "type": "String",
+              "value": "String",
+              "required": false
+            },
+            {
+              "name": "fraudCheckResults",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "T_out_Underwriting",
@@ -160,7 +218,7 @@
       "width": 20,
       "height": 60,
       "label": "T_out_Underwriting",
-      "rotation": 0.0,
+      "rotation": 0,
       "node_type": "GatewayNode",
       "node_value": "GATEWAY_NODE",
       "transition_type": "T_out"
@@ -173,7 +231,7 @@
       "width": 20,
       "height": 60,
       "label": "T_in_Decision",
-      "rotation": 0.0,
+      "rotation": 0,
       "node_type": "EdgeNode",
       "node_value": "EDGE_NODE",
       "transition_type": "T_in",
@@ -188,7 +246,20 @@
       "height": 50,
       "label": "Decision",
       "service": "DecisionService",
-      "operations": ["processToken"]
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "decisionResults",
+          "arguments": [
+            {
+              "name": "underwritingResults",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "T_out_Decision",
@@ -198,7 +269,7 @@
       "width": 20,
       "height": 60,
       "label": "T_out_Decision",
-      "rotation": 0.0,
+      "rotation": 0,
       "node_type": "TerminateNode",
       "node_value": "TERMINATE_NODE",
       "transition_type": "T_out"
@@ -210,8 +281,8 @@
       "y": 350,
       "width": 20,
       "height": 60,
-      "label": "Terminate_Invalid",
-      "rotation": 0.0,
+      "label": "Invalid Application",
+      "rotation": 0,
       "node_type": "TerminateNode",
       "node_value": "TERMINATE_NODE",
       "transition_type": "Other"
@@ -223,8 +294,8 @@
       "y": 350,
       "width": 20,
       "height": 60,
-      "label": "Terminate_Declined",
-      "rotation": 0.0,
+      "label": "Declined Application",
+      "rotation": 0,
       "node_type": "TerminateNode",
       "node_value": "TERMINATE_NODE",
       "transition_type": "Other"
@@ -232,7 +303,7 @@
   ],
   "arrows": [
     {
-      "source": "Application Submitted",
+      "source": "APPLICATION_SUBMITTED",
       "target": "T_in_Validation",
       "label": "",
       "guardCondition": "",
@@ -386,11 +457,51 @@
   ],
   "textElements": [
     {
-      "x": 400,
+      "x": 390,
       "y": 50,
-      "text": "Loan Application Processing Workflow",
+      "text": "Loan Application Processing Workflow — infrastructure independent",
       "fontSize": 16,
       "fontStyle": 1,
+      "color": -16777216
+    },
+    {
+      "x": 145,
+      "y": 165,
+      "text": "ValidationService",
+      "fontSize": 10,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 400,
+      "y": 105,
+      "text": "CreditCheckService",
+      "fontSize": 10,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 400,
+      "y": 345,
+      "text": "FraudCheckService",
+      "fontSize": 10,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 650,
+      "y": 175,
+      "text": "UnderwritingService (JOIN)",
+      "fontSize": 10,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 825,
+      "y": 275,
+      "text": "DecisionService",
+      "fontSize": 10,
+      "fontStyle": 0,
       "color": -16777216
     },
     {

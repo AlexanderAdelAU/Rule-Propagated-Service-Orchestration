@@ -3,7 +3,7 @@
 <project name="FinancialSystem_P1_P5_BuildAndRun" default="run-complete-workflow" basedir="."
 	    xmlns:if="ant:if" xmlns:unless="ant:unless">
 	<description>
-		Financial System business workflow mapped onto generic stochastic Petri places P1-P5.
+		Financial System business workflow uses logical services; the Infrastructure Definition maps them onto generic stochastic Petri places P1-P5.
 
 		Business-role mapping:
 		  Validation   -> P1_Place
@@ -12,8 +12,9 @@
 		  Underwriting -> P4_Place (JoinNode, two inputs)
 		  Decision     -> P5_Place
 
-		The handler/runtime infrastructure is unchanged. Workflow behaviour is supplied
-		through generated bindings and propagated rule sets.
+		The handler/runtime nodes remain generic. Workflow behaviour is supplied
+		through generated bindings and propagated rule sets. Monitor remains a
+		separate infrastructure/observation service and is not on the business-token route.
 
 		Phases:
 		  Phase 1: Initialize databases for P1-P5 and Monitor
@@ -22,6 +23,11 @@
 
 		Services start once and remain running throughout all phases.
 	</description>
+    <!-- Shared packaged runtime; source deployment files and Eclipse outputs are not modified. -->
+    <property name="launcher.profile.file" location="../btsn.services/deployments/financial/Deployment.json"/>
+    <property name="launcher.rules.file" location="../btsn.services/deployments/financial/InfrastructureDeployment.ruleml.xml"/>
+    <import file="../btsn.services/launcher-runtime.xml"/>
+
 
 	<!-- ======================================================================= -->
 	<!-- DEPLOYMENT CONFIGURATION                                                -->
@@ -32,12 +38,12 @@
 	<!-- Workflow business roles are mapped separately in the workflow JSON.     -->
 	<!-- ======================================================================= -->
 
-	<property name="p1.mode"      value="local" />
-	<property name="p2.mode"      value="local" />
-	<property name="p3.mode"      value="local" />
-	<property name="p4.mode"      value="local" />
-	<property name="p5.mode"      value="local" />
-	<property name="monitor.mode" value="local" />
+	<property name="p1.mode"      value="auto" />
+	<property name="p2.mode"      value="auto" />
+	<property name="p3.mode"      value="auto" />
+	<property name="p4.mode"      value="auto" />
+	<property name="p5.mode"      value="auto" />
+	<property name="monitor.mode" value="auto" />
 
 	<!-- ======================================================================= -->
 	<!-- PROPERTIES                                                              -->
@@ -49,6 +55,7 @@
 	<!-- Process names for each phase -->
 	<property name="init.process.name" value="petrinet/Initializers/P1_P2_P3_P4_P5_Initialization" />
 	<property name="workflow.process.name" value="petrinet/Workflow/FinancialSystem_P1_P5_Workflow" />
+	<property name="infrastructure.definition.name" value="FinancialSystem_Infrastructure" />
 	<property name="collector.process.name" value="petrinet/Collectors/P1_P2_P3_P4_P5_Collector" />
 
 	<!-- Phase 1: Initialization parameters (v999 = admin/non-instrumented) -->
@@ -69,12 +76,12 @@
 	<property name="event.generator.id" value="EVENT_GENERATOR" />
 	<!-- Financial application data carried by the entry token's JSON data object -->
 	<property name="financial.token.data" value="application_id=APP001,annual_income=85000,requested_amount=25000,credit_score=720,fraud_risk=low" />
-	
+
 	<!-- TOKEN MODE SELECTION: 1=EDGE_NODE (default), 2=JOIN_NODE -->
 	<property name="mode" value="1" />
 	<property name="token.count" value="10" />
 	<property name="join.tokens" value="1000001,1000002" />
-	
+
 	<!-- Mode mapping (Ant condition) -->
 	<condition property="token.mode" value="EDGE_NODE"><equals arg1="${mode}" arg2="1"/></condition>
 	<condition property="token.mode" value="JOIN_NODE"><equals arg1="${mode}" arg2="2"/></condition>
@@ -97,19 +104,8 @@
 
 	<!-- Base directories -->
 	<property name="build.file.dir" location="." />
-	<property name="petrinet.root.dir" location="../" />
-
 	<!-- Common project -->
-	<property name="common.project.dir" location="${petrinet.root.dir}/btsn.common" />
-	<property name="lib.dir" location="${common.project.dir}/lib" />
-	<property name="class.dir" location="${common.project.dir}/bin" />
-	<property name="common.src.dir" location="${common.project.dir}/src" />
-
 	<!-- Event Generators project -->
-	<property name="generator.project.dir" location="${petrinet.root.dir}/btsn.common.eventgenerators" />
-	<property name="generator.src.dir" location="${generator.project.dir}/src" />
-	<property name="generator.bin.dir" location="${generator.project.dir}/bin" />
-
 	<!-- Output directory -->
 	<property name="output.dir" location="${build.file.dir}" />
 	<property name="p1.output.file" location="${output.dir}/P1_Place.out.txt" />
@@ -120,26 +116,8 @@
 	<property name="monitor.output.file" location="${output.dir}/MonitorService.out.txt" />
 
 	<!-- P1-P5 Services -->
-	<property name="p1.project.dir" location="${petrinet.root.dir}/btsn.petrinet.places.p1" />
-	<property name="p1.bin.dir" location="${p1.project.dir}/bin" />
-
-	<property name="p2.project.dir" location="${petrinet.root.dir}/btsn.petrinet.places.p2" />
-	<property name="p2.bin.dir" location="${p2.project.dir}/bin" />
-
-	<property name="p3.project.dir" location="${petrinet.root.dir}/btsn.petrinet.places.p3" />
-	<property name="p3.bin.dir" location="${p3.project.dir}/bin" />
-
-	<property name="p4.project.dir" location="${petrinet.root.dir}/btsn.petrinet.places.p4" />
-	<property name="p4.bin.dir" location="${p4.project.dir}/bin" />
-
 	<!-- P5 Service -->
-	<property name="p5.project.dir" location="${petrinet.root.dir}/btsn.petrinet.places.p5" />
-	<property name="p5.bin.dir" location="${p5.project.dir}/bin" />
-
 	<!-- Monitor Service -->
-	<property name="monitor.project.dir" location="${petrinet.root.dir}/btsn.common.Monitor" />
-	<property name="monitor.bin.dir" location="${monitor.project.dir}/bin" />
-
 	<!-- Java Classes -->
 	<property name="service.loader.class" value="org.btsn.handlers.ServiceLoader" />
 	<property name="init.event.generator.class" value="org.btsn.common.eventgenerators.DatabaseInitialization_EventGenerator" />
@@ -150,68 +128,25 @@
 	<!-- CLASSPATHS                                                              -->
 	<!-- ======================================================================= -->
 
-	<path id="common.classpath">
-		<fileset dir="${lib.dir}" erroronmissingdir="false">
-			<include name="*.jar" />
-		</fileset>
-		<pathelement location="${class.dir}" />
-	</path>
-
-	<path id="p1.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${p1.bin.dir}" />
-	</path>
-
-	<path id="p2.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${p2.bin.dir}" />
-	</path>
-
-	<path id="p3.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${p3.bin.dir}" />
-	</path>
-
-	<path id="p4.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${p4.bin.dir}" />
-	</path>
-
-	<path id="p5.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${p5.bin.dir}" />
-	</path>
-
-	<path id="monitor.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${monitor.bin.dir}" />
-	</path>
-
-	<path id="generator.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${generator.bin.dir}" />
-	</path>
-
 	<!-- ======================================================================= -->
 	<!-- DEPLOYMENT MODE RESOLUTION                                              -->
 	<!-- ======================================================================= -->
-
-	<target name="resolve-deployment-modes">
-		<condition property="p1.is.local"><equals arg1="${p1.mode}" arg2="local" /></condition>
-		<condition property="p2.is.local"><equals arg1="${p2.mode}" arg2="local" /></condition>
-		<condition property="p3.is.local"><equals arg1="${p3.mode}" arg2="local" /></condition>
-		<condition property="p4.is.local"><equals arg1="${p4.mode}" arg2="local" /></condition>
-		<condition property="p5.is.local"><equals arg1="${p5.mode}" arg2="local" /></condition>
-		<condition property="monitor.is.local"><equals arg1="${monitor.mode}" arg2="local" /></condition>
+	<target name="resolve-deployment-modes" depends="prepare-runtime,detect-local-channel">
+		<resolve-local-launch component="p1" mode="${p1.mode}" />
+		<resolve-local-launch component="p2" mode="${p2.mode}" />
+		<resolve-local-launch component="p3" mode="${p3.mode}" />
+		<resolve-local-launch component="p4" mode="${p4.mode}" />
+		<resolve-local-launch component="p5" mode="${p5.mode}" />
+		<resolve-local-launch component="monitor" mode="${monitor.mode}" />
 
 		<echo message="" />
 		<echo message="  Deployment Configuration:" />
-		<echo message="    P1:      ${p1.mode}" />
-		<echo message="    P2:      ${p2.mode}" />
-		<echo message="    P3:      ${p3.mode}" />
-		<echo message="    P4:      ${p4.mode}" />
-		<echo message="    P5:      ${p5.mode}" />
-		<echo message="    Monitor: ${monitor.mode}" />
+		<echo message="    P1:      ${p1.resolved.mode}" />
+		<echo message="    P2:      ${p2.resolved.mode}" />
+		<echo message="    P3:      ${p3.resolved.mode}" />
+		<echo message="    P4:      ${p4.resolved.mode}" />
+		<echo message="    P5:      ${p5.resolved.mode}" />
+		<echo message="    Monitor: ${monitor.resolved.mode}" />
 		<echo message="" />
 	</target>
 
@@ -229,9 +164,9 @@
 		<echo message="Previous output files cleaned" />
 	</target>
 
-	<target name="generate-workflow-bindings" description="Generate canonical bindings from workflow JSON">
+	<target name="generate-workflow-bindings" description="Generate canonical bindings from workflow JSON" depends="prepare-runtime">
 		<echo message="=== Generating Workflow Bindings ===" />
-		<java classname="org.btsn.rulecontroller.TopologyBindingGenerator" 
+		<java classname="org.btsn.rulecontroller.TopologyBindingGenerator"
 		      classpathref="generator.classpath"
 		      dir="${common.project.dir}"
 		      fork="true"
@@ -242,10 +177,10 @@
 		<echo message="Workflow bindings generated successfully" />
 	</target>
 
-	<target name="rebuild-service-ruleml" depends="generate-workflow-bindings" 
+	<target name="rebuild-service-ruleml" depends="prepare-runtime,generate-workflow-bindings"
 	        description="Generate bindings and rebuild master Service.ruleml">
 		<echo message="=== Building Master Service.ruleml ===" />
-		<java classname="org.btsn.utils.BuildMasterServiceRuleBase" 
+		<java classname="org.btsn.utils.BuildMasterServiceRuleBase"
 		      classpathref="generator.classpath"
 		      dir="${common.project.dir}"
 		      fork="true"
@@ -260,7 +195,7 @@
 	<!-- MAIN TARGET: COMPLETE WORKFLOW                                          -->
 	<!-- ======================================================================= -->
 
-	<target name="run-complete-workflow" depends="resolve-deployment-modes,clean-output,rebuild-service-ruleml" 
+	<target name="run-complete-workflow" depends="prepare-runtime,resolve-deployment-modes,clean-output,rebuild-service-ruleml"
 	        description="Run complete FinancialSystem P1-P5 workflow with init, execution and collection (DEFAULT)">
 		<echo message="" />
 		<echo message="================================================================" />
@@ -276,8 +211,8 @@
 		<parallel>
 			<!-- Start P1-P5 Services -->
 			<echo message="  [p1] Skipping - running on remote host" unless:set="p1.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p1.is.local"
-			      fork="true" timeout="600000" 
+			<java classname="${service.loader.class}" if:set="p1.is.local"
+			      fork="true" timeout="600000"
 			      dir="${p1.project.dir}" output="${p1.output.file}">
 				<classpath refid="p1.classpath" />
 				<arg value="${p1.project.dir}" />
@@ -285,8 +220,8 @@
 			</java>
 
 			<echo message="  [p2] Skipping - running on remote host" unless:set="p2.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p2.is.local"
-			      fork="true" timeout="600000" 
+			<java classname="${service.loader.class}" if:set="p2.is.local"
+			      fork="true" timeout="600000"
 			      dir="${p2.project.dir}" output="${p2.output.file}">
 				<classpath refid="p2.classpath" />
 				<arg value="${p2.project.dir}" />
@@ -294,8 +229,8 @@
 			</java>
 
 			<echo message="  [p3] Skipping - running on remote host" unless:set="p3.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p3.is.local"
-			      fork="true" timeout="600000" 
+			<java classname="${service.loader.class}" if:set="p3.is.local"
+			      fork="true" timeout="600000"
 			      dir="${p3.project.dir}" output="${p3.output.file}">
 				<classpath refid="p3.classpath" />
 				<arg value="${p3.project.dir}" />
@@ -303,8 +238,8 @@
 			</java>
 
 			<echo message="  [p4] Skipping - running on remote host" unless:set="p4.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p4.is.local"
-			      fork="true" timeout="600000" 
+			<java classname="${service.loader.class}" if:set="p4.is.local"
+			      fork="true" timeout="600000"
 			      dir="${p4.project.dir}" output="${p4.output.file}">
 				<classpath refid="p4.classpath" />
 				<arg value="${p4.project.dir}" />
@@ -312,8 +247,8 @@
 			</java>
 
 			<echo message="  [p5] Skipping - running on remote host" unless:set="p5.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p5.is.local"
-			      fork="true" timeout="600000" 
+			<java classname="${service.loader.class}" if:set="p5.is.local"
+			      fork="true" timeout="600000"
 			      dir="${p5.project.dir}" output="${p5.output.file}">
 				<classpath refid="p5.classpath" />
 				<arg value="${p5.project.dir}" />
@@ -322,8 +257,8 @@
 
 			<!-- Start Monitor Service -->
 			<echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="monitor.is.local"
-			      fork="true" timeout="600000" 
+			<java classname="${service.loader.class}" if:set="monitor.is.local"
+			      fork="true" timeout="600000"
 			      dir="${monitor.project.dir}" output="${monitor.output.file}">
 				<classpath refid="monitor.classpath" />
 				<arg value="${monitor.project.dir}" />
@@ -344,7 +279,7 @@
 
 				<!-- Deploy Initialization rules and trigger P1 -->
 				<echo message="Deploying Initialization rules..." />
-				<java classname="${init.event.generator.class}" 
+				<java classname="${init.event.generator.class}"
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
 					<arg value="-service" /><arg value="P1_InitializationService" />
@@ -356,7 +291,7 @@
 				</java>
 
 				<!-- Trigger P2-P5 and Monitor Initialization (skip deploy) -->
-				<java classname="${init.event.generator.class}" 
+				<java classname="${init.event.generator.class}"
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
 					<arg value="-service" /><arg value="P2_InitializationService" />
@@ -368,7 +303,7 @@
 					<arg value="-skipDeploy" />
 				</java>
 
-				<java classname="${init.event.generator.class}" 
+				<java classname="${init.event.generator.class}"
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
 					<arg value="-service" /><arg value="P3_InitializationService" />
@@ -380,7 +315,7 @@
 					<arg value="-skipDeploy" />
 				</java>
 
-				<java classname="${init.event.generator.class}" 
+				<java classname="${init.event.generator.class}"
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
 					<arg value="-service" /><arg value="P4_InitializationService" />
@@ -392,7 +327,7 @@
 					<arg value="-skipDeploy" />
 				</java>
 
-				<java classname="${init.event.generator.class}" 
+				<java classname="${init.event.generator.class}"
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
 					<arg value="-service" /><arg value="P5_InitializationService" />
@@ -404,7 +339,7 @@
 					<arg value="-skipDeploy" />
 				</java>
 
-				<java classname="${init.event.generator.class}" 
+				<java classname="${init.event.generator.class}"
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
 					<arg value="-service" /><arg value="Monitor_InitializationService" />
@@ -434,11 +369,12 @@
 
 				<!-- Deploy Workflow rules (tokens=0) -->
 				<echo message="Deploying Workflow rules..." />
-				<java classname="${token.generator.class}" 
+				<java classname="${token.generator.class}"
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
 					<arg value="-version" /><arg value="${rule.version}" />
 					<arg value="-process" /><arg value="${workflow.process.name}" />
+			<arg value="-infrastructure" /><arg value="${infrastructure.definition.name}" />
 					<arg value="-place" /><arg value="${target.place}" />
 					<arg value="-operation" /><arg value="${target.operation}" />
 					<arg value="-tokens" /><arg value="0" />
@@ -449,7 +385,7 @@
 				<!-- Fire tokens based on mode -->
 				<echo message="Firing tokens (Mode: ${token.mode})..." />
 				<antcall target="fire-tokens-${token.mode}" />
-				
+
 				<echo message="=== Phase 2 Complete ===" />
 				<sleep seconds="${phase.delay.seconds}" />
 
@@ -463,7 +399,7 @@
 
 				<!-- P1 Collection (with deployment) -->
 				<echo message="Collecting from P1_CollectorService..." />
-				<java classname="${collector.event.generator.class}" 
+				<java classname="${collector.event.generator.class}"
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
 					<arg value="-service" /><arg value="P1_CollectorService" />
@@ -477,7 +413,7 @@
 
 				<!-- P2-P5 Collection (skip deployment) -->
 				<echo message="Collecting from P2_CollectorService..." />
-				<java classname="${collector.event.generator.class}" 
+				<java classname="${collector.event.generator.class}"
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
 					<arg value="-service" /><arg value="P2_CollectorService" />
@@ -491,7 +427,7 @@
 				<sleep seconds="${collector.delay.seconds}" />
 
 				<echo message="Collecting from P3_CollectorService..." />
-				<java classname="${collector.event.generator.class}" 
+				<java classname="${collector.event.generator.class}"
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
 					<arg value="-service" /><arg value="P3_CollectorService" />
@@ -505,7 +441,7 @@
 				<sleep seconds="${collector.delay.seconds}" />
 
 				<echo message="Collecting from P4_CollectorService..." />
-				<java classname="${collector.event.generator.class}" 
+				<java classname="${collector.event.generator.class}"
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
 					<arg value="-service" /><arg value="P4_CollectorService" />
@@ -518,7 +454,7 @@
 				</java>
 				<sleep seconds="${collector.delay.seconds}" />
 				<echo message="Collecting from P5_CollectorService..." />
-				<java classname="${collector.event.generator.class}" 
+				<java classname="${collector.event.generator.class}"
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
 					<arg value="-service" /><arg value="P5_CollectorService" />
@@ -553,13 +489,14 @@
 	<!-- ======================================================================= -->
 
 	<!-- Fire tokens for EDGE_NODE mode (single tokens) -->
-	<target name="fire-tokens-EDGE_NODE">
+	<target name="fire-tokens-EDGE_NODE" depends="prepare-runtime">
 		<echo message="Firing ${token.count} edge token(s) to ${target.place}..." />
-		<java classname="${token.generator.class}" 
+		<java classname="${token.generator.class}"
 		      fork="true" dir="${generator.project.dir}" failonerror="true">
 			<classpath refid="generator.classpath" />
 			<arg value="-version" /><arg value="${rule.version}" />
 			<arg value="-process" /><arg value="${workflow.process.name}" />
+			<arg value="-infrastructure" /><arg value="${infrastructure.definition.name}" />
 			<arg value="-place" /><arg value="${target.place}" />
 			<arg value="-operation" /><arg value="${target.operation}" />
 			<arg value="-tokens" /><arg value="${token.count}" />
@@ -571,13 +508,14 @@
 	</target>
 
 	<!-- Fire tokens for JOIN_NODE mode (paired join tokens) -->
-	<target name="fire-tokens-JOIN_NODE">
+	<target name="fire-tokens-JOIN_NODE" depends="prepare-runtime">
 		<echo message="Firing join tokens: ${join.tokens} to ${target.place}..." />
-		<java classname="${token.generator.class}" 
+		<java classname="${token.generator.class}"
 		      fork="true" dir="${generator.project.dir}" failonerror="true">
 			<classpath refid="generator.classpath" />
 			<arg value="-version" /><arg value="${rule.version}" />
 			<arg value="-process" /><arg value="${workflow.process.name}" />
+			<arg value="-infrastructure" /><arg value="${infrastructure.definition.name}" />
 			<arg value="-place" /><arg value="${target.place}" />
 			<arg value="-operation" /><arg value="${target.operation}" />
 			<arg value="-expire" /><arg value="${token.expire}" />
@@ -591,7 +529,7 @@
 	<!-- WORKFLOW-ONLY TARGET (skip init/collect)                               -->
 	<!-- ======================================================================= -->
 
-	<target name="run-workflow-only" depends="resolve-deployment-modes,clean-output,rebuild-service-ruleml" 
+	<target name="run-workflow-only" depends="prepare-runtime,resolve-deployment-modes,clean-output,rebuild-service-ruleml"
 	        description="Run only the workflow phase (skip init and collect)">
 		<echo message="" />
 		<echo message="================================================================" />
@@ -605,8 +543,8 @@
 		<parallel>
 			<!-- Start all services -->
 			<echo message="  [p1] Skipping - running on remote host" unless:set="p1.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p1.is.local"
-			      fork="true" timeout="600000" 
+			<java classname="${service.loader.class}" if:set="p1.is.local"
+			      fork="true" timeout="600000"
 			      dir="${p1.project.dir}" output="${p1.output.file}">
 				<classpath refid="p1.classpath" />
 				<arg value="${p1.project.dir}" />
@@ -614,8 +552,8 @@
 			</java>
 
 			<echo message="  [p2] Skipping - running on remote host" unless:set="p2.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p2.is.local"
-			      fork="true" timeout="600000" 
+			<java classname="${service.loader.class}" if:set="p2.is.local"
+			      fork="true" timeout="600000"
 			      dir="${p2.project.dir}" output="${p2.output.file}">
 				<classpath refid="p2.classpath" />
 				<arg value="${p2.project.dir}" />
@@ -623,8 +561,8 @@
 			</java>
 
 			<echo message="  [p3] Skipping - running on remote host" unless:set="p3.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p3.is.local"
-			      fork="true" timeout="600000" 
+			<java classname="${service.loader.class}" if:set="p3.is.local"
+			      fork="true" timeout="600000"
 			      dir="${p3.project.dir}" output="${p3.output.file}">
 				<classpath refid="p3.classpath" />
 				<arg value="${p3.project.dir}" />
@@ -632,8 +570,8 @@
 			</java>
 
 			<echo message="  [p4] Skipping - running on remote host" unless:set="p4.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p4.is.local"
-			      fork="true" timeout="600000" 
+			<java classname="${service.loader.class}" if:set="p4.is.local"
+			      fork="true" timeout="600000"
 			      dir="${p4.project.dir}" output="${p4.output.file}">
 				<classpath refid="p4.classpath" />
 				<arg value="${p4.project.dir}" />
@@ -641,8 +579,8 @@
 			</java>
 
 			<echo message="  [p5] Skipping - running on remote host" unless:set="p5.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p5.is.local"
-			      fork="true" timeout="600000" 
+			<java classname="${service.loader.class}" if:set="p5.is.local"
+			      fork="true" timeout="600000"
 			      dir="${p5.project.dir}" output="${p5.output.file}">
 				<classpath refid="p5.classpath" />
 				<arg value="${p5.project.dir}" />
@@ -650,8 +588,8 @@
 			</java>
 
 			<echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="monitor.is.local"
-			      fork="true" timeout="600000" 
+			<java classname="${service.loader.class}" if:set="monitor.is.local"
+			      fork="true" timeout="600000"
 			      dir="${monitor.project.dir}" output="${monitor.output.file}">
 				<classpath refid="monitor.classpath" />
 				<arg value="${monitor.project.dir}" />
@@ -663,11 +601,12 @@
 
 				<!-- Deploy workflow rules -->
 				<echo message="Deploying workflow rules..." />
-				<java classname="${token.generator.class}" 
+				<java classname="${token.generator.class}"
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
 					<arg value="-version" /><arg value="${rule.version}" />
 					<arg value="-process" /><arg value="${workflow.process.name}" />
+			<arg value="-infrastructure" /><arg value="${infrastructure.definition.name}" />
 					<arg value="-place" /><arg value="${target.place}" />
 					<arg value="-operation" /><arg value="${target.operation}" />
 					<arg value="-tokens" /><arg value="0" />

@@ -106,7 +106,7 @@
       "width": 50,
       "height": 50,
       "label": "Triage",
-      "service": "Triage_InitializationService",
+      "service": "P1_InitializationService",
       "operations": [
         {
           "name": "purgeAndInitialize"
@@ -121,7 +121,7 @@
       "width": 50,
       "height": 50,
       "label": "Laboratory",
-      "service": "Laboratory_InitializationService",
+      "service": "P2_InitializationService",
       "operations": [
         {
           "name": "purgeAndInitialize"
@@ -136,7 +136,7 @@
       "width": 50,
       "height": 50,
       "label": "Radiology",
-      "service": "Radiology_InitializationService",
+      "service": "P4_InitializationService",
       "operations": [
         {
           "name": "purgeAndInitialize"
@@ -151,7 +151,7 @@
       "width": 50,
       "height": 50,
       "label": "Cardiology",
-      "service": "Cardiology_InitializationService",
+      "service": "P3_InitializationService",
       "operations": [
         {
           "name": "purgeAndInitialize"
@@ -166,7 +166,7 @@
       "width": 50,
       "height": 50,
       "label": "Diagnosis",
-      "service": "Diagnosis_InitializationService",
+      "service": "P5_InitializationService",
       "operations": [
         {
           "name": "purgeAndInitialize"
@@ -181,7 +181,7 @@
       "width": 50,
       "height": 50,
       "label": "Treatment",
-      "service": "Treatment_InitializationService",
+      "service": "P6_InitializationService",
       "operations": [
         {
           "name": "purgeAndInitialize"

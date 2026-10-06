@@ -35,7 +35,7 @@
       "width": 50,
       "height": 50,
       "label": "Validation",
-      "service": "P1_Place",
+      "service": "ValidationService",
       "operations": [
         {
           "name": "processToken",
@@ -86,7 +86,7 @@
       "width": 50,
       "height": 50,
       "label": "CreditCheck",
-      "service": "P2_Place",
+      "service": "CreditCheckService",
       "operations": [
         {
           "name": "processToken",
@@ -137,7 +137,7 @@
       "width": 50,
       "height": 50,
       "label": "FraudCheck",
-      "service": "P3_Place",
+      "service": "FraudCheckService",
       "operations": [
         {
           "name": "processToken",
@@ -188,7 +188,7 @@
       "width": 50,
       "height": 50,
       "label": "Underwriting",
-      "service": "P4_Place",
+      "service": "UnderwritingService",
       "operations": [
         {
           "name": "processToken",
@@ -245,7 +245,7 @@
       "width": 50,
       "height": 50,
       "label": "Decision",
-      "service": "P5_Place",
+      "service": "DecisionService",
       "operations": [
         {
           "name": "processToken",
@@ -269,56 +269,6 @@
       "width": 20,
       "height": 60,
       "label": "T_out_Decision",
-      "rotation": 0,
-      "node_type": "EdgeNode",
-      "node_value": "EDGE_NODE",
-      "transition_type": "T_out"
-    },
-    {
-      "id": "T_in_Monitor",
-      "type": "TRANSITION",
-      "x": 1010,
-      "y": 390,
-      "width": 20,
-      "height": 60,
-      "label": "T_in_Monitor",
-      "rotation": 0,
-      "node_type": "EdgeNode",
-      "node_value": "EDGE_NODE",
-      "transition_type": "T_in",
-      "buffer": "10"
-    },
-    {
-      "id": "Monitor",
-      "type": "PLACE",
-      "x": 1070,
-      "y": 395,
-      "width": 50,
-      "height": 50,
-      "label": "Monitor",
-      "service": "MonitorService",
-      "operations": [
-        {
-          "name": "acknowledgeTokenArrival",
-          "arguments": [
-            {
-              "name": "decisionResults",
-              "type": "String",
-              "value": "String",
-              "required": false
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "T_out_Monitor",
-      "type": "TRANSITION",
-      "x": 1160,
-      "y": 390,
-      "width": 20,
-      "height": 60,
-      "label": "T_out_Monitor",
       "rotation": 0,
       "node_type": "TerminateNode",
       "node_value": "TERMINATE_NODE",
@@ -503,37 +453,13 @@
       "guardCondition": "",
       "decision_value": "",
       "endpoint": ""
-    },
-    {
-      "source": "T_out_Decision",
-      "target": "T_in_Monitor",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": "acknowledgeTokenArrival"
-    },
-    {
-      "source": "T_in_Monitor",
-      "target": "Monitor",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
-    },
-    {
-      "source": "Monitor",
-      "target": "T_out_Monitor",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
     }
   ],
   "textElements": [
     {
       "x": 390,
       "y": 50,
-      "text": "Loan Application Processing Workflow — mapped to generic P1-P5",
+      "text": "Loan Application Processing Workflow — infrastructure independent",
       "fontSize": 16,
       "fontStyle": 1,
       "color": -16777216
@@ -541,7 +467,7 @@
     {
       "x": 145,
       "y": 165,
-      "text": "Validation → P1",
+      "text": "ValidationService",
       "fontSize": 10,
       "fontStyle": 0,
       "color": -16777216
@@ -549,7 +475,7 @@
     {
       "x": 400,
       "y": 105,
-      "text": "Credit Check → P2",
+      "text": "CreditCheckService",
       "fontSize": 10,
       "fontStyle": 0,
       "color": -16777216
@@ -557,7 +483,7 @@
     {
       "x": 400,
       "y": 345,
-      "text": "Fraud Check → P3",
+      "text": "FraudCheckService",
       "fontSize": 10,
       "fontStyle": 0,
       "color": -16777216
@@ -565,7 +491,7 @@
     {
       "x": 650,
       "y": 175,
-      "text": "Underwriting → P4 (JOIN)",
+      "text": "UnderwritingService (JOIN)",
       "fontSize": 10,
       "fontStyle": 0,
       "color": -16777216
@@ -573,7 +499,7 @@
     {
       "x": 825,
       "y": 275,
-      "text": "Decision → P5",
+      "text": "DecisionService",
       "fontSize": 10,
       "fontStyle": 0,
       "color": -16777216
@@ -592,14 +518,6 @@
       "text": "Declined applications terminated",
       "fontSize": 10,
       "fontStyle": 2,
-      "color": -16777216
-    },
-    {
-      "x": 1030,
-      "y": 365,
-      "text": "Workflow Monitor",
-      "fontSize": 10,
-      "fontStyle": 0,
       "color": -16777216
     }
   ]

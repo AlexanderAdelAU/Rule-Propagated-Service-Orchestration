@@ -35,7 +35,7 @@
       "width": 50,
       "height": 50,
       "label": "Validation",
-      "service": "P1_Place",
+      "service": "ValidationService",
       "operations": [
         {
           "name": "processToken",
@@ -86,7 +86,7 @@
       "width": 50,
       "height": 50,
       "label": "CreditCheck",
-      "service": "P2_Place",
+      "service": "CreditCheckService",
       "operations": [
         {
           "name": "processToken",
@@ -110,56 +110,6 @@
       "width": 20,
       "height": 60,
       "label": "T_out_CreditCheck",
-      "rotation": 0,
-      "node_type": "EdgeNode",
-      "node_value": "EDGE_NODE",
-      "transition_type": "T_out"
-    },
-    {
-      "id": "T_in_Monitor",
-      "type": "TRANSITION",
-      "x": 620,
-      "y": 190,
-      "width": 20,
-      "height": 60,
-      "label": "T_in_Monitor",
-      "rotation": 0,
-      "node_type": "EdgeNode",
-      "node_value": "EDGE_NODE",
-      "transition_type": "T_in",
-      "buffer": "10"
-    },
-    {
-      "id": "Monitor",
-      "type": "PLACE",
-      "x": 680,
-      "y": 195,
-      "width": 50,
-      "height": 50,
-      "label": "Monitor",
-      "service": "MonitorService",
-      "operations": [
-        {
-          "name": "acknowledgeTokenArrival",
-          "arguments": [
-            {
-              "name": "creditCheckResults",
-              "type": "String",
-              "value": "String",
-              "required": false
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "T_out_Monitor",
-      "type": "TRANSITION",
-      "x": 770,
-      "y": 190,
-      "width": 20,
-      "height": 60,
-      "label": "T_out_Monitor",
       "rotation": 0,
       "node_type": "TerminateNode",
       "node_value": "TERMINATE_NODE",
@@ -235,37 +185,13 @@
       "guardCondition": "",
       "decision_value": "",
       "endpoint": ""
-    },
-    {
-      "source": "T_out_CreditCheck",
-      "target": "T_in_Monitor",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": "acknowledgeTokenArrival"
-    },
-    {
-      "source": "T_in_Monitor",
-      "target": "Monitor",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
-    },
-    {
-      "source": "Monitor",
-      "target": "T_out_Monitor",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
     }
   ],
   "textElements": [
     {
       "x": 230,
       "y": 70,
-      "text": "v002 Financial Pre-Screen — independent topology on shared P1/P2",
+      "text": "v002 Financial Pre-Screen — logical services on shared infrastructure",
       "fontSize": 14,
       "fontStyle": 1,
       "color": -16777216
@@ -273,7 +199,7 @@
     {
       "x": 145,
       "y": 165,
-      "text": "Pre-Screen Validation → P1",
+      "text": "ValidationService",
       "fontSize": 10,
       "fontStyle": 0,
       "color": -16777216
@@ -281,15 +207,7 @@
     {
       "x": 400,
       "y": 165,
-      "text": "Pre-Screen Credit Check → P2",
-      "fontSize": 10,
-      "fontStyle": 0,
-      "color": -16777216
-    },
-    {
-      "x": 625,
-      "y": 165,
-      "text": "Monitor",
+      "text": "CreditCheckService",
       "fontSize": 10,
       "fontStyle": 0,
       "color": -16777216

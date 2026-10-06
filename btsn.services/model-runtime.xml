@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="petri-net-model-runtime" default="prepare-runtime" basedir=".">
+    <!-- Stable entry point for Eclipse launchers and imported host builds. -->
+    <import file="build/workflows/model-runtime.xml"/>
+</project>

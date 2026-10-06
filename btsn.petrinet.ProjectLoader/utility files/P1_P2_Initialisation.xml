@@ -3,15 +3,22 @@
     <description>
         Phase 1: Database Initialization for P1, P2 and Monitor Services
         Simple Loop Petri Net - Database Initialization Workflow
-        
+
         TWO-PHASE APPROACH:
         Phase 1A: Load InitializationServices → Trigger purge → Kill services
         Phase 1B: (Optional) Verify database is clean
-        
+
         Then run P1_P2_Workflow.xml to start main services.
-        
+
         ADMIN VERSION (v999): Instrumentation is DISABLED for these tokens.
     </description>
+    <!-- Shared packaged runtime; source deployment files and Eclipse outputs are not modified. -->
+    <property name="launcher.profile.file" location="../../btsn.services/deployments/models/StochasticLoopDeployment.json"/>
+    <property name="launcher.rules.file" location="../../btsn.services/deployments/models/StochasticLoopInfrastructure.ruleml.xml"/>
+    <property name="launcher.runtime.dir" location="../../btsn.services/target/launchers/P1_P2_Phases"/>
+    <property name="infrastructure.definition.name" value="StochasticLoopModels_Infrastructure"/>
+    <import file="../../btsn.services/launcher-runtime.xml"/>
+
 
     <!-- =================================== -->
     <!-- PROPERTIES SECTION                 -->
@@ -22,7 +29,7 @@
     <property name="sequence.id.p2" value="999100000" />
     <property name="sequence.id.monitor" value="999600000" />
     <property name="db.init.operation" value="purgeAndInitialize" />
-    <property name="process.name" value="petrinet/P1_P2_Initialization" />
+    <property name="process.name" value="petrinet/Initializers/P1_P2_Initialization" />
 
     <!-- Timing -->
     <property name="port.release.seconds" value="5" />
@@ -31,33 +38,16 @@
 
     <!-- Base directories -->
     <property name="build.file.dir" location="." />
-    <property name="petrinet.root.dir" location="../" />
-
     <!-- Common project directories -->
-    <property name="common.project.dir" location="${petrinet.root.dir}/btsn.common" />
-    <property name="lib.dir" location="${common.project.dir}/lib" />
-    <property name="class.dir" location="${common.project.dir}/bin" />
-
     <!-- Output directory -->
     <property name="output.dir" location="${build.file.dir}" />
 
     <!-- Service project directories -->
-    <property name="p1.project.dir" location="${petrinet.root.dir}/btsn.petrinet.places.p1" />
-    <property name="p1.bin.dir" location="${p1.project.dir}/bin" />
     <property name="p1.init.output.file" location="${output.dir}/P1_InitializationService.out.txt" />
-
-    <property name="p2.project.dir" location="${petrinet.root.dir}/btsn.petrinet.places.p2" />
-    <property name="p2.bin.dir" location="${p2.project.dir}/bin" />
     <property name="p2.init.output.file" location="${output.dir}/P2_InitializationService.out.txt" />
-
-    <property name="monitor.project.dir" location="${petrinet.root.dir}/btsn.common.Monitor" />
-    <property name="monitor.bin.dir" location="${monitor.project.dir}/bin" />
     <property name="monitor.init.output.file" location="${output.dir}/Monitor_InitializationService.out.txt" />
 
     <!-- Event Generator -->
-    <property name="generator.project.dir" location="${petrinet.root.dir}/btsn.common.eventgenerators" />
-    <property name="generator.bin.dir" location="${generator.project.dir}/bin" />
-
     <!-- Java Classes -->
     <property name="service.loader.class" value="org.btsn.handlers.ServiceLoader" />
     <property name="event.generator.class" value="org.btsn.common.eventgenerators.DatabaseInitialization_EventGenerator" />
@@ -66,50 +56,13 @@
     <!-- CLASSPATH SECTION                  -->
     <!-- =================================== -->
 
-    <path id="common.classpath">
-        <fileset dir="${lib.dir}" erroronmissingdir="false">
-            <include name="*.jar" />
-        </fileset>
-        <pathelement location="${class.dir}" />
-    </path>
-
-    <path id="p1.classpath">
-        <path refid="common.classpath" />
-        <pathelement location="${p1.bin.dir}" />
-    </path>
-
-    <path id="p2.classpath">
-        <path refid="common.classpath" />
-        <pathelement location="${p2.bin.dir}" />
-    </path>
-
-    <path id="monitor.classpath">
-        <path refid="common.classpath" />
-        <pathelement location="${monitor.bin.dir}" />
-    </path>
-
-    <path id="generator.classpath">
-        <path refid="common.classpath" />
-        <pathelement location="${generator.bin.dir}" />
-    </path>
-
     <!-- =================================== -->
     <!-- UTILITY TARGETS                    -->
     <!-- =================================== -->
 
-    <target name="kill-java-processes" description="Kill any lingering Java processes">
-        <echo message="Killing any lingering Java processes..." />
-        <exec executable="cmd" osfamily="windows" failonerror="false">
-            <arg value="/c"/>
-            <arg value="taskkill /F /IM java.exe /T 2>nul"/>
-        </exec>
-        <exec executable="bash" osfamily="unix" failonerror="false">
-            <arg value="-c"/>
-            <arg value="pkill -9 java 2>/dev/null || true"/>
-        </exec>
-        <echo message="Waiting ${port.release.seconds}s for ports to be released..." />
+    <target name="kill-java-processes" description="Compatibility target: allow ports to close after stopping the previous Ant run">
+        <echo message="Stop the previous Ant run before starting these standalone phases."/>
         <sleep seconds="${port.release.seconds}"/>
-        <echo message="Process cleanup complete" />
     </target>
 
     <target name="clean-output" description="Clean previous output files">
@@ -124,10 +77,10 @@
     <!-- These load P1_InitializationService, NOT P1_Place -->
     <!-- =================================== -->
 
-    <target name="load-p1-init-service" description="Load P1_InitializationService">
+    <target name="load-p1-init-service" description="Load P1_InitializationService" depends="prepare-runtime">
         <echo message="Starting P1_InitializationService..." />
-        <java classname="${service.loader.class}" 
-              fork="true" 
+        <java classname="${service.loader.class}"
+              fork="true"
               dir="${p1.project.dir}"
               output="${p1.init.output.file}">
             <classpath refid="p1.classpath" />
@@ -139,10 +92,10 @@
         </java>
     </target>
 
-    <target name="load-p2-init-service" description="Load P2_InitializationService">
+    <target name="load-p2-init-service" description="Load P2_InitializationService" depends="prepare-runtime">
         <echo message="Starting P2_InitializationService..." />
-        <java classname="${service.loader.class}" 
-              fork="true" 
+        <java classname="${service.loader.class}"
+              fork="true"
               dir="${p2.project.dir}"
               output="${p2.init.output.file}">
             <classpath refid="p2.classpath" />
@@ -154,10 +107,10 @@
         </java>
     </target>
 
-    <target name="load-monitor-init-service" description="Load Monitor_InitializationService">
+    <target name="load-monitor-init-service" description="Load Monitor_InitializationService" depends="prepare-runtime">
         <echo message="Starting Monitor_InitializationService..." />
-        <java classname="${service.loader.class}" 
-              fork="true" 
+        <java classname="${service.loader.class}"
+              fork="true"
               dir="${monitor.project.dir}"
               output="${monitor.init.output.file}">
             <classpath refid="monitor.classpath" />
@@ -173,13 +126,13 @@
     <!-- DEPLOY PROCESS RULES TARGET        -->
     <!-- =================================== -->
 
-    <target name="deploy-process-rules" description="Deploy process rules for initialization">
+    <target name="deploy-process-rules" description="Deploy process rules for initialization" depends="prepare-runtime">
         <echo message="=== Deploying Process Rules ===" />
         <echo message="Process: ${process.name}" />
         <echo message="Version: ${rule.version}" />
-        
-        <java classname="${event.generator.class}" 
-              fork="true" 
+
+        <java classname="${event.generator.class}"
+              fork="true"
               dir="${generator.project.dir}"
               failonerror="true">
             <classpath refid="generator.classpath" />
@@ -197,10 +150,10 @@
     <!-- TRIGGER INITIALIZATION EVENTS      -->
     <!-- =================================== -->
 
-    <target name="trigger-p1-initializer" description="Trigger P1 Initialization">
+    <target name="trigger-p1-initializer" description="Trigger P1 Initialization" depends="prepare-runtime">
         <echo message="Triggering P1 purgeAndInitialize..." />
-        <java classname="${event.generator.class}" 
-              fork="true" 
+        <java classname="${event.generator.class}"
+              fork="true"
               dir="${generator.project.dir}"
               failonerror="true">
             <classpath refid="generator.classpath" />
@@ -214,10 +167,10 @@
         </java>
     </target>
 
-    <target name="trigger-p2-initializer" description="Trigger P2 Initialization">
+    <target name="trigger-p2-initializer" description="Trigger P2 Initialization" depends="prepare-runtime">
         <echo message="Triggering P2 purgeAndInitialize..." />
-        <java classname="${event.generator.class}" 
-              fork="true" 
+        <java classname="${event.generator.class}"
+              fork="true"
               dir="${generator.project.dir}"
               failonerror="true">
             <classpath refid="generator.classpath" />
@@ -231,10 +184,10 @@
         </java>
     </target>
 
-    <target name="trigger-monitor-initializer" description="Trigger Monitor Initialization">
+    <target name="trigger-monitor-initializer" description="Trigger Monitor Initialization" depends="prepare-runtime">
         <echo message="Triggering Monitor purgeAndInitialize..." />
-        <java classname="${event.generator.class}" 
-              fork="true" 
+        <java classname="${event.generator.class}"
+              fork="true"
               dir="${generator.project.dir}"
               failonerror="true">
             <classpath refid="generator.classpath" />
@@ -252,10 +205,10 @@
     <!-- MAIN INITIALIZATION TARGET         -->
     <!-- =================================== -->
 
-    <target name="initialize-all" 
-            depends="kill-java-processes,clean-output" 
+    <target name="initialize-all"
+            depends="prepare-runtime,kill-java-processes,clean-output"
             description="Initialize all databases (DEFAULT)">
-        
+
         <echo message="" />
         <echo message="╔════════════════════════════════════════════════════════════╗" />
         <echo message="║  PHASE 1A: LOADING INITIALIZATION SERVICES                 ║" />
@@ -283,7 +236,7 @@
                 <echo message="║  PHASE 1B: DEPLOYING PROCESS RULES                         ║" />
                 <echo message="╚════════════════════════════════════════════════════════════╝" />
                 <echo message="" />
-                
+
                 <antcall target="deploy-process-rules" />
 
                 <echo message="" />
@@ -308,7 +261,7 @@
                 <echo message="║  PHASE 1D: STOPPING INITIALIZATION SERVICES                ║" />
                 <echo message="╚════════════════════════════════════════════════════════════╝" />
                 <echo message="" />
-                
+
                 <antcall target="kill-java-processes" />
             </sequential>
         </parallel>

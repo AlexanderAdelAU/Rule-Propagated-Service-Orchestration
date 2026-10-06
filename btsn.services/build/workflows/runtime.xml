@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="workflow-runtime-build" default="build-workflow-runtime" basedir="../..">
+    <target name="build-workflow-runtime" depends="build-hosts" description="Build packaged hosts, Monitor and event generators">
+        <ant antfile="workflow-runtime.xml" target="jar" inheritall="false"/>
+    </target>
+</project>

@@ -1,0 +1,24 @@
+<!-- Healthcare infrastructure deployment; business classes are supplied by service JARs. -->
+<Atom><Rel>boundChannel</Rel><Ind>ip0</Ind><Ind>192.168.1.82</Ind></Atom>
+<Atom><Rel>localDefined</Rel><Ind>P1_Place</Ind></Atom>
+<Atom><Rel>localDefined</Rel><Ind>P2_Place</Ind></Atom>
+<Atom><Rel>localDefined</Rel><Ind>P3_Place</Ind></Atom>
+<Atom><Rel>localDefined</Rel><Ind>P4_Place</Ind></Atom>
+<Atom><Rel>localDefined</Rel><Ind>P5_Place</Ind></Atom>
+<Atom><Rel>localDefined</Rel><Ind>P6_Place</Ind></Atom>
+<!-- TriageService.processTriageAssessment on P1 -->
+<Atom><Rel>activeService</Rel><Ind>P1_Place</Ind><Ind>processTriageAssessment</Ind><Ind>ip0</Ind><Ind>4001</Ind></Atom>
+<!-- LaboratoryService.processLabRequest on P2 -->
+<Atom><Rel>activeService</Rel><Ind>P2_Place</Ind><Ind>processLabRequest</Ind><Ind>ip0</Ind><Ind>4002</Ind></Atom>
+<!-- CardiologyService.processCardiacAssessment on P3 -->
+<Atom><Rel>activeService</Rel><Ind>P3_Place</Ind><Ind>processCardiacAssessment</Ind><Ind>ip0</Ind><Ind>4003</Ind></Atom>
+<!-- RadiologyService.processImagingRequest on P4 -->
+<Atom><Rel>activeService</Rel><Ind>P4_Place</Ind><Ind>processImagingRequest</Ind><Ind>ip0</Ind><Ind>4004</Ind></Atom>
+<!-- RadiologyService.federatedRadiologyRequest on P4 -->
+<Atom><Rel>activeService</Rel><Ind>P4_Place</Ind><Ind>federatedRadiologyRequest</Ind><Ind>ip0</Ind><Ind>4007</Ind></Atom>
+<!-- DiagnosisService.processClinicalDecision on P5 -->
+<Atom><Rel>activeService</Rel><Ind>P5_Place</Ind><Ind>processClinicalDecision</Ind><Ind>ip0</Ind><Ind>4005</Ind></Atom>
+<!-- TreatmentService.executeTreatmentPlan on P6 -->
+<Atom><Rel>activeService</Rel><Ind>P6_Place</Ind><Ind>executeTreatmentPlan</Ind><Ind>ip0</Ind><Ind>4006</Ind></Atom>
+<!-- TreatmentService.executeDirectTreatment on P6 -->
+<Atom><Rel>activeService</Rel><Ind>P6_Place</Ind><Ind>executeDirectTreatment</Ind><Ind>ip0</Ind><Ind>4008</Ind></Atom>

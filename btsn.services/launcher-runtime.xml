@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="launcher-runtime-entry" default="prepare-runtime" basedir=".">
+    <import file="build/workflows/launcher-runtime.xml"/>
+</project>

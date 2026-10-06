@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="individual-place-release" basedir=".">
+    <!-- Stable entry point for Eclipse launchers and imported host builds. -->
+    <import file="build/hosts/place-release.xml"/>
+</project>

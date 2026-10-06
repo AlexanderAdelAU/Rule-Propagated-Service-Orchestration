@@ -1,5 +1,5 @@
 {
-   "processType":"PetriNet",
+  "processType": "PetriNet",
   "elements": [
     {
       "id": "T_in_P1",
@@ -23,12 +23,18 @@
       "width": 50,
       "height": 50,
       "label": "P1",
-      "service": "P1_Place",
+      "service": "StochasticEntryTokenService",
       "operations": [
         {
           "name": "processToken",
+          "returnAttribute": "token",
           "arguments": [
-            {"name": "token", "type": "String", "value": "String", "required": false}
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
           ]
         }
       ]
@@ -68,12 +74,18 @@
       "width": 50,
       "height": 50,
       "label": "P2",
-      "service": "P2_Place",
+      "service": "StochasticBranchTwoTokenService",
       "operations": [
         {
           "name": "processToken",
+          "returnAttribute": "token_branch2",
           "arguments": [
-            {"name": "token", "type": "String", "value": "String", "required": false}
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
           ]
         }
       ]
@@ -113,12 +125,18 @@
       "width": 50,
       "height": 50,
       "label": "P3",
-      "service": "P3_Place",
+      "service": "StochasticBranchOneTokenService",
       "operations": [
         {
           "name": "processToken",
+          "returnAttribute": "token_branch1",
           "arguments": [
-            {"name": "token", "type": "String", "value": "String", "required": false}
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
           ]
         }
       ]
@@ -158,13 +176,24 @@
       "width": 50,
       "height": 50,
       "label": "P4",
-      "service": "P4_Place",
+      "service": "StochasticMergeTokenService",
       "operations": [
         {
           "name": "processToken",
+          "returnAttribute": "token",
           "arguments": [
-            {"name": "token_branch1", "type": "String", "value": "string", "required": false},
-            {"name": "token_branch2", "type": "String", "value": "string", "required": false}
+            {
+              "name": "token_branch1",
+              "type": "String",
+              "value": "String",
+              "required": false
+            },
+            {
+              "name": "token_branch2",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
           ]
         }
       ]
@@ -180,51 +209,6 @@
       "rotation": 0.0,
       "node_type": "EdgeNode",
       "node_value": "EDGE_NODE",
-      "transition_type": "T_out"
-    },
-    {
-      "id": "T_in_Monitor",
-      "type": "TRANSITION",
-      "x": 768,
-      "y": 350,
-      "width": 24,
-      "height": 60,
-      "label": "T_in_Monitor",
-      "rotation": 90.0,
-      "node_type": "EdgeNode",
-      "node_value": "EDGE_NODE",
-      "transition_type": "T_in",
-      "buffer": "10"
-    },
-    {
-      "id": "Monitor",
-      "type": "PLACE",
-      "x": 755,
-      "y": 435,
-      "width": 50,
-      "height": 50,
-      "label": "Monitor",
-      "service": "MonitorService",
-      "operations": [
-        {
-          "name": "acknowledgeTokenArrival",
-          "arguments": [
-            {"name": "token", "type": "String", "value": "string", "required": false}
-          ]
-        }
-      ]
-    },
-    {
-      "id": "T_out_Monitor",
-      "type": "TRANSITION",
-      "x": 768,
-      "y": 510,
-      "width": 24,
-      "height": 60,
-      "label": "T_out_Monitor",
-      "rotation": 90.0,
-      "node_type": "TerminateNode",
-      "node_value": "TERMINATE_NODE",
       "transition_type": "T_out"
     },
     {
@@ -251,6 +235,18 @@
       "rotation": 0.0,
       "generator_rate": "1000",
       "token_version": "v001"
+    },
+    {
+      "id": "T_in_Model_Terminate",
+      "type": "TRANSITION",
+      "x": 860,
+      "y": 250,
+      "width": 20,
+      "height": 60,
+      "label": "Terminate",
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
     }
   ],
   "arrows": [
@@ -262,7 +258,10 @@
       "decision_value": "true",
       "endpoint": "processToken",
       "waypoints": [
-        {"x": 320, "y": 220}
+        {
+          "x": 320,
+          "y": 220
+        }
       ],
       "labelOffsetX": -14,
       "labelOffsetY": -18
@@ -275,7 +274,10 @@
       "decision_value": "true",
       "endpoint": "processToken",
       "waypoints": [
-        {"x": 320, "y": 320}
+        {
+          "x": 320,
+          "y": 320
+        }
       ],
       "labelOffsetX": -15,
       "labelOffsetY": 31
@@ -312,7 +314,10 @@
       "decision_value": "",
       "endpoint": "",
       "waypoints": [
-        {"x": 480, "y": 320}
+        {
+          "x": 480,
+          "y": 320
+        }
       ]
     },
     {
@@ -356,24 +361,8 @@
       "endpoint": ""
     },
     {
-      "source": "T_in_Monitor",
-      "target": "Monitor",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
-    },
-    {
-      "source": "Monitor",
-      "target": "T_out_Monitor",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
-    },
-    {
       "source": "T_out_P4",
-      "target": "T_in_Monitor",
+      "target": "T_in_Model_Terminate",
       "label": "",
       "guardCondition": "",
       "decision_value": "",

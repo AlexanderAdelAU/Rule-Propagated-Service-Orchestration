@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="launcher-jar-runtime-support" default="prepare-runtime" basedir="../..">
+    <description>Shared JAR paths and isolated working configuration for development launchers.</description>
+    <dirname property="launcher.support.dir" file="${ant.file.launcher-jar-runtime-support}"/>
+    <property name="services.project.dir" location="${launcher.support.dir}/../.."/>
+    <property name="source.root" location="${services.project.dir}/.."/>
+    <property name="petrinet.root.dir" location="${source.root}"/>
+    <property name="launcher.runtime.dir" location="${services.project.dir}/target/launchers/${ant.project.name}"/>
+    <property name="common.project.dir" location="${launcher.runtime.dir}/btsn.common"/>
+    <property name="generator.project.dir" location="${launcher.runtime.dir}/btsn.common.eventgenerators"/>
+    <property name="monitor.project.dir" location="${source.root}/btsn.common.Monitor"/>
+    <property name="service.bundle.dir" location="${services.project.dir}/target/deployment"/>
+    <property name="lib.dir" location="${source.root}/btsn.common/lib"/>
+    <property name="infrastructure.jar" location="${source.root}/btsn.common/target/host-runtime/btsn-infrastructure.jar"/>
+    <property name="generator.runtime.jar" location="${source.root}/btsn.common.eventgenerators/target/jar-runtime/btsn-eventgenerators.jar"/>
+    <property name="monitor.runtime.jar" location="${source.root}/btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+    <property name="local.channel.project.dir" location="${services.project.dir}"/>
+    <property name="local.channel.rules" location="${common.project.dir}/RuleBase/Generated/InfrastructureDeployment.ruleml.xml"/>
+    <property name="p1.project.dir" location="${launcher.runtime.dir}/btsn.rpso.places.p1"/>
+    <property name="p2.project.dir" location="${launcher.runtime.dir}/btsn.rpso.places.p2"/>
+    <property name="p3.project.dir" location="${launcher.runtime.dir}/btsn.rpso.places.p3"/>
+    <property name="p4.project.dir" location="${launcher.runtime.dir}/btsn.rpso.places.p4"/>
+    <property name="p5.project.dir" location="${launcher.runtime.dir}/btsn.rpso.places.p5"/>
+    <property name="p6.project.dir" location="${launcher.runtime.dir}/btsn.rpso.places.p6"/>
+    <property name="p1.host.jar" location="${source.root}/btsn.rpso.places.p1/target/btsn.rpso.places.p1.jar"/>
+    <property name="p2.host.jar" location="${source.root}/btsn.rpso.places.p2/target/btsn.rpso.places.p2.jar"/>
+    <property name="p3.host.jar" location="${source.root}/btsn.rpso.places.p3/target/btsn.rpso.places.p3.jar"/>
+    <property name="p4.host.jar" location="${source.root}/btsn.rpso.places.p4/target/btsn.rpso.places.p4.jar"/>
+    <property name="p5.host.jar" location="${source.root}/btsn.rpso.places.p5/target/btsn.rpso.places.p5.jar"/>
+    <property name="p6.host.jar" location="${source.root}/btsn.rpso.places.p6/target/btsn.rpso.places.p6.jar"/>
+    <import file="auto-deployment.xml"/>
+    <path id="common.classpath">
+        <pathelement location="${infrastructure.jar}"/>
+        <fileset dir="${lib.dir}" includes="*.jar" excludesfile="${services.project.dir}/target/runtime-library-excludes.txt"/>
+        <fileset dir="${service.bundle.dir}/lib" includes="*.jar"/>
+        <fileset dir="${service.bundle.dir}/services" includes="**/*.jar"/>
+    </path>
+    <path id="generator.classpath"><path refid="common.classpath"/><pathelement location="${generator.runtime.jar}"/></path>
+    <path id="monitor.classpath"><path refid="common.classpath"/><pathelement location="${monitor.runtime.jar}"/></path>
+    <path id="p1.classpath"><path refid="common.classpath"/><pathelement location="${p1.host.jar}"/></path>
+    <path id="p2.classpath"><path refid="common.classpath"/><pathelement location="${p2.host.jar}"/></path>
+    <path id="p3.classpath"><path refid="common.classpath"/><pathelement location="${p3.host.jar}"/></path>
+    <path id="p4.classpath"><path refid="common.classpath"/><pathelement location="${p4.host.jar}"/></path>
+    <path id="p5.classpath"><path refid="common.classpath"/><pathelement location="${p5.host.jar}"/></path>
+    <path id="p6.classpath"><path refid="common.classpath"/><pathelement location="${p6.host.jar}"/></path>
+    <macrodef name="copy-launcher-component">
+        <attribute name="directory"/>
+        <sequential>
+            <copy todir="${launcher.runtime.dir}/@{directory}">
+                <fileset dir="${source.root}/@{directory}" includes="ServiceLoaderQueries/**,resources/**,PayLoad/**,TokenFormats/**,EventTriggeringFile/**"/>
+            </copy>
+        </sequential>
+    </macrodef>
+    <macrodef name="build-launcher-master">
+        <attribute name="version"/>
+        <sequential>
+            <java classname="org.btsn.utils.BuildMasterServiceRuleBase" fork="true" failonerror="true" dir="${common.project.dir}">
+                <classpath refid="generator.classpath"/><arg value="@{version}"/><arg value="ALL"/>
+            </java>
+        </sequential>
+    </macrodef>
+    <condition property="launcher.jars.ready"><or><isset property="launcher.skip.build"/><isset property="launcher.runtime.prepared"/></or></condition>
+    <target name="build-launcher-jars" unless="launcher.jars.ready">
+        <ant antfile="${services.project.dir}/build.xml" target="build-workflow-runtime" inheritall="false"/>
+    </target>
+    <target name="prepare-runtime" depends="build-launcher-jars" unless="launcher.runtime.prepared"
+            description="Build packaged components and select this launcher's isolated deployment configuration">
+        <fail unless="launcher.profile.file" message="Select launcher.profile.file before importing launcher-runtime.xml"/>
+        <fail unless="launcher.rules.file" message="Select launcher.rules.file before importing launcher-runtime.xml"/>
+        <mkdir dir="${output.dir}"/>
+        <copy todir="${common.project.dir}">
+            <fileset dir="${source.root}/btsn.common" includes="RuleBase/**,RulePayLoad/**,ServiceAttributeBindings/**,BusinessServiceDefinitions/**,ProcessDefinitionFolder/**,PayLoad/**"/>
+        </copy>
+        <copy file="${launcher.profile.file}" tofile="${common.project.dir}/BusinessServiceDefinitions/Deployment.json" overwrite="true"/>
+        <copy file="${launcher.rules.file}" tofile="${local.channel.rules}" overwrite="true"/>
+        <copy-launcher-component directory="btsn.rpso.places.p1"/>
+        <copy-launcher-component directory="btsn.rpso.places.p2"/>
+        <copy-launcher-component directory="btsn.rpso.places.p3"/>
+        <copy-launcher-component directory="btsn.rpso.places.p4"/>
+        <copy-launcher-component directory="btsn.rpso.places.p5"/>
+        <copy-launcher-component directory="btsn.rpso.places.p6"/>
+        <copy-launcher-component directory="btsn.common.eventgenerators"/>
+        <copy file="${source.root}/btsn.common.eventgenerators/PayLoad/payload.xml" tofile="${generator.project.dir}/Payload/payLoad.xml"/>
+        <build-launcher-master version="v001"/>
+        <build-launcher-master version="v002"/>
+        <build-launcher-master version="v003"/>
+        <build-launcher-master version="v999"/>
+        <property name="launcher.runtime.prepared" value="true"/>
+    </target>
+    <target name="analyse" description="Analyse the usual Monitor database">
+        <java classname="org.btsn.derby.Analysis.PetriNetAnalyzer" fork="true" failonerror="true" maxmemory="128m" dir="${monitor.project.dir}">
+            <classpath refid="monitor.classpath"/><arg value="--all"/>
+        </java>
+    </target>
+</project>

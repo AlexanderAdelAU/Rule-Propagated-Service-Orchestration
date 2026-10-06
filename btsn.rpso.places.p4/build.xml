@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="btsn.rpso.places.p4" default="release" basedir=".">
+    <description>Build P4 alone: portable executable JAR and manual-launch ZIP.</description>
+    <property name="host.artifact" value="btsn.rpso.places.p4"/>
+    <import file="../btsn.services/host-build.xml"/>
+</project>

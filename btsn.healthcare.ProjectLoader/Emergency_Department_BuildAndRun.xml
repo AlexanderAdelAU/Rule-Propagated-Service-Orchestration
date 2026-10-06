@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Emergency_Department_Combined" default="run-complete-workflow" basedir="."
 	    xmlns:if="ant:if" xmlns:unless="ant:unless">
+	<property name="source.root" location=".."/>
+	<property name="services.project.dir" location="${source.root}/btsn.services"/>
+	<property name="healthcare.runtime.dir" location="${services.project.dir}/target/healthcare-runtime"/>
+	<property name="init.version" value="v999"/>
+	<property name="collector.version" value="v999"/>
 	<description>
 		Emergency Department Patient Workflow - Single Workflow Version
 		
@@ -9,7 +14,7 @@
 		- Phase 2: Deploy rules -> Wait for commitment -> Fire tokens
 		- Phase 3: Deploy collector rules -> Collect data
 		
-		Workflow: Triage -> Fork(Lab, Cardio, Radiology) -> Join -> Diagnosis -> Treatment -> Monitor
+		Workflow: Triage -> Fork(Lab, Cardio, Radiology) -> Join -> Diagnosis -> Treatment -> Terminate
 	</description>
 
 	<!-- ======================================================================= -->
@@ -23,13 +28,13 @@
 	<!-- Override from command line: ant -Dtriage.mode=remote                     -->
 	<!-- ======================================================================= -->
 
-	<property name="triage.mode"     value="remote" />
-	<property name="laboratory.mode" value="local" />
-	<property name="radiology.mode"  value="local" />
-	<property name="cardiology.mode" value="local" />
-	<property name="diagnosis.mode"  value="local" />
-	<property name="treatment.mode"  value="local" />
-	<property name="monitor.mode"    value="local" />
+	<property name="triage.mode"     value="auto" />
+	<property name="laboratory.mode" value="auto" />
+	<property name="radiology.mode"  value="auto" />
+	<property name="cardiology.mode" value="auto" />
+	<property name="diagnosis.mode"  value="auto" />
+	<property name="treatment.mode"  value="auto" />
+	<property name="monitor.mode"    value="auto" />
 
 	<!-- ======================================================================= -->
 	<!-- PROPERTIES                                                              -->
@@ -45,16 +50,16 @@
 
 	<!-- Phase 1: Initialization parameters -->
 	<property name="db.init.operation" value="purgeAndInitialize" />
-	<property name="sequence.id.init.triage" value="100000" />
-	<property name="sequence.id.init.laboratory" value="110000" />
-	<property name="sequence.id.init.radiology" value="120000" />
-	<property name="sequence.id.init.cardiology" value="130000" />
-	<property name="sequence.id.init.diagnosis" value="140000" />
-	<property name="sequence.id.init.treatment" value="150000" />
-	<property name="sequence.id.init.monitor" value="160000" />
+	<property name="sequence.id.init.triage" value="999010000" />
+	<property name="sequence.id.init.laboratory" value="999020000" />
+	<property name="sequence.id.init.radiology" value="999040000" />
+	<property name="sequence.id.init.cardiology" value="999030000" />
+	<property name="sequence.id.init.diagnosis" value="999050000" />
+	<property name="sequence.id.init.treatment" value="999060000" />
+	<property name="sequence.id.init.monitor" value="999070000" />
 
 	<!-- Phase 2: Workflow parameters -->
-	<property name="target.service" value="TriageService" />
+	<property name="target.service" value="P1_Place" />
 	<property name="target.operation" value="processTriageAssessment" />
 	<property name="sequence.id.workflow" value="1000000" />
 	<property name="token.count" value="10" />
@@ -64,12 +69,12 @@
 
 	<!-- Phase 3: Collector parameters (sequence IDs in v001 range since collectors use v001 routing) -->
 	<property name="collector.operation" value="collectAllData" />
-	<property name="sequence.id.collect.triage" value="1410000" />
-	<property name="sequence.id.collect.laboratory" value="1420000" />
-	<property name="sequence.id.collect.radiology" value="1430000" />
-	<property name="sequence.id.collect.cardiology" value="1440000" />
-	<property name="sequence.id.collect.diagnosis" value="1450000" />
-	<property name="sequence.id.collect.treatment" value="1460000" />
+	<property name="sequence.id.collect.triage" value="999010000" />
+	<property name="sequence.id.collect.laboratory" value="999020000" />
+	<property name="sequence.id.collect.radiology" value="999040000" />
+	<property name="sequence.id.collect.cardiology" value="999030000" />
+	<property name="sequence.id.collect.diagnosis" value="999050000" />
+	<property name="sequence.id.collect.treatment" value="999060000" />
 	<property name="collector.delay.seconds" value="3" />
 
 	<!-- Timing parameters -->
@@ -82,10 +87,9 @@
 	<property name="healthcare.root.dir" location="../" />
 
 	<!-- Common project -->
-	<property name="common.project.dir" location="${healthcare.root.dir}/btsn.common" />
 	<property name="lib.dir" location="${common.project.dir}/lib" />
-	<property name="class.dir" location="${common.project.dir}/bin" />
-	<property name="common.src.dir" location="${common.project.dir}/src" />
+
+
 
 	<!-- Output directory -->
 	<property name="output.dir" location="${build.file.dir}" />
@@ -98,31 +102,28 @@
 	<property name="monitor.output.file" location="${output.dir}/MonitorService_out.txt" />
 
 	<!-- Service Projects -->
-	<property name="triage.project.dir" location="${healthcare.root.dir}/btsn.healthcare.places.Triage" />
-	<property name="triage.bin.dir" location="${triage.project.dir}/bin" />
+	<property name="triage.project.dir" location="${healthcare.runtime.dir}/btsn.rpso.places.p1" />
 
-	<property name="laboratory.project.dir" location="${healthcare.root.dir}/btsn.healthcare.places.Laboratory" />
-	<property name="laboratory.bin.dir" location="${laboratory.project.dir}/bin" />
 
-	<property name="radiology.project.dir" location="${healthcare.root.dir}/btsn.healthcare.places.Radiology" />
-	<property name="radiology.bin.dir" location="${radiology.project.dir}/bin" />
+	<property name="laboratory.project.dir" location="${healthcare.runtime.dir}/btsn.rpso.places.p2" />
 
-	<property name="cardiology.project.dir" location="${healthcare.root.dir}/btsn.healthcare.places.Cardiology" />
-	<property name="cardiology.bin.dir" location="${cardiology.project.dir}/bin" />
 
-	<property name="diagnosis.project.dir" location="${healthcare.root.dir}/btsn.healthcare.places.Diagnosis" />
-	<property name="diagnosis.bin.dir" location="${diagnosis.project.dir}/bin" />
+	<property name="radiology.project.dir" location="${healthcare.runtime.dir}/btsn.rpso.places.p4" />
 
-	<property name="treatment.project.dir" location="${healthcare.root.dir}/btsn.healthcare.places.Treatment" />
-	<property name="treatment.bin.dir" location="${treatment.project.dir}/bin" />
 
-	<property name="monitor.project.dir" location="${healthcare.root.dir}/btsn.common.Monitor" />
-	<property name="monitor.bin.dir" location="${monitor.project.dir}/bin" />
+	<property name="cardiology.project.dir" location="${healthcare.runtime.dir}/btsn.rpso.places.p3" />
+
+
+	<property name="diagnosis.project.dir" location="${healthcare.runtime.dir}/btsn.rpso.places.p5" />
+
+
+	<property name="treatment.project.dir" location="${healthcare.runtime.dir}/btsn.rpso.places.p6" />
+
+
 
 	<!-- Event Generators -->
-	<property name="generator.project.dir" location="${healthcare.root.dir}/btsn.common.eventgenerators" />
-	<property name="generator.bin.dir" location="${generator.project.dir}/bin" />
-	<property name="generator.src.dir" location="${generator.project.dir}/src" />
+
+
 
 	<!-- Java Classes -->
 	<property name="service.loader.class" value="org.btsn.handlers.ServiceLoader" />
@@ -134,66 +135,37 @@
 	<!-- CLASSPATHS                                                              -->
 	<!-- ======================================================================= -->
 
-	<path id="common.classpath">
-		<fileset dir="${lib.dir}" erroronmissingdir="false">
-			<include name="*.jar" />
-		</fileset>
-		<pathelement location="${class.dir}" />
-	</path>
+	<path id="common.classpath"><path refid="healthcare.dependencies"/></path>
 
-	<path id="triage.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${triage.bin.dir}" />
-	</path>
+	<path id="triage.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.rpso.places.p1/target/btsn.rpso.places.p1.jar"/></path>
 
-	<path id="laboratory.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${laboratory.bin.dir}" />
-	</path>
+	<path id="laboratory.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.rpso.places.p2/target/btsn.rpso.places.p2.jar"/></path>
 
-	<path id="radiology.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${radiology.bin.dir}" />
-	</path>
+	<path id="radiology.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.rpso.places.p4/target/btsn.rpso.places.p4.jar"/></path>
 
-	<path id="cardiology.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${cardiology.bin.dir}" />
-	</path>
+	<path id="cardiology.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.rpso.places.p3/target/btsn.rpso.places.p3.jar"/></path>
 
-	<path id="diagnosis.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${diagnosis.bin.dir}" />
-	</path>
+	<path id="diagnosis.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.rpso.places.p5/target/btsn.rpso.places.p5.jar"/></path>
 
-	<path id="treatment.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${treatment.bin.dir}" />
-	</path>
+	<path id="treatment.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.rpso.places.p6/target/btsn.rpso.places.p6.jar"/></path>
 
-	<path id="monitor.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${monitor.bin.dir}" />
-	</path>
+	<path id="monitor.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/></path>
 
-	<path id="generator.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${generator.bin.dir}" />
-	</path>
+	<path id="generator.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.common.eventgenerators/target/jar-runtime/btsn-eventgenerators.jar"/></path>
 
 	<!-- ======================================================================= -->
 	<!-- DEPLOYMENT MODE RESOLUTION                                              -->
 	<!-- ======================================================================= -->
 
-	<target name="resolve-deployment-modes">
+	<target name="resolve-deployment-modes" depends="prepare-runtime,detect-local-channel">
 		<!-- Resolve boolean properties from mode settings -->
-		<condition property="triage.is.local"><equals arg1="${triage.mode}" arg2="local" /></condition>
-		<condition property="laboratory.is.local"><equals arg1="${laboratory.mode}" arg2="local" /></condition>
-		<condition property="radiology.is.local"><equals arg1="${radiology.mode}" arg2="local" /></condition>
-		<condition property="cardiology.is.local"><equals arg1="${cardiology.mode}" arg2="local" /></condition>
-		<condition property="diagnosis.is.local"><equals arg1="${diagnosis.mode}" arg2="local" /></condition>
-		<condition property="treatment.is.local"><equals arg1="${treatment.mode}" arg2="local" /></condition>
-		<condition property="monitor.is.local"><equals arg1="${monitor.mode}" arg2="local" /></condition>
+		<resolve-local-launch component="triage" mode="${triage.mode}"/>
+		<resolve-local-launch component="laboratory" mode="${laboratory.mode}"/>
+		<resolve-local-launch component="radiology" mode="${radiology.mode}"/>
+		<resolve-local-launch component="cardiology" mode="${cardiology.mode}"/>
+		<resolve-local-launch component="diagnosis" mode="${diagnosis.mode}"/>
+		<resolve-local-launch component="treatment" mode="${treatment.mode}"/>
+		<resolve-local-launch component="monitor" mode="${monitor.mode}"/>
 
 		<!-- Display deployment configuration -->
 		<echo message="" />
@@ -239,7 +211,7 @@
 		<echo message="================================================================" />
 		<echo message="  Rule Version: ${rule.version}" />
 		<echo message="  Tokens: ${token.count}" />
-		<echo message="  Flow: Triage -> [Lab, Cardio, Radiology] -> Diagnosis -> Treatment -> Monitor" />
+		<echo message="  Flow: Triage -> [Lab, Cardio, Radiology] -> Diagnosis -> Treatment -> Terminate" />
 		<echo message="================================================================" />
 
 		<parallel>
@@ -250,7 +222,7 @@
 			<!-- Triage Service -->
 			<echo message="  [triage] Skipping - running on remote host" unless:set="triage.is.local" />
 			<java classname="${service.loader.class}" fork="true" if:set="triage.is.local"
-			      dir="${triage.project.dir}" output="${triage.output.file}">
+			      dir="${triage.project.dir}" output="${triage.output.file}" failonerror="true">
 				<classpath refid="triage.classpath" />
 				<arg value="${triage.project.dir}" />
 				<arg value="-version" /><arg value="${rule.version}" />
@@ -259,7 +231,7 @@
 			<!-- Laboratory Service -->
 			<echo message="  [laboratory] Skipping - running on remote host" unless:set="laboratory.is.local" />
 			<java classname="${service.loader.class}" fork="true" if:set="laboratory.is.local"
-			      dir="${laboratory.project.dir}" output="${laboratory.output.file}">
+			      dir="${laboratory.project.dir}" output="${laboratory.output.file}" failonerror="true">
 				<classpath refid="laboratory.classpath" />
 				<arg value="${laboratory.project.dir}" />
 				<arg value="-version" /><arg value="${rule.version}" />
@@ -268,7 +240,7 @@
 			<!-- Radiology Service -->
 			<echo message="  [radiology] Skipping - running on remote host" unless:set="radiology.is.local" />
 			<java classname="${service.loader.class}" fork="true" if:set="radiology.is.local"
-			      dir="${radiology.project.dir}" output="${radiology.output.file}">
+			      dir="${radiology.project.dir}" output="${radiology.output.file}" failonerror="true">
 				<classpath refid="radiology.classpath" />
 				<arg value="${radiology.project.dir}" />
 				<arg value="-version" /><arg value="${rule.version}" />
@@ -277,7 +249,7 @@
 			<!-- Cardiology Service -->
 			<echo message="  [cardiology] Skipping - running on remote host" unless:set="cardiology.is.local" />
 			<java classname="${service.loader.class}" fork="true" if:set="cardiology.is.local"
-			      dir="${cardiology.project.dir}" output="${cardiology.output.file}">
+			      dir="${cardiology.project.dir}" output="${cardiology.output.file}" failonerror="true">
 				<classpath refid="cardiology.classpath" />
 				<arg value="${cardiology.project.dir}" />
 				<arg value="-version" /><arg value="${rule.version}" />
@@ -286,7 +258,7 @@
 			<!-- Diagnosis Service -->
 			<echo message="  [diagnosis] Skipping - running on remote host" unless:set="diagnosis.is.local" />
 			<java classname="${service.loader.class}" fork="true" if:set="diagnosis.is.local"
-			      dir="${diagnosis.project.dir}" output="${diagnosis.output.file}">
+			      dir="${diagnosis.project.dir}" output="${diagnosis.output.file}" failonerror="true">
 				<classpath refid="diagnosis.classpath" />
 				<arg value="${diagnosis.project.dir}" />
 				<arg value="-version" /><arg value="${rule.version}" />
@@ -295,7 +267,7 @@
 			<!-- Treatment Service -->
 			<echo message="  [treatment] Skipping - running on remote host" unless:set="treatment.is.local" />
 			<java classname="${service.loader.class}" fork="true" if:set="treatment.is.local"
-			      dir="${treatment.project.dir}" output="${treatment.output.file}">
+			      dir="${treatment.project.dir}" output="${treatment.output.file}" failonerror="true">
 				<classpath refid="treatment.classpath" />
 				<arg value="${treatment.project.dir}" />
 				<arg value="-version" /><arg value="${rule.version}" />
@@ -304,7 +276,7 @@
 			<!-- Monitor Service -->
 			<echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local" />
 			<java classname="${service.loader.class}" fork="true" if:set="monitor.is.local"
-			      dir="${monitor.project.dir}" output="${monitor.output.file}">
+			      dir="${monitor.project.dir}" output="${monitor.output.file}" failonerror="true">
 				<classpath refid="monitor.classpath" />
 				<arg value="${monitor.project.dir}" />
 				<arg value="-version" /><arg value="${rule.version}" />
@@ -330,9 +302,9 @@
 				<java classname="${init.event.generator.class}" 
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
-					<arg value="-service" /><arg value="Triage_InitializationService" />
+					<arg value="-service" /><arg value="P1_InitializationService" />
 					<arg value="-operation" /><arg value="${db.init.operation}" />
-					<arg value="-version" /><arg value="${rule.version}" />
+					<arg value="-version" /><arg value="${init.version}" />
 					<arg value="-process" /><arg value="${init.process.name}" />
 					<arg value="-sequenceId" /><arg value="${sequence.id.init.triage}" />
 					<arg value="-tokens" /><arg value="0" />
@@ -344,9 +316,9 @@
 					<java classname="${init.event.generator.class}" 
 					      fork="true" dir="${generator.project.dir}" failonerror="true">
 						<classpath refid="generator.classpath" />
-						<arg value="-service" /><arg value="Triage_InitializationService" />
+						<arg value="-service" /><arg value="P1_InitializationService" />
 						<arg value="-operation" /><arg value="${db.init.operation}" />
-						<arg value="-version" /><arg value="${rule.version}" />
+						<arg value="-version" /><arg value="${init.version}" />
 						<arg value="-process" /><arg value="${init.process.name}" />
 						<arg value="-sequenceId" /><arg value="${sequence.id.init.triage}" />
 						<arg value="-tokens" /><arg value="1" />
@@ -355,9 +327,9 @@
 					<java classname="${init.event.generator.class}" 
 					      fork="true" dir="${generator.project.dir}" failonerror="true">
 						<classpath refid="generator.classpath" />
-						<arg value="-service" /><arg value="Laboratory_InitializationService" />
+						<arg value="-service" /><arg value="P2_InitializationService" />
 						<arg value="-operation" /><arg value="${db.init.operation}" />
-						<arg value="-version" /><arg value="${rule.version}" />
+						<arg value="-version" /><arg value="${init.version}" />
 						<arg value="-process" /><arg value="${init.process.name}" />
 						<arg value="-sequenceId" /><arg value="${sequence.id.init.laboratory}" />
 						<arg value="-tokens" /><arg value="1" />
@@ -366,9 +338,9 @@
 					<java classname="${init.event.generator.class}" 
 					      fork="true" dir="${generator.project.dir}" failonerror="true">
 						<classpath refid="generator.classpath" />
-						<arg value="-service" /><arg value="Radiology_InitializationService" />
+						<arg value="-service" /><arg value="P4_InitializationService" />
 						<arg value="-operation" /><arg value="${db.init.operation}" />
-						<arg value="-version" /><arg value="${rule.version}" />
+						<arg value="-version" /><arg value="${init.version}" />
 						<arg value="-process" /><arg value="${init.process.name}" />
 						<arg value="-sequenceId" /><arg value="${sequence.id.init.radiology}" />
 						<arg value="-tokens" /><arg value="1" />
@@ -377,9 +349,9 @@
 					<java classname="${init.event.generator.class}" 
 					      fork="true" dir="${generator.project.dir}" failonerror="true">
 						<classpath refid="generator.classpath" />
-						<arg value="-service" /><arg value="Cardiology_InitializationService" />
+						<arg value="-service" /><arg value="P3_InitializationService" />
 						<arg value="-operation" /><arg value="${db.init.operation}" />
-						<arg value="-version" /><arg value="${rule.version}" />
+						<arg value="-version" /><arg value="${init.version}" />
 						<arg value="-process" /><arg value="${init.process.name}" />
 						<arg value="-sequenceId" /><arg value="${sequence.id.init.cardiology}" />
 						<arg value="-tokens" /><arg value="1" />
@@ -388,9 +360,9 @@
 					<java classname="${init.event.generator.class}" 
 					      fork="true" dir="${generator.project.dir}" failonerror="true">
 						<classpath refid="generator.classpath" />
-						<arg value="-service" /><arg value="Diagnosis_InitializationService" />
+						<arg value="-service" /><arg value="P5_InitializationService" />
 						<arg value="-operation" /><arg value="${db.init.operation}" />
-						<arg value="-version" /><arg value="${rule.version}" />
+						<arg value="-version" /><arg value="${init.version}" />
 						<arg value="-process" /><arg value="${init.process.name}" />
 						<arg value="-sequenceId" /><arg value="${sequence.id.init.diagnosis}" />
 						<arg value="-tokens" /><arg value="1" />
@@ -399,9 +371,9 @@
 					<java classname="${init.event.generator.class}" 
 					      fork="true" dir="${generator.project.dir}" failonerror="true">
 						<classpath refid="generator.classpath" />
-						<arg value="-service" /><arg value="Treatment_InitializationService" />
+						<arg value="-service" /><arg value="P6_InitializationService" />
 						<arg value="-operation" /><arg value="${db.init.operation}" />
-						<arg value="-version" /><arg value="${rule.version}" />
+						<arg value="-version" /><arg value="${init.version}" />
 						<arg value="-process" /><arg value="${init.process.name}" />
 						<arg value="-sequenceId" /><arg value="${sequence.id.init.treatment}" />
 						<arg value="-tokens" /><arg value="1" />
@@ -412,7 +384,7 @@
 						<classpath refid="generator.classpath" />
 						<arg value="-service" /><arg value="Monitor_InitializationService" />
 						<arg value="-operation" /><arg value="${db.init.operation}" />
-						<arg value="-version" /><arg value="${rule.version}" />
+						<arg value="-version" /><arg value="${init.version}" />
 						<arg value="-process" /><arg value="${init.process.name}" />
 						<arg value="-sequenceId" /><arg value="${sequence.id.init.monitor}" />
 						<arg value="-tokens" /><arg value="1" />
@@ -432,7 +404,7 @@
 				<echo message="    PHASE 2: PATIENT WORKFLOW EXECUTION        " />
 				<echo message="===============================================" />
 				<echo message="Tokens: ${token.count}, Target: ${target.service}" />
-				<echo message="Flow: Triage -> [Lab, Cardio, Radiology] -> Diagnosis -> Treatment -> Monitor" />
+				<echo message="Flow: Triage -> [Lab, Cardio, Radiology] -> Diagnosis -> Treatment -> Terminate" />
 				<echo message="" />
 
 				<!-- Deploy Workflow rules (tokens=0, with commitment port) -->
@@ -448,7 +420,8 @@
 					<arg value="-tokens" /><arg value="0" />
 					<arg value="-expire" /><arg value="${token.expire}" />
 					<arg value="-commitmentPort" /><arg value="${commitment.port}" />
-					<arg value="-generator" /><arg value="${event.generator.id}" />
+					<arg value="-generator" /><arg value="${event.generator.id}" />					<arg value="-infrastructure"/><arg value="Healthcare_Infrastructure"/>
+					<arg value="-format-service"/><arg value="TriageService"/>
 				</java>
 
 				<echo message="[${rule.version}] Waiting ${deploy.wait.seconds}s for commitment..." />
@@ -467,7 +440,8 @@
 					<arg value="-tokens" /><arg value="${token.count}" />
 					<arg value="-expire" /><arg value="${token.expire}" />
 					<arg value="-generator" /><arg value="${event.generator.id}" />
-					<arg value="-skipDeploy" />
+					<arg value="-skipDeploy" />					<arg value="-infrastructure"/><arg value="Healthcare_Infrastructure"/>
+					<arg value="-format-service"/><arg value="TriageService"/>
 				</java>
 
 				<echo message="=== Phase 2 Complete ===" />
@@ -486,9 +460,9 @@
 				<java classname="${collector.event.generator.class}" 
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
-					<arg value="-service" /><arg value="Triage_CollectorService" />
+					<arg value="-service" /><arg value="P1_CollectorService" />
 					<arg value="-operation" /><arg value="${collector.operation}" />
-					<arg value="-version" /><arg value="${rule.version}" />
+					<arg value="-version" /><arg value="${collector.version}" />
 					<arg value="-process" /><arg value="${collector.process.name}" />
 					<arg value="-queryVersion" /><arg value="${rule.version}" />
 					<arg value="-sequenceId" /><arg value="${sequence.id.collect.triage}" />
@@ -502,9 +476,9 @@
 				<java classname="${collector.event.generator.class}" 
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
-					<arg value="-service" /><arg value="Laboratory_CollectorService" />
+					<arg value="-service" /><arg value="P2_CollectorService" />
 					<arg value="-operation" /><arg value="${collector.operation}" />
-					<arg value="-version" /><arg value="${rule.version}" />
+					<arg value="-version" /><arg value="${collector.version}" />
 					<arg value="-process" /><arg value="${collector.process.name}" />
 					<arg value="-queryVersion" /><arg value="${rule.version}" />
 					<arg value="-sequenceId" /><arg value="${sequence.id.collect.laboratory}" />
@@ -516,9 +490,9 @@
 				<java classname="${collector.event.generator.class}" 
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
-					<arg value="-service" /><arg value="Radiology_CollectorService" />
+					<arg value="-service" /><arg value="P4_CollectorService" />
 					<arg value="-operation" /><arg value="${collector.operation}" />
-					<arg value="-version" /><arg value="${rule.version}" />
+					<arg value="-version" /><arg value="${collector.version}" />
 					<arg value="-process" /><arg value="${collector.process.name}" />
 					<arg value="-queryVersion" /><arg value="${rule.version}" />
 					<arg value="-sequenceId" /><arg value="${sequence.id.collect.radiology}" />
@@ -530,9 +504,9 @@
 				<java classname="${collector.event.generator.class}" 
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
-					<arg value="-service" /><arg value="Cardiology_CollectorService" />
+					<arg value="-service" /><arg value="P3_CollectorService" />
 					<arg value="-operation" /><arg value="${collector.operation}" />
-					<arg value="-version" /><arg value="${rule.version}" />
+					<arg value="-version" /><arg value="${collector.version}" />
 					<arg value="-process" /><arg value="${collector.process.name}" />
 					<arg value="-queryVersion" /><arg value="${rule.version}" />
 					<arg value="-sequenceId" /><arg value="${sequence.id.collect.cardiology}" />
@@ -544,9 +518,9 @@
 				<java classname="${collector.event.generator.class}" 
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
-					<arg value="-service" /><arg value="Diagnosis_CollectorService" />
+					<arg value="-service" /><arg value="P5_CollectorService" />
 					<arg value="-operation" /><arg value="${collector.operation}" />
-					<arg value="-version" /><arg value="${rule.version}" />
+					<arg value="-version" /><arg value="${collector.version}" />
 					<arg value="-process" /><arg value="${collector.process.name}" />
 					<arg value="-queryVersion" /><arg value="${rule.version}" />
 					<arg value="-sequenceId" /><arg value="${sequence.id.collect.diagnosis}" />
@@ -558,9 +532,9 @@
 				<java classname="${collector.event.generator.class}" 
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
-					<arg value="-service" /><arg value="Treatment_CollectorService" />
+					<arg value="-service" /><arg value="P6_CollectorService" />
 					<arg value="-operation" /><arg value="${collector.operation}" />
-					<arg value="-version" /><arg value="${rule.version}" />
+					<arg value="-version" /><arg value="${collector.version}" />
 					<arg value="-process" /><arg value="${collector.process.name}" />
 					<arg value="-queryVersion" /><arg value="${rule.version}" />
 					<arg value="-sequenceId" /><arg value="${sequence.id.collect.treatment}" />
@@ -599,7 +573,7 @@
 		<echo message="================================================================" />
 		<echo message="" />
 		<echo message="WORKFLOW TOPOLOGY:" />
-		<echo message="  Triage -> Fork(Lab, Cardio, Radiology) -> Join -> Diagnosis -> Treatment -> Monitor" />
+		<echo message="  Triage -> Fork(Lab, Cardio, Radiology) -> Join -> Diagnosis -> Treatment -> Terminate" />
 		<echo message="" />
 		<echo message="EXECUTION PATTERN:" />
 		<echo message="  Phase 1: Load services ONCE, Initialize databases (parallel)" />
@@ -619,7 +593,7 @@
 		<echo message="  -Ddeploy.wait.seconds=3          Wait for commitment after deploy" />
 		<echo message="" />
 		<echo message="DEPLOYMENT MODES (per service):" />
-		<echo message="  -D&lt;service&gt;.mode=local           Launch service on this machine (default)" />
+		<echo message="  -D&lt;service&gt;.mode=local           Force launch on this machine" />
 		<echo message="  -D&lt;service&gt;.mode=remote          Service runs on another machine (skip launch)" />
 		<echo message="" />
 		<echo message="  Services: triage, laboratory, radiology, cardiology, diagnosis, treatment, monitor" />
@@ -631,4 +605,5 @@
 		<echo message="" />
 	</target>
 
+	<import file="../btsn.services/healthcare-runtime.xml"/>
 </project>

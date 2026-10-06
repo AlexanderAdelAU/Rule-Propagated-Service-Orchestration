@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="generic-host-infrastructure-support" default="jar" basedir="../..">
+    <property name="common.dir" location="../btsn.common"/>
+    <property name="service.target" location="target"/>
+    <property name="runtime.dir" location="${common.dir}/target/host-runtime"/>
+    <property name="java.release" value="15"/>
+    <path id="compile.classpath">
+        <fileset dir="${common.dir}/lib" includes="*.jar"/>
+        <fileset dir="${service.target}/deployment/services" includes="**/*.jar"/>
+        <fileset dir="${service.target}/deployment/lib" includes="*.jar"/>
+    </path>
+    <target name="jar" description="Compile common infrastructure with service-owned sources excluded">
+        <delete dir="${runtime.dir}/classes"/>
+        <mkdir dir="${runtime.dir}/classes"/>
+        <mkdir dir="${runtime.dir}/empty-sourcepath"/>
+        <javac srcdir="${common.dir}/src" destdir="${runtime.dir}/classes" release="${java.release}"
+               sourcepath="${runtime.dir}/empty-sourcepath" includeantruntime="false" encoding="UTF-8"
+               excludesfile="${service.target}/service-source-excludes.txt">
+            <classpath refid="compile.classpath"/>
+        </javac>
+        <copy todir="${runtime.dir}/classes">
+            <fileset dir="${common.dir}/src" excludes="**/*.java,**/*.class"/>
+        </copy>
+        <jar destfile="${runtime.dir}/btsn-infrastructure.jar" basedir="${runtime.dir}/classes" modificationtime="315532800000"/>
+    </target>
+</project>

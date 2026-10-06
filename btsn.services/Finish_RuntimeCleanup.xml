@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="finish-runtime-git-cleanup" default="prepare" basedir="..">
+    <description>One-time, verified preservation of local runtime results before removing them from Git.</description>
+    <property name="cleanup.root" location="${basedir}"/>
+    <property name="cleanup.classes" location="${basedir}/btsn.services/target/runtime-git-cleanup/classes"/>
+    <target name="compile">
+        <mkdir dir="${cleanup.classes}"/>
+        <javac srcdir="${basedir}/btsn.services/tools" destdir="${cleanup.classes}"
+               includes="RuntimeGitCleanup.java" includeantruntime="false" encoding="UTF-8" release="11"/>
+    </target>
+    <macrodef name="cleanup-action">
+        <attribute name="name"/>
+        <sequential>
+            <java classname="RuntimeGitCleanup" fork="true" failonerror="true" classpath="${cleanup.classes}">
+                <arg value="@{name}"/><arg value="${cleanup.root}"/>
+            </java>
+        </sequential>
+    </macrodef>
+    <target name="prepare" depends="compile" description="After stopping all Java runs, verify a backup and park runtime folders outside Git">
+        <cleanup-action name="prepare"/>
+    </target>
+    <target name="restore" depends="compile" description="After pulling the tracking cleanup, restore the saved results into ignored local folders">
+        <cleanup-action name="restore"/>
+    </target>
+    <target name="cancel" depends="compile" description="Restore the saved results before the tracking cleanup, if you need to cancel">
+        <cleanup-action name="cancel"/>
+    </target>
+</project>

@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="service-checks" default="check" basedir="../..">
+    <target name="check-launchers" depends="build-workflow-runtime" description="Configure and prepare every model/financial Ant launcher and standalone phase">
+        <mkdir dir="${target.dir}/launcher-check/classes"/>
+        <path id="launcher.check.classpath">
+            <pathelement location="${target.dir}/launcher-check/classes"/>
+            <pathelement location="${common.dir}/target/host-runtime/btsn-infrastructure.jar"/>
+            <fileset dir="${target.dir}/deployment/services" includes="**/*.jar"/>
+            <fileset dir="${target.dir}/deployment/lib" includes="*.jar"/>
+            <pathelement location="${ant.home}/lib/ant.jar"/>
+            <pathelement location="${ant.home}/lib/ant-launcher.jar"/>
+        </path>
+        <javac srcdir="tests" destdir="${target.dir}/launcher-check/classes" includes="LauncherRuntimeCheck.java"
+               release="${java.release}" includeantruntime="false" encoding="UTF-8">
+            <classpath refid="launcher.check.classpath"/>
+        </javac>
+        <java classname="LauncherRuntimeCheck" fork="true" failonerror="true" maxmemory="256m">
+            <classpath refid="launcher.check.classpath"/><arg file=".."/>
+        </java>
+    </target>
+    <target name="check-model-services" depends="package" description="Check deterministic model outcomes using packaged service JARs">
+        <mkdir dir="${target.dir}/model-check"/>
+        <path id="model.check.classpath">
+            <pathelement location="${target.dir}/model-check"/>
+            <fileset dir="${target.dir}/deployment/services" includes="**/*.jar"/>
+            <fileset dir="${target.dir}/deployment/lib" includes="*.jar"/>
+        </path>
+        <javac srcdir="tests" destdir="${target.dir}/model-check" includes="DeterministicModelServiceCheck.java"
+               release="${java.release}" includeantruntime="false" encoding="UTF-8">
+            <classpath refid="model.check.classpath"/>
+        </javac>
+        <java classname="DeterministicModelServiceCheck" fork="true" failonerror="true">
+            <classpath refid="model.check.classpath"/>
+        </java>
+    </target>
+    <target name="check-healthcare-services" depends="package" description="Check healthcare results, direct treatment and federated audit fields using JARs">
+        <mkdir dir="${target.dir}/healthcare-check"/>
+        <delete dir="${target.dir}/healthcare-check/runtime"/>
+        <mkdir dir="${target.dir}/healthcare-check/runtime"/>
+        <path id="healthcare.check.classpath">
+            <pathelement location="${target.dir}/healthcare-check"/>
+            <fileset dir="${target.dir}/deployment/services" includes="**/*.jar"/>
+            <fileset dir="${target.dir}/deployment/lib" includes="*.jar"/>
+        </path>
+        <javac srcdir="tests" destdir="${target.dir}/healthcare-check" includes="HealthcareServiceCheck.java"
+               release="${java.release}" includeantruntime="false" encoding="UTF-8">
+            <classpath refid="healthcare.check.classpath"/>
+        </javac>
+        <java classname="HealthcareServiceCheck" fork="true" failonerror="true" maxmemory="128m" dir="${target.dir}/healthcare-check/runtime">
+            <classpath refid="healthcare.check.classpath"/>
+        </java>
+    </target>
+    <target name="check-hosts" depends="build-workflow-runtime" description="Verify real host JAR classpaths and invoke services on every host">
+        <delete dir="${target.dir}/host-check"/>
+        <mkdir dir="${target.dir}/host-check/classes"/>
+        <mkdir dir="${target.dir}/host-check/empty-sourcepath"/>
+        <path id="host.check.dependencies">
+            <pathelement location="${common.dir}/target/host-runtime/btsn-infrastructure.jar"/>
+            <fileset dir="${target.dir}/deployment/services" includes="**/*.jar"/>
+            <fileset dir="${target.dir}/deployment/lib" includes="*.jar"/>
+            <fileset dir="${common.dir}/lib" includes="*.jar" excludesfile="${target.dir}/runtime-library-excludes.txt"/>
+        </path>
+        <javac destdir="${target.dir}/host-check/classes" release="${java.release}"
+               sourcepath="${target.dir}/host-check/empty-sourcepath" includeantruntime="false" encoding="UTF-8">
+            <src path="tests"/><src path="${common.dir}/tests"/>
+            <include name="HostClasspathCheck.java"/>
+            <include name="org/btsn/invocation/BusinessCapabilityResolverTest.java"/>
+            <classpath>
+                <pathelement location="../btsn.rpso.places.p1/target/btsn.rpso.places.p1.jar"/>
+                <path refid="host.check.dependencies"/>
+            </classpath>
+        </javac>
+        <macrodef name="check-host">
+            <attribute name="number"/>
+            <sequential>
+                <mkdir dir="${target.dir}/host-check/p@{number}"/>
+                <java classname="HostClasspathCheck" fork="true" failonerror="true">
+                    <classpath>
+                        <pathelement location="${target.dir}/host-check/classes"/>
+                        <pathelement location="../btsn.rpso.places.p@{number}/target/btsn.rpso.places.p@{number}.jar"/>
+                        <path refid="host.check.dependencies"/>
+                    </classpath>
+                    <arg file="${target.dir}/deployment"/>
+                    <arg file="../btsn.rpso.places.p@{number}/target/btsn.rpso.places.p@{number}.jar"/>
+                    <arg file="${common.dir}/target/host-runtime/btsn-infrastructure.jar"/>
+                </java>
+                <java classname="org.btsn.invocation.BusinessCapabilityResolverTest" fork="true" failonerror="true"
+                      dir="${target.dir}/host-check/p@{number}">
+                    <classpath>
+                        <pathelement location="${target.dir}/host-check/classes"/>
+                        <pathelement location="../btsn.rpso.places.p@{number}/target/btsn.rpso.places.p@{number}.jar"/>
+                        <path refid="host.check.dependencies"/>
+                    </classpath>
+                    <arg file="${common.dir}"/>
+                    <arg value="org.btsn.places.P@{number}_Place"/>
+                </java>
+            </sequential>
+        </macrodef>
+        <check-host number="1"/><check-host number="2"/><check-host number="3"/>
+        <check-host number="4"/><check-host number="5"/><check-host number="6"/>
+    </target>
+    <target name="check" depends="package" description="Check isolated JARs and all six invocation boundaries">
+        <ant antfile="${target.dir}/service-tasks.xml" target="check" inheritall="false"/>
+        <antcall target="check-resolver"/>
+    </target>
+    <target name="check-resolver" description="Run existing invocation checks using packaged service implementations">
+        <delete dir="${target.dir}/resolver-check"/>
+        <mkdir dir="${target.dir}/resolver-check/classes"/>
+        <mkdir dir="${target.dir}/resolver-check/empty-sourcepath"/>
+        <path id="packaged.classpath">
+            <fileset dir="${target.dir}/deployment/services" includes="**/*.jar"/>
+            <fileset dir="${target.dir}/deployment/lib" includes="*.jar"/>
+        </path>
+        <path id="resolver.classpath">
+            <pathelement location="${target.dir}/resolver-check/classes"/>
+            <path refid="packaged.classpath"/>
+        </path>
+        <javac destdir="${target.dir}/resolver-check/classes" release="${java.release}"
+               sourcepath="${target.dir}/resolver-check/empty-sourcepath" includeantruntime="false" encoding="UTF-8">
+            <src path="${common.dir}/src"/><src path="${common.dir}/tests"/>
+            <src path="../btsn.rpso.places.p1/src"/>
+            <include name="org/btsn/invocation/BusinessCapabilityResolver.java"/>
+            <include name="org/btsn/invocation/BusinessCapabilityResolverTest.java"/>
+            <include name="org/btsn/json/jsonLibrary.java"/>
+            <include name="org/btsn/handlers/ServiceHelper.java"/>
+            <classpath refid="packaged.classpath"/>
+        </javac>
+        <macrodef name="check-helper">
+            <attribute name="number"/>
+            <sequential>
+                <mkdir dir="${target.dir}/resolver-check/p@{number}"/>
+                <javac srcdir="../btsn.rpso.places.p@{number}/src"
+                       destdir="${target.dir}/resolver-check/p@{number}" release="${java.release}"
+                       sourcepath="${target.dir}/resolver-check/empty-sourcepath" includeantruntime="false" encoding="UTF-8">
+                    <include name="org/btsn/handlers/ServiceHelper.java"/>
+                    <classpath refid="resolver.classpath"/>
+                </javac>
+                <java classname="org.btsn.packaging.ServiceInventory" fork="true" failonerror="true">
+                    <classpath refid="inventory.classpath"/>
+                    <arg value="same-file"/>
+                    <arg file="../btsn.rpso.places.p1/src/org/btsn/handlers/ServiceHelper.java"/>
+                    <arg file="../btsn.rpso.places.p@{number}/src/org/btsn/handlers/ServiceHelper.java"/>
+                </java>
+            </sequential>
+        </macrodef>
+        <check-helper number="2"/><check-helper number="3"/><check-helper number="4"/>
+        <check-helper number="5"/><check-helper number="6"/>
+        <java classname="org.btsn.invocation.BusinessCapabilityResolverTest" fork="true" failonerror="true"
+              dir="${target.dir}/resolver-check">
+            <classpath refid="resolver.classpath"/><arg file="${common.dir}"/>
+        </java>
+        <echo>PASS: all six invocation boundaries checked with services loaded exclusively from JARs</echo>
+    </target>
+</project>

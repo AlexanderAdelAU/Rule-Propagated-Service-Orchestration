@@ -1,0 +1,96 @@
+{
+  "domain": "Healthcare",
+  "purpose": "Logical healthcare capabilities. Physical hosts are configured independently.",
+  "services": [
+    {
+      "service": "TriageService",
+      "implementationClass": "org.btsn.business.healthcare.TriageService",
+      "operation": "processTriageAssessment",
+      "inputs": [
+        "token"
+      ],
+      "returnAttribute": "triageResults",
+      "canonicalBinding": "ServiceAttributeBindings/TriageService/TriageService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "LaboratoryService",
+      "implementationClass": "org.btsn.business.healthcare.LaboratoryService",
+      "operation": "processLabRequest",
+      "inputs": [
+        "triageResults"
+      ],
+      "returnAttribute": "laboratoryResults",
+      "canonicalBinding": "ServiceAttributeBindings/LaboratoryService/LaboratoryService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "CardiologyService",
+      "implementationClass": "org.btsn.business.healthcare.CardiologyService",
+      "operation": "processCardiacAssessment",
+      "inputs": [
+        "triageResults"
+      ],
+      "returnAttribute": "cardiologyResults",
+      "canonicalBinding": "ServiceAttributeBindings/CardiologyService/CardiologyService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "RadiologyService",
+      "implementationClass": "org.btsn.business.healthcare.RadiologyService",
+      "operation": "processImagingRequest",
+      "inputs": [
+        "triageResults"
+      ],
+      "returnAttribute": "radiologyResults",
+      "canonicalBinding": "ServiceAttributeBindings/RadiologyService/RadiologyService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "RadiologyService",
+      "implementationClass": "org.btsn.business.healthcare.RadiologyService",
+      "operation": "federatedRadiologyRequest",
+      "inputs": [
+        "token"
+      ],
+      "returnAttribute": "radiologyResults",
+      "canonicalBinding": "ServiceAttributeBindings/RadiologyService/RadiologyService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "DiagnosisService",
+      "implementationClass": "org.btsn.business.healthcare.DiagnosisService",
+      "operation": "processClinicalDecision",
+      "inputs": [
+        "radiologyResults",
+        "laboratoryResults",
+        "cardiologyResults"
+      ],
+      "returnAttribute": "diagnosisResults",
+      "canonicalBinding": "ServiceAttributeBindings/DiagnosisService/DiagnosisService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "TreatmentService",
+      "implementationClass": "org.btsn.business.healthcare.TreatmentService",
+      "operation": "executeTreatmentPlan",
+      "inputs": [
+        "diagnosisResults"
+      ],
+      "returnAttribute": "treatmentResults",
+      "canonicalBinding": "ServiceAttributeBindings/TreatmentService/TreatmentService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "TreatmentService",
+      "implementationClass": "org.btsn.business.healthcare.TreatmentService",
+      "operation": "executeDirectTreatment",
+      "inputs": [
+        "triageResults"
+      ],
+      "returnAttribute": "treatmentResults",
+      "canonicalBinding": "ServiceAttributeBindings/TreatmentService/TreatmentService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    }
+  ]
+}

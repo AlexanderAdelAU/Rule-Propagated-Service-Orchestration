@@ -26,6 +26,7 @@
   		<xs:sequence>
   			<xs:element name="serviceName" type="xs:string"></xs:element>
    			<xs:element name="operationName" type="xs:string" />
+   			<xs:element name="businessService" type="xs:string" minOccurs="0" />
   		</xs:sequence>
   	</xs:complexType>
   </xs:element>

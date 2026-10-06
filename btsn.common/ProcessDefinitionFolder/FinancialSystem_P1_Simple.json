@@ -1,0 +1,88 @@
+{
+   "processType":"PetriNet",
+  "elements": [
+    {
+      "id": "EG1",
+      "type": "EVENT_GENERATOR",
+      "x": 68,
+      "y": 190,
+      "width": 24,
+      "height": 60,
+      "label": "EG1",
+      "rotation": 0.0,
+      "generator_rate": "1000",
+      "token_version": "v001"
+    },
+    {
+      "id": "T2",
+      "type": "TRANSITION",
+      "x": 128,
+      "y": 190,
+      "width": 24,
+      "height": 60,
+      "label": "T2",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "Other"
+    },
+    {
+      "id": "P1",
+      "type": "PLACE",
+      "x": 195,
+      "y": 195,
+      "width": 50,
+      "height": 50,
+      "label": "P1",
+      "service": "ValidationService",
+      "operations": [
+        {
+          "name": "processToken",
+          "arguments": [{"name": "token", "type": "String", "value": "String", "required": false}],
+          "returnAttribute": "validationResults"
+        }
+      ]
+    },
+    {
+      "id": "T4",
+      "type": "TRANSITION",
+      "x": 308,
+      "y": 190,
+      "width": 24,
+      "height": 60,
+      "label": "T4",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "Other"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "T2",
+      "target": "P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P1",
+      "target": "T4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "EG1",
+      "target": "T2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    }
+  ],
+  "textElements": [
+  ]
+}

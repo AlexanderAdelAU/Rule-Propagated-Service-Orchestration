@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="service-packaging" default="package" basedir="../..">
+    <!-- Ant 1.10.2+ running on JDK 15+. No external build tool is invoked. -->
+    <property name="packaging.config" location="packaging.json"/>
+    <property name="target.dir" location="target"/>
+    <property name="java.release" value="15"/>
+    <property name="common.dir" location="../btsn.common"/>
+    <path id="inventory.classpath">
+        <pathelement location="${target.dir}/tools"/>
+        <pathelement location="${common.dir}/lib/json-simple-1.1.1.jar"/>
+    </path>
+    <target name="clean" description="Remove generated service module output">
+        <delete dir="${target.dir}"/>
+    </target>
+    <target name="inventory" description="Read catalogue data and generate native Ant packaging tasks">
+        <delete dir="${target.dir}/inventory"/>
+        <delete dir="${target.dir}/tools"/>
+        <mkdir dir="${target.dir}/tools"/>
+        <javac srcdir="src" destdir="${target.dir}/tools" release="${java.release}"
+               includeantruntime="false" encoding="UTF-8">
+            <classpath refid="inventory.classpath"/>
+        </javac>
+        <java classname="org.btsn.packaging.ServiceInventory" fork="true" failonerror="true">
+            <classpath refid="inventory.classpath"/>
+            <arg value="generate"/><arg file="${packaging.config}"/><arg file="${target.dir}"/><arg file="${basedir}"/>
+        </java>
+    </target>
+    <target name="package" depends="inventory" description="Compile service JARs and deployment ZIP with Ant">
+        <ant antfile="${target.dir}/service-tasks.xml" target="package" inheritall="false"/>
+        <echo>Deployment bundle: ${target.dir}/service-deployment.zip</echo>
+    </target>
+</project>

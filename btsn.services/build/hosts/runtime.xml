@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="host-runtime-build" default="runtime" basedir="../..">
+    <target name="runtime" depends="package" description="Build shared host infrastructure without embedded service classes">
+        <ant antfile="infrastructure.xml" target="jar" inheritall="false"/>
+    </target>
+    <target name="build-hosts" depends="runtime" description="Build all six generic hosts against the same service JARs">
+        <ant antfile="../btsn.rpso.places.p1/build.xml" target="jar-only" inheritall="false"/>
+        <ant antfile="../btsn.rpso.places.p2/build.xml" target="jar-only" inheritall="false"/>
+        <ant antfile="../btsn.rpso.places.p3/build.xml" target="jar-only" inheritall="false"/>
+        <ant antfile="../btsn.rpso.places.p4/build.xml" target="jar-only" inheritall="false"/>
+        <ant antfile="../btsn.rpso.places.p5/build.xml" target="jar-only" inheritall="false"/>
+        <ant antfile="../btsn.rpso.places.p6/build.xml" target="jar-only" inheritall="false"/>
+    </target>
+</project>

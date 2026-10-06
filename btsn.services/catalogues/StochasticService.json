@@ -1,0 +1,106 @@
+{
+  "domain": "PetriNetModels",
+  "purpose": "Packaging inventory only; this does not activate or place a service.",
+  "services": [
+    {
+      "service": "StochasticPlaceService",
+      "implementationClass": "org.btsn.services.StochasticPlaceService",
+      "operation": "processToken",
+      "inputs": [
+        "token"
+      ],
+      "returnAttribute": "token",
+      "status": "preserved-unbound"
+    },
+    {
+      "service": "StochasticEntryTokenService",
+      "implementationClass": "org.btsn.services.StochasticEntryTokenService",
+      "operation": "processToken",
+      "inputs": [
+        "token"
+      ],
+      "returnAttribute": "token",
+      "canonicalBinding": "ServiceAttributeBindings/StochasticEntryTokenService/StochasticEntryTokenService-CanonicalBindings.ruleml.xml",
+      "status": "preserved-unbound"
+    },
+    {
+      "service": "StochasticForwardTokenService",
+      "implementationClass": "org.btsn.services.StochasticForwardTokenService",
+      "operation": "processToken",
+      "inputs": [
+        "token"
+      ],
+      "returnAttribute": "token",
+      "canonicalBinding": "ServiceAttributeBindings/StochasticForwardTokenService/StochasticForwardTokenService-CanonicalBindings.ruleml.xml",
+      "status": "preserved-unbound"
+    },
+    {
+      "service": "StochasticBranchTwoTokenService",
+      "implementationClass": "org.btsn.services.StochasticBranchTwoTokenService",
+      "operation": "processToken",
+      "inputs": [
+        "token"
+      ],
+      "returnAttribute": "token_branch2",
+      "canonicalBinding": "ServiceAttributeBindings/StochasticBranchTwoTokenService/StochasticBranchTwoTokenService-CanonicalBindings.ruleml.xml",
+      "status": "preserved-unbound"
+    },
+    {
+      "service": "StochasticBranchOneTokenService",
+      "implementationClass": "org.btsn.services.StochasticBranchOneTokenService",
+      "operation": "processToken",
+      "inputs": [
+        "token"
+      ],
+      "returnAttribute": "token_branch1",
+      "canonicalBinding": "ServiceAttributeBindings/StochasticBranchOneTokenService/StochasticBranchOneTokenService-CanonicalBindings.ruleml.xml",
+      "status": "preserved-unbound"
+    },
+    {
+      "service": "StochasticMergeTokenService",
+      "implementationClass": "org.btsn.services.StochasticMergeTokenService",
+      "operation": "processToken",
+      "inputs": [
+        "token_branch1",
+        "token_branch2"
+      ],
+      "returnAttribute": "token",
+      "canonicalBinding": "ServiceAttributeBindings/StochasticMergeTokenService/StochasticMergeTokenService-CanonicalBindings.ruleml.xml",
+      "status": "preserved-unbound"
+    },
+    {
+      "service": "StochasticSideTokenService",
+      "implementationClass": "org.btsn.services.StochasticSideTokenService",
+      "operation": "processToken",
+      "inputs": [
+        "token"
+      ],
+      "returnAttribute": "token_branch1",
+      "canonicalBinding": "ServiceAttributeBindings/StochasticSideTokenService/StochasticSideTokenService-CanonicalBindings.ruleml.xml",
+      "status": "preserved-unbound"
+    },
+    {
+      "service": "StochasticReturnTokenService",
+      "implementationClass": "org.btsn.services.StochasticReturnTokenService",
+      "operation": "processToken",
+      "inputs": [
+        "token"
+      ],
+      "returnAttribute": "token_branch2",
+      "canonicalBinding": "ServiceAttributeBindings/StochasticReturnTokenService/StochasticReturnTokenService-CanonicalBindings.ruleml.xml",
+      "status": "preserved-unbound"
+    },
+    {
+      "service": "StochasticEntryJoinService",
+      "implementationClass": "org.btsn.services.StochasticEntryJoinService",
+      "operation": "processToken",
+      "inputs": [
+        "token_branch1",
+        "token_branch2"
+      ],
+      "returnAttribute": "token",
+      "canonicalBinding": "ServiceAttributeBindings/StochasticEntryJoinService/StochasticEntryJoinService-CanonicalBindings.ruleml.xml",
+      "status": "preserved-unbound"
+    }
+  ]
+}

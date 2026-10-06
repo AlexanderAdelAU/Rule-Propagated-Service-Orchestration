@@ -628,6 +628,22 @@ public class ProcessEditor extends JFrame {
         // File menu
         JMenu fileMenu = new JMenu("File");
         
+        JMenu newMenu = new JMenu("New");
+        
+        JMenuItem newProcessItem = new JMenuItem("Process Definition");
+        newProcessItem.addActionListener(e -> clearCanvas());
+        newMenu.add(newProcessItem);
+        
+        JMenuItem newInfrastructureItem = new JMenuItem("Infrastructure Definition");
+        newInfrastructureItem.addActionListener(e -> {
+            InfrastructureDefinitionFrame frame = new InfrastructureDefinitionFrame();
+            frame.setVisible(true);
+        });
+        newMenu.add(newInfrastructureItem);
+        
+        fileMenu.add(newMenu);
+        fileMenu.addSeparator();
+        
         JMenuItem saveItem = new JMenuItem("Save (.json)");
         saveItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, 
             InputEvent.CTRL_DOWN_MASK));

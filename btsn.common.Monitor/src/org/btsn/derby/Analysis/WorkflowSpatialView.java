@@ -48,6 +48,8 @@ public class WorkflowSpatialView extends JPanel {
     
     // Place ordering (Y-axis)
     private List<String> placeOrder = new ArrayList<>();
+    private ServiceDisplayNames serviceDisplayNames = ServiceDisplayNames.empty();
+    private WorkflowProcessNames processNames = WorkflowProcessNames.empty();
     private Map<String, Integer> placeLanes = new HashMap<>();
     
     // Time range
@@ -206,6 +208,8 @@ public class WorkflowSpatialView extends JPanel {
                     } else {
                         selectedWorkflowBase = hoveredPath.workflowBase;
                     }
+                    calculatePreferredSize();
+                    revalidate();
                     repaint();
                 }
             }
@@ -275,8 +279,15 @@ public class WorkflowSpatialView extends JPanel {
     }
     
     private void calculatePreferredSize() {
+        int labelWidth = 0;
+        FontMetrics metrics = getFontMetrics(labelFont);
+        for (String place : placeOrder) {
+            labelWidth = Math.max(labelWidth, metrics.stringWidth(getPlaceDisplayName(place)));
+        }
+        leftMargin = Math.max(120, labelWidth + 25);
         int visiblePlaceCount = placeOrder.size() - hiddenPlaces.size();
         int baseWidth = leftMargin + rightMargin + 800;  // Minimum width
+        topMargin = 60 + processHeaderLines(Math.max(900, baseWidth)).size() * (metrics.getHeight()+2);
         int baseHeight = topMargin + bottomMargin + (visiblePlaceCount * laneHeight);
         
         // Apply zoom factor to preferred size
@@ -297,6 +308,8 @@ public class WorkflowSpatialView extends JPanel {
             DriverManager.registerDriver(new EmbeddedDriver());
             conn = DriverManager.getConnection(DB_URL);
             stmt = conn.createStatement();
+            serviceDisplayNames = ServiceDisplayNames.load(conn);
+            processNames = WorkflowProcessNames.load(conn);
             
             tokenPaths.clear();
             genealogy.clear();
@@ -349,7 +362,7 @@ public class WorkflowSpatialView extends JPanel {
             System.out.println("Workflows found: " + workflows);
             
             // Order places logically (P1 → P2 → P3 → P4 → P5 → Monitor)
-            String[] preferredOrder = {"P1_Place", "P2_Place", "P3_Place", "P4_Place", "P5_Place", "MonitorService", "TERMINATE"};
+            String[] preferredOrder = {"P1_Place", "P2_Place", "P3_Place", "P4_Place", "P5_Place", "P6_Place", "MonitorService", "TERMINATE"};
             for (String p : preferredOrder) {
                 if (places.contains(p)) {
                     placeOrder.add(p);
@@ -460,6 +473,11 @@ public class WorkflowSpatialView extends JPanel {
         }
     }
 
+    public String processDescription() { return processNames.caption(selectedWorkflowBase > 0 ? selectedWorkflowBase : -1); }
+    private java.util.List<String> processHeaderLines(int width) {
+        return WorkflowProcessNames.wrap(processNames.caption(selectedWorkflowBase > 0 ? selectedWorkflowBase : -1, true),
+                getFontMetrics(labelFont), Math.max(40, width-40));
+    }
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -477,6 +495,8 @@ public class WorkflowSpatialView extends JPanel {
         
         // Use unscaled dimensions for chart layout calculations
         int chartWidth = (int)(getWidth() / zoomFactor) - leftMargin - rightMargin;
+        java.util.List<String> processLines = processHeaderLines((int)(getWidth()/zoomFactor));
+        topMargin = 60 + processLines.size() * (getFontMetrics(labelFont).getHeight()+2);
         int chartHeight = placeOrder.size() * laneHeight;
         
         // Draw title
@@ -489,6 +509,10 @@ public class WorkflowSpatialView extends JPanel {
         FontMetrics fm = g2.getFontMetrics();
         g2.drawString(title, (getWidth() - fm.stringWidth(title)) / 2, 30);
         
+        g2.setFont(labelFont);
+        int processY = 49;
+        for (String line : processLines) { g2.drawString(line, 20, processY); processY += getFontMetrics(labelFont).getHeight()+2; }
+
         // Draw place labels (Y-axis) - only visible places
         g2.setFont(labelFont);
         int visibleLaneIdx = 0;
@@ -507,7 +531,8 @@ public class WorkflowSpatialView extends JPanel {
             // Place label
             g2.setColor(Color.BLACK);
             fm = g2.getFontMetrics();
-            g2.drawString(place, leftMargin - fm.stringWidth(place) - 10, y + fm.getAscent()/2);
+            String serviceLabel = getPlaceDisplayName(place);
+            g2.drawString(serviceLabel, leftMargin - fm.stringWidth(serviceLabel) - 10, y + fm.getAscent()/2);
             
             // Lane separator
             g2.setColor(new Color(220, 220, 220));
@@ -990,7 +1015,8 @@ public class WorkflowSpatialView extends JPanel {
         
         String[] lines = {
             "Token: " + path.tokenId,
-            "Service: " + path.getServiceVersionLabel(),
+            "Service: " + serviceDisplayNames.visitLabel(path.workflowBase, path.tokenId, path.placeName, path.entryTime),
+            "Version: " + path.getServiceVersionLabel(),
             "Place: " + path.placeName,
             "Residence: " + path.residenceTime + "ms",
             "Buffer: " + path.entryBufferSize + " → " + path.exitBufferSize,
@@ -1115,6 +1141,10 @@ public class WorkflowSpatialView extends JPanel {
         return !hiddenPlaces.contains(placeName);
     }
     
+    public String getPlaceDisplayName(String place) {
+        return serviceDisplayNames.laneLabel(place, selectedWorkflowBase);
+    }
+
     public Set<String> getAllPlaces() {
         return new LinkedHashSet<>(placeOrder);
     }
@@ -1164,11 +1194,15 @@ public class WorkflowSpatialView extends JPanel {
     
     public void filterByWorkflow(long workflowBase) {
         this.selectedWorkflowBase = workflowBase;
+        calculatePreferredSize();
+        revalidate();
         repaint();
     }
     
     public void showAllWorkflows() {
         this.selectedWorkflowBase = -1;
+        calculatePreferredSize();
+        revalidate();
         repaint();
     }
     
@@ -1392,7 +1426,7 @@ public class WorkflowSpatialView extends JPanel {
                 double avgRes = (double) totalResidence / placePaths.size();
                 
                 report.append(String.format("  %-15s: %d tokens, avg=%.1fms, min=%dms, max=%dms\n",
-                    place, placePaths.size(), avgRes, minRes, maxRes));
+                    serviceDisplayNames.describe(wfBase, place), placePaths.size(), avgRes, minRes, maxRes));
             }
             report.append("\n");
         }
@@ -1524,7 +1558,7 @@ public class WorkflowSpatialView extends JPanel {
         
         for (String place : chart.getAllPlaces()) {
             boolean defaultVisible = !place.equals("MonitorService") && !place.equals("TERMINATE");
-            JCheckBoxMenuItem placeItem = new JCheckBoxMenuItem(place, defaultVisible);
+            JCheckBoxMenuItem placeItem = new JCheckBoxMenuItem(chart.serviceDisplayNames.laneDescription(place, -1), defaultVisible);
             placeItem.addActionListener(e -> chart.setPlaceVisible(place, placeItem.isSelected()));
             placesMenu.add(placeItem);
         }

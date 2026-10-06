@@ -2,6 +2,9 @@
 
 <project name="Federated_Radiology_Workflow" default="run-complete-workflow" basedir="."
 	    xmlns:if="ant:if" xmlns:unless="ant:unless">
+	<property name="source.root" location=".."/>
+	<property name="services.project.dir" location="${source.root}/btsn.services"/>
+	<property name="healthcare.runtime.dir" location="${services.project.dir}/target/healthcare-runtime"/>
 	<description>
 		Federated Radiology Workflow - Complete Workflow with Collectors
 		Executes federated radiology requests across distributed services
@@ -25,8 +28,8 @@
 	<!-- Override from command line: ant -Dradiology.mode=remote                  -->
 	<!-- ======================================================================= -->
 
-	<property name="radiology.mode" value="local" />
-	<property name="monitor.mode"   value="local" />
+	<property name="radiology.mode" value="auto" />
+	<property name="monitor.mode"   value="auto" />
 
 	<!-- ======================================================================= -->
 	<!-- PROPERTIES                                                              -->
@@ -43,12 +46,12 @@
 	<!-- Phase 1: Initialization parameters (v999 = admin/non-instrumented) -->
 	<property name="init.version" value="v999" />
 	<property name="db.init.operation" value="purgeAndInitialize" />
-	<property name="sequence.id.init.radiology" value="999100000" />
-	<property name="sequence.id.init.monitor" value="999600000" />
+	<property name="sequence.id.init.radiology" value="999040000" />
+	<property name="sequence.id.init.monitor" value="999070000" />
 	<property name="init.delay.seconds" value="3" />
 
 	<!-- Phase 2: Workflow parameters -->
-	<property name="target.place" value="RadiologyService" />
+	<property name="target.place" value="P4_Place" />
 	<property name="target.operation" value="federatedRadiologyRequest" />
 	<property name="token.count" value="10" />
 	<property name="token.expire" value="120000" />
@@ -58,7 +61,7 @@
 	<property name="collector.version" value="v999" />
 	<property name="collector.operation" value="collectAllData" />
 	<property name="query.version" value="v002" />
-	<property name="sequence.id.collect.radiology" value="999110000" />
+	<property name="sequence.id.collect.radiology" value="999040000" />
 	<property name="collector.delay.seconds" value="3" />
 
 	<!-- Timing parameters -->
@@ -71,15 +74,13 @@
 	<property name="healthcare.root.dir" location="../" />
 
 	<!-- Common project -->
-	<property name="common.project.dir" location="${healthcare.root.dir}/btsn.common" />
 	<property name="lib.dir" location="${common.project.dir}/lib" />
-	<property name="class.dir" location="${common.project.dir}/bin" />
-	<property name="common.src.dir" location="${common.project.dir}/src" />
+
+
 
 	<!-- Event Generators project -->
-	<property name="generator.project.dir" location="${healthcare.root.dir}/btsn.common.eventgenerators" />
-	<property name="generator.src.dir" location="${generator.project.dir}/src" />
-	<property name="generator.bin.dir" location="${generator.project.dir}/bin" />
+
+
 
 	<!-- Output directory -->
 	<property name="output.dir" location="${build.file.dir}" />
@@ -87,14 +88,13 @@
 	<property name="monitor.output.file" location="${output.dir}/MonitorService.out.txt" />
 
 	<!-- Radiology Service -->
-	<property name="radiology.project.dir" location="${healthcare.root.dir}/btsn.healthcare.places.Radiology" />
-	<property name="radiology.bin.dir" location="${radiology.project.dir}/bin" />
-	<property name="radiology.src.dir" location="${radiology.project.dir}/src" />
+	<property name="radiology.project.dir" location="${healthcare.runtime.dir}/btsn.rpso.places.p4" />
+
+
 
 	<!-- Monitor Service -->
-	<property name="monitor.project.dir" location="${healthcare.root.dir}/btsn.common.Monitor" />
-	<property name="monitor.bin.dir" location="${monitor.project.dir}/bin" />
-	<property name="monitor.src.dir" location="${monitor.project.dir}/src" />
+
+
 
 	<!-- Java Classes -->
 	<property name="service.loader.class" value="org.btsn.handlers.ServiceLoader" />
@@ -106,36 +106,22 @@
 	<!-- CLASSPATHS                                                              -->
 	<!-- ======================================================================= -->
 
-	<path id="common.classpath">
-		<fileset dir="${lib.dir}" erroronmissingdir="false">
-			<include name="*.jar" />
-		</fileset>
-		<pathelement location="${class.dir}" />
-	</path>
+	<path id="common.classpath"><path refid="healthcare.dependencies"/></path>
 
-	<path id="radiology.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${radiology.bin.dir}" />
-	</path>
+	<path id="radiology.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.rpso.places.p4/target/btsn.rpso.places.p4.jar"/></path>
 
-	<path id="monitor.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${monitor.bin.dir}" />
-	</path>
+	<path id="monitor.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/></path>
 
-	<path id="generator.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${generator.bin.dir}" />
-	</path>
+	<path id="generator.classpath"><path refid="common.classpath"/><pathelement location="${source.root}/btsn.common.eventgenerators/target/jar-runtime/btsn-eventgenerators.jar"/></path>
 
 	<!-- ======================================================================= -->
 	<!-- DEPLOYMENT MODE RESOLUTION                                              -->
 	<!-- ======================================================================= -->
 
-	<target name="resolve-deployment-modes">
+	<target name="resolve-deployment-modes" depends="prepare-runtime,detect-local-channel">
 		<!-- Resolve boolean properties from mode settings -->
-		<condition property="radiology.is.local"><equals arg1="${radiology.mode}" arg2="local" /></condition>
-		<condition property="monitor.is.local"><equals arg1="${monitor.mode}" arg2="local" /></condition>
+		<resolve-local-launch component="radiology" mode="${radiology.mode}"/>
+		<resolve-local-launch component="monitor" mode="${monitor.mode}"/>
 
 		<!-- Display deployment configuration -->
 		<echo message="" />
@@ -155,7 +141,7 @@
 		<echo message="Previous output files cleaned" />
 	</target>
 
-	<target name="generate-workflow-bindings" description="Generate canonical bindings from workflow JSON">
+	<target depends="prepare-runtime" name="generate-workflow-bindings" description="Generate canonical bindings from workflow JSON">
 		<echo message="=== Generating Workflow Bindings ===" />
 		<java classname="org.btsn.rulecontroller.TopologyBindingGenerator" 
 		      classpathref="generator.classpath"
@@ -202,9 +188,9 @@
 		<parallel>
 			<!-- Radiology Service (runs entire duration) -->
 			<echo message="  [radiology] Skipping - running on remote host" unless:set="radiology.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="radiology.is.local"
+			<java classname="${service.loader.class}" if:set="radiology.is.local"
 			      fork="true" timeout="600000" 
-			      dir="${radiology.project.dir}" output="${radiology.output.file}">
+			      dir="${radiology.project.dir}" output="${radiology.output.file}" failonerror="true">
 				<classpath refid="radiology.classpath" />
 				<arg value="${radiology.project.dir}" />
 				<arg value="-version" />
@@ -213,9 +199,9 @@
 
 			<!-- Monitor Service (runs entire duration) -->
 			<echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="monitor.is.local"
+			<java classname="${service.loader.class}" if:set="monitor.is.local"
 			      fork="true" timeout="600000" 
-			      dir="${monitor.project.dir}" output="${monitor.output.file}">
+			      dir="${monitor.project.dir}" output="${monitor.output.file}" failonerror="true">
 				<classpath refid="monitor.classpath" />
 				<arg value="${monitor.project.dir}" />
 				<arg value="-version" />
@@ -239,7 +225,7 @@
 				<java classname="${init.event.generator.class}" 
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
-					<arg value="-service" /><arg value="Radiology_InitializationService" />
+					<arg value="-service" /><arg value="P4_InitializationService" />
 					<arg value="-operation" /><arg value="${db.init.operation}" />
 					<arg value="-version" /><arg value="${init.version}" />
 					<arg value="-process" /><arg value="${init.process.name}" />
@@ -281,7 +267,8 @@
 					<arg value="-operation" /><arg value="${target.operation}" />
 					<arg value="-tokens" /><arg value="0" />
 					<arg value="-expire" /><arg value="${token.expire}" />
-					<arg value="-generator" /><arg value="${event.generator.id}" />
+					<arg value="-generator" /><arg value="${event.generator.id}" />					<arg value="-infrastructure"/><arg value="Healthcare_Infrastructure"/>
+					<arg value="-format-service"/><arg value="RadiologyService"/>
 				</java>
 				<sleep seconds="2" />
 
@@ -297,7 +284,8 @@
 					<arg value="-tokens" /><arg value="${token.count}" />
 					<arg value="-expire" /><arg value="${token.expire}" />
 					<arg value="-generator" /><arg value="${event.generator.id}" />
-					<arg value="-skipdeploy" />
+					<arg value="-skipdeploy" />					<arg value="-infrastructure"/><arg value="Healthcare_Infrastructure"/>
+					<arg value="-format-service"/><arg value="RadiologyService"/>
 				</java>
 				<echo message="=== Phase 2 Complete ===" />
 				<sleep seconds="${phase.delay.seconds}" />
@@ -311,11 +299,11 @@
 				<echo message="===============================================" />
 
 				<!-- Radiology Collection -->
-				<echo message="Collecting from Radiology_CollectorService..." />
+				<echo message="Collecting from P4_CollectorService..." />
 				<java classname="${collector.event.generator.class}" 
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
-					<arg value="-service" /><arg value="Radiology_CollectorService" />
+					<arg value="-service" /><arg value="P4_CollectorService" />
 					<arg value="-operation" /><arg value="${collector.operation}" />
 					<arg value="-version" /><arg value="${collector.version}" />
 					<arg value="-process" /><arg value="${collector.process.name}" />
@@ -357,9 +345,9 @@
 		<parallel>
 			<!-- Start services -->
 			<echo message="  [radiology] Skipping - running on remote host" unless:set="radiology.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="radiology.is.local"
+			<java classname="${service.loader.class}" if:set="radiology.is.local"
 			      fork="true" timeout="600000" 
-			      dir="${radiology.project.dir}" output="${radiology.output.file}">
+			      dir="${radiology.project.dir}" output="${radiology.output.file}" failonerror="true">
 				<classpath refid="radiology.classpath" />
 				<arg value="${radiology.project.dir}" />
 				<arg value="-version" />
@@ -367,9 +355,9 @@
 			</java>
 
 			<echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="monitor.is.local"
+			<java classname="${service.loader.class}" if:set="monitor.is.local"
 			      fork="true" timeout="600000" 
-			      dir="${monitor.project.dir}" output="${monitor.output.file}">
+			      dir="${monitor.project.dir}" output="${monitor.output.file}" failonerror="true">
 				<classpath refid="monitor.classpath" />
 				<arg value="${monitor.project.dir}" />
 				<arg value="-version" />
@@ -390,7 +378,8 @@
 					<arg value="-operation" /><arg value="${target.operation}" />
 					<arg value="-tokens" /><arg value="0" />
 					<arg value="-expire" /><arg value="${token.expire}" />
-					<arg value="-generator" /><arg value="${event.generator.id}" />
+					<arg value="-generator" /><arg value="${event.generator.id}" />					<arg value="-infrastructure"/><arg value="Healthcare_Infrastructure"/>
+					<arg value="-format-service"/><arg value="RadiologyService"/>
 				</java>
 
 				<!-- Fire tokens -->
@@ -405,7 +394,8 @@
 					<arg value="-tokens" /><arg value="${token.count}" />
 					<arg value="-expire" /><arg value="${token.expire}" />
 					<arg value="-generator" /><arg value="${event.generator.id}" />
-					<arg value="-skipdeploy" />
+					<arg value="-skipdeploy" />					<arg value="-infrastructure"/><arg value="Healthcare_Infrastructure"/>
+					<arg value="-format-service"/><arg value="RadiologyService"/>
 				</java>
 
 				<echo message="Workflow running. Waiting ${workflow.completion.seconds} seconds..." />
@@ -432,14 +422,14 @@
 		<echo message="  ant help                   Show this help" />
 		<echo message="" />
 		<echo message="DEPLOYMENT MODES (per service):" />
-		<echo message="  -D&lt;service&gt;.mode=local           Launch service on this machine (default)" />
+		<echo message="  -D&lt;service&gt;.mode=local           Force launch on this machine" />
 		<echo message="  -D&lt;service&gt;.mode=remote          Service runs on another machine (skip launch)" />
 		<echo message="" />
 		<echo message="  Services: radiology, monitor" />
 		<echo message="" />
 		<echo message="CONFIGURABLE PARAMETERS:" />
 		<echo message="  -Drule.version=v002              Rule base version" />
-		<echo message="  -Dtarget.place=RadiologyService  Target service name" />
+		<echo message="  -Dtarget.place=P4_Place          Orchestration host" />
 		<echo message="  -Dtarget.operation=federatedRadiologyRequest  Service operation" />
 		<echo message="  -Dtoken.count=10                 Number of tokens to generate" />
 		<echo message="  -Dphase.delay.seconds=5          Delay between phases" />
@@ -448,4 +438,5 @@
 		<echo message="" />
 	</target>
 
+	<import file="../btsn.services/healthcare-runtime.xml"/>
 </project>

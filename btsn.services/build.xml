@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="service-deployment" default="package" basedir=".">
+    <description>Independent service packaging, with optional host/runtime builds and checks.</description>
+    <import file="build/packaging/services.xml"/>
+    <import file="build/hosts/runtime.xml"/>
+    <import file="build/workflows/runtime.xml"/>
+    <import file="build/checks/services.xml"/>
+</project>

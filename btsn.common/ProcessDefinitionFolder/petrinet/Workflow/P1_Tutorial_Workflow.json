@@ -1,5 +1,5 @@
 {
-   "processType":"PetriNet",
+  "processType": "PetriNet",
   "elements": [
     {
       "id": "T_in_P1",
@@ -24,64 +24,22 @@
       "width": 50,
       "height": 50,
       "label": "P1",
-      "service": "P1_Place",
+      "service": "StochasticEntryTokenService",
       "operations": [
         {
           "name": "processToken",
+          "returnAttribute": "token",
           "arguments": [
-            {"name": "token", "type": "String", "value": "string", "required": false}
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
           ]
         }
       ],
       "fill_color": "#33FF33"
-    },
-    {
-      "id": "T_in_Monitor",
-      "type": "TRANSITION",
-      "x": 510,
-      "y": 190,
-      "width": 20,
-      "height": 60,
-      "label": "T_in_Monitor",
-      "rotation": 90.0,
-      "node_type": "EdgeNode",
-      "node_value": "EDGE_NODE",
-      "transition_type": "T_in",
-      "buffer": "50",
-      "fill_color": "#CCCCCC"
-    },
-    {
-      "id": "Monitor",
-      "type": "PLACE",
-      "x": 495,
-      "y": 275,
-      "width": 50,
-      "height": 50,
-      "label": "Monitor",
-      "service": "MonitorService",
-      "operations": [
-        {
-          "name": "acknowledgeTokenArrival",
-          "arguments": [
-            {"name": "token", "type": "String", "value": "string", "required": false}
-          ]
-        }
-      ],
-      "fill_color": "#33FF33"
-    },
-    {
-      "id": "T_out_Monitor",
-      "type": "TRANSITION",
-      "x": 510,
-      "y": 350,
-      "width": 20,
-      "height": 60,
-      "label": "T_out_Monitor",
-      "rotation": 90.0,
-      "node_type": "TerminateNode",
-      "node_value": "TERMINATE_NODE",
-      "transition_type": "T_out",
-      "fill_color": "#FF9933"
     },
     {
       "id": "T_out_P1",
@@ -108,28 +66,24 @@
       "rotation": 0.0,
       "generator_rate": "1000",
       "token_version": "v002"
+    },
+    {
+      "id": "T_in_Model_Terminate",
+      "type": "TRANSITION",
+      "x": 860,
+      "y": 250,
+      "width": 20,
+      "height": 60,
+      "label": "Terminate",
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
     }
   ],
   "arrows": [
     {
       "source": "T_in_P1",
       "target": "P1",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
-    },
-    {
-      "source": "T_in_Monitor",
-      "target": "Monitor",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
-    },
-    {
-      "source": "Monitor",
-      "target": "T_out_Monitor",
       "label": "",
       "guardCondition": "",
       "decision_value": "",
@@ -155,13 +109,16 @@
     },
     {
       "source": "T_out_P1",
-      "target": "T_in_Monitor",
+      "target": "T_in_Model_Terminate",
       "label": "true",
       "guardCondition": "DECISION_EQUAL_TO",
       "decision_value": "true",
       "endpoint": "",
       "waypoints": [
-        {"x": 520, "y": 160}
+        {
+          "x": 520,
+          "y": 160
+        }
       ],
       "labelOffsetX": 26,
       "labelOffsetY": -20,
@@ -176,8 +133,14 @@
       "decision_value": "false",
       "endpoint": "",
       "waypoints": [
-        {"x": 380, "y": 80},
-        {"x": 220, "y": 80}
+        {
+          "x": 380,
+          "y": 80
+        },
+        {
+          "x": 220,
+          "y": 80
+        }
       ],
       "labelOffsetX": -32,
       "labelOffsetY": -10
