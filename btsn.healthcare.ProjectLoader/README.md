@@ -134,8 +134,12 @@ in the familiar version lanes and chronological arrival positions:
 - Coloured bar height: measured GENERATED-to-canonical-completion elapsed time.
 - Black diamond beside each bar: maximum **observed service-visit queue wait**
   across that root family, including nested fork children.
+- **View > Queue Display > Lighter Queue Bars** replaces diamonds with narrower
+  bars in a lighter shade of the version colour. Each queue bar stands beside its
+  solid elapsed-time bar, from the same baseline on the same lane scale.
+  **Diamonds** restores the original presentation and remains the default.
 - Each version lane has its own labelled millisecond scale, so short-route versions
-  remain readable alongside longer routes. Bars and queue diamonds within a lane
+  remain readable alongside longer routes. Both queue display styles within a lane
   share that lane's scale. Read axis values when comparing absolute times across
   versions; equal bar heights in different lanes do not mean equal durations.
 - **View > Y-Axis Scale > Shared Milliseconds** restores one common scale when
@@ -144,14 +148,15 @@ in the familiar version lanes and chronological arrival positions:
   is arrival rank. Scale limits include both bars and queue markers and stay fixed
   when limiting the displayed arrival range.
 
-The diamond is an independent measurement, not a stacked portion of the bar or a
-workflow waiting fraction. Parallel branch waits are not added, and queue maxima
+The diamond or lighter queue bar is an independent measurement, not a stacked
+portion of the elapsed bar or a workflow waiting fraction. Parallel branch waits are not added, and queue maxima
 are not subtracted from elapsed time. Longer or shorter routes can change both
 metrics, so this figure alone does not prove priority ordering or queue pre-emption.
 
 An X on a lane baseline means the elapsed interval is unavailable (incomplete,
 invalid clock ordering, or legacy data without canonical events). Missing queue
-measurements have no diamond; valid zero waits have a diamond at the baseline.
+measurements have no queue glyph; valid zero waits have a diamond or a lighter
+horizontal line at the baseline, depending on the display mode.
 Exact repeated visit observations contribute once; null, negative or conflicting
 waits are excluded, with valid and invalid visit counts in tooltips and exports.
 A maximum may therefore describe only the valid observed visits. For old runs
@@ -159,8 +164,8 @@ without GENERATED events, arrival order falls back to recorded workflow starts;
 elapsed time stays unavailable. Canonical genealogy prevents orphan branch tokens
 from becoming extra root rows. Administration (v999) is omitted.
 
-PNG/PDF and LaTeX/TikZ follow the selected axis scales and state the scale mode
-in the legend or caption. The LaTeX table and text summary retain absolute times
+PNG/PDF and LaTeX/TikZ follow the selected queue style and axis scales, with matching
+legends and captions. The LaTeX table and text summary retain absolute times
 in milliseconds.
 For a paper, the suggested caption is:
 
@@ -168,6 +173,13 @@ For a paper, the suggested caption is:
 > service-visit queue wait, including fork branches. Queue markers do not represent
 > total workflow waiting time. Each version uses its own millisecond scale; compare
 > axis values, not bar heights, across versions.
+
+For the lighter bar presentation, use:
+
+> Solid bars show measured workflow elapsed time; lighter bars beside them show
+> maximum observed service-visit queue wait, including fork branches. Queue bars
+> do not represent total workflow waiting time. Each version uses its own
+> millisecond scale; compare axis values, not bar heights, across versions.
 
 Choose **View > Service Queue Timings** for measured waiting times at each shared
 host operation. Each operation has separate v001/v002/v003 comparisons on the same
