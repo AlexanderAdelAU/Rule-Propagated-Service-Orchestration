@@ -134,8 +134,15 @@ in the familiar version lanes and chronological arrival positions:
 - Coloured bar height: measured GENERATED-to-canonical-completion elapsed time.
 - Black diamond beside each bar: maximum **observed service-visit queue wait**
   across that root family, including nested fork children.
-- Every lane uses the same labelled millisecond scale. Bar width indicates neither
-  execution duration nor overlap; horizontal position is arrival rank.
+- Each version lane has its own labelled millisecond scale, so short-route versions
+  remain readable alongside longer routes. Bars and queue diamonds within a lane
+  share that lane's scale. Read axis values when comparing absolute times across
+  versions; equal bar heights in different lanes do not mean equal durations.
+- **View > Y-Axis Scale > Shared Milliseconds** restores one common scale when
+  comparing absolute durations visually. **Scale Each Version** is the default.
+- Bar width indicates neither execution duration nor overlap; horizontal position
+  is arrival rank. Scale limits include both bars and queue markers and stay fixed
+  when limiting the displayed arrival range.
 
 The diamond is an independent measurement, not a stacked portion of the bar or a
 workflow waiting fraction. Parallel branch waits are not added, and queue maxima
@@ -152,12 +159,15 @@ without GENERATED events, arrival order falls back to recorded workflow starts;
 elapsed time stays unavailable. Canonical genealogy prevents orphan branch tokens
 from becoming extra root rows. Administration (v999) is omitted.
 
-PNG/PDF, LaTeX/TikZ, the LaTeX table and the text summary use these same meanings.
+PNG/PDF and LaTeX/TikZ follow the selected axis scales and state the scale mode
+in the legend or caption. The LaTeX table and text summary retain absolute times
+in milliseconds.
 For a paper, the suggested caption is:
 
 > Bars show measured workflow elapsed time; diamonds show maximum observed
 > service-visit queue wait, including fork branches. Queue markers do not represent
-> total workflow waiting time.
+> total workflow waiting time. Each version uses its own millisecond scale; compare
+> axis values, not bar heights, across versions.
 
 Choose **View > Service Queue Timings** for measured waiting times at each shared
 host operation. Each operation has separate v001/v002/v003 comparisons on the same

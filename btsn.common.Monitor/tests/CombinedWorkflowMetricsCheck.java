@@ -77,8 +77,10 @@ public final class CombinedWorkflowMetricsCheck {
         check(!find(rows,6000000).hasDuration()&&!find(rows,6000000).hasQueueMaximum(),"PROCESS-only legacy row became measured");
         SwingGanttChart_WithLatency_v1d panel=new SwingGanttChart_WithLatency_v1d();
         check(panel.tasks.size()==9&&panel.axisMaximum()==500,"Panel scale omitted a marker or included an orphan");
-        double scale=panel.axisMaximum(); panel.setMaxDisplayTasks(2);
-        check(panel.axisMaximum()==scale,"Display range changed the common millisecond scale");
+        check(panel.axisMaximum("v001")==200&&panel.axisMaximum("v002")==250
+                &&panel.axisMaximum("v003")==500,"Lane scales merged versions or clipped queue markers");
+        double scale=panel.axisMaximum("v002"); panel.setMaxDisplayTasks(2);
+        check(panel.axisMaximum("v002")==scale,"Display range changed a version's millisecond scale");
         panel.setMaxDisplayTasks(Integer.MAX_VALUE);
         String report=panel.generateWorkflowSummaryReport();
         check(report.contains(CombinedWorkflowMetrics.CAPTION)&&report.contains("N/A")
@@ -87,7 +89,8 @@ public final class CombinedWorkflowMetricsCheck {
         panel.exportToLaTeXTable("combined-workflow-table.tex");
         String figure=Files.readString(Path.of("combined-workflow-fixture.tex"));
         String table=Files.readString(Path.of("combined-workflow-table.tex"));
-        check(figure.contains(CombinedWorkflowMetrics.CAPTION)&&figure.contains("500")&&figure.contains("\\fill[black]")
+        check(figure.contains(CombinedWorkflowMetrics.CAPTION)&&figure.contains("500")
+                &&figure.contains("Each version has its own millisecond scale")&&!figure.contains("All lanes share")&&figure.contains("\\fill[black]")
                 &&figure.contains("$\\times$")&&!figure.contains("NaN"),"Vector export lost scale, glyphs or caption");
         check(table.contains("2000000 & v002 & 250 & 180 & 3 & 0")
                 &&table.contains("3001000 & v003 & 0 & 0 & 1 & 0")
@@ -96,6 +99,19 @@ public final class CombinedWorkflowMetricsCheck {
         BufferedImage image=new BufferedImage(panel.getWidth(),panel.getHeight(),BufferedImage.TYPE_INT_RGB);
         Graphics2D g=image.createGraphics(); panel.paint(g); g.dispose();
         ImageIO.write(image,"png",new File("combined-workflow-fixture.png"));
+        int redHeight=longestColourRun(image,0xe74c3c),blueHeight=longestColourRun(image,0x3498db);
+        check(redHeight==blueHeight&&redHeight>40,"Per-version bars did not fill equal relative axis ranges");
+        panel.setIndependentLaneScales(false);
+        check(panel.axisMaximum("v001")==500&&panel.axisMaximum("v002")==500,"Shared mode did not use one absolute scale");
+        String shared=panel.generateLaTeXFigure();
+        check(shared.contains("All versions share the same millisecond scale")
+                &&!shared.contains("Each version has its own millisecond scale"),"Shared export retained per-version caption");
+        Files.writeString(Path.of("combined-shared-scale-fixture.tex"),shared);
+        BufferedImage sharedImage=new BufferedImage(panel.getWidth(),panel.getHeight(),BufferedImage.TYPE_INT_RGB);
+        g=sharedImage.createGraphics(); panel.paint(g); g.dispose();
+        check(longestColourRun(sharedImage,0xe74c3c)<longestColourRun(sharedImage,0x3498db),
+                "Shared renderer lost absolute duration comparison");
+        panel.setIndependentLaneScales(true);
         // Hovering the independent black marker must return its workflow, including at zero.
         boolean forkMarker=false,zeroMarker=false;
         for(int y=90;y<image.getHeight()-90;y++) for(int x=150;x<image.getWidth()-35;x++) {
@@ -105,7 +121,7 @@ public final class CombinedWorkflowMetricsCheck {
             if(t!=null&&t.sequenceId==3001000) zeroMarker=true;
         }
         check(forkMarker&&zeroMarker,"Hover hit regions lost branch/zero markers");
-        // Typical three-version density: a shared scale keeps short-route bars shorter.
+        // Typical three-version density: independently scaled lanes keep all three versions readable.
         panel.tasks.clear();
         for(int i=0;i<40;i++) {
             int version=i%3+1;
@@ -121,8 +137,20 @@ public final class CombinedWorkflowMetricsCheck {
         g=image.createGraphics(); panel.paint(g); g.dispose();
         ImageIO.write(image,"png",new File("combined-three-version-fixture.png"));
         panel.exportToLaTeX("combined-three-version-fixture.tex");
-        check(panel.axisMaximum()>=2417,"Dense figure clipped measured durations");
-        System.out.println("PASS: measured serial/fork durations; nested genealogy queue maxima; no sum/fraction; duplicate/admin/orphan exclusion; incomplete/invalid/zero/legacy values; stable shared scale; publication exports; marker hover and rendering");
+        check(panel.axisMaximum("v001")==250&&panel.axisMaximum("v002")==500
+                &&panel.axisMaximum("v003")==2500,"Dense figure merged version scales or clipped durations");
+        System.out.println("PASS: measured serial/fork durations; nested genealogy queue maxima; no sum/fraction; duplicate/admin/orphan exclusion; incomplete/invalid/zero/legacy values; stable per-version/shared scales; normalized bar rendering; publication exports; marker hover and rendering");
+    }
+    private static int longestColourRun(BufferedImage image,int colour) {
+        int longest=0;
+        for(int x=0;x<image.getWidth();x++) {
+            int run=0;
+            for(int y=0;y<image.getHeight();y++) {
+                if((image.getRGB(x,y)&0xffffff)==colour) { run++; longest=Math.max(longest,run); }
+                else run=0;
+            }
+        }
+        return longest;
     }
     private static CombinedWorkflowMetrics.Workflow find(List<CombinedWorkflowMetrics.Workflow> rows,int root) {
         return rows.stream().filter(w->w.rootTokenId==root).findFirst().orElseThrow();

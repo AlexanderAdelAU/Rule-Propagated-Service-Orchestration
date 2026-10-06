@@ -53,6 +53,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
     
     // Version display feature
     private boolean displayByVersion = true;
+    private boolean independentLaneScales = true;
     private Map<String, List<Task>> versionGroups = new HashMap<>();
     private List<String> uniqueVersions = new ArrayList<>();
     private Map<String, Color> versionColors = new HashMap<>();
@@ -122,7 +123,9 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
     public String generateWorkflowSummaryReport() {
         StringBuilder report = new StringBuilder("WORKFLOW ELAPSED TIME AND QUEUE WAIT\n");
         report.append(CombinedWorkflowMetrics.CAPTION).append('\n');
-        report.append("All lanes use the same millisecond scale. X = unavailable elapsed interval; no diamond = unavailable queue measurement.\n");
+        report.append(scaleDescription()).append("\nX = unavailable elapsed interval; no diamond = unavailable queue measurement.\n");
+        for(String group:displayByVersion?uniqueVersions:uniqueServices)
+            report.append(group).append(" axis: 0 to ").append(axisLabel(axisMaximum(group))).append(" ms\n");
         report.append("Arrival order uses GENERATED timestamps, or recorded workflow starts for legacy rows. N/A is not zero.\n\n");
         report.append("Arrival | Root sequence | Version | Elapsed ms | Max observed queue ms | Valid queue visits | Invalid/conflicting visits | Services\n");
         for (int i=0; i<tasks.size(); i++) {
@@ -380,12 +383,12 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         Map<String,Integer> lanes=displayByVersion?versionLanes:serviceLanes;
         Map<String,Color> colors=displayByVersion?versionColors:serviceColors;
         int count=Math.min(tasks.size(),maxDisplayTasks);
-        double maximum=axisMaximum();
-        w.println("% Preamble: \\usepackage{tikz}. All lanes share the same millisecond scale.");
+        w.println("% Preamble: \\usepackage{tikz}. "+scaleDescription());
         w.println("\\begin{figure}[htbp]\n\\centering");
         w.printf(Locale.ROOT,"\\begin{tikzpicture}[x=%.5fcm,y=1.9cm,font=\\scriptsize]%n",14.0/Math.max(1,count));
         for(int lane=0;lane<groups.size();lane++) {
             String group=groups.get(lane);
+            double maximum=axisMaximum(group);
             Color c=colors.getOrDefault(group,Color.GRAY);
             w.printf("\\definecolor{lane%d}{RGB}{%d,%d,%d}%n",lane,c.getRed(),c.getGreen(),c.getBlue());
             double baseline=groups.size()-1-lane;
@@ -401,6 +404,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             Integer lane=lanes.get(displayByVersion?deriveVersion(t.sequenceId):t.service);
             if(lane==null) continue;
             double base=groups.size()-1-lane;
+            double maximum=axisMaximum(groups.get(lane));
             if(t.hasElapsedTime) {
                 double top=base+0.8*t.elapsedTime/maximum;
                 if(t.elapsedTime==0) w.printf(Locale.ROOT,"\\draw[lane%d,thick] (%.3f,%.3f)--(%.3f,%.3f);%n",lane,i+0.12,base,i+0.57,base);
@@ -418,7 +422,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         for(int i=0;i<count;i+=step) w.printf(Locale.ROOT,"\\node[below] at (%.3f,-0.08) {%d};%n",i+0.38,i+1);
         w.printf(Locale.ROOT,"\\node[below] at (%.3f,-0.25) {Workflow arrival order; elapsed / queue wait (ms)};%n",count/2.0);
         w.println("\\end{tikzpicture}");
-        w.println("\\caption{"+CombinedWorkflowMetrics.CAPTION+" All lanes share the same millisecond scale. Crosses indicate unavailable elapsed intervals; missing diamonds indicate unavailable queue measurements. Arrival order uses GENERATED timestamps, or recorded starts for legacy rows.}");
+        w.println("\\caption{"+CombinedWorkflowMetrics.CAPTION+" "+scaleDescription()+" Crosses indicate unavailable elapsed intervals; missing diamonds indicate unavailable queue measurements. Arrival order uses GENERATED timestamps, or recorded starts for legacy rows.}");
         w.println("\\label{fig:workflow-elapsed-queue}\n\\end{figure}");
         w.flush(); return text.toString();
     }
@@ -519,7 +523,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         }
         
         int width = Math.max(1200, maxId * 10 + 150);
-        int topMargin = Math.round(80 * fontScaleFactor);
+        int topMargin = Math.round(112 * fontScaleFactor);
         int bottomPadding = Math.round(105 * fontScaleFactor);
         int numLanes = uniqueVersions.size();
         int laneHeight = Math.round(110 * fontScaleFactor);
@@ -542,7 +546,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         updateFonts();
         
         setPreferredSize(new Dimension(Math.round(Math.max(1200,maxId*18+180)*fontScaleFactor),
-            Math.round((190+Math.max(1,uniqueVersions.size())*110)*fontScaleFactor)));
+            Math.round((210+Math.max(1,uniqueVersions.size())*110)*fontScaleFactor)));
         revalidate();
 
         repaint();
@@ -594,21 +598,36 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             maxId=tasks.size()+1;
             groupTasksByVersion();
             setPreferredSize(new Dimension(Math.max(1200,maxId*18+180),
-                Math.round((190+Math.max(1,uniqueServices.size())*110)*fontScaleFactor)));
+                Math.round((210+Math.max(1,uniqueServices.size())*110)*fontScaleFactor)));
             System.out.println("Loaded "+tasks.size()+" root workflows for elapsed / queue view");
         } catch(Exception e) {
             throw new IllegalStateException("Unable to load measured workflow metrics",e);
         }
     }
-    // One global scale, including queue markers above a duration bar and undisplayed rows.
-    double axisMaximum() {
+    public void setIndependentLaneScales(boolean independent) {
+        independentLaneScales=independent;
+        repaint();
+    }
+    private String scaleDescription() {
+        return independentLaneScales
+            ? "Each version has its own millisecond scale; compare axis values, not bar heights, across versions."
+            : "All versions share the same millisecond scale.";
+    }
+    // Include both elapsed bars and queue markers, and keep ranges stable when truncating rows.
+    double axisMaximum() { return maximumForGroup(null); }
+    double axisMaximum(String group) {
+        return maximumForGroup(independentLaneScales?group:null);
+    }
+    private double maximumForGroup(String group) {
         double max=1;
         for(Task t:tasks) {
+            String taskGroup=displayByVersion?deriveVersion(t.sequenceId):t.service;
+            if(group!=null&&!group.equals(taskGroup)) continue;
             if(t.hasElapsedTime) max=Math.max(max,t.elapsedTime);
             if(t.hasQueueTime) max=Math.max(max,t.queueTime);
         }
         double unit=Math.pow(10,Math.floor(Math.log10(max)));
-        double step=(max/unit<=2?0.5:max/unit<=5?1:2)*unit;
+        double step=(max/unit<=5?0.5:1)*unit;
         return Math.ceil(max/step)*step;
     }
     private String axisLabel(double value) {
@@ -619,9 +638,12 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         final Map<String,Integer> lanes=displayByVersion?versionLanes:serviceLanes;
         final Map<String,Color> colors=displayByVersion?versionColors:serviceColors;
         final int count=Math.min(tasks.size(),maxDisplayTasks);
-        final int left,top=Math.round(92*fontScaleFactor),width,laneHeight,plotHeight;
-        final double maximum=axisMaximum(),slot;
+        final int left,top=Math.round(112*fontScaleFactor),width,laneHeight,plotHeight;
+        final double slot;
+        final double[] maxima;
         Plot(Graphics2D g) {
+            maxima=new double[groups.size()];
+            for(int lane=0;lane<groups.size();lane++) maxima[lane]=axisMaximum(groups.get(lane));
             left=calculateLeftMargin(g,groups)+Math.round(55*fontScaleFactor);
             width=Math.max(1,getWidth()-left-35);
             laneHeight=Math.max(1,(getHeight()-top-Math.round(105*fontScaleFactor))/Math.max(1,groups.size()));
@@ -629,7 +651,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         }
         int lane(Task t) { return lanes.getOrDefault(displayByVersion?deriveVersion(t.sequenceId):t.service,0); }
         int baseline(int lane) { return top+(lane+1)*laneHeight-Math.round(15*fontScaleFactor); }
-        int valueY(int lane,long value) { return baseline(lane)-(int)Math.round(value*plotHeight/maximum); }
+        int valueY(int lane,long value) { return baseline(lane)-(int)Math.round(value*plotHeight/maxima[lane]); }
         int barX(int i) { return left+(int)Math.round((i+0.12)*slot); }
         int barWidth() { return Math.max(1,(int)(slot*0.45)); }
         int diamondX(int i) { return left+(int)Math.round((i+0.82)*slot); }
@@ -650,8 +672,9 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             g.setFont(axisLabelFont);
             g.drawString("Coloured bar: measured workflow elapsed time     Black diamond: maximum observed service-visit queue wait",
                 20,Math.round(52*fontScaleFactor));
-            g.drawString("Same millisecond scale in every lane.  X: elapsed interval unavailable; no diamond: queue measurement unavailable.",
-                20,Math.round(70*fontScaleFactor));
+            g.drawString(scaleDescription(),20,Math.round(70*fontScaleFactor));
+            g.drawString("X: elapsed interval unavailable; no diamond: queue measurement unavailable.",
+                20,Math.round(88*fontScaleFactor));
             for(int lane=0;lane<p.groups.size();lane++) {
                 String group=p.groups.get(lane);
                 for(int tick=0;tick<=2;tick++) {
@@ -659,7 +682,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
                     g.setColor(tick==0?Color.GRAY:new Color(225,228,232));
                     g.drawLine(p.left,y,p.left+p.width,y);
                     g.setColor(Color.DARK_GRAY); g.setFont(axisLabelFont);
-                    String label=axisLabel(p.maximum*tick/2)+" ms";
+                    String label=axisLabel(p.maxima[lane]*tick/2)+" ms";
                     g.drawString(label,p.left-g.getFontMetrics().stringWidth(label)-8,y+4);
                 }
                 Color c=p.colors.getOrDefault(group,Color.GRAY);
@@ -771,7 +794,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             displayGroups = uniqueVersions;
         }
         
-        int topMargin = Math.round(80 * fontScaleFactor);
+        int topMargin = Math.round(112 * fontScaleFactor);
         int bottomPadding = Math.round(105 * fontScaleFactor);
         int numLanes = Math.max(1, displayGroups.size());
         int laneHeight = Math.round(110 * fontScaleFactor);
@@ -917,6 +940,17 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         JMenuItem queueTimingItem = new JMenuItem("Service Queue Timings...");
         queueTimingItem.addActionListener(e -> ServiceQueueTimingView.showWindow());
         viewMenu.add(queueTimingItem);
+        viewMenu.addSeparator();
+
+        JMenu yScaleMenu = new JMenu("Y-Axis Scale");
+        ButtonGroup yScaleGroup = new ButtonGroup();
+        JRadioButtonMenuItem independentScaleItem = new JRadioButtonMenuItem("Scale Each Version", chart.independentLaneScales);
+        independentScaleItem.addActionListener(e -> chart.setIndependentLaneScales(true));
+        yScaleGroup.add(independentScaleItem); yScaleMenu.add(independentScaleItem);
+        JRadioButtonMenuItem sharedScaleItem = new JRadioButtonMenuItem("Shared Milliseconds", !chart.independentLaneScales);
+        sharedScaleItem.addActionListener(e -> chart.setIndependentLaneScales(false));
+        yScaleGroup.add(sharedScaleItem); yScaleMenu.add(sharedScaleItem);
+        viewMenu.add(yScaleMenu);
         viewMenu.addSeparator();
 
         JMenu truncateMenu = new JMenu("Display Range");
