@@ -1,0 +1,28 @@
+{
+  "domain": "PetriNetModels",
+  "purpose": "Preserves the existing stochastic model operations in independently packaged business services.",
+  "services": [
+    {
+      "service": "StochasticEntryTokenService",
+      "implementationClass": "org.btsn.services.StochasticEntryTokenService",
+      "operation": "processToken",
+      "inputs": [
+        "token"
+      ],
+      "returnAttribute": "token",
+      "canonicalBinding": "ServiceAttributeBindings/StochasticEntryTokenService/StochasticEntryTokenService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "StochasticForwardTokenService",
+      "implementationClass": "org.btsn.services.StochasticForwardTokenService",
+      "operation": "processToken",
+      "inputs": [
+        "token"
+      ],
+      "returnAttribute": "token",
+      "canonicalBinding": "ServiceAttributeBindings/StochasticForwardTokenService/StochasticForwardTokenService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    }
+  ]
+}

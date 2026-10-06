@@ -69,7 +69,7 @@ The output is `btsn.services/target/service-deployment.zip`, containing:
 | --- | --- |
 | `services/healthcare/<service>.jar` | Six healthcare implementations |
 | `services/financial/<service>.jar` | Seven Financial implementations |
-| `services/models/<service>.jar` | Seven deterministic model implementations and the stochastic implementation |
+| `services/models/<service>.jar` | Seven deterministic implementations, the preserved stochastic implementation and eight stochastic workflow adapters |
 | `lib/service-support.jar` | Shared service helpers discovered through compilation |
 | `lib/*.jar` | Declared third-party runtime dependencies, copied without alteration |
 | `catalogues/*.json` | Packaging catalogue snapshots |
@@ -93,9 +93,10 @@ not search these subdirectories. The Ant build and development launchers collect
 service JARs recursively and retain their existing deployment selection.
 
 The builder reads every catalogue entry, including preserved unbound services, without domain-specific business logic or host-placement decisions. The separate stochastic inventory is packaging data; it does not
-change active deployment metadata. The current inventory yields twenty-one service
+change active deployment metadata. The current inventory yields twenty-nine service
 JARs: seven Financial implementations, seven deterministic model implementations,
-six healthcare implementations and the preserved stochastic implementation.
+six healthcare implementations, the preserved stochastic implementation and eight
+stochastic workflow adapters.
 See [PETRINET_MODELS.md](docs/PETRINET_MODELS.md)
 for the two-place and six-place double-join models using actual platform measurements.
 Use `-Dpackaging.config=/path/to/packaging.json` for another inventory.
@@ -163,3 +164,8 @@ The obsolete healthcare-specific host projects and standalone canary launcher
 have been removed. `btsn.healthcare.ProjectLoader` remains the active healthcare
 launcher project. Clinical implementations, workflow definitions and the shared
 Monitor/event-generator projects are retained.
+
+All retained model and financial launchers and their standalone utility phases
+now use the packaged runtime. Run the usual XML directly; it builds its JARs
+automatically. See [the launcher guide](../btsn.petrinet.ProjectLoader/README.md)
+for isolated deployment profiles, stochastic examples and phase directories.

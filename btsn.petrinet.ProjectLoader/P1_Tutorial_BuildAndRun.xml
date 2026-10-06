@@ -4,7 +4,7 @@
 	    xmlns:if="ant:if" xmlns:unless="ant:unless">
 	<description>
 		P1_Tutorial Petri Net - Complete Workflow with Initialization and Collection
-		
+
 		Phases:
 		  Phase 1: Initialize Databases (purgeAndInitialize)
 		  Phase 2: Execute Workflow (generate and process tokens)
@@ -17,6 +17,12 @@
 
 		Services (P1, Monitor) start once and remain running throughout all phases.
 	</description>
+    <!-- Shared packaged runtime; source deployment files and Eclipse outputs are not modified. -->
+    <property name="launcher.profile.file" location="../btsn.services/deployments/models/StochasticLoopDeployment.json"/>
+    <property name="launcher.rules.file" location="../btsn.services/deployments/models/StochasticLoopInfrastructure.ruleml.xml"/>
+    <property name="infrastructure.definition.name" value="StochasticLoopModels_Infrastructure"/>
+    <import file="../btsn.services/launcher-runtime.xml"/>
+
 
 	<!-- ======================================================================= -->
 	<!-- DEPLOYMENT CONFIGURATION                                                -->
@@ -56,12 +62,12 @@
 	<property name="target.operation" value="processToken" />
 	<property name="token.expire" value="120000" />
 	<property name="event.generator.id" value="P1_EVENTGENERATOR" />
-	
+
 	<!-- TOKEN MODE SELECTION: 1=EDGE_NODE (single tokens), 2=JOIN_NODE (paired tokens) -->
 	<property name="mode" value="1" />
 	<property name="token.count" value="10" />
 	<property name="join.tokens" value="1000001,1000002" />
-	
+
 	<!-- Mode mapping (Ant condition) -->
 	<condition property="token.mode" value="EDGE_NODE"><equals arg1="${mode}" arg2="1"/></condition>
 	<condition property="token.mode" value="JOIN_NODE"><equals arg1="${mode}" arg2="2"/></condition>
@@ -81,34 +87,15 @@
 
 	<!-- Base directories -->
 	<property name="build.file.dir" location="." />
-	<property name="petrinet.root.dir" location="../" />
-
 	<!-- Common project -->
-	<property name="common.project.dir" location="${petrinet.root.dir}/btsn.common" />
-	<property name="lib.dir" location="${common.project.dir}/lib" />
-	<property name="class.dir" location="${common.project.dir}/bin" />
-	<property name="common.src.dir" location="${common.project.dir}/src" />
-
 	<!-- Event Generators project -->
-	<property name="generator.project.dir" location="${petrinet.root.dir}/btsn.common.eventgenerators" />
-	<property name="generator.src.dir" location="${generator.project.dir}/src" />
-	<property name="generator.bin.dir" location="${generator.project.dir}/bin" />
-
 	<!-- Output directory -->
 	<property name="output.dir" location="${build.file.dir}" />
 	<property name="p1.output.file" location="${output.dir}/P1_Place.out.txt" />
 	<property name="monitor.output.file" location="${output.dir}/MonitorService.out.txt" />
 
 	<!-- P1 Service -->
-	<property name="p1.project.dir" location="${petrinet.root.dir}/btsn.petrinet.places.p1" />
-	<property name="p1.bin.dir" location="${p1.project.dir}/bin" />
-	<property name="p1.src.dir" location="${p1.project.dir}/src" />
-
 	<!-- Monitor Service -->
-	<property name="monitor.project.dir" location="${petrinet.root.dir}/btsn.common.Monitor" />
-	<property name="monitor.bin.dir" location="${monitor.project.dir}/bin" />
-	<property name="monitor.src.dir" location="${monitor.project.dir}/src" />
-
 	<!-- Java Classes -->
 	<property name="service.loader.class" value="org.btsn.handlers.ServiceLoader" />
 	<property name="init.event.generator.class" value="org.btsn.common.eventgenerators.DatabaseInitialization_EventGenerator" />
@@ -119,35 +106,10 @@
 	<!-- CLASSPATHS                                                              -->
 	<!-- ======================================================================= -->
 
-	<path id="common.classpath">
-		<fileset dir="${lib.dir}" erroronmissingdir="false">
-			<include name="*.jar" />
-		</fileset>
-		<pathelement location="${class.dir}" />
-	</path>
-
-	<path id="p1.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${p1.bin.dir}" />
-	</path>
-
-	<path id="monitor.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${monitor.bin.dir}" />
-	</path>
-
-	<path id="generator.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${generator.bin.dir}" />
-	</path>
-
 	<!-- ======================================================================= -->
 	<!-- DEPLOYMENT MODE RESOLUTION                                              -->
 	<!-- ======================================================================= -->
-
-	<import file="../btsn.services/auto-deployment.xml" />
-
-	<target name="resolve-deployment-modes" depends="detect-local-channel">
+	<target name="resolve-deployment-modes" depends="prepare-runtime,detect-local-channel">
 		<!-- Resolve boolean properties from mode settings -->
 		<resolve-local-launch component="p1" mode="${p1.mode}" />
 		<resolve-local-launch component="monitor" mode="${monitor.mode}" />
@@ -170,9 +132,9 @@
 		<echo message="Previous output files cleaned" />
 	</target>
 
-	<target name="generate-workflow-bindings" description="Generate canonical bindings from workflow JSON">
+	<target name="generate-workflow-bindings" description="Generate canonical bindings from workflow JSON" depends="prepare-runtime">
 		<echo message="=== Generating Workflow Bindings ===" />
-		<java classname="org.btsn.rulecontroller.TopologyBindingGenerator" 
+		<java classname="org.btsn.rulecontroller.TopologyBindingGenerator"
 		      classpathref="generator.classpath"
 		      dir="${common.project.dir}"
 		      fork="true"
@@ -183,10 +145,10 @@
 		<echo message="Workflow bindings generated successfully" />
 	</target>
 
-	<target name="rebuild-service-ruleml" depends="generate-workflow-bindings" 
+	<target name="rebuild-service-ruleml" depends="prepare-runtime,generate-workflow-bindings"
 	        description="Generate bindings and rebuild master Service.ruleml">
 		<echo message="=== Building Master Service.ruleml ===" />
-		<java classname="org.btsn.utils.BuildMasterServiceRuleBase" 
+		<java classname="org.btsn.utils.BuildMasterServiceRuleBase"
 		      classpathref="generator.classpath"
 		      dir="${common.project.dir}"
 		      fork="true"
@@ -202,10 +164,11 @@
 	<!-- ======================================================================= -->
 
 	<!-- Fire tokens for EDGE_NODE mode (single tokens) -->
-	<target name="fire-tokens-EDGE_NODE">
+	<target name="fire-tokens-EDGE_NODE" depends="prepare-runtime">
 		<echo message="Firing ${token.count} tokens to ${target.place}..." />
-		<java classname="${token.generator.class}" 
+		<java classname="${token.generator.class}"
 		      fork="true" dir="${generator.project.dir}" failonerror="true">
+        <arg value="-infrastructure"/><arg value="${infrastructure.definition.name}"/>
 			<classpath refid="generator.classpath" />
 			<arg value="-version" /><arg value="${rule.version}" />
 			<arg value="-process" /><arg value="${workflow.process.name}" />
@@ -219,10 +182,11 @@
 	</target>
 
 	<!-- Fire tokens for JOIN_NODE mode (paired join tokens) -->
-	<target name="fire-tokens-JOIN_NODE">
+	<target name="fire-tokens-JOIN_NODE" depends="prepare-runtime">
 		<echo message="Firing join tokens: ${join.tokens} to ${target.place}..." />
-		<java classname="${token.generator.class}" 
+		<java classname="${token.generator.class}"
 		      fork="true" dir="${generator.project.dir}" failonerror="true">
+        <arg value="-infrastructure"/><arg value="${infrastructure.definition.name}"/>
 			<classpath refid="generator.classpath" />
 			<arg value="-version" /><arg value="${rule.version}" />
 			<arg value="-process" /><arg value="${workflow.process.name}" />
@@ -239,7 +203,7 @@
 	<!-- MAIN TARGET: COMPLETE WORKFLOW                                          -->
 	<!-- ======================================================================= -->
 
-	<target name="run-complete-workflow" depends="resolve-deployment-modes,clean-output,rebuild-service-ruleml" 
+	<target name="run-complete-workflow" depends="prepare-runtime,resolve-deployment-modes,clean-output,rebuild-service-ruleml"
 	        description="Run complete P1_Tutorial workflow with init, execution and collection (DEFAULT)">
 		<echo message="" />
 		<echo message="================================================================" />
@@ -254,8 +218,8 @@
 		<parallel>
 			<!-- Start P1 Service -->
 			<echo message="  [p1] Skipping - running on remote host" unless:set="p1.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p1.is.local"
-			      fork="true" timeout="600000" 
+			<java classname="${service.loader.class}" if:set="p1.is.local"
+			      fork="true" timeout="600000"
 			      dir="${p1.project.dir}" output="${p1.output.file}">
 				<classpath refid="p1.classpath" />
 				<arg value="${p1.project.dir}" />
@@ -265,8 +229,8 @@
 
 			<!-- Start Monitor Service -->
 			<echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="monitor.is.local"
-			      fork="true" timeout="600000" 
+			<java classname="${service.loader.class}" if:set="monitor.is.local"
+			      fork="true" timeout="600000"
 			      dir="${monitor.project.dir}" output="${monitor.output.file}">
 				<classpath refid="monitor.classpath" />
 				<arg value="${monitor.project.dir}" />
@@ -288,7 +252,7 @@
 
 				<!-- Deploy and trigger P1 Initialization -->
 				<echo message="Deploying Initialization rules..." />
-				<java classname="${init.event.generator.class}" 
+				<java classname="${init.event.generator.class}"
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
 					<arg value="-service" /><arg value="P1_InitializationService" />
@@ -300,7 +264,7 @@
 				</java>
 
 				<!-- Trigger Monitor Initialization -->
-				<java classname="${init.event.generator.class}" 
+				<java classname="${init.event.generator.class}"
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
 					<arg value="-service" /><arg value="Monitor_InitializationService" />
@@ -330,8 +294,9 @@
 
 				<!-- Deploy Workflow rules (tokens=0) -->
 				<echo message="Deploying Workflow rules..." />
-				<java classname="${token.generator.class}" 
+				<java classname="${token.generator.class}"
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
+        <arg value="-infrastructure"/><arg value="${infrastructure.definition.name}"/>
 					<classpath refid="generator.classpath" />
 					<arg value="-version" /><arg value="${rule.version}" />
 					<arg value="-process" /><arg value="${workflow.process.name}" />
@@ -359,7 +324,7 @@
 
 				<!-- P1 Collection (with deployment) -->
 				<echo message="Collecting from P1_CollectorService..." />
-				<java classname="${collector.event.generator.class}" 
+				<java classname="${collector.event.generator.class}"
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
 					<classpath refid="generator.classpath" />
 					<arg value="-service" /><arg value="P1_CollectorService" />
@@ -392,7 +357,7 @@
 	<!-- WORKFLOW-ONLY TARGET (skip init/collect)                               -->
 	<!-- ======================================================================= -->
 
-	<target name="run-workflow-only" depends="resolve-deployment-modes,clean-output,rebuild-service-ruleml" 
+	<target name="run-workflow-only" depends="prepare-runtime,resolve-deployment-modes,clean-output,rebuild-service-ruleml"
 	        description="Run only the workflow phase (skip init and collect)">
 		<echo message="" />
 		<echo message="================================================================" />
@@ -405,8 +370,8 @@
 		<parallel>
 			<!-- Start P1 Service -->
 			<echo message="  [p1] Skipping - running on remote host" unless:set="p1.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="p1.is.local"
-			      fork="true" timeout="600000" 
+			<java classname="${service.loader.class}" if:set="p1.is.local"
+			      fork="true" timeout="600000"
 			      dir="${p1.project.dir}" output="${p1.output.file}">
 				<classpath refid="p1.classpath" />
 				<arg value="${p1.project.dir}" />
@@ -416,8 +381,8 @@
 
 			<!-- Start Monitor Service -->
 			<echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local" />
-			<java jvm="java.exe" classname="${service.loader.class}" if:set="monitor.is.local"
-			      fork="true" timeout="600000" 
+			<java classname="${service.loader.class}" if:set="monitor.is.local"
+			      fork="true" timeout="600000"
 			      dir="${monitor.project.dir}" output="${monitor.output.file}">
 				<classpath refid="monitor.classpath" />
 				<arg value="${monitor.project.dir}" />
@@ -430,8 +395,9 @@
 
 				<!-- Deploy workflow rules -->
 				<echo message="Deploying workflow rules..." />
-				<java classname="${token.generator.class}" 
+				<java classname="${token.generator.class}"
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
+        <arg value="-infrastructure"/><arg value="${infrastructure.definition.name}"/>
 					<classpath refid="generator.classpath" />
 					<arg value="-version" /><arg value="${rule.version}" />
 					<arg value="-process" /><arg value="${workflow.process.name}" />

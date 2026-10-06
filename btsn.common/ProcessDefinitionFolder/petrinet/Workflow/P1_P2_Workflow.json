@@ -1,5 +1,5 @@
 {
-   "processType":"PetriNet",
+  "processType": "PetriNet",
   "elements": [
     {
       "id": "T_in_P1",
@@ -24,12 +24,18 @@
       "width": 50,
       "height": 50,
       "label": "P1",
-      "service": "P1_Place",
+      "service": "StochasticEntryTokenService",
       "operations": [
         {
           "name": "processToken",
+          "returnAttribute": "token",
           "arguments": [
-            {"name": "token", "type": "String", "value": "string", "required": false}
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
           ]
         }
       ],
@@ -58,12 +64,18 @@
       "width": 50,
       "height": 50,
       "label": "P2",
-      "service": "P2_Place",
+      "service": "StochasticForwardTokenService",
       "operations": [
         {
           "name": "processToken",
+          "returnAttribute": "token",
           "arguments": [
-            {"name": "token", "type": "String", "value": "string", "required": false}
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
           ]
         }
       ]
@@ -79,54 +91,6 @@
       "rotation": 0.0,
       "node_type": "EdgeNode",
       "node_value": "EDGE_NODE",
-      "transition_type": "T_out",
-      "fill_color": "#FF9933"
-    },
-    {
-      "id": "T_in_Monitor",
-      "type": "TRANSITION",
-      "x": 610,
-      "y": 190,
-      "width": 20,
-      "height": 60,
-      "label": "T_in_Monitor",
-      "rotation": 90.0,
-      "node_type": "EdgeNode",
-      "node_value": "EDGE_NODE",
-      "transition_type": "T_in",
-      "buffer": "50",
-      "fill_color": "#CCCCCC"
-    },
-    {
-      "id": "Monitor",
-      "type": "PLACE",
-      "x": 595,
-      "y": 275,
-      "width": 50,
-      "height": 50,
-      "label": "Monitor",
-      "service": "MonitorService",
-      "operations": [
-        {
-          "name": "acknowledgeTokenArrival",
-          "arguments": [
-            {"name": "token", "type": "String", "value": "string", "required": false}
-          ]
-        }
-      ],
-      "fill_color": "#33FF33"
-    },
-    {
-      "id": "T_out_Monitor",
-      "type": "TRANSITION",
-      "x": 610,
-      "y": 350,
-      "width": 20,
-      "height": 60,
-      "label": "T_out_Monitor",
-      "rotation": 90.0,
-      "node_type": "TerminateNode",
-      "node_value": "TERMINATE_NODE",
       "transition_type": "T_out",
       "fill_color": "#FF9933"
     },
@@ -155,6 +119,18 @@
       "rotation": 0.0,
       "generator_rate": "1000",
       "token_version": "v002"
+    },
+    {
+      "id": "T_in_Model_Terminate",
+      "type": "TRANSITION",
+      "x": 860,
+      "y": 250,
+      "width": 20,
+      "height": 60,
+      "label": "Terminate",
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
     }
   ],
   "arrows": [
@@ -184,23 +160,7 @@
     },
     {
       "source": "T_out_P2",
-      "target": "T_in_Monitor",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
-    },
-    {
-      "source": "T_in_Monitor",
-      "target": "Monitor",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
-    },
-    {
-      "source": "Monitor",
-      "target": "T_out_Monitor",
+      "target": "T_in_Model_Terminate",
       "label": "",
       "guardCondition": "",
       "decision_value": "",

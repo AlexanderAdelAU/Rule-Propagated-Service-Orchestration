@@ -1,5 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="service-checks" default="check" basedir="../..">
+    <target name="check-launchers" depends="build-workflow-runtime" description="Configure and prepare every model/financial Ant launcher and standalone phase">
+        <mkdir dir="${target.dir}/launcher-check/classes"/>
+        <path id="launcher.check.classpath">
+            <pathelement location="${target.dir}/launcher-check/classes"/>
+            <pathelement location="${common.dir}/target/host-runtime/btsn-infrastructure.jar"/>
+            <fileset dir="${target.dir}/deployment/services" includes="**/*.jar"/>
+            <fileset dir="${target.dir}/deployment/lib" includes="*.jar"/>
+            <pathelement location="${ant.home}/lib/ant.jar"/>
+            <pathelement location="${ant.home}/lib/ant-launcher.jar"/>
+        </path>
+        <javac srcdir="tests" destdir="${target.dir}/launcher-check/classes" includes="LauncherRuntimeCheck.java"
+               release="${java.release}" includeantruntime="false" encoding="UTF-8">
+            <classpath refid="launcher.check.classpath"/>
+        </javac>
+        <java classname="LauncherRuntimeCheck" fork="true" failonerror="true" maxmemory="256m">
+            <classpath refid="launcher.check.classpath"/><arg file=".."/>
+        </java>
+    </target>
     <target name="check-model-services" depends="package" description="Check deterministic model outcomes using packaged service JARs">
         <mkdir dir="${target.dir}/model-check"/>
         <path id="model.check.classpath">

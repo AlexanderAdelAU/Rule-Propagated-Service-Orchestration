@@ -37,7 +37,9 @@
       "service": "ValidationService",
       "operations": [
         {
-          "name": "processToken"
+          "name": "processToken",
+          "arguments": [{"name": "token", "type": "String", "value": "String", "required": false}],
+          "returnAttribute": "validationResults"
         }
       ]
     },

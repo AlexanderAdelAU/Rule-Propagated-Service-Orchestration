@@ -1,0 +1,151 @@
+{
+  "definitionType": "Infrastructure",
+  "nodes": [
+    {
+      "node": "P1",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "portStart": 4001,
+      "portEnd": 4099
+    },
+    {
+      "node": "P2",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "portStart": 4001,
+      "portEnd": 4099
+    },
+    {
+      "node": "P3",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "portStart": 4001,
+      "portEnd": 4099
+    },
+    {
+      "node": "P4",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "portStart": 4001,
+      "portEnd": 4099
+    },
+    {
+      "node": "P5",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "portStart": 4001,
+      "portEnd": 4099
+    },
+    {
+      "node": "P6",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "portStart": 4001,
+      "portEnd": 4099
+    }
+  ],
+  "capabilities": [
+    {
+      "node": "P1",
+      "service": "StochasticEntryJoinService",
+      "operation": "processToken",
+      "returnAttribute": "token",
+      "basePort": 4001,
+      "arguments": [
+        {
+          "name": "token_branch1",
+          "type": "String",
+          "value": "String",
+          "required": false
+        },
+        {
+          "name": "token_branch2",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ]
+    },
+    {
+      "node": "P2",
+      "service": "StochasticBranchTwoTokenService",
+      "operation": "processToken",
+      "returnAttribute": "token_branch2",
+      "basePort": 4002,
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ]
+    },
+    {
+      "node": "P3",
+      "service": "StochasticBranchOneTokenService",
+      "operation": "processToken",
+      "returnAttribute": "token_branch1",
+      "basePort": 4003,
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ]
+    },
+    {
+      "node": "P4",
+      "service": "StochasticMergeTokenService",
+      "operation": "processToken",
+      "returnAttribute": "token",
+      "basePort": 4004,
+      "arguments": [
+        {
+          "name": "token_branch1",
+          "type": "String",
+          "value": "String",
+          "required": false
+        },
+        {
+          "name": "token_branch2",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ]
+    },
+    {
+      "node": "P5",
+      "service": "StochasticReturnTokenService",
+      "operation": "processToken",
+      "returnAttribute": "token_branch2",
+      "basePort": 4005,
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ]
+    },
+    {
+      "node": "P6",
+      "service": "StochasticSideTokenService",
+      "operation": "processToken",
+      "returnAttribute": "token_branch1",
+      "basePort": 4006,
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ]
+    }
+  ]
+}

@@ -5,7 +5,7 @@
       "id": "T_in_P1",
       "type": "TRANSITION",
       "x": 210,
-      "y": 130,
+      "y": 110,
       "width": 20,
       "height": 60,
       "label": "T_in_P1",
@@ -20,7 +20,7 @@
       "id": "P1",
       "type": "PLACE",
       "x": 275,
-      "y": 135,
+      "y": 115,
       "width": 50,
       "height": 50,
       "label": "P1",
@@ -42,10 +42,63 @@
       "fill_color": "#33FF33"
     },
     {
+      "id": "T_in_P2",
+      "type": "TRANSITION",
+      "x": 450,
+      "y": 110,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_P2",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "50",
+      "fill_color": "#CCCCCC"
+    },
+    {
+      "id": "P2",
+      "type": "PLACE",
+      "x": 515,
+      "y": 115,
+      "width": 50,
+      "height": 50,
+      "label": "P2",
+      "service": "StochasticBranchTwoTokenService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "token_branch2",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_P2",
+      "type": "TRANSITION",
+      "x": 610,
+      "y": 110,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_P2",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out",
+      "fill_color": "#FF9933"
+    },
+    {
       "id": "T_out_P1",
       "type": "TRANSITION",
       "x": 370,
-      "y": 130,
+      "y": 110,
       "width": 20,
       "height": 60,
       "label": "T_out_P1",
@@ -59,7 +112,7 @@
       "id": "P1_EVENTGENERATOR",
       "type": "EVENT_GENERATOR",
       "x": 88,
-      "y": 130,
+      "y": 110,
       "width": 24,
       "height": 60,
       "label": "P1_EVENTGENERATOR",
@@ -90,6 +143,30 @@
       "endpoint": ""
     },
     {
+      "source": "T_in_P2",
+      "target": "P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P2",
+      "target": "T_out_P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P2",
+      "target": "T_in_Model_Terminate",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
       "source": "P1",
       "target": "T_out_P1",
       "label": "",
@@ -103,70 +180,30 @@
       "label": "",
       "guardCondition": "",
       "decision_value": "",
-      "endpoint": "",
-      "connection_type": "NETWORK",
-      "availability": 1.0
+      "endpoint": ""
     },
     {
       "source": "T_out_P1",
-      "target": "T_in_Model_Terminate",
-      "label": "true",
-      "guardCondition": "DECISION_EQUAL_TO",
-      "decision_value": "true",
-      "endpoint": "",
-      "waypoints": [
-        {
-          "x": 520,
-          "y": 160
-        }
-      ],
-      "labelOffsetX": 26,
-      "labelOffsetY": -20,
-      "connection_type": "NETWORK",
-      "availability": 1.0
-    },
-    {
-      "source": "T_out_P1",
-      "target": "T_in_P1",
-      "label": "false",
-      "guardCondition": "DECISION_EQUAL_TO",
-      "decision_value": "false",
-      "endpoint": "",
-      "waypoints": [
-        {
-          "x": 380,
-          "y": 80
-        },
-        {
-          "x": 220,
-          "y": 80
-        }
-      ],
-      "labelOffsetX": -32,
-      "labelOffsetY": -10
+      "target": "T_in_P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
     }
   ],
   "textElements": [
     {
-      "x": 251,
-      "y": 45,
-      "text": "P1_Workflow_Tutorial",
+      "x": 304,
+      "y": 34,
+      "text": "P1_P2_Workflow",
       "fontSize": 12,
       "fontStyle": 0,
       "color": -16777216
     },
     {
       "x": 229,
-      "y": 241,
+      "y": 221,
       "text": "Place P1 returns a random| result. (either True or False)",
-      "fontSize": 12,
-      "fontStyle": 0,
-      "color": -16777216
-    },
-    {
-      "x": 410,
-      "y": 295,
-      "text": "Monitor is an |observer only",
       "fontSize": 12,
       "fontStyle": 0,
       "color": -16777216

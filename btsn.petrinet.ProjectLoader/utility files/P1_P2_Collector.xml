@@ -4,6 +4,13 @@
         Phase 3: P1, P2 and Monitor Services - Performance Data Collection
         Simple Loop Petri Net - Collector Workflow
     </description>
+    <!-- Shared packaged runtime; source deployment files and Eclipse outputs are not modified. -->
+    <property name="launcher.profile.file" location="../../btsn.services/deployments/models/StochasticLoopDeployment.json"/>
+    <property name="launcher.rules.file" location="../../btsn.services/deployments/models/StochasticLoopInfrastructure.ruleml.xml"/>
+    <property name="launcher.runtime.dir" location="../../btsn.services/target/launchers/P1_P2_Phases"/>
+    <property name="infrastructure.definition.name" value="StochasticLoopModels_Infrastructure"/>
+    <import file="../../btsn.services/launcher-runtime.xml"/>
+
 
 	<!-- =================================== -->
 	<!-- PROPERTIES SECTION                 -->
@@ -11,7 +18,7 @@
 
 	<!-- COLLECTOR PARAMETERS -->
 	<property name="rule.version" value="v999" />
-	<property name="process.name" value="petrinet/P1_P2_Collector" />
+	<property name="process.name" value="petrinet/Collectors/P1_P2_Collector" />
 	<property name="service.operation" value="collectAllData" />
 	<property name="collection.delay.seconds" value="3" />
 
@@ -28,35 +35,20 @@
 
 	<!-- Base directories -->
 	<property name="build.file.dir" location="." />
-	<property name="petrinet.root.dir" location="../" />
-
 	<!-- Common project directories -->
-	<property name="common.project.dir" location="${petrinet.root.dir}/btsn.common" />
-	<property name="lib.dir" location="${common.project.dir}/lib" />
-	<property name="class.dir" location="${common.project.dir}/bin" />
-
 	<!-- Output directory (current directory) -->
 	<property name="output.dir" location="${build.file.dir}" />
 
 	<!-- P1 Service -->
-	<property name="p1.project.dir" location="${petrinet.root.dir}/btsn.petrinet.places.p1" />
-	<property name="p1.bin.dir" location="${p1.project.dir}/bin" />
 	<property name="p1.output.file" location="${output.dir}/P1_CollectorService.out.txt" />
 
 	<!-- P2 Service -->
-	<property name="p2.project.dir" location="${petrinet.root.dir}/btsn.petrinet.places.p2" />
-	<property name="p2.bin.dir" location="${p2.project.dir}/bin" />
 	<property name="p2.output.file" location="${output.dir}/P2_CollectorService.out.txt" />
 
 	<!-- Monitor Service -->
-	<property name="monitor.project.dir" location="${petrinet.root.dir}/btsn.common.Monitor" />
-	<property name="monitor.bin.dir" location="${monitor.project.dir}/bin" />
 	<property name="monitor.output.file" location="${output.dir}/MonitorService.out.txt" />
 
 	<!-- Event Generator -->
-	<property name="generator.project.dir" location="${petrinet.root.dir}/btsn.common.eventgenerators" />
-	<property name="generator.bin.dir" location="${generator.project.dir}/bin" />
-
 	<!-- Java Classes -->
 	<property name="service.loader.class" value="org.btsn.handlers.ServiceLoader" />
 	<property name="collector.generator.class" value="org.btsn.common.eventgenerators.Common_Collector_EventGenerator" />
@@ -65,51 +57,14 @@
 	<!-- CLASSPATH SECTION                  -->
 	<!-- =================================== -->
 
-	<path id="common.classpath">
-		<fileset dir="${lib.dir}" erroronmissingdir="false">
-			<include name="*.jar" />
-		</fileset>
-		<pathelement location="${class.dir}" />
-	</path>
-
-	<path id="p1.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${p1.bin.dir}" />
-	</path>
-
-	<path id="p2.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${p2.bin.dir}" />
-	</path>
-
-	<path id="monitor.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${monitor.bin.dir}" />
-	</path>
-
-	<path id="generator.classpath">
-		<path refid="common.classpath" />
-		<pathelement location="${generator.bin.dir}" />
-	</path>
-
 	<!-- =================================== -->
 	<!-- UTILITY TARGETS                    -->
 	<!-- =================================== -->
 
-	<target name="kill-java-processes" description="Kill any lingering Java processes">
-		<echo message="Killing any lingering Java processes..." />
-		<exec executable="cmd" osfamily="windows" failonerror="false">
-			<arg value="/c"/>
-			<arg value="taskkill /F /IM java.exe /T 2>nul"/>
-		</exec>
-		<exec executable="bash" osfamily="unix" failonerror="false">
-			<arg value="-c"/>
-			<arg value="pkill -9 java 2>/dev/null || true"/>
-		</exec>
-		<echo message="Waiting ${port.release.seconds}s for ports to be released..." />
-		<sleep seconds="${port.release.seconds}"/>
-		<echo message="Process cleanup complete" />
-	</target>
+	<target name="kill-java-processes" description="Compatibility target: allow ports to close after stopping the previous Ant run">
+        <echo message="Stop the previous Ant run before starting these standalone phases."/>
+        <sleep seconds="${port.release.seconds}"/>
+    </target>
 
 	<target name="clean-output" description="Clean previous output files">
 		<delete file="${p1.output.file}" quiet="true" />
@@ -122,9 +77,9 @@
 	<!-- RULE BASE BUILD TARGET             -->
 	<!-- =================================== -->
 
-	<target name="rebuild-service-ruleml" description="Rebuild master Service.ruleml from all service definitions">
+	<target name="rebuild-service-ruleml" description="Rebuild master Service.ruleml from all service definitions" depends="prepare-runtime">
 		<echo message="=== Building Master Service.ruleml ===" />
-		<java classname="org.btsn.utils.BuildMasterServiceRuleBase" 
+		<java classname="org.btsn.utils.BuildMasterServiceRuleBase"
 		      classpathref="generator.classpath"
 		      dir="${common.project.dir}"
 		      fork="true"
@@ -139,10 +94,10 @@
 	<!-- SERVICE LOADING TARGETS            -->
 	<!-- =================================== -->
 
-	<target name="load-p1-service" description="Load P1_CollectorService">
+	<target name="load-p1-service" description="Load P1_CollectorService" depends="prepare-runtime">
 		<echo message="Starting P1_CollectorService..." />
-		<java classname="${service.loader.class}" 
-		      fork="true" 
+		<java classname="${service.loader.class}"
+		      fork="true"
 		      dir="${p1.project.dir}"
 		      output="${p1.output.file}">
 			<classpath refid="p1.classpath" />
@@ -154,10 +109,10 @@
 		</java>
 	</target>
 
-	<target name="load-p2-service" description="Load P2_CollectorService">
+	<target name="load-p2-service" description="Load P2_CollectorService" depends="prepare-runtime">
 		<echo message="Starting P2_CollectorService..." />
-		<java classname="${service.loader.class}" 
-		      fork="true" 
+		<java classname="${service.loader.class}"
+		      fork="true"
 		      dir="${p2.project.dir}"
 		      output="${p2.output.file}">
 			<classpath refid="p2.classpath" />
@@ -169,10 +124,10 @@
 		</java>
 	</target>
 
-	<target name="load-monitor-service" description="Load Monitor service">
+	<target name="load-monitor-service" description="Load Monitor service" depends="prepare-runtime">
 		<echo message="Starting Monitor service..." />
-		<java classname="${service.loader.class}" 
-		      fork="true" 
+		<java classname="${service.loader.class}"
+		      fork="true"
 		      dir="${monitor.project.dir}"
 		      output="${monitor.output.file}">
 			<classpath refid="monitor.classpath" />
@@ -188,7 +143,7 @@
 	<!-- PERFORMANCE COLLECTOR TRIGGER      -->
 	<!-- =================================== -->
 
-	<target name="performance-collector-trigger" description="Trigger Performance Data Collection for P1-P2">
+	<target name="performance-collector-trigger" description="Trigger Performance Data Collection for P1-P2" depends="prepare-runtime">
 		<echo message="=== Initializing Performance Collector ===" />
 		<echo message="  Rule Version: ${rule.version}" />
 		<echo message="  Process: ${process.name}" />
@@ -197,8 +152,8 @@
 
 		<!-- P1 Collection (with deployment) -->
 		<echo message="=== Collecting from P1_CollectorService (deploying rules) ===" />
-		<java classname="${collector.generator.class}" 
-		      fork="true" 
+		<java classname="${collector.generator.class}"
+		      fork="true"
 		      dir="${generator.project.dir}"
 		      failonerror="true">
 			<classpath refid="generator.classpath" />
@@ -214,8 +169,8 @@
 
 		<!-- P2 Collection (skip deployment) -->
 		<echo message="=== Collecting from P2_CollectorService (skipping deploy) ===" />
-		<java classname="${collector.generator.class}" 
-		      fork="true" 
+		<java classname="${collector.generator.class}"
+		      fork="true"
 		      dir="${generator.project.dir}"
 		      failonerror="true">
 			<classpath refid="generator.classpath" />
@@ -237,8 +192,8 @@
 	<!-- MAIN TARGET                         -->
 	<!-- =================================== -->
 
-	<target name="load-all-services" 
-	        depends="kill-java-processes,clean-output,rebuild-service-ruleml" 
+	<target name="load-all-services"
+	        depends="kill-java-processes,clean-output,rebuild-service-ruleml"
 	        description="Load collector services and trigger collection (DEFAULT)">
 		<echo message="=== COLLECTION: LOADING COLLECTOR SERVICES ===" />
 		<echo message="Rule version: ${rule.version}" />

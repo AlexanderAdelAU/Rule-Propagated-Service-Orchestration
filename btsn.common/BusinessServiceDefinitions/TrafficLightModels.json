@@ -1,0 +1,74 @@
+{
+  "domain": "PetriNetModels",
+  "purpose": "Preserves the existing stochastic model operations in independently packaged business services.",
+  "services": [
+    {
+      "service": "StochasticEntryJoinService",
+      "implementationClass": "org.btsn.services.StochasticEntryJoinService",
+      "operation": "processToken",
+      "inputs": [
+        "token_branch1",
+        "token_branch2"
+      ],
+      "returnAttribute": "token",
+      "canonicalBinding": "ServiceAttributeBindings/StochasticEntryJoinService/StochasticEntryJoinService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "StochasticBranchTwoTokenService",
+      "implementationClass": "org.btsn.services.StochasticBranchTwoTokenService",
+      "operation": "processToken",
+      "inputs": [
+        "token"
+      ],
+      "returnAttribute": "token_branch2",
+      "canonicalBinding": "ServiceAttributeBindings/StochasticBranchTwoTokenService/StochasticBranchTwoTokenService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "StochasticBranchOneTokenService",
+      "implementationClass": "org.btsn.services.StochasticBranchOneTokenService",
+      "operation": "processToken",
+      "inputs": [
+        "token"
+      ],
+      "returnAttribute": "token_branch1",
+      "canonicalBinding": "ServiceAttributeBindings/StochasticBranchOneTokenService/StochasticBranchOneTokenService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "StochasticMergeTokenService",
+      "implementationClass": "org.btsn.services.StochasticMergeTokenService",
+      "operation": "processToken",
+      "inputs": [
+        "token_branch1",
+        "token_branch2"
+      ],
+      "returnAttribute": "token",
+      "canonicalBinding": "ServiceAttributeBindings/StochasticMergeTokenService/StochasticMergeTokenService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "StochasticReturnTokenService",
+      "implementationClass": "org.btsn.services.StochasticReturnTokenService",
+      "operation": "processToken",
+      "inputs": [
+        "token"
+      ],
+      "returnAttribute": "token_branch2",
+      "canonicalBinding": "ServiceAttributeBindings/StochasticReturnTokenService/StochasticReturnTokenService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "StochasticSideTokenService",
+      "implementationClass": "org.btsn.services.StochasticSideTokenService",
+      "operation": "processToken",
+      "inputs": [
+        "token"
+      ],
+      "returnAttribute": "token_branch1",
+      "canonicalBinding": "ServiceAttributeBindings/StochasticSideTokenService/StochasticSideTokenService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    }
+  ]
+}
