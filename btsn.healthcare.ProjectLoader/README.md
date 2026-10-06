@@ -128,11 +128,36 @@ Monitor-ending workflows retain the analyzer's successful Monitor boundary.
 Fork children do not become additional workflows. Incomplete or invalid-timestamp
 rows have no fabricated duration. Administration (v999) is omitted.
 
-The default **Concurrent Workflow Overview** keeps the familiar version lanes,
-colours and chronological arrival positions. Its bars are solid: bar size shows
-neither elapsed time nor a queue fraction. Tooltips and overview exports describe
-the workflow identity, business services and recorded visit count. Queue caps and
-the independent-maxima ratio have been removed. Administration (v999) is omitted.
+The default **Workflow Elapsed Time and Queue Wait** combines two measurements
+in the familiar version lanes and chronological arrival positions:
+
+- Coloured bar height: measured GENERATED-to-canonical-completion elapsed time.
+- Black diamond beside each bar: maximum **observed service-visit queue wait**
+  across that root family, including nested fork children.
+- Every lane uses the same labelled millisecond scale. Bar width indicates neither
+  execution duration nor overlap; horizontal position is arrival rank.
+
+The diamond is an independent measurement, not a stacked portion of the bar or a
+workflow waiting fraction. Parallel branch waits are not added, and queue maxima
+are not subtracted from elapsed time. Longer or shorter routes can change both
+metrics, so this figure alone does not prove priority ordering or queue pre-emption.
+
+An X on a lane baseline means the elapsed interval is unavailable (incomplete,
+invalid clock ordering, or legacy data without canonical events). Missing queue
+measurements have no diamond; valid zero waits have a diamond at the baseline.
+Exact repeated visit observations contribute once; null, negative or conflicting
+waits are excluded, with valid and invalid visit counts in tooltips and exports.
+A maximum may therefore describe only the valid observed visits. For old runs
+without GENERATED events, arrival order falls back to recorded workflow starts;
+elapsed time stays unavailable. Canonical genealogy prevents orphan branch tokens
+from becoming extra root rows. Administration (v999) is omitted.
+
+PNG/PDF, LaTeX/TikZ, the LaTeX table and the text summary use these same meanings.
+For a paper, the suggested caption is:
+
+> Bars show measured workflow elapsed time; diamonds show maximum observed
+> service-visit queue wait, including fork branches. Queue markers do not represent
+> total workflow waiting time.
 
 Choose **View > Service Queue Timings** for measured waiting times at each shared
 host operation. Each operation has separate v001/v002/v003 comparisons on the same
@@ -157,4 +182,6 @@ adding parallel branch times. Scheduling, handlers and measurement ingestion are
 unchanged.
 
 Regression check: `ant -f btsn.services/workflow-runtime.xml check-measured-timeline`.
-Queue/overview check: `ant -f btsn.services/workflow-runtime.xml check-queue-view`.
+Queue/legacy-observation check: `ant -f btsn.services/workflow-runtime.xml check-queue-view`.
+
+Combined figure check: `ant -f btsn.services/workflow-runtime.xml check-combined-workflow`.

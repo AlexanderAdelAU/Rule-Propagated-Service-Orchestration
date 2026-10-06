@@ -4,19 +4,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.*;
 import java.util.List;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import org.apache.derby.jdbc.EmbeddedDriver;
 import org.btsn.constants.VersionConstants;
 
 // For PDF export - requires Apache PDFBox library
@@ -26,12 +21,10 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 
 /**
- * SwingGanttChart - Database-driven Gantt chart with PDF and LaTeX export capabilities
- * Refactored to use linear scaling and VersionConstants
+ * Arrival-ordered workflow elapsed bars with independent service-visit queue markers.
+ * Class name retained for existing Monitor entry points and launchers.
  */
 public class SwingGanttChart_WithLatency_v1d extends JPanel {
     
@@ -59,15 +52,12 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
     
     
     // Version display feature
-    private boolean displayByVersion = false;
+    private boolean displayByVersion = true;
     private Map<String, List<Task>> versionGroups = new HashMap<>();
     private List<String> uniqueVersions = new ArrayList<>();
     private Map<String, Color> versionColors = new HashMap<>();
     private Map<String, Integer> versionLanes = new HashMap<>();
-    
-    private long maxQueueTime = 1;
-    private long maxElapsedTime = 1;
-    
+
     
     public static class Task {
         int id;
@@ -77,7 +67,9 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         long queueTime;
         String businessServices = "Unresolved";
         int serviceCount;  // Number of services in this workflow
-        long elapsedTime;  // Total workflow duration from PROCESSMEASUREMENTS
+        long elapsedTime;  // GENERATED to canonical completion, never estimated from visits
+        boolean hasElapsedTime, hasQueueTime, canonical;
+        int invalidQueueVisits;
         
         public Task(int id, String service, int sequenceId, long processingTime) {
             this.id = id;
@@ -94,7 +86,6 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
     private Map<String, Integer> serviceLanes = new HashMap<>();
     protected List<String> uniqueServices = new ArrayList<>();
     private int maxId = 1;
-    private long maxTime = 1;
     private Task hoveredTask = null;
     
     private Color[] colorPalette = {
@@ -128,26 +119,23 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
     /**
      * Generate workflow summary report
      */
-    /**
-     * Generate workflow summary report
-     */
     public String generateWorkflowSummaryReport() {
-        StringBuilder report = new StringBuilder("CONCURRENT WORKFLOW OVERVIEW\n");
-        report.append("One bar per observed root workflow, in arrival order. Bar size does not encode duration.\n");
-        report.append("Measured waits: View > Service Queue Timings. Elapsed intervals: View > Measured Workflow Timeline.\n\n");
-        Map<String, Integer> counts = new TreeMap<>();
-        for (Task task : tasks) counts.merge(deriveVersion(task.sequenceId), 1, Integer::sum);
-        for (Map.Entry<String, Integer> entry : counts.entrySet())
-            report.append(entry.getKey()).append(": ").append(entry.getValue()).append(" workflows\n");
-        report.append("\nArrival position | Root sequence | Version | Recorded service visits | Business services\n");
-        for (int i = 0; i < tasks.size(); i++) {
-            Task task = tasks.get(i);
-            report.append(i + 1).append(" | ").append(task.sequenceId).append(" | ")
-                .append(deriveVersion(task.sequenceId)).append(" | ").append(task.serviceCount)
-                .append(" | ").append(task.businessServices).append('\n');
+        StringBuilder report = new StringBuilder("WORKFLOW ELAPSED TIME AND QUEUE WAIT\n");
+        report.append(CombinedWorkflowMetrics.CAPTION).append('\n');
+        report.append("All lanes use the same millisecond scale. X = unavailable elapsed interval; no diamond = unavailable queue measurement.\n");
+        report.append("Arrival order uses GENERATED timestamps, or recorded workflow starts for legacy rows. N/A is not zero.\n\n");
+        report.append("Arrival | Root sequence | Version | Elapsed ms | Max observed queue ms | Valid queue visits | Invalid/conflicting visits | Services\n");
+        for (int i=0; i<tasks.size(); i++) {
+            Task t=tasks.get(i);
+            report.append(i+1).append(" | ").append(t.sequenceId).append(" | ")
+                .append(deriveVersion(t.sequenceId)).append(" | ").append(elapsedLabel(t))
+                .append(" | ").append(queueLabel(t)).append(" | ").append(t.serviceCount)
+                .append(" | ").append(t.invalidQueueVisits).append(" | ").append(t.businessServices).append('\n');
         }
         return report.toString();
     }
+    private static String elapsedLabel(Task t) { return t.hasElapsedTime?Long.toString(t.elapsedTime):"N/A"; }
+    private static String queueLabel(Task t) { return t.hasQueueTime?Long.toString(t.queueTime):"N/A"; }
 
     /**
      * Export workflow summary to text file
@@ -368,197 +356,85 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
      * Export the chart to LaTeX TikZ format
      */
     public void exportToLaTeX(String filename) {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
-            
-            List<String> displayGroups = displayByVersion ? uniqueVersions : uniqueServices;
-            Map<String, Integer> displayLanes = displayByVersion ? versionLanes : serviceLanes;
-            Map<String, Color> displayColors = displayByVersion ? versionColors : serviceColors;
-            
-            if (tasks.isEmpty() || displayGroups.isEmpty()) {
-                writer.println("% No data to export");
-                writer.println("\\begin{figure}[htbp]");
-                writer.println("\\centering");
-                writer.println("\\textbf{No data available for Gantt chart}");
-                writer.println("\\end{figure}");
-                JOptionPane.showMessageDialog(this, 
-                    "Warning: No data to export!", 
-                    "Export Warning", 
-                    JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            
-            int safeMaxId = Math.max(Math.min(tasks.size(), maxDisplayTasks), 10);
-            long safeMaxTime = Math.max(maxTime, 1);
-            
-            writer.println("% Gantt Chart generated from SwingGanttChart");
-            writer.println("% Add this to your LaTeX document preamble:");
-            writer.println("% \\usepackage{tikz}");
-            writer.println("% \\usepackage{pgfplots}");
-            writer.println("% \\usetikzlibrary{patterns,shapes,arrows}");
-            writer.println();
-            writer.println("\\begin{figure}[htbp]");
-            writer.println("\\centering");
-            writer.println("\\begin{tikzpicture}[x=0.15cm, y=0.8cm]");
-            writer.println();
-            
-            writer.println("% Define colors");
-            int colorIndex = 0;
-            Map<String, String> latexColors = new HashMap<>();
-            for (String group : displayGroups) {
-                Color c = displayColors.get(group);
-                if (c == null) c = Color.GRAY;
-                String colorName = "color" + colorIndex;
-                writer.printf("\\definecolor{%s}{RGB}{%d,%d,%d}\n", 
-                    colorName, c.getRed(), c.getGreen(), c.getBlue());
-                latexColors.put(group, colorName);
-                colorIndex++;
-            }
-            
-            writer.println();
-            
-            writer.println("% Draw axes");
-            writer.printf("\\draw[->] (0,0) -- (%d,0) node[right] {Arrival Position};\n", safeMaxId + 2);
-            writer.printf("\\draw[->] (0,0) -- (0,%d) node[above] {%s};\n", 
-                displayGroups.size() + 1, "Workflow versions");
-            writer.println();
-            
-            writer.println("% Draw grid");
-            writer.printf("\\draw[gray!30, thin] (0,0) grid (%d,%d);\n", safeMaxId, displayGroups.size());
-            writer.println();
-            
-            writer.println("% Group labels");
-            for (int i = 0; i < displayGroups.size(); i++) {
-                String group = displayGroups.get(i);
-                writer.printf("\\node[left] at (-0.5,%.1f) {%s};\n", i + 0.5, escapeLatex(group));
-            }
-            writer.println();
-            
-            writer.println("% X-axis labels");
-            int step = Math.max(1, safeMaxId / 10);
-            for (int i = 0; i <= safeMaxId; i += step) {
-                writer.printf("\\node[below] at (%d,-0.3) {\\tiny %d};\n", i, i);
-            }
-            writer.println();
-            
-            writer.println("% Tasks (bars)");
-            for (int i = 0; i < Math.min(tasks.size(), maxDisplayTasks); i++) {
-                Task task = tasks.get(i);
-                Integer laneIndex;
-                String group;
-                
-                if (displayByVersion) {
-                    String version = deriveVersion(task.sequenceId);
-                    laneIndex = versionLanes.get(version);
-                    group = version;
-                } else {
-                    laneIndex = serviceLanes.get(task.service);
-                    group = task.service;
-                }
-                
-                if (laneIndex == null) continue;
-                
-                String color = latexColors.get(group);
-                if (color == null) color = "gray";
-                
-                double x = i;
-                double y = laneIndex + 0.3;
-                double width = 0.5;
-                double height = 0.5;
-                
-                if (Double.isNaN(x) || Double.isNaN(y) || Double.isNaN(width) || Double.isNaN(height) ||
-                    Double.isInfinite(x) || Double.isInfinite(y) || Double.isInfinite(width) || Double.isInfinite(height)) {
-                    System.err.println("Warning: Invalid values for task " + task.id);
-                    continue;
-                }
-                
-                writer.printf("\\filldraw[fill=%s!70, draw=%s!90] (%.2f,%.2f) rectangle (%.2f,%.2f);\n",
-                    color, color, x, y, x + width, y + height);
-                
-                if (tasks.size() <= 30) {
-                    writer.printf("\\node[font=\\tiny] at (%.2f,%.2f) {%d};\n", 
-                        x + width/2, y + height/2, task.id);
-                }
-            }
-            writer.println();
-            
-            writer.println();
-            writer.println("\\end{tikzpicture}");
-            String caption = displayByVersion ? 
-                "Concurrent workflow overview by version (arrival order)" :
-                "Concurrent workflow overview (arrival order)";
-            writer.println("\\caption{" + caption + "}");
-            writer.println("\\label{fig:gantt-chart}");
-            writer.println("\\end{figure}");
-            
-            System.out.println("Exported LaTeX with " + Math.min(tasks.size(), maxDisplayTasks) + " tasks");
-            
-            writer.println();
-            writer.println("% Standalone version (compile with pdflatex):");
-            writer.println("% \\documentclass{standalone}");
-            writer.println("% \\usepackage{tikz}");
-            writer.println("% \\begin{document}");
-            writer.println("% [Insert tikzpicture code here]");
-            writer.println("% \\end{document}");
-            
-            JOptionPane.showMessageDialog(this, 
-                "LaTeX/TikZ code exported successfully to: " + filename, 
-                "Export Success", 
-                JOptionPane.INFORMATION_MESSAGE);
-                
+        exportText(filename, generateLaTeXFigure());
+    }
+    public void exportToLaTeXTable(String filename) {
+        exportText(filename, generateLaTeXTable());
+    }
+    private void exportText(String filename, String content) {
+        try {
+            Files.writeString(Paths.get(filename), content);
+            if (!GraphicsEnvironment.isHeadless()) JOptionPane.showMessageDialog(this,
+                "Exported successfully to: " + filename, "Export Success", JOptionPane.INFORMATION_MESSAGE);
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, 
-                "Error exporting to LaTeX: " + e.getMessage(), 
-                "Export Error", 
-                JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
+            if (!GraphicsEnvironment.isHeadless()) JOptionPane.showMessageDialog(this,
+                "Export failed: " + e.getMessage(), "Export Error", JOptionPane.ERROR_MESSAGE);
+            throw new UncheckedIOException(e);
         }
     }
-
-    /**
-     * Export data to LaTeX table format
-     */
-    public void exportToLaTeXTable(String filename) {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
-            
-            writer.println("% Workflow arrival overview. Bar size does not encode duration.");
-            writer.println("% Add to preamble: \\usepackage{booktabs}");
-            writer.println("% Add to preamble: \\usepackage{longtable} % for long tables");
-            writer.println();
-            writer.println("\\begin{longtable}{cccccc}");
-            writer.println("\\toprule");
-            writer.println("Database ID & Lane & Version & Sequence ID & Arrival Position & Recorded Visits \\\\");
-            writer.println("\\midrule");
-            writer.println("\\endhead");
-            
-            for (int i = 0; i < Math.min(tasks.size(), maxDisplayTasks); i++) {
-                Task task = tasks.get(i);
-                String version = deriveVersion(task.sequenceId);
-                writer.printf("%d & %s & %s & %d & %d & %d \\\\\n",
-                    task.id, 
-                    escapeLatex(task.service),
-                    escapeLatex(version),
-                    task.sequenceId,
-                    i + 1,
-                    task.serviceCount);
+    /** Vector publication export uses the same values, order, scale and glyphs as the panel. */
+    public String generateLaTeXFigure() {
+        StringWriter text=new StringWriter();
+        PrintWriter w=new PrintWriter(text);
+        List<String> groups=displayByVersion?uniqueVersions:uniqueServices;
+        Map<String,Integer> lanes=displayByVersion?versionLanes:serviceLanes;
+        Map<String,Color> colors=displayByVersion?versionColors:serviceColors;
+        int count=Math.min(tasks.size(),maxDisplayTasks);
+        double maximum=axisMaximum();
+        w.println("% Preamble: \\usepackage{tikz}. All lanes share the same millisecond scale.");
+        w.println("\\begin{figure}[htbp]\n\\centering");
+        w.printf(Locale.ROOT,"\\begin{tikzpicture}[x=%.5fcm,y=1.9cm,font=\\scriptsize]%n",14.0/Math.max(1,count));
+        for(int lane=0;lane<groups.size();lane++) {
+            String group=groups.get(lane);
+            Color c=colors.getOrDefault(group,Color.GRAY);
+            w.printf("\\definecolor{lane%d}{RGB}{%d,%d,%d}%n",lane,c.getRed(),c.getGreen(),c.getBlue());
+            double baseline=groups.size()-1-lane;
+            w.printf(Locale.ROOT,"\\node[anchor=east,text=lane%d] at ([xshift=-1.15cm]0,%.3f) {%s};%n",lane,baseline+0.45,escapeLatex(group));
+            for(int tick=0;tick<=2;tick++) {
+                double y=baseline+tick*0.4;
+                w.printf(Locale.ROOT,"\\draw[gray!30] (0,%.3f)--(%d,%.3f);%n",y,count,y);
+                w.printf(Locale.ROOT,"\\node[anchor=east] at ([xshift=-0.08cm]0,%.3f) {%s};%n",y,axisLabel(maximum*tick/2));
             }
-            
-            writer.println("\\bottomrule");
-            writer.println("\\caption{Workflow Arrival Overview}");
-            writer.println("\\label{tab:service-data}");
-            writer.println("\\end{longtable}");
-            
-            JOptionPane.showMessageDialog(this, 
-                "LaTeX table exported successfully to: " + filename, 
-                "Export Success", 
-                JOptionPane.INFORMATION_MESSAGE);
-                
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, 
-                "Error exporting LaTeX table: " + e.getMessage(), 
-                "Export Error", 
-                JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
         }
+        for(int i=0;i<count;i++) {
+            Task t=tasks.get(i);
+            Integer lane=lanes.get(displayByVersion?deriveVersion(t.sequenceId):t.service);
+            if(lane==null) continue;
+            double base=groups.size()-1-lane;
+            if(t.hasElapsedTime) {
+                double top=base+0.8*t.elapsedTime/maximum;
+                if(t.elapsedTime==0) w.printf(Locale.ROOT,"\\draw[lane%d,thick] (%.3f,%.3f)--(%.3f,%.3f);%n",lane,i+0.12,base,i+0.57,base);
+                else w.printf(Locale.ROOT,"\\filldraw[fill=lane%d,draw=lane%d] (%.3f,%.3f) rectangle (%.3f,%.3f);%n",lane,lane,i+0.12,base,i+0.57,top);
+            } else w.printf(Locale.ROOT,"\\node at (%.3f,%.3f) {$\\times$};%n",i+0.38,base);
+            if(t.hasQueueTime) {
+                double x=i+0.82,y=base+0.8*t.queueTime/maximum;
+                // Explicit diamond, with equal physical half-width/height across display ranges.
+                double radius=Math.min(0.07,0.23*14.0/Math.max(1,count));
+                double dx=radius*count/14.0,dy=radius/1.9;
+                w.printf(Locale.ROOT,"\\fill[black] (%.4f,%.4f)--(%.4f,%.4f)--(%.4f,%.4f)--(%.4f,%.4f)--cycle;%n",x-dx,y,x,y+dy,x+dx,y,x,y-dy);
+            }
+        }
+        int step=Math.max(1,count/10);
+        for(int i=0;i<count;i+=step) w.printf(Locale.ROOT,"\\node[below] at (%.3f,-0.08) {%d};%n",i+0.38,i+1);
+        w.printf(Locale.ROOT,"\\node[below] at (%.3f,-0.25) {Workflow arrival order; elapsed / queue wait (ms)};%n",count/2.0);
+        w.println("\\end{tikzpicture}");
+        w.println("\\caption{"+CombinedWorkflowMetrics.CAPTION+" All lanes share the same millisecond scale. Crosses indicate unavailable elapsed intervals; missing diamonds indicate unavailable queue measurements. Arrival order uses GENERATED timestamps, or recorded starts for legacy rows.}");
+        w.println("\\label{fig:workflow-elapsed-queue}\n\\end{figure}");
+        w.flush(); return text.toString();
+    }
+    public String generateLaTeXTable() {
+        StringWriter text=new StringWriter(); PrintWriter w=new PrintWriter(text);
+        w.println("% Preamble: \\usepackage{booktabs,longtable}. N/A is not zero.");
+        w.println("\\begin{longtable}{rrrrrrr}\n\\toprule");
+        w.println("Arrival & Root & Version & Elapsed (ms) & Max queue (ms) & Valid visits & Invalid visits \\\\");
+        w.println("\\midrule\n\\endhead");
+        for(int i=0;i<Math.min(tasks.size(),maxDisplayTasks);i++) {
+            Task t=tasks.get(i);
+            w.printf("%d & %d & %s & %s & %s & %d & %d \\\\%n",i+1,t.sequenceId,
+                escapeLatex(deriveVersion(t.sequenceId)),elapsedLabel(t),queueLabel(t),t.serviceCount,t.invalidQueueVisits);
+        }
+        w.println("\\bottomrule\n\\caption{"+CombinedWorkflowMetrics.CAPTION+"}\n\\label{tab:workflow-elapsed-queue}\n\\end{longtable}");
+        w.flush(); return text.toString();
     }
 
     /**
@@ -644,9 +520,9 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         
         int width = Math.max(1200, maxId * 10 + 150);
         int topMargin = Math.round(80 * fontScaleFactor);
-        int bottomPadding = Math.round(15 * fontScaleFactor);
+        int bottomPadding = Math.round(105 * fontScaleFactor);
         int numLanes = uniqueVersions.size();
-        int laneHeight = Math.round(45 * fontScaleFactor);
+        int laneHeight = Math.round(110 * fontScaleFactor);
         int chartHeight = numLanes * laneHeight;
         int totalHeight = topMargin + chartHeight + bottomPadding;
         
@@ -665,13 +541,10 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         this.fontScaleFactor = scaleFactor;
         updateFonts();
         
-        if (scaleFactor > 1.5f) {
-            int width = Math.max(900, maxId * 7 + 200);
-            int height = Math.max(600, Math.round(400 * scaleFactor));
-            setPreferredSize(new Dimension(width, height));
-            revalidate();
-        }
-        
+        setPreferredSize(new Dimension(Math.round(Math.max(1200,maxId*18+180)*fontScaleFactor),
+            Math.round((190+Math.max(1,uniqueVersions.size())*110)*fontScaleFactor)));
+        revalidate();
+
         repaint();
     }
     
@@ -696,630 +569,157 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
     }
     
     
-    /**
-     * Helper class to aggregate service times per workflow
-     */
-    private static class WorkflowAggregate {
-        int baseSequenceId;
-        int workflowBase;
-        long totalQueueTime = 0;
-        long totalServiceTime = 0;
-        int serviceCount = 0;
-        // Earliest real workflow start seen in SERVICECONTRIBUTION.
-        // Used to preserve chronology when PROCESSMEASUREMENTS is empty.
-        long workflowStartTime = Long.MAX_VALUE;
-        
-        // Track services by fork number for parallel execution analysis
-        Map<Integer, List<ServiceTiming>> forkGroups = new HashMap<>();
-        
-        WorkflowAggregate(int baseSequenceId, int workflowBase) {
-            this.baseSequenceId = baseSequenceId;
-            this.workflowBase = workflowBase;
-        }
-        
-        void addService(int sequenceId, long queueTime, long serviceTime) {
-            // Extract fork number (last 2 digits)
-            int forkNumber = sequenceId % 1000;
-            
-            List<ServiceTiming> forkServices = forkGroups.get(forkNumber);
-            if (forkServices == null) {
-                forkServices = new ArrayList<>();
-                forkGroups.put(forkNumber, forkServices);
-            }
-            
-            forkServices.add(new ServiceTiming(queueTime, serviceTime));
-            serviceCount++;
-        }
-        
-        /**
-         * Maximum observed queue and service duration across individual visits.
-         * These independent maxima do not constitute a workflow critical path.
-         */
-        void calculateVisitMaxima() {
-            long maxForkQueue = 0;
-            long maxForkService = 0;
-            
-            // For each fork group, find the maximum queue and service time
-            for (List<ServiceTiming> forkServices : forkGroups.values()) {
-                long forkQueue = 0;
-                long forkService = 0;
-                
-                // Retain each independent visit maximum within this fork group.
-                for (ServiceTiming timing : forkServices) {
-                    if (timing.queueTime > forkQueue) {
-                        forkQueue = timing.queueTime;
-                    }
-                    if (timing.serviceTime > forkService) {
-                        forkService = timing.serviceTime;
-                    }
-                }
-                
-                // Independent per-visit maxima; no path reconstruction is implied.
-                if (forkQueue > maxForkQueue) {
-                    maxForkQueue = forkQueue;
-                }
-                if (forkService > maxForkService) {
-                    maxForkService = forkService;
-                }
-            }
-            
-            totalQueueTime = maxForkQueue;
-            totalServiceTime = maxForkService;
-        }
-    }
-    
-    private static class ServiceTiming {
-        long queueTime;
-        long serviceTime;
-        
-        ServiceTiming(long queueTime, long serviceTime) {
-            this.queueTime = queueTime;
-            this.serviceTime = serviceTime;
-        }
-    }
-    
     protected void loadDataFromDatabase() {
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        
+        tasks.clear(); uniqueServices.clear(); serviceColors.clear(); serviceLanes.clear();
         try {
-            DriverManager.registerDriver(new EmbeddedDriver());
-            conn = DriverManager.getConnection(DB_URL);
-            stmt = conn.createStatement();
-            ServiceDisplayNames names = ServiceDisplayNames.load(conn);
-            
-            tasks.clear();
-            uniqueServices.clear();
-            serviceLanes.clear();
-            serviceColors.clear();
-            maxQueueTime = 1;
-            
-            boolean dataLoaded = false;
-            
-            // First, aggregate SERVICECONTRIBUTION data by base sequenceID
-            Map<Integer, WorkflowAggregate> contributionMap = new HashMap<>();
-            try {
-                String query = "SELECT " +
-                              "WORKFLOWBASE, " +
-                              "SEQUENCEID, " +
-                              "QUEUETIME, " +
-                              "SERVICETIME, " +
-                              "WORKFLOWSTARTTIME " +
-                              "FROM SERVICECONTRIBUTION";
-                
-                System.out.println("Loading SERVICECONTRIBUTION data...");
-                rs = stmt.executeQuery(query);
-                
-                while (rs.next()) {
-                    int sequenceId = rs.getInt("SEQUENCEID");
-                    if (sequenceId / 1000000 == 999) continue;
-                    int workflowBase = rs.getInt("WORKFLOWBASE");
-                    long queueTime = Math.max(0, rs.getLong("QUEUETIME"));
-                    long serviceTime = Math.max(0, rs.getLong("SERVICETIME"));
-                    long workflowStartTime = rs.getLong("WORKFLOWSTARTTIME");
-                    
-                    // Calculate base sequenceID
-                    int baseSequenceId = (sequenceId / 1000) * 1000;
-                    
-                    // Get or create aggregate
-                    WorkflowAggregate aggregate = contributionMap.get(baseSequenceId);
-                    if (aggregate == null) {
-                        aggregate = new WorkflowAggregate(baseSequenceId, workflowBase);
-                        contributionMap.put(baseSequenceId, aggregate);
-                    }
-
-                    if (workflowStartTime > 0 && workflowStartTime < aggregate.workflowStartTime) {
-                        aggregate.workflowStartTime = workflowStartTime;
-                    }
-                    
-                    aggregate.addService(sequenceId, queueTime, serviceTime);
+            Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+            try (Connection c=DriverManager.getConnection(DB_URL)) {
+                int id=1;
+                for (CombinedWorkflowMetrics.Workflow row:CombinedWorkflowMetrics.load(c)) {
+                    Task t=new Task(id++,deriveVersion(row.rootTokenId),row.rootTokenId,0);
+                    t.hasElapsedTime=row.hasDuration(); t.hasQueueTime=row.hasQueueMaximum();
+                    t.canonical=row.canonical;
+                    t.elapsedTime=t.hasElapsedTime?row.durationMs():0;
+                    t.queueTime=row.maxQueueMs; t.serviceCount=row.validQueueVisits;
+                    t.invalidQueueVisits=row.invalidQueueVisits; t.businessServices=row.services;
+                    tasks.add(t);
+                    if(!uniqueServices.contains(t.service)) uniqueServices.add(t.service);
                 }
-                rs.close();
-                
-                // Calculate diagnostic visit maxima, not workflow elapsed durations.
-                for (WorkflowAggregate aggregate : contributionMap.values()) {
-                    aggregate.calculateVisitMaxima();
-                }
-                
-                System.out.println("Aggregated " + contributionMap.size() + " workflows from SERVICECONTRIBUTION");
-                
-            } catch (SQLException e) {
-                System.out.println("Error loading SERVICECONTRIBUTION: " + e.getMessage());
-                e.printStackTrace();
             }
-            
-            // Now load PROCESSMEASUREMENTS to get arrival order and IDs
-         // Now load PROCESSMEASUREMENTS to get arrival order and IDs
-            try {
-                String query = "SELECT id, serviceName, sequenceID, " +
-                              "TOKENARRIVALTIME, WORKFLOWSTARTTIME, ELAPSEDTIME " +
-                              "FROM PROCESSMEASUREMENTS " +
-                              "WHERE serviceName IS NOT NULL " +
-                              "ORDER BY WORKFLOWSTARTTIME, TOKENARRIVALTIME, id";
-                
-                System.out.println("Loading PROCESSMEASUREMENTS for arrival order...");
-                rs = stmt.executeQuery(query);
-                
-                boolean hasAnyAggregates = !contributionMap.isEmpty();  // Check ONCE at start
-                boolean shownWarning = false;  // Only show warning once
-                
-                while (rs.next()) {
-                    int id = rs.getInt("id");
-                    String serviceName = rs.getString("serviceName");
-                    int sequenceId = rs.getInt("sequenceID");
-                    if (sequenceId / 1000000 == 999) continue;
-                    
-                    // Calculate base sequenceID
-                    int baseSequenceId = (sequenceId / 1000) * 1000;
-                    
-                    // Look up the aggregated data from SERVICECONTRIBUTION
-                    WorkflowAggregate aggregate = contributionMap.get(baseSequenceId);
-                    
-                    long queueTime;
-                    long processingTime;
-                    
-                    if (aggregate != null) {
-                        // Use real aggregated values from SERVICECONTRIBUTION
-                        queueTime = aggregate.totalQueueTime;
-                        processingTime = aggregate.totalServiceTime;
-                    } else {
-                        // No aggregate for this workflow - use fallback
-                        if (!shownWarning && !hasAnyAggregates) {
-                            // Only warn if SERVICECONTRIBUTION is completely empty
-                            System.err.println("=====================================================");
-                            System.err.println("WARNING: SERVICECONTRIBUTION table is EMPTY");
-                            System.err.println("Displaying spatial timeline only with solid bars.");
-                            System.err.println("Queue/execution time ratios are NOT available.");
-                            System.err.println("=====================================================");
-                            shownWarning = true;
-                        }
-                        queueTime = 0;  // Force solid bars (no queue/execution split)
-                        processingTime = rs.getLong("ELAPSEDTIME");
-                    }
-                    
-                    String version = VersionConstants.getVersionFromSequenceId(sequenceId);
-                    
-                    long elapsedTime = rs.getLong("ELAPSEDTIME");
-                    
-                    Task task = new Task(id, version, sequenceId, processingTime);
-                    task.businessServices = names.familyServices(sequenceId);
-                    task.queueTime = queueTime;
-                    task.serviceCount = (aggregate != null) ? aggregate.serviceCount : 0;
-                    task.elapsedTime = elapsedTime;
-                    tasks.add(task);
-                    
-                    if (!uniqueServices.contains(version)) {
-                        uniqueServices.add(version);
-                    }
-                    
-                    if (id > maxId) maxId = id;
-                    if (processingTime > maxTime) maxTime = processingTime;
-                    if (queueTime > maxQueueTime) maxQueueTime = queueTime;
-                    if (elapsedTime > maxElapsedTime) maxElapsedTime = elapsedTime;
-                    
-                    dataLoaded = true;
-                }
-                rs.close();
-                
-                System.out.println("Loaded " + tasks.size() + " tasks with real queue/service times");
-                
-            } catch (SQLException e) {
-                System.out.println("Error loading PROCESSMEASUREMENTS: " + e.getMessage());
-                e.printStackTrace();
+            Collections.sort(uniqueServices);
+            for(int i=0;i<uniqueServices.size();i++) {
+                String version=uniqueServices.get(i);
+                serviceLanes.put(version,i); serviceColors.put(version,getVersionColor(version,i));
             }
-            
-            // FALLBACK: Only use SERVICECONTRIBUTION if PROCESSMEASUREMENTS is completely empty
-            // Previously this compared tasks.size() < contributionMap.size() which was wrong because
-            // PROCESSMEASUREMENTS has one row per workflow completion, while contributionMap has entries
-            // for every service visited. The fallback should only trigger when we have NO data from PROCESSMEASUREMENTS.
-            if (!dataLoaded && !contributionMap.isEmpty()) {
-                System.out.println("Using SERVICECONTRIBUTION fallback (PROCESSMEASUREMENTS empty, " + 
-                                  "SERVICECONTRIBUTION workflows: " + contributionMap.size() + ")...");
-                
-                // Clear any partial data from PROCESSMEASUREMENTS
-                tasks.clear();
-                uniqueServices.clear();
-                
-                // PROCESSMEASUREMENTS may be empty after unified collection. In that
-                // case SERVICECONTRIBUTION still carries the real workflow start time.
-                // Preserve chronology instead of sorting by sequence ID (which would
-                // always group v001 before v002 regardless of when they ran).
-                List<WorkflowAggregate> sortedWorkflows = new ArrayList<>(contributionMap.values());
-                sortedWorkflows.sort((a, b) -> {
-                    int timeOrder = Long.compare(a.workflowStartTime, b.workflowStartTime);
-                    return timeOrder != 0 ? timeOrder : Integer.compare(a.baseSequenceId, b.baseSequenceId);
-                });
-                
-                int syntheticId = 1;
-                for (WorkflowAggregate aggregate : sortedWorkflows) {
-                    String version = VersionConstants.getVersionFromSequenceId(aggregate.baseSequenceId);
-                    
-                    Task task = new Task(syntheticId, version, aggregate.baseSequenceId, aggregate.totalServiceTime);
-                    task.businessServices = names.familyServices(aggregate.baseSequenceId);
-                    task.queueTime = aggregate.totalQueueTime;
-                    task.serviceCount = aggregate.serviceCount;
-                    tasks.add(task);
-                    
-                    if (!uniqueServices.contains(version)) {
-                        uniqueServices.add(version);
-                    }
-                    
-                    if (syntheticId > maxId) maxId = syntheticId;
-                    if (aggregate.totalServiceTime > maxTime) maxTime = aggregate.totalServiceTime;
-                    if (aggregate.totalQueueTime > maxQueueTime) maxQueueTime = aggregate.totalQueueTime;
-                    
-                    syntheticId++;
-                }
-                
-                dataLoaded = true;
-                System.out.println("Created " + tasks.size() + " tasks from SERVICECONTRIBUTION fallback");
-            }
-            
-            if (dataLoaded) {
-                Collections.sort(uniqueServices);
-                
-                for (int i = 0; i < uniqueServices.size(); i++) {
-                    String service = uniqueServices.get(i);
-                    serviceLanes.put(service, i);
-                    serviceColors.put(service, getVersionColor(service, i));
-                }
-                
-                System.out.println("Found " + uniqueServices.size() + " unique versions: " + uniqueServices);
-                System.out.println("Max queue time: " + maxQueueTime + " ms");
-                System.out.println("Max service time: " + maxTime + " ms");
-                System.out.println("MaxId: " + maxId);
-
-                int width = Math.max(1200, maxId * 10 + 150);
-                int height = Math.round(400 * fontScaleFactor);
-                setPreferredSize(new Dimension(width, height));
-                revalidate();
-                repaint();
-            } else {
-                System.err.println("No data found in database!");
-                JOptionPane.showMessageDialog(this, 
-                    "No data found in database.\nPlease ensure the database is populated.", 
-                    "Database Error", 
-                    JOptionPane.ERROR_MESSAGE);
-            }
-            
-            if (dataLoaded) {
-                Collections.sort(uniqueServices);
-                
-                for (int i = 0; i < uniqueServices.size(); i++) {
-                    String service = uniqueServices.get(i);
-                    serviceLanes.put(service, i);
-                    serviceColors.put(service, getVersionColor(service, i));
-                }
-                
-                System.out.println("Loaded " + tasks.size() + " tasks from database");
-                System.out.println("Found " + uniqueServices.size() + " workflow versions: " + uniqueServices);
-                System.out.println("Max queue time: " + maxQueueTime + " ms");
-                
-                this.maxId = Math.max(tasks.size() + 1, 1);
-                
-                if (this.maxTime <= 0) {
-                    this.maxTime = 1000;
-                    System.out.println("Warning: maxTime was invalid, setting to default 1000");
-                }
-                
-                System.out.println("MaxId: " + maxId + ", MaxTime: " + maxTime);
-
-                int width = Math.max(1200, maxId * 10 + 150);
-                int height = Math.round(400 * fontScaleFactor);
-                setPreferredSize(new Dimension(width, height));
-                revalidate();
-                repaint();
-            } else {
-                System.err.println("No data found in database!");
-                JOptionPane.showMessageDialog(this, 
-                    "No data found in database.\nPlease ensure the database is populated.", 
-                    "Database Error", 
-                    JOptionPane.ERROR_MESSAGE);
-            }
-            
-        } catch (SQLException e) {
-            System.err.println("Database connection error: " + e.getMessage());
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, 
-                "Database connection failed:\n" + e.getMessage(), 
-                "Database Error", 
-                JOptionPane.ERROR_MESSAGE);
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-                if (conn != null) conn.close();
-            } catch (SQLException e) {
-                System.err.println("Error closing database resources: " + e.getMessage());
-            }
+            maxId=tasks.size()+1;
+            groupTasksByVersion();
+            setPreferredSize(new Dimension(Math.max(1200,maxId*18+180),
+                Math.round((190+Math.max(1,uniqueServices.size())*110)*fontScaleFactor)));
+            System.out.println("Loaded "+tasks.size()+" root workflows for elapsed / queue view");
+        } catch(Exception e) {
+            throw new IllegalStateException("Unable to load measured workflow metrics",e);
         }
     }
-    
+    // One global scale, including queue markers above a duration bar and undisplayed rows.
+    double axisMaximum() {
+        double max=1;
+        for(Task t:tasks) {
+            if(t.hasElapsedTime) max=Math.max(max,t.elapsedTime);
+            if(t.hasQueueTime) max=Math.max(max,t.queueTime);
+        }
+        double unit=Math.pow(10,Math.floor(Math.log10(max)));
+        double step=(max/unit<=2?0.5:max/unit<=5?1:2)*unit;
+        return Math.ceil(max/step)*step;
+    }
+    private String axisLabel(double value) {
+        return value==Math.rint(value)?String.format(Locale.ROOT,"%.0f",value):String.format(Locale.ROOT,"%.1f",value);
+    }
+    private final class Plot {
+        final List<String> groups=displayByVersion?uniqueVersions:uniqueServices;
+        final Map<String,Integer> lanes=displayByVersion?versionLanes:serviceLanes;
+        final Map<String,Color> colors=displayByVersion?versionColors:serviceColors;
+        final int count=Math.min(tasks.size(),maxDisplayTasks);
+        final int left,top=Math.round(92*fontScaleFactor),width,laneHeight,plotHeight;
+        final double maximum=axisMaximum(),slot;
+        Plot(Graphics2D g) {
+            left=calculateLeftMargin(g,groups)+Math.round(55*fontScaleFactor);
+            width=Math.max(1,getWidth()-left-35);
+            laneHeight=Math.max(1,(getHeight()-top-Math.round(105*fontScaleFactor))/Math.max(1,groups.size()));
+            plotHeight=Math.max(1,(int)(laneHeight*0.78)); slot=width/(double)Math.max(1,count);
+        }
+        int lane(Task t) { return lanes.getOrDefault(displayByVersion?deriveVersion(t.sequenceId):t.service,0); }
+        int baseline(int lane) { return top+(lane+1)*laneHeight-Math.round(15*fontScaleFactor); }
+        int valueY(int lane,long value) { return baseline(lane)-(int)Math.round(value*plotHeight/maximum); }
+        int barX(int i) { return left+(int)Math.round((i+0.12)*slot); }
+        int barWidth() { return Math.max(1,(int)(slot*0.45)); }
+        int diamondX(int i) { return left+(int)Math.round((i+0.82)*slot); }
+        int diamondRadius() { return Math.max(2,Math.min(Math.round(4*fontScaleFactor),(int)(slot*0.13))); }
+    }
+
     @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2 = (Graphics2D) g;
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-        if (tasks.isEmpty()) {
-            g2.setFont(titleFont);
-            g2.drawString("No data to display", getWidth() / 2 - 60, getHeight() / 2);
-            return;
-        }
-
-        List<String> displayGroups = displayByVersion ? uniqueVersions : uniqueServices;
-        Map<String, Integer> displayLanes = displayByVersion ? versionLanes : serviceLanes;
-        Map<String, Color> displayColors = displayByVersion ? versionColors : serviceColors;
-
-        if (displayGroups.isEmpty()) {
-            if (displayByVersion) {
-                groupTasksByVersion();
-                displayGroups = uniqueVersions;
-                displayLanes = versionLanes;
-                displayColors = versionColors;
-            }
-
-            if (displayGroups.isEmpty()) {
-                g2.setFont(titleFont);
-                g2.drawString("No data to display", getWidth() / 2 - 60, getHeight() / 2);
-                return;
-            }
-        }
-
-        int leftMargin = calculateLeftMargin(g2, displayGroups);
-        int topMargin = Math.round(80 * fontScaleFactor);
-        int rightMargin = 50;
-        int chartWidth = getWidth() - leftMargin - rightMargin;
-
-        int numLanes = displayGroups.size();
-        int fullLaneHeight = (getHeight() - topMargin - 30) / numLanes;
-        int laneHeight = (int) (fullLaneHeight * 0.80);
-        int chartHeight = laneHeight * numLanes;
-
-        // Draw title
-        g2.setFont(titleFont);
-        String title = displayByVersion ?
-            "Concurrent Workflow Overview by Version" :
-            "Concurrent Workflow Overview";
-        FontMetrics fm = g2.getFontMetrics(titleFont);
-        int titleWidth = fm.stringWidth(title);
-        g2.drawString(title, (getWidth() - titleWidth) / 2, Math.round(30 * fontScaleFactor));
-
-        g2.setColor(Color.DARK_GRAY);
-        g2.setFont(new Font("Arial", Font.PLAIN, Math.round(10 * fontScaleFactor)));
-        g2.drawString("One bar per workflow; position shows arrival order. Bar size does not encode duration.",
-                     leftMargin, Math.round(50 * fontScaleFactor));
-
-        // Draw horizontal lane lines
-        g2.setColor(Color.LIGHT_GRAY);
-        for (int i = 0; i <= numLanes; i++) {
-            int y = topMargin + i * laneHeight;
-            g2.drawLine(leftMargin, y, leftMargin + chartWidth, y);
-        }
-
-        // Draw lane labels
-        g2.setFont(labelFont);
-        FontMetrics labelFm = g2.getFontMetrics(labelFont);
-
-        if (legendTextBelow) {
-            int legendX = 10;
-            int boxSize = Math.round(15 * fontScaleFactor);
-            Font smallFont = new Font("Arial", Font.PLAIN, Math.round(10 * fontScaleFactor));
-
-            for (String group : displayGroups) {
-                Integer laneIndex = displayLanes.get(group);
-                if (laneIndex == null) continue;
-
-                int centerY = topMargin + laneIndex * laneHeight + laneHeight / 2;
-
-                Color groupColor = displayColors.get(group);
-                g2.setColor(groupColor);
-                g2.fillRect(legendX, centerY - boxSize / 2, boxSize, boxSize);
-                g2.setColor(groupColor.darker());
-                g2.drawRect(legendX, centerY - boxSize / 2, boxSize, boxSize);
-
-                g2.setColor(Color.BLACK);
-                g2.setFont(smallFont);
-
-                FontMetrics smallFm = g2.getFontMetrics(smallFont);
-                String displayText = group;
-
-                int textX = legendX;
-                int textY = centerY + boxSize / 2 + smallFm.getHeight() + 2;
-
-                int availableWidth = leftMargin - 10;
-
-                if (smallFm.stringWidth(displayText) > availableWidth) {
-                    while (smallFm.stringWidth(displayText + "...") > availableWidth && displayText.length() > 1) {
-                        displayText = displayText.substring(0, displayText.length() - 1);
-                    }
-                    if (displayText.length() > 1) {
-                        displayText += "...";
-                    }
+    protected void paintComponent(Graphics graphics) {
+        super.paintComponent(graphics);
+        Graphics2D g=(Graphics2D)graphics.create();
+        try {
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
+            g.setColor(Color.BLACK); g.setFont(titleFont);
+            String title="Workflow Elapsed Time and Queue Wait";
+            g.drawString(title,(getWidth()-g.getFontMetrics().stringWidth(title))/2,Math.round(30*fontScaleFactor));
+            if(tasks.isEmpty()) { g.drawString("No observed workflows",25,100); return; }
+            Plot p=new Plot(g);
+            g.setFont(axisLabelFont);
+            g.drawString("Coloured bar: measured workflow elapsed time     Black diamond: maximum observed service-visit queue wait",
+                20,Math.round(52*fontScaleFactor));
+            g.drawString("Same millisecond scale in every lane.  X: elapsed interval unavailable; no diamond: queue measurement unavailable.",
+                20,Math.round(70*fontScaleFactor));
+            for(int lane=0;lane<p.groups.size();lane++) {
+                String group=p.groups.get(lane);
+                for(int tick=0;tick<=2;tick++) {
+                    int y=p.baseline(lane)-(int)Math.round(tick*p.plotHeight/2.0);
+                    g.setColor(tick==0?Color.GRAY:new Color(225,228,232));
+                    g.drawLine(p.left,y,p.left+p.width,y);
+                    g.setColor(Color.DARK_GRAY); g.setFont(axisLabelFont);
+                    String label=axisLabel(p.maximum*tick/2)+" ms";
+                    g.drawString(label,p.left-g.getFontMetrics().stringWidth(label)-8,y+4);
                 }
-
-                g2.drawString(displayText, textX, textY);
-                g2.setFont(labelFont);
+                Color c=p.colors.getOrDefault(group,Color.GRAY);
+                int cy=p.baseline(lane)-p.plotHeight/2;
+                g.setColor(c); g.fillRect(10,cy-7,12,12);
+                g.setColor(Color.BLACK); g.setFont(labelFont);
+                g.drawString(group,legendTextBelow?10:28,legendTextBelow?cy+22:cy+4);
             }
-        } else {
-            for (String group : displayGroups) {
-                Integer laneIndex = displayLanes.get(group);
-                if (laneIndex == null) continue;
-
-                int y = topMargin + laneIndex * laneHeight + laneHeight / 2;
-
-                Color groupColor = displayColors.get(group);
-                g2.setColor(groupColor);
-                int rectSize = Math.round(15 * fontScaleFactor);
-                g2.fillRect(10, y - rectSize / 2, rectSize, rectSize);
-
-                g2.setColor(Color.BLACK);
-                g2.drawString(group, 30, y + 4);
+            int gridInterval=Math.max(1,p.count/10);
+            for(int i=0;i<p.count;i+=gridInterval) {
+                int x=p.barX(i)+p.barWidth()/2;
+                g.setColor(new Color(238,238,238));
+                g.drawLine(x,p.top,x,p.baseline(p.groups.size()-1));
+                g.setColor(Color.DARK_GRAY); g.setFont(axisLabelFont);
+                String label=Integer.toString(i+1);
+                g.drawString(label,x-g.getFontMetrics().stringWidth(label)/2,p.baseline(p.groups.size()-1)+22);
             }
-        }
-
-        // Draw vertical grid lines
-        g2.setColor(Color.LIGHT_GRAY);
-        g2.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{2}, 0));
-
-        int actualMaxId = Math.min(tasks.size(), maxDisplayTasks);
-        int gridInterval = Math.max(1, actualMaxId / 10);
-
-        g2.setFont(axisLabelFont);
-        for (int i = 0; i < actualMaxId; i += gridInterval) {
-            int x = leftMargin + (i * chartWidth / Math.max(1, actualMaxId));
-            int y = topMargin + chartHeight;
-            g2.drawLine(x, topMargin, x, y);
-
-            g2.setColor(Color.GRAY);
-            String label = String.valueOf(i + 1);
-            FontMetrics axisfm = g2.getFontMetrics(axisLabelFont);
-            int labelWidth = axisfm.stringWidth(label);
-            g2.drawString(label, x - labelWidth / 2, y + Math.round(15 * fontScaleFactor));
-            g2.setColor(Color.LIGHT_GRAY);
-        }
-
-        // Draw X-axis label
-        g2.setColor(Color.BLACK);
-        g2.setFont(new Font("Arial", Font.BOLD, Math.round(12 * fontScaleFactor)));
-        String xLabel = "Workflow Arrival Order (chronological)";
-        FontMetrics xfm = g2.getFontMetrics();
-        int xLabelWidth = xfm.stringWidth(xLabel);
-        g2.drawString(xLabel, (getWidth() - xLabelWidth) / 2, topMargin + chartHeight + Math.round(40 * fontScaleFactor));
-
-        g2.setStroke(new BasicStroke(1));
-
-        List<Task> displayTasks = tasks;
-
-        // Draw tasks with linear scaling (no logarithm, no heat strips)
-        // Use actual display count to properly scale X-axis when Display Range is limited
-        int actualDisplayCount = Math.min(displayTasks.size(), maxDisplayTasks);
-        
-        for (int i = 0; i < actualDisplayCount; i++) {
-            Task task = displayTasks.get(i);
-            Integer laneIndex;
-            Color barColor;
-
-            if (displayByVersion) {
-                String version = deriveVersion(task.sequenceId);
-                laneIndex = versionLanes.get(version);
-                barColor = versionColors.get(version);
-            } else {
-                laneIndex = serviceLanes.get(task.service);
-                barColor = serviceColors.get(task.service);
+            for(int i=0;i<p.count;i++) {
+                Task t=tasks.get(i); int lane=p.lane(t),x=p.barX(i),base=p.baseline(lane);
+                Color c=p.colors.getOrDefault(p.groups.get(lane),Color.GRAY);
+                g.setColor(c);
+                if(t.hasElapsedTime) {
+                    int y=p.valueY(lane,t.elapsedTime),height=base-y;
+                    if(height==0) { g.setStroke(new BasicStroke(2)); g.drawLine(x,base,x+p.barWidth(),base); g.setStroke(new BasicStroke(1)); }
+                    else { g.fillRect(x,y,p.barWidth(),height); g.setColor(c.darker()); g.drawRect(x,y,p.barWidth(),height); }
+                } else {
+                    g.setColor(Color.GRAY); int cx=x+p.barWidth()/2;
+                    g.drawLine(cx-3,base-3,cx+3,base+3); g.drawLine(cx-3,base+3,cx+3,base-3);
+                }
+                if(t.hasQueueTime) {
+                    int dx=p.diamondX(i),dy=p.valueY(lane,t.queueTime),r=p.diamondRadius();
+                    g.setColor(Color.BLACK);
+                    g.fillPolygon(new int[]{dx-r,dx,dx+r,dx},new int[]{dy,dy-r,dy,dy+r},4);
+                }
             }
-
-            if (laneIndex == null) continue;
-
-            // FIX: Use task index (i) instead of database ID for X position
-            // Database IDs can be non-sequential (221, 222, etc.) which causes bars to render off-screen
-            // Use actualDisplayCount to scale properly when maxDisplayTasks is set
-            int x = leftMargin + (i * chartWidth / Math.max(1, actualDisplayCount));
-
-            // FIXED WIDTH - all bars same width for timeline visualization
-            // Use actualDisplayCount to scale properly when maxDisplayTasks is set
-            int barWidth = Math.max(8, (chartWidth / Math.max(1, actualDisplayCount)) - 4);
-
-        //    int barHeight = laneHeight * 2 / 5;
-            int barHeight = (int) (laneHeight * 0.75);
-            int y = topMargin + (laneIndex * laneHeight) + (
-            		laneHeight - barHeight) - 5;
-
-            g2.setColor(barColor);
-            g2.fillRoundRect(x, y, barWidth, barHeight, 5, 5);
-            g2.setColor(barColor.darker());
-            g2.drawRoundRect(x, y, barWidth, barHeight, 5, 5);
-
-            // Add task ID for small datasets
-            if (displayTasks.size() <= 30 && barWidth > 15) {
-                g2.setColor(Color.WHITE);
-                g2.setFont(new Font("Arial", Font.PLAIN, 9));
-                String idStr = String.valueOf(task.sequenceId / 100);  // Token ID without last 2 digits
-                FontMetrics idFm = g2.getFontMetrics();
-                int textWidth = idFm.stringWidth(idStr);
-                g2.drawString(idStr, x + (barWidth - textWidth) / 2, y + barHeight / 2 + 3);
-            }
-        }
-
-        // Draw tooltip if hovering
-        if (hoveredTask != null) {
-            drawTooltip(g2, hoveredTask);
-        }
+            g.setColor(Color.BLACK); g.setFont(labelFont);
+            int bottom=p.baseline(p.groups.size()-1)+43;
+            String xlabel="Workflow arrival order";
+            g.drawString(xlabel,(getWidth()-g.getFontMetrics().stringWidth(xlabel))/2,bottom);
+            g.setFont(axisLabelFont);
+            g.drawString("Queue markers include fork branches and do not represent total workflow waiting time.",20,bottom+22);
+            g.drawString("Order: GENERATED timestamps (recorded workflow starts for legacy rows). Missing measurements are not zero.",20,bottom+40);
+            if(hoveredTask!=null) drawTooltip(g,hoveredTask);
+        } finally { g.dispose(); }
     }
-    
-    private Task getTaskAt(int mouseX, int mouseY) {
-        if (tasks.isEmpty()) return null;
-        
-        List<String> displayGroups = displayByVersion ? uniqueVersions : uniqueServices;
-        Map<String, Integer> displayLanes = displayByVersion ? versionLanes : serviceLanes;
-        
-        if (displayGroups.isEmpty()) return null;
-        
-        Graphics2D g2 = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB).createGraphics();
-        int leftMargin = calculateLeftMargin(g2, displayGroups);
-        g2.dispose();
-        int topMargin = Math.round(80 * fontScaleFactor);
-        int rightMargin = 50;
-        int chartWidth = getWidth() - leftMargin - rightMargin;
-        
-        int numLanes = displayGroups.size();
-        int fullLaneHeight = (getHeight() - topMargin - 30) / numLanes;
-        int laneHeight = (int) (fullLaneHeight * 0.80);
-        
-      //  int barHeight = laneHeight * 2 / 5;
-        int barHeight = (int) (laneHeight * 0.75);
-        
-        // Use actual display count to match paintComponent scaling
-        int actualDisplayCount = Math.min(tasks.size(), maxDisplayTasks);
-        
-        for (int i = 0; i < actualDisplayCount; i++) {
-            Task task = tasks.get(i);
-            Integer laneIndex;
-            
-            if (displayByVersion) {
-                String version = deriveVersion(task.sequenceId);
-                laneIndex = versionLanes.get(version);
-            } else {
-                laneIndex = serviceLanes.get(task.service);
-            }
-            
-            if (laneIndex == null) continue;
-            
-            // FIX: Use task index (i) instead of database ID for X position
-            // Use actualDisplayCount to match paintComponent scaling
-            int x = leftMargin + (i * chartWidth / Math.max(1, actualDisplayCount));
-            
-            // FIXED WIDTH - all bars same width for timeline visualization
-            // Use actualDisplayCount to match paintComponent scaling
-            int barWidth = Math.max(8, (chartWidth / Math.max(1, actualDisplayCount)) - 4);
-            
-            int y = topMargin + (laneIndex * laneHeight) + (laneHeight - barHeight) - 5;
-            if (new Rectangle(x, y, barWidth, barHeight).contains(mouseX, mouseY)) return task;
+    Task getTaskAt(int mouseX,int mouseY) {
+        if(tasks.isEmpty()) return null;
+        Graphics2D g=new BufferedImage(1,1,BufferedImage.TYPE_INT_RGB).createGraphics();
+        Plot p=new Plot(g); g.dispose();
+        for(int i=0;i<p.count;i++) {
+            Task t=tasks.get(i); int lane=p.lane(t),base=p.baseline(lane);
+            int top=t.hasElapsedTime?p.valueY(lane,t.elapsedTime):base;
+            Rectangle bar=new Rectangle(p.barX(i)-3,top-4,p.barWidth()+6,base-top+8);
+            int r=p.diamondRadius()+3;
+            Rectangle marker=new Rectangle(p.diamondX(i)-r,p.valueY(lane,t.queueTime)-r,2*r,2*r);
+            if(bar.contains(mouseX,mouseY)||(t.hasQueueTime&&marker.contains(mouseX,mouseY))) return t;
         }
         return null;
     }
-    
+
     private void drawTooltip(Graphics2D g2, Task task) {
         String version = deriveVersion(task.sequenceId);
         
@@ -1327,10 +727,11 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             "Business services: " + task.businessServices,
             "Workflow version: " + version,
             "Root sequence: " + task.sequenceId,
-            "Recorded service visits: " + task.serviceCount,
-            "Bar size does not encode duration",
-            "Queue waits: View > Service Queue Timings",
-            "Elapsed time: View > Measured Workflow Timeline"
+            "Measured elapsed time: " + elapsedLabel(task) + " ms",
+            "Maximum observed queue wait: " + queueLabel(task) + " ms",
+            "Valid queue visits: " + task.serviceCount + "; invalid/conflicting: " + task.invalidQueueVisits,
+            task.canonical ? "Queue maximum includes fork branches" : "Legacy row: GENERATED/completion interval unavailable",
+            "Queue marker is not total workflow waiting time"
         };
 
         g2.setFont(tooltipFont);
@@ -1359,10 +760,10 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
     }
     
     public void setMaxDisplayTasks(int max) {
-        this.maxDisplayTasks = max;
+        this.maxDisplayTasks = Math.max(1,max);
         this.maxId = Math.min(tasks.size(), max) + 1;
         
-        int width = Math.max(700, maxId * 10 + 200);
+        int width = Math.max(1200, maxId * 18 + 180);
         
         List<String> displayGroups = displayByVersion ? uniqueVersions : uniqueServices;
         if (displayGroups.isEmpty() && displayByVersion) {
@@ -1371,9 +772,9 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         }
         
         int topMargin = Math.round(80 * fontScaleFactor);
-        int bottomPadding = Math.round(15 * fontScaleFactor);
+        int bottomPadding = Math.round(105 * fontScaleFactor);
         int numLanes = Math.max(1, displayGroups.size());
-        int laneHeight = Math.round(45 * fontScaleFactor);
+        int laneHeight = Math.round(110 * fontScaleFactor);
         int chartHeight = numLanes * laneHeight;
         int totalHeight = topMargin + chartHeight + bottomPadding;
         
@@ -1382,10 +783,8 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         repaint();
     }
     
-    // Export methods removed for brevity - can be added back with linear scaling
-    
     public static void createAndShowGUI(SwingGanttChart_WithLatency_v1d chart) {
-        JFrame frame = new JFrame("Concurrent Workflow Overview");
+        JFrame frame = new JFrame("Workflow Elapsed Time and Queue Wait");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         JMenuBar menuBar = new JMenuBar();
@@ -1520,23 +919,6 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         viewMenu.add(queueTimingItem);
         viewMenu.addSeparator();
 
-        JMenu displayModeMenu = new JMenu("Display Mode");
-        ButtonGroup displayGroup = new ButtonGroup();
-        
-        JRadioButtonMenuItem serviceDisplayItem = new JRadioButtonMenuItem("Display by Service");
-        serviceDisplayItem.setSelected(true);
-        serviceDisplayItem.addActionListener(e -> chart.setDisplayByVersion(false));
-        displayGroup.add(serviceDisplayItem);
-        displayModeMenu.add(serviceDisplayItem);
-        
-        JRadioButtonMenuItem versionDisplayItem = new JRadioButtonMenuItem("Display by Version");
-        versionDisplayItem.addActionListener(e -> chart.setDisplayByVersion(true));
-        displayGroup.add(versionDisplayItem);
-        displayModeMenu.add(versionDisplayItem);
-        
-        viewMenu.add(displayModeMenu);
-        viewMenu.addSeparator();
-        
         JMenu truncateMenu = new JMenu("Display Range");
         ButtonGroup truncateGroup = new ButtonGroup();
         
@@ -1610,7 +992,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         
         frame.add(scrollPane);
         frame.pack();
-        frame.setSize(Math.min(1400, frame.getWidth()), Math.min(500, frame.getHeight()));
+        frame.setSize(Math.min(1400, frame.getWidth()), Math.min(720, frame.getHeight()));
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }

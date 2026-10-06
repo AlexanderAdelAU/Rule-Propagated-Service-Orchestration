@@ -55,10 +55,10 @@ public final class ServiceQueueTimingCheck {
             if(!csv.contains("\"RadiologyService, \"\"Audit\"\"\"")) throw new AssertionError("CSV quoting lost service identity");
             ServiceQueueTimingView panel=new ServiceQueueTimingView(data);
             render(panel,"service-queue-fixture.png");
-            // The original chart retains arrival/version lanes but cannot expose maxima as a wait fraction.
+            // Legacy observations retain queue markers but never acquire invented elapsed bars.
             SwingGanttChart_WithLatency_v1d overview=new SwingGanttChart_WithLatency_v1d();
             String report=overview.generateWorkflowSummaryReport();
-            if(!report.contains("Bar size does not encode duration")||report.contains("Maxima Ratio")||report.contains("SUM OF MAXIMA")||report.contains("v999"))
+            if(!report.contains(CombinedWorkflowMetrics.CAPTION)||!report.contains("N/A")||report.contains("Maxima Ratio")||report.contains("SUM OF MAXIMA")||report.contains("v999"))
                 throw new AssertionError("Misleading overview totals remain");
             render(overview,"workflow-overview-fixture.png");
         }

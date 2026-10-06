@@ -84,7 +84,26 @@
             <jvmarg value="-Djava.awt.headless=true"/>
         </java>
     </target>
-    <target name="check-queue-view" depends="jar" description="Check measured per-operation waits and the arrival overview without queue caps">
+    <target name="check-combined-workflow" depends="jar" description="Check measured workflow bars and independent fork-family queue markers">
+        <delete dir="target/combined-workflow-check"/>
+        <mkdir dir="target/combined-workflow-check/classes"/>
+        <mkdir dir="target/combined-workflow-check/runtime"/>
+        <path id="combined.workflow.check.classpath">
+            <path refid="runtime.classpath"/>
+            <pathelement location="../btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+            <pathelement location="target/combined-workflow-check/classes"/>
+        </path>
+        <javac srcdir="../btsn.common.Monitor/tests" destdir="target/combined-workflow-check/classes"
+               includes="CombinedWorkflowMetricsCheck.java" release="${java.release}" includeantruntime="false" encoding="UTF-8">
+            <classpath refid="combined.workflow.check.classpath"/>
+        </javac>
+        <java classname="org.btsn.derby.Analysis.CombinedWorkflowMetricsCheck" fork="true" failonerror="true"
+              dir="target/combined-workflow-check/runtime" maxmemory="128m">
+            <classpath refid="combined.workflow.check.classpath"/>
+            <jvmarg value="-Djava.awt.headless=true"/>
+        </java>
+    </target>
+    <target name="check-queue-view" depends="jar" description="Check measured per-operation waits and legacy queue markers without invented duration bars">
         <delete dir="target/queue-view-check"/>
         <mkdir dir="target/queue-view-check/classes"/>
         <mkdir dir="target/queue-view-check/runtime"/>
