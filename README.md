@@ -192,7 +192,8 @@ The definition of service attributes is done on the basis *"if you want to talk 
 | `btsn.common.Monitor` | Observation collection and analysis |
 | `btsn.common.eventgenerators` | Shared workflow and administration token generators |
 | `btsn.healthcare.ProjectLoader` | Healthcare build-and-run workflows and process tests |
-| `btsn.petrinet.ProjectLoader` | Financial and Petri-net build-and-run workflows |
+| `btsn.financial.ProjectLoader` | Financial system build-and-run workflows |
+| `btsn.petrinet.ProjectLoader` | Petri-net model build-and-run workflows and utility phases |
 | `btsn.workflowEditor` | Workflow editor and animator |
 
 Healthcare services run on P1–P6 using their independently packaged business

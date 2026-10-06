@@ -167,8 +167,11 @@ Monitor/event-generator projects are retained.
 
 All retained model and financial launchers and their standalone utility phases
 now use the packaged runtime. Run the usual XML directly; it builds its JARs
-automatically. See [the launcher guide](../btsn.petrinet.ProjectLoader/README.md)
-for isolated deployment profiles, stochastic examples and phase directories.
+automatically. Financial examples live in
+[btsn.financial.ProjectLoader](../btsn.financial.ProjectLoader/README.md); model
+examples and utility phases remain in
+[btsn.petrinet.ProjectLoader](../btsn.petrinet.ProjectLoader/README.md). See those
+guides for isolated deployment profiles, stochastic examples and phase directories.
 
 For existing Eclipse workspaces, [the runtime Git cleanup guide](docs/RUNTIME_GIT_CLEANUP.md)
 describes the one-time verified backup before removing historical databases,
