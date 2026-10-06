@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="workflow-components" default="jar" basedir="../..">
+    <property name="common.dir" location="../btsn.common"/>
+    <property name="java.release" value="15"/>
+    <path id="runtime.classpath">
+        <pathelement location="${common.dir}/target/host-runtime/btsn-infrastructure.jar"/>
+        <fileset dir="target/deployment/services" includes="*.jar"/>
+        <fileset dir="target/deployment/lib" includes="*.jar"/>
+        <fileset dir="${common.dir}/lib" includes="*.jar" excludesfile="target/runtime-library-excludes.txt"/>
+    </path>
+    <macrodef name="build-component">
+        <attribute name="directory"/><attribute name="artifact"/>
+        <sequential>
+            <delete dir="@{directory}/target/jar-runtime/classes"/>
+            <mkdir dir="@{directory}/target/jar-runtime/classes"/>
+            <mkdir dir="@{directory}/target/jar-runtime/empty-sourcepath"/>
+            <javac srcdir="@{directory}/src" destdir="@{directory}/target/jar-runtime/classes"
+                   sourcepath="@{directory}/target/jar-runtime/empty-sourcepath"
+                   release="${java.release}" includeantruntime="false" encoding="UTF-8">
+                <classpath refid="runtime.classpath"/>
+            </javac>
+            <copy todir="@{directory}/target/jar-runtime/classes"><fileset dir="@{directory}/src" excludes="**/*.java,**/*.class"/></copy>
+            <jar destfile="@{directory}/target/jar-runtime/@{artifact}.jar"
+                 basedir="@{directory}/target/jar-runtime/classes" modificationtime="315532800000"/>
+        </sequential>
+    </macrodef>
+    <target name="jar-monitor" description="Build the Monitor JAR against shared runtime dependencies">
+        <build-component directory="../btsn.common.Monitor" artifact="btsn-monitor"/>
+    </target>
+    <target name="jar-generators" description="Build the common event-generator JAR">
+        <build-component directory="../btsn.common.eventgenerators" artifact="btsn-eventgenerators"/>
+    </target>
+    <target name="jar" depends="jar-monitor,jar-generators" description="Build Monitor and event-generator JARs"/>
+</project>

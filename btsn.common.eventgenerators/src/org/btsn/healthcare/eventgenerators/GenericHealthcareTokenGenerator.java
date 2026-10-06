@@ -829,7 +829,7 @@ public class GenericHealthcareTokenGenerator {
 	 * 
 	 * Search order:
 	 * 1. Current working directory: ./TokenFormats/{serviceName}.json
-	 * 2. Event generator project: btsn.healthcare.eventgenerators/TokenFormats/
+	 * 2. Event generator project: btsn.common.eventgenerators/TokenFormats/
 	 * 3. Common directory: btsn.common/TokenFormats/
 	 * 
 	 * Falls back to _default.json if service-specific format not found
@@ -840,7 +840,7 @@ public class GenericHealthcareTokenGenerator {
 		// Search paths in priority order
 		String[] searchPaths = {
 			"./TokenFormats",                          // Current working directory
-			"../btsn.healthcare.eventgenerators/TokenFormats",  // Sibling project
+			"../btsn.common.eventgenerators/TokenFormats",  // Sibling project
 			"../btsn.common/TokenFormats",             // Common directory (sibling)
 			"../../btsn.common/TokenFormats"           // Common directory (parent's sibling)
 		};

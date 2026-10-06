@@ -184,38 +184,51 @@ The definition of service attributes is done on the basis *"if you want to talk 
 
 ## Project Structure
 
-```
-├── btsn.common/                    # Shared libraries and rules
-│   ├── src/org/btsn/              # Common source code
-│   ├── lib/                        # Dependencies
-│   ├── RuleBase/                   # Rule definitions
-│   ├── ServiceAttributeBindings/   # Service bindings
-│   └── serviceLoaderQueries/       # Loader configurations
-│
-├── btsn.healthcare.places.Triage/      # Triage service
-├── btsn.healthcare.places.Cardiology/  # Cardiology service
-├── btsn.healthcare.places.Diagnosis/   # Diagnosis service
-├── btsn.healthcare.places.Laboratory/  # Laboratory service
-├── btsn.healthcare.places.Radiology/   # Radiology service
-└── btsn.healthcare.places.Treatment/   # Treatment service
-```
+| Project | Purpose |
+|---|---|
+| `btsn.common` | Shared infrastructure, rules, catalogues and business-service source |
+| `btsn.services` | Independent service JAR packaging and shared Ant build support |
+| `btsn.petrinet.places.p1` through `p6` | Generic numbered orchestration hosts |
+| `btsn.common.Monitor` | Observation collection and analysis |
+| `btsn.common.eventgenerators` | Shared workflow and administration token generators |
+| `btsn.healthcare.ProjectLoader` | Healthcare build-and-run workflows and process tests |
+| `btsn.petrinet.ProjectLoader` | Financial and Petri-net build-and-run workflows |
+| `btsn.workflowEditor` | Workflow editor and animator |
+
+Healthcare services run on P1–P6 using their independently packaged business
+JARs. The six former healthcare-specific host projects have been removed. See
+[the healthcare guide](btsn.services/docs/HEALTHCARE.md) for the service mapping.
 
 ## Requirements
 
-- Java 15+
-- Apache Ant
-- OOjDREW rule engine
-- Derby (Embedded)
+- JDK 15+ (the Ant JVM must provide the Java compiler)
+- Apache Ant 1.10.2+
+- Repository-supplied runtime libraries, including OOjDREW and embedded Derby
 
 ## Building a Project
 
-Each service or mesh project is normally built by the IDE, for example Eclipse.   If you wish to run the service on another host the project can be built independently by running
+From the repository root, build and check the independent service JARs with:
 
- ```Ant build.xml ```:
+```sh
+ant -f btsn.services/build.xml clean check
+```
 
-This produces a distributable ZIP containing the service JAR, dependencies, and launch scripts. This allows a service or build to be deployed to any host on the network.
+Build one generic host's executable JAR and portable ZIP with:
 
-For example to build the Triage service with its Control Node navigate to `btsn.healthcare.places.Triage` and then run `build.xml`.   This will generate the zip file `btsn.places.Triage-1.0.zip` which you can copy to any platform.  Running `launch.bat` will load the complete application.  It just remains then to launch any one of the process workflows defined in the `btsn.healthcare.ProjectLoader` directory.
+```sh
+ant -f btsn.petrinet.places.p1/build.xml
+```
+
+Each host's portable package contains its infrastructure and launch scripts.
+Install the selected business-service JARs and support libraries separately on
+its classpath. See [the portable-release guide](btsn.services/docs/PLACE_RELEASES.md)
+for deployment instructions.
+
+For the development healthcare workflow, run
+`btsn.healthcare.ProjectLoader/Emergency_Department_BuildAndRun.xml` as an Ant
+Build in Eclipse. It builds the current JARs and prepares the healthcare runtime
+on the generic hosts. The shared build organisation is described in
+[btsn.services](btsn.services/README.md).
 
 ## Validation Scenario
 

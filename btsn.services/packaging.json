@@ -2,7 +2,7 @@
   "sourceRoot": "../btsn.common/src",
   "catalogues": [
     "../btsn.common/BusinessServiceDefinitions/FinancialSystem.json",
-    "StochasticService.json",
+    "catalogues/StochasticService.json",
     "../btsn.common/BusinessServiceDefinitions/PetriNetModels.json",
     "../btsn.common/BusinessServiceDefinitions/Healthcare.json"
   ],

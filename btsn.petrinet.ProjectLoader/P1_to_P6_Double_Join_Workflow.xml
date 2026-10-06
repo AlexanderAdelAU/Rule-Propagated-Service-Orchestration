@@ -28,8 +28,8 @@
     <property name="lib.dir" location="${source.root}/btsn.common/lib"/>
     <property name="generator.bin.dir" location="${source.root}/btsn.common.eventgenerators/target/jar-runtime/btsn-eventgenerators.jar"/>
     <property name="monitor.bin.dir" location="${source.root}/btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
-    <property name="model.profile.file" location="${services.project.dir}/models/DoubleJoinDeployment.json"/>
-    <property name="model.rules.file" location="${services.project.dir}/models/DoubleJoinInfrastructure.ruleml.xml"/>
+    <property name="model.profile.file" location="${services.project.dir}/deployments/models/DoubleJoinDeployment.json"/>
+    <property name="model.rules.file" location="${services.project.dir}/deployments/models/DoubleJoinInfrastructure.ruleml.xml"/>
     <property name="local.channel.rules" location="${common.project.dir}/RuleBase/Generated/InfrastructureDeployment.ruleml.xml"/>
     <property name="token.outcome" value="true"/>
     <property name="p1.project.dir" location="${model.runtime.dir}/btsn.petrinet.places.p1"/>

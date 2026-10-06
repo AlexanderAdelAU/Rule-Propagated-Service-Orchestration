@@ -1,51 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Imported unchanged by all six host projects. Host identity is supplied by the wrapper. -->
 <project name="generic-place-host" default="release" basedir=".">
-    <property name="common.dir" location="../btsn.common"/>
-    <property name="services.dir" location="../btsn.services"/>
-    <property name="service.target" location="${services.dir}/target"/>
-    <property name="host.target" location="target"/>
-    <property name="host.jar" location="${host.target}/${host.artifact}.jar"/>
-    <property name="java.release" value="15"/>
-    <property name="service.args" value="-version v001"/>
-    <path id="runtime.dependencies">
-        <pathelement location="${common.dir}/target/host-runtime/btsn-infrastructure.jar"/>
-        <fileset dir="${service.target}/deployment/services" includes="*.jar"/>
-        <fileset dir="${service.target}/deployment/lib" includes="*.jar"/>
-        <fileset dir="${common.dir}/lib" includes="*.jar" excludesfile="${service.target}/runtime-library-excludes.txt"/>
-    </path>
-    <path id="host.runtime.classpath">
-        <pathelement location="${host.jar}"/>
-        <path refid="runtime.dependencies"/>
-    </path>
-    <target name="clean" description="Remove only this host's Ant output">
-        <delete dir="${host.target}"/>
-    </target>
-    <target name="prepare" description="Build independent services and common infrastructure">
-        <ant antfile="${services.dir}/build.xml" target="runtime" inheritall="false"/>
-    </target>
-    <target name="compile" description="Compile this generic host against the packaged runtime">
-        <delete dir="${host.target}/classes"/>
-        <mkdir dir="${host.target}/classes"/>
-        <mkdir dir="${host.target}/empty-sourcepath"/>
-        <javac srcdir="src" destdir="${host.target}/classes" release="${java.release}"
-               sourcepath="${host.target}/empty-sourcepath" includeantruntime="false" encoding="UTF-8">
-            <classpath refid="runtime.dependencies"/>
-        </javac>
-        <copy todir="${host.target}/classes"><fileset dir="src" excludes="**/*.java,**/*.class"/></copy>
-    </target>
-    <target name="jar-only" depends="compile" description="Package host using an already prepared shared runtime">
-        <manifestclasspath property="host.manifest.classpath" jarfile="${host.jar}">
-            <classpath refid="runtime.dependencies"/>
-        </manifestclasspath>
-        <jar destfile="${host.jar}" basedir="${host.target}/classes" modificationtime="315532800000">
-            <manifest>
-                <attribute name="Main-Class" value="org.btsn.handlers.ServiceLoader"/>
-                <attribute name="Class-Path" value="${host.manifest.classpath}"/>
-            </manifest>
-        </jar>
-    </target>
-    <target name="jar" depends="place-release" description="Build only this numbered place's portable executable JAR and ZIP"/>
-    <import file="place-release.xml"/>
-    <target name="release" depends="place-release" description="Build only this numbered place's executable JAR and portable ZIP"/>
+    <!-- Stable entry point for Eclipse launchers and imported host builds. -->
+    <import file="build/hosts/host-build.xml"/>
 </project>

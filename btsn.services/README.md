@@ -1,10 +1,38 @@
-# Independent service deployment JARs
+# Service packaging and shared build support
+
+This is the build-support project for independent business-service JARs and the
+generic host/workflow launchers. It contains no business-service implementations
+or execution handlers. Implementations remain in `btsn.common`; the numbered
+places remain the runtime hosts. Its default build packages the business JARs.
+Host and workflow builds are optional targets.
 
 This module builds service implementations independently of the generic P1–P6
 hosts. P1–P6 `build.xml` files now import the same generic host build; handlers
 and `ServiceThread` are unchanged.
 Service identity and host placement remain separate: none of the generated service
 JARs belongs to a numbered host.
+
+## Organisation
+
+| Location | Responsibility |
+|---|---|
+| `build/packaging/` | Catalogue inventory and independent service packaging |
+| `build/hosts/` | Shared infrastructure, generic host builds and portable place releases |
+| `build/workflows/` | Monitor/generator builds, local channel checks and runtime preparation |
+| `build/checks/` | Packaged-service, host-boundary and analysis regression targets |
+| `deployments/healthcare/` | Healthcare deployment profile and channel facts |
+| `deployments/models/` | Deterministic and double-join model deployment profiles |
+| `catalogues/` | Supplemental packaging inventory |
+| `src/`, `tests/` | Java build helpers and regression checks |
+| `docs/` | Healthcare, model and portable-release guides |
+
+The root XML files are stable Ant entry points. Existing Eclipse configurations
+and launcher imports keep their paths and target names. Use these entry points;
+XML files under `build/` are implementation fragments imported by them.
+`packaging.json` remains the inventory configuration entry point. All generated
+outputs stay under the existing `target` directories.
+
+## Build and check
 
 From the repository root, with Ant 1.10.2+ running on a JDK 15+:
 
@@ -51,8 +79,9 @@ release. The builder reads every catalogue entry, including preserved unbound
 services, without interpreting the business domain or making host-placement
 decisions. The separate stochastic inventory is packaging data; it does not
 change active deployment metadata. The current inventory yields twenty-one service
-JARs: seven Financial implementations, seven deterministic model implementations
-and the preserved stochastic implementation. See [PETRINET_MODELS.md](PETRINET_MODELS.md)
+JARs: seven Financial implementations, seven deterministic model implementations,
+six healthcare implementations and the preserved stochastic implementation.
+See [PETRINET_MODELS.md](docs/PETRINET_MODELS.md)
 for the two-place and six-place double-join models using actual platform measurements.
 Use `-Dpackaging.config=/path/to/packaging.json` for another inventory.
 
@@ -85,7 +114,7 @@ library path to avoid duplicate copies.
 ## Numbered-place releases and BuildAndRun
 
 Run each numbered place's `build.xml` in Eclipse to build that place's executable
-JAR and portable ZIP. See [PLACE_RELEASES.md](PLACE_RELEASES.md) for outputs and
+JAR and portable ZIP. See [PLACE_RELEASES.md](docs/PLACE_RELEASES.md) for outputs and
 manual startup commands. These packages contain infrastructure only.
 
 Run the service project's `build.xml` in Eclipse to build the separate business
@@ -113,7 +142,9 @@ conflicting ip0 facts fail the build rather than guessing a destination.
 catalogues. Run its default check target to verify address and rule parsing.
 Only the launcher decision changes; handlers, token scheduling, service
 invocation and process deployment keep their existing behaviour. The healthcare
-launchers also use this check; see [HEALTHCARE.md](HEALTHCARE.md).
+launchers also use this check; see [HEALTHCARE.md](docs/HEALTHCARE.md).
 
-The abandoned aggregate two-JAR distribution and its launch commands have been
-removed. Active infrastructure handlers and healthcare projects are preserved.
+The obsolete healthcare-specific host projects and standalone canary launcher
+have been removed. `btsn.healthcare.ProjectLoader` remains the active healthcare
+launcher project. Clinical implementations, workflow definitions and the shared
+Monitor/event-generator projects are retained.

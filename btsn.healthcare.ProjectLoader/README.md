@@ -58,7 +58,7 @@ or a comma-separated list) and `collector.operation`. `init.version` and
 `collector.version` default to v999; `rule.version` defaults to v001.
 
 The launcher changes leave execution handlers, scheduling and business logic
-unchanged. Shared `btsn.services` build organisation remains a separate cleanup.
+unchanged. Shared build support is grouped under `btsn.services/build`; its existing Ant entry points are retained.
 
 ## Controlled queue-priority experiment
 
