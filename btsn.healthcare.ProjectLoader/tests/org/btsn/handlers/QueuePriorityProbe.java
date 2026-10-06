@@ -1,5 +1,7 @@
 package org.btsn.handlers;
 
+import java.awt.Desktop;
+import java.awt.GraphicsEnvironment;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -94,15 +96,38 @@ public final class QueuePriorityProbe {
             throw new AssertionError("Expected packaged P1 scheduler, loaded " + reactorOrigin);
         Path output = Path.of(args[0]);
         int repeats = Integer.parseInt(args[1]), requestedPort = Integer.parseInt(args[2]);
+        boolean openResults = args.length < 4 || Boolean.parseBoolean(args[3]);
         if (repeats < 1 || repeats > 20) throw new IllegalArgumentException("repeats must be 1..20");
+        Files.createDirectories(output);
+        StringBuilder summary = new StringBuilder("CONTROLLED QUEUE-PRIORITY RESULTS\n"
+                + "Real P1 UDP queue; controlled worker; healthcare/Monitor databases are not used.\n");
         for (int run = 1; run <= repeats; run++) {
             int port = requestedPort;
             if (port == 0) try (DatagramSocket unused = new DatagramSocket(0, InetAddress.getLoopbackAddress())) { port = unused.getLocalPort(); }
-            experiment(output.resolve("run-" + run), port);
+            summary.append("Run ").append(run).append(": ").append(experiment(output.resolve("run-" + run), port)).append('\n');
         }
-        System.out.println("PASS: " + repeats + " observed-backlog runs; v001 overtakes v002/v003; occupied work finishes first.");
+        summary.append("PASS: ").append(repeats).append(" observed-backlog runs; v001 overtakes v002/v003; occupied work finishes first.\n");
+        Files.writeString(output.resolve("summary.txt"), summary);
+        System.out.print(summary);
+        Path report = output.resolve("run-1/timeline.html").toAbsolutePath().normalize();
+        Files.writeString(output.resolve("viewer-status.txt"), openResults ? openTimeline(report)
+                : "Automatic graph opening disabled. Open this run's graph: " + report + "\n");
     }
-    private static void experiment(Path output, int port) throws Exception {
+    private static String openTimeline(Path report) {
+        if (GraphicsEnvironment.isHeadless() || !Desktop.isDesktopSupported())
+            return "No desktop browser available. Open this run's graph: " + report + "\n";
+        try {
+            Desktop desktop = Desktop.getDesktop();
+            if (!desktop.isSupported(Desktop.Action.BROWSE))
+                return "Browser opening unavailable. Open this run's graph: " + report + "\n";
+            desktop.browse(report.toUri());
+            return "Opened this run's queue-priority graph in the default browser: " + report + "\n";
+        } catch (IOException | UnsupportedOperationException | SecurityException e) {
+            return "The test passed, but the graph could not open automatically (" + e.getMessage()
+                    + "). Open: " + report + "\n";
+        }
+    }
+    private static String experiment(Path output, int port) throws Exception {
         ObservedReactor reactor = new ObservedReactor(port);
         CountDownLatch busy = new CountDownLatch(1), release = new CountDownLatch(1), done = new CountDownLatch(1);
         List<Integer> order = Collections.synchronizedList(new ArrayList<>());
@@ -150,7 +175,10 @@ public final class QueuePriorityProbe {
                     throw new AssertionError("Token was not waiting at release: " + token);
                 previousEnd = v.ended;
             }
-            write(output, reactor, released, port);
+            write(output, reactor, released, port, order);
+            return "PASS; 8 tokens confirmed waiting before release; queue drained; zero lost tokens.\n"
+                    + "  Actual execution: " + order + "\n"
+                    + "  v003 blocker finishes first, then v001, v001, v002, v002, v003, v003, v003, v003.";
         } finally {
             release.countDown();
             worker.interrupt();
@@ -160,7 +188,7 @@ public final class QueuePriorityProbe {
     }
     private static String ms(long ns) { return String.format(Locale.ROOT, "%.3f", ns / 1000000.0); }
     private static String color(int id) { return id / 1000000 == 1 ? "#b8423a" : id / 1000000 == 2 ? "#286ba0" : "#278654"; }
-    private static void write(Path output, ObservedReactor r, long release, int port) throws Exception {
+    private static void write(Path output, ObservedReactor r, long release, int port, List<Integer> order) throws Exception {
         Files.createDirectories(output);
         StringBuilder csv = new StringBuilder("token,version,enqueue_before_ms,dequeue_ms,start_ms,end_ms,queue_wait_upper_bound_ms,execution_ms\n");
         for (Visit v : r.visits.values()) csv.append(v.id).append(",v00").append(v.id / 1000000).append(',')
@@ -172,7 +200,7 @@ public final class QueuePriorityProbe {
         Files.writeString(output.resolve("queue.csv"), depth);
         String report = "PASS: priority overtaking with confirmed backlog\nQueue: packaged P1 EventReactor, loopback UDP " + port
                 + "; one controlled consumer, no business rule execution\n"
-                + "Arrivals behind blocker: " + ARRIVALS + "\nExecution order: " + EXPECTED
+                + "Arrivals behind blocker: " + ARRIVALS + "\nActual execution order: " + order
                 + "\nEight tokens confirmed waiting before release at " + ms(release) + " ms.\n"
                 + "No interruption of running work; zero rejected tokens; queue drained.\n"
                 + "Enqueue timestamps are taken immediately BEFORE synchronized production admission. CSV queue wait includes admission overhead and is an upper bound. Graph waiting extends to execution start and includes dispatch overhead.\n";

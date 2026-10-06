@@ -90,7 +90,18 @@ the ordering evidence. Failure to reach a gate or the expected order fails Ant.
 The default is three runs. Set `-Dprobe.repeats=10` for more repetitions or
 `-Dprobe.port=0` to select an available loopback UDP port (the default). The JVM
 and its worker/UDP resources stop when the test finishes; no external host is
-needed. Each run writes the following under `target/queue-priority/run-N/`:
+needed. Ant prints each run's confirmed backlog, actual execution order and PASS
+summary. The handler's verbose stdout/stderr goes to `target/queue-priority/runtime.log`
+and `runtime-errors.log`; those paths are printed before the test starts, including
+when a failed assertion stops the run.
+
+After success, the launcher opens `run-1/timeline.html` in the default browser.
+Set `-Dprobe.open.results=false` to disable automatic opening; systems without a
+desktop print the file path. This graph contains the probe's nine tokens. The
+ordinary Monitor chart and Petri analyzer continue to show the previous real
+healthcare run because this isolated experiment does not collect into Monitor.
+The two views have different data sources. Each run writes the following under
+`target/queue-priority/run-N/`:
 
 | Output | Meaning |
 |---|---|

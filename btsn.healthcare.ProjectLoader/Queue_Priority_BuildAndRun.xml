@@ -6,8 +6,10 @@
     <property name="probe.dir" location="target/queue-priority"/>
     <property name="probe.repeats" value="3"/>
     <property name="probe.port" value="0"/>
+    <property name="probe.open.results" value="true"/>
     <property name="java.release" value="15"/>
     <target name="prepare">
+        <echo message="Controlled queue-priority probe: real P1 UDP queue, isolated worker and reports. Open the generated timeline; Monitor retains the previous healthcare data."/>
         <ant antfile="${services.dir}/build.xml" target="runtime" inheritall="false"/>
         <ant antfile="../btsn.petrinet.places.p1/build.xml" target="jar-only" inheritall="false"/>
         <mkdir dir="${probe.dir}/classes"/>
@@ -28,16 +30,24 @@
         </javac>
     </target>
     <target name="run" depends="prepare" description="Assert priority overtaking and produce CSV, HTML and SVG timelines">
+        <echo message="Detailed queue debug output: ${probe.dir}/runtime.log and runtime-errors.log"/>
         <java classname="org.btsn.handlers.QueuePriorityProbe" fork="true" failonerror="true"
-              dir="${probe.dir}/runtime" timeout="60000" maxmemory="128m">
+              dir="${probe.dir}/runtime" timeout="60000" maxmemory="128m"
+              output="${probe.dir}/runtime.log" error="${probe.dir}/runtime-errors.log">
             <classpath refid="probe.classpath"/>
             <arg file="${probe.dir}"/><arg value="${probe.repeats}"/><arg value="${probe.port}"/>
+            <arg value="${probe.open.results}"/>
         </java>
+        <loadfile property="probe.summary" srcfile="${probe.dir}/summary.txt" encoding="UTF-8"/>
+        <echo message="${probe.summary}"/>
+        <loadfile property="probe.viewer.status" srcfile="${probe.dir}/viewer-status.txt" encoding="UTF-8"/>
+        <echo message="${probe.viewer.status}"/>
         <echo message="Results: ${probe.dir}/run-1/timeline.html (also timeline.svg, tokens.csv, queue.csv, report.txt)"/>
     </target>
     <target name="help" description="Explain the isolated priority experiment">
         <echo message="Run this file with Ant. One occupied worker; four v003, two v002, then two v001 tokens queued before release."/>
         <echo message="Override -Dprobe.repeats=3 or -Dprobe.port=0 (an automatically selected loopback UDP port)."/>
+        <echo message="The run opens its timeline in the default browser. Disable with -Dprobe.open.results=false."/>
         <echo message="This tests the production queue with a controlled consumer; it does not execute healthcare business rules or collectors."/>
     </target>
 </project>
