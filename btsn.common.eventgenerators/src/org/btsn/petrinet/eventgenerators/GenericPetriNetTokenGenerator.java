@@ -1027,6 +1027,7 @@ public class GenericPetriNetTokenGenerator {
 			byte[] data = payload.getBytes();
 			DatagramPacket packet = new DatagramPacket(data, data.length, targetAddress, targetPort);
 			udpSocket.send(packet);
+			org.btsn.observation.WorkflowRunMetadata.recordPayload(processName, payload);
 			
 		} catch (Exception e) {
 			if (udpSocket != null) {

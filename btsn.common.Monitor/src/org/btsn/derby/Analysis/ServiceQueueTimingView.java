@@ -53,8 +53,10 @@ public final class ServiceQueueTimingView extends JPanel {
     }
     public static final class Data {
         public final List<Summary> summaries;
+        public final WorkflowProcessNames processNames;
         public final int invalidVisits, unresolvedVisits, duplicateRows;
-        private Data(List<Summary> summaries,int invalid,int unresolved,int duplicates) {
+        private Data(List<Summary> summaries,int invalid,int unresolved,int duplicates, WorkflowProcessNames processes) {
+            processNames = processes;
             this.summaries=Collections.unmodifiableList(summaries);
             invalidVisits=invalid; unresolvedVisits=unresolved; duplicateRows=duplicates;
         }
@@ -91,7 +93,7 @@ public final class ServiceQueueTimingView extends JPanel {
         for(Summary s:data.summaries) queues.computeIfAbsent(s.place+"\u0000"+s.operation,k->new ArrayList<>()).add(s);
         scaleMax=Math.max(1,data.summaries.stream().mapToDouble(s->Math.max(s.meanMs,s.p95Ms)).max().orElse(1))*1.05;
         setBackground(Color.WHITE);
-        setPreferredSize(new Dimension(1250,Math.max(330,205+queues.size()*68+data.summaries.size()*34)));
+        setPreferredSize(new Dimension(1250,Math.max(330,205+headerHeight(1250)+queues.size()*68+data.summaries.size()*34)));
     }
     private static String key(long workflow,long token,String operation,long arrival) {
         return workflow+"/"+token+"/"+arrival+"/"+operation;
@@ -149,8 +151,12 @@ public final class ServiceQueueTimingView extends JPanel {
         }
         List<Summary> summaries=new ArrayList<>();
         for(Group g:groups.values()) summaries.add(new Summary(g.place,g.operation,g.version,g.names,g.waits));
-        return new Data(summaries,invalid,unresolved,duplicateRows);
+        return new Data(summaries,invalid,unresolved,duplicateRows,WorkflowProcessNames.load(c));
     }
+    private List<String> headerLines(int width) {
+        return WorkflowProcessNames.wrap(data.processNames.caption(-1, true), getFontMetrics(getFont()), Math.max(40, width-40));
+    }
+    private int headerHeight(int width) { return headerLines(width).size() * (getFontMetrics(getFont()).getHeight()+2); }
     @Override protected void paintComponent(Graphics graphics) {
         super.paintComponent(graphics);
         Graphics2D g=(Graphics2D)graphics.create();
@@ -159,8 +165,10 @@ public final class ServiceQueueTimingView extends JPanel {
         g.drawString("Measured queue waits by service / host operation",20,28);
         g.drawString("Bars: mean wait. Diamonds: 95th percentile. Common millisecond scale; one sample per observed service visit.",20,50);
         g.drawString("Queue averages describe waiting; execution-order evidence is needed to establish priority selection.",20,70);
-        if(queues.isEmpty()) { g.drawString("No visits with both valid queue timing and a reliable host identity.",20,115); g.drawString(data.note(),20,145); g.dispose(); return; }
-        int chartWidth=Math.max(1,getWidth()-420),y=105;
+        int header = headerHeight(getWidth()), labelY = 91;
+        for (String line : headerLines(getWidth())) { g.drawString(line, 20, labelY); labelY += getFontMetrics(getFont()).getHeight()+2; }
+        if(queues.isEmpty()) { g.drawString("No visits with both valid queue timing and a reliable host identity.",20,115+header); g.drawString(data.note(),20,145+header); g.dispose(); return; }
+        int chartWidth=Math.max(1,getWidth()-420),y=105+header;
         for(List<Summary> rows:queues.values()) {
             Summary first=rows.get(0);
             Set<String> names=new TreeSet<>(); for(Summary row:rows) names.add(row.services);

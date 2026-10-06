@@ -24,6 +24,7 @@ public final class CombinedWorkflowMetrics {
         public int validQueueVisits, invalidQueueVisits;
         public boolean canonical;
         public String services = "Unresolved";
+        public String process = WorkflowProcessNames.UNKNOWN;
         private Workflow(int base, int root) { workflowBase=base; rootTokenId=root; }
         public boolean hasDuration() { return canonical && generatedAt>0 && completedAt>=generatedAt; }
         public long durationMs() {
@@ -46,6 +47,7 @@ public final class CombinedWorkflowMetrics {
         Map<String,Workflow> roots=new TreeMap<>(), owners=new HashMap<>();
         Set<Integer> canonicalBases=new HashSet<>();
         ServiceDisplayNames names=ServiceDisplayNames.load(c);
+        WorkflowProcessNames processes=WorkflowProcessNames.load(c);
         if (hasTable(c,"CONSOLIDATED_TRANSITION_FIRINGS")) {
             List<Integer> bases=new ArrayList<>();
             try (Statement s=c.createStatement(); ResultSet r=s.executeQuery(
@@ -129,6 +131,7 @@ public final class CombinedWorkflowMetrics {
         }
         for(Map.Entry<Workflow,Set<String>> e:capturedNames.entrySet()) e.getKey().services=String.join(" / ",e.getValue());
         List<Workflow> result=new ArrayList<>(roots.values());
+        for (Workflow w : result) w.process=processes.forRoot(w.rootTokenId,w.generatedAt);
         result.sort(Comparator.comparingLong((Workflow w)->w.arrivalOrderTime>0?w.arrivalOrderTime:Long.MAX_VALUE)
                 .thenComparingInt(w->w.rootTokenId));
         return result;

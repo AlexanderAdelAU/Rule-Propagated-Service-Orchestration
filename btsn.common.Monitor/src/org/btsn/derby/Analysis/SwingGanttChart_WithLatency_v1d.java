@@ -68,6 +68,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         long processingTime;
         long queueTime;
         String businessServices = "Unresolved";
+        String process = WorkflowProcessNames.UNKNOWN;
         int serviceCount;  // Number of services in this workflow
         long elapsedTime;  // GENERATED to canonical completion, never estimated from visits
         boolean hasElapsedTime, hasQueueTime, canonical;
@@ -123,6 +124,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
      */
     public String generateWorkflowSummaryReport() {
         StringBuilder report = new StringBuilder("WORKFLOW ELAPSED TIME AND QUEUE WAIT\n");
+        report.append(processDescription(false)).append('\n');
         report.append(workflowCaption()).append('\n');
         report.append(scaleDescription()).append("\nX = unavailable elapsed interval; ").append(missingQueueLabel())
             .append(" = unavailable queue measurement.\n");
@@ -130,13 +132,14 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             report.append(group).append(" axis: 0 to ").append(axisLabel(axisMaximum(group))).append(" ms\n");
         report.append(exceptionDescription()).append('\n');
         report.append("Arrival order uses GENERATED timestamps, or recorded workflow starts for legacy rows. N/A is not zero.\n\n");
-        report.append("Arrival | Root sequence | Version | Elapsed ms | Max observed queue ms | Valid queue visits | Invalid/conflicting visits | Services\n");
+        report.append("Arrival | Root sequence | Version | Elapsed ms | Max observed queue ms | Valid queue visits | Invalid/conflicting visits | Services | Process\n");
         for (int i=0; i<tasks.size(); i++) {
             Task t=tasks.get(i);
             report.append(i+1).append(" | ").append(t.sequenceId).append(" | ")
                 .append(deriveVersion(t.sequenceId)).append(" | ").append(elapsedLabel(t))
                 .append(" | ").append(queueLabel(t)).append(" | ").append(t.serviceCount)
-                .append(" | ").append(t.invalidQueueVisits).append(" | ").append(t.businessServices).append('\n');
+                .append(" | ").append(t.invalidQueueVisits).append(" | ").append(t.businessServices)
+                .append(" | ").append(t.process).append('\n');
         }
         return report.toString();
     }
@@ -440,22 +443,22 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         for(int i=0;i<count;i+=step) w.printf(Locale.ROOT,"\\node[below] at (%.3f,-0.08) {%d};%n",i+0.38,i+1);
         w.printf(Locale.ROOT,"\\node[below] at (%.3f,-0.25) {Workflow arrival order; elapsed / queue wait (ms)};%n",count/2.0);
         w.println("\\end{tikzpicture}");
-        w.println("\\caption{"+workflowCaption()+" "+scaleDescription()+" Crosses indicate unavailable elapsed intervals; "+missingQueueLabel()+" indicates unavailable queue measurements. "+exceptionDescription()+" Arrival order uses GENERATED timestamps, or recorded starts for legacy rows.}");
+        w.println("\\caption{"+escapeLatex(processDescription(false))+". "+workflowCaption()+" "+scaleDescription()+" Crosses indicate unavailable elapsed intervals; "+missingQueueLabel()+" indicates unavailable queue measurements. "+exceptionDescription()+" Arrival order uses GENERATED timestamps, or recorded starts for legacy rows.}");
         w.println("\\label{fig:workflow-elapsed-queue}\n\\end{figure}");
         w.flush(); return text.toString();
     }
     public String generateLaTeXTable() {
         StringWriter text=new StringWriter(); PrintWriter w=new PrintWriter(text);
         w.println("% Preamble: \\usepackage{booktabs,longtable}. N/A is not zero.");
-        w.println("\\begin{longtable}{rrrrrrr}\n\\toprule");
-        w.println("Arrival & Root & Version & Elapsed (ms) & Max queue (ms) & Valid visits & Invalid visits \\\\");
+        w.println("\\begin{longtable}{rrrrrrrp{5cm}}\n\\toprule");
+        w.println("Arrival & Root & Version & Elapsed (ms) & Max queue (ms) & Valid visits & Invalid visits & Process \\\\");
         w.println("\\midrule\n\\endhead");
         for(int i=0;i<Math.min(tasks.size(),maxDisplayTasks);i++) {
             Task t=tasks.get(i);
-            w.printf("%d & %d & %s & %s & %s & %d & %d \\\\%n",i+1,t.sequenceId,
-                escapeLatex(deriveVersion(t.sequenceId)),elapsedLabel(t),queueLabel(t),t.serviceCount,t.invalidQueueVisits);
+            w.printf("%d & %d & %s & %s & %s & %d & %d & %s \\\\%n",i+1,t.sequenceId,
+                escapeLatex(deriveVersion(t.sequenceId)),elapsedLabel(t),queueLabel(t),t.serviceCount,t.invalidQueueVisits,escapeLatex(t.process));
         }
-        w.println("\\bottomrule\n\\caption{"+workflowCaption()+"}\n\\label{tab:workflow-elapsed-queue}\n\\end{longtable}");
+        w.println("\\bottomrule\n\\caption{"+escapeLatex(processDescription(false))+". "+workflowCaption()+"}\n\\label{tab:workflow-elapsed-queue}\n\\end{longtable}");
         w.flush(); return text.toString();
     }
 
@@ -541,7 +544,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         }
         
         int width = Math.max(1200, maxId * 10 + 150);
-        int topMargin = Math.round(112 * fontScaleFactor);
+        int topMargin = plotTop(width);
         int bottomPadding = Math.round(105 * fontScaleFactor);
         int numLanes = uniqueVersions.size();
         int laneHeight = Math.round(110 * fontScaleFactor);
@@ -563,8 +566,8 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         this.fontScaleFactor = scaleFactor;
         updateFonts();
         
-        setPreferredSize(new Dimension(Math.round(Math.max(1200,maxId*18+180)*fontScaleFactor),
-            Math.round((210+Math.max(1,uniqueVersions.size())*110)*fontScaleFactor)));
+        int width=Math.round(Math.max(1200,maxId*18+180)*fontScaleFactor);
+        setPreferredSize(new Dimension(width,plotTop(width)+Math.round((105+Math.max(1,uniqueVersions.size())*110)*fontScaleFactor)));
         revalidate();
 
         repaint();
@@ -604,6 +607,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
                     t.elapsedTime=t.hasElapsedTime?row.durationMs():0;
                     t.queueTime=row.maxQueueMs; t.serviceCount=row.validQueueVisits;
                     t.invalidQueueVisits=row.invalidQueueVisits; t.businessServices=row.services;
+                    t.process=row.process;
                     tasks.add(t);
                     if(!uniqueServices.contains(t.service)) uniqueServices.add(t.service);
                 }
@@ -615,8 +619,8 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             }
             maxId=tasks.size()+1;
             groupTasksByVersion();
-            setPreferredSize(new Dimension(Math.max(1200,maxId*18+180),
-                Math.round((210+Math.max(1,uniqueServices.size())*110)*fontScaleFactor)));
+            int width=Math.max(1200,maxId*18+180);
+            setPreferredSize(new Dimension(width,plotTop(width)+Math.round((105+Math.max(1,uniqueServices.size())*110)*fontScaleFactor)));
             System.out.println("Loaded "+tasks.size()+" root workflows for elapsed / queue view");
         } catch(Exception e) {
             throw new IllegalStateException("Unable to load measured workflow metrics",e);
@@ -632,6 +636,21 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             : CombinedWorkflowMetrics.CAPTION;
     }
     private String missingQueueLabel() { return lightQueueBars?"no lighter shading":"no diamond"; }
+    public String processDescription(boolean abbreviated) {
+        Map<String,Set<String>> byVersion=new TreeMap<>();
+        for(Task task:tasks) byVersion.computeIfAbsent(deriveVersion(task.sequenceId),k->new TreeSet<>())
+            .add(abbreviated?WorkflowProcessNames.shortName(task.process):task.process);
+        List<String> labels=new ArrayList<>();
+        for(Map.Entry<String,Set<String>> entry:byVersion.entrySet()) labels.add(entry.getKey()+": "+String.join(" / ",entry.getValue()));
+        return labels.isEmpty()?WorkflowProcessNames.UNKNOWN:"Processes: "+String.join("; ",labels);
+    }
+    private List<String> processHeaderLines(int width) {
+        return WorkflowProcessNames.wrap(processDescription(true),getFontMetrics(axisLabelFont),Math.max(40,width-40));
+    }
+    private int processHeaderHeight(int width) {
+        return processHeaderLines(width).size()*(getFontMetrics(axisLabelFont).getHeight()+Math.round(2*fontScaleFactor));
+    }
+    private int plotTop(int width) { return Math.round(112*fontScaleFactor)+processHeaderHeight(width); }
     static Color queueBarColor(Color primary) {
         return new Color((primary.getRed()+255)/2,(primary.getGreen()+255)/2,(primary.getBlue()+255)/2);
     }
@@ -684,7 +703,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         final Map<String,Integer> lanes=displayByVersion?versionLanes:serviceLanes;
         final Map<String,Color> colors=displayByVersion?versionColors:serviceColors;
         final int count=Math.min(tasks.size(),maxDisplayTasks);
-        final int left,top=Math.round(112*fontScaleFactor),width,laneHeight,plotHeight;
+        final int left,top=plotTop(getWidth()),width,laneHeight,plotHeight;
         final double slot;
         final double[] maxima;
         Plot(Graphics2D g) {
@@ -715,15 +734,21 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             g.setColor(Color.BLACK); g.setFont(titleFont);
             String title="Workflow Elapsed Time and Queue Wait";
             g.drawString(title,(getWidth()-g.getFontMetrics().stringWidth(title))/2,Math.round(30*fontScaleFactor));
+            g.setFont(axisLabelFont);
+            int processY=Math.round(49*fontScaleFactor);
+            for(String line:processHeaderLines(getWidth())) {
+                g.drawString(line,20,processY);
+                processY+=g.getFontMetrics().getHeight()+Math.round(2*fontScaleFactor);
+            }
             if(tasks.isEmpty()) { g.drawString("No observed workflows",25,100); return; }
             Plot p=new Plot(g);
             g.setFont(axisLabelFont);
             g.drawString("Solid bar: measured workflow elapsed time     "+(lightQueueBars?"Lighter lower shading":"Black diamond")
                 +": maximum observed service-visit queue wait",
-                20,Math.round(52*fontScaleFactor));
-            g.drawString(scaleDescription(),20,Math.round(70*fontScaleFactor));
+                20,Math.round(52*fontScaleFactor)+processHeaderHeight(getWidth()));
+            g.drawString(scaleDescription(),20,Math.round(70*fontScaleFactor)+processHeaderHeight(getWidth()));
             g.drawString("X: elapsed interval unavailable; "+missingQueueLabel()+": queue measurement unavailable.",
-                20,Math.round(88*fontScaleFactor));
+                20,Math.round(88*fontScaleFactor)+processHeaderHeight(getWidth()));
             for(int lane=0;lane<p.groups.size();lane++) {
                 String group=p.groups.get(lane);
                 for(int tick=0;tick<=2;tick++) {
@@ -826,6 +851,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         String version = deriveVersion(task.sequenceId);
         
         String[] lines = {
+            "Process: " + task.process,
             "Business services: " + task.businessServices,
             "Workflow version: " + version,
             "Root sequence: " + task.sequenceId,
@@ -875,7 +901,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             displayGroups = uniqueVersions;
         }
         
-        int topMargin = Math.round(112 * fontScaleFactor);
+        int topMargin = plotTop(width);
         int bottomPadding = Math.round(105 * fontScaleFactor);
         int numLanes = Math.max(1, displayGroups.size());
         int laneHeight = Math.round(110 * fontScaleFactor);

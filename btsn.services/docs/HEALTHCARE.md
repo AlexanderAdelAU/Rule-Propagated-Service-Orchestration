@@ -76,6 +76,28 @@ rules, and Monitor stores it with the execution's version, operation and place.
 The Gantt chart still groups complete workflows by version; its tooltips list
 the business services visited by that workflow.
 
+Diagrams also label the process definition that generated each version's
+observations. Concurrent runs show a version-to-process mapping beneath the
+title. The workflow elapsed/queue chart includes the names in both display
+modes, PNG/PDF exports, LaTeX captions and tables, and its summary report;
+tooltips show the full definition path. The measured timeline, queue comparison
+and spatial view carry the same recorded process context.
+
+Your usual `XXX_BuildAndRun.xml` captures these names automatically on the next
+run. Each successful generator submission records its `-process` value in
+`btsn.common.Monitor/WorkflowRunMetadata`, matched to the submitted token ID,
+version and exact generation timestamp. This observation metadata does not
+change token payloads, service handlers or queue scheduling. Older observations
+without matching metadata show `Process not captured` and their recorded
+generator source, where available; the viewer never guesses from the current
+deployment or assumes a version always means the same process.
+
+Keep `WorkflowRunMetadata` alongside `ServiceAnalysisDataBase` when archiving or
+moving results. For a generator or viewer outside the checkout, both JVMs can
+use `-Dbtsn.workflow.metadata.dir=<shared-directory>` to select the same metadata
+location. A viewer can also point that property at archived metadata. Generated
+metadata is excluded from Git and is retained across builds.
+
 Already-collected healthcare runs can display names without rerunning: an
 operation is resolved only when the available catalogues identify one logical
 service. Ambiguous older operations retain their physical labels. Captured

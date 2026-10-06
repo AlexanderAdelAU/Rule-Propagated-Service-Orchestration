@@ -49,6 +49,7 @@ public class WorkflowSpatialView extends JPanel {
     // Place ordering (Y-axis)
     private List<String> placeOrder = new ArrayList<>();
     private ServiceDisplayNames serviceDisplayNames = ServiceDisplayNames.empty();
+    private WorkflowProcessNames processNames = WorkflowProcessNames.empty();
     private Map<String, Integer> placeLanes = new HashMap<>();
     
     // Time range
@@ -286,6 +287,7 @@ public class WorkflowSpatialView extends JPanel {
         leftMargin = Math.max(120, labelWidth + 25);
         int visiblePlaceCount = placeOrder.size() - hiddenPlaces.size();
         int baseWidth = leftMargin + rightMargin + 800;  // Minimum width
+        topMargin = 60 + processHeaderLines(Math.max(900, baseWidth)).size() * (metrics.getHeight()+2);
         int baseHeight = topMargin + bottomMargin + (visiblePlaceCount * laneHeight);
         
         // Apply zoom factor to preferred size
@@ -307,6 +309,7 @@ public class WorkflowSpatialView extends JPanel {
             conn = DriverManager.getConnection(DB_URL);
             stmt = conn.createStatement();
             serviceDisplayNames = ServiceDisplayNames.load(conn);
+            processNames = WorkflowProcessNames.load(conn);
             
             tokenPaths.clear();
             genealogy.clear();
@@ -470,6 +473,11 @@ public class WorkflowSpatialView extends JPanel {
         }
     }
 
+    public String processDescription() { return processNames.caption(selectedWorkflowBase > 0 ? selectedWorkflowBase : -1); }
+    private java.util.List<String> processHeaderLines(int width) {
+        return WorkflowProcessNames.wrap(processNames.caption(selectedWorkflowBase > 0 ? selectedWorkflowBase : -1, true),
+                getFontMetrics(labelFont), Math.max(40, width-40));
+    }
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -487,6 +495,8 @@ public class WorkflowSpatialView extends JPanel {
         
         // Use unscaled dimensions for chart layout calculations
         int chartWidth = (int)(getWidth() / zoomFactor) - leftMargin - rightMargin;
+        java.util.List<String> processLines = processHeaderLines((int)(getWidth()/zoomFactor));
+        topMargin = 60 + processLines.size() * (getFontMetrics(labelFont).getHeight()+2);
         int chartHeight = placeOrder.size() * laneHeight;
         
         // Draw title
@@ -499,6 +509,10 @@ public class WorkflowSpatialView extends JPanel {
         FontMetrics fm = g2.getFontMetrics();
         g2.drawString(title, (getWidth() - fm.stringWidth(title)) / 2, 30);
         
+        g2.setFont(labelFont);
+        int processY = 49;
+        for (String line : processLines) { g2.drawString(line, 20, processY); processY += getFontMetrics(labelFont).getHeight()+2; }
+
         // Draw place labels (Y-axis) - only visible places
         g2.setFont(labelFont);
         int visibleLaneIdx = 0;
