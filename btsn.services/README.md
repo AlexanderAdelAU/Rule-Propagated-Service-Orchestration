@@ -169,3 +169,9 @@ All retained model and financial launchers and their standalone utility phases
 now use the packaged runtime. Run the usual XML directly; it builds its JARs
 automatically. See [the launcher guide](../btsn.petrinet.ProjectLoader/README.md)
 for isolated deployment profiles, stochastic examples and phase directories.
+
+For existing Eclipse workspaces, [the runtime Git cleanup guide](docs/RUNTIME_GIT_CLEANUP.md)
+describes the one-time verified backup before removing historical databases,
+installed rules and chart exports from Git. `Finish_RuntimeCleanup.xml` prepares
+and restores that backup; ordinary workflow launchers remain the entry points
+afterwards.
