@@ -128,10 +128,33 @@ Monitor-ending workflows retain the analyzer's successful Monitor boundary.
 Fork children do not become additional workflows. Incomplete or invalid-timestamp
 rows have no fabricated duration. Administration (v999) is omitted.
 
-The previous normalised chart remains a diagnostic for **independent maximum
-visit queue/service timings**. Its labels and report now state that the maximum
-values can come from different visits, and their ratio is not a workflow wait
-fraction. The measured timeline avoids estimating a critical path or adding
-parallel branch times.
+The default **Concurrent Workflow Overview** keeps the familiar version lanes,
+colours and chronological arrival positions. Its bars are solid: bar size shows
+neither elapsed time nor a queue fraction. Tooltips and overview exports describe
+the workflow identity, business services and recorded visit count. Queue caps and
+the independent-maxima ratio have been removed. Administration (v999) is omitted.
+
+Choose **View > Service Queue Timings** for measured waiting times at each shared
+host operation. Each operation has separate v001/v002/v003 comparisons on the same
+millisecond scale. Bars show the mean queue wait; diamonds show the 95th percentile.
+The Statistics tab includes sample count, mean, median, P95 and maximum, and its
+data can be exported to CSV. Median averages the two middle values for even sample
+counts; P95 uses the nearest-rank definition. Different operations at the same
+service remain separate, as do different physical hosts executing the same operation.
+
+The view reads recorded service-visit queue times and captured service/host
+identities. Repeated observations of the same visit are counted once. Missing,
+negative or conflicting wait values are omitted; an unknown or ambiguous host is
+also omitted instead of guessed. Omission and duplicate counts are displayed.
+Older records with a physical place in `serviceName` can still be grouped without
+captured metadata. Records containing only a version label cannot establish a host.
+
+These queue distributions help compare waiting at a shared operation; they do not
+establish execution order or prove priority selection. The controlled priority
+probe supplies that evidence separately. The measured workflow timeline continues
+to show generation-to-completion durations without estimating a critical path or
+adding parallel branch times. Scheduling, handlers and measurement ingestion are
+unchanged.
 
 Regression check: `ant -f btsn.services/workflow-runtime.xml check-measured-timeline`.
+Queue/overview check: `ant -f btsn.services/workflow-runtime.xml check-queue-view`.

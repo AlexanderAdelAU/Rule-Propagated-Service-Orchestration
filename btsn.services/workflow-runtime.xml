@@ -84,6 +84,25 @@
             <jvmarg value="-Djava.awt.headless=true"/>
         </java>
     </target>
+    <target name="check-queue-view" depends="jar" description="Check measured per-operation waits and the arrival overview without queue caps">
+        <delete dir="target/queue-view-check"/>
+        <mkdir dir="target/queue-view-check/classes"/>
+        <mkdir dir="target/queue-view-check/runtime"/>
+        <path id="queue.view.check.classpath">
+            <path refid="runtime.classpath"/>
+            <pathelement location="../btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+            <pathelement location="target/queue-view-check/classes"/>
+        </path>
+        <javac srcdir="../btsn.common.Monitor/tests" destdir="target/queue-view-check/classes"
+               includes="ServiceQueueTimingCheck.java" release="${java.release}" includeantruntime="false" encoding="UTF-8">
+            <classpath refid="queue.view.check.classpath"/>
+        </javac>
+        <java classname="org.btsn.derby.Analysis.ServiceQueueTimingCheck" fork="true" failonerror="true"
+              dir="target/queue-view-check/runtime" maxmemory="128m">
+            <classpath refid="queue.view.check.classpath"/>
+            <jvmarg value="-Djava.awt.headless=true"/>
+        </java>
+    </target>
     <target name="check-healthcare-names" depends="jar" description="Read-only naming check after the default ten-patient healthcare run">
         <mkdir dir="target/healthcare-names-check/classes"/>
         <path id="healthcare.names.check.classpath">

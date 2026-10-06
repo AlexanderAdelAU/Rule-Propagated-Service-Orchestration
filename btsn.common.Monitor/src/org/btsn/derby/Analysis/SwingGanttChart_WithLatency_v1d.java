@@ -57,9 +57,6 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
     private boolean legendTextBelow = true;
     private boolean compactMode = true;
     
-    // Queue time visualization options
-    private boolean showQueueTime = true;
-    private boolean colorCodeQueueTime = true;
     
     // Version display feature
     private boolean displayByVersion = false;
@@ -71,8 +68,6 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
     private long maxQueueTime = 1;
     private long maxElapsedTime = 1;
     
-    // X-axis display mode
-    private boolean sortByDuration = false;
     
     public static class Task {
         int id;
@@ -137,175 +132,23 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
      * Generate workflow summary report
      */
     public String generateWorkflowSummaryReport() {
-        StringBuilder report = new StringBuilder();
-        
-        // Group tasks by base sequenceID
-        Map<Integer, WorkflowSummary> summaryMap = new LinkedHashMap<>();
-        
-        for (Task task : tasks) {
-            int baseSeqId = (task.sequenceId / 1000) * 1000;
-            
-            WorkflowSummary summary = summaryMap.get(baseSeqId);
-            if (summary == null) {
-                summary = new WorkflowSummary(baseSeqId);
-                summaryMap.put(baseSeqId, summary);
-            }
-            
-            summary.totalQueueTime = task.queueTime;
-            summary.totalServiceTime = task.processingTime;
-            summary.version = deriveVersion(task.sequenceId);
-            summary.serviceCount = task.serviceCount;
+        StringBuilder report = new StringBuilder("CONCURRENT WORKFLOW OVERVIEW\n");
+        report.append("One bar per observed root workflow, in arrival order. Bar size does not encode duration.\n");
+        report.append("Measured waits: View > Service Queue Timings. Elapsed intervals: View > Measured Workflow Timeline.\n\n");
+        Map<String, Integer> counts = new TreeMap<>();
+        for (Task task : tasks) counts.merge(deriveVersion(task.sequenceId), 1, Integer::sum);
+        for (Map.Entry<String, Integer> entry : counts.entrySet())
+            report.append(entry.getKey()).append(": ").append(entry.getValue()).append(" workflows\n");
+        report.append("\nArrival position | Root sequence | Version | Recorded service visits | Business services\n");
+        for (int i = 0; i < tasks.size(); i++) {
+            Task task = tasks.get(i);
+            report.append(i + 1).append(" | ").append(task.sequenceId).append(" | ")
+                .append(deriveVersion(task.sequenceId)).append(" | ").append(task.serviceCount)
+                .append(" | ").append(task.businessServices).append('\n');
         }
-        
-        // Calculate workflow time ranges from database
-        Map<String, WorkflowTimeRange> versionTimeRanges = calculateVersionTimeRanges();
-        
-        // Generate report header
-        report.append("WORKFLOW SUMMARY REPORT\n");
-        report.append("Queue/service columns are independent per-visit maxima; their sum and ratio are diagnostics, not workflow latency or wait fraction.\n");
-        report.append("Use View > Measured Workflow Timeline for observed generation-to-completion durations.\n");
-        report.append("Rows without visit measurements retain the legacy ELAPSEDTIME service-column fallback; no queue fraction is available for those rows.\n");
-        report.append("Generated: ").append(new java.util.Date()).append("\n");
-        report.append("=" .repeat(120)).append("\n\n");
-        
-        // Group by version
-        Map<String, java.util.List<WorkflowSummary>> byVersion = new java.util.HashMap<>();
-        for (WorkflowSummary summary : summaryMap.values()) {
-            byVersion.computeIfAbsent(summary.version, k -> new java.util.ArrayList<>()).add(summary);
-        }
-        
-        // Report for each version
-        for (String version : byVersion.keySet()) {
-            java.util.List<WorkflowSummary> workflows = byVersion.get(version);
-            
-            report.append("\n").append(version).append(" Workflows\n");
-            
-            // Add duration information
-            WorkflowTimeRange timeRange = versionTimeRanges.get(version);
-            if (timeRange != null) {
-                report.append(String.format("Duration of Workflow Tokens: %d ms (from %d to %d)\n", 
-                    timeRange.duration, timeRange.minTime, timeRange.maxTime));
-            }
-            
-            report.append("-".repeat(120)).append("\n");
-            report.append(String.format("%-15s %-12s %-20s %-20s %-15s %-15s%n",
-                "Base SeqID", "Services", "Max Queue (ms)", "Max Service (ms)", "Maxima Sum (ms)", "Maxima Ratio"));
-            report.append("-".repeat(120)).append("\n");
-            
-            long totalQueue = 0;
-            long totalService = 0;
-            
-            for (WorkflowSummary summary : workflows) {
-                long total = summary.totalQueueTime + summary.totalServiceTime;
-                double ratio = total > 0 ? (double)summary.totalQueueTime / total * 100 : 0;
-                
-                report.append(String.format("%-15d %-12d %-20d %-20d %-15d %.1f%%%n",
-                    summary.baseSequenceId,
-                    summary.serviceCount,
-                    summary.totalQueueTime,
-                    summary.totalServiceTime,
-                    total,
-                    ratio));
-                
-                totalQueue += summary.totalQueueTime;
-                totalService += summary.totalServiceTime;
-            }
-            
-            report.append("-".repeat(120)).append("\n");
-            long versionTotal = totalQueue + totalService;
-            double versionRatio = versionTotal > 0 ? (double)totalQueue / versionTotal * 100 : 0;
-            report.append(String.format("%-15s %-20d %-20d %-15d %.1f%%%n",
-                version + " SUM OF MAXIMA:",
-                totalQueue,
-                totalService,
-                versionTotal,
-                versionRatio));
-            report.append("\n");
-        }
-        
         return report.toString();
     }
 
-    /**
-     * Calculate time ranges for each version from database
-     */
-    private Map<String, WorkflowTimeRange> calculateVersionTimeRanges() {
-        Map<String, WorkflowTimeRange> ranges = new HashMap<>();
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        
-        try {
-            conn = DriverManager.getConnection(DB_URL);
-            stmt = conn.createStatement();
-            
-            String query = "SELECT sequenceID, WORKFLOWSTARTTIME " +
-                          "FROM PROCESSMEASUREMENTS " +
-                          "WHERE WORKFLOWSTARTTIME IS NOT NULL " +
-                          "ORDER BY sequenceID";
-            
-            rs = stmt.executeQuery(query);
-            
-            while (rs.next()) {
-                int sequenceId = rs.getInt("sequenceID");
-                long workflowStartTime = rs.getLong("WORKFLOWSTARTTIME");
-                
-                String version = deriveVersion(sequenceId);
-                
-                WorkflowTimeRange range = ranges.get(version);
-                if (range == null) {
-                    range = new WorkflowTimeRange();
-                    ranges.put(version, range);
-                }
-                
-                range.update(workflowStartTime);
-            }
-            
-        } catch (SQLException e) {
-            System.err.println("Error calculating version time ranges: " + e.getMessage());
-            e.printStackTrace();
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-                if (conn != null) conn.close();
-            } catch (SQLException e) {
-                System.err.println("Error closing database resources: " + e.getMessage());
-            }
-        }      
-        return ranges;
-    }
-
-    /**
-     * Helper class to track time range for a version
-     */
-    private static class WorkflowTimeRange {
-        long minTime = Long.MAX_VALUE;
-        long maxTime = Long.MIN_VALUE;
-        long duration = 0;
-        
-        void update(long time) {
-            if (time < minTime) minTime = time;
-            if (time > maxTime) maxTime = time;
-            duration = maxTime - minTime;
-        }
-    }
-    
-    /**
-     * Helper class for workflow summary
-     */
-    private static class WorkflowSummary {
-        int baseSequenceId;
-        String version;
-        int serviceCount = 0;
-        long totalQueueTime = 0;
-        long totalServiceTime = 0;
-        
-        WorkflowSummary(int baseSequenceId) {
-            this.baseSequenceId = baseSequenceId;
-        }
-    }
-    
     /**
      * Export workflow summary to text file
      */
@@ -571,15 +414,10 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
                 colorIndex++;
             }
             
-            if (showQueueTime) {
-                writer.println("\\definecolor{queueGreen}{RGB}{0,200,0}");
-                writer.println("\\definecolor{queueOrange}{RGB}{255,165,0}");
-                writer.println("\\definecolor{queueRed}{RGB}{255,0,0}");
-            }
             writer.println();
             
             writer.println("% Draw axes");
-            writer.printf("\\draw[->] (0,0) -- (%d,0) node[right] {Execution Order};\n", safeMaxId + 2);
+            writer.printf("\\draw[->] (0,0) -- (%d,0) node[right] {Arrival Position};\n", safeMaxId + 2);
             writer.printf("\\draw[->] (0,0) -- (0,%d) node[above] {%s};\n", 
                 displayGroups.size() + 1, "Workflow versions");
             writer.println();
@@ -622,7 +460,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
                 String color = latexColors.get(group);
                 if (color == null) color = "gray";
                 
-                double x = Math.max(0, task.id - 1);
+                double x = i;
                 double y = laneIndex + 0.3;
                 double width = 0.5;
                 double height = 0.5;
@@ -646,8 +484,8 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             writer.println();
             writer.println("\\end{tikzpicture}");
             String caption = displayByVersion ? 
-                "Normalised maximum visit timings by version" :
-                "Normalised maximum visit timings by service";
+                "Concurrent workflow overview by version (arrival order)" :
+                "Concurrent workflow overview (arrival order)";
             writer.println("\\caption{" + caption + "}");
             writer.println("\\label{fig:gantt-chart}");
             writer.println("\\end{figure}");
@@ -682,13 +520,13 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
     public void exportToLaTeXTable(String filename) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
             
-            writer.println("% Independent maximum visit timings, not workflow latency or critical path");
+            writer.println("% Workflow arrival overview. Bar size does not encode duration.");
             writer.println("% Add to preamble: \\usepackage{booktabs}");
             writer.println("% Add to preamble: \\usepackage{longtable} % for long tables");
             writer.println();
             writer.println("\\begin{longtable}{cccccc}");
             writer.println("\\toprule");
-            writer.println("ID & Workflow Version & Version & Sequence ID & Max Visit Service (ms) & Max Visit Queue (ms) \\\\");
+            writer.println("Database ID & Lane & Version & Sequence ID & Arrival Position & Recorded Visits \\\\");
             writer.println("\\midrule");
             writer.println("\\endhead");
             
@@ -700,12 +538,12 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
                     escapeLatex(task.service),
                     escapeLatex(version),
                     task.sequenceId,
-                    task.processingTime,
-                    task.queueTime);
+                    i + 1,
+                    task.serviceCount);
             }
             
             writer.println("\\bottomrule");
-            writer.println("\\caption{Independent Maximum Visit Timings}");
+            writer.println("\\caption{Workflow Arrival Overview}");
             writer.println("\\label{tab:service-data}");
             writer.println("\\end{longtable}");
             
@@ -759,40 +597,6 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         }
     }
     
-    /**
-     * Get queue time color based on percentage of total time
-     */
-    private Color getQueueTimeColor(long queueTime, long processingTime) {
-        if (!colorCodeQueueTime) {
-            return new Color(128, 128, 128, 60);
-        }
-        
-        long totalTime = queueTime + processingTime;
-        if (totalTime == 0) {
-            return new Color(128, 128, 128, 60);
-        }
-        
-        double queueRatio = (double)queueTime / totalTime * 100;
-        
-        if (queueRatio > 50) {
-            return new Color(255, 0, 0, 80);      // Red: >50% queue
-        } else if (queueRatio > 20) {
-            return new Color(255, 165, 0, 80);    // Orange: 20-50% queue
-        } else {
-            return new Color(0, 200, 0, 60);      // Green: <20% queue
-        }
-    }
-    
-    public void setShowQueueTime(boolean show) {
-        this.showQueueTime = show;
-        repaint();
-    }
-    
-    public void setColorCodeQueueTime(boolean colorCode) {
-        this.colorCodeQueueTime = colorCode;
-        repaint();
-    }
-    
     public void setCompactMode(boolean compact) {
         this.compactMode = compact;
         repaint();
@@ -811,15 +615,6 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         }
         
         repaint();
-    }
-    
-    public void setSortByDuration(boolean byDuration) {
-        this.sortByDuration = byDuration;
-        repaint();
-    }
-    
-    public boolean isSortByDuration() {
-        return sortByDuration;
     }
     
     private void groupTasksByVersion() {
@@ -1018,6 +813,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
                 
                 while (rs.next()) {
                     int sequenceId = rs.getInt("SEQUENCEID");
+                    if (sequenceId / 1000000 == 999) continue;
                     int workflowBase = rs.getInt("WORKFLOWBASE");
                     long queueTime = Math.max(0, rs.getLong("QUEUETIME"));
                     long serviceTime = Math.max(0, rs.getLong("SERVICETIME"));
@@ -1072,6 +868,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
                     int id = rs.getInt("id");
                     String serviceName = rs.getString("serviceName");
                     int sequenceId = rs.getInt("sequenceID");
+                    if (sequenceId / 1000000 == 999) continue;
                     
                     // Calculate base sequenceID
                     int baseSequenceId = (sequenceId / 1000) * 1000;
@@ -1303,43 +1100,16 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         // Draw title
         g2.setFont(titleFont);
         String title = displayByVersion ?
-            "Maximum Visit Timing by Version (Normalised Bars)" :
-            "Maximum Visit Timing (Normalised Bars)";
+            "Concurrent Workflow Overview by Version" :
+            "Concurrent Workflow Overview";
         FontMetrics fm = g2.getFontMetrics(titleFont);
         int titleWidth = fm.stringWidth(title);
         g2.drawString(title, (getWidth() - titleWidth) / 2, Math.round(30 * fontScaleFactor));
 
-        // Draw queue time legend
-        if (showQueueTime) {
-            g2.setFont(new Font("Arial", Font.PLAIN, Math.round(10 * fontScaleFactor)));
-            int legendY = Math.round(50 * fontScaleFactor);
-            int legendX = leftMargin;
-
-            g2.setColor(Color.BLACK);
-            g2.drawString("Maxima ratio: ", legendX, legendY);
-            legendX += 85;
-
-            if (colorCodeQueueTime) {
-                g2.setColor(new Color(0, 200, 0, 60));
-                g2.fillRect(legendX, legendY - 10, 20, 10);
-                g2.setColor(Color.BLACK);
-                g2.drawString("<20%", legendX + 25, legendY);
-                legendX += 65;
-
-                g2.setColor(new Color(255, 165, 0, 80));
-                g2.fillRect(legendX, legendY - 10, 20, 10);
-                g2.setColor(Color.BLACK);
-                g2.drawString("20-50%", legendX + 25, legendY);
-                legendX += 75;
-
-                g2.setColor(new Color(255, 0, 0, 80));
-                g2.fillRect(legendX, legendY - 10, 20, 10);
-                g2.setColor(Color.BLACK);
-                g2.drawString(">50%", legendX + 25, legendY);
-            } else {
-                g2.drawString("(shown as semi-transparent bars)", legendX, legendY);
-            }
-        }
+        g2.setColor(Color.DARK_GRAY);
+        g2.setFont(new Font("Arial", Font.PLAIN, Math.round(10 * fontScaleFactor)));
+        g2.drawString("One bar per workflow; position shows arrival order. Bar size does not encode duration.",
+                     leftMargin, Math.round(50 * fontScaleFactor));
 
         // Draw horizontal lane lines
         g2.setColor(Color.LIGHT_GRAY);
@@ -1417,13 +1187,13 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         int gridInterval = Math.max(1, actualMaxId / 10);
 
         g2.setFont(axisLabelFont);
-        for (int i = 0; i <= actualMaxId + 1; i += gridInterval) {
-            int x = leftMargin + (i * chartWidth / (actualMaxId + 1));
+        for (int i = 0; i < actualMaxId; i += gridInterval) {
+            int x = leftMargin + (i * chartWidth / Math.max(1, actualMaxId));
             int y = topMargin + chartHeight;
             g2.drawLine(x, topMargin, x, y);
 
             g2.setColor(Color.GRAY);
-            String label = String.valueOf(i);
+            String label = String.valueOf(i + 1);
             FontMetrics axisfm = g2.getFontMetrics(axisLabelFont);
             int labelWidth = axisfm.stringWidth(label);
             g2.drawString(label, x - labelWidth / 2, y + Math.round(15 * fontScaleFactor));
@@ -1433,23 +1203,14 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         // Draw X-axis label
         g2.setColor(Color.BLACK);
         g2.setFont(new Font("Arial", Font.BOLD, Math.round(12 * fontScaleFactor)));
-        String xLabel = sortByDuration ? 
-            "Workflow Duration (sorted by total elapsed time)" :
-            "Workflow Arrival Order (chronological)";
+        String xLabel = "Workflow Arrival Order (chronological)";
         FontMetrics xfm = g2.getFontMetrics();
         int xLabelWidth = xfm.stringWidth(xLabel);
         g2.drawString(xLabel, (getWidth() - xLabelWidth) / 2, topMargin + chartHeight + Math.round(40 * fontScaleFactor));
 
         g2.setStroke(new BasicStroke(1));
 
-        // Create display list - either original order or sorted by duration
-        List<Task> displayTasks;
-        if (sortByDuration) {
-            displayTasks = new ArrayList<>(tasks);
-            displayTasks.sort((a, b) -> Long.compare(a.elapsedTime, b.elapsedTime));
-        } else {
-            displayTasks = tasks;
-        }
+        List<Task> displayTasks = tasks;
 
         // Draw tasks with linear scaling (no logarithm, no heat strips)
         // Use actual display count to properly scale X-axis when Display Range is limited
@@ -1485,39 +1246,10 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             int y = topMargin + (laneIndex * laneHeight) + (
             		laneHeight - barHeight) - 5;
 
-            // Calculate queue and execution ratio for vertical split
-            long totalTime = task.queueTime + task.processingTime;
-            double queueRatio = totalTime > 0 ? (double) task.queueTime / totalTime : 0;
-            
-            // Split bar vertically based on queue/execution ratio
-            if (showQueueTime && task.queueTime > 0 && totalTime > 0) {
-                int queueHeight = (int) (barHeight * queueRatio);
-                int execHeight = barHeight - queueHeight;
-                
-                // Draw queue time portion (top part of bar)
-                Color queueColor = getQueueTimeColor(task.queueTime, task.processingTime);
-                g2.setColor(queueColor);
-                g2.fillRoundRect(x, y, barWidth, queueHeight, 5, 5);
-                
-                // Draw execution time portion (bottom part of bar)
-                g2.setColor(barColor);
-                g2.fillRoundRect(x, y + queueHeight, barWidth, execHeight, 5, 5);
-                
-                // Draw border around entire bar
-                g2.setColor(barColor.darker());
-                g2.drawRoundRect(x, y, barWidth, barHeight, 5, 5);
-                
-                // Draw dividing line between queue and execution
-                g2.setColor(Color.BLACK);
-                g2.drawLine(x, y + queueHeight, x + barWidth, y + queueHeight);
-            } else {
-                // No queue time - draw solid execution bar
-                g2.setColor(barColor);
-                g2.fillRoundRect(x, y, barWidth, barHeight, 5, 5);
-
-                g2.setColor(barColor.darker());
-                g2.drawRoundRect(x, y, barWidth, barHeight, 5, 5);
-            }
+            g2.setColor(barColor);
+            g2.fillRoundRect(x, y, barWidth, barHeight, 5, 5);
+            g2.setColor(barColor.darker());
+            g2.drawRoundRect(x, y, barWidth, barHeight, 5, 5);
 
             // Add task ID for small datasets
             if (displayTasks.size() <= 30 && barWidth > 15) {
@@ -1544,14 +1276,15 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         
         if (displayGroups.isEmpty()) return null;
         
-        Graphics2D g2 = (Graphics2D) getGraphics();
+        Graphics2D g2 = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB).createGraphics();
         int leftMargin = calculateLeftMargin(g2, displayGroups);
+        g2.dispose();
         int topMargin = Math.round(80 * fontScaleFactor);
-        int rightMargin = 13;
+        int rightMargin = 50;
         int chartWidth = getWidth() - leftMargin - rightMargin;
         
         int numLanes = displayGroups.size();
-        int fullLaneHeight = (getHeight() - topMargin - 15) / numLanes;
+        int fullLaneHeight = (getHeight() - topMargin - 30) / numLanes;
         int laneHeight = (int) (fullLaneHeight * 0.80);
         
       //  int barHeight = laneHeight * 2 / 5;
@@ -1581,19 +1314,8 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             // Use actualDisplayCount to match paintComponent scaling
             int barWidth = Math.max(8, (chartWidth / Math.max(1, actualDisplayCount)) - 4);
             
-            int queueBarWidth = 0;
-            if (showQueueTime && task.queueTime > 0) {
-                queueBarWidth = barWidth / 2;
-            }
-            
-            int y = topMargin + (laneIndex * laneHeight) + ((laneHeight - barHeight) / 2);
-            
-            Rectangle processRect = new Rectangle(x, y, barWidth, barHeight);
-            Rectangle queueRect = new Rectangle(x - queueBarWidth, y, queueBarWidth, barHeight);
-            
-            if (processRect.contains(mouseX, mouseY) || queueRect.contains(mouseX, mouseY)) {
-                return task;
-            }
+            int y = topMargin + (laneIndex * laneHeight) + (laneHeight - barHeight) - 5;
+            if (new Rectangle(x, y, barWidth, barHeight).contains(mouseX, mouseY)) return task;
         }
         return null;
     }
@@ -1601,20 +1323,16 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
     private void drawTooltip(Graphics2D g2, Task task) {
         String version = deriveVersion(task.sequenceId);
         
-        double waitRatio = task.queueTime > 0 ? 
-            (double)task.queueTime / (task.queueTime + task.processingTime) * 100 : 0;
-        
         String[] lines = {
             "Business services: " + task.businessServices,
             "Workflow version: " + version,
-            "Seq ID: " + task.sequenceId,
-            "Total Duration: " + task.elapsedTime + " ms",
-            (task.serviceCount > 0 ? "Maximum Visit Service Time: " : "Legacy Elapsed Fallback: ") + task.processingTime + " ms",
-            "Maximum Visit Queue Time: " + task.queueTime + " ms",
-            String.format("Independent maxima ratio: %.1f%% (not workflow wait)", waitRatio),
-            "Completion Order: #" + task.id
+            "Root sequence: " + task.sequenceId,
+            "Recorded service visits: " + task.serviceCount,
+            "Bar size does not encode duration",
+            "Queue waits: View > Service Queue Timings",
+            "Elapsed time: View > Measured Workflow Timeline"
         };
-        
+
         g2.setFont(tooltipFont);
         int maxWidth = 0;
         FontMetrics fm = g2.getFontMetrics();
@@ -1635,26 +1353,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         g2.fillRoundRect(x, y, tooltipWidth, tooltipHeight, 5, 5);
         
         for (int i = 0; i < lines.length; i++) {
-            if (lines[i].startsWith("Maximum Visit Queue Time:")) {
-                if (task.queueTime > 5000) {
-                    g2.setColor(new Color(255, 100, 100));
-                } else if (task.queueTime > 2000) {
-                    g2.setColor(new Color(255, 200, 100));
-                } else {
-                    g2.setColor(new Color(100, 255, 100));
-                }
-            } else if (lines[i].startsWith("Total Duration:")) {
-                // Color code total duration
-                if (task.elapsedTime > 50000) {
-                    g2.setColor(new Color(255, 100, 100));  // Red for very long
-                } else if (task.elapsedTime > 30000) {
-                    g2.setColor(new Color(255, 200, 100));  // Orange for long
-                } else {
-                    g2.setColor(new Color(100, 255, 100));  // Green for normal
-                }
-            } else {
-                g2.setColor(Color.WHITE);
-            }
+            g2.setColor(Color.WHITE);
             g2.drawString(lines[i], x + 10, y + lineHeight + i * lineHeight);
         }
     }
@@ -1686,7 +1385,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
     // Export methods removed for brevity - can be added back with linear scaling
     
     public static void createAndShowGUI(SwingGanttChart_WithLatency_v1d chart) {
-        JFrame frame = new JFrame("Service Visit Timing Diagnostics");
+        JFrame frame = new JFrame("Concurrent Workflow Overview");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         JMenuBar menuBar = new JMenuBar();
@@ -1816,20 +1515,11 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         viewMenu.add(measuredTimelineItem);
         viewMenu.addSeparator();
         
-        JMenu queueMenu = new JMenu("Queue Time Display");
-        JCheckBoxMenuItem showQueueItem = new JCheckBoxMenuItem("Show Queue Time");
-        showQueueItem.setSelected(true);
-        showQueueItem.addActionListener(e -> chart.setShowQueueTime(showQueueItem.isSelected()));
-        queueMenu.add(showQueueItem);
-        
-        JCheckBoxMenuItem colorCodeItem = new JCheckBoxMenuItem("Color Code by Severity");
-        colorCodeItem.setSelected(true);
-        colorCodeItem.addActionListener(e -> chart.setColorCodeQueueTime(colorCodeItem.isSelected()));
-        queueMenu.add(colorCodeItem);
-        
-        viewMenu.add(queueMenu);
+        JMenuItem queueTimingItem = new JMenuItem("Service Queue Timings...");
+        queueTimingItem.addActionListener(e -> ServiceQueueTimingView.showWindow());
+        viewMenu.add(queueTimingItem);
         viewMenu.addSeparator();
-        
+
         JMenu displayModeMenu = new JMenu("Display Mode");
         ButtonGroup displayGroup = new ButtonGroup();
         
@@ -1845,24 +1535,6 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         displayModeMenu.add(versionDisplayItem);
         
         viewMenu.add(displayModeMenu);
-        viewMenu.addSeparator();
-        
-        // X-Axis Order submenu
-        JMenu xAxisMenu = new JMenu("X-Axis Order");
-        ButtonGroup xAxisGroup = new ButtonGroup();
-        
-        JRadioButtonMenuItem completionOrderItem = new JRadioButtonMenuItem("By Arrival Order");
-        completionOrderItem.setSelected(true);
-        completionOrderItem.addActionListener(e -> chart.setSortByDuration(false));
-        xAxisGroup.add(completionOrderItem);
-        xAxisMenu.add(completionOrderItem);
-        
-        JRadioButtonMenuItem durationOrderItem = new JRadioButtonMenuItem("By Duration (shortest to longest)");
-        durationOrderItem.addActionListener(e -> chart.setSortByDuration(true));
-        xAxisGroup.add(durationOrderItem);
-        xAxisMenu.add(durationOrderItem);
-        
-        viewMenu.add(xAxisMenu);
         viewMenu.addSeparator();
         
         JMenu truncateMenu = new JMenu("Display Range");
