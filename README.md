@@ -191,6 +191,51 @@ All three examples use the same generic host machinery. The diagrams describe
 their configured paths, not measured performance or evidence that every path
 has been exercised in a particular run.
 
+## Execution examples
+
+These screenshots show captured runs on the Java execution fabric, rather than
+topology illustrations or simulated timings. They retain the chart settings and
+measurements used when captured; timing depends on the machine and run.
+
+### Petri-net fork/join execution
+
+![Captured P1–P4 fork/join run: ten root workflows with elapsed-time bars and independent queue-wait diamonds.](images/execution/petrinet-p1-p4-run.png)
+
+*A run of [P1_P2_P3_P4_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_P3_P4_BuildAndRun.xml).
+Ten root workflows are shown in arrival order. Bars measure elapsed time from
+generation to business completion; diamonds show the maximum observed
+service-visit queue wait across each root's family, including fork children.
+Children are reconstructed through genealogy, rather than drawn as extra root
+workflows. The lane maximum in this run is 1,499 ms.*
+
+### Financial service execution
+
+![Captured FinancialSystem P1 Simple run: ten root workflows with lighter queue-wait overlays inside red elapsed-time bars.](images/execution/financial-p1-run.png)
+
+*A run of [FinancialSystem_P1_Simple_BuildAndRun.xml](btsn.financial.ProjectLoader/FinancialSystem_P1_Simple_BuildAndRun.xml),
+the single-place Financial example. Ten application workflows are shown; lighter
+lower shading marks the maximum observed visit queue wait. The lane maximum is
+247 ms. This is the P1 example, not the full P1–P5 loan-application workflow.*
+
+### Concurrent healthcare execution
+
+![Captured concurrent healthcare viewport: v001 Federated Radiology, v002 Triage CanaryTest and v003 Emergency Department Patient workflows, with independently scaled lanes.](images/execution/healthcare-concurrent-run.png)
+
+*A captured viewport of the concurrent healthcare run. The three versions share
+global arrival ranks, so a blank position in one lane can belong to another
+version. Each lane uses its own measured maximum: 624, 1,014 and 5,329 ms.
+The screenshot is clipped at the right edge; it is an excerpt, not a full-run
+token count. Different routes and service loads also affect queue waits, so this
+image alone does not establish priority overtaking at a shared queue.*
+
+These captures precede the wider-bar menu and clearer measurement notes described
+below. Their generic “queue-only observations” legend describes the glyph used
+when queue wait is known but workflow elapsed time is unavailable; it does not
+state that tokens have been excluded. New charts show this note only when such
+observations are present. The Petri-net and Financial captures each visibly show
+ten measured elapsed-time bars; run completeness should be checked against the
+analyzer's generated-root and completion counts.
+
 ## Observe and interpret a run
 
 Monitor is an **observation service outside the active business-token path**.
@@ -217,6 +262,17 @@ scales to its maximum measured workflow duration. Select **Shared Milliseconds**
 to compare absolute durations by bar height across versions. Horizontal position
 is arrival rank; bar width does not encode duration. Missing observations remain
 unavailable rather than being plotted as measured zero.
+
+**View → Bar Width → Wide (Publication)** is the default for a fuller figure,
+closer to the earlier presentation. Select **Narrow** for the thinner bars.
+Both choices preserve arrival positions, measured heights, lane scales and
+lower queue shading, and apply to PNG, PDF and TikZ exports. The footer reports
+how many observed roots the selected **Display Range** shows. This count describes
+the plotted data; a narrow viewport may still require horizontal scrolling.
+A dashed queue outline means the wait is known but the elapsed interval is
+unavailable; the chart retains that root without inventing a completion time.
+For a full figure rather than a viewport screenshot, select **Display Range →
+Show All**, then use **File → Export Chart to PNG** or the PDF/TikZ export.
 
 New runs capture their process definitions in
 `btsn.common.Monitor/WorkflowRunMetadata`; charts and exports display that context.

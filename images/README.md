@@ -43,3 +43,24 @@ current root README or tutorial. In particular, `rule_generation.png` depicts an
 older DOT pipeline, while `building_a_model.png` and `P1_Workflow_Tutorial.png`
 show earlier editor models with Monitor on the drawn business path. Do not use
 those images as descriptions of the migrated runtime.
+
+## Captured execution examples
+
+The root README also uses these unmodified user-supplied chart screenshots.
+They are measured-run illustrations, not generated fixtures or regenerated data.
+
+| Image | Capture and scope |
+|---|---|
+| `execution/petrinet-p1-p4-run.png` | `image(20261006-105613).png`: P1–P4 fork/join, ten root bars, elapsed/queue diamonds. |
+| `execution/financial-p1-run.png` | `image(20261006-125126).png`: FinancialSystem P1 Simple, ten root bars, lower queue shading. |
+| `execution/healthcare-concurrent-run.png` | `image(20261007-004520).png`: three healthcare versions, lower queue shading, right-clipped viewport excerpt. |
+
+The captures retain earlier generic missing-measurement legends and bar widths.
+The updated chart offers Wide/Narrow bars and displays unavailable-measurement
+notes only when applicable to the displayed roots. No raw observation database
+accompanies these captures: do not infer exact values from pixels, treat a
+viewport as proof of full-run accounting, or relabel them as a newer run.
+`generate_diagrams.py` regenerates only the six SVG schematics, not these images.
+The journal screenshot `image(20261007-004731).png` was a layout reference only;
+its completion-order axis and percentage queue bands are not the current
+combined chart's arrival-order and measured queue-maximum semantics.

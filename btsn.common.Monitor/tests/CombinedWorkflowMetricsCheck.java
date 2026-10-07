@@ -76,6 +76,9 @@ public final class CombinedWorkflowMetricsCheck {
                 &&find(rows,5000000).validQueueVisits==1,"Legacy queue data acquired fabricated elapsed time");
         check(!find(rows,6000000).hasDuration()&&!find(rows,6000000).hasQueueMaximum(),"PROCESS-only legacy row became measured");
         SwingGanttChart_WithLatency_v1d panel=new SwingGanttChart_WithLatency_v1d();
+        check(panel.generateLaTeXFigure().contains("(2.045,4.000) rectangle (2.645,4.800)"),
+                "Default publication bars did not retain the arrival slot centre");
+        panel.setWideBars(false);
         check(panel.tasks.size()==9&&panel.axisMaximum()==400,"Panel scale omitted a marker or included an orphan");
         check(panel.axisMaximum("v001")==200&&panel.axisMaximum("v002")==250
                 &&panel.axisMaximum("v003")==400,"Queue observations changed the measured duration scale");
@@ -131,6 +134,8 @@ public final class CombinedWorkflowMetricsCheck {
         check(lightReport.substring(lightReport.indexOf("Arrival | Root sequence"))
                 .equals(report.substring(report.indexOf("Arrival | Root sequence"))),"Queue style changed measured values");
         String lightFigure=panel.generateLaTeXFigure();
+        check(lightFigure.contains("Dashed outlines: queue wait measured, elapsed interval unavailable (2)"),
+                "Queue-only annotation lost its measurement meaning or count");
         check(lightFigure.contains("\\definecolor{queue0}")&&lightFigure.contains("\\fill[queue1]")
                 &&lightFigure.contains("\\draw[queue2,thick]")&&lightFigure.contains("dashed")&&lightFigure.contains("\\uparrow")&&!lightFigure.contains("\\fill[black]")
                 &&!lightFigure.contains("diamonds")&&!lightFigure.contains("NaN"),"Queue bar export lost shade/zero/caption or retained diamonds");
@@ -198,7 +203,46 @@ public final class CombinedWorkflowMetricsCheck {
         g=image.createGraphics(); panel.paint(g); g.dispose();
         ImageIO.write(image,"png",new File("combined-three-version-queue-bars-fixture.png"));
         panel.exportToLaTeX("combined-three-version-queue-bars-fixture.tex");
-        System.out.println("PASS: measured serial/fork durations; nested genealogy queue maxima; no sum/fraction; duplicate/admin/orphan exclusion; incomplete/invalid/zero/legacy values; stable per-version/shared scales; normalized bar rendering; publication exports; diamond/lower-shading switching, unchanged outlines, aligned proportional shading, zero/incomplete hover and rendering");
+        String completeFigure=panel.generateLaTeXFigure();
+        check(!completeFigure.contains("Dashed outlines")&&!completeFigure.contains("queue-only")
+                &&!completeFigure.contains("elapsed interval unavailable")
+                &&completeFigure.contains("Showing 40 of 40 observed root workflows"),
+                "Complete run retained misleading missing-measurement notes");
+        String completeTable=panel.generateLaTeXTable();
+        int narrowRun=widestColourRun(image,0xe74c3c);
+        panel.setWideBars(true);
+        BufferedImage wideImage=new BufferedImage(panel.getWidth(),panel.getHeight(),BufferedImage.TYPE_INT_RGB);
+        g=wideImage.createGraphics(); panel.paint(g); g.dispose();
+        check(widestColourRun(wideImage,0xe74c3c)>2*narrowRun
+                &&longestColourRun(wideImage,0xe74c3c)==longestColourRun(image,0xe74c3c),
+                "Wide style did not increase density or changed measured bar height");
+        check(panel.generateLaTeXTable().equals(completeTable),"Bar width changed values or workflow ordering");
+        boolean wideHover=false;
+        for(int y=160;y<wideImage.getHeight()-90;y++) for(int x=150;x<wideImage.getWidth()-35;x++) {
+            if((wideImage.getRGB(x,y)&0xffffff)!=0xe74c3c) continue;
+            SwingGanttChart_WithLatency_v1d.Task t=panel.getTaskAt(x,y);
+            if(t!=null&&t.sequenceId==1000000) wideHover=true;
+        }
+        check(wideHover,"Wide style lost root hover identity");
+        ImageIO.write(wideImage,"png",new File("combined-three-version-wide-fixture.png"));
+        Files.writeString(Path.of("combined-three-version-wide-fixture.tex"),panel.generateLaTeXFigure());
+        panel.setWideBars(false);
+        check(panel.generateLaTeXFigure().equals(completeFigure),"Returning to narrow bars did not restore the original figure");
+        panel.setMaxDisplayTasks(20);
+        check(panel.generateLaTeXFigure().contains("Showing 20 of 40 observed root workflows")
+                &&panel.axisMaximum("v001")==219,"Truncation concealed omitted roots or changed the scale");
+        System.out.println("PASS: measured serial/fork durations; nested genealogy queue maxima; no sum/fraction; duplicate/admin/orphan exclusion; incomplete/invalid/zero/legacy values; stable per-version/shared scales; publication exports; diamond/lower-shading and wide/narrow switching; unchanged heights, aligned proportional shading, root hover, conditional measurement notes and display-range counts");
+    }
+    private static int widestColourRun(BufferedImage image,int colour) {
+        int longest=0;
+        for(int y=112;y<image.getHeight()-90;y++) {
+            int run=0;
+            for(int x=150;x<image.getWidth()-35;x++) {
+                if((image.getRGB(x,y)&0xffffff)==colour) { run++; longest=Math.max(longest,run); }
+                else run=0;
+            }
+        }
+        return longest;
     }
     private static int[] colourColumns(BufferedImage image,int colour) {
         int min=image.getWidth(),max=-1;
