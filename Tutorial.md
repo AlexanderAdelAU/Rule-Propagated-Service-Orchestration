@@ -16,7 +16,7 @@ logical workflow.*
 ## Open the model
 
 1. Import the repository projects into Eclipse as described in the
-   [README](README.md#run-an-example).
+   [README workspace preparation](README.md#prepare-the-workspace).
 2. Run `com.editor.ProcessEditor` from
    [`btsn.workflowEditor`](btsn.workflowEditor/src/com/editor/ProcessEditor.java).
 3. Open
@@ -158,7 +158,48 @@ This keeps the supplied tutorial available for comparison. Saving creates the
 JSON process definition: nodes, operations, arguments, guards and layout.
 Reopen the saved file with **File → Load (.json)** to inspect the result.
 
-### 5. Run the process you saved
+## Define the architecture and contract
+
+The process graph describes logical activities and routes. The architecture
+(infrastructure) definition places their capabilities on hosts and channels;
+the deployment profile selects the matching definitions and service catalog.
+For this one-place tutorial, reuse the supplied architecture:
+
+| Definition | What it supplies |
+|---|---|
+| [StochasticLoopModels_Infrastructure.json](btsn.common/ProcessDefinitionFolder/StochasticLoopModels_Infrastructure.json) | Numbered nodes, channel addresses/ports and capability placement; P1 hosts `StochasticEntryTokenService.processToken` |
+| [StochasticLoopModels.json](btsn.common/BusinessServiceDefinitions/StochasticLoopModels.json) | The implementation class and the `token → token` service contract |
+| [StochasticLoopDeployment.json](btsn.services/deployments/models/StochasticLoopDeployment.json) | The catalog, infrastructure definition and deployment rules selected by the launcher |
+
+ProcessEditor also provides **File → New → Infrastructure Definition** for
+building infrastructure definitions separately from the process canvas. This
+practice model uses the existing host placement and service, so its saved process
+can use the tutorial's existing deployment profile. Changing host placement
+requires matching infrastructure definitions and deployment rules.
+
+The operation contract is `token → token`. Bindings generated for this logical
+service include facts with the following shape:
+
+```xml
+<Atom>
+    <Rel>localDefined</Rel>
+    <Ind>StochasticEntryTokenService</Ind>
+</Atom>
+<Atom>
+    <Rel>canonicalBinding</Rel>
+    <Ind>processToken</Ind>
+    <Ind>token</Ind> <!-- returned attribute -->
+    <Ind>token</Ind> <!-- required input -->
+</Atom>
+```
+
+At runtime, input coordination supplies the named argument. `ServiceHelper`
+invokes the installed implementation in-process. Output routing uses the local
+RuleBase: `false` publishes back to P1's input; `true` takes the declared terminal
+path. The host records those events, and the collector later sends observations
+to Monitor. Monitor is not an extra activity in this loop.
+
+## Run the process you saved
 
 In Eclipse, open the Ant launch configuration for
 [`P1_Tutorial_BuildAndRun.xml`](btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml).
@@ -214,30 +255,6 @@ run before starting another launcher on the same ports.
 Initialization resets the selected runtime's data. Save or collect results from
 an earlier run before starting a fresh initialized run. Monitor retains its usual
 working directory so the analysis tools read the collected results.
-
-## Understand the contract and routes
-
-The operation contract is `token → token`. Bindings generated for this logical
-service include facts with the following shape:
-
-```xml
-<Atom>
-    <Rel>localDefined</Rel>
-    <Ind>StochasticEntryTokenService</Ind>
-</Atom>
-<Atom>
-    <Rel>canonicalBinding</Rel>
-    <Ind>processToken</Ind>
-    <Ind>token</Ind> <!-- returned attribute -->
-    <Ind>token</Ind> <!-- required input -->
-</Atom>
-```
-
-At runtime, input coordination supplies the named argument. `ServiceHelper`
-invokes the installed implementation in-process. Output routing uses the local
-RuleBase: `false` publishes back to P1's input; `true` takes the declared terminal
-path. The host records those events, and the collector later sends observations
-to Monitor. Monitor is not an extra activity in this loop.
 
 ## Analyze and replay observations
 
