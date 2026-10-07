@@ -23,6 +23,9 @@ logical workflow.*
    [`P1_Tutorial_Workflow.json`](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json).
    The directory is `Workflow`, with a capital W.
 
+Use **File → Load (.json)** to open the supplied definition. The following
+walkthrough also shows how to reconstruct its behavior on a blank canvas.
+
 Inspect these model elements:
 
 | Element | Meaning |
@@ -45,6 +48,143 @@ To change the model, edit its nodes, operations or outgoing guards in the editor
 and save the JSON. Preserve the service's canonical input/output contract unless
 you are also changing the matching implementation and deployment definition.
 Opening or playing a model does not deploy it.
+
+## Build this process in ProcessEditor
+
+![ProcessEditor with the P1 loop on the canvas and the selected place's service and processToken operation in the Attributes panel.](images/process-editor-p1-tutorial.png)
+
+*The supplied tutorial in ProcessEditor. Select a node or arrow to edit its
+properties in the left Attributes panel. P1's service binding gives the place
+its functionality; the surrounding transitions and arrows define coordination.*
+
+### 1. Place and configure the nodes
+
+Choose **File → New → Process Definition**, then select **PetriNet** in the
+toolbar's **Type** field. Click a palette tool, then click the canvas to place
+its shape. The tooltips identify **Event Generator**, **Transition** and
+**Place**. Arrange these five nodes from left to right:
+
+| Palette tool | Label | Attributes to set | Purpose |
+|---|---|---|---|
+| Event Generator | `P1_EVENTGENERATOR` | Rate (ms): `1000`; Version: `v001`; Fork Children: `0` | Identify the initial token source |
+| Transition | `T_in_P1` | Transition Type: `T_in`; Node Type: `EdgeNode`; Buffer: `50` | Receive and buffer the single required input |
+| Place | `P1` | Service: `StochasticEntryTokenService`; configure its operation below | Supply the Boolean-returning function |
+| Transition | `T_out_P1` | Transition Type: `T_out`; Node Type: `GatewayNode` | Route the function's result |
+| Transition | `Terminate` | Transition Type: `Other`; Node Type: `TerminateNode` | End the successful path |
+
+Click a node to select it and use the **Attributes** panel for these settings.
+Set **Transition Type** before **Node Type**, because the available node types
+depend on the transition role. The editor sets the corresponding Node Value
+automatically. Every label must be unique; labels become node IDs when saved.
+The supplied JSON uses the internal ID `T_in_Model_Terminate` for the node
+displayed as `Terminate`; a new node labelled `Terminate` provides the same
+terminal role through its `TerminateNode` setting.
+
+The generator's displayed Rate and Version are model fields. The actual run is
+controlled by the generator arguments and `rule.version` in the Ant launcher;
+changing these editor fields alone does not change those launch settings.
+
+### 2. Bind functionality to P1
+
+Select the circular **P1** node. Enter `StochasticEntryTokenService` in
+**Service**. In **Operations**, enter `processToken` and click the operation
+**+** button. Expand the new operation with **[+]** to configure its argument:
+
+| Setting | Value |
+|---|---|
+| Operation name | `processToken` |
+| Argument name | `token` |
+| Argument value | `String`, matching the supplied tutorial |
+| Argument type | `String`, the editor's default |
+| Required checkbox (`R`) | Leave unchecked, matching the supplied tutorial |
+| Returned attribute | `token`, as defined by this service's contract |
+
+Enter the argument name and value in the operation's argument row, then click
+that row's **+** button. The panel should show **processToken (1 args)**. The
+returned attribute belongs to the service contract; the current operation panel
+edits the operation name and inputs, rather than providing a return-attribute
+field. For this single-input, non-join output, binding generation uses `token`.
+
+This selects the already packaged Boolean function. To use different
+functionality at P1, provide the corresponding service implementation, contract
+and deployment binding, then select its service and operation in the model.
+Entering a new service name in the editor does not create its implementation.
+
+### 3. Connect the execution structure and routes
+
+Use **Arrow (drag)**: press on the source node and release over the target.
+Alternatively, **Arrow (click waypoints)** lets you select the source, add bends
+and finish on the target. Create these five connections:
+
+| Source | Target | Arrow label | Guard Condition | Decision Value |
+|---|---|---|---|---|
+| `P1_EVENTGENERATOR` | `T_in_P1` | Leave blank | Leave blank | Leave blank |
+| `T_in_P1` | `P1` | Leave blank | Leave blank | Leave blank |
+| `P1` | `T_out_P1` | Leave blank | Leave blank | Leave blank |
+| `T_out_P1` | `Terminate` | `true` | `DECISION_EQUAL_TO` | `true` |
+| `T_out_P1` | `T_in_P1` | `false` | `DECISION_EQUAL_TO` | `false` |
+
+Select each output arrow and set **Guard Condition** and **Decision Value** in
+its Attributes panel. **The arrow label is a caption; the guard fields specify
+the routing condition.** Leave **Endpoint** blank for this single-operation
+service. The two local arcs connect T_in → P → T_out; publication routes leave
+T_out, including the returning false path.
+
+To make the false loop readable, route it above the place using click waypoints,
+or double-click an existing arrow to add a control point and drag that point.
+The **Network Connection** checkbox controls the saved connection annotation
+and dashed appearance. The supplied model marks the generator and true terminal
+publication as network connections; its false loop remains solid. Host/channel
+selection still comes from deployment configuration.
+
+The graph now says: receive a token, invoke P1's function, terminate on `true`,
+or return on `false`. Repeated loop visits belong to the same workflow instance.
+Monitor is an observer and is not added as a sixth activity.
+
+### 4. Validate and save the definition
+
+Click **Validate** or choose **Edit → Validate**. Resolve missing or duplicate
+labels, incomplete place definitions and invalid connections. This checks the
+editor's structural rules; deployment and execution also check service bindings
+and runtime behavior.
+
+Use **File → Save As (.json)** and save the practice model as:
+
+```text
+btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Editor_Practice.json
+```
+
+This keeps the supplied tutorial available for comparison. Saving creates the
+JSON process definition: nodes, operations, arguments, guards and layout.
+Reopen the saved file with **File → Load (.json)** to inspect the result.
+
+### 5. Run the process you saved
+
+In Eclipse, open the Ant launch configuration for
+[`P1_Tutorial_BuildAndRun.xml`](btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml).
+In its **Properties** tab, add this user property and select the default
+**run-complete-workflow** target:
+
+| Property | Value |
+|---|---|
+| `workflow.process.name` | `petrinet/Workflow/P1_Editor_Practice` |
+
+Use the path relative to `ProcessDefinitionFolder`, without `.json`.
+Keep the generator label `P1_EVENTGENERATOR` and operation `processToken` so they
+match this launcher's existing settings. The initializer, collector, deployment
+profile and physical target `P1_Place` stay suitable for this one-place model.
+
+From a terminal at the repository root, the equivalent command is:
+
+```sh
+ant -f btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml -Dworkflow.process.name=petrinet/Workflow/P1_Editor_Practice
+```
+
+The launcher reads the saved definition, generates bindings, deploys its rules
+and runs it on the packaged host. The editor's **Play** button is for replaying
+captured observations. Remove the property override to return to the supplied
+`P1_Tutorial_Workflow` example described below. When analyzing or replaying the
+practice run, use `P1_Editor_Practice.json` as the matching process definition.
 
 ## Run the BuildAndRun XML
 
