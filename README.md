@@ -27,6 +27,7 @@ workflow editor, Ant build-and-run launchers, and observation/analysis tools.
 |---|---|
 | Single-place tutorial | [P1_Tutorial_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml) |
 | P1–P4 fork/join model | [P1_P2_P3_P4_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_P3_P4_BuildAndRun.xml) |
+| Live six-place double-join model | [P1_to_P6_Double_Join_Workflow.xml](btsn.petrinet.ProjectLoader/P1_to_P6_Double_Join_Workflow.xml) |
 | Emergency department | [Emergency_Department_BuildAndRun.xml](btsn.healthcare.ProjectLoader/Emergency_Department_BuildAndRun.xml) |
 | Full Financial application | [FinancialSystem_P1_P5_BuildAndRun.xml](btsn.financial.ProjectLoader/FinancialSystem_P1_P5_BuildAndRun.xml) |
 | Concurrent healthcare versions | [Triple_Workflow_Emergencey_Department_Concurrent.xml](btsn.healthcare.ProjectLoader/Triple_Workflow_Emergencey_Department_Concurrent.xml) |
@@ -125,7 +126,7 @@ same-queue evidence, run
 [its guide](btsn.healthcare.ProjectLoader/README.md#controlled-queue-priority-experiment)
 explains the observed-backlog probe and its separate output files.
 
-## Example business processes
+## Example processes and Petri-net models
 
 ### Emergency department
 
@@ -146,9 +147,49 @@ Check. Underwriting joins their named results. `approved` and `conditional`
 proceed to Decision; `declined` terminates early. See
 [the Financial application guide](btsn.common/FinancialApplication.md) for contracts.
 
-Both models use the same generic host machinery. The diagrams describe their
-configured paths, not measured performance or evidence that every path has been
-exercised in a particular run.
+### Live Petri-net model execution
+
+![P1 forks to P2, P3 and P5; P4 joins P2/P3, then P6 joins P4/P5 and terminates. Monitor collects measured runtime observations.](images/petrinet-double-join.svg)
+
+RPSO also runs Petri-net models directly on the same execution fabric. The
+[six-place double-join definition](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_to_P6_Double_Join_Workflow.json)
+replaces domain calculations with small deterministic token operations:
+
+| Place | Logical service | Model role |
+|---|---|---|
+| P1 | `BooleanTokenService` | Select `true` or `false`; `true` forks into three branches, `false` terminates |
+| P2 | `BranchTwoTokenService` | Return `token_branch2` to the first join |
+| P3 | `BranchOneTokenService` | Return `token_branch1` to the first join |
+| P4 | `MergeTokenService` | Receive both P2/P3 results, return `token_branch2` |
+| P5 | `SideTokenService` | Return `token_branch1` to the second join |
+| P6 | `FinalMergeTokenService` | Receive P4/P5 results, return `token` and terminate |
+
+The generic fabric performs the forks, input synchronization and publication;
+the model services carry and combine the token data. P4 becomes eligible after
+both P2/P3 inputs are available, while P6 requires P4/P5. The topology constrains
+causal order; the running hosts determine when those steps actually execute.
+
+Run
+[P1_to_P6_Double_Join_Workflow.xml](btsn.petrinet.ProjectLoader/P1_to_P6_Double_Join_Workflow.xml)
+as an Ant Build with its default target. It builds the JARs, prepares the selected
+deployment, initializes, deploys, sends ten tokens and collects observations.
+`token.outcome` defaults to `true`; set it to `false` to exercise termination at
+P1. A shorter starting point is
+[P1_P2_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_BuildAndRun.xml), using
+Boolean and Forward token operations. See
+[the model guide](btsn.services/docs/PETRINET_MODELS.md) for profiles and contracts.
+
+This is live token execution with measured queueing, local execution, join
+waiting and workflow elapsed time. The deterministic services introduce no
+simulated processing delays; launcher waits support startup and collection.
+Monitor reconstructs the generated workflow families and the same analyzer,
+timing chart and spatial view can inspect their observations. ProcessEditor can
+then replay that captured execution on the topology. Observed timing is distinct
+from a guarantee to meet real-time deadlines.
+
+All three examples use the same generic host machinery. The diagrams describe
+their configured paths, not measured performance or evidence that every path
+has been exercised in a particular run.
 
 ## Observe and interpret a run
 

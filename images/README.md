@@ -12,6 +12,7 @@ content, not generated raster artwork.
 | `financial-workflow.svg` | P1–P5 Validation → Credit/Fraud → Underwriting → Decision, with invalid/declined termination. Source: `btsn.common/ProcessDefinitionFolder/petrinet/Workflow/FinancialSystem_P1_P5_Workflow.json`. |
 | `healthcare-workflow.svg` | P1 Triage, P2 Laboratory, P3 Cardiology, P4 Radiology, P5 Diagnosis and P6 Treatment, including the direct treatment path. Source: `btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Emergency_Department_Patient_Workflow.json`. |
 | `p1-tutorial.svg` | Current StochasticEntryTokenService loop and direct termination, with observation outside the token path. Source: `btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json`. |
+| `petrinet-double-join.svg` | Live deterministic P1–P6 model: three-way fork, P2/P3 input join at P4, P4/P5 input join at P6, false termination at P1, and collected runtime measurements outside the token path. Source: `btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_to_P6_Double_Join_Workflow.json`. |
 
 Process diagrams abbreviate each activity's local T_in → P → T_out roles. They
 show logical publications and routing alternatives, not a full classical
@@ -26,7 +27,7 @@ host process; separate packaging does not imply a separate network service.
 Monitor's arrow represents collected observations, not a mandatory business hop
 or a claim that every runtime event is streamed directly to Monitor.
 
-To regenerate all five SVGs after editing their standard-library Python source:
+To regenerate all six SVGs after editing their standard-library Python source:
 
 ```sh
 python3 images/generate_diagrams.py
