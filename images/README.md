@@ -7,17 +7,23 @@ content, not generated raster artwork.
 
 | Diagram | Meaning and source |
 |---|---|
-| `rpso-architecture.svg` | Current responsibility boundaries: local rules and input/output coordination in a generic host, in-process business JAR invocation, separate Monitor collection. Based on `ServiceThread`, `ServiceHelper`, `RuleHandler` and the packaged runtime. |
+| `rpso-architecture.svg` | Current responsibility boundaries: explicit T_in → Place P → T_out roles in a generic host, in-process invocation of a bound domain or token-operation JAR, separate Monitor collection. Based on `ServiceThread`, `ServiceHelper`, `RuleHandler` and the packaged runtime. |
 | `rpso-rule-deployment.svg` | JSON topology, canonical contracts and deployment profile feed binding/rule generation. Local acknowledgements and runtime token flow are distinct. Based on `TopologyBindingGenerator` and `RuleDeployer`. |
 | `financial-workflow.svg` | P1–P5 Validation → Credit/Fraud → Underwriting → Decision, with invalid/declined termination. Source: `btsn.common/ProcessDefinitionFolder/petrinet/Workflow/FinancialSystem_P1_P5_Workflow.json`. |
 | `healthcare-workflow.svg` | P1 Triage, P2 Laboratory, P3 Cardiology, P4 Radiology, P5 Diagnosis and P6 Treatment, including the direct treatment path. Source: `btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Emergency_Department_Patient_Workflow.json`. |
 | `p1-tutorial.svg` | Current StochasticEntryTokenService loop and direct termination, with observation outside the token path. Source: `btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json`. |
-| `petrinet-double-join.svg` | Live deterministic P1–P6 model: three-way fork, P2/P3 input join at P4, P4/P5 input join at P6, false termination at P1, and collected runtime measurements outside the token path. Source: `btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_to_P6_Double_Join_Workflow.json`. |
+| `petrinet-double-join.svg` | Explicit P1–P6 transition–place–transition units: circular places, transition bars, three-way fork at T_out_P1, input joins at T_in_P4/T_in_P6, and terminal transitions. JSON node/arc identities are retained in the SVG; generation checks every configured arc. Source: `btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_to_P6_Double_Join_Workflow.json`. |
 
-Process diagrams abbreviate each activity's local T_in → P → T_out roles. They
-show logical publications and routing alternatives, not a full classical
-bipartite Petri net, physical network placement, or measured execution evidence.
-The editor's JSON model supplies the detailed transition/place structure.
+Business process diagrams abbreviate each activity's local T_in → P → T_out
+roles. The Petri-net diagram expands all six units: each has a circular place
+between input/output transition bars. Solid local arcs connect unlike node
+types; dashed blue links represent RPSO's transition-to-transition publication
+channels. These links are distinct from ordinary bipartite P/T-net arcs.
+The input transitions perform synchronization; the bound operation supplies
+the place's computation; the output transitions route, fork or terminate.
+The dot is an illustrative token marking, not a measured execution snapshot.
+The diagram describes the executable RPSO model and its implementation mapping.
+Host placement is specified separately by deployment metadata.
 
 The architecture/deployment diagrams use solid blue arrows for execution/token
 flow, purple dashed arrows for rule installation, grey dashed arrows for

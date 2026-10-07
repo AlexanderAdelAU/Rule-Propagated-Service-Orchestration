@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1120" height="690" viewBox="0 0 1120 690" role="img" aria-labelledby="title desc">
-<title id="title">RPSO responsibility boundaries</title><desc id="desc">Process and deployment definitions install local rules in a generic orchestration host. The host invokes a separately packaged business JAR in-process, routes token publications to other hosts, and supplies collected observations to Monitor outside the business path.</desc>
+<title id="title">RPSO responsibility boundaries</title><desc id="desc">Process and deployment definitions install local rules in a generic orchestration host. The host implements input transition, place invocation and output transition roles, invokes a separately packaged domain or token operation in-process, routes publications to other hosts, and supplies collected observations to Monitor outside the token path.</desc>
 <defs>
 <marker id="flow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#24598e"/></marker>
 <marker id="rule" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7350a2"/></marker>
@@ -17,14 +17,14 @@
 <text x="347.5" y="329" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">T_in</text>
 <text x="347.5" y="355" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Buffer / synchronize</text>
 <rect x="475" y="300" width="175" height="90" rx="8" fill="#edf3fa" stroke="#60738a" stroke-width="1.5"/>
-<text x="562.5" y="329" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">ServiceThread</text>
-<text x="562.5" y="355" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Validate / invoke</text>
+<text x="562.5" y="329" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Place P</text>
+<text x="562.5" y="355" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Invoke bound operation</text>
 <rect x="695" y="300" width="160" height="90" rx="8" fill="#edf3fa" stroke="#60738a" stroke-width="1.5"/>
 <text x="775.0" y="329" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">T_out</text>
 <text x="775.0" y="355" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Route / publish</text>
 <rect x="450" y="440" width="255" height="65" rx="8" fill="#edf7f0" stroke="#60738a" stroke-width="1.5"/>
-<text x="577.5" y="469" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Business-service JAR</text>
-<text x="577.5" y="495" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Domain objects and decisions</text>
+<text x="577.5" y="469" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Bound service JAR</text>
+<text x="577.5" y="495" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Domain or token operation</text>
 <rect x="20" y="300" width="175" height="90" rx="8" fill="#f5f6f8" stroke="#60738a" stroke-width="1.5"/>
 <text x="107.5" y="329" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Incoming token</text>
 <text x="107.5" y="355" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Generator / prior host</text>
