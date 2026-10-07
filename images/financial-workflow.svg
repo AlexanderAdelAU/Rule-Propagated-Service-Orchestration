@@ -47,21 +47,20 @@
 <text x="757" y="338" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start" fill="#1b2b40">declined</text>
 <path d="M 1007 290 L 1007 370" fill="none" stroke="#24598e" stroke-width="2" marker-end="url(#flow)"/>
 <g id="activity-notation-legend" aria-label="Legend: each rounded service activity represents T_in, a service function at P, and T_out.">
-<rect x="650" y="20" width="450" height="155" rx="12" fill="#fafbfc" stroke="#98a7b6" stroke-width="1.5"/>
-<text x="670" y="43" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="start" fill="#1b2b40">Legend: a rounded service activity</text>
-<rect x="670" y="54" width="410" height="105" rx="8" fill="#edf7f0" stroke="#60738a" stroke-width="1.5"/>
-<text x="870" y="80" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1b2b40">Credit Check</text>
-<rect x="705" y="95" width="12" height="32" fill="#24598e"/>
-<circle cx="870" cy="111" r="18" fill="#edf7f0" stroke="#1b2b40" stroke-width="2"/>
-<text x="870" y="117" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" text-anchor="middle" fill="#1b2b40">P</text>
-<rect x="1028" y="95" width="12" height="32" fill="#24598e"/>
-<path d="M 717 111 L 844 111" fill="none" stroke="#24598e" stroke-width="2"/>
-<path d="M 844 107 L 852 111 L 844 115 Z" fill="#24598e"/>
-<path d="M 888 111 L 1020 111" fill="none" stroke="#24598e" stroke-width="2"/>
-<path d="M 1020 107 L 1028 111 L 1020 115 Z" fill="#24598e"/>
-<text x="711" y="149" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="middle" fill="#1b2b40">T_in</text>
-<text x="870" y="149" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="middle" fill="#1b2b40">service function</text>
-<text x="1034" y="149" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="middle" fill="#1b2b40">T_out</text>
+<text x="995" y="52" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#1b2b40">Legend: inside an activity</text>
+<rect x="890" y="70" width="210" height="90" rx="8" fill="#edf7f0" stroke="#60738a" stroke-width="1.5"/>
+<text x="995" y="99" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Credit Check</text>
+<rect x="913" y="112" width="8" height="24" fill="#24598e"/>
+<circle cx="995" cy="124" r="13" fill="#edf7f0" stroke="#1b2b40" stroke-width="2"/>
+<text x="995" y="129" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#1b2b40">P</text>
+<rect x="1069" y="112" width="8" height="24" fill="#24598e"/>
+<path d="M 921 124 L 976 124" fill="none" stroke="#24598e" stroke-width="1.5"/>
+<path d="M 976 121 L 982 124 L 976 127 Z" fill="#24598e"/>
+<path d="M 1008 124 L 1063 124" fill="none" stroke="#24598e" stroke-width="1.5"/>
+<path d="M 1063 121 L 1069 124 L 1063 127 Z" fill="#24598e"/>
+<text x="917" y="151" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="400" text-anchor="middle" fill="#1b2b40">T_in</text>
+<text x="995" y="151" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="400" text-anchor="middle" fill="#1b2b40">service function</text>
+<text x="1073" y="151" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="400" text-anchor="middle" fill="#1b2b40">T_out</text>
 </g>
 <text x="560" y="482" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Activity boxes abbreviate local T_in → P → T_out roles; arrows show logical publication.</text>
 </svg>
