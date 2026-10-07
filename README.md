@@ -22,7 +22,19 @@ inputs, P performs the bound functionality, and T_out routes the result. Shaded
 activation bars show responsibility for one invocation; their lengths do not
 represent measured time.*
 
-## Start with the Petri-net model
+## From the architecture pattern to a running service
+
+Here is an example of how the components of the architecture pattern come
+together to implement a real-time service workflow. A token arrives at an input
+transition, the place invokes its bound service function, and an output
+transition uses the result to continue or complete the process. The interactions
+in the sequence diagram now become a running example.
+
+We present the workflow as a **Petri net**: circular places identify the bound
+functions, transition bars coordinate their execution, and arrows show the
+possible routes taken by tokens. We begin with a single Boolean-returning
+service, extend it into a parallel fork-and-join workflow, then give the same
+architecture financial and healthcare functionality.
 
 ### One place: a function and its execution structure
 
