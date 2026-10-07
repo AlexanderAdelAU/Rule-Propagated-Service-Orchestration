@@ -5,6 +5,16 @@ orchestration architecture. It separates **process coordination** from
 **functionality at each place**: input transitions receive and synchronize tokens,
 a place invokes its bound function, and output transitions route the result.
 
+**P1, P2, …, Pn are generic positions, not fixed business functions.** A place can
+return a simple Boolean, perform a financial calculation, or process a clinical
+result. The chosen service supplies its meaning; the process model supplies the
+connections and routing rules. Functions conform to the declared input/output
+contract, while deployment selects their implementations and hosts.
+
+Start with a Boolean-returning Petri-net example, then build towards the
+Financial and healthcare workflows. The repository also provides a workflow
+editor, Ant build-and-run launchers, and observation/analysis tools.
+
 ![RPSO execution sequence with light blue activation bars: T_in receives and buffers a token, synchronizes required inputs and invokes P; P returns its result; T_in hands it to T_out, which routes or terminates the workflow.](images/rpso-execution-sequence.svg)
 
 *The execution pattern within a generic host. T_in receives and synchronizes
@@ -12,140 +22,7 @@ inputs, P performs the bound functionality, and T_out routes the result. Shaded
 activation bars show responsibility for one invocation; their lengths do not
 represent measured time.*
 
-**Synchronize required inputs** means waiting for any remaining inputs after
-the first token has been received and buffered. At a join, all declared inputs
-must be available before P is invoked; for a single-input operation, that
-requirement is immediately satisfied. T_in's activation ends after P's result
-has returned and been handed to T_out. T_out's activation ends after routing
-and publication, or after termination has been recorded. These are logical roles
-within the host, which remains available for subsequent tokens.
-
-**P1, P2, …, Pn are generic positions, not fixed business functions.** A place can
-return a simple Boolean, perform a financial calculation, or process a clinical
-result. The chosen service supplies its meaning; the process model supplies the
-connections and routing rules. Functions conform to the declared input/output
-contract, while deployment selects their implementations and hosts.
-
-The examples begin with a Boolean-returning Petri-net model and build towards
-the Financial and healthcare workflows. The repository also provides a workflow
-editor, Ant build-and-run launchers, and observation/analysis tools.
-
-## Architecture: coordination and business meaning
-
-![Process definitions install local rules in generic hosts, which invoke separate business JARs and supply observations to Monitor.](images/rpso-architecture.svg)
-
-*Responsibility boundaries in the current Java implementation. Bound service
-JARs are invoked in-process inside a numbered host. The dashed path configures
-local rules; the dotted path carries collected observations outside the business
-workflow.*
-
-| Layer | Responsibility | Repository artefacts |
-|---|---|---|
-| Process model | Places, transitions, fork/join structure, guards and termination | `btsn.common/ProcessDefinitionFolder` |
-| Service contract | Logical service identity, operations, named inputs and returned attribute | `BusinessServiceDefinitions`, `ServiceAttributeBindings` in `btsn.common` |
-| Deployment | Map capabilities to implementation classes, hosts and channels | Infrastructure definitions and `btsn.services/deployments/{healthcare,financial,models}` |
-| Generic execution fabric | Transport, buffering, synchronization, version selection, invocation and publication | `btsn.rpso.places.p1`–`p6`, shared infrastructure |
-| Business computation | Domain objects, calculations and decision symbols | `btsn.common/src/org/btsn/business`, packaged as independent service JARs |
-| Observation | Collect records, reconstruct workflow families and display measurements | `btsn.common.Monitor` |
-
-A business service consumes its named inputs and returns a result. Where routing
-is conditional, the result includes a symbol such as `approved` or `declined`.
-The service interprets business meaning; the fabric matches the symbol against
-declared routes and resolves the destination. Logical service identity is
-separate from physical placement: P1 can host a clinical, financial or model
-capability according to the selected deployment.
-
-The execution pattern is **T_in → P → T_out**:
-
-- **T_in** receives and buffers inputs, accumulating the required named values
-  for joins. Readiness also depends on version, validity and available capacity.
-- **P** invokes the bound business operation under the local execution capacity.
-- **T_out** applies the installed routing rules, publishes fork children or
-  records a business termination.
-
-These are semantic roles within the local execution machinery. The business
-activity boxes abbreviate a complete **T_in → P → T_out** execution unit; the
-Petri-net examples below expand their transition and place nodes explicitly.
-The host implements the whole unit, with its bound operation giving P its
-computational meaning.
-
-There is no central engine making every runtime routing decision. Hosts use
-local rule fragments and communicate through tokens. This does not imply absence
-of distributed coordination, unlimited scalability, or a proven workflow
-soundness property. Shared-host queues, transport and deployment remain relevant.
-
-## Rule deployment and token execution
-
-![JSON workflows, contracts and deployment profiles feed local rule installation; host acknowledgements precede the normal workflow start.](images/rpso-rule-deployment.svg)
-
-*Rule installation and runtime token flow are separate paths. Local installation
-acknowledgements are not a global atomic-commit protocol.*
-
-`TopologyBindingGenerator` derives operation bindings from the workflow.
-`RuleDeployer` compiles/distributes versioned RuleML fragments to the participating
-host operations and waits for local acknowledgements with retries in the normal
-deployment path. Launchers that explicitly skip deployment require previously
-installed matching rules. RuleBase version selection does not by itself pin the
-business implementation binary; deploy the matching JARs and configuration too.
-
-Runtime XML payloads carry token identity, workflow version, target operation,
-named business attributes, validity and instrumentation fields. A fork creates
-physical child tokens within one logical workflow family. Joins accumulate the
-required inputs for that family; the analyzer uses recorded generated roots and
-parent/child genealogy rather than treating every child as a new workflow.
-
-| Component | Current role |
-|---|---|
-| `EventReactor` / `Scheduler` | Receive packets and maintain the local eligible-work ordering |
-| `ServiceThread` | Validate the selected contract/version, coordinate inputs, invoke and publish |
-| `RuleHandler` / OOjDREW | Install local RuleML and evaluate rule queries |
-| `ServiceHelper` | Resolve and invoke the installed business implementation |
-| `EventPublisher` | Send the resulting payload to the declared channel |
-
-Priority applies to **waiting eligible work**. It does not interrupt a running
-business operation. Different path lengths or different host operations can have
-different queue waits without demonstrating priority overtaking. For controlled
-same-queue evidence, run
-[Queue_Priority_BuildAndRun.xml](btsn.healthcare.ProjectLoader/Queue_Priority_BuildAndRun.xml);
-[its guide](btsn.healthcare.ProjectLoader/README.md#controlled-queue-priority-experiment)
-explains the observed-backlog probe and its separate output files.
-
-## Prepare the workspace
-
-1. Use **JDK 15+** and **Apache Ant 1.10.2+**. In Eclipse, ensure the Ant launch uses
-   a JDK so the Java compiler is available.
-2. Import the repository's projects with **File → Import → General → Existing
-   Projects into Workspace**, leaving **Copy projects into workspace** unchecked.
-   Existing workspaces should also import `btsn.services`, the generic
-   `btsn.rpso.places.p1`–`p6` projects, and `btsn.financial.ProjectLoader`.
-
-The workspace supports both defining a process in ProcessEditor and executing
-it through an Ant launcher.
-
-## Start with the Petri-net model
-
-### One place: a function and its execution structure
-
-![A circular P1 place between input and output transition bars. Its function returns true or false; the output transition terminates on true and loops on false.](images/p1-tutorial.svg)
-
-In the [single-place tutorial](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json),
-**P1 performs a function whose result is `true` or `false`**. The function produces
-its own result; it does not simply copy the arriving token's logical state.
-The transitions supply the execution behavior around that function:
-
-| Model role | Execution responsibility | Tutorial behavior |
-|---|---|---|
-| **T_in** — input transition | Receive and buffer tokens; synchronize required inputs where a join is declared | Accept the initial token or a returning token |
-| **P** — place with bound functionality | Invoke the selected operation with its declared inputs | P1 returns `true` or `false` |
-| **T_out** — output transition | Apply routing rules; publish, fork or terminate | `true` ends the workflow; `false` returns to T_in_P1 |
-
-Thus **T_in → P → T_out** maps to **receive/synchronize → invoke function →
-route/publish**. A generic orchestration host implements the whole unit. The
-place's function and the transitions' coordination responsibilities are separate.
-Build this definition in ProcessEditor using the walkthrough below;
-[Tutorial.md](Tutorial.md) supplies the detailed settings.
-
-#### Build the process in ProcessEditor
+## Build the process in ProcessEditor
 
 ![ProcessEditor showing the single-place tutorial on its canvas and P1's StochasticEntryTokenService binding in the Attributes panel.](images/process-editor-p1-tutorial.png)
 
@@ -167,6 +44,68 @@ See [Build this process in ProcessEditor](Tutorial.md#build-this-process-in-proc
 for the exact node settings, operation arguments, arrow guards, save location
 and launcher property. The editor defines the process and its bindings; the
 launcher supplies the packaged runtime and deployment.
+
+## Run an example
+
+1. Use **JDK 15+** and **Apache Ant 1.10.2+**. In Eclipse, ensure the Ant launch uses
+   a JDK so the Java compiler is available.
+2. Import the repository's projects with **File → Import → General → Existing
+   Projects into Workspace**, leaving **Copy projects into workspace** unchecked.
+   Existing workspaces should also import `btsn.services`, the generic
+   `btsn.rpso.places.p1`–`p6` projects, and `btsn.financial.ProjectLoader`.
+3. Choose a launcher below, right-click the XML and select **Run As → Ant Build**.
+   Use its default `run-complete-workflow` target. It builds the required JARs,
+   prepares the configured runtime, starts local components, runs the workflow
+   phases and collects observations. No separate `clean`/`package` step is needed.
+4. After collection, run the launcher's `analyse` target or run `PetriNetAnalyzer`
+   in `btsn.common.Monitor`, package `org.btsn.derby.Analysis`.
+
+| Example | Ant entry point |
+|---|---|
+| Single-place tutorial | [P1_Tutorial_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml) |
+| P1–P4 fork/join model | [P1_P2_P3_P4_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_P3_P4_BuildAndRun.xml) |
+| Six-place double-join model | [P1_to_P6_Double_Join_Workflow.xml](btsn.petrinet.ProjectLoader/P1_to_P6_Double_Join_Workflow.xml) |
+| Emergency department | [Emergency_Department_BuildAndRun.xml](btsn.healthcare.ProjectLoader/Emergency_Department_BuildAndRun.xml) |
+| Full Financial application | [FinancialSystem_P1_P5_BuildAndRun.xml](btsn.financial.ProjectLoader/FinancialSystem_P1_P5_BuildAndRun.xml) |
+| Concurrent healthcare versions | [Triple_Workflow_Emergencey_Department_Concurrent.xml](btsn.healthcare.ProjectLoader/Triple_Workflow_Emergencey_Department_Concurrent.xml) |
+
+The concurrent launcher's existing filename includes `Emergencey`; use the file
+as named. The loader guides list further scenarios and phase-only targets:
+[healthcare](btsn.healthcare.ProjectLoader/README.md),
+[Financial](btsn.financial.ProjectLoader/README.md), and
+[Petri-net models](btsn.petrinet.ProjectLoader/README.md).
+
+Local/remote startup follows the launcher's deployment profile. In `auto` mode,
+the configured channel address must belong to this machine for a component to
+start locally. Remote hosts must already be running with the matching JARs and
+configuration. Stop the previous Ant run before starting another launcher on the
+same ports. Initialization targets reset the selected runtime databases; collect
+or archive results before starting a fresh initialized run.
+
+For an editable model walkthrough, see [Tutorial.md](Tutorial.md).
+
+## Start with the Petri-net model
+
+### One place: a function and its execution structure
+
+![A circular P1 place between input and output transition bars. Its function returns true or false; the output transition terminates on true and loops on false.](images/p1-tutorial.svg)
+
+In the [single-place tutorial](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json),
+**P1 performs a function whose result is `true` or `false`**. The function produces
+its own result; it does not simply copy the arriving token's logical state.
+The transitions supply the execution behavior around that function:
+
+| Model role | Execution responsibility | Tutorial behavior |
+|---|---|---|
+| **T_in** — input transition | Receive and buffer tokens; synchronize required inputs where a join is declared | Accept the initial token or a returning token |
+| **P** — place with bound functionality | Invoke the selected operation with its declared inputs | P1 returns `true` or `false` |
+| **T_out** — output transition | Apply routing rules; publish, fork or terminate | `true` ends the workflow; `false` returns to T_in_P1 |
+
+Thus **T_in → P → T_out** maps to **receive/synchronize → invoke function →
+route/publish**. A generic orchestration host implements the whole unit. The
+place's function and the transitions' coordination responsibilities are separate.
+Run [P1_Tutorial_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml)
+as an Ant Build; [Tutorial.md](Tutorial.md) explains editing and running it.
 
 ### Four places: Boolean functionality with a fork and join
 
@@ -196,8 +135,9 @@ to select a fresh result (default probability of `true`: 0.5). This implements
 the place's Boolean function. The transitions receive inputs and route its result
 according to the model.
 
-The launcher is listed under [Run an example](#run-an-example). Captured results
-appear under [Petri-net fork/join execution](#petri-net-forkjoin-execution) below.
+Run [P1_P2_P3_P4_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_P3_P4_BuildAndRun.xml)
+to execute this model. Its captured results appear under
+[Petri-net fork/join execution](#petri-net-forkjoin-execution) below.
 
 Circles are places; bars are transitions. Solid local arcs connect each
 transition–place–transition unit. Dashed blue links represent publication between
@@ -269,8 +209,15 @@ the model services carry and combine the token data. P4 becomes eligible after
 both P2/P3 inputs are available, while P6 requires P4/P5. The topology constrains
 causal order; the running hosts determine when those steps actually execute.
 
-See [the model guide](btsn.services/docs/PETRINET_MODELS.md) for profiles and
-contracts, and [Run an example](#run-an-example) for launch settings.
+Run
+[P1_to_P6_Double_Join_Workflow.xml](btsn.petrinet.ProjectLoader/P1_to_P6_Double_Join_Workflow.xml)
+as an Ant Build with its default target. It builds the JARs, prepares the selected
+deployment, initializes, deploys, sends ten tokens and collects observations.
+`token.outcome` defaults to `true`; set it to `false` to exercise termination at
+P1. Another deterministic example is
+[P1_P2_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_BuildAndRun.xml), using
+Boolean and Forward token operations. See
+[the model guide](btsn.services/docs/PETRINET_MODELS.md) for profiles and contracts.
 
 This is live token execution with measured queueing, local execution, join
 waiting and workflow elapsed time. The deterministic services introduce no
@@ -284,52 +231,93 @@ These examples execute on the same generic host machinery. Their diagrams show
 configured paths; the captured runs show measured execution. Neither a topology
 nor one run establishes a guarantee to meet real-time deadlines.
 
-## Run an example
+## Architecture: coordination and business meaning
 
-Once the process, service contract and deployment are defined, select its
-launcher. See [workspace preparation](#prepare-the-workspace) for the JDK and
-Eclipse import requirements.
+![Process definitions install local rules in generic hosts, which invoke separate business JARs and supply observations to Monitor.](images/rpso-architecture.svg)
 
-1. Choose a launcher below, right-click the XML and select **Run As → Ant Build**.
-   Use its default `run-complete-workflow` target. It builds the required JARs,
-   prepares the configured runtime, starts local components, runs the workflow
-   phases and collects observations. No separate `clean`/`package` step is needed.
-2. After collection, run the launcher's `analyse` target or run `PetriNetAnalyzer`
-   in `btsn.common.Monitor`, package `org.btsn.derby.Analysis`.
+*Responsibility boundaries in the current Java implementation. Bound service
+JARs are invoked in-process inside a numbered host. The dashed path configures
+local rules; the dotted path carries collected observations outside the business
+workflow.*
 
-| Example | Ant entry point |
+| Layer | Responsibility | Repository artefacts |
+|---|---|---|
+| Process model | Places, transitions, fork/join structure, guards and termination | `btsn.common/ProcessDefinitionFolder` |
+| Service contract | Logical service identity, operations, named inputs and returned attribute | `BusinessServiceDefinitions`, `ServiceAttributeBindings` in `btsn.common` |
+| Deployment | Map capabilities to implementation classes, hosts and channels | Infrastructure definitions and `btsn.services/deployments/{healthcare,financial,models}` |
+| Generic execution fabric | Transport, buffering, synchronization, version selection, invocation and publication | `btsn.rpso.places.p1`–`p6`, shared infrastructure |
+| Business computation | Domain objects, calculations and decision symbols | `btsn.common/src/org/btsn/business`, packaged as independent service JARs |
+| Observation | Collect records, reconstruct workflow families and display measurements | `btsn.common.Monitor` |
+
+**Synchronize required inputs** means waiting for any remaining inputs after
+the first token has been received and buffered. At a join, all declared inputs
+must be available before P is invoked; for a single-input operation, that
+requirement is immediately satisfied. T_in's activation ends after P's result
+has returned and been handed to T_out. T_out's activation ends after routing
+and publication, or after termination has been recorded. These are logical roles
+within the host, which remains available for subsequent tokens.
+
+A business service consumes its named inputs and returns a result. Where routing
+is conditional, the result includes a symbol such as `approved` or `declined`.
+The service interprets business meaning; the fabric matches the symbol against
+declared routes and resolves the destination. Logical service identity is
+separate from physical placement: P1 can host a clinical, financial or model
+capability according to the selected deployment.
+
+The execution pattern is **T_in → P → T_out**:
+
+- **T_in** receives and buffers inputs, accumulating the required named values
+  for joins. Readiness also depends on version, validity and available capacity.
+- **P** invokes the bound business operation under the local execution capacity.
+- **T_out** applies the installed routing rules, publishes fork children or
+  records a business termination.
+
+These are semantic roles within the local execution machinery. The business
+activity boxes abbreviate a complete **T_in → P → T_out** execution unit; the
+Petri-net examples above expand their transition and place nodes explicitly.
+The host implements the whole unit, with its bound operation giving P its
+computational meaning.
+
+There is no central engine making every runtime routing decision. Hosts use
+local rule fragments and communicate through tokens. This does not imply absence
+of distributed coordination, unlimited scalability, or a proven workflow
+soundness property. Shared-host queues, transport and deployment remain relevant.
+
+## Rule deployment and token execution
+
+![JSON workflows, contracts and deployment profiles feed local rule installation; host acknowledgements precede the normal workflow start.](images/rpso-rule-deployment.svg)
+
+*Rule installation and runtime token flow are separate paths. Local installation
+acknowledgements are not a global atomic-commit protocol.*
+
+`TopologyBindingGenerator` derives operation bindings from the workflow.
+`RuleDeployer` compiles/distributes versioned RuleML fragments to the participating
+host operations and waits for local acknowledgements with retries in the normal
+deployment path. Launchers that explicitly skip deployment require previously
+installed matching rules. RuleBase version selection does not by itself pin the
+business implementation binary; deploy the matching JARs and configuration too.
+
+Runtime XML payloads carry token identity, workflow version, target operation,
+named business attributes, validity and instrumentation fields. A fork creates
+physical child tokens within one logical workflow family. Joins accumulate the
+required inputs for that family; the analyzer uses recorded generated roots and
+parent/child genealogy rather than treating every child as a new workflow.
+
+| Component | Current role |
 |---|---|
-| Single-place tutorial | [P1_Tutorial_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml) |
-| P1–P4 fork/join model | [P1_P2_P3_P4_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_P3_P4_BuildAndRun.xml) |
-| Six-place double-join model | [P1_to_P6_Double_Join_Workflow.xml](btsn.petrinet.ProjectLoader/P1_to_P6_Double_Join_Workflow.xml) |
-| Emergency department | [Emergency_Department_BuildAndRun.xml](btsn.healthcare.ProjectLoader/Emergency_Department_BuildAndRun.xml) |
-| Full Financial application | [FinancialSystem_P1_P5_BuildAndRun.xml](btsn.financial.ProjectLoader/FinancialSystem_P1_P5_BuildAndRun.xml) |
-| Concurrent healthcare versions | [Triple_Workflow_Emergencey_Department_Concurrent.xml](btsn.healthcare.ProjectLoader/Triple_Workflow_Emergencey_Department_Concurrent.xml) |
+| `EventReactor` / `Scheduler` | Receive packets and maintain the local eligible-work ordering |
+| `ServiceThread` | Validate the selected contract/version, coordinate inputs, invoke and publish |
+| `RuleHandler` / OOjDREW | Install local RuleML and evaluate rule queries |
+| `ServiceHelper` | Resolve and invoke the installed business implementation |
+| `EventPublisher` | Send the resulting payload to the declared channel |
 
-Run
-[P1_to_P6_Double_Join_Workflow.xml](btsn.petrinet.ProjectLoader/P1_to_P6_Double_Join_Workflow.xml)
-as an Ant Build with its default target. It builds the JARs, prepares the selected
-deployment, initializes, deploys, sends ten tokens and collects observations.
-`token.outcome` defaults to `true`; set it to `false` to exercise termination at
-P1. Another deterministic example is
-[P1_P2_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_BuildAndRun.xml), using
-Boolean and Forward token operations. See
-[the model guide](btsn.services/docs/PETRINET_MODELS.md) for profiles and contracts.
-
-The concurrent launcher's existing filename includes `Emergencey`; use the file
-as named. The loader guides list further scenarios and phase-only targets:
-[healthcare](btsn.healthcare.ProjectLoader/README.md),
-[Financial](btsn.financial.ProjectLoader/README.md), and
-[Petri-net models](btsn.petrinet.ProjectLoader/README.md).
-
-Local/remote startup follows the launcher's deployment profile. In `auto` mode,
-the configured channel address must belong to this machine for a component to
-start locally. Remote hosts must already be running with the matching JARs and
-configuration. Stop the previous Ant run before starting another launcher on the
-same ports. Initialization targets reset the selected runtime databases; collect
-or archive results before starting a fresh initialized run.
-
-For an editable model walkthrough, see [Tutorial.md](Tutorial.md).
+Priority applies to **waiting eligible work**. It does not interrupt a running
+business operation. Different path lengths or different host operations can have
+different queue waits without demonstrating priority overtaking. For controlled
+same-queue evidence, run
+[Queue_Priority_BuildAndRun.xml](btsn.healthcare.ProjectLoader/Queue_Priority_BuildAndRun.xml);
+[its guide](btsn.healthcare.ProjectLoader/README.md#controlled-queue-priority-experiment)
+explains the observed-backlog probe and its separate output files.
 
 ## Execution examples
 
