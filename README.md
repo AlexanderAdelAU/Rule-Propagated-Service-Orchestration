@@ -128,7 +128,7 @@ A loan application gives the fork and join pattern a concrete business purpose.
 Credit and fraud checks supply different information about the same application;
 underwriting needs both results to decide how processing should continue.
 
-![Validation forks to Credit Check and Fraud Check; Underwriting joins both inputs and routes to Decision or early termination.](images/financial-workflow.svg)
+![Validation forks to Credit Check and Fraud Check; Underwriting joins both inputs and routes to Decision or early termination. A top-right legend expands a rounded Credit Check activity into T_in, its service function at P, and T_out.](images/financial-workflow.svg)
 
 Validation rejects invalid applications or forks into Credit Check and Fraud
 Check. Underwriting joins their named results. `approved` and `conditional`
