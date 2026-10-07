@@ -259,9 +259,11 @@ workflow waiting or an additive decomposition into waiting and service time.
 
 **View → Y-Axis Scale → Scale Each Version** is the default: each version lane
 scales to its maximum measured workflow duration. Select **Shared Milliseconds**
-to compare absolute durations by bar height across versions. Horizontal position
-is arrival rank; bar width does not encode duration. Missing observations remain
-unavailable rather than being plotted as measured zero.
+to compare absolute durations by bar height across versions. **Workflow arrival
+rank** on the x-axis counts roots in generation order across all versions;
+equal spacing does not mean equal time between arrivals. Time is measured on
+the y-axis, in milliseconds; bar width does not encode duration. Missing
+observations remain unavailable rather than being plotted as measured zero.
 
 **View → Bar Width → Wide (Publication)** is the default for a fuller figure,
 closer to the earlier presentation. Select **Narrow** for the thinner bars.

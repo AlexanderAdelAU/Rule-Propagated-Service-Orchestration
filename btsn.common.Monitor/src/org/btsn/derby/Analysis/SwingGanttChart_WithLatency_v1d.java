@@ -448,7 +448,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         }
         int step=Math.max(1,count/10);
         for(int i=0;i<count;i+=step) w.printf(Locale.ROOT,"\\node[below] at (%.3f,-0.08) {%d};%n",i+BAR_SLOT_CENTER,i+1);
-        w.printf(Locale.ROOT,"\\node[below] at (%.3f,-0.25) {Workflow arrival order; elapsed / queue wait (ms)};%n",count/2.0);
+        w.printf(Locale.ROOT,"\\node[below] at (%.3f,-0.25) {Workflow arrival rank};%n",count/2.0);
         w.println("\\end{tikzpicture}");
         w.println("\\caption{"+escapeLatex(processDescription(false))+". "+workflowCaption()+" "+scaleDescription()+" "+observationDescription()+" "+exceptionDescription()+" Arrival order uses GENERATED timestamps, or recorded starts for legacy rows.}");
         w.println("\\label{fig:workflow-elapsed-queue}\n\\end{figure}");
@@ -853,7 +853,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             }
             g.setColor(Color.BLACK); g.setFont(labelFont);
             int bottom=p.baseline(p.groups.size()-1)+43;
-            String xlabel="Workflow arrival order";
+            String xlabel="Workflow arrival rank";
             g.drawString(xlabel,(getWidth()-g.getFontMetrics().stringWidth(xlabel))/2,bottom);
             g.setFont(axisLabelFont);
             g.drawString(observationDescription(),20,bottom+22);
