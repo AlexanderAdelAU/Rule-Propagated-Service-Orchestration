@@ -16,7 +16,7 @@ public final class LauncherRuntimeCheck {
         Path root=Path.of(args[0]).toAbsolutePath();
         java.util.Map<Path,String> before=sourceConfiguration(root);
         List<Path> builds=new ArrayList<>();
-        for(Path dir:Arrays.asList(root.resolve("btsn.petrinet.ProjectLoader"),root.resolve("btsn.petrinet.ProjectLoader/utility files")))
+        for(Path dir:Arrays.asList(root.resolve("btsn.financial.ProjectLoader"),root.resolve("btsn.petrinet.ProjectLoader"),root.resolve("btsn.petrinet.ProjectLoader/utility files")))
             try(java.util.stream.Stream<Path> files=Files.list(dir)) { files.filter(p->p.toString().endsWith(".xml")).sorted().forEach(builds::add); }
         int operations=0;
         for(Path build:builds) {

@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="760" viewBox="0 0 1120 760" role="img" aria-labelledby="title desc">
+<title id="title">Rule deployment and runtime token flow</title><desc id="desc">Workflow JSON, canonical service contracts and deployment bindings feed rule generation. RuleDeployer sends versioned local fragments to hosts and waits for acknowledgements in the normal deployment path. Event generation and host-to-host token flow are separate from rule installation.</desc>
+<defs>
+<marker id="flow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#24598e"/></marker>
+<marker id="rule" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7350a2"/></marker>
+<marker id="observe" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#19776e"/></marker>
+<marker id="ack" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#65758b"/></marker>
+</defs><rect width="100%" height="100%" fill="#ffffff"/>
+<rect x="25" y="25" width="330" height="80" rx="8" fill="#f3eff8" stroke="#60738a" stroke-width="1.5"/>
+<text x="190.0" y="54" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Workflow JSON</text>
+<text x="190.0" y="80" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Places · transitions · guards</text>
+<rect x="395" y="25" width="330" height="80" rx="8" fill="#f3eff8" stroke="#60738a" stroke-width="1.5"/>
+<text x="560.0" y="54" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Service contracts</text>
+<text x="560.0" y="80" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Named inputs · output · operation</text>
+<rect x="765" y="25" width="330" height="80" rx="8" fill="#f3eff8" stroke="#60738a" stroke-width="1.5"/>
+<text x="930.0" y="54" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Deployment profile</text>
+<text x="930.0" y="80" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Implementation · host · channel</text>
+<rect x="375" y="200" width="370" height="85" rx="8" fill="#f3eff8" stroke="#60738a" stroke-width="1.5"/>
+<text x="560.0" y="229" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Binding and rule generation</text>
+<text x="560.0" y="255" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">TopologyBindingGenerator · RuleDeployer</text>
+<rect x="375" y="350" width="370" height="85" rx="8" fill="#f3eff8" stroke="#60738a" stroke-width="1.5"/>
+<text x="560.0" y="379" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Fragment distribution</text>
+<text x="560.0" y="405" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Versioned RuleML · local commitments</text>
+<rect x="45" y="510" width="345" height="90" rx="8" fill="#edf3fa" stroke="#60738a" stroke-width="1.5"/>
+<text x="217.5" y="539" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Generic host A</text>
+<text x="217.5" y="565" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Installed rules · T_in → P → T_out</text>
+<rect x="735" y="510" width="345" height="90" rx="8" fill="#edf3fa" stroke="#60738a" stroke-width="1.5"/>
+<text x="907.5" y="539" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Generic host B</text>
+<text x="907.5" y="565" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Installed rules · T_in → P → T_out</text>
+<rect x="405" y="660" width="310" height="70" rx="8" fill="#f5f6f8" stroke="#60738a" stroke-width="1.5"/>
+<text x="560.0" y="689" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Event generator</text>
+<text x="560.0" y="715" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Start workflow tokens</text>
+<path d="M 190 105 L 190 158 L 465 158 L 465 200" fill="none" stroke="#7350a2" stroke-width="2" stroke-dasharray="8 5" marker-end="url(#rule)"/>
+<path d="M 560 105 L 560 200" fill="none" stroke="#7350a2" stroke-width="2" stroke-dasharray="8 5" marker-end="url(#rule)"/>
+<path d="M 930 105 L 930 158 L 655 158 L 655 200" fill="none" stroke="#7350a2" stroke-width="2" stroke-dasharray="8 5" marker-end="url(#rule)"/>
+<path d="M 560 285 L 560 350" fill="none" stroke="#7350a2" stroke-width="2" stroke-dasharray="8 5" marker-end="url(#rule)"/>
+<path d="M 460 435 L 460 460 L 218 460 L 218 510" fill="none" stroke="#7350a2" stroke-width="2" stroke-dasharray="8 5" marker-end="url(#rule)"/>
+<path d="M 660 435 L 660 460 L 908 460 L 908 510" fill="none" stroke="#7350a2" stroke-width="2" stroke-dasharray="8 5" marker-end="url(#rule)"/>
+<path d="M 135 510 L 135 320 L 375 320 L 375 388" fill="none" stroke="#65758b" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#ack)"/>
+<path d="M 990 510 L 990 320 L 745 320 L 745 388" fill="none" stroke="#65758b" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#ack)"/>
+<text x="153" y="338" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start" fill="#65758b">acknowledgement</text>
+<text x="972" y="338" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="end" fill="#65758b">acknowledgement</text>
+<path d="M 390 555 L 735 555" fill="none" stroke="#24598e" stroke-width="2" marker-end="url(#flow)"/>
+<text x="562" y="543" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">runtime token publication</text>
+<path d="M 455 660 L 455 630 L 217 630 L 217 600" fill="none" stroke="#24598e" stroke-width="2" marker-end="url(#flow)"/>
+<text x="562" y="483" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="middle" fill="#1b2b40">Rules are installed before the normal workflow start</text>
+<text x="560" y="750" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Local acknowledgements are not a global atomic-commit protocol.</text>
+</svg>

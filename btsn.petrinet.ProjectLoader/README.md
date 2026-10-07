@@ -1,11 +1,11 @@
-# Model and financial launchers
+# Petri-net model launchers
 
 Run your usual `XXX_BuildAndRun.xml` as an Ant Build in Eclipse with Ant 1.10.2+
 and a JDK 15+. Each retained launcher builds the packaged business services,
 shared infrastructure, numbered hosts, Monitor and event generators automatically.
 No separate `clean`/`package` step or Eclipse `bin` compilation is required.
 
-The eleven main launchers and eleven standalone utility phases import
+The six main model launchers and eleven standalone utility phases import
 `btsn.services/launcher-runtime.xml`. Shared JAR paths are declared once; business
 JARs are collected recursively from their domain folders. Each main launcher
 uses its own configuration and host databases under
@@ -14,8 +14,9 @@ working directory and database, so the analyser and diagrams keep reading the
 same results. Output filenames and each launcher's existing token counts,
 versions, delays, deployment modes and phase order are retained.
 
-Financial examples select `deployments/financial`. The existing deterministic
-two-place and double-join examples retain their deterministic model profiles.
+Financial launchers now live in [btsn.financial.ProjectLoader](../btsn.financial.ProjectLoader/README.md).
+The existing deterministic two-place and double-join examples retain their
+deterministic model profiles.
 The older tutorial, fork/join and traffic-light examples select explicit
 stochastic model profiles. Their business operations use the unchanged
 `BaseStochasticPetriNetPlace` processing, including guards, delays and join
@@ -45,6 +46,6 @@ generated runtime and leaves source deployment metadata unchanged.
 
 Each main launcher exposes `prepare-runtime` and `analyse` for those phases
 alone. Developers can run `btsn.services/build.xml` with `check-launchers` to
-configure and prepare all 22 Ant entry points, check JAR-only classpaths and
+configure and prepare all 22 Financial/model Ant entry points, check JAR-only classpaths and
 resolve their workflow contracts without starting services. The check reuses
 the JARs it has just built; ordinary launcher execution always builds them.

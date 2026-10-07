@@ -96,7 +96,7 @@ the caller. It can be selected through the same metadata boundary on any host.
 
 Authoritative regression launcher for this branch:
 
-- `../btsn.petrinet.ProjectLoader/FinancialSystem_Stage5_PriorityPreemption_BuildAndRun.xml`
+- `../btsn.financial.ProjectLoader/FinancialSystem_Stage5_PriorityPreemption_BuildAndRun.xml`
 
 Expected characteristics:
 
@@ -118,9 +118,9 @@ single-node testing purposes and are not the authoritative application definitio
 
 - `ProcessDefinitionFolder/FinancialSystem.json`
 - `ProcessDefinitionFolder/FinancialSystem_P1_Simple.json`
-- `../btsn.petrinet.ProjectLoader/FinancialSystem_P1_Simple_BuildAndRun.xml`
-- `../btsn.petrinet.ProjectLoader/FinancialSystem_Stage3_Concurrent_BuildAndRun.xml`
-- `../btsn.petrinet.ProjectLoader/FinancialSystem_Stage4_LiveDeployment_BuildAndRun.xml`
+- `../btsn.financial.ProjectLoader/FinancialSystem_P1_Simple_BuildAndRun.xml`
+- `../btsn.financial.ProjectLoader/FinancialSystem_Stage3_Concurrent_BuildAndRun.xml`
+- `../btsn.financial.ProjectLoader/FinancialSystem_Stage4_LiveDeployment_BuildAndRun.xml`
 
 They should not be treated as competing production definitions of the Financial
 application.

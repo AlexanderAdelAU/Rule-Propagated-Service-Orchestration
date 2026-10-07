@@ -27,6 +27,10 @@ import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
  * Class name retained for existing Monitor entry points and launchers.
  */
 public class SwingGanttChart_WithLatency_v1d extends JPanel {
+    private static final double BAR_SLOT_CENTER = 0.345;
+    private static final double BAR_SLOT_WIDTH = 0.225;
+    private boolean wideBars = true;
+    private double barSlotWidth() { return wideBars ? 0.60 : BAR_SLOT_WIDTH; }
     
     private static final String PROTOCOL = "jdbc:derby:";
     private static final String DB_NAME = "ServiceAnalysisDataBase";
@@ -126,6 +130,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         StringBuilder report = new StringBuilder("WORKFLOW ELAPSED TIME AND QUEUE WAIT\n");
         report.append(processDescription(false)).append('\n');
         report.append(workflowCaption()).append('\n');
+        report.append(observationDescription()).append('\n');
         report.append(scaleDescription()).append("\nX = unavailable elapsed interval; ").append(missingQueueLabel())
             .append(" = unavailable queue measurement.\n");
         for(String group:displayByVersion?uniqueVersions:uniqueServices)
@@ -416,19 +421,21 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             if(lane==null) continue;
             double base=groups.size()-1-lane;
             double maximum=axisMaximum(groups.get(lane));
+            double barLeft=i+BAR_SLOT_CENTER-barSlotWidth()/2;
+            double barRight=i+BAR_SLOT_CENTER+barSlotWidth()/2;
             if(t.hasElapsedTime) {
                 double top=base+0.8*t.elapsedTime/maximum;
-                if(t.elapsedTime==0) w.printf(Locale.ROOT,"\\draw[lane%d,thick] (%.3f,%.3f)--(%.3f,%.3f);%n",lane,i+0.12,base,i+0.57,base);
-                else w.printf(Locale.ROOT,"\\filldraw[fill=lane%d,draw=lane%d] (%.3f,%.3f) rectangle (%.3f,%.3f);%n",lane,lane,i+0.12,base,i+0.57,top);
-            } else w.printf(Locale.ROOT,"\\node at (%.3f,%.3f) {$\\times$};%n",i+0.38,base);
+                if(t.elapsedTime==0) w.printf(Locale.ROOT,"\\draw[lane%d,thick] (%.3f,%.3f)--(%.3f,%.3f);%n",lane,barLeft,base,barRight,base);
+                else w.printf(Locale.ROOT,"\\filldraw[fill=lane%d,draw=lane%d] (%.3f,%.3f) rectangle (%.3f,%.3f);%n",lane,lane,barLeft,base,barRight,top);
+            } else w.printf(Locale.ROOT,"\\node at (%.3f,%.3f) {$\\times$};%n",i+BAR_SLOT_CENTER,base);
             if(t.hasQueueTime) {
                 long shown=queueDisplayValue(t,maximum);
                 double y=base+0.8*shown/maximum;
                 if(lightQueueBars) {
-                    if(shown==0) w.printf(Locale.ROOT,"\\draw[queue%d,thick] (%.3f,%.3f)--(%.3f,%.3f);%n",lane,i+0.12,base,i+0.57,base);
-                    else if(t.hasElapsedTime) w.printf(Locale.ROOT,"\\fill[queue%d] (%.3f,%.3f) rectangle (%.3f,%.3f);%n",lane,i+0.12,base,i+0.57,y);
-                    else w.printf(Locale.ROOT,"\\draw[queue%d,dashed] (%.3f,%.3f) rectangle (%.3f,%.3f);%n",lane,i+0.12,base,i+0.57,y);
-                    if(t.hasElapsedTime) w.printf(Locale.ROOT,"\\draw[lane%d] (%.3f,%.3f) rectangle (%.3f,%.3f);%n",lane,i+0.12,base,i+0.57,base+0.8*t.elapsedTime/maximum);
+                    if(shown==0) w.printf(Locale.ROOT,"\\draw[queue%d,thick] (%.3f,%.3f)--(%.3f,%.3f);%n",lane,barLeft,base,barRight,base);
+                    else if(t.hasElapsedTime) w.printf(Locale.ROOT,"\\fill[queue%d] (%.3f,%.3f) rectangle (%.3f,%.3f);%n",lane,barLeft,base,barRight,y);
+                    else w.printf(Locale.ROOT,"\\draw[queue%d,dashed] (%.3f,%.3f) rectangle (%.3f,%.3f);%n",lane,barLeft,base,barRight,y);
+                    if(t.hasElapsedTime) w.printf(Locale.ROOT,"\\draw[lane%d] (%.3f,%.3f) rectangle (%.3f,%.3f);%n",lane,barLeft,base,barRight,base+0.8*t.elapsedTime/maximum);
                 } else {
                     double x=i+0.82;
                     // Explicit diamond, with equal physical half-width/height across display ranges.
@@ -436,14 +443,14 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
                     double dx=radius*count/14.0,dy=radius/1.9;
                     w.printf(Locale.ROOT,"\\fill[black] (%.4f,%.4f)--(%.4f,%.4f)--(%.4f,%.4f)--(%.4f,%.4f)--cycle;%n",x-dx,y,x,y+dy,x+dx,y,x,y-dy);
                 }
-                if(t.queueTime>shown) w.printf(Locale.ROOT,"\\node[anchor=south] at (%.3f,%.3f) {$\\uparrow$};%n",i+(lightQueueBars?0.345:0.82),y);
+                if(t.queueTime>shown) w.printf(Locale.ROOT,"\\node[anchor=south] at (%.3f,%.3f) {$\\uparrow$};%n",i+(lightQueueBars?BAR_SLOT_CENTER:0.82),y);
             }
         }
         int step=Math.max(1,count/10);
-        for(int i=0;i<count;i+=step) w.printf(Locale.ROOT,"\\node[below] at (%.3f,-0.08) {%d};%n",i+0.38,i+1);
-        w.printf(Locale.ROOT,"\\node[below] at (%.3f,-0.25) {Workflow arrival order; elapsed / queue wait (ms)};%n",count/2.0);
+        for(int i=0;i<count;i+=step) w.printf(Locale.ROOT,"\\node[below] at (%.3f,-0.08) {%d};%n",i+BAR_SLOT_CENTER,i+1);
+        w.printf(Locale.ROOT,"\\node[below] at (%.3f,-0.25) {Workflow arrival rank};%n",count/2.0);
         w.println("\\end{tikzpicture}");
-        w.println("\\caption{"+escapeLatex(processDescription(false))+". "+workflowCaption()+" "+scaleDescription()+" Crosses indicate unavailable elapsed intervals; "+missingQueueLabel()+" indicates unavailable queue measurements. "+exceptionDescription()+" Arrival order uses GENERATED timestamps, or recorded starts for legacy rows.}");
+        w.println("\\caption{"+escapeLatex(processDescription(false))+". "+workflowCaption()+" "+scaleDescription()+" "+observationDescription()+" "+exceptionDescription()+" Arrival order uses GENERATED timestamps, or recorded starts for legacy rows.}");
         w.println("\\label{fig:workflow-elapsed-queue}\n\\end{figure}");
         w.flush(); return text.toString();
     }
@@ -630,6 +637,11 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         lightQueueBars=lightBars;
         repaint();
     }
+    public void setWideBars(boolean wide) {
+        wideBars=wide;
+        hoveredTask=null;
+        repaint();
+    }
     private String workflowCaption() {
         return lightQueueBars
             ? "Bar height shows measured workflow elapsed time; lighter lower shading marks maximum observed service-visit queue wait, including fork branches. Shading is an overlay, not total workflow waiting time or a decomposition into waiting and service time."
@@ -691,9 +703,29 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         double limit=lightQueueBars&&t.hasElapsedTime?Math.min(maximum,t.elapsedTime):maximum;
         return (long)Math.min(t.queueTime,limit);
     }
+    private String observationDescription() {
+        return "Showing "+Math.min(tasks.size(),maxDisplayTasks)+" of "+tasks.size()+
+            " observed root workflows. Fork children contribute to their family's queue maximum.";
+    }
     private String exceptionDescription() {
-        return (lightQueueBars?"Dashed outlines mark queue-only observations with no measured elapsed interval. ":"")+
-            "Up arrows mark queue values beyond the drawn range.";
+        int queueOnly=0,missingElapsed=0,missingQueue=0;
+        boolean overflow=false;
+        Map<String,Double> maxima=new HashMap<>();
+        for(int i=0;i<Math.min(tasks.size(),maxDisplayTasks);i++) {
+            Task t=tasks.get(i);
+            if(!t.hasElapsedTime) { missingElapsed++; if(t.hasQueueTime) queueOnly++; }
+            if(!t.hasQueueTime) missingQueue++;
+            String group=displayByVersion?deriveVersion(t.sequenceId):t.service;
+            double maximum=maxima.computeIfAbsent(group,this::axisMaximum);
+            if(t.hasQueueTime&&t.queueTime>queueDisplayValue(t,maximum)) overflow=true;
+        }
+        List<String> notes=new ArrayList<>();
+        if(missingElapsed>0) notes.add("X: elapsed interval unavailable ("+missingElapsed+")");
+        if(missingQueue>0) notes.add(missingQueueLabel()+": queue measurement unavailable ("+missingQueue+")");
+        if(lightQueueBars&&queueOnly>0) notes.add("Dashed outlines: queue wait measured, elapsed interval unavailable ("+queueOnly+")");
+        if(overflow) notes.add("Arrow: queue exceeds drawn range");
+        if(missingElapsed>0||missingQueue>0) notes.add("Missing measurements are not zero");
+        return notes.isEmpty()?"All shown workflows have measured elapsed and queue values.":String.join("; ",notes)+".";
     }
     private String axisLabel(double value) {
         return value==Math.rint(value)?String.format(Locale.ROOT,"%.0f",value):String.format(Locale.ROOT,"%.1f",value);
@@ -717,8 +749,8 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         int lane(Task t) { return lanes.getOrDefault(displayByVersion?deriveVersion(t.sequenceId):t.service,0); }
         int baseline(int lane) { return top+(lane+1)*laneHeight-Math.round(15*fontScaleFactor); }
         int valueY(int lane,long value) { return baseline(lane)-(int)Math.round(value*plotHeight/maxima[lane]); }
-        int barX(int i) { return left+(int)Math.round((i+0.12)*slot); }
-        int barWidth() { return Math.max(1,(int)(slot*0.45)); }
+        int barX(int i) { return left+(int)Math.round((i+BAR_SLOT_CENTER)*slot)-barWidth()/2; }
+        int barWidth() { return Math.max(1,(int)(slot*barSlotWidth())); }
         int queueBarX(int i) { return barX(i); }
         int queueBarWidth() { return barWidth(); }
         int diamondX(int i) { return left+(int)Math.round((i+0.82)*slot); }
@@ -747,7 +779,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
                 +": maximum observed service-visit queue wait",
                 20,Math.round(52*fontScaleFactor)+processHeaderHeight(getWidth()));
             g.drawString(scaleDescription(),20,Math.round(70*fontScaleFactor)+processHeaderHeight(getWidth()));
-            g.drawString("X: elapsed interval unavailable; "+missingQueueLabel()+": queue measurement unavailable.",
+            g.drawString("Queue wait is a separate measurement, not total workflow waiting time or a service-time decomposition.",
                 20,Math.round(88*fontScaleFactor)+processHeaderHeight(getWidth()));
             for(int lane=0;lane<p.groups.size();lane++) {
                 String group=p.groups.get(lane);
@@ -821,11 +853,15 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             }
             g.setColor(Color.BLACK); g.setFont(labelFont);
             int bottom=p.baseline(p.groups.size()-1)+43;
-            String xlabel="Workflow arrival order";
+            String xlabel="Workflow arrival rank";
             g.drawString(xlabel,(getWidth()-g.getFontMetrics().stringWidth(xlabel))/2,bottom);
             g.setFont(axisLabelFont);
-            g.drawString("Queue markers include fork branches and do not represent total workflow waiting time.",20,bottom+22);
-            g.drawString((lightQueueBars?"Outlined: queue-only observations; ":"")+"arrow: queue exceeds drawn range. Missing measurements are not zero.",20,bottom+40);
+            g.drawString(observationDescription(),20,bottom+22);
+            int noteY=bottom+40;
+            for(String line:WorkflowProcessNames.wrap(exceptionDescription(),g.getFontMetrics(),Math.max(40,getWidth()-40))) {
+                g.drawString(line,20,noteY);
+                noteY+=g.getFontMetrics().getHeight();
+            }
             if(hoveredTask!=null) drawTooltip(g,hoveredTask);
         } finally { g.dispose(); }
     }
@@ -1058,6 +1094,17 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         lightBarItem.addActionListener(e -> chart.setLightQueueBars(true));
         queueDisplayGroup.add(lightBarItem); queueDisplayMenu.add(lightBarItem);
         viewMenu.add(queueDisplayMenu);
+        viewMenu.addSeparator();
+
+        JMenu barWidthMenu = new JMenu("Bar Width");
+        ButtonGroup barWidthGroup = new ButtonGroup();
+        JRadioButtonMenuItem wideItem = new JRadioButtonMenuItem("Wide (Publication)", chart.wideBars);
+        wideItem.addActionListener(e -> chart.setWideBars(true));
+        barWidthGroup.add(wideItem); barWidthMenu.add(wideItem);
+        JRadioButtonMenuItem narrowItem = new JRadioButtonMenuItem("Narrow", !chart.wideBars);
+        narrowItem.addActionListener(e -> chart.setWideBars(false));
+        barWidthGroup.add(narrowItem); barWidthMenu.add(narrowItem);
+        viewMenu.add(barWidthMenu);
         viewMenu.addSeparator();
 
         JMenu yScaleMenu = new JMenu("Y-Axis Scale");

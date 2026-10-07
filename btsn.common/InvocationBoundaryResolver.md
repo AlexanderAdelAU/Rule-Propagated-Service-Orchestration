@@ -90,7 +90,7 @@ adapter or application-specific host code is required by the invocation boundary
 The standalone checks do not execute the networked queue/fork/join workflow.
 The live acceptance run remains:
 
-`btsn.petrinet.ProjectLoader/FinancialSystem_Stage5_PriorityPreemption_BuildAndRun.xml`
+`btsn.financial.ProjectLoader/FinancialSystem_Stage5_PriorityPreemption_BuildAndRun.xml`
 
 After pulling, run the existing Stage-5 launcher as an Ant Build: it now compiles
 the runtime and puts service JARs on the host classpaths. Require v001 15/15 completions with 15 forks,

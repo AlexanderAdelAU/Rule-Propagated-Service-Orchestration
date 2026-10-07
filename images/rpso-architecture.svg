@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="690" viewBox="0 0 1120 690" role="img" aria-labelledby="title desc">
+<title id="title">RPSO responsibility boundaries</title><desc id="desc">Process and deployment definitions install local rules in a generic orchestration host. The host invokes a separately packaged business JAR in-process, routes token publications to other hosts, and supplies collected observations to Monitor outside the business path.</desc>
+<defs>
+<marker id="flow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#24598e"/></marker>
+<marker id="rule" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7350a2"/></marker>
+<marker id="observe" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#19776e"/></marker>
+<marker id="ack" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#65758b"/></marker>
+</defs><rect width="100%" height="100%" fill="#ffffff"/>
+<rect x="235" y="145" width="650" height="370" rx="12" fill="#fafbfc" stroke="#98a7b6" stroke-width="1.5"/>
+<text x="253" y="172" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="start" fill="#1b2b40">Generic numbered host · P1–P6</text>
+<rect x="355" y="20" width="410" height="90" rx="8" fill="#f3eff8" stroke="#60738a" stroke-width="1.5"/>
+<text x="560.0" y="49" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Process and deployment definitions</text>
+<text x="560.0" y="75" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Topology · contracts · version · bindings</text>
+<rect x="405" y="195" width="310" height="70" rx="8" fill="#f3eff8" stroke="#60738a" stroke-width="1.5"/>
+<text x="560.0" y="224" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Installed local RuleBase</text>
+<rect x="265" y="300" width="165" height="90" rx="8" fill="#edf3fa" stroke="#60738a" stroke-width="1.5"/>
+<text x="347.5" y="329" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">T_in</text>
+<text x="347.5" y="355" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Buffer / synchronize</text>
+<rect x="475" y="300" width="175" height="90" rx="8" fill="#edf3fa" stroke="#60738a" stroke-width="1.5"/>
+<text x="562.5" y="329" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">ServiceThread</text>
+<text x="562.5" y="355" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Validate / invoke</text>
+<rect x="695" y="300" width="160" height="90" rx="8" fill="#edf3fa" stroke="#60738a" stroke-width="1.5"/>
+<text x="775.0" y="329" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">T_out</text>
+<text x="775.0" y="355" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Route / publish</text>
+<rect x="450" y="440" width="255" height="65" rx="8" fill="#edf7f0" stroke="#60738a" stroke-width="1.5"/>
+<text x="577.5" y="469" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Business-service JAR</text>
+<text x="577.5" y="495" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Domain objects and decisions</text>
+<rect x="20" y="300" width="175" height="90" rx="8" fill="#f5f6f8" stroke="#60738a" stroke-width="1.5"/>
+<text x="107.5" y="329" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Incoming token</text>
+<text x="107.5" y="355" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Generator / prior host</text>
+<rect x="935" y="300" width="165" height="90" rx="8" fill="#f5f6f8" stroke="#60738a" stroke-width="1.5"/>
+<text x="1017.5" y="329" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Outcome</text>
+<text x="1017.5" y="355" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Publish to next host</text>
+<text x="1017.5" y="377" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">or terminate locally</text>
+<rect x="390" y="565" width="350" height="75" rx="8" fill="#edf7f5" stroke="#60738a" stroke-width="1.5"/>
+<text x="565.0" y="594" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Monitor</text>
+<text x="565.0" y="620" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Collection · reconstruction · diagrams</text>
+<path d="M 560 110 L 560 195" fill="none" stroke="#7350a2" stroke-width="2" stroke-dasharray="8 5" marker-end="url(#rule)"/>
+<text x="573" y="138" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start" fill="#7350a2">compile / deploy</text>
+<path d="M 435 265 L 435 282 L 347 282 L 347 300" fill="none" stroke="#7350a2" stroke-width="2" stroke-dasharray="8 5" marker-end="url(#rule)"/>
+<path d="M 685 265 L 685 282 L 775 282 L 775 300" fill="none" stroke="#7350a2" stroke-width="2" stroke-dasharray="8 5" marker-end="url(#rule)"/>
+<path d="M 195 345 L 265 345" fill="none" stroke="#24598e" stroke-width="2" marker-end="url(#flow)"/>
+<path d="M 430 345 L 475 345" fill="none" stroke="#24598e" stroke-width="2" marker-end="url(#flow)"/>
+<path d="M 650 345 L 695 345" fill="none" stroke="#24598e" stroke-width="2" marker-end="url(#flow)"/>
+<path d="M 855 345 L 935 345" fill="none" stroke="#24598e" stroke-width="2" marker-end="url(#flow)"/>
+<path d="M 510 390 L 510 440" fill="none" stroke="#24598e" stroke-width="2" marker-end="url(#flow)"/>
+<path d="M 635 440 L 635 390" fill="none" stroke="#24598e" stroke-width="2" marker-end="url(#flow)"/>
+<text x="490" y="419" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="end" fill="#1b2b40">named inputs</text>
+<text x="652" y="414" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#1b2b40">result +</text>
+<text x="652" y="434" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="start" fill="#1b2b40">routing symbol</text>
+<path d="M 560 515 L 560 565" fill="none" stroke="#19776e" stroke-width="2" stroke-dasharray="3 5" marker-end="url(#observe)"/>
+<text x="577" y="545" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start" fill="#19776e">collector observations</text>
+<text x="560" y="673" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Solid: execution / token flow     Dashed: rule installation     Dotted: observation</text>
+</svg>
