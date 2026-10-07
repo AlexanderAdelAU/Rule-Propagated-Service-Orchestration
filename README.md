@@ -184,14 +184,20 @@ The
 [six-place double-join definition](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_to_P6_Double_Join_Workflow.json)
 binds its six places to small deterministic token operations:
 
-| Place | Logical service | Model role |
-|---|---|---|
-| P1 | `BooleanTokenService` | Select `true` or `false`; `true` forks into three branches, `false` terminates |
-| P2 | `BranchTwoTokenService` | Return `token_branch2` to the first join |
-| P3 | `BranchOneTokenService` | Return `token_branch1` to the first join |
-| P4 | `MergeTokenService` | Receive both P2/P3 results, return `token_branch2` |
-| P5 | `SideTokenService` | Return `token_branch1` to the second join |
-| P6 | `FinalMergeTokenService` | Receive P4/P5 results, return `token` and terminate |
+| Place | Bound service | What its operation does | Output attribute and transition route |
+|---|---|---|---|
+| P1 | `BooleanTokenService` | Read the supplied `outcome` (default `true`); record the Boolean value and routing decision | `token`; T_out forks to P2/P3/P5 on `true`, or terminates on `false` |
+| P2 | `BranchTwoTokenService` | Carry the incoming token data unchanged | `token_branch2` → P4 |
+| P3 | `BranchOneTokenService` | Carry the incoming token data unchanged | `token_branch1` → P4 |
+| P4 | `MergeTokenService` | Combine the two input objects into a JSON `branches` array after T_in synchronizes P2/P3 | `token_branch2` → P6 |
+| P5 | `SideTokenService` | Carry the incoming token data unchanged | `token_branch1` → P6 |
+| P6 | `FinalMergeTokenService` | Combine the P4/P5 input objects into a JSON `branches` array after T_in synchronizes them | `token`; T_out records workflow termination |
+
+**These six operations are deterministic.** The generator supplies P1's outcome
+through `token.outcome`; the default is `true`. P2/P3/P5 forward data and P4/P6
+combine it. The output names above are payload attributes carrying JSON objects.
+The legacy `Stochastic...` services remain available for older models; this
+launcher selects the deterministic services listed in the table.
 
 The generic fabric performs the forks, input synchronization and publication;
 the model services carry and combine the token data. P4 becomes eligible after

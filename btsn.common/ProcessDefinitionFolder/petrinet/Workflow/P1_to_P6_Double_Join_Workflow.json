@@ -605,7 +605,7 @@
     {
       "x": 312,
       "y": 119,
-      "text": "(P1 to P4 Return True of False with 50% Probability)",
+      "text": "P1 outcome is configured; branch/merge operations are deterministic",
       "fontSize": 12,
       "fontStyle": 0,
       "color": -16777216
@@ -613,7 +613,7 @@
     {
       "x": 496,
       "y": 570,
-      "text": "Monitor allows Spatial Graphing of Token Arrival",
+      "text": "Monitor collects execution observations outside the token path",
       "fontSize": 12,
       "fontStyle": 0,
       "color": -16777216
