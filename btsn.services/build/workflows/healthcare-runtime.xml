@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="healthcare-jar-runtime-support" default="prepare-runtime" basedir="../..">
     <description>Build support for healthcare workflows on the generic PN hosts.</description>
+    <property name="host.address" value=""/>
     <property name="source.root" location=".."/>
     <property name="services.project.dir" location="${source.root}/btsn.services"/>
     <property name="healthcare.runtime.dir" location="${services.project.dir}/target/healthcare-runtime"/>
@@ -42,11 +43,15 @@
     <target name="prepare-runtime" description="Build service and infrastructure JARs; select healthcare deployment metadata">
         <ant antfile="${services.project.dir}/build.xml" target="build-workflow-runtime" inheritall="false"/>
         <mkdir dir="${output.dir}"/>
+        <delete dir="${common.project.dir}/InfrastructureDefinitionFolder"/>
+        <delete dir="${common.project.dir}/ServiceDeploymentFolder"/>
         <copy todir="${common.project.dir}">
-            <fileset dir="${source.root}/btsn.common" includes="RuleBase/**,RulePayLoad/**,ServiceAttributeBindings/**,BusinessServiceDefinitions/**,ProcessDefinitionFolder/**,InfrastructureDefinitionFolder/**,PayLoad/**"/>
+            <fileset dir="${source.root}/btsn.common" includes="RuleBase/**,RulePayLoad/**,ServiceAttributeBindings/**,BusinessServiceDefinitions/**,ProcessDefinitionFolder/**,InfrastructureDefinitionFolder/**,ServiceDeploymentFolder/**,PayLoad/**"/>
         </copy>
         <copy file="${services.project.dir}/deployments/healthcare/Deployment.json" tofile="${common.project.dir}/BusinessServiceDefinitions/Deployment.json" overwrite="true"/>
-        <copy file="${services.project.dir}/deployments/healthcare/InfrastructureDeployment.ruleml.xml" tofile="${local.channel.rules}" overwrite="true"/>
+        <java classname="org.btsn.deployment.GenerateDeploymentRules" fork="true" failonerror="true" dir="${common.project.dir}">
+            <classpath refid="healthcare.dependencies"/><arg file="${common.project.dir}"/><arg value="${host.address}"/>
+        </java>
         <copy-healthcare-component directory="btsn.rpso.places.p1"/>
         <copy-healthcare-component directory="btsn.rpso.places.p2"/>
         <copy-healthcare-component directory="btsn.rpso.places.p3"/>

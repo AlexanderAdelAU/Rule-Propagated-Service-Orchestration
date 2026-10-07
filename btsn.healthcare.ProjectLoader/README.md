@@ -26,8 +26,11 @@ application retains its canary workload and its existing JSON definition.
 The three process-test launchers import `ProcessTests/triage-runtime.xml` to share
 the current runtime configuration, packaged classpaths and phase commands.
 `Triage_Workflow.json` contains a logical TriageService operation followed by a
-terminal transition. `Healthcare_Infrastructure.json` places that operation on
-P1. Monitor receives collector observations separately from the patient path.
+terminal transition. `ServiceDeploymentFolder/healthcare/Healthcare.json` places
+that operation on P1 using the shared `InfrastructureDefinitionFolder/SingleHost.json`.
+All domains retain the same physical addresses and fixed port slots. Runtime
+preparation generates the matching RuleML; `-Dhost.address=127.0.0.1` selects a
+local address in the isolated runtime. Monitor receives collector observations separately from the patient path.
 Initialization and collection use P1's generic infrastructure adapters and v999
 administration tokens. Workflow and collection operations have separate settings.
 

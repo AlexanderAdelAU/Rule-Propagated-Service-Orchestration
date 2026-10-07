@@ -1,59 +1,60 @@
-# Infrastructure definitions
+# Physical infrastructure
 
-An infrastructure definition brings the logical service contracts onto physical
-nodes: it declares their channels, addresses, port ranges and available service
-operations. Choose the definition for your application before deploying a process.
+All Petri-net, healthcare and financial examples share
+[SingleHost.json](SingleHost.json). It defines the physical P1–P6 nodes, their
+channels, address and fixed base ports. Service functions and workflow topology
+are selected separately, so changing a service function leaves its network
+endpoint unchanged.
 
-The editable JSON files are grouped by domain:
+| Node | Port slot 0 | Port slot 1 |
+|---|---|---|
+| P1 | 4001 | — |
+| P2 | 4002 | — |
+| P3 | 4003 | — |
+| P4 | 4004 | 4007 |
+| P5 | 4005 | — |
+| P6 | 4006 | 4008 |
 
-| Folder | Definitions |
-|---|---|
-| [healthcare](healthcare) | [Healthcare_Infrastructure.json](healthcare/Healthcare_Infrastructure.json) |
-| [financial](financial) | [FinancialSystem_Infrastructure.json](financial/FinancialSystem_Infrastructure.json), [InfrastructureDefinition.json](financial/InfrastructureDefinition.json) |
-| [petrinet](petrinet) | [PetriNetModels_Infrastructure.json](petrinet/PetriNetModels_Infrastructure.json), [StochasticLoopModels_Infrastructure.json](petrinet/StochasticLoopModels_Infrastructure.json), [ForkModels_Infrastructure.json](petrinet/ForkModels_Infrastructure.json), [DoubleJoinModels_Infrastructure.json](petrinet/DoubleJoinModels_Infrastructure.json), [TrafficLightModels_Infrastructure.json](petrinet/TrafficLightModels_Infrastructure.json), [P1_Tutorial_LocalInfrastructure.json](petrinet/P1_Tutorial_LocalInfrastructure.json) |
+The additional slots preserve the existing healthcare operations on P4 and P6.
+These are base ports; the runtime applies its existing channel offsets to obtain
+transport, rule and synchronization ports. Initialization, collection and Monitor
+retain their existing infrastructure operations.
 
-`InfrastructureDefinition.json` is the existing generic-named copy of the
-financial definition. Both files are retained with their original contents.
+## Edit and select
 
-## Edit and run
+Choose **File → Open → Infrastructure Definition** in the workflow editor and
+open `SingleHost.json`. The **Fixed Base Ports** column lists the slots in order,
+starting at zero. Editing an address updates all nodes on that channel. Save the
+physical definition once; every domain profile selects it.
 
-In the workflow editor, choose **File → New → Infrastructure Definition** or
-**File → Open → Infrastructure Definition**. The infrastructure file chooser
-starts in this folder unless you have previously selected another directory.
-Open the appropriate domain subfolder and save your definition there.
+The default `ip0` address remains `192.168.1.82`. To run any supported launcher on
+one local computer, pass `-Dhost.address=127.0.0.1`. The P1 local tutorial wrapper
+supplies that setting automatically. Runtime preparation applies an explicit
+host override to its isolated copy of the shared definition and generates the
+matching RuleML; source configuration is preserved. Service choice does not
+select an address or allocate a port.
 
-The launchers select a definition using its domain and filename without `.json`:
+The token generators use `-infrastructure SingleHost`. Each deployment profile
+selects this physical file and a [service deployment](../ServiceDeploymentFolder/README.md),
+then runtime preparation generates `RuleBase/Generated/InfrastructureDeployment.ruleml.xml`.
+There are no per-model network snapshots to synchronize manually.
 
-```text
--infrastructure healthcare/Healthcare_Infrastructure
--infrastructure financial/FinancialSystem_Infrastructure
--infrastructure petrinet/P1_Tutorial_LocalInfrastructure
-```
+For a distributed arrangement, create another physical definition with the
+appropriate node/channel/address mapping and fixed ports, then select it in the
+deployment profile and launcher. The `host.address` override is restricted to
+single-host arrangements. Review the existing administrative service placement
+when distributing nodes; those operations currently use their existing channels.
 
-The P1 launcher exposes this selection as the Ant property
-`infrastructure.definition.name`. Deployment profiles use a path relative to
-`btsn.common`, such as
-`InfrastructureDefinitionFolder/petrinet/P1_Tutorial_LocalInfrastructure.json`.
-Runtime preparation and portable host releases copy this folder alongside the
-process definitions.
-
-Saving the JSON and generating its configuration are separate steps. **Generate
-Configuration** writes canonical service bindings and generated deployment rules;
-keep the selected [deployment snapshot](../../btsn.services/deployments) consistent
-with the editable definition. The [P1 tutorial](../../Tutorial.md#1-define-the-infrastructure)
-walks through both steps and a complete run.
-
-## Where the other parts belong
-
-Follow a model from deployment settings through routing to observations using
-these three locations:
+## Follow the configuration
 
 | Location | Purpose |
 |---|---|
-| `InfrastructureDefinitionFolder/{healthcare,financial,petrinet}` | Editable physical node and capability definitions |
-| [ProcessDefinitionFolder](../ProcessDefinitionFolder) | Process topology, operations, guards and workflow documentation |
+| `InfrastructureDefinitionFolder` | Physical nodes, addresses and fixed port slots |
+| [ServiceDeploymentFolder](../ServiceDeploymentFolder/README.md) | Business operations assigned to nodes and port slots |
+| [BusinessServiceDefinitions](../BusinessServiceDefinitions) | Implementation classes and active service contracts |
+| [ProcessDefinitionFolder](../ProcessDefinitionFolder) | Process topology, operations and guards |
 | Monitor analysis folders and exported results | Observations produced by process runs |
 
-The nine infrastructure JSON files previously stored directly in
-`ProcessDefinitionFolder` have moved here. Generated RuleML, canonical bindings
-and deployment snapshots continue to have their own runtime roles and locations.
+The previous domain/model infrastructure files have been replaced by this shared
+physical definition and separate service deployments. See the
+[P1 tutorial](../../Tutorial.md#1-define-the-infrastructure) for an editor-to-run walkthrough.

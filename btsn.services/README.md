@@ -143,6 +143,12 @@ this remains the existing in-process invocation, not a separate business-service
 program. Remote runtimes must be started manually. Portable packaging does not
 replace this development workflow.
 
+All domains select the same `InfrastructureDefinitionFolder/SingleHost.json`
+and separate placements from `ServiceDeploymentFolder`. Runtime preparation
+generates their network RuleML before building the master service rules.
+`-Dhost.address=127.0.0.1` applies a synchronized local address override to the
+isolated runtime. Changing service functions preserves the fixed node ports.
+
 All PN BuildAndRun launchers now default to `auto`: the build reads the active
 `boundChannel(ip0, address)` fact from
 `btsn.common/RuleBase/Generated/InfrastructureDeployment.ruleml.xml` and compares

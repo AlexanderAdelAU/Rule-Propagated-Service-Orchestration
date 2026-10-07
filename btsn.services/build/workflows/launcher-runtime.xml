@@ -3,6 +3,7 @@
     <description>Shared JAR paths and isolated working configuration for development launchers.</description>
     <dirname property="launcher.support.dir" file="${ant.file.launcher-jar-runtime-support}"/>
     <property name="services.project.dir" location="${launcher.support.dir}/../.."/>
+    <property name="host.address" value=""/>
     <property name="source.root" location="${services.project.dir}/.."/>
     <property name="petrinet.root.dir" location="${source.root}"/>
     <property name="launcher.runtime.dir" location="${services.project.dir}/target/launchers/${ant.project.name}"/>
@@ -66,13 +67,16 @@
     <target name="prepare-runtime" depends="build-launcher-jars" unless="launcher.runtime.prepared"
             description="Build packaged components and select this launcher's isolated deployment configuration">
         <fail unless="launcher.profile.file" message="Select launcher.profile.file before importing launcher-runtime.xml"/>
-        <fail unless="launcher.rules.file" message="Select launcher.rules.file before importing launcher-runtime.xml"/>
         <mkdir dir="${output.dir}"/>
+        <delete dir="${common.project.dir}/InfrastructureDefinitionFolder"/>
+        <delete dir="${common.project.dir}/ServiceDeploymentFolder"/>
         <copy todir="${common.project.dir}">
-            <fileset dir="${source.root}/btsn.common" includes="RuleBase/**,RulePayLoad/**,ServiceAttributeBindings/**,BusinessServiceDefinitions/**,ProcessDefinitionFolder/**,InfrastructureDefinitionFolder/**,PayLoad/**"/>
+            <fileset dir="${source.root}/btsn.common" includes="RuleBase/**,RulePayLoad/**,ServiceAttributeBindings/**,BusinessServiceDefinitions/**,ProcessDefinitionFolder/**,InfrastructureDefinitionFolder/**,ServiceDeploymentFolder/**,PayLoad/**"/>
         </copy>
         <copy file="${launcher.profile.file}" tofile="${common.project.dir}/BusinessServiceDefinitions/Deployment.json" overwrite="true"/>
-        <copy file="${launcher.rules.file}" tofile="${local.channel.rules}" overwrite="true"/>
+        <java classname="org.btsn.deployment.GenerateDeploymentRules" fork="true" failonerror="true" dir="${common.project.dir}">
+            <classpath refid="generator.classpath"/><arg file="${common.project.dir}"/><arg value="${host.address}"/>
+        </java>
         <copy-launcher-component directory="btsn.rpso.places.p1"/>
         <copy-launcher-component directory="btsn.rpso.places.p2"/>
         <copy-launcher-component directory="btsn.rpso.places.p3"/>

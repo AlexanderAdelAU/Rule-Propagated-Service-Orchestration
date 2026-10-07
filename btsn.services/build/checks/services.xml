@@ -10,10 +10,13 @@
             <pathelement location="${ant.home}/lib/ant.jar"/>
             <pathelement location="${ant.home}/lib/ant-launcher.jar"/>
         </path>
-        <javac srcdir="tests" destdir="${target.dir}/launcher-check/classes" includes="LauncherRuntimeCheck.java"
+        <javac srcdir="tests" destdir="${target.dir}/launcher-check/classes" includes="LauncherRuntimeCheck.java,SharedInfrastructureCheck.java"
                release="${java.release}" includeantruntime="false" encoding="UTF-8">
             <classpath refid="launcher.check.classpath"/>
         </javac>
+        <java classname="SharedInfrastructureCheck" fork="true" failonerror="true">
+            <classpath refid="launcher.check.classpath"/><arg file=".."/>
+        </java>
         <java classname="LauncherRuntimeCheck" fork="true" failonerror="true" maxmemory="256m">
             <classpath refid="launcher.check.classpath"/><arg file=".."/>
         </java>
@@ -120,6 +123,7 @@
             <src path="${common.dir}/src"/><src path="${common.dir}/tests"/>
             <src path="../btsn.rpso.places.p1/src"/>
             <include name="org/btsn/invocation/BusinessCapabilityResolver.java"/>
+            <include name="org/btsn/deployment/DeploymentConfiguration.java"/>
             <include name="org/btsn/invocation/BusinessCapabilityResolverTest.java"/>
             <include name="org/btsn/json/jsonLibrary.java"/>
             <include name="org/btsn/handlers/ServiceHelper.java"/>

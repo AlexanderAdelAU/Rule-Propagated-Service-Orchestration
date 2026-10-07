@@ -15,7 +15,6 @@
 	</description>
     <!-- Shared packaged runtime; source deployment files and Eclipse outputs are not modified. -->
     <property name="launcher.profile.file" location="../btsn.services/deployments/financial/Deployment.json"/>
-    <property name="launcher.rules.file" location="../btsn.services/deployments/financial/InfrastructureDeployment.ruleml.xml"/>
     <import file="../btsn.services/launcher-runtime.xml"/>
 
 
@@ -46,7 +45,7 @@
 	<!-- Each workflow has its own topology/rule version; physical services remain shared. -->
 	<property name="workflow1.process.name" value="petrinet/Workflow/FinancialSystem_P1_P5_Workflow" />
 	<property name="workflow2.process.name" value="petrinet/Workflow/FinancialSystem_Stage3_PreScreen_Workflow" />
-	<property name="infrastructure.definition.name" value="financial/FinancialSystem_Infrastructure" />
+	<property name="infrastructure.definition.name" value="SingleHost" />
 	<property name="collector.process.name" value="petrinet/Collectors/P1_P2_P3_P4_P5_Collector" />
 
 	<!-- Phase 1: Initialization parameters (v999 = admin/non-instrumented) -->

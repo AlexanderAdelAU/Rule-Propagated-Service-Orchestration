@@ -50,34 +50,48 @@ previous results you need before running it.
 
 ## 1. Define the infrastructure
 
-Infrastructure defines network resources and the service operation available
-on each physical node. It does not define the loop or its routing guards.
-Editable definitions are grouped by domain in
-[`InfrastructureDefinitionFolder`](btsn.common/InfrastructureDefinitionFolder/README.md);
-this tutorial uses its `petrinet` subfolder.
+Infrastructure defines the physical nodes, addresses and fixed ports available
+to the application. Every domain example uses the same
+[`SingleHost.json`](btsn.common/InfrastructureDefinitionFolder/SingleHost.json).
+A separate service deployment assigns the P1 entry operation to its fixed port;
+the process in the next section defines the loop and its routing guards.
 
-### Create the physical node
+### Inspect the shared physical nodes
 
-Choose **File → New → Infrastructure Definition**. In **Physical node network**,
-click **Add node** and enter:
+Choose **File → Open → Infrastructure Definition** and open
+`btsn.common/InfrastructureDefinitionFolder/SingleHost.json`. It declares P1–P6:
 
-| Node | Channel | Address | Base Port Start | Base Port End |
-|---|---|---|---|---|
-| `P1` | `ip0` | `127.0.0.1` | `4001` | `4099` |
+| Node | Channel | Address | Fixed Base Ports |
+|---|---|---|---|
+| `P1` | `ip0` | `192.168.1.82` | `4001` |
+| `P2` | `ip0` | `192.168.1.82` | `4002` |
+| `P3` | `ip0` | `192.168.1.82` | `4003` |
+| `P4` | `ip0` | `192.168.1.82` | `4004, 4007` |
+| `P5` | `ip0` | `192.168.1.82` | `4005` |
+| `P6` | `ip0` | `192.168.1.82` | `4006, 4008` |
 
-These are base-port values used by the platform's channel mapping. The runtime
-logs show the resolved transport ports. P1 is the physical node; its runtime
-service identity is `P1_Place`.
+This walkthrough starts P1 only. The other nodes remain available in the shared
+infrastructure. The local tutorial wrapper sets `host.address=127.0.0.1` in its
+isolated runtime, so no source address edit is needed. The runtime logs show the
+resolved transport ports after the platform's existing channel offsets. P1's
+runtime service identity is `P1_Place`.
+
+To build a physical definition yourself, choose **File → New → Infrastructure
+Definition**, add the nodes and their fixed ports, then save it. Physical settings
+are shared independently of the service functions assigned to those nodes.
 
 ### Declare P1's capability and contract
 
-Select the P1 row, click **Add capability**, and fill in **Node capabilities**:
+Choose **File → New → Service Deployment**. Its physical-node table previews
+`SingleHost.json`; those settings are read-only here. Select P1, click **Add
+capability**, and fill in **Node capabilities**:
 
-| Node | Service | Operation | Return Attribute | Base Port |
+| Node | Service | Operation | Return Attribute | Port Slot |
 |---|---|---|---|---|
-| `P1` | `StochasticEntryTokenService` | `processToken` | `token` | `4001` |
+| `P1` | `StochasticEntryTokenService` | `processToken` | `token` | `0` |
 
-Select that capability, then click **Add argument** in its **Arguments** panel:
+Slot `0` selects P1's fixed base port `4001`. Changing the service function
+preserves that endpoint. Select the capability, then click **Add argument**:
 
 | Name | Type | Value | Required |
 |---|---|---|---|
@@ -91,39 +105,35 @@ implementation.
 
 ### Save and generate the configuration
 
-1. Click **Save...**, open the `petrinet` subfolder of the infrastructure
-   definitions folder, and save the definition as
-   `btsn.common/InfrastructureDefinitionFolder/petrinet/P1_Tutorial_LocalInfrastructure.json`.
-2. Click **Generate Configuration**. The editor validates the definition and
-   writes the service's canonical binding under `btsn.common/ServiceAttributeBindings`,
-   plus `btsn.common/RuleBase/Generated/InfrastructureDeployment.ruleml.xml`.
-3. Copy that generated deployment file to
-   `btsn.services/deployments/models/P1_Tutorial_LocalInfrastructure.ruleml.xml`.
-   This is the deployment snapshot selected by the local tutorial launcher.
+1. Click **Save...** and save the service deployment as
+   `btsn.common/ServiceDeploymentFolder/petrinet/P1_Tutorial.json`.
+2. Click **Generate Bindings** to validate the placement and write the service's
+   canonical contract under `btsn.common/ServiceAttributeBindings`.
+3. Inspect the [local deployment profile](btsn.services/deployments/models/P1_Tutorial_LocalDeployment.json).
+   It selects `SingleHost.json`, this service deployment and the P1-only catalogue.
+   Runtime preparation combines them and generates its network RuleML automatically.
 
-Ready-to-use versions of both files are included:
+Ready-to-use definitions are included:
 
-- [Editable infrastructure JSON](btsn.common/InfrastructureDefinitionFolder/petrinet/P1_Tutorial_LocalInfrastructure.json).
-- [Matching deployment rules](btsn.services/deployments/models/P1_Tutorial_LocalInfrastructure.ruleml.xml).
-- [Local deployment profile](btsn.services/deployments/models/P1_Tutorial_LocalDeployment.json), which selects that JSON, the P1-only service catalogue and the initialization/collection services.
+- [Shared physical infrastructure](btsn.common/InfrastructureDefinitionFolder/SingleHost.json).
+- [P1 service deployment](btsn.common/ServiceDeploymentFolder/petrinet/P1_Tutorial.json).
+- [Local deployment profile](btsn.services/deployments/models/P1_Tutorial_LocalDeployment.json).
 
-The launcher copies the selected deployment snapshot into its working runtime.
-If you change the infrastructure address or base port, save the JSON, generate
-configuration again and update the matching snapshot. Changing only a launch
-mode to `local` does not change the configured destination address.
+There is no deployment snapshot to copy or synchronize manually. If you edit the
+shared physical address or ports, runtime preparation derives the matching rules
+on the next run. An explicit `host.address` override changes the isolated runtime
+address. Changing only a launch mode to `local` does not change the destination.
 
 **Monitor remains an observation service.** Its existing rules provide
-initialization and collection operations. Do not add Monitor to the P1 process
-or declare it as P1's business capability. P1 initialization and collection use
-the existing `P1_InitializationService` and `P1_CollectorService` definitions.
+initialization and collection operations. P1 initialization and collection use
+`P1_InitializationService` and `P1_CollectorService`.
 
-The original launcher selects
-[`StochasticLoopModels_Infrastructure.json`](btsn.common/InfrastructureDefinitionFolder/petrinet/StochasticLoopModels_Infrastructure.json)
-and its [deployment snapshot](btsn.services/deployments/models/StochasticLoopInfrastructure.ruleml.xml).
-That infrastructure also declares a P2 capability for other stochastic models;
-this one-place tutorial uses P1 only. The supplied local variant needs one node and selects a P1-only catalogue.
-Every active catalogue operation must have a matching deployed capability;
-using the two-service catalogue with only P1 would prevent capability resolution.
+The original launcher selects the same physical infrastructure with
+[`StochasticLoopModels.json`](btsn.common/ServiceDeploymentFolder/petrinet/StochasticLoopModels.json).
+That service deployment also selects P2 for other stochastic models; the local
+walkthrough selects P1 only. Every active catalogue operation must have a matching
+deployed capability; using the two-service catalogue with only P1 would prevent
+capability resolution.
 
 <a id="build-this-process-in-processeditor"></a>
 
@@ -288,8 +298,8 @@ To use the original deployment instead, run:
 ant -f btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml
 ```
 
-Keep its infrastructure JSON and deployment snapshot addresses consistent with
-your host network. In default **auto** mode the launcher starts a component
+Set the shared `SingleHost.json` address for your host network, or pass
+`-Dhost.address=<your-host-address>` to override the isolated runtime. In default **auto** mode the launcher starts a component
 locally only when `ip0` belongs to that computer; otherwise the component must
 already run on its configured remote host. The local wrapper avoids a LAN
 address change for the single-computer walkthrough.
@@ -397,10 +407,10 @@ observations does not deploy or rerun the process.
 
 | Artefact | Role |
 |---|---|
-| [P1_Tutorial_LocalInfrastructure.json](btsn.common/InfrastructureDefinitionFolder/petrinet/P1_Tutorial_LocalInfrastructure.json) | Editable single-node infrastructure |
-| [P1_Tutorial_LocalInfrastructure.ruleml.xml](btsn.services/deployments/models/P1_Tutorial_LocalInfrastructure.ruleml.xml) | Matching loopback network/capability deployment snapshot |
+| [SingleHost.json](btsn.common/InfrastructureDefinitionFolder/SingleHost.json) | Shared P1–P6 network settings and fixed port slots |
+| [P1_Tutorial.json](btsn.common/ServiceDeploymentFolder/petrinet/P1_Tutorial.json) | P1 entry-service placement and contract |
 | [P1_Tutorial_Local.json](btsn.common/BusinessServiceDefinitions/P1_Tutorial_Local.json) | Active catalogue containing the P1 entry capability only |
-| [P1_Tutorial_LocalDeployment.json](btsn.services/deployments/models/P1_Tutorial_LocalDeployment.json) | Catalogue and infrastructure selection |
+| [P1_Tutorial_LocalDeployment.json](btsn.services/deployments/models/P1_Tutorial_LocalDeployment.json) | Catalogue, infrastructure and service deployment selection |
 | [P1_Tutorial_Workflow.json](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json) | Editable process design |
 | [process-editor-p1-tutorial.png](images/process-editor-p1-tutorial.png) | Process-editor image used in this tutorial |
 | [P1_Tutorial_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml) | Original build-and-run phases |

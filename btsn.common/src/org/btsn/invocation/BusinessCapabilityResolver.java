@@ -47,9 +47,10 @@ public final class BusinessCapabilityResolver {
 
     public BusinessCapabilityResolver(Path common, Path runtimeDirectory) throws Exception {
         this.runtimeDirectory = runtimeDirectory;
-        JSONObject config = json(common.resolve("BusinessServiceDefinitions/Deployment.json"));
+        org.btsn.deployment.DeploymentConfiguration deployment = new org.btsn.deployment.DeploymentConfiguration(common);
+        JSONObject config = deployment.profile;
         JSONObject catalog = json(common.resolve(text(config, "catalog")));
-        JSONObject infrastructure = json(common.resolve(text(config, "infrastructure")));
+        JSONObject infrastructure = deployment.infrastructure;
         require("Infrastructure".equals(text(infrastructure, "definitionType")),
                 "Selected definition is not Infrastructure");
         List<List<String>> deploymentFacts = facts(common.resolve(text(config, "deploymentRules")), "activeService");
@@ -67,7 +68,7 @@ public final class BusinessCapabilityResolver {
             require(logicalBindings.put(key, capability) == null, "Duplicate catalogue capability: " + key);
         }
         Set<String> deployed = new HashSet<>();
-        for (Object item : array(infrastructure, "capabilities")) {
+        for (Object item : array(deployment.serviceDeployment, "capabilities")) {
             JSONObject placement = object(item);
             String logicalKey = key(text(placement, "service"), text(placement, "operation"));
             Capability capability = logicalBindings.get(logicalKey);
@@ -96,7 +97,7 @@ public final class BusinessCapabilityResolver {
                 }
             }
             require(matchedChannels == 1, "Missing/duplicate deployment channel: " + channel);
-            String port = text(placement, "basePort");
+            String port = Integer.toString(deployment.port(placement));
             String runtime = null;
             for (List<String> fact : deploymentFacts) {
                 require(fact.size() == 4, "Malformed activeService deployment fact");

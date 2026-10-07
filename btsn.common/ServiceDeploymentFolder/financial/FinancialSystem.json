@@ -1,49 +1,11 @@
 {
-  "definitionType": "Infrastructure",
-  "nodes": [
-    {
-      "node": "P1",
-      "channel": "ip0",
-      "address": "192.168.1.82",
-      "portStart": 4001,
-      "portEnd": 4099
-    },
-    {
-      "node": "P2",
-      "channel": "ip0",
-      "address": "192.168.1.82",
-      "portStart": 4001,
-      "portEnd": 4099
-    },
-    {
-      "node": "P3",
-      "channel": "ip0",
-      "address": "192.168.1.82",
-      "portStart": 4001,
-      "portEnd": 4099
-    },
-    {
-      "node": "P4",
-      "channel": "ip0",
-      "address": "192.168.1.82",
-      "portStart": 4001,
-      "portEnd": 4099
-    },
-    {
-      "node": "P5",
-      "channel": "ip0",
-      "address": "192.168.1.82",
-      "portStart": 4001,
-      "portEnd": 4099
-    }
-  ],
+  "definitionType": "ServiceDeployment",
   "capabilities": [
     {
       "node": "P1",
       "service": "ValidationService",
       "operation": "processToken",
       "returnAttribute": "validationResults",
-      "basePort": 4001,
       "arguments": [
         {
           "name": "token",
@@ -51,14 +13,14 @@
           "value": "String",
           "required": false
         }
-      ]
+      ],
+      "portSlot": 0
     },
     {
       "node": "P2",
       "service": "CreditCheckService",
       "operation": "processToken",
       "returnAttribute": "creditCheckResults",
-      "basePort": 4002,
       "arguments": [
         {
           "name": "validationResults",
@@ -66,14 +28,14 @@
           "value": "String",
           "required": false
         }
-      ]
+      ],
+      "portSlot": 0
     },
     {
       "node": "P3",
       "service": "FraudCheckService",
       "operation": "processToken",
       "returnAttribute": "fraudCheckResults",
-      "basePort": 4003,
       "arguments": [
         {
           "name": "validationResults",
@@ -81,14 +43,14 @@
           "value": "String",
           "required": false
         }
-      ]
+      ],
+      "portSlot": 0
     },
     {
       "node": "P4",
       "service": "UnderwritingService",
       "operation": "processToken",
       "returnAttribute": "underwritingResults",
-      "basePort": 4004,
       "arguments": [
         {
           "name": "creditCheckResults",
@@ -102,14 +64,14 @@
           "value": "String",
           "required": false
         }
-      ]
+      ],
+      "portSlot": 0
     },
     {
       "node": "P5",
       "service": "DecisionService",
       "operation": "processToken",
       "returnAttribute": "decisionResults",
-      "basePort": 4005,
       "arguments": [
         {
           "name": "underwritingResults",
@@ -117,7 +79,8 @@
           "value": "String",
           "required": false
         }
-      ]
+      ],
+      "portSlot": 0
     }
   ]
 }

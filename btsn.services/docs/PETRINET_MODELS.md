@@ -39,10 +39,11 @@ P1/P2 working configuration remains under
 unchanged. Both model launchers import `btsn.services/model-runtime.xml` for
 shared build support.
 
-The model address settings are in
-`btsn.common/InfrastructureDefinitionFolder/petrinet/PetriNetModels_Infrastructure.json` and
-`btsn.services/deployments/models/InfrastructureDeployment.ruleml.xml`; keep their ip0
-addresses consistent. The usual `auto`, `local` and `remote` launch properties
+All models use the address and fixed ports in
+`btsn.common/InfrastructureDefinitionFolder/SingleHost.json`. Service placement
+is selected separately from `btsn.common/ServiceDeploymentFolder/petrinet`;
+runtime preparation generates matching deployment rules.
+Pass `-Dhost.address=127.0.0.1` for an isolated local run. The usual `auto`, `local` and `remote` launch properties
 apply to P1, P2 and Monitor. This launcher uses the existing ServiceHelper
 invocation mechanism and introduces no additional deployment protocol.
 
@@ -75,10 +76,9 @@ and its erroneous input-join label have been corrected.
 | P5 | SideTokenService | token | token_branch1 |
 | P6 | FinalMergeTokenService | token_branch1, token_branch2 | token |
 
-The branch slots follow the incoming arc order in the existing model. The model
-address settings are
-`btsn.common/InfrastructureDefinitionFolder/petrinet/DoubleJoinModels_Infrastructure.json`
-and `btsn.services/deployments/models/DoubleJoinInfrastructure.ruleml.xml`.
-Keep their ip0 addresses consistent. Working place configuration is under
+The branch slots follow the incoming arc order in the existing model. Service
+placement is selected by `ServiceDeploymentFolder/petrinet/DoubleJoinModels.json`
+using the same `InfrastructureDefinitionFolder/SingleHost.json` as every other
+model. Runtime preparation generates its network rules from that selection. Working place configuration is under
 `btsn.services/target/double-join-model-runtime`. Stop locally launched hosts
 before starting another run using these ports.

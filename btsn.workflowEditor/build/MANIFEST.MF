@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
-Ant-Version: Apache Ant 1.10.12
-Created-By: 15.0.1+9-18 (Oracle Corporation)
+Ant-Version: Apache Ant 1.10.14
+Created-By: 17.0.20+8-1-24.04-Ubuntu (Ubuntu)
 Main-Class: com.editor.ProcessEditor
 Implementation-Title: Petri Net Editor
 Implementation-Version: 1.1
-Built-By: ACameron
+Built-By: root
 Built-Date: ${TODAY}
 Class-Path: .
 

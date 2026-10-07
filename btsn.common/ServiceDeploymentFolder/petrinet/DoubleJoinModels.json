@@ -1,56 +1,11 @@
 {
-  "definitionType": "Infrastructure",
-  "nodes": [
-    {
-      "node": "P1",
-      "channel": "ip0",
-      "address": "192.168.1.82",
-      "portStart": 4001,
-      "portEnd": 4099
-    },
-    {
-      "node": "P2",
-      "channel": "ip0",
-      "address": "192.168.1.82",
-      "portStart": 4001,
-      "portEnd": 4099
-    },
-    {
-      "node": "P3",
-      "channel": "ip0",
-      "address": "192.168.1.82",
-      "portStart": 4001,
-      "portEnd": 4099
-    },
-    {
-      "node": "P4",
-      "channel": "ip0",
-      "address": "192.168.1.82",
-      "portStart": 4001,
-      "portEnd": 4099
-    },
-    {
-      "node": "P5",
-      "channel": "ip0",
-      "address": "192.168.1.82",
-      "portStart": 4001,
-      "portEnd": 4099
-    },
-    {
-      "node": "P6",
-      "channel": "ip0",
-      "address": "192.168.1.82",
-      "portStart": 4001,
-      "portEnd": 4099
-    }
-  ],
+  "definitionType": "ServiceDeployment",
   "capabilities": [
     {
       "node": "P1",
       "service": "BooleanTokenService",
       "operation": "processToken",
       "returnAttribute": "token",
-      "basePort": 4001,
       "arguments": [
         {
           "name": "token",
@@ -58,14 +13,14 @@
           "value": "String",
           "required": false
         }
-      ]
+      ],
+      "portSlot": 0
     },
     {
       "node": "P2",
       "service": "BranchTwoTokenService",
       "operation": "processToken",
       "returnAttribute": "token_branch2",
-      "basePort": 4002,
       "arguments": [
         {
           "name": "token",
@@ -73,14 +28,14 @@
           "value": "String",
           "required": false
         }
-      ]
+      ],
+      "portSlot": 0
     },
     {
       "node": "P3",
       "service": "BranchOneTokenService",
       "operation": "processToken",
       "returnAttribute": "token_branch1",
-      "basePort": 4003,
       "arguments": [
         {
           "name": "token",
@@ -88,14 +43,14 @@
           "value": "String",
           "required": false
         }
-      ]
+      ],
+      "portSlot": 0
     },
     {
       "node": "P4",
       "service": "MergeTokenService",
       "operation": "processToken",
       "returnAttribute": "token_branch2",
-      "basePort": 4004,
       "arguments": [
         {
           "name": "token_branch1",
@@ -109,14 +64,14 @@
           "value": "String",
           "required": false
         }
-      ]
+      ],
+      "portSlot": 0
     },
     {
       "node": "P5",
       "service": "SideTokenService",
       "operation": "processToken",
       "returnAttribute": "token_branch1",
-      "basePort": 4005,
       "arguments": [
         {
           "name": "token",
@@ -124,14 +79,14 @@
           "value": "String",
           "required": false
         }
-      ]
+      ],
+      "portSlot": 0
     },
     {
       "node": "P6",
       "service": "FinalMergeTokenService",
       "operation": "processToken",
       "returnAttribute": "token",
-      "basePort": 4006,
       "arguments": [
         {
           "name": "token_branch1",
@@ -145,7 +100,8 @@
           "value": "String",
           "required": false
         }
-      ]
+      ],
+      "portSlot": 0
     }
   ]
 }

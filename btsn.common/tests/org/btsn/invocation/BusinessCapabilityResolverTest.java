@@ -23,7 +23,8 @@ public final class BusinessCapabilityResolverTest {
     private static int checks;
     private static Path common;
     private static final String CATALOG = "BusinessServiceDefinitions/FinancialSystem.json";
-    private static final String INFRASTRUCTURE = "InfrastructureDefinitionFolder/financial/FinancialSystem_Infrastructure.json";
+    private static final String INFRASTRUCTURE = "InfrastructureDefinitionFolder/SingleHost.json";
+    private static final String PLACEMENT = "ServiceDeploymentFolder/financial/FinancialSystem.json";
     private static final String RULES = "RuleBase/Generated/InfrastructureDeployment.ruleml.xml";
     private static final String[] SERVICES = {"ValidationService", "CreditCheckService", "FraudCheckService",
             "UnderwritingService", "DecisionService"};
@@ -118,14 +119,14 @@ public final class BusinessCapabilityResolverTest {
 
     private static void verifyMetadataFailures() throws Exception {
         Path fixture = fixture();
-        JSONObject infrastructure = read(fixture.resolve(INFRASTRUCTURE));
+        JSONObject infrastructure = read(fixture.resolve(PLACEMENT));
         JSONArray capabilities = (JSONArray) infrastructure.get("capabilities");
         capabilities.add(capabilities.get(0));
-        write(fixture.resolve(INFRASTRUCTURE), infrastructure);
+        write(fixture.resolve(PLACEMENT), infrastructure);
         rejects(() -> new BusinessCapabilityResolver(fixture), "Duplicate deployment capability");
         capabilities.remove(capabilities.size() - 1);
         capabilities.remove(0);
-        write(fixture.resolve(INFRASTRUCTURE), infrastructure);
+        write(fixture.resolve(PLACEMENT), infrastructure);
         rejects(() -> new BusinessCapabilityResolver(fixture), "not deployed");
         Path conflict = fixture();
         JSONObject catalog = read(conflict.resolve(CATALOG));
@@ -224,15 +225,16 @@ public final class BusinessCapabilityResolverTest {
         Path metadata = Files.createTempDirectory(Paths.get("").toAbsolutePath(), "host-metadata-");
         Files.createDirectories(metadata.resolve("BusinessServiceDefinitions"));
         Files.writeString(metadata.resolve("BusinessServiceDefinitions/Deployment.json"),
-                "{\"catalog\":\"catalog.json\",\"infrastructure\":\"deployment.json\","
+                "{\"catalog\":\"catalog.json\",\"infrastructure\":\"infrastructure.json\",\"serviceDeployment\":\"deployment.json\","
                 + "\"deploymentRules\":\"facts.xml\",\"directServiceRules\":[]}");
         Files.writeString(metadata.resolve("catalog.json"), "{\"services\":[{\"service\":\"ConfiguredCapability\","
                 + "\"operation\":\"" + operation + "\",\"implementationClass\":\"" + implementation + "\","
                 + "\"returnAttribute\":\"" + output + "\",\"inputs\":[\"" + input + "\"],\"status\":\"active\"}]}");
-        Files.writeString(metadata.resolve("deployment.json"), "{\"definitionType\":\"Infrastructure\","
-                + "\"nodes\":[{\"node\":\"configured-node\",\"channel\":\"fixture\",\"address\":\"127.0.0.1\"}],"
+        Files.writeString(metadata.resolve("infrastructure.json"), "{\"definitionType\":\"Infrastructure\","
+                + "\"nodes\":[{\"node\":\"configured-node\",\"channel\":\"fixture\",\"address\":\"127.0.0.1\",\"basePorts\":[7000]}]}");
+        Files.writeString(metadata.resolve("deployment.json"), "{\"definitionType\":\"ServiceDeployment\","
                 + "\"capabilities\":[{\"node\":\"configured-node\",\"service\":\"ConfiguredCapability\","
-                + "\"operation\":\"" + operation + "\",\"basePort\":7000,\"returnAttribute\":\"" + output + "\","
+                + "\"operation\":\"" + operation + "\",\"portSlot\":0,\"returnAttribute\":\"" + output + "\","
                 + "\"arguments\":[{\"name\":\"" + input + "\",\"type\":\"String\"}]}]}");
         Files.writeString(metadata.resolve("facts.xml"), "<Atom><Rel>boundChannel</Rel><Ind>fixture</Ind><Ind>127.0.0.1</Ind></Atom>"
                 + "<Atom><Rel>activeService</Rel><Ind>" + runtime + "</Ind><Ind>" + operation
@@ -262,7 +264,7 @@ public final class BusinessCapabilityResolverTest {
     private static Path fixture() throws Exception {
         Path directory = Files.createTempDirectory("resolver-metadata-");
         JSONObject deployment = read(common.resolve("BusinessServiceDefinitions/Deployment.json"));
-        ArrayList<String> files = new ArrayList<>(Arrays.asList("BusinessServiceDefinitions/Deployment.json", CATALOG, INFRASTRUCTURE, RULES));
+        ArrayList<String> files = new ArrayList<>(Arrays.asList("BusinessServiceDefinitions/Deployment.json", CATALOG, INFRASTRUCTURE, PLACEMENT, RULES));
         for (Object file : (JSONArray) deployment.get("directServiceRules")) files.add(file.toString());
         for (String file : files) {
             Files.createDirectories(directory.resolve(file).getParent());

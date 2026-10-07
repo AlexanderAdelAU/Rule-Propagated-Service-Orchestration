@@ -6,9 +6,8 @@
     </description>
     <!-- Shared packaged runtime; source deployment files and Eclipse outputs are not modified. -->
     <property name="launcher.profile.file" location="../../btsn.services/deployments/models/StochasticLoopDeployment.json"/>
-    <property name="launcher.rules.file" location="../../btsn.services/deployments/models/StochasticLoopInfrastructure.ruleml.xml"/>
     <property name="launcher.runtime.dir" location="../../btsn.services/target/launchers/P1_P2_Phases"/>
-    <property name="infrastructure.definition.name" value="petrinet/StochasticLoopModels_Infrastructure"/>
+    <property name="infrastructure.definition.name" value="SingleHost"/>
     <import file="../../btsn.services/launcher-runtime.xml"/>
 
 

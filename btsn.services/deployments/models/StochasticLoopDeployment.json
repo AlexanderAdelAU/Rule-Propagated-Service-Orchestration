@@ -1,9 +1,10 @@
 {
   "catalog": "BusinessServiceDefinitions/StochasticLoopModels.json",
-  "infrastructure": "InfrastructureDefinitionFolder/petrinet/StochasticLoopModels_Infrastructure.json",
+  "infrastructure": "InfrastructureDefinitionFolder/SingleHost.json",
   "deploymentRules": "RuleBase/Generated/InfrastructureDeployment.ruleml.xml",
   "directServiceRules": [
     "RuleBase/PetriNet/ListofPetriNetInitializationServices.ruleml.xml",
     "RuleBase/PetriNet/ListofPetrinetCollectorServices.ruleml.xml"
-  ]
+  ],
+  "serviceDeployment": "ServiceDeploymentFolder/petrinet/StochasticLoopModels.json"
 }

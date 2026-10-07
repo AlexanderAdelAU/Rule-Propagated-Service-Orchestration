@@ -116,10 +116,10 @@ public final class ExportP1TutorialResults {
         JSONObject hashes = new JSONObject();
         for (String name : new String[] {
                 "btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json",
-                "btsn.common/InfrastructureDefinitionFolder/petrinet/P1_Tutorial_LocalInfrastructure.json",
+                "btsn.common/InfrastructureDefinitionFolder/SingleHost.json",
                 "btsn.common/BusinessServiceDefinitions/P1_Tutorial_Local.json",
                 "btsn.services/deployments/models/P1_Tutorial_LocalDeployment.json",
-                "btsn.services/deployments/models/P1_Tutorial_LocalInfrastructure.ruleml.xml",
+                "btsn.common/ServiceDeploymentFolder/petrinet/P1_Tutorial.json",
                 "btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml",
                 "btsn.petrinet.ProjectLoader/P1_Tutorial_Local_BuildAndRun.xml",
                 "btsn.common.eventgenerators/EventTriggeringFile/V001_EventTriggeringFile.csv",

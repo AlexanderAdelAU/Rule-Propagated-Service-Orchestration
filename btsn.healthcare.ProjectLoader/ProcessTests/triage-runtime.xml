@@ -154,7 +154,7 @@
                 <arg value="-expire"/><arg value="${token.expire}"/>
                 <arg value="-generator"/><arg value="${event.generator.id}"/>
                 <arg value="-data"/><arg value="${token.data}"/>
-                <arg value="-infrastructure"/><arg value="healthcare/Healthcare_Infrastructure"/>
+                <arg value="-infrastructure"/><arg value="SingleHost"/>
                 <arg value="-format-service"/><arg value="TriageService"/>
                 <arg line="@{deployment-argument}"/>
             </java>

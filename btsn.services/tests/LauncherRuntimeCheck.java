@@ -55,6 +55,9 @@ public final class LauncherRuntimeCheck {
                     Path definition=common.resolve("InfrastructureDefinitionFolder").resolve(name+".json");
                     check(Files.isRegularFile(definition),"Missing infrastructure definition: "+definition);
                     check("Infrastructure".equals(json(definition).get("definitionType")),"Wrong infrastructure definition type: "+definition);
+                    check(!json(definition).containsKey("capabilities"),"Business capabilities retained in physical infrastructure: "+definition);
+                    JSONObject selected=json(common.resolve("BusinessServiceDefinitions/Deployment.json"));
+                    check(definition.equals(common.resolve((String)selected.get("infrastructure"))),"Launcher/profile infrastructure mismatch: "+build);
                 }
             }
             BusinessCapabilityResolver resolver=new BusinessCapabilityResolver(common);
@@ -100,7 +103,7 @@ public final class LauncherRuntimeCheck {
     private static JSONObject json(Path p) throws Exception { return (JSONObject)new JSONParser().parse(Files.readString(p)); }
     private static java.util.Map<Path,String> sourceConfiguration(Path root) throws Exception {
         java.util.Map<Path,String> hashes=new java.util.TreeMap<>();
-        for(String directory:Arrays.asList("RuleBase","ServiceAttributeBindings","BusinessServiceDefinitions","ProcessDefinitionFolder","InfrastructureDefinitionFolder","RulePayLoad"))
+        for(String directory:Arrays.asList("RuleBase","ServiceAttributeBindings","BusinessServiceDefinitions","ProcessDefinitionFolder","InfrastructureDefinitionFolder","ServiceDeploymentFolder","RulePayLoad"))
             try(java.util.stream.Stream<Path> files=Files.walk(root.resolve("btsn.common").resolve(directory))) {
                 for(Path file:(Iterable<Path>)files.filter(Files::isRegularFile)::iterator)
                     hashes.put(file,java.util.Base64.getEncoder().encodeToString(java.security.MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(file))));
