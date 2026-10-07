@@ -1,267 +1,234 @@
-# Introduction
-If you just want to try out the RPSO infrastructure without wading through all the detail, a tutorial on how to use the tools and the infrastructure can be found here [Link to tutorial](Tutorial.md).  Otherwise the next section provide an insight into why a change in the approach the service or mesh orchestration is needed and a brief description of how the infrastructure pattern can be applied to your particular network.  
+# Rule-Propagated Service Orchestration (RPSO)
 
-# The Concept
+RPSO is an executable Petri-net architecture for distributed business processes.
+It separates **process coordination** from **business computation**: a declarative
+workflow describes the allowed paths, generic orchestration hosts buffer and
+synchronize tokens, and independently packaged services perform domain operations.
 
-## Centralised Orchestration
-<p align="center">
-  <img src="images/centralised_orchestration.png" alt="Core orchestration pattern" width="80%" />
+The repository contains healthcare, Financial and Petri-net model examples, a
+workflow editor, Ant build-and-run launchers, and observation/analysis tools.
 
-</p>
+## Run an example
 
-  *Figure 1. Conventional Centralised orchestration pattern*
+1. Use **JDK 15+** and **Apache Ant 1.10.2+**. In Eclipse, ensure the Ant launch uses
+   a JDK so the Java compiler is available.
+2. Import the repository's projects with **File → Import → General → Existing
+   Projects into Workspace**, leaving **Copy projects into workspace** unchecked.
+   Existing workspaces should also import `btsn.services`, the generic
+   `btsn.rpso.places.p1`–`p6` projects, and `btsn.financial.ProjectLoader`.
+3. Choose a launcher below, right-click the XML and select **Run As → Ant Build**.
+   Use its default `run-complete-workflow` target. It builds the required JARs,
+   prepares the configured runtime, starts local components, runs the workflow
+   phases and collects observations. No separate `clean`/`package` step is needed.
+4. After collection, run the launcher's `analyse` target or run `PetriNetAnalyzer`
+   in `btsn.common.Monitor`, package `org.btsn.derby.Analysis`.
 
-## Decentralised Orchestration
-<p align="center">
-  <img src="images/decentralised_orchestration.png" alt="Core orchestration pattern" width="80%" />
-</p>
+| Example | Ant entry point |
+|---|---|
+| Single-place tutorial | [P1_Tutorial_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml) |
+| P1–P4 fork/join model | [P1_P2_P3_P4_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_P3_P4_BuildAndRun.xml) |
+| Emergency department | [Emergency_Department_BuildAndRun.xml](btsn.healthcare.ProjectLoader/Emergency_Department_BuildAndRun.xml) |
+| Full Financial application | [FinancialSystem_P1_P5_BuildAndRun.xml](btsn.financial.ProjectLoader/FinancialSystem_P1_P5_BuildAndRun.xml) |
+| Concurrent healthcare versions | [Triple_Workflow_Emergencey_Department_Concurrent.xml](btsn.healthcare.ProjectLoader/Triple_Workflow_Emergencey_Department_Concurrent.xml) |
 
-*Figure 2. Decentralised orchestration pattern*
+The concurrent launcher's existing filename includes `Emergencey`; use the file
+as named. The loader guides list further scenarios and phase-only targets:
+[healthcare](btsn.healthcare.ProjectLoader/README.md),
+[Financial](btsn.financial.ProjectLoader/README.md), and
+[Petri-net models](btsn.petrinet.ProjectLoader/README.md).
 
+Local/remote startup follows the launcher's deployment profile. In `auto` mode,
+the configured channel address must belong to this machine for a component to
+start locally. Remote hosts must already be running with the matching JARs and
+configuration. Stop the previous Ant run before starting another launcher on the
+same ports. Initialization targets reset the selected runtime databases; collect
+or archive results before starting a fresh initialized run.
 
-# Rule-Propagated-Service-Orchestration
+For an editable model walkthrough, see [Tutorial.md](Tutorial.md).
 
-RPSO is a decentralized workflow orchestration infrastructure that eliminates central coordination bottlenecks by embedding orchestration logic as executable rules at service or mesh boundaries. Unlike traditional orchestrators that maintain global workflow state in a central engine, RPSO distributes coordination intelligence to autonomous synchronising nodes that are ideally, but not essentially, co-hosted on the service node or mesh platform as a set of Java classes (handlers). These control nodes make local routing decisions based on locally-cached rules while maintaining global workflow coherence through an xml payload that carries token-based state propagation. The architecture operates through a two-phase approach: compile-time transformation of declarative JSON workflow specifications into service-specific rule fragments, followed by runtime execution where control nodes independently evaluate rules to determine routing without inter-service coordination. 
+## Architecture: coordination and business meaning
 
+![Process definitions install local rules in generic hosts, which invoke separate business JARs and supply observations to Monitor.](images/rpso-architecture.svg)
 
-<p align="center">
-  <img src="images/control_node.png" alt="Core orchestration pattern" width="80%" />
-</p>
+*Responsibility boundaries in the current Java implementation. Business-service
+JARs are invoked in-process inside a numbered host. The dashed path configures
+local rules; the dotted path carries collected observations outside the business
+workflow.*
 
-*Figure 3. Core orchestration pattern*
+| Layer | Responsibility | Repository artefacts |
+|---|---|---|
+| Process model | Places, transitions, fork/join structure, guards and termination | `btsn.common/ProcessDefinitionFolder` |
+| Service contract | Logical service identity, operations, named inputs and returned attribute | `BusinessServiceDefinitions`, `ServiceAttributeBindings` in `btsn.common` |
+| Deployment | Map capabilities to implementation classes, hosts and channels | Infrastructure definitions and `btsn.services/deployments/{healthcare,financial,models}` |
+| Generic execution fabric | Transport, buffering, synchronization, version selection, invocation and publication | `btsn.rpso.places.p1`–`p6`, shared infrastructure |
+| Business computation | Domain objects, calculations and decision symbols | `btsn.common/src/org/btsn/business`, packaged as independent service JARs |
+| Observation | Collect records, reconstruct workflow families and display measurements | `btsn.common.Monitor` |
 
-## Overview
+A business service consumes its named inputs and returns a result. Where routing
+is conditional, the result includes a symbol such as `approved` or `declined`.
+The service interprets business meaning; the fabric matches the symbol against
+declared routes and resolves the destination. Logical service identity is
+separate from physical placement: P1 can host a clinical, financial or model
+capability according to the selected deployment.
 
-The control node comprises primarily synchronisation and publishing functions.   In figure3, these are clearly annotated however for some representation the notation  *T_in* is using to define the synchronisation function and the routing or publishing function annotated as *T_out* (this will be apparent later). The dotted arrows between *T_out and *T_in reflects that generally network connections of some sort.  Services remain focused on business logic while the control nodes make autonomous routing decisions based on locally-executed rules.  These rule are sent to the control nodes prior to a particular workflow commencing. In this manner global workflow coherence can be maintained through token-based state propagation between control and routing nodes.  The service or computation node is not touch by the control nodes except to invoke them.  The dotted lines notate network connections.
+The execution pattern is **T_in → P → T_out**:
 
+- **T_in** receives and buffers inputs, accumulating the required named values
+  for joins. Readiness also depends on version, validity and available capacity.
+- **P** invokes the bound business operation under the local execution capacity.
+- **T_out** applies the installed routing rules, publishes fork children or
+  records a business termination.
 
-<p align="center">
-  <img src="images/rule_deployment_2.png" alt="Rule Deployment pattern" width="80%" />
-</p>
+These are semantic roles within the local execution machinery. Activity boxes in
+the diagrams abbreviate those roles; the arrows represent logical publications,
+not a complete classical bipartite place/transition net. A process editor model
+retains the explicit transition and place nodes.
 
-*Figure 4. Dual-layer architecture: Rule distribution (compile-time) and token flow (runtime)*
+There is no central engine making every runtime routing decision. Hosts use
+local rule fragments and communicate through tokens. This does not imply absence
+of distributed coordination, unlimited scalability, or a proven workflow
+soundness property. Shared-host queues, transport and deployment remain relevant.
 
-## Java Implementation
+## Rule deployment and token execution
 
-The Java classes that implement the architecture interfaces are build on standard event patterns however the *ServiceThread*  performs the bulk of the activities of managing the incoming payload data and performing node type joins, routing etc and most importantly determining if it the requested invocation is valid.  Following invocation the results are passed to the routing handler for looking up the publishing rules and routing to the next service in the workflow. 
+![JSON workflows, contracts and deployment profiles feed local rule installation; host acknowledgements precede the normal workflow start.](images/rpso-rule-deployment.svg)
 
+*Rule installation and runtime token flow are separate paths. Local installation
+acknowledgements are not a global atomic-commit protocol.*
 
-<p align="center">
-  <img src="images/java_implementation.png" alt="Java implementation classes" width="80%" />
-</p>
+`TopologyBindingGenerator` derives operation bindings from the workflow.
+`RuleDeployer` compiles/distributes versioned RuleML fragments to the participating
+host operations and waits for local acknowledgements with retries in the normal
+deployment path. Launchers that explicitly skip deployment require previously
+installed matching rules. RuleBase version selection does not by itself pin the
+business implementation binary; deploy the matching JARs and configuration too.
 
-*Figure 5. Java Implementation Handler Classes.*
+Runtime XML payloads carry token identity, workflow version, target operation,
+named business attributes, validity and instrumentation fields. A fork creates
+physical child tokens within one logical workflow family. Joins accumulate the
+required inputs for that family; the analyzer uses recorded generated roots and
+parent/child genealogy rather than treating every child as a new workflow.
 
-### Control Node - Core Components
+| Component | Current role |
+|---|---|
+| `EventReactor` / `Scheduler` | Receive packets and maintain the local eligible-work ordering |
+| `ServiceThread` | Validate the selected contract/version, coordinate inputs, invoke and publish |
+| `RuleHandler` / OOjDREW | Install local RuleML and evaluate rule queries |
+| `ServiceHelper` | Resolve and invoke the installed business implementation |
+| `EventPublisher` | Send the resulting payload to the declared channel |
 
-| Component | Description |
-|-----------|-------------|
-| EventReactor | UDP-based token reception with buffering |
-| Scheduler | Order according to ruleBase Version and Join Priority |
-| ServiceThread | Embedded orchestrator coordinating all components |
-| Rule Handler | Receives and validates rule fragments |
-| OOjDREW Engine | RuleML query processing for routing decisions |
-| EventPublisher | Intelligent token routing to downstream services |
-| ServiceHelper | Multi-protocol service invocation |
+Priority applies to **waiting eligible work**. It does not interrupt a running
+business operation. Different path lengths or different host operations can have
+different queue waits without demonstrating priority overtaking. For controlled
+same-queue evidence, run
+[Queue_Priority_BuildAndRun.xml](btsn.healthcare.ProjectLoader/Queue_Priority_BuildAndRun.xml);
+[its guide](btsn.healthcare.ProjectLoader/README.md#controlled-queue-priority-experiment)
+explains the observed-backlog probe and its separate output files.
 
+## Example business processes
 
-## High Level Architecture Concepts
+### Emergency department
 
-The system implements a two-layer architecture:
+![Triage forks to Laboratory, Cardiology and Radiology, which join at Diagnosis; Treatment also accepts direct triage.](images/healthcare-workflow.svg)
 
-- **Rule Deployment Layer** (compile-time)
-- **Token Flow Layer** (runtime)
+Triage either publishes directly to Treatment or forks to Laboratory, Cardiology
+and Radiology. Diagnosis waits for all three named results. Treatment accepts the
+diagnosis path or the direct triage path through distinct operations, then ends
+the patient workflow. See [the healthcare mapping](btsn.services/docs/HEALTHCARE.md)
+for contracts and host assignments.
 
-### Rule Deployment Layer
- At deployment time, the RulePropagation component transforms JSON workflow specifications into service-specific rule fragments. Each service receives rules defining its coordination behavior (NodeType atoms), routing conditions (meetsCondition atoms), and decision values (DecisionValue atoms). These rules can occur in real-time whilst other process are still in flight.  They are distributed via UDP with a commitment protocol ensuring all services acknowledge receipt before workflow activation is allowed.
+### Financial loan application
 
-![RuleGeneration](images/rule_generation.png)
-*Figure 6. Rule Fragments Deployment Flow*
+![Validation forks to Credit Check and Fraud Check; Underwriting joins both inputs and routes to Decision or early termination.](images/financial-workflow.svg)
 
-### Token Flow Layer
-At runtime, an xml payload traverses the network carrying both workflow state and accumulated business data.  Each **Control Node** reads the payload (*T_in*) and prioritises and buffers the arriving tokens that carries the service's operation arguments.   Once the service has been invoked the results enrich the token, and then EventPublisher (*T_out*) querying local OOjDREW rule engine for routing decisions to downstream services.
+Validation rejects invalid applications or forks into Credit Check and Fraud
+Check. Underwriting joins their named results. `approved` and `conditional`
+proceed to Decision; `declined` terminates early. See
+[the Financial application guide](btsn.common/FinancialApplication.md) for contracts.
 
-### Payload Structure
+Both models use the same generic host machinery. The diagrams describe their
+configured paths, not measured performance or evidence that every path has been
+exercised in a particular run.
 
-The inter-service payload is an **XML document** with four main sections:
+## Observe and interpret a run
 
-```xml
-<payload>
-    <header>...</header>
-    <service>...</service>
-    <joinAttribute>...</joinAttribute>
-    <monitorData>...</monitorData>
-</payload>
-```
+Monitor is an **observation service outside the active business-token path**.
+An explicit business `TerminateNode` defines completion in the migrated workflows;
+collector arrival at Monitor is a separate observation boundary. Initializer and
+collector commands are administration traffic, normally using v999.
 
-### Sections
+The tools in `btsn.common.Monitor/src/org/btsn/derby/Analysis` include:
 
-| Section | Purpose | Key Fields |
-|---------|---------|------------|
-| `<header>` | Routing & versioning | `sequenceId`, `ruleBaseVersion`, `monitorIncomingEvents` |
-| `<service>` | Target service info | `serviceName`, `operation` |
-| `<joinAttribute>` | Token data | `attributeName`, `attributeValue`, `notAfter` |
-| `<monitorData>` | Instrumentation | `processStartTime`, `eventGeneratorTimestamp`, `sourceEventGenerator`, `processElapsedTime` |
+| Tool | Use |
+|---|---|
+| `PetriNetAnalyzer` | Generated roots, fork genealogy, join consumption, canonical place visits, completion and structural/temporal checks |
+| `SwingGanttChart_WithLatency_v1d` | Workflow elapsed/queue figure, measured timeline, service queue comparisons, and publication exports |
+| `WorkflowSpatialView` | Service/host activity in a spatial view |
 
-### Token Data Flow
+The combined chart offers **Diamonds** and **Lower Queue Shading** from
+**View → Queue Display**. The bar shows measured workflow elapsed time; the marker
+or lighter lower portion shows the **maximum observed service-visit queue wait**
+across that workflow family. This is an independent measurement, not total
+workflow waiting or an additive decomposition into waiting and service time.
 
-1. **Incoming** — `ServiceThread` extracts maps via XPath:
-   ```java
-   headerMap = xph.findMultipleXMLItems(incomingXMLPayLoad, "//header/*");
-   attrMap = xph.findMultipleXMLItems(incomingXMLPayLoad, "//joinAttribute/*");
-   ```
+**View → Y-Axis Scale → Scale Each Version** is the default: each version lane
+scales to its maximum measured workflow duration. Select **Shared Milliseconds**
+to compare absolute durations by bar height across versions. Horizontal position
+is arrival rank; bar width does not encode duration. Missing observations remain
+unavailable rather than being plotted as measured zero.
 
-2. **Service invocation** — Token data passed to service via `attributeValue`
+New runs capture their process definitions in
+`btsn.common.Monitor/WorkflowRunMetadata`; charts and exports display that context.
+Keep this metadata with `ServiceAnalysisDataBase` when archiving results. Older
+runs without matching metadata show `Process not captured`.
 
-3. **Outgoing** — Maps updated and written back to XML:
-   ```java
-   outgoingXMLPayLoad = xph.modifyMultipleXMLItems(outgoingXMLPayLoad, "//service/*", serviceMap);
-   outgoingXMLPayLoad = xph.modifyMultipleXMLItems(outgoingXMLPayLoad, "//joinAttribute/*", attrMap);
-   ```
+To animate observations, run `com.editor.ProcessEditor` from
+[btsn.workflowEditor](btsn.workflowEditor/src/com/editor/ProcessEditor.java), open
+the matching workflow JSON, load the saved analyzer output, then press **Play**.
+This replays captured observations; it does not launch the distributed workflow.
 
-4. **Publish** — `EventPublisher` sends payload to next service's channel/port
-
-*Key Point*
-
-The **token identity** (`sequenceId`) and **token value** (`attributeValue`) travel together in the payload, allowing join synchronization via `argValPriorityMap` keyed by join ID.
-
-
-### Coordination Patterns
-
-- **GatewayNode** - XOR-based routing guards
-- **DecisionNode** - Conditional routing based on service results
-- **ForkNode** - Parallel service invocation
-- **JoinNode** - Correlation-based synchronization
-- **MergeNode** - Flexible input handling
-
-### Service Definitions (RuleBase)
-Services Names and Operations are defined as RuleML atoms, where ip0 is mapped to an IP address, and the last entry represents the port number, for example
-
-
-```xml
-<!-- List of service facts -->
-<!-- Triage Service Method -->
-<Atom>
-	<Rel>activeService</Rel>
-	<Ind>TriageService</Ind>
-	<Ind>processTriageAssessment</Ind>
-	<Ind>ip0</Ind>
-	<Ind>2100</Ind>
-</Atom>
-```
-### Canonical Bindings (ServiceAttributeBindings)
-Services arguments are defined in a similar manner the Service Definitions. 
-
-The definition of service attributes is done on the basis *"if you want to talk to me you must call my operations with the following arguments and I will return the following values"*.  This form of compartmentalisation makes routing straight forward.  In the example below we can see that the ```DiagnosisService``` method ```processClinicalDecision``` requires three arguments, ```cardiologyResults```  , ```laboratoryResults``` and ```radiologyResults```.  In the workflow definition of this process this would represent a ```Join Node```.
-
-```xml
-
-<!-- Canonical Binding Service and Operation facts -->
-<Atom>
-	<Rel>localDefined</Rel>
-	<Ind>DiagnosisService</Ind>
-</Atom>
-
-<Atom>
-    <Rel>canonicalBinding</Rel>
-    <Ind>processClinicalDecision</Ind>
-    <Ind>diagnosisResults</Ind> <!-- This is the attribute returned -->
-    <Ind>cardiologyResults</Ind> <!-- This is the attribute needed -->
-</Atom>
-<Atom>
-    <Rel>canonicalBinding</Rel>
-    <Ind>processClinicalDecision</Ind>
-    <Ind>diagnosisResults</Ind> <!-- This is the attribute returned -->
-    <Ind>laboratoryResults</Ind> <!-- This is the attribute needed -->
-</Atom>
-<Atom>
-    <Rel>canonicalBinding</Rel>
-    <Ind>processClinicalDecision</Ind>
-    <Ind>diagnosisResults</Ind> <!-- This is the attribute returned -->
-    <Ind>radiologyResults</Ind> <!-- This is the attribute needed -->
-</Atom>
-```
-
-## Project Structure
+## Project layout and build support
 
 | Project | Purpose |
 |---|---|
-| `btsn.common` | Shared infrastructure, rules, catalogues and business-service source |
-| `btsn.services` | Independent service JAR packaging and shared Ant build support |
-| `btsn.rpso.places.p1` through `p6` | Generic numbered orchestration hosts |
-| `btsn.common.Monitor` | Observation collection and analysis |
-| `btsn.common.eventgenerators` | Shared workflow and administration token generators |
-| `btsn.healthcare.ProjectLoader` | Healthcare build-and-run workflows and process tests |
-| `btsn.financial.ProjectLoader` | Financial system build-and-run workflows |
-| `btsn.petrinet.ProjectLoader` | Petri-net model build-and-run workflows and utility phases |
-| `btsn.workflowEditor` | Workflow editor and animator |
+| `btsn.common` | Shared source, business implementations, contracts, process definitions and rules |
+| `btsn.services` | Service packaging, shared Ant builds, deployment profiles and checks |
+| `btsn.rpso.places.p1`–`p6` | Generic numbered orchestration hosts |
+| `btsn.common.Monitor` | Collection, reconstruction and visualization |
+| `btsn.common.eventgenerators` | Shared workflow and administration generators |
+| `btsn.healthcare.ProjectLoader` | Healthcare launchers and process tests |
+| `btsn.financial.ProjectLoader` | Financial launchers |
+| `btsn.petrinet.ProjectLoader` | Petri-net model launchers and utility phases |
+| `btsn.workflowEditor` | Model editor and observation animator |
 
-Healthcare services run on P1–P6 using their independently packaged business
-JARs. The six former healthcare-specific host projects have been removed. See
-[the healthcare guide](btsn.services/docs/HEALTHCARE.md) for the service mapping.
+`btsn.services` contains build support, not business implementation or execution
+handlers. Service JARs are grouped under
+`btsn.services/target/deployment/services/{healthcare,financial,models}`; support
+libraries accompany them under `target/deployment/lib`. Host placement is selected
+separately by deployment metadata. Eclipse `bin` outputs are not inputs to the
+packaged workflow runtime. Runtime databases, installed rule copies, run metadata
+and chart exports are local outputs excluded from Git.
 
-## Requirements
-
-- JDK 15+ (the Ant JVM must provide the Java compiler)
-- Apache Ant 1.10.2+
-- Repository-supplied runtime libraries, including OOjDREW and embedded Derby
-
-## Building a Project
-
-From the repository root, build and check the independent service JARs with:
+For packaging/checks without starting a workflow:
 
 ```sh
-ant -f btsn.services/build.xml clean check
+ant -f btsn.services/build.xml check
 ```
 
-Build one generic host's executable JAR and portable ZIP with:
+For a portable numbered-host JAR and ZIP:
 
 ```sh
 ant -f btsn.rpso.places.p1/build.xml
 ```
 
-Each host's portable package contains its infrastructure and launch scripts.
-Install the selected business-service JARs and support libraries separately on
-its classpath. See [the portable-release guide](btsn.services/docs/PLACE_RELEASES.md)
-for deployment instructions.
+See [shared build support](btsn.services/README.md),
+[portable releases](btsn.services/docs/PLACE_RELEASES.md), and
+[Petri-net model profiles](btsn.services/docs/PETRINET_MODELS.md).
+The repository supplies the runtime libraries, including OOjDREW and embedded
+Derby; the normal Ant workflow does not require Maven or Python.
 
-For the development healthcare workflow, run
-`btsn.healthcare.ProjectLoader/Emergency_Department_BuildAndRun.xml` as an Ant
-Build in Eclipse. It builds the current JARs and prepares the healthcare runtime
-on the generic hosts. The shared build organisation is described in
-[btsn.services](btsn.services/README.md).
-
-## Validation Scenario
-
-The implementations includes a healthcare emergency department workflow along with simple Petri Net type services workflow.  An example of a practical  process workflow is shown below in Figure 5. 
-
-![HowToBuildAModel](images/building_a_model.png)
-*Figure 7. Emergency_Department_Patient_Workflow.*
-
-## Tutorial: Running the Healthcare Workflow
-
-If you would just like to run an existing animation you do not need to build and run the process, you can just go straight to step 5.
-
-### Running the Emergency_Department_Patient_Workflow
-
-1. Expand project `btsn.healthcare.ProjectLoader`
-
-2. Run the Ant build file `Emergency_Department_BuildAndRun`
-
-3. When complete, open project `btsn.common.Monitor`, then open `org.btsn.derby.Analysis` and run `PetriNetAnalyzer` to confirm the analysis was captured and valid
-
-4. Copy the analysis results to: `btsn.common/AnalysisFolder/Healthcare/Emergency_Department_Patient_Workflow.txt`
-
-### Animating a Process
-
-5. To run the animator, open `btsn.WorkflowEditor/com/editor/ProcessEditor`
-
-6. Now we need to load the workflow defintion file in the process editor.  Open the workflow definition folder `ProcessDefinitionFolder/healthcare/Workflow` in `btsn.common` and navigate to select the process: `Emergency_Department_Patient_Workflow.json`
-
-7. Load the analysis file from the Analysis, e.g. `btsn.common/AnalysisFolder/Healthcare/Emergency_Department_Patient_Workflow.txt`
-
-8. Press **Play** to see the simulation results
-
+The current diagrams are editable SVGs. Their source models, conventions and
+regeneration command are documented in [images/README.md](images/README.md).
 
 # License
 

@@ -1,134 +1,125 @@
-# Tutorial for Building a Simple Workflow
+# Build and run a single-place workflow
 
-Assuming that you have read the readme file, and have loaded the projects into either Eclipse or your favourite IDE, then here a short tutorial that you can use to build your first process using process editor.  
+This tutorial uses the current P1 loop model. P1 is a generic orchestration host;
+its business operation is supplied by the independent
+`StochasticEntryTokenService` JAR. Monitor collects observations outside the
+business-token path.
 
-Before we start, bear in mind that the infrastructure model is based around the concept below
+![Generator sends tokens through P1 input, business computation and output routing; false loops, true terminates, and Monitor observes separately.](images/p1-tutorial.svg)
 
-<p align="center">
-  <img src="images/control_node.png" alt="Core orchestration pattern" width="75%" />
-</p>
+*The tutorial's explicit input/place/output roles. `true` completes the model
+workflow; `false` repeats the activity. Repeated visits remain part of the same
+logical workflow.*
 
-*Figure 1. Tutorial of a Single Service process*
+## Open the model
 
-however when working with the workflow modeling it is more convenient to separate `sync` and `publish` functions out into virtual `T_in` and `T_out` edge and gateway nodes so that the process becomes clearer and also helps with the analysis.
+1. Import the repository projects into Eclipse as described in the
+   [README](README.md#run-an-example).
+2. Run `com.editor.ProcessEditor` from
+   [`btsn.workflowEditor`](btsn.workflowEditor/src/com/editor/ProcessEditor.java).
+3. Open
+   [`P1_Tutorial_Workflow.json`](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json).
+   The directory is `Workflow`, with a capital W.
 
-## Edit the Workflow with the ProcessEditor
+Inspect these model elements:
 
-First, begin by running the process editor which can be found in the project  `btsn.WorkflowEditor/com/editor/ProcessEditor`.  Then from the `File` menu, load the tutorial workflow definition from `btsn.common/ProcessDefinitionFolder/petrinet/workflow/P1_Tutorial_Workflow.json`.  It should look like the workflow depicted in Figure 1.
+| Element | Meaning |
+|---|---|
+| Event generator | Supplies workflow tokens to `T_in_P1` |
+| `T_in_P1` | Single-input `EdgeNode`; receives/buffers work |
+| Place P1 | `StochasticEntryTokenService.processToken`, consuming and returning `token` |
+| `T_out_P1` | `GatewayNode`; applies the declared `true`/`false` routes |
+| `TerminateNode` | Ends the successful path; it is not a Monitor invocation |
 
-<p align="center">
-  <img src="images/P1_Workflow_Tutorial.png" alt="Core orchestration pattern" width="75%" />
-</p>
+The logical service name is separate from the physical `P1_Place` runtime
+location used by the launcher. The model service preserves the existing
+stochastic processing behaviour; it is not a business implementation inside P1's
+orchestration handlers. Do not assume fixed timings or a fixed number of repeat
+visits from the picture. Token validity bounds the run; an expired incomplete
+instance is not a successful completion.
 
-*Figure 2. Tutorial of a Single Service process*
+To change the model, edit its nodes, operations or outgoing guards in the editor
+and save the JSON. Preserve the service's canonical input/output contract unless
+you are also changing the matching implementation and deployment definition.
+Opening or playing a model does not deploy it.
 
+## Run the BuildAndRun XML
 
-We are using the PetriNet process type as the methods and attributes are very simple and reflect typical petri net architecture model.  The process comprises an Event Generator that generates the payload a single service node and a monitor service.
+Run
+[`btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml`](btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml)
+as an **Ant Build**, with the default `run-complete-workflow` target. Ant must run
+on a JDK 15+; Ant 1.10.2+ is required. No preliminary service build is needed.
 
-Note don't be confused with the Monitor Service - it is not part of the process but acts as an observer only.   It is not normally needed as generally a process just goes to a  `Terminate Node` but we are using it here to capture the tokens as they arrive so we can gain an understanding of their arrival distribution.
+The launcher:
 
-If you click on the *T_in_P1* node you will see the type of node it represents (i this case it is an `Edge Node`, but could be a Merge or Join type).  An Edge Node is the simplest type and reflects a standard UDP port. 
+1. Builds the independent business JARs, shared infrastructure, generic host,
+   Monitor and event generators.
+2. Prepares an isolated configuration and host database directory under
+   `btsn.services/target/launchers/P1_Tutorial_BuildAndRun`, using the
+   [stochastic loop profile](btsn.services/deployments/models/StochasticLoopDeployment.json).
+3. Generates bindings from the workflow and prepares the RuleBase configuration.
+4. Starts configured local components, initializes their databases, deploys the
+   workflow rules, generates tokens and collects observations.
 
-If you now click on the Service (or place) node you will see that the Service name is `P1_Place` and has a single method `processToken`, and if you click on the argument type you will see that it accepts the argument `token` which is of type `String`.  Because it is a simple Petri Net service, it just returns `true` or `false` with equal probability.
+Its `rule.version` property selects the workflow version for the run; the JSON
+editor's displayed generator version is not a substitute for the launch settings.
+Local/remote startup follows the configured channel address and mode overrides.
+Remote components must already be running with the corresponding configuration.
+Locally started components remain active after the phases finish: stop the Ant
+run before starting another launcher on the same ports.
 
-If you now click on the *T_out_P1*  node you will see that it is a node type `Gateway Node` and thus has publishing guards associated with it.  These guards can be set by clicking on the outgoing edges or arrows.  The process requires the `token` to be true, thus if it the service returns a `false` value it is routed back to the *T_in_P1* to try again.  That's it - however if you have changed anything you will need to save the changes.
+Initialization resets the selected runtime's data. Save or collect results from
+an earlier run before starting a fresh initialized run. Monitor retains its usual
+working directory so the analysis tools read the collected results.
 
+## Understand the contract and routes
 
-## Build and Deploy and Running the Workflow
-We now have the process defined, so we now need to build and deploy the infrastructure components and the RuleBase so that when the infrastructure receives a payload belonging to say `RuleBase V001` it will know what to do with it.  For the PetriNet type of process the Service Attributes are automatically generated to the folder `btsn.common/ServiceAttributeBindings` during this phase.
-
-```xml
-<!-- Canonical Binding for P1_Place -->
-<!-- Auto-generated by RuleDeployer - DO NOT EDIT -->
-<!-- Input count: 1 -->
-<!-- Arguments from topology: [token] -->
-<!-- Return attribute from topology: token -->
-
-<Atom>
-	<Rel>localDefined</Rel>
-	<Ind>P1_Place</Ind>
-</Atom>
-<Atom>
-	<Rel>canonicalBinding</Rel>
-	<Ind>processToken</Ind>
-	<Ind>token</Ind>
-	<Ind>token</Ind>
-</Atom>
-```
-We build, load and deploy the process by running the Ant build located at `btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml`
-
-### What is Happening during the build?
-
-1. All the infrastructure handlers are compiled and loaded by the `serviceLoader` class and the UDP listener threads created.
-
-2. The process definition (figure 1) is now parsed by a two utilities classes called `TopologyBindingGenerator.java` and `RuleDeployer.java`.  Their pupose is to extract all the bindings from the `json` topology and to verify that it matches the Service Definitions and to then Deploy calls the `RuleHandler` with the RuleBase configuration.   If successful, the `ruleHandler` will commit to the process.
-3. Once the infrastructure is loaded it will be first initialised to clean the embedded databases and then wait for the arrival of the first payload from the event generator.  *At this point the service and the infrastructure are running on the same platform but are oblivious of each other.*  The service is free to accept calls from other services or indeed other agents.
-
-## Process Workflow Execution
-Once commitment has been received from all infrastructure players the event generator is launched that begins the process workflow.
-
-### Event Generator
-The Event Generator is launched by the Ant build file and its task is to simply send tokens to the service specified in the argument list.  Because it is part of the infrastructure, it will not send the payload (contains the tokens) to the service but to *T_in_P1*.  The rate at which they tokens are sent depends of the EventTriggering file, e.g. `btsn.common.eventgenerators/EventTriggeringFile`
-
-### Payload
-The payload's is configured as an xml package - its essential fields are:
-
-```xml
-<payload>
-    <header>...</header>
-    <service>...</service>
-    <joinAttribute>...</joinAttribute>
-    <monitorData>...</monitorData>
-</payload>
-```
-### Infrastructure Internals
-
-On receiving a payload the `ServiceThread` handler extracts the necessary data to determine the validity of the payload and the confirms that the correct method and arguments are contained.  If successful the service method is called by the `serviceHelper` and the result returned to `ServiceThread` which will then interrogate the local `ruleBase`s that will tell it where to route the returned data to.  A typical rule for the PetriNet services will look like this:
+The operation contract is `token → token`. Bindings generated for this logical
+service include facts with the following shape:
 
 ```xml
 <Atom>
-	<Rel>NodeType</Rel>
-	<Ind>GatewayNode</Ind>
+    <Rel>localDefined</Rel>
+    <Ind>StochasticEntryTokenService</Ind>
 </Atom>
 <Atom>
-	<Rel>NodeType</Rel>
-	<Ind>GatewayNode</Ind>
-</Atom>
-<Atom>
-	<Rel>meetsCondition</Rel>
-	<Ind>MonitorService</Ind>
-	<Ind>acknowledgeTokenArrival</Ind>
-	<Ind>GATEWAY_NODE</Ind>
-	<Ind>true</Ind>
-</Atom>
-<Atom>
-	<Rel>meetsCondition</Rel>
-	<Ind>P1_Place</Ind>
-	<Ind>processToken</Ind>
-	<Ind>GATEWAY_NODE</Ind>
-	<Ind>false</Ind>
+    <Rel>canonicalBinding</Rel>
+    <Ind>processToken</Ind>
+    <Ind>token</Ind> <!-- returned attribute -->
+    <Ind>token</Ind> <!-- required input -->
 </Atom>
 ```
 
-Here you can see the true and false guard conditions that govern the behaviour of the Gateway Node.
+At runtime, input coordination supplies the named argument. `ServiceHelper`
+invokes the installed implementation in-process. Output routing uses the local
+RuleBase: `false` publishes back to P1's input; `true` takes the declared terminal
+path. The host records those events, and the collector later sends observations
+to Monitor. Monitor is not an extra activity in this loop.
 
-## Analysing the Results
+## Analyze and replay observations
 
-Once the run is complete, open project `btsn.common.Monitor`, then open `org.btsn.derby.Analysis` and run `PetriNetAnalyzer`.  This will display to the console the Petri Net analysis (If you want a graphical or spatial view you can run `WorkflowSpatialView`). The Petri Net analysis will show the complete marking history of all the tokens that entered the infrastructure.   
+After collection, run the launcher's `analyse` target or run `PetriNetAnalyzer`
+from `btsn.common.Monitor`, package `org.btsn.derby.Analysis`. Check generated and
+completed instances, canonical place visits and any structural/temporal issues.
+Loop visits are not additional workflow roots. Missing completion records must
+not be interpreted as measured successful durations.
 
-If you would like to animate the analysis markings on the actual workflow topology, then you will need to save the results of `PetriNetAnalyzer`.  Copy them to: `btsn.common/AnalysisFolder/PetriNet/P1_Tutorial_Workflow.txt`
+`SwingGanttChart_WithLatency_v1d` displays measured workflow and queue intervals;
+`WorkflowSpatialView` displays service activity. See
+[the README's interpretation guide](README.md#observe-and-interpret-a-run).
 
-## Animating Token Markings on the Process Topology
+For animation:
 
-To run the animator, open `btsn.WorkflowEditor/com/editor/ProcessEditor`
+1. Save the analyzer's console output, for example as
+   `btsn.common/AnalysisFolder/PetriNet/P1_Tutorial_Workflow.txt`.
+2. In ProcessEditor, open the same `P1_Tutorial_Workflow.json` that produced the run.
+3. Load the saved analysis file and press **Play**.
 
-Now we need to load the workflow definition file in the process editor.  Open the workflow definition folder `ProcessDefinitionFolder/petrinet/Workflow` in `btsn.common` and navigate to select the process: `P1_Tutorial_Workflow.json`
-
-Load the analysis file you just saveed from running the `PetriNetAnalyzer` e.g. `btsn.common/AnalysisFolder/PetriNet/P1_Tutorial_Workflow.txt`
-
-Press **Play** to see the simulation results
-
-
+The animator replays the captured observations. Keep the analyzer output and
+workflow JSON together, and retain Monitor's `WorkflowRunMetadata` with the
+analysis database when archiving a run. Historical observations without captured
+process metadata are labelled accordingly; the viewer does not infer the process
+from today's deployment.
 
 ## Author
 
