@@ -1,9 +1,11 @@
 # Build and run a single-place workflow
 
 This tutorial uses the current P1 loop model. P1 is a generic orchestration host;
-its business operation is supplied by the independent
-`StochasticEntryTokenService` JAR. Monitor collects observations outside the
-business-token path.
+its bound function returns `true` or `false`, supplied by the independent
+`StochasticEntryTokenService` JAR. Input receipt and output routing belong to
+the surrounding transitions. Monitor collects observations outside the
+business-token path. Other functions can be bound at a place using their
+matching contracts and deployment definitions.
 
 ![Generator sends tokens through P1 input, business computation and output routing; false loops, true terminates, and Monitor observes separately.](images/p1-tutorial.svg)
 
@@ -27,16 +29,17 @@ Inspect these model elements:
 |---|---|
 | Event generator | Supplies workflow tokens to `T_in_P1` |
 | `T_in_P1` | Single-input `EdgeNode`; receives/buffers work |
-| Place P1 | `StochasticEntryTokenService.processToken`, consuming and returning `token` |
+| Place P1 | A Boolean-returning function: `StochasticEntryTokenService.processToken`, consuming and returning `token` |
 | `T_out_P1` | `GatewayNode`; applies the declared `true`/`false` routes |
 | `TerminateNode` | Ends the successful path; it is not a Monitor invocation |
 
 The logical service name is separate from the physical `P1_Place` runtime
-location used by the launcher. The model service preserves the existing
-stochastic processing behaviour; it is not a business implementation inside P1's
-orchestration handlers. Do not assume fixed timings or a fixed number of repeat
-visits from the picture. Token validity bounds the run; an expired incomplete
-instance is not a successful completion.
+location used by the launcher. Each completed invocation produces a fresh
+Boolean independently of the arriving Boolean value; this demo implementation
+selects `true` with probability 0.5. The place function produces the result and
+T_out applies the declared routes. Timings and the number of repeat visits vary
+between runs. Token validity bounds the run; an expired incomplete instance is
+not a successful completion.
 
 To change the model, edit its nodes, operations or outgoing guards in the editor
 and save the JSON. Preserve the service's canonical input/output contract unless

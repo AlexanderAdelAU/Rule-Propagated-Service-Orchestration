@@ -1,38 +1,40 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="440" viewBox="0 0 1120 440" role="img" aria-labelledby="title desc">
-<title id="title">P1 tutorial loop and business termination</title><desc id="desc">The tutorial generator sends tokens to T_in on P1, where StochasticEntryTokenService returns a true or false result. True terminates; false returns to the same input. Collected observations go to Monitor outside the business flow.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="465" viewBox="0 0 1120 465" role="img" aria-labelledby="title desc">
+<title id="title">One place: Boolean functionality and transition coordination</title><desc id="desc">P1 is a circular place between input and output transition bars. Its bound function produces true or false independently of the arriving Boolean value. The output transition routes true to termination and false back to the input. The generic host implements the local unit; Monitor observes separately. The dot illustrates a token, not a captured marking.</desc>
 <defs>
 <marker id="flow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#24598e"/></marker>
 <marker id="rule" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7350a2"/></marker>
 <marker id="observe" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#19776e"/></marker>
 <marker id="ack" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#65758b"/></marker>
 </defs><rect width="100%" height="100%" fill="#ffffff"/>
-<rect x="215" y="40" width="655" height="255" rx="12" fill="#fafbfc" stroke="#98a7b6" stroke-width="1.5"/>
-<text x="233" y="67" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="start" fill="#1b2b40">P1 generic host · local execution roles</text>
-<rect x="20" y="150" width="155" height="85" rx="8" fill="#f5f6f8" stroke="#60738a" stroke-width="1.5"/>
-<text x="97.5" y="179" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Generator</text>
-<text x="97.5" y="205" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Workflow tokens</text>
-<rect x="245" y="150" width="145" height="85" rx="8" fill="#edf3fa" stroke="#60738a" stroke-width="1.5"/>
-<text x="317.5" y="179" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">T_in</text>
-<text x="317.5" y="205" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Receive / buffer</text>
-<rect x="430" y="150" width="240" height="85" rx="8" fill="#edf7f0" stroke="#60738a" stroke-width="1.5"/>
-<text x="550.0" y="179" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Place P1</text>
-<text x="550.0" y="205" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">StochasticEntryTokenService</text>
-<rect x="715" y="150" width="125" height="85" rx="8" fill="#edf3fa" stroke="#60738a" stroke-width="1.5"/>
-<text x="777.5" y="179" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">T_out</text>
-<text x="777.5" y="205" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Route</text>
-<rect x="940" y="150" width="160" height="85" rx="8" fill="#f5f6f8" stroke="#60738a" stroke-width="1.5"/>
-<text x="1020.0" y="179" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Terminate</text>
-<text x="1020.0" y="205" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">true outcome</text>
-<rect x="380" y="340" width="370" height="75" rx="8" fill="#edf7f5" stroke="#60738a" stroke-width="1.5"/>
-<text x="565.0" y="369" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Monitor</text>
-<text x="565.0" y="395" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Collected execution observations</text>
-<path d="M 175 192 L 245 192" fill="none" stroke="#24598e" stroke-width="2" marker-end="url(#flow)"/>
-<path d="M 390 192 L 430 192" fill="none" stroke="#24598e" stroke-width="2" marker-end="url(#flow)"/>
-<path d="M 670 192 L 715 192" fill="none" stroke="#24598e" stroke-width="2" marker-end="url(#flow)"/>
-<path d="M 840 192 L 940 192" fill="none" stroke="#24598e" stroke-width="2" marker-end="url(#flow)"/>
-<text x="890" y="175" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">true</text>
-<path d="M 777 150 L 777 103 L 317 103 L 317 150" fill="none" stroke="#24598e" stroke-width="2" marker-end="url(#flow)"/>
-<text x="550" y="93" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">false: repeat the activity</text>
-<path d="M 550 295 L 550 340" fill="none" stroke="#19776e" stroke-width="2" stroke-dasharray="3 5" marker-end="url(#observe)"/>
-<text x="567" y="324" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start" fill="#19776e">collector</text>
+<rect x="255" y="55" width="530" height="255" rx="12" fill="#fafbfc" stroke="#98a7b6" stroke-width="1.5"/>
+<text x="273" y="82" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="start" fill="#1b2b40">Generic host · T_in → P → T_out</text>
+<rect id="P1_EVENTGENERATOR" x="20" y="157" width="210" height="85" rx="8" fill="#f5f6f8" stroke="#60738a" stroke-width="1.5"/>
+<text x="125.0" y="186" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Generator</text>
+<text x="125.0" y="212" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Workflow tokens</text>
+<rect id="T_in_P1" x="342" y="176" width="16" height="48" fill="#24598e"/>
+<text x="350" y="248" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#1b2b40">T_in_P1</text>
+<circle id="P1" cx="520" cy="200" r="27" fill="#edf7f0" stroke="#1b2b40" stroke-width="2"/>
+<text x="520" y="197" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" text-anchor="middle" fill="#1b2b40">P1</text>
+<circle cx="520" cy="212" r="4" fill="#1b2b40"/>
+<rect id="T_out_P1" x="682" y="176" width="16" height="48" fill="#24598e"/>
+<text x="690" y="248" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#1b2b40">T_out_P1</text>
+<rect id="T_in_Model_Terminate" x="942" y="176" width="16" height="48" fill="#1b2b40"/>
+<text x="950" y="248" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#1b2b40">T_in_Model_Terminate</text>
+<text x="350" y="280" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Receive / buffer</text>
+<text x="520" y="280" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#1b2b40">Function: true / false</text>
+<text x="690" y="280" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Route result</text>
+<text x="950" y="280" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#1b2b40">Terminate</text>
+<path d="M 230 200 L 342 200" fill="none" stroke="#24598e" stroke-width="2" stroke-dasharray="6 4" data-source="P1_EVENTGENERATOR" data-target="T_in_P1" marker-end="url(#flow)"/>
+<path d="M 358 200 L 493 200" fill="none" stroke="#24598e" stroke-width="2" data-source="T_in_P1" data-target="P1" marker-end="url(#flow)"/>
+<path d="M 547 200 L 682 200" fill="none" stroke="#24598e" stroke-width="2" data-source="P1" data-target="T_out_P1" marker-end="url(#flow)"/>
+<path d="M 698 200 L 942 200" fill="none" stroke="#24598e" stroke-width="2" stroke-dasharray="6 4" data-source="T_out_P1" data-target="T_in_Model_Terminate" marker-end="url(#flow)"/>
+<path d="M 690 176 L 690 115 L 350 115 L 350 176" fill="none" stroke="#24598e" stroke-width="2" stroke-dasharray="6 4" data-source="T_out_P1" data-target="T_in_P1" marker-end="url(#flow)"/>
+<text x="820" y="185" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">true</text>
+<text x="520" y="105" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">false: invoke the function again</text>
+<rect x="365" y="350" width="390" height="70" rx="8" fill="#edf7f5" stroke="#60738a" stroke-width="1.5"/>
+<text x="560.0" y="379" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Monitor</text>
+<text x="560.0" y="405" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Collected execution observations</text>
+<path d="M 520 310 L 520 350" fill="none" stroke="#19776e" stroke-width="2" stroke-dasharray="3 5" marker-end="url(#observe)"/>
+<text x="537" y="336" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start" fill="#19776e">collection</text>
+<text x="560" y="448" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="middle" fill="#1b2b40">Circle: place · Bar: transition · Dot: illustrative token · Dashed blue: publication</text>
 </svg>
