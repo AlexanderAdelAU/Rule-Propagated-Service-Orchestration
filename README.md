@@ -92,6 +92,29 @@ place's function and the transitions' coordination responsibilities are separate
 Run [P1_Tutorial_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml)
 as an Ant Build; [Tutorial.md](Tutorial.md) explains editing and running it.
 
+#### Build the process in ProcessEditor
+
+![ProcessEditor showing the single-place tutorial on its canvas and P1's StochasticEntryTokenService binding in the Attributes panel.](images/process-editor-p1-tutorial.png)
+
+*The executable process definition in the editor. The canvas defines the
+transition–place–transition structure and its routes; the Attributes panel binds
+P1 to a service operation. Monitor remains an observer outside this path.*
+
+1. Choose **File → New → Process Definition** and set **Type** to **PetriNet**.
+2. Place an **Event Generator**, an input **Transition**, a **Place**, an output
+   **Transition**, and a terminal **Transition** on the canvas.
+3. Select P1 and bind **Service** `StochasticEntryTokenService` to operation
+   `processToken`, with input argument `token`.
+4. Connect the nodes, then set the output arrows' guards: `true` terminates and
+   `false` returns to T_in_P1.
+5. **Validate**, **Save As (.json)**, then select that definition in the
+   BuildAndRun launcher to deploy and execute it.
+
+See [Build this process in ProcessEditor](Tutorial.md#build-this-process-in-processeditor)
+for the exact node settings, operation arguments, arrow guards, save location
+and launcher property. The editor defines the process and its bindings; the
+launcher supplies the packaged runtime and deployment.
+
 ### Four places: Boolean functionality with a fork and join
 
 ![P1–P4 shown as circular places between input and output transition bars. P1 true forks to P2 and P3, their arrivals join before P4, and each place produces its own Boolean result.](images/petrinet-fork-join.svg)

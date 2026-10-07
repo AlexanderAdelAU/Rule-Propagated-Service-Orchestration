@@ -56,6 +56,15 @@ older DOT pipeline, while `building_a_model.png` and `P1_Workflow_Tutorial.png`
 show earlier editor models with Monitor on the drawn business path. Do not use
 those images as descriptions of the migrated runtime.
 
+## ProcessEditor tutorial screenshot
+
+`process-editor-p1-tutorial.png` is the unmodified user-supplied
+`image(20261007-065518).png`. The README and tutorial use it to show the live
+editor: the P1 loop on the canvas and its service/operation binding in the
+Attributes panel. The terminal is displayed as `Terminate`; Monitor is described
+as an observer outside the token path. This is an editor screenshot, not a
+captured execution or a regenerated diagram. The SVG generator does not alter it.
+
 ## Captured execution examples
 
 The root README also uses these unmodified user-supplied chart screenshots.
