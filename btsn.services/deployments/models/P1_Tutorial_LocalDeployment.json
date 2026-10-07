@@ -1,0 +1,9 @@
+{
+  "catalog": "BusinessServiceDefinitions/P1_Tutorial_Local.json",
+  "infrastructure": "ProcessDefinitionFolder/P1_Tutorial_LocalInfrastructure.json",
+  "deploymentRules": "RuleBase/Generated/InfrastructureDeployment.ruleml.xml",
+  "directServiceRules": [
+    "RuleBase/PetriNet/ListofPetriNetInitializationServices.ruleml.xml",
+    "RuleBase/PetriNet/ListofPetrinetCollectorServices.ruleml.xml"
+  ]
+}

@@ -1,268 +1,401 @@
-# Build and run a single-place workflow
+# P1 tutorial: define the infrastructure, define the process, run and inspect the results
 
-This tutorial uses the current P1 loop model. P1 is a generic orchestration host;
-its bound function returns `true` or `false`, supplied by the independent
-`StochasticEntryTokenService` JAR. Input receipt and output routing belong to
-the surrounding transitions. Monitor collects observations outside the
-business-token path. Other functions can be bound at a place using their
-matching contracts and deployment definitions.
+This tutorial builds and runs the process selected by
+[`P1_Tutorial_BuildAndRun.xml`](btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml).
+An event generator sends a token to P1. P1 invokes
+`StochasticEntryTokenService.processToken`; its function returns a fresh `true`
+or `false` result. The output transition terminates on `true` and sends the same
+workflow back to P1 on `false`. Monitor collects observations separately.
 
-![Generator sends tokens through P1 input, business computation and output routing; false loops, true terminates, and Monitor observes separately.](images/p1-tutorial.svg)
+Follow the four stages in order:
 
-*The tutorial's explicit input/place/output roles. `true` completes the model
-workflow; `false` repeats the activity. Repeated visits remain part of the same
-logical workflow.*
+1. [Define the infrastructure](#1-define-the-infrastructure): where the function can run and how it is reached.
+2. [Define the process](#2-define-the-process): which operation runs and how its result is routed.
+3. [Run the tutorial](#3-run-the-tutorial): build, initialize, deploy, fire ten tokens and collect observations.
+4. [Show the results](#4-show-the-results): inspect completion, repeat visits, timings and replay.
 
-## Open the model
+The supplied files let you run the finished example first, or reconstruct its
+infrastructure and process in the editor. All commands below start at the
+repository root.
 
-1. Import the repository projects into Eclipse as described in the
-   [README](README.md#run-an-example).
-2. Run `com.editor.ProcessEditor` from
-   [`btsn.workflowEditor`](btsn.workflowEditor/src/com/editor/ProcessEditor.java).
-3. Open
-   [`P1_Tutorial_Workflow.json`](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json).
-   The directory is `Workflow`, with a capital W.
+## Before you start
 
-Use **File → Load (.json)** to open the supplied definition. The following
-walkthrough also shows how to reconstruct its behavior on a blank canvas.
+Use **JDK 15 or later** and **Apache Ant 1.10.2 or later**. In Eclipse, import
+existing projects with **Copy projects into workspace** unchecked. Include
+`btsn.common`, `btsn.services`, `btsn.common.eventgenerators`,
+`btsn.common.Monitor`, `btsn.petrinet.ProjectLoader`, `btsn.workflowEditor` and the
+numbered `btsn.rpso.places.p1`–`p6` projects. Run Ant with a JDK, so its compiler
+is available.
 
-Inspect these model elements:
+Run [`com.editor.ProcessEditor`](btsn.workflowEditor/src/com/editor/ProcessEditor.java)
+from `btsn.workflowEditor` as a Java application. Its **File → New** menu has
+separate **Infrastructure Definition** and **Process Definition** editors.
 
-| Element | Meaning |
-|---|---|
-| Event generator | Supplies workflow tokens to `T_in_P1` |
-| `T_in_P1` | Single-input `EdgeNode`; receives/buffers work |
-| Place P1 | A Boolean-returning function: `StochasticEntryTokenService.processToken`, consuming and returning `token` |
-| `T_out_P1` | `GatewayNode`; applies the declared `true`/`false` routes |
-| `TerminateNode` | Ends the successful path; it is not a Monitor invocation |
+The local configuration below uses `127.0.0.1`: P1, the generator and Monitor
+run on the same computer. The original launcher retains its existing LAN
+configuration. Stop an earlier local workflow before starting this one.
+Initialization resets the selected P1 runtime and Monitor databases; retain any
+previous results you need before running it.
 
-The logical service name is separate from the physical `P1_Place` runtime
-location used by the launcher. Each completed invocation produces a fresh
-Boolean independently of the arriving Boolean value; this demo implementation
-selects `true` with probability 0.5. The place function produces the result and
-T_out applies the declared routes. Timings and the number of repeat visits vary
-between runs. Token validity bounds the run; an expired incomplete instance is
-not a successful completion.
+## 1. Define the infrastructure
 
-To change the model, edit its nodes, operations or outgoing guards in the editor
-and save the JSON. Preserve the service's canonical input/output contract unless
-you are also changing the matching implementation and deployment definition.
-Opening or playing a model does not deploy it.
+Infrastructure defines network resources and the service operation available
+on each physical node. It does not define the loop or its routing guards.
 
-## Build this process in ProcessEditor
+### Create the physical node
 
-![ProcessEditor with the P1 loop on the canvas and the selected place's service and processToken operation in the Attributes panel.](images/process-editor-p1-tutorial.png)
+Choose **File → New → Infrastructure Definition**. In **Physical node network**,
+click **Add node** and enter:
 
-*The supplied tutorial in ProcessEditor. Select a node or arrow to edit its
-properties in the left Attributes panel. P1's service binding gives the place
-its functionality; the surrounding transitions and arrows define coordination.*
+| Node | Channel | Address | Base Port Start | Base Port End |
+|---|---|---|---|---|
+| `P1` | `ip0` | `127.0.0.1` | `4001` | `4099` |
 
-### 1. Place and configure the nodes
+These are base-port values used by the platform's channel mapping. The runtime
+logs show the resolved transport ports. P1 is the physical node; its runtime
+service identity is `P1_Place`.
 
-Choose **File → New → Process Definition**, then select **PetriNet** in the
-toolbar's **Type** field. Click a palette tool, then click the canvas to place
-its shape. The tooltips identify **Event Generator**, **Transition** and
-**Place**. Arrange these five nodes from left to right:
+### Declare P1's capability and contract
 
-| Palette tool | Label | Attributes to set | Purpose |
+Select the P1 row, click **Add capability**, and fill in **Node capabilities**:
+
+| Node | Service | Operation | Return Attribute | Base Port |
+|---|---|---|---|---|
+| `P1` | `StochasticEntryTokenService` | `processToken` | `token` | `4001` |
+
+Select that capability, then click **Add argument** in its **Arguments** panel:
+
+| Name | Type | Value | Required |
 |---|---|---|---|
-| Event Generator | `P1_EVENTGENERATOR` | Rate (ms): `1000`; Version: `v001`; Fork Children: `0` | Identify the initial token source |
-| Transition | `T_in_P1` | Transition Type: `T_in`; Node Type: `EdgeNode`; Buffer: `50` | Receive and buffer the single required input |
-| Place | `P1` | Service: `StochasticEntryTokenService`; configure its operation below | Supply the Boolean-returning function |
-| Transition | `T_out_P1` | Transition Type: `T_out`; Node Type: `GatewayNode` | Route the function's result |
-| Transition | `Terminate` | Transition Type: `Other`; Node Type: `TerminateNode` | End the successful path |
+| `token` | `String` | `String` | Unchecked |
 
-Click a node to select it and use the **Attributes** panel for these settings.
-Set **Transition Type** before **Node Type**, because the available node types
-depend on the transition role. The editor sets the corresponding Node Value
-automatically. Every label must be unique; labels become node IDs when saved.
-The supplied JSON uses the internal ID `T_in_Model_Terminate` for the node
-displayed as `Terminate`; a new node labelled `Terminate` provides the same
-terminal role through its `TerminateNode` setting.
+The contract is `token → token`. The service name selects the existing
+implementation in the [P1 tutorial service catalogue](btsn.common/BusinessServiceDefinitions/P1_Tutorial_Local.json).
+The packaged [service implementation](btsn.common/src/org/btsn/services/StochasticEntryTokenService.java)
+runs inside the generic P1 host; entering a service name does not create an
+implementation.
 
-The generator's displayed Rate and Version are model fields. The actual run is
-controlled by the generator arguments and `rule.version` in the Ant launcher;
-changing these editor fields alone does not change those launch settings.
+### Save and generate the configuration
 
-### 2. Bind functionality to P1
+1. Click **Save...** and save the definition as
+   `btsn.common/ProcessDefinitionFolder/P1_Tutorial_LocalInfrastructure.json`.
+2. Click **Generate Configuration**. The editor validates the definition and
+   writes the service's canonical binding under `btsn.common/ServiceAttributeBindings`,
+   plus `btsn.common/RuleBase/Generated/InfrastructureDeployment.ruleml.xml`.
+3. Copy that generated deployment file to
+   `btsn.services/deployments/models/P1_Tutorial_LocalInfrastructure.ruleml.xml`.
+   This is the deployment snapshot selected by the local tutorial launcher.
 
-Select the circular **P1** node. Enter `StochasticEntryTokenService` in
-**Service**. In **Operations**, enter `processToken` and click the operation
-**+** button. Expand the new operation with **[+]** to configure its argument:
+Ready-to-use versions of both files are included:
 
-| Setting | Value |
-|---|---|
-| Operation name | `processToken` |
-| Argument name | `token` |
-| Argument value | `String`, matching the supplied tutorial |
-| Argument type | `String`, the editor's default |
-| Required checkbox (`R`) | Leave unchecked, matching the supplied tutorial |
-| Returned attribute | `token`, as defined by this service's contract |
+- [Editable infrastructure JSON](btsn.common/ProcessDefinitionFolder/P1_Tutorial_LocalInfrastructure.json).
+- [Matching deployment rules](btsn.services/deployments/models/P1_Tutorial_LocalInfrastructure.ruleml.xml).
+- [Local deployment profile](btsn.services/deployments/models/P1_Tutorial_LocalDeployment.json), which selects that JSON, the P1-only service catalogue and the initialization/collection services.
 
-Enter the argument name and value in the operation's argument row, then click
-that row's **+** button. The panel should show **processToken (1 args)**. The
-returned attribute belongs to the service contract; the current operation panel
-edits the operation name and inputs, rather than providing a return-attribute
-field. For this single-input, non-join output, binding generation uses `token`.
+The launcher copies the selected deployment snapshot into its working runtime.
+If you change the infrastructure address or base port, save the JSON, generate
+configuration again and update the matching snapshot. Changing only a launch
+mode to `local` does not change the configured destination address.
 
-This selects the already packaged Boolean function. To use different
-functionality at P1, provide the corresponding service implementation, contract
-and deployment binding, then select its service and operation in the model.
-Entering a new service name in the editor does not create its implementation.
+**Monitor remains an observation service.** Its existing rules provide
+initialization and collection operations. Do not add Monitor to the P1 process
+or declare it as P1's business capability. P1 initialization and collection use
+the existing `P1_InitializationService` and `P1_CollectorService` definitions.
 
-### 3. Connect the execution structure and routes
+The original launcher selects
+[`StochasticLoopModels_Infrastructure.json`](btsn.common/ProcessDefinitionFolder/StochasticLoopModels_Infrastructure.json)
+and its [deployment snapshot](btsn.services/deployments/models/StochasticLoopInfrastructure.ruleml.xml).
+That infrastructure also declares a P2 capability for other stochastic models;
+this one-place tutorial uses P1 only. The supplied local variant needs one node and selects a P1-only catalogue.
+Every active catalogue operation must have a matching deployed capability;
+using the two-service catalogue with only P1 would prevent capability resolution.
 
-Use **Arrow (drag)**: press on the source node and release over the target.
-Alternatively, **Arrow (click waypoints)** lets you select the source, add bends
-and finish on the target. Create these five connections:
+<a id="build-this-process-in-processeditor"></a>
+
+## 2. Define the process
+
+![ProcessEditor showing P1_Tutorial_Workflow, the selected P1 service binding, the true termination route and the false loop.](images/process-editor-p1-tutorial.png)
+
+*The process design supplied with this tutorial. Its circular P1 place binds
+functionality; the transitions and arrows coordinate its execution.*
+
+To inspect the finished design, choose **File → Load (.json)** and open
+[`P1_Tutorial_Workflow.json`](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json).
+To build it yourself, choose **File → New → Process Definition** and select
+**PetriNet** in the toolbar's **Type** field.
+
+### Place the five elements
+
+Select a palette tool and click the canvas to place a shape. Configure each
+shape in the **Attributes** panel. Arrange the generator, input transition,
+place, output transition and terminal transition from left to right.
+
+| Palette tool | Label | Attributes |
+|---|---|---|
+| Event Generator | `P1_EVENTGENERATOR` | Rate (ms): `1000`; Version: `v001`; Fork Children: `0` |
+| Transition | `T_in_P1` | Transition Type: `T_in`; Node Type: `EdgeNode`; Buffer: `50` |
+| Place | `P1` | Service: `StochasticEntryTokenService` |
+| Transition | `T_out_P1` | Transition Type: `T_out`; Node Type: `GatewayNode` |
+| Transition | `Terminate` | Transition Type: `Other`; Node Type: `TerminateNode` |
+
+Set **Transition Type** before **Node Type**; the editor sets **Node Value**
+automatically. Labels must be unique. The supplied definition uses internal ID
+`T_in_Model_Terminate` for the transition displayed as `Terminate`; the
+`TerminateNode` setting gives a newly labelled terminal transition the same role.
+
+The supplied JSON's generator Version field currently stores `v002`. The
+launcher's `rule.version=v001` selects the actual version for this tutorial.
+Its event-trigger CSV supplies the firing schedule; the generator's canvas
+Rate and Version fields do not replace those launch settings.
+
+### Bind the operation to P1
+
+Select P1. In **Operations**, enter `processToken`, then click the operation
+**+** button. Expand it with **[+]**. Enter argument name `token` and value
+`String`, leave its type `String` and **Required** checkbox unchecked, then click
+the argument row's **+** button. The panel should show **processToken (1 args)**.
+
+The returned attribute is `token`, matching the infrastructure contract. The
+current process panel edits the operation and its inputs; its single-input
+binding generator uses that output attribute. Infrastructure and process must
+name the same service operation and input/output contract.
+
+### Connect the nodes and set the guards
+
+Use **Arrow (drag)**, or **Arrow (click waypoints)** to give the return route
+bends. Connect:
 
 | Source | Target | Arrow label | Guard Condition | Decision Value |
 |---|---|---|---|---|
-| `P1_EVENTGENERATOR` | `T_in_P1` | Leave blank | Leave blank | Leave blank |
-| `T_in_P1` | `P1` | Leave blank | Leave blank | Leave blank |
-| `P1` | `T_out_P1` | Leave blank | Leave blank | Leave blank |
+| `P1_EVENTGENERATOR` | `T_in_P1` | Blank | Blank | Blank |
+| `T_in_P1` | `P1` | Blank | Blank | Blank |
+| `P1` | `T_out_P1` | Blank | Blank | Blank |
 | `T_out_P1` | `Terminate` | `true` | `DECISION_EQUAL_TO` | `true` |
 | `T_out_P1` | `T_in_P1` | `false` | `DECISION_EQUAL_TO` | `false` |
 
-Select each output arrow and set **Guard Condition** and **Decision Value** in
-its Attributes panel. **The arrow label is a caption; the guard fields specify
-the routing condition.** Leave **Endpoint** blank for this single-operation
-service. The two local arcs connect T_in → P → T_out; publication routes leave
-T_out, including the returning false path.
+Select the two output arrows and enter their guard fields. **The label is a
+caption; Guard Condition and Decision Value define the route.** Leave
+**Endpoint** blank. The supplied model marks the generator and terminal
+publication links as **Network Connection**; its false loop is solid.
 
-To make the false loop readable, route it above the place using click waypoints,
-or double-click an existing arrow to add a control point and drag that point.
-The **Network Connection** checkbox controls the saved connection annotation
-and dashed appearance. The supplied model marks the generator and true terminal
-publication as network connections; its false loop remains solid. Host/channel
-selection still comes from deployment configuration.
+T_in receives and buffers a token, P invokes the bound function, and T_out
+routes the result. `false` repeats this activity with the same root token;
+`true` records completion. The stochastic function selects a fresh Boolean
+(default probability of `true`: 0.5), independently of the incoming Boolean.
+Its implementation includes an acceptance delay, so elapsed and queue times
+reflect the supplied demo function as well as the running fabric.
 
-The graph now says: receive a token, invoke P1's function, terminate on `true`,
-or return on `false`. Repeated loop visits belong to the same workflow instance.
-Monitor is an observer and is not added as a sixth activity.
+### Validate and save
 
-### 4. Validate and save the definition
-
-Click **Validate** or choose **Edit → Validate**. Resolve missing or duplicate
-labels, incomplete place definitions and invalid connections. This checks the
-editor's structural rules; deployment and execution also check service bindings
-and runtime behavior.
-
-Use **File → Save As (.json)** and save the practice model as:
+Click **Validate** or **Edit → Validate**. Resolve missing or duplicate labels,
+incomplete operation definitions and invalid connections. Save a reconstructed
+practice model with **File → Save As (.json)** to:
 
 ```text
 btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Editor_Practice.json
 ```
 
-This keeps the supplied tutorial available for comparison. Saving creates the
-JSON process definition: nodes, operations, arguments, guards and layout.
-Reopen the saved file with **File → Load (.json)** to inspect the result.
+Reopen it with **File → Load (.json)** to verify the saved design. Keeping the
+practice file separate preserves the supplied tutorial for comparison. Editor
+validation checks the structure; deployment also checks bindings and host
+capabilities. The editor's **Play** control replays observations; it does not
+start a distributed run.
 
-### 5. Run the process you saved
+## 3. Run the tutorial
 
-In Eclipse, open the Ant launch configuration for
-[`P1_Tutorial_BuildAndRun.xml`](btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml).
-In its **Properties** tab, add this user property and select the default
-**run-complete-workflow** target:
+### Run the supplied local configuration
 
-| Property | Value |
-|---|---|
-| `workflow.process.name` | `petrinet/Workflow/P1_Editor_Practice` |
+The [local launcher](btsn.petrinet.ProjectLoader/P1_Tutorial_Local_BuildAndRun.xml)
+imports `P1_Tutorial_BuildAndRun.xml` and selects the local infrastructure and
+deployment profile from stage 1. It uses the original workflow phases unchanged.
 
-Use the path relative to `ProcessDefinitionFolder`, without `.json`.
-Keep the generator label `P1_EVENTGENERATOR` and operation `processToken` so they
-match this launcher's existing settings. The initializer, collector, deployment
-profile and physical target `P1_Place` stay suitable for this one-place model.
-
-From a terminal at the repository root, the equivalent command is:
+In Eclipse, right-click **P1_Tutorial_Local_BuildAndRun.xml** and choose
+**Run As → Ant Build**. Select its default **run-complete-workflow** target.
+From a terminal at the repository root:
 
 ```sh
-ant -f btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml -Dworkflow.process.name=petrinet/Workflow/P1_Editor_Practice
+ant -f btsn.petrinet.ProjectLoader/P1_Tutorial_Local_BuildAndRun.xml
 ```
 
-The launcher reads the saved definition, generates bindings, deploys its rules
-and runs it on the packaged host. The editor's **Play** button is for replaying
-captured observations. Remove the property override to return to the supplied
-`P1_Tutorial_Workflow` example described below. When analyzing or replaying the
-practice run, use `P1_Editor_Practice.json` as the matching process definition.
+The initial build packages the service, shared infrastructure, generic hosts,
+event generators and Monitor. No separate clean/package command is needed.
+Working P1 configuration and its database are isolated under
+`btsn.services/target/launchers/P1_Tutorial_Local_BuildAndRun`.
 
-## Run the BuildAndRun XML
+| Setting | Default | Meaning |
+|---|---|---|
+| `rule.version` | `v001` | Workflow rules and token version |
+| `workflow.process.name` | `petrinet/Workflow/P1_Tutorial_Workflow` | Process JSON path relative to `ProcessDefinitionFolder`, without `.json` |
+| `target.place` | `P1_Place` | Physical runtime destination |
+| `target.operation` | `processToken` | Bound operation |
+| `event.generator.id` | `P1_EVENTGENERATOR` | Generator identity in the process |
+| `mode` | `1` | Normal single-token (`EDGE_NODE`) injection |
+| `token.count` | `10` | Maximum tokens fired from the event-trigger sequence |
+| `token.expire` | `120000` | Token validity, in milliseconds |
+| `query.version` | `v001` | Version requested by the collector |
 
-Run
-[`btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml`](btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml)
-as an **Ant Build**, with the default `run-complete-workflow` target. Ant must run
-on a JDK 15+; Ant 1.10.2+ is required. No preliminary service build is needed.
+For a reconstructed practice model, set **workflow.process.name** in the
+Eclipse Ant configuration's **Properties** tab to
+`petrinet/Workflow/P1_Editor_Practice`, or use:
 
-The launcher:
-
-1. Builds the independent business JARs, shared infrastructure, generic host,
-   Monitor and event generators.
-2. Prepares an isolated configuration and host database directory under
-   `btsn.services/target/launchers/P1_Tutorial_BuildAndRun`, using the
-   [stochastic loop profile](btsn.services/deployments/models/StochasticLoopDeployment.json).
-3. Generates bindings from the workflow and prepares the RuleBase configuration.
-4. Starts configured local components, initializes their databases, deploys the
-   workflow rules, generates tokens and collects observations.
-
-Its `rule.version` property selects the workflow version for the run; the JSON
-editor's displayed generator version is not a substitute for the launch settings.
-Local/remote startup follows the configured channel address and mode overrides.
-Remote components must already be running with the corresponding configuration.
-Locally started components remain active after the phases finish: stop the Ant
-run before starting another launcher on the same ports.
-
-Initialization resets the selected runtime's data. Save or collect results from
-an earlier run before starting a fresh initialized run. Monitor retains its usual
-working directory so the analysis tools read the collected results.
-
-## Understand the contract and routes
-
-The operation contract is `token → token`. Bindings generated for this logical
-service include facts with the following shape:
-
-```xml
-<Atom>
-    <Rel>localDefined</Rel>
-    <Ind>StochasticEntryTokenService</Ind>
-</Atom>
-<Atom>
-    <Rel>canonicalBinding</Rel>
-    <Ind>processToken</Ind>
-    <Ind>token</Ind> <!-- returned attribute -->
-    <Ind>token</Ind> <!-- required input -->
-</Atom>
+```sh
+ant -f btsn.petrinet.ProjectLoader/P1_Tutorial_Local_BuildAndRun.xml -Dworkflow.process.name=petrinet/Workflow/P1_Editor_Practice
 ```
 
-At runtime, input coordination supplies the named argument. `ServiceHelper`
-invokes the installed implementation in-process. Output routing uses the local
-RuleBase: `false` publishes back to P1's input; `true` takes the declared terminal
-path. The host records those events, and the collector later sends observations
-to Monitor. Monitor is not an extra activity in this loop.
+Keep `P1_EVENTGENERATOR` and `processToken` so the model matches the launcher.
+Remove that override to return to the supplied process. To fire twenty tokens,
+use `-Dtoken.count=20`; the firing schedule comes from
+[`V001_EventTriggeringFile.csv`](btsn.common.eventgenerators/EventTriggeringFile/V001_EventTriggeringFile.csv).
 
-## Analyze and replay observations
+### Follow the three execution phases
 
-After collection, run the launcher's `analyse` target or run `PetriNetAnalyzer`
-from `btsn.common.Monitor`, package `org.btsn.derby.Analysis`. Check generated and
-completed instances, canonical place visits and any structural/temporal issues.
-Loop visits are not additional workflow roots. Missing completion records must
-not be interpreted as measured successful durations.
+The four tutorial stages describe your design/run workflow. The XML's three
+runtime phases have a different purpose:
 
-`SwingGanttChart_WithLatency_v1d` displays measured workflow and queue intervals;
-`WorkflowSpatialView` displays service activity. See
-[the README's interpretation guide](README.md#observe-and-interpret-a-run).
+| XML phase | Action | Definition used |
+|---|---|---|
+| 1 — Database initialization | Initialize P1 and Monitor using administrative version `v999` | [P1_Initialization.json](btsn.common/ProcessDefinitionFolder/petrinet/Initializers/P1_Initialization.json) |
+| 2 — Workflow execution | Deploy the P1 loop as `v001`, then fire up to ten root tokens | [P1_Tutorial_Workflow.json](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json) |
+| 3 — Data collection | Request P1 observations for `v001` and write them to Monitor | [P1_Collector.json](btsn.common/ProcessDefinitionFolder/petrinet/Collectors/P1_Collector.json) |
 
-For animation:
+The console reports each phase and prints the P1 and Monitor output paths.
+Locally launched hosts remain running after the completion banner. Allow
+Monitor's collection processing to finish, then stop that Ant run (Eclipse's
+**Terminate** control, or **Ctrl+C** in the terminal). This releases the embedded
+Derby database before a separate analyzer or chart JVM opens it.
 
-1. Save the analyzer's console output, for example as
-   `btsn.common/AnalysisFolder/PetriNet/P1_Tutorial_Workflow.txt`.
-2. In ProcessEditor, open the same `P1_Tutorial_Workflow.json` that produced the run.
-3. Load the saved analysis file and press **Play**.
+The output files are `P1_Place.out.txt` and `MonitorService.out.txt` beside the
+launcher. Monitor's collected database is
+`btsn.common.Monitor/ServiceAnalysisDataBase`. These working results are ignored
+by Git; the tutorial's captured text, CSV and chart exports are explicitly
+versioned under `docs/tutorials/p1/results`.
 
-The animator replays the captured observations. Keep the analyzer output and
-workflow JSON together, and retain Monitor's `WorkflowRunMetadata` with the
-analysis database when archiving a run. Historical observations without captured
-process metadata are labelled accordingly; the viewer does not infer the process
-from today's deployment.
+### Use the original LAN launcher
+
+To use the original deployment instead, run:
+
+```sh
+ant -f btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml
+```
+
+Keep its infrastructure JSON and deployment snapshot addresses consistent with
+your host network. In default **auto** mode the launcher starts a component
+locally only when `ip0` belongs to that computer; otherwise the component must
+already run on its configured remote host. The local wrapper avoids a LAN
+address change for the single-computer walkthrough.
+
+## 4. Show the results
+
+### Analyze the collected run
+
+After stopping the completed run, execute:
+
+```sh
+ant -f btsn.petrinet.ProjectLoader/P1_Tutorial_Local_BuildAndRun.xml analyse
+```
+
+In Eclipse, choose the same XML's **analyse** target, or run
+`org.btsn.derby.Analysis.PetriNetAnalyzer` with program argument `--all` and
+working directory **btsn.common.Monitor**. Save the analyzer console output to
+use with the process editor's replay controls.
+
+Read the [captured results](docs/tutorials/p1/results/README.md) for the measured
+reference run, its completion counts and per-root timings. The linked exports
+come from the supplied P1 process and the local configuration above. Exact
+Boolean outcomes, repeat counts and timings vary between runs.
+
+The captured reference run generated and completed **10 roots**, made **21 P1
+visits** (including **11 repeat visits**) and had no incomplete roots, forks or
+joins. Per-root elapsed times ranged from **231 to 1,253 ms**.
+
+For a complete ten-token run, look for **10 generated root workflows and 10
+completed roots**, with no forks or joins. Count roots independently of place
+visits: a `false` result causes another visit by the same root. A terminal event
+records successful completion; an expired or unfinished root is not a completed
+workflow. Administrative `v999` initialization/collection activity is separate.
+
+### Export artefacts from your run
+
+After collection completes and you stop the workflow hosts, run:
+
+```sh
+ant -f btsn.petrinet.ProjectLoader/P1_Tutorial_Local_BuildAndRun.xml export-tutorial-results
+```
+
+The [export helper](docs/tutorials/p1/ExportP1TutorialResults.java) uses the
+existing analyzer and chart classes to write replayable analysis, per-root CSV,
+PNG charts, text summaries, LaTeX exports and capture metadata to
+`btsn.services/target/tutorial-results/P1`. It checks that the supplied P1
+process completed the expected number of roots before exporting. For a run
+with twenty tokens, add `-Dtoken.count=20` to this export command too.
+
+Use `-Dtutorial.results.dir=/absolute/path/to/results` to choose another
+output folder. The default keeps your exports separate from the committed
+reference example. Export before running initialization again, which clears
+Monitor's collected data. To preserve a run made from a modified practice
+model, use the analyzer and viewer exports directly and retain that model
+alongside them.
+
+### Inspect the current timing chart and spatial view
+
+Run these Java applications from `btsn.common.Monitor`, with that project as the
+working directory:
+
+| Viewer | What to inspect |
+|---|---|
+| `org.btsn.derby.Analysis.SwingGanttChart_WithLatency_v1d` | Measured root-workflow elapsed time and maximum observed service-visit queue wait |
+| `org.btsn.derby.Analysis.WorkflowSpatialView` | P1 service activity over time, including repeated loop visits |
+
+![Current workflow elapsed-time chart for the captured ten-token P1 tutorial run.](docs/tutorials/p1/results/workflow-timing.png)
+
+*The current chart implementation is used unchanged. Bars show measured elapsed
+time from generation to completion; its default black diamonds show the maximum
+observed queue wait on a service visit. Queue wait is a separate measurement,
+not total waiting time summed across the loop.*
+
+![Spatial activity view for the same captured P1 tutorial run.](docs/tutorials/p1/results/workflow-spatial.png)
+
+*The spatial view labels the bound service. Repeated activity belongs to the
+same root workflow; observation and administrative operations do not turn
+Monitor into a P1 business activity.*
+
+### Replay the observations on the design
+
+1. Open `P1_Tutorial_Workflow.json` in ProcessEditor.
+2. Click **Load Analysis...** and select the
+   [captured analyzer output](docs/tutorials/p1/results/analysis.txt), or the
+   saved output from your own run.
+3. Use **Play**, step controls and **Speed** to follow the tokens through the
+   model. A `false` result returns to P1; a `true` result reaches termination.
+
+Use the process JSON that actually produced the observations. For a practice
+run, load `P1_Editor_Practice.json` and that run's analysis together. Replaying
+observations does not deploy or rerun the process.
+
+### If your results differ
+
+| Observation | Check |
+|---|---|
+| P1 or Monitor was skipped at startup | Read the resolved deployment mode and `ip0` address; use the supplied local wrapper for this walkthrough |
+| No data appears in the viewers | Confirm Phase 3 finished in Monitor's log; use `btsn.common.Monitor` as the viewer working directory |
+| Derby reports another active instance | Stop the previous local Ant run and other database-opening viewers before analyzing |
+| Fewer completed roots than generated | Inspect unfinished roots and token expiry; allow workflow completion before requesting collection |
+| More visits than root tokens | This is expected when `false` loops; compare generated/completed roots separately from visits |
+| A modified model did not run | Check `workflow.process.name`, save the JSON and start a fresh initialized run |
+
+## Repository artefacts
+
+| Artefact | Role |
+|---|---|
+| [P1_Tutorial_LocalInfrastructure.json](btsn.common/ProcessDefinitionFolder/P1_Tutorial_LocalInfrastructure.json) | Editable single-node infrastructure |
+| [P1_Tutorial_LocalInfrastructure.ruleml.xml](btsn.services/deployments/models/P1_Tutorial_LocalInfrastructure.ruleml.xml) | Matching loopback network/capability deployment snapshot |
+| [P1_Tutorial_Local.json](btsn.common/BusinessServiceDefinitions/P1_Tutorial_Local.json) | Active catalogue containing the P1 entry capability only |
+| [P1_Tutorial_LocalDeployment.json](btsn.services/deployments/models/P1_Tutorial_LocalDeployment.json) | Catalogue and infrastructure selection |
+| [P1_Tutorial_Workflow.json](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json) | Editable process design |
+| [process-editor-p1-tutorial.png](images/process-editor-p1-tutorial.png) | Process-editor image shown in the README |
+| [P1_Tutorial_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml) | Original build-and-run phases |
+| [P1_Tutorial_Local_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_Tutorial_Local_BuildAndRun.xml) | Portable local configuration for those phases |
+| [Captured results and export helper](docs/tutorials/p1/results/README.md) | Analyzer output, per-root CSV, current chart images and capture provenance |
 
 ## Author
 

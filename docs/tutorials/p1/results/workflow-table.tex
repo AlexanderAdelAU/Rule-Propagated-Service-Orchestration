@@ -1,0 +1,20 @@
+% Preamble: \usepackage{booktabs,longtable}. N/A is not zero.
+\begin{longtable}{rrrrrrrp{5cm}}
+\toprule
+Arrival & Root & Version & Elapsed (ms) & Max queue (ms) & Valid visits & Invalid visits & Process \\
+\midrule
+\endhead
+1 & 1000000 & v001 & 1247 & 145 & 4 & 0 & petrinet/Workflow/P1\_Tutorial\_Workflow \\
+2 & 1010000 & v001 & 251 & 96 & 1 & 0 & petrinet/Workflow/P1\_Tutorial\_Workflow \\
+3 & 1020000 & v001 & 248 & 96 & 1 & 0 & petrinet/Workflow/P1\_Tutorial\_Workflow \\
+4 & 1030000 & v001 & 273 & 125 & 1 & 0 & petrinet/Workflow/P1\_Tutorial\_Workflow \\
+5 & 1040000 & v001 & 557 & 99 & 2 & 0 & petrinet/Workflow/P1\_Tutorial\_Workflow \\
+6 & 1050000 & v001 & 609 & 118 & 2 & 0 & petrinet/Workflow/P1\_Tutorial\_Workflow \\
+7 & 1060000 & v001 & 888 & 115 & 3 & 0 & petrinet/Workflow/P1\_Tutorial\_Workflow \\
+8 & 1070000 & v001 & 1253 & 126 & 4 & 0 & petrinet/Workflow/P1\_Tutorial\_Workflow \\
+9 & 1080000 & v001 & 231 & 88 & 1 & 0 & petrinet/Workflow/P1\_Tutorial\_Workflow \\
+10 & 1090000 & v001 & 547 & 106 & 2 & 0 & petrinet/Workflow/P1\_Tutorial\_Workflow \\
+\bottomrule
+\caption{Processes: v001: petrinet/Workflow/P1\_Tutorial\_Workflow. Bars show measured workflow elapsed time; diamonds show maximum observed service-visit queue wait, including fork branches. Queue markers do not represent total workflow waiting time.}
+\label{tab:workflow-elapsed-queue}
+\end{longtable}

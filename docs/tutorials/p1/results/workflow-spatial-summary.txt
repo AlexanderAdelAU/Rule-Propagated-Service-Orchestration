@@ -1,0 +1,7 @@
+TOKEN TIME IN SERVICE SUMMARY
+Generated: Wed Oct 07 07:56:46 BRT 2026
+================================================================================
+
+Workflow Base: 1000000
+----------------------------------------
+  StochasticEntryTokenService (P1_Place): 21 tokens, avg=152.8ms, min=142ms, max=163ms

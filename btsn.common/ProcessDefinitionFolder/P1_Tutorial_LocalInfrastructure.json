@@ -1,0 +1,29 @@
+{
+  "definitionType": "Infrastructure",
+  "nodes": [
+    {
+      "node": "P1",
+      "channel": "ip0",
+      "address": "127.0.0.1",
+      "portStart": 4001,
+      "portEnd": 4099
+    }
+  ],
+  "capabilities": [
+    {
+      "node": "P1",
+      "service": "StochasticEntryTokenService",
+      "operation": "processToken",
+      "returnAttribute": "token",
+      "basePort": 4001,
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ]
+    }
+  ]
+}

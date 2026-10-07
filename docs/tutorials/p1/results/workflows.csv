@@ -1,0 +1,11 @@
+root_token_id,workflow_base,generated_at_epoch_ms,completed_at_epoch_ms,elapsed_ms,max_visit_queue_ms,p1_visits,repeat_visits,valid_queue_visits,invalid_queue_visits,services,process
+1000000,1000000,1791370069207,1791370070454,1247,145,4,3,4,0,"StochasticEntryTokenService","petrinet/Workflow/P1_Tutorial_Workflow"
+1010000,1000000,1791370074800,1791370075051,251,96,1,0,1,0,"StochasticEntryTokenService","petrinet/Workflow/P1_Tutorial_Workflow"
+1020000,1000000,1791370078601,1791370078849,248,96,1,0,1,0,"StochasticEntryTokenService","petrinet/Workflow/P1_Tutorial_Workflow"
+1030000,1000000,1791370080800,1791370081073,273,125,1,0,1,0,"StochasticEntryTokenService","petrinet/Workflow/P1_Tutorial_Workflow"
+1040000,1000000,1791370084200,1791370084757,557,99,2,1,2,0,"StochasticEntryTokenService","petrinet/Workflow/P1_Tutorial_Workflow"
+1050000,1000000,1791370085401,1791370086010,609,118,2,1,2,0,"StochasticEntryTokenService","petrinet/Workflow/P1_Tutorial_Workflow"
+1060000,1000000,1791370087200,1791370088088,888,115,3,2,3,0,"StochasticEntryTokenService","petrinet/Workflow/P1_Tutorial_Workflow"
+1070000,1000000,1791370088800,1791370090053,1253,126,4,3,4,0,"StochasticEntryTokenService","petrinet/Workflow/P1_Tutorial_Workflow"
+1080000,1000000,1791370090601,1791370090832,231,88,1,0,1,0,"StochasticEntryTokenService","petrinet/Workflow/P1_Tutorial_Workflow"
+1090000,1000000,1791370092601,1791370093148,547,106,2,1,2,0,"StochasticEntryTokenService","petrinet/Workflow/P1_Tutorial_Workflow"

@@ -22,28 +22,25 @@ inputs, P performs the bound functionality, and T_out routes the result. Shaded
 activation bars show responsibility for one invocation; their lengths do not
 represent measured time.*
 
-## Build the process in ProcessEditor
+## P1 tutorial: infrastructure, process, execution and results
 
-![ProcessEditor showing the single-place tutorial on its canvas and P1's StochasticEntryTokenService binding in the Attributes panel.](images/process-editor-p1-tutorial.png)
+[![ProcessEditor showing the P1 tutorial design, its StochasticEntryTokenService binding and the true/false routes.](images/process-editor-p1-tutorial.png)](Tutorial.md)
 
-*The executable process definition in the editor. The canvas defines the
-transition–place–transition structure and its routes; the Attributes panel binds
-P1 to a service operation. Monitor remains an observer outside this path.*
+*The P1 process design in ProcessEditor. P1 invokes its bound function; `true`
+terminates and `false` loops back. Monitor observes outside the process path.*
 
-1. Choose **File → New → Process Definition** and set **Type** to **PetriNet**.
-2. Place an **Event Generator**, an input **Transition**, a **Place**, an output
-   **Transition**, and a terminal **Transition** on the canvas.
-3. Select P1 and bind **Service** `StochasticEntryTokenService` to operation
-   `processToken`, with input argument `token`.
-4. Connect the nodes, then set the output arrows' guards: `true` terminates and
-   `false` returns to T_in_P1.
-5. **Validate**, **Save As (.json)**, then select that definition in the
-   BuildAndRun launcher to deploy and execute it.
+Follow the **[full P1 tutorial](Tutorial.md)** to build and run this example:
 
-See [Build this process in ProcessEditor](Tutorial.md#build-this-process-in-processeditor)
-for the exact node settings, operation arguments, arrow guards, save location
-and launcher property. The editor defines the process and its bindings; the
-launcher supplies the packaged runtime and deployment.
+| Step | What you do | Repository reference |
+|---|---|---|
+| **1. Define the infrastructure** | Set the physical node, channel, address and service capability | [Infrastructure and contract settings](Tutorial.md#1-define-the-infrastructure) |
+| **2. Define the process** | Build the design above, bind `processToken`, set its guards, validate and save | [ProcessEditor walkthrough](Tutorial.md#2-define-the-process) |
+| **3. Run the tutorial** | Use `P1_Tutorial_BuildAndRun.xml` through the supplied local configuration to build, initialize, deploy and collect | [Run instructions and launchers](Tutorial.md#3-run-the-tutorial) |
+| **4. Show the results** | Check root completion, inspect timing/spatial views and replay the captured observations | [Measured results and reusable artefacts](Tutorial.md#4-show-the-results) |
+
+The guide links the editable infrastructure and process definitions, matching
+deployment files, launchers and captured result exports so you can inspect the
+complete example in this repository.
 
 ## Run an example
 
