@@ -167,25 +167,96 @@ d.path('M 1025 390 L 1025 480')
 d.text(560,576,'Treatment merges alternatives; Diagnosis synchronizes all diagnostic inputs. Monitor is outside this path.',15)
 d.save('healthcare-workflow.svg')
 
-# Tutorial: real logical capability, loop and direct termination.
-d=Diagram(1120,440,'P1 tutorial loop and business termination','The tutorial generator sends tokens to T_in on P1, where StochasticEntryTokenService returns a true or false result. True terminates; false returns to the same input. Collected observations go to Monitor outside the business flow.')
-d.group(215,40,655,255,'P1 generic host · local execution roles')
-d.box(20,150,155,85,'Generator',['Workflow tokens'],'endpoint')
-d.box(245,150,145,85,'T_in',['Receive / buffer'])
-d.box(430,150,240,85,'Place P1',['StochasticEntryTokenService'],'business')
-d.box(715,150,125,85,'T_out',['Route'])
-d.box(940,150,160,85,'Terminate',['true outcome'],'endpoint')
-d.box(380,340,370,75,'Monitor',['Collected execution observations'],'observe')
-d.path('M 175 192 L 245 192')
-d.path('M 390 192 L 430 192')
-d.path('M 670 192 L 715 192')
-d.path('M 840 192 L 940 192')
-d.text(890,175,'true',15)
-d.path('M 777 150 L 777 103 L 317 103 L 317 150')
-d.text(550,93,'false: repeat the activity',15)
-d.path('M 550 295 L 550 340','observe')
-d.text(567,324,'collector',14,anchor='start',colour=TEAL)
+# Boolean-function examples: exact model identities, independent of layout.
+def load_model(filename):
+    model=json.loads((ROOT.parent/'btsn.common/ProcessDefinitionFolder/petrinet/Workflow'/filename).read_text())
+    return ({node['id']:node for node in model['elements']},
+            {(arc['source'],arc['target']):arc for arc in model['arrows']})
+
+def arc_drawer(diagram, arcs):
+    drawn=set()
+    def draw(source,target,path,publication=False):
+        assert (source,target) in arcs, f'Unknown model arc: {source} → {target}'
+        drawn.add((source,target))
+        diagram.path(path,'publication' if publication else 'flow',source,target)
+    return draw, drawn
+
+nodes,arcs=load_model('P1_Tutorial_Workflow.json')
+d=Diagram(1120,465,'One place: Boolean functionality and transition coordination','P1 is a circular place between input and output transition bars. Its bound function produces true or false independently of the arriving Boolean value. The output transition routes true to termination and false back to the input. The generic host implements the local unit; Monitor observes separately. The dot illustrates a token, not a captured marking.')
+draw,drawn=arc_drawer(d,arcs)
+d.group(255,55,530,255,'Generic host · T_in → P → T_out')
+d.box(20,157,210,85,'Generator',['Workflow tokens'],'endpoint',identity='P1_EVENTGENERATOR')
+d.transition(350,200,'T_in_P1')
+d.place(520,200,'P1',token=True)
+d.transition(690,200,'T_out_P1')
+d.transition(950,200,'T_in_Model_Terminate',terminal=True)
+d.text(350,280,'Receive / buffer',15)
+d.text(520,280,'Function: true / false',15,True)
+d.text(690,280,'Route result',15)
+d.text(950,280,'Terminate',15,True)
+draw('P1_EVENTGENERATOR','T_in_P1','M 230 200 L 342 200',True)
+draw('T_in_P1','P1','M 358 200 L 493 200')
+draw('P1','T_out_P1','M 547 200 L 682 200')
+draw('T_out_P1','T_in_Model_Terminate','M 698 200 L 942 200',True)
+draw('T_out_P1','T_in_P1','M 690 176 L 690 115 L 350 115 L 350 176',True)
+assert drawn==set(arcs)
+assert arcs['T_out_P1','T_in_Model_Terminate']['decision_value']=='true'
+assert arcs['T_out_P1','T_in_P1']['decision_value']=='false'
+d.text(820,185,'true',15)
+d.text(520,105,'false: invoke the function again',15)
+d.box(365,350,390,70,'Monitor',['Collected execution observations'],'observe')
+d.path('M 520 310 L 520 350','observe')
+d.text(537,336,'collection',14,anchor='start',colour=TEAL)
+d.text(560,448,'Circle: place · Bar: transition · Dot: illustrative token · Dashed blue: publication',14)
 d.save('p1-tutorial.svg')
+
+nodes,arcs=load_model('P1_P2_P3_P4_Fork_Join_Workflow.json')
+d=Diagram(1120,700,'Four-place Boolean-function model with fork and input join','Each of P1 through P4 is a circular place whose bound function independently produces true or false. T_out_P1 forks true into P2 and P3 or terminates false. P2 and P3 publish either result to the input join before P4. The join synchronizes arrivals, not Boolean truth; P4 produces its own Boolean and either outcome reaches final termination. All fifteen model nodes and arcs are represented. Monitor observes outside the token path.')
+draw,drawn=arc_drawer(d,arcs)
+d.group(20,20,1080,520,'Petri-net execution · Boolean functionality at every place')
+positions={'P1':(160,260),'P2':(500,145),'P3':(500,390),'P4':(850,260)}
+for place,(x,y) in positions.items():
+    tin,tout='T_in_'+place,'T_out_'+place
+    assert nodes[place]['type']=='PLACE'
+    join=nodes[tin]['node_type']=='JoinNode'
+    d.group(x-115,y-60,230,125,'Function: true / false')
+    d.place(x,y,place,token=place=='P1')
+    d.transition(x-80,y,tin,join=join)
+    d.transition(x+80,y,tout)
+    draw(tin,place,f'M {x-(66 if join else 72)} {y} L {x-27} {y}')
+    draw(place,tout,f'M {x+27} {y} L {x+72} {y}')
+d.box(35,90,235,70,'Generator',['Workflow tokens'],'endpoint',identity='EVENT_GENERATOR')
+d.transition(160,445,'T_in_Terminate',terminal=True)
+d.text(160,518,'P1 false: terminate',15,True)
+d.transition(1030,410,'T_in_Model_Terminate',terminal=True)
+d.text(1030,483,'Terminate',15,True)
+publications={
+    ('EVENT_GENERATOR','T_in_P1'):'M 160 160 L 40 185 L 40 260 L 72 260',
+    ('T_out_P1','T_in_P2'):'M 248 260 L 315 260 L 315 145 L 412 145',
+    ('T_out_P1','T_in_P3'):'M 248 260 L 315 260 L 315 390 L 412 390',
+    ('T_out_P1','T_in_Terminate'):'M 240 284 L 240 365 L 160 365 L 160 421',
+    ('T_out_P2','T_in_P4'):'M 588 145 L 670 145 L 670 260 L 756 260',
+    ('T_out_P3','T_in_P4'):'M 588 390 L 670 390 L 670 260 L 756 260',
+    ('T_out_P4','T_in_Model_Terminate'):'M 938 260 L 1030 260 L 1030 386',
+}
+for (source,target),path in publications.items(): draw(source,target,path,True)
+assert drawn==set(arcs)
+assert nodes['T_in_P4']['node_type']=='JoinNode'
+assert all(arcs['T_out_P1',target]['decision_value']=='true' for target in ['T_in_P2','T_in_P3'])
+assert arcs['T_out_P1','T_in_Terminate']['decision_value']=='false'
+assert all(not arcs[source,target].get('decision_value') for source,target in publications if source not in ['EVENT_GENERATOR','T_out_P1'])
+d.text(322,249,'true: fork',14,anchor='start')
+d.text(253,349,'false',14,anchor='start')
+d.text(647,124,'either result',14)
+d.text(647,424,'either result',14)
+d.text(850,362,['Join waits for P2 + P3 arrivals','P4 computes its own result'],14)
+d.text(988,244,'either result',14)
+d.box(350,575,420,70,'Monitor · observed execution',['Queueing · execution · joins · elapsed time'],'observe')
+d.path('M 560 540 L 560 575','observe')
+d.text(577,563,'collected observations',14,anchor='start',colour=TEAL)
+d.text(560,675,'Circle: place · Bar: transition · AND: input arrivals, not Boolean AND · Dashed blue: publication',14)
+d.text(560,694,'Each place supplies functionality; the generic execution fabric supplies coordination.',14)
+d.save('petrinet-fork-join.svg')
 # Executable RPSO Petri-net notation: explicit local triples, publication links.
 # All model nodes and arcs retain their JSON identities; coordinates are only layout.
 model_path=ROOT.parent/'btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_to_P6_Double_Join_Workflow.json'
@@ -243,4 +314,4 @@ d.text(577,681,'collected host observations',14,anchor='start',colour=TEAL)
 d.text(560,798,'Circle: place · Bar: transition · AND: input join · Dot: illustrative token · Dashed blue: publication',14)
 d.text(560,820,'Every local triple is supported by the generic fabric; the bound operation gives its place meaning.',14)
 d.save('petrinet-double-join.svg')
-print('Generated six editable SVG diagrams.')
+print('Generated seven editable SVG diagrams.')

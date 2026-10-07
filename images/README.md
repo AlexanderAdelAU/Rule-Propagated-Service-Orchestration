@@ -11,16 +11,21 @@ content, not generated raster artwork.
 | `rpso-rule-deployment.svg` | JSON topology, canonical contracts and deployment profile feed binding/rule generation. Local acknowledgements and runtime token flow are distinct. Based on `TopologyBindingGenerator` and `RuleDeployer`. |
 | `financial-workflow.svg` | P1–P5 Validation → Credit/Fraud → Underwriting → Decision, with invalid/declined termination. Source: `btsn.common/ProcessDefinitionFolder/petrinet/Workflow/FinancialSystem_P1_P5_Workflow.json`. |
 | `healthcare-workflow.svg` | P1 Triage, P2 Laboratory, P3 Cardiology, P4 Radiology, P5 Diagnosis and P6 Treatment, including the direct treatment path. Source: `btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Emergency_Department_Patient_Workflow.json`. |
-| `p1-tutorial.svg` | Current StochasticEntryTokenService loop and direct termination, with observation outside the token path. Source: `btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json`. |
+| `p1-tutorial.svg` | Explicit circular P1 between input/output transition bars: a Boolean-returning function, a false loop and true termination. All five JSON nodes/arcs are retained; observation is outside the token path. Source: `btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json`. |
+| `petrinet-fork-join.svg` | Boolean-returning functionality at every P1–P4 place; T_out_P1 forks on true or terminates on false. P2/P3 forward either result to the input join before P4. The join requires both arrivals, irrespective of their Boolean values. All fifteen JSON nodes/arcs are retained and checked during generation. Source: `btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_P2_P3_P4_Fork_Join_Workflow.json`. |
 | `petrinet-double-join.svg` | Explicit P1–P6 transition–place–transition units: circular places, transition bars, three-way fork at T_out_P1, input joins at T_in_P4/T_in_P6, and terminal transitions. JSON node/arc identities are retained in the SVG; generation checks every configured arc. Source: `btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_to_P6_Double_Join_Workflow.json`. |
 
 Business process diagrams abbreviate each activity's local T_in → P → T_out
-roles. The Petri-net diagram expands all six units: each has a circular place
+roles. The Petri-net diagrams expand the local units: each has a circular place
 between input/output transition bars. Solid local arcs connect unlike node
 types; dashed blue links represent RPSO's transition-to-transition publication
 channels. These links are distinct from ordinary bipartite P/T-net arcs.
-The input transitions perform synchronization; the bound operation supplies
+The input transitions perform synchronization; the bound function supplies
 the place's computation; the output transitions route, fork or terminate.
+The tutorial and four-place diagrams label the simple function as returning
+true or false; the six-place deployment uses the separate deterministic
+Boolean/carry/merge functions described in the root README. The `AND` label
+denotes required arrivals at an input join, not an AND of their Boolean values.
 The dot is an illustrative token marking, not a measured execution snapshot.
 The diagram describes the executable RPSO model and its implementation mapping.
 Host placement is specified separately by deployment metadata.
@@ -33,7 +38,7 @@ host process; separate packaging does not imply a separate network service.
 Monitor's arrow represents collected observations, not a mandatory business hop
 or a claim that every runtime event is streamed directly to Monitor.
 
-To regenerate all six SVGs after editing their standard-library Python source:
+To regenerate all seven SVGs after editing their standard-library Python source:
 
 ```sh
 python3 images/generate_diagrams.py
@@ -66,7 +71,7 @@ The updated chart offers Wide/Narrow bars and displays unavailable-measurement
 notes only when applicable to the displayed roots. No raw observation database
 accompanies these captures: do not infer exact values from pixels, treat a
 viewport as proof of full-run accounting, or relabel them as a newer run.
-`generate_diagrams.py` regenerates only the six SVG schematics, not these images.
+`generate_diagrams.py` regenerates only the seven SVG schematics, not these images.
 The journal screenshot `image(20261007-004731).png` was a layout reference only;
 its completion-order axis and percentage queue bands are not the current
 combined chart's arrival-order and measured queue-maximum semantics.

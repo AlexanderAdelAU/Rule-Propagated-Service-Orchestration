@@ -1,12 +1,19 @@
 # Rule-Propagated Service Orchestration (RPSO)
 
-RPSO is an executable Petri-net architecture for distributed business processes.
-It separates **process coordination** from **business computation**: a declarative
-workflow describes the allowed paths, generic orchestration hosts buffer and
-synchronize tokens, and independently packaged services perform domain operations.
+RPSO executes Petri-net models and distributed business processes using the same
+orchestration architecture. It separates **process coordination** from
+**functionality at each place**: input transitions receive and synchronize tokens,
+a place invokes its bound function, and output transitions route the result.
 
-The repository contains healthcare, Financial and Petri-net model examples, a
-workflow editor, Ant build-and-run launchers, and observation/analysis tools.
+**P1, P2, …, Pn are generic positions, not fixed business functions.** A place can
+return a simple Boolean, perform a financial calculation, or process a clinical
+result. The chosen service supplies its meaning; the process model supplies the
+connections and routing rules. Functions conform to the declared input/output
+contract, while deployment selects their implementations and hosts.
+
+Start with a Boolean-returning Petri-net example, then build towards the
+Financial and healthcare workflows. The repository also provides a workflow
+editor, Ant build-and-run launchers, and observation/analysis tools.
 
 ## Run an example
 
@@ -27,7 +34,7 @@ workflow editor, Ant build-and-run launchers, and observation/analysis tools.
 |---|---|
 | Single-place tutorial | [P1_Tutorial_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml) |
 | P1–P4 fork/join model | [P1_P2_P3_P4_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_P3_P4_BuildAndRun.xml) |
-| Live six-place double-join model | [P1_to_P6_Double_Join_Workflow.xml](btsn.petrinet.ProjectLoader/P1_to_P6_Double_Join_Workflow.xml) |
+| Six-place double-join model | [P1_to_P6_Double_Join_Workflow.xml](btsn.petrinet.ProjectLoader/P1_to_P6_Double_Join_Workflow.xml) |
 | Emergency department | [Emergency_Department_BuildAndRun.xml](btsn.healthcare.ProjectLoader/Emergency_Department_BuildAndRun.xml) |
 | Full Financial application | [FinancialSystem_P1_P5_BuildAndRun.xml](btsn.financial.ProjectLoader/FinancialSystem_P1_P5_BuildAndRun.xml) |
 | Concurrent healthcare versions | [Triple_Workflow_Emergencey_Department_Concurrent.xml](btsn.healthcare.ProjectLoader/Triple_Workflow_Emergencey_Department_Concurrent.xml) |
@@ -46,6 +53,153 @@ same ports. Initialization targets reset the selected runtime databases; collect
 or archive results before starting a fresh initialized run.
 
 For an editable model walkthrough, see [Tutorial.md](Tutorial.md).
+
+## Start with the Petri-net model
+
+### One place: a function and its execution structure
+
+![A circular P1 place between input and output transition bars. Its function returns true or false; the output transition terminates on true and loops on false.](images/p1-tutorial.svg)
+
+In the [single-place tutorial](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json),
+**P1 performs a function whose result is `true` or `false`**. The function produces
+its own result; it does not simply copy the arriving token's logical state.
+The transitions supply the execution behavior around that function:
+
+| Model role | Execution responsibility | Tutorial behavior |
+|---|---|---|
+| **T_in** — input transition | Receive and buffer tokens; synchronize required inputs where a join is declared | Accept the initial token or a returning token |
+| **P** — place with bound functionality | Invoke the selected operation with its declared inputs | P1 returns `true` or `false` |
+| **T_out** — output transition | Apply routing rules; publish, fork or terminate | `true` ends the workflow; `false` returns to T_in_P1 |
+
+Thus **T_in → P → T_out** maps to **receive/synchronize → invoke function →
+route/publish**. A generic orchestration host implements the whole unit. The
+place's function and the transitions' coordination responsibilities are separate.
+Run [P1_Tutorial_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml)
+as an Ant Build; [Tutorial.md](Tutorial.md) explains editing and running it.
+
+### Four places: Boolean functionality with a fork and join
+
+![P1–P4 shown as circular places between input and output transition bars. P1 true forks to P2 and P3, their arrivals join before P4, and each place produces its own Boolean result.](images/petrinet-fork-join.svg)
+
+The [P1–P4 model](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_P2_P3_P4_Fork_Join_Workflow.json)
+uses the same simple Boolean-returning functionality at **all four places**.
+Each completed invocation produces its own `true` or `false` result, irrespective
+of the arriving Boolean value. The model's routing rules determine whether that
+result affects the next path:
+
+| Place | Function result | What its surrounding transitions do |
+|---|---|---|
+| P1 | A fresh `true` or `false` | T_out forks to P2/P3 on `true`, or terminates on `false` |
+| P2 | A fresh `true` or `false`, independent of P1's value | Forward either result to P4 through an unguarded publication |
+| P3 | A fresh `true` or `false`, independent of P1's value | Forward either result to P4 through an unguarded publication |
+| P4 | A fresh `true` or `false`, independent of the two input values | T_in waits for both P2/P3 arrivals; T_out forwards either result to final termination |
+
+**The join synchronizes arrivals, not Boolean truth.** P4 does not require both
+incoming values to be `true` and does not compute their Boolean AND. `AND` on the
+input-transition bar denotes the required input arrivals. A result can be `false`
+without preventing an unguarded onward publication.
+
+Implementation detail: the packaged Boolean functions use
+[`BaseStochasticPetriNetPlace.evaluateGuard`](btsn.common/src/org/btsn/base/BaseStochasticPetriNetPlace.java)
+to select a fresh result (default probability of `true`: 0.5). This implements
+the place's Boolean function. The transitions receive inputs and route its result
+according to the model.
+
+Run [P1_P2_P3_P4_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_P3_P4_BuildAndRun.xml)
+to execute this model. Its captured results appear under
+[Petri-net fork/join execution](#petri-net-forkjoin-execution) below.
+
+Circles are places; bars are transitions. Solid local arcs connect each
+transition–place–transition unit. Dashed blue links represent publication between
+units in executable RPSO notation; these transition-to-transition links are
+separate from the arcs of an ordinary bipartite P/T net. Token dots are illustrative
+markings, not measured execution snapshots. Monitor observes outside the token path.
+
+### Give the same positions domain functionality
+
+The Boolean function is a minimal demonstration, not a restriction on P1–Pn.
+Replace it with a function that accepts domain data and returns domain results,
+then declare the corresponding contracts and routes. Business activity boxes in
+the following diagrams abbreviate the same **T_in → P → T_out** unit.
+
+| Example | Functionality supplied at places | Coordination supplied by the fabric |
+|---|---|---|
+| Boolean Petri-net model | Produce `true` or `false` | Conditional routing, fork, buffering and input join |
+| Financial application | Validate, check credit/fraud, underwrite and decide | Fork checks, synchronize their results and route declared outcomes |
+| Emergency department | Triage, perform diagnostic operations, diagnose and treat | Select direct/diagnostic paths, fork diagnostics and synchronize results |
+
+P1–Pn denotes the general model positions. This repository currently packages
+six numbered host projects; deployment determines which functions they run.
+
+### Financial loan application
+
+![Validation forks to Credit Check and Fraud Check; Underwriting joins both inputs and routes to Decision or early termination.](images/financial-workflow.svg)
+
+Validation rejects invalid applications or forks into Credit Check and Fraud
+Check. Underwriting joins their named results. `approved` and `conditional`
+proceed to Decision; `declined` terminates early. See
+[the Financial application guide](btsn.common/FinancialApplication.md) for contracts.
+
+### Emergency department
+
+![Triage forks to Laboratory, Cardiology and Radiology, which join at Diagnosis; Treatment also accepts direct triage.](images/healthcare-workflow.svg)
+
+Triage either publishes directly to Treatment or forks to Laboratory, Cardiology
+and Radiology. Diagnosis waits for all three named results. Treatment accepts the
+diagnosis path or the direct triage path through distinct operations, then ends
+the patient workflow. See [the healthcare mapping](btsn.services/docs/HEALTHCARE.md)
+for contracts and host assignments.
+
+### Further topology: six places and two joins
+
+![Six explicit transition–place–transition units. P1 forks to P2, P3 and P5; P4 joins P2/P3, P6 joins P4/P5 and terminates.](images/petrinet-double-join.svg)
+
+The
+[six-place double-join definition](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_to_P6_Double_Join_Workflow.json)
+binds its six places to small deterministic token operations:
+
+| Place | Bound service | What its operation does | Output attribute and transition route |
+|---|---|---|---|
+| P1 | `BooleanTokenService` | Read the supplied `outcome` (default `true`); record the Boolean value and routing decision | `token`; T_out forks to P2/P3/P5 on `true`, or terminates on `false` |
+| P2 | `BranchTwoTokenService` | Carry the incoming token data unchanged | `token_branch2` → P4 |
+| P3 | `BranchOneTokenService` | Carry the incoming token data unchanged | `token_branch1` → P4 |
+| P4 | `MergeTokenService` | Combine the two input objects into a JSON `branches` array after T_in synchronizes P2/P3 | `token_branch2` → P6 |
+| P5 | `SideTokenService` | Carry the incoming token data unchanged | `token_branch1` → P6 |
+| P6 | `FinalMergeTokenService` | Combine the P4/P5 input objects into a JSON `branches` array after T_in synchronizes them | `token`; T_out records workflow termination |
+
+**These six operations are deterministic.** The generator supplies P1's outcome
+through `token.outcome`; the default is `true`. P2/P3/P5 forward data and P4/P6
+combine it. The output names above are payload attributes carrying JSON objects.
+This additional deployment illustrates other place functionality: carrying and
+combining data rather than generating a fresh Boolean at every place. Its
+behavior differs from the Boolean-function examples above.
+
+The generic fabric performs the forks, input synchronization and publication;
+the model services carry and combine the token data. P4 becomes eligible after
+both P2/P3 inputs are available, while P6 requires P4/P5. The topology constrains
+causal order; the running hosts determine when those steps actually execute.
+
+Run
+[P1_to_P6_Double_Join_Workflow.xml](btsn.petrinet.ProjectLoader/P1_to_P6_Double_Join_Workflow.xml)
+as an Ant Build with its default target. It builds the JARs, prepares the selected
+deployment, initializes, deploys, sends ten tokens and collects observations.
+`token.outcome` defaults to `true`; set it to `false` to exercise termination at
+P1. Another deterministic example is
+[P1_P2_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_BuildAndRun.xml), using
+Boolean and Forward token operations. See
+[the model guide](btsn.services/docs/PETRINET_MODELS.md) for profiles and contracts.
+
+This is live token execution with measured queueing, local execution, join
+waiting and workflow elapsed time. The deterministic services introduce no
+simulated processing delays; launcher waits support startup and collection.
+Monitor reconstructs the generated workflow families and the same analyzer,
+timing chart and spatial view can inspect their observations. ProcessEditor can
+then replay that captured execution on the topology. Observed timing is distinct
+from a guarantee to meet real-time deadlines.
+
+These examples execute on the same generic host machinery. Their diagrams show
+configured paths; the captured runs show measured execution. Neither a topology
+nor one run establishes a guarantee to meet real-time deadlines.
 
 ## Architecture: coordination and business meaning
 
@@ -82,7 +236,7 @@ The execution pattern is **T_in → P → T_out**:
 
 These are semantic roles within the local execution machinery. The business
 activity boxes abbreviate a complete **T_in → P → T_out** execution unit; the
-Petri-net example below expands its transition and place nodes explicitly.
+Petri-net examples above expand their transition and place nodes explicitly.
 The host implements the whole unit, with its bound operation giving P its
 computational meaning.
 
@@ -126,105 +280,6 @@ same-queue evidence, run
 [Queue_Priority_BuildAndRun.xml](btsn.healthcare.ProjectLoader/Queue_Priority_BuildAndRun.xml);
 [its guide](btsn.healthcare.ProjectLoader/README.md#controlled-queue-priority-experiment)
 explains the observed-backlog probe and its separate output files.
-
-## Example processes and Petri-net models
-
-### Emergency department
-
-![Triage forks to Laboratory, Cardiology and Radiology, which join at Diagnosis; Treatment also accepts direct triage.](images/healthcare-workflow.svg)
-
-Triage either publishes directly to Treatment or forks to Laboratory, Cardiology
-and Radiology. Diagnosis waits for all three named results. Treatment accepts the
-diagnosis path or the direct triage path through distinct operations, then ends
-the patient workflow. See [the healthcare mapping](btsn.services/docs/HEALTHCARE.md)
-for contracts and host assignments.
-
-### Financial loan application
-
-![Validation forks to Credit Check and Fraud Check; Underwriting joins both inputs and routes to Decision or early termination.](images/financial-workflow.svg)
-
-Validation rejects invalid applications or forks into Credit Check and Fraud
-Check. Underwriting joins their named results. `approved` and `conditional`
-proceed to Decision; `declined` terminates early. See
-[the Financial application guide](btsn.common/FinancialApplication.md) for contracts.
-
-### Live Petri-net model execution
-
-![Explicit Petri-net execution units: transition bars surround each circular place. T_out_P1 forks to P2, P3 and P5; T_in_P4 joins P2/P3, T_in_P6 joins P4/P5, and T_out_P6 terminates. The generic fabric implements each unit.](images/petrinet-double-join.svg)
-
-**The architecture implements the model's transition–place–transition structure.**
-In RPSO notation, each circular place P has an input transition T_in and an
-output transition T_out. Its generic orchestration host realizes the whole
-unit; the service bound to P supplies the operation performed there:
-
-| Model role | Corresponding execution role | In the double-join example |
-|---|---|---|
-| **T_in** — input transition | Receive and buffer tokens; synchronize the declared inputs before invocation | `T_in_P4` waits for both P2/P3 results; `T_in_P6` waits for P4/P5 |
-| **P** — place with a bound operation | Invoke the configured operation through `ServiceThread` and `ServiceHelper` | P4 invokes `MergeTokenService`; P6 invokes `FinalMergeTokenService` |
-| **T_out** — output transition | Apply installed routing rules; publish fork children, forward results or terminate | `T_out_P1` forks on `true`; `T_out_P6` records termination |
-
-Thus **T_in → P → T_out** maps directly to **receive/synchronize → invoke →
-route/publish**. The joins belong to the input-transition role; the token-service
-operation runs when its required inputs are ready. The diagram's dot illustrates
-a model token. Execution observations are shown separately in the captured runs
-below, and Monitor collects outside the active token path.
-
-The Financial and healthcare activity boxes use this same execution unit.
-Binding P to a token operation gives a Petri-net model place; binding P to a
-clinical or financial operation gives the business activity its domain meaning.
-Contracts and routing rules specify the inputs and outcomes in either case.
-
-Solid local arcs connect transition bars and place circles. Dashed blue links
-show the publication channels between units in the executable RPSO notation;
-transition-to-transition publication links are distinct from the arcs of an
-ordinary bipartite P/T net. The figure maps the executable RPSO notation to its
-runtime roles.
-
-The
-[six-place double-join definition](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_to_P6_Double_Join_Workflow.json)
-binds its six places to small deterministic token operations:
-
-| Place | Bound service | What its operation does | Output attribute and transition route |
-|---|---|---|---|
-| P1 | `BooleanTokenService` | Read the supplied `outcome` (default `true`); record the Boolean value and routing decision | `token`; T_out forks to P2/P3/P5 on `true`, or terminates on `false` |
-| P2 | `BranchTwoTokenService` | Carry the incoming token data unchanged | `token_branch2` → P4 |
-| P3 | `BranchOneTokenService` | Carry the incoming token data unchanged | `token_branch1` → P4 |
-| P4 | `MergeTokenService` | Combine the two input objects into a JSON `branches` array after T_in synchronizes P2/P3 | `token_branch2` → P6 |
-| P5 | `SideTokenService` | Carry the incoming token data unchanged | `token_branch1` → P6 |
-| P6 | `FinalMergeTokenService` | Combine the P4/P5 input objects into a JSON `branches` array after T_in synchronizes them | `token`; T_out records workflow termination |
-
-**These six operations are deterministic.** The generator supplies P1's outcome
-through `token.outcome`; the default is `true`. P2/P3/P5 forward data and P4/P6
-combine it. The output names above are payload attributes carrying JSON objects.
-The legacy `Stochastic...` services remain available for older models; this
-launcher selects the deterministic services listed in the table.
-
-The generic fabric performs the forks, input synchronization and publication;
-the model services carry and combine the token data. P4 becomes eligible after
-both P2/P3 inputs are available, while P6 requires P4/P5. The topology constrains
-causal order; the running hosts determine when those steps actually execute.
-
-Run
-[P1_to_P6_Double_Join_Workflow.xml](btsn.petrinet.ProjectLoader/P1_to_P6_Double_Join_Workflow.xml)
-as an Ant Build with its default target. It builds the JARs, prepares the selected
-deployment, initializes, deploys, sends ten tokens and collects observations.
-`token.outcome` defaults to `true`; set it to `false` to exercise termination at
-P1. A shorter starting point is
-[P1_P2_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_BuildAndRun.xml), using
-Boolean and Forward token operations. See
-[the model guide](btsn.services/docs/PETRINET_MODELS.md) for profiles and contracts.
-
-This is live token execution with measured queueing, local execution, join
-waiting and workflow elapsed time. The deterministic services introduce no
-simulated processing delays; launcher waits support startup and collection.
-Monitor reconstructs the generated workflow families and the same analyzer,
-timing chart and spatial view can inspect their observations. ProcessEditor can
-then replay that captured execution on the topology. Observed timing is distinct
-from a guarantee to meet real-time deadlines.
-
-All three examples use the same generic host machinery. The diagrams describe
-their configured paths, not measured performance or evidence that every path
-has been exercised in a particular run.
 
 ## Execution examples
 
