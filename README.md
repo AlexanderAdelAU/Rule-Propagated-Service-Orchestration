@@ -22,6 +22,31 @@ inputs, P performs the bound functionality, and T_out routes the result. Shaded
 activation bars show responsibility for one invocation; their lengths do not
 represent measured time.*
 
+## Start with the Petri-net model
+
+### One place: a function and its execution structure
+
+![A circular P1 place between input and output transition bars. Its function returns true or false; the output transition terminates on true and loops on false.](images/p1-tutorial.svg)
+
+In the [single-place tutorial](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json),
+**P1 performs a function whose result is `true` or `false`**. The function produces
+its own result; it does not simply copy the arriving token's logical state.
+The transitions supply the execution behavior around that function:
+
+| Model role | Execution responsibility | Tutorial behavior |
+|---|---|---|
+| **T_in** — input transition | Receive and buffer tokens; synchronize required inputs where a join is declared | Accept the initial token or a returning token |
+| **P** — place with bound functionality | Invoke the selected operation with its declared inputs | P1 returns `true` or `false` |
+| **T_out** — output transition | Apply routing rules; publish, fork or terminate | `true` ends the workflow; `false` returns to T_in_P1 |
+
+Thus **T_in → P → T_out** maps to **receive/synchronize → invoke function →
+route/publish**. A generic orchestration host implements the whole unit. The
+place's function and the transitions' coordination responsibilities are separate.
+
+**We will now implement this model in ProcessEditor:** place its nodes, bind the
+function at P1 and define the two output routes. We will then run the saved
+process using the tutorial's BuildAndRun launcher.
+
 ## Build the process in ProcessEditor
 
 ![ProcessEditor showing the single-place tutorial on its canvas and P1's StochasticEntryTokenService binding in the Attributes panel.](images/process-editor-p1-tutorial.png)
@@ -37,8 +62,8 @@ P1 to a service operation. Monitor remains an observer outside this path.*
    `processToken`, with input argument `token`.
 4. Connect the nodes, then set the output arrows' guards: `true` terminates and
    `false` returns to T_in_P1.
-5. **Validate**, **Save As (.json)**, then select that definition in the
-   BuildAndRun launcher to deploy and execute it.
+5. **Validate** and **Save As (.json)** to produce the executable process
+   definition.
 
 See [Build this process in ProcessEditor](Tutorial.md#build-this-process-in-processeditor)
 for the exact node settings, operation arguments, arrow guards, save location
@@ -46,6 +71,12 @@ and launcher property. The editor defines the process and its bindings; the
 launcher supplies the packaged runtime and deployment.
 
 ## Run an example
+
+For the single-place model just described and designed, use
+[P1_Tutorial_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml).
+If you saved a practice copy under a different filename, select it with the
+`workflow.process.name` property as explained in
+[Run the process you saved](Tutorial.md#5-run-the-process-you-saved).
 
 1. Use **JDK 15+** and **Apache Ant 1.10.2+**. In Eclipse, ensure the Ant launch uses
    a JDK so the Java compiler is available.
@@ -84,28 +115,7 @@ or archive results before starting a fresh initialized run.
 
 For an editable model walkthrough, see [Tutorial.md](Tutorial.md).
 
-## Start with the Petri-net model
-
-### One place: a function and its execution structure
-
-![A circular P1 place between input and output transition bars. Its function returns true or false; the output transition terminates on true and loops on false.](images/p1-tutorial.svg)
-
-In the [single-place tutorial](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json),
-**P1 performs a function whose result is `true` or `false`**. The function produces
-its own result; it does not simply copy the arriving token's logical state.
-The transitions supply the execution behavior around that function:
-
-| Model role | Execution responsibility | Tutorial behavior |
-|---|---|---|
-| **T_in** — input transition | Receive and buffer tokens; synchronize required inputs where a join is declared | Accept the initial token or a returning token |
-| **P** — place with bound functionality | Invoke the selected operation with its declared inputs | P1 returns `true` or `false` |
-| **T_out** — output transition | Apply routing rules; publish, fork or terminate | `true` ends the workflow; `false` returns to T_in_P1 |
-
-Thus **T_in → P → T_out** maps to **receive/synchronize → invoke function →
-route/publish**. A generic orchestration host implements the whole unit. The
-place's function and the transitions' coordination responsibilities are separate.
-Run [P1_Tutorial_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml)
-as an Ant Build; [Tutorial.md](Tutorial.md) explains editing and running it.
+## Extend the model
 
 ### Four places: Boolean functionality with a fork and join
 
