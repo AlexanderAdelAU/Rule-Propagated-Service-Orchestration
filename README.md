@@ -22,65 +22,6 @@ inputs, P performs the bound functionality, and T_out routes the result. Shaded
 activation bars show responsibility for one invocation; their lengths do not
 represent measured time.*
 
-## P1 tutorial: infrastructure, process, execution and results
-
-[![ProcessEditor showing the P1 tutorial design, its StochasticEntryTokenService binding and the true/false routes.](images/process-editor-p1-tutorial.png)](Tutorial.md)
-
-*The P1 process design in ProcessEditor. P1 invokes its bound function; `true`
-terminates and `false` loops back. Monitor observes outside the process path.*
-
-Follow the **[full P1 tutorial](Tutorial.md)** to build and run this example:
-
-| Step | What you do | Repository reference |
-|---|---|---|
-| **1. Define the infrastructure** | Set the physical node, channel, address and service capability | [Infrastructure and contract settings](Tutorial.md#1-define-the-infrastructure) |
-| **2. Define the process** | Build the design above, bind `processToken`, set its guards, validate and save | [ProcessEditor walkthrough](Tutorial.md#2-define-the-process) |
-| **3. Run the tutorial** | Use `P1_Tutorial_BuildAndRun.xml` through the supplied local configuration to build, initialize, deploy and collect | [Run instructions and launchers](Tutorial.md#3-run-the-tutorial) |
-| **4. Show the results** | Check root completion, inspect timing/spatial views and replay the captured observations | [Measured results and reusable artefacts](Tutorial.md#4-show-the-results) |
-
-The guide links the editable infrastructure and process definitions, matching
-deployment files, launchers and captured result exports so you can inspect the
-complete example in this repository.
-
-## Run an example
-
-1. Use **JDK 15+** and **Apache Ant 1.10.2+**. In Eclipse, ensure the Ant launch uses
-   a JDK so the Java compiler is available.
-2. Import the repository's projects with **File → Import → General → Existing
-   Projects into Workspace**, leaving **Copy projects into workspace** unchecked.
-   Existing workspaces should also import `btsn.services`, the generic
-   `btsn.rpso.places.p1`–`p6` projects, and `btsn.financial.ProjectLoader`.
-3. Choose a launcher below, right-click the XML and select **Run As → Ant Build**.
-   Use its default `run-complete-workflow` target. It builds the required JARs,
-   prepares the configured runtime, starts local components, runs the workflow
-   phases and collects observations. No separate `clean`/`package` step is needed.
-4. After collection, run the launcher's `analyse` target or run `PetriNetAnalyzer`
-   in `btsn.common.Monitor`, package `org.btsn.derby.Analysis`.
-
-| Example | Ant entry point |
-|---|---|
-| Single-place tutorial | [P1_Tutorial_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml) |
-| P1–P4 fork/join model | [P1_P2_P3_P4_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_P3_P4_BuildAndRun.xml) |
-| Six-place double-join model | [P1_to_P6_Double_Join_Workflow.xml](btsn.petrinet.ProjectLoader/P1_to_P6_Double_Join_Workflow.xml) |
-| Emergency department | [Emergency_Department_BuildAndRun.xml](btsn.healthcare.ProjectLoader/Emergency_Department_BuildAndRun.xml) |
-| Full Financial application | [FinancialSystem_P1_P5_BuildAndRun.xml](btsn.financial.ProjectLoader/FinancialSystem_P1_P5_BuildAndRun.xml) |
-| Concurrent healthcare versions | [Triple_Workflow_Emergencey_Department_Concurrent.xml](btsn.healthcare.ProjectLoader/Triple_Workflow_Emergencey_Department_Concurrent.xml) |
-
-The concurrent launcher's existing filename includes `Emergencey`; use the file
-as named. The loader guides list further scenarios and phase-only targets:
-[healthcare](btsn.healthcare.ProjectLoader/README.md),
-[Financial](btsn.financial.ProjectLoader/README.md), and
-[Petri-net models](btsn.petrinet.ProjectLoader/README.md).
-
-Local/remote startup follows the launcher's deployment profile. In `auto` mode,
-the configured channel address must belong to this machine for a component to
-start locally. Remote hosts must already be running with the matching JARs and
-configuration. Stop the previous Ant run before starting another launcher on the
-same ports. Initialization targets reset the selected runtime databases; collect
-or archive results before starting a fresh initialized run.
-
-For an editable model walkthrough, see [Tutorial.md](Tutorial.md).
-
 ## Start with the Petri-net model
 
 ### One place: a function and its execution structure

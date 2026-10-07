@@ -1,4 +1,4 @@
-# P1 tutorial: define the infrastructure, define the process, run and inspect the results
+# P1 tutorial: infrastructure, process, execution and results
 
 This tutorial builds and runs the process selected by
 [`P1_Tutorial_BuildAndRun.xml`](btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml).
@@ -7,12 +7,23 @@ An event generator sends a token to P1. P1 invokes
 or `false` result. The output transition terminates on `true` and sends the same
 workflow back to P1 on `false`. Monitor collects observations separately.
 
-Follow the four stages in order:
+[![ProcessEditor showing the P1 tutorial design, its StochasticEntryTokenService binding and the true/false routes.](images/process-editor-p1-tutorial.png)](#2-define-the-process)
 
-1. [Define the infrastructure](#1-define-the-infrastructure): where the function can run and how it is reached.
-2. [Define the process](#2-define-the-process): which operation runs and how its result is routed.
-3. [Run the tutorial](#3-run-the-tutorial): build, initialize, deploy, fire ten tokens and collect observations.
-4. [Show the results](#4-show-the-results): inspect completion, repeat visits, timings and replay.
+*The P1 process design in ProcessEditor. P1 invokes its bound function; `true`
+terminates and `false` loops back. Monitor observes outside the process path.*
+
+Follow the four stages below to build and run this example:
+
+| Step | What you do | Repository reference |
+|---|---|---|
+| **1. Define the infrastructure** | Set the physical node, channel, address and service capability | [Infrastructure and contract settings](#1-define-the-infrastructure) |
+| **2. Define the process** | Build the design above, bind `processToken`, set its guards, validate and save | [ProcessEditor walkthrough](#2-define-the-process) |
+| **3. Run the tutorial** | Use `P1_Tutorial_BuildAndRun.xml` through the supplied local configuration to build, initialize, deploy and collect | [Run instructions and launchers](#3-run-the-tutorial) |
+| **4. Show the results** | Check root completion, inspect timing/spatial views and replay the captured observations | [Measured results and reusable artefacts](#4-show-the-results) |
+
+This tutorial links the editable infrastructure and process definitions, matching
+deployment files, launchers and captured result exports so you can inspect the
+complete example in this repository.
 
 The supplied files let you run the finished example first, or reconstruct its
 infrastructure and process in the editor. All commands below start at the
@@ -113,11 +124,6 @@ using the two-service catalogue with only P1 would prevent capability resolution
 <a id="build-this-process-in-processeditor"></a>
 
 ## 2. Define the process
-
-![ProcessEditor showing P1_Tutorial_Workflow, the selected P1 service binding, the true termination route and the false loop.](images/process-editor-p1-tutorial.png)
-
-*The process design supplied with this tutorial. Its circular P1 place binds
-functionality; the transitions and arrows coordinate its execution.*
 
 To inspect the finished design, choose **File → Load (.json)** and open
 [`P1_Tutorial_Workflow.json`](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json).
@@ -392,10 +398,49 @@ observations does not deploy or rerun the process.
 | [P1_Tutorial_Local.json](btsn.common/BusinessServiceDefinitions/P1_Tutorial_Local.json) | Active catalogue containing the P1 entry capability only |
 | [P1_Tutorial_LocalDeployment.json](btsn.services/deployments/models/P1_Tutorial_LocalDeployment.json) | Catalogue and infrastructure selection |
 | [P1_Tutorial_Workflow.json](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json) | Editable process design |
-| [process-editor-p1-tutorial.png](images/process-editor-p1-tutorial.png) | Process-editor image shown in the README |
+| [process-editor-p1-tutorial.png](images/process-editor-p1-tutorial.png) | Process-editor image used in this tutorial |
 | [P1_Tutorial_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml) | Original build-and-run phases |
 | [P1_Tutorial_Local_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_Tutorial_Local_BuildAndRun.xml) | Portable local configuration for those phases |
 | [Captured results and export helper](docs/tutorials/p1/results/README.md) | Analyzer output, per-root CSV, current chart images and capture provenance |
+
+## Run an example
+
+1. Use **JDK 15+** and **Apache Ant 1.10.2+**. In Eclipse, ensure the Ant launch uses
+   a JDK so the Java compiler is available.
+2. Import the repository's projects with **File → Import → General → Existing
+   Projects into Workspace**, leaving **Copy projects into workspace** unchecked.
+   Existing workspaces should also import `btsn.services`, the generic
+   `btsn.rpso.places.p1`–`p6` projects, and `btsn.financial.ProjectLoader`.
+3. Choose a launcher below, right-click the XML and select **Run As → Ant Build**.
+   Use its default `run-complete-workflow` target. It builds the required JARs,
+   prepares the configured runtime, starts local components, runs the workflow
+   phases and collects observations. No separate `clean`/`package` step is needed.
+4. After collection, run the launcher's `analyse` target or run `PetriNetAnalyzer`
+   in `btsn.common.Monitor`, package `org.btsn.derby.Analysis`.
+
+| Example | Ant entry point |
+|---|---|
+| Single-place tutorial | [P1_Tutorial_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml) |
+| P1–P4 fork/join model | [P1_P2_P3_P4_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_P3_P4_BuildAndRun.xml) |
+| Six-place double-join model | [P1_to_P6_Double_Join_Workflow.xml](btsn.petrinet.ProjectLoader/P1_to_P6_Double_Join_Workflow.xml) |
+| Emergency department | [Emergency_Department_BuildAndRun.xml](btsn.healthcare.ProjectLoader/Emergency_Department_BuildAndRun.xml) |
+| Full Financial application | [FinancialSystem_P1_P5_BuildAndRun.xml](btsn.financial.ProjectLoader/FinancialSystem_P1_P5_BuildAndRun.xml) |
+| Concurrent healthcare versions | [Triple_Workflow_Emergencey_Department_Concurrent.xml](btsn.healthcare.ProjectLoader/Triple_Workflow_Emergencey_Department_Concurrent.xml) |
+
+The concurrent launcher's existing filename includes `Emergencey`; use the file
+as named. The loader guides list further scenarios and phase-only targets:
+[healthcare](btsn.healthcare.ProjectLoader/README.md),
+[Financial](btsn.financial.ProjectLoader/README.md), and
+[Petri-net models](btsn.petrinet.ProjectLoader/README.md).
+
+Local/remote startup follows the launcher's deployment profile. In `auto` mode,
+the configured channel address must belong to this machine for a component to
+start locally. Remote hosts must already be running with the matching JARs and
+configuration. Stop the previous Ant run before starting another launcher on the
+same ports. Initialization targets reset the selected runtime databases; collect
+or archive results before starting a fresh initialized run.
+
+For the single-place model walkthrough, follow [the four stages above](#1-define-the-infrastructure).
 
 ## Author
 
