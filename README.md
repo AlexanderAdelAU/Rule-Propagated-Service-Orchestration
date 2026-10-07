@@ -38,6 +38,10 @@ architecture financial and healthcare functionality.
 
 ### One place: a function and its execution structure
 
+We begin with one service so we can follow a token through a complete execution
+unit. A decision to repeat or finish makes the relationship between input
+receipt, function invocation and output routing visible in one small model.
+
 ![A circular P1 place between input and output transition bars. Its function returns true or false; the output transition terminates on true and loops on false.](images/p1-tutorial.svg)
 
 In the [single-place tutorial](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json),
@@ -58,6 +62,11 @@ Run [P1_Tutorial_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_Tutorial_BuildA
 as an Ant Build; [Tutorial.md](Tutorial.md) explains editing and running it.
 
 ### Four places: Boolean functionality with a fork and join
+
+With the pattern for one service established, we can connect several execution
+units. This example introduces parallel branches and a join: the fabric must
+deliver work to two functions and bring their results together before the next
+function can run.
 
 ![P1–P4 shown as circular places between input and output transition bars. P1 true forks to P2 and P3, their arrivals join before P4, and each place produces its own Boolean result.](images/petrinet-fork-join.svg)
 
@@ -97,10 +106,12 @@ markings, not measured execution snapshots. Monitor observes outside the token p
 
 ### Give the same positions domain functionality
 
-The Boolean function is a minimal demonstration, not a restriction on P1–Pn.
-Replace it with a function that accepts domain data and returns domain results,
-then declare the corresponding contracts and routes. Business activity boxes in
-the following diagrams abbreviate the same **T_in → P → T_out** unit.
+The first two models make coordination easy to follow by using simple Boolean
+functions. We can now give the same positions a business purpose: bind functions
+that accept domain data and return domain results, then declare their contracts
+and routes. The following examples show what changes when those functions
+perform financial or clinical work. Their business activity boxes abbreviate
+the same **T_in → P → T_out** unit.
 
 | Example | Functionality supplied at places | Coordination supplied by the fabric |
 |---|---|---|
@@ -113,6 +124,10 @@ six numbered host projects; deployment determines which functions they run.
 
 ### Financial loan application
 
+A loan application gives the fork and join pattern a concrete business purpose.
+Credit and fraud checks supply different information about the same application;
+underwriting needs both results to decide how processing should continue.
+
 ![Validation forks to Credit Check and Fraud Check; Underwriting joins both inputs and routes to Decision or early termination.](images/financial-workflow.svg)
 
 Validation rejects invalid applications or forks into Credit Check and Fraud
@@ -121,6 +136,11 @@ proceed to Decision; `declined` terminates early. See
 [the Financial application guide](btsn.common/FinancialApplication.md) for contracts.
 
 ### Emergency department
+
+A patient workflow adds a choice of paths and a larger set of required inputs.
+This example shows how the same execution pattern supports a route selected by
+triage and synchronizes several diagnostic results before the next function
+runs.
 
 ![Triage forks to Laboratory, Cardiology and Radiology, which join at Diagnosis; Treatment also accepts direct triage.](images/healthcare-workflow.svg)
 
@@ -131,6 +151,11 @@ the patient workflow. See [the healthcare mapping](btsn.services/docs/HEALTHCARE
 for contracts and host assignments.
 
 ### Further topology: six places and two joins
+
+The domain examples give the places business meaning. We can also extend the
+coordination structure itself: this six-place model connects two joins, so the
+result of one synchronized activity becomes an input to another. Functions that
+carry and merge data deterministically make that dependency easier to trace.
 
 ![Six explicit transition–place–transition units. P1 forks to P2, P3 and P5; P4 joins P2/P3, P6 joins P4/P5 and terminates.](images/petrinet-double-join.svg)
 
@@ -182,6 +207,12 @@ configured paths; the captured runs show measured execution. Neither a topology
 nor one run establishes a guarantee to meet real-time deadlines.
 
 ## Architecture: coordination and business meaning
+
+The examples have shown one execution pattern supporting different functions
+and process structures. We can now look behind those models to see how the
+platform assembles them. The diagram and table below locate the process
+definition, service contract, deployment, execution machinery and observation
+tools, and explain how their responsibilities fit together.
 
 ![Process definitions install local rules in generic hosts, which invoke separate business JARs and supply observations to Monitor.](images/rpso-architecture.svg)
 
@@ -235,6 +266,12 @@ soundness property. Shared-host queues, transport and deployment remain relevant
 
 ## Rule deployment and token execution
 
+Those architectural responsibilities become operational when a model is
+deployed to its hosts. Follow the path from the workflow definition and service
+bindings to installed local rules, then to the tokens that activate the bound
+functions. This connects the diagrams above to the steps performed by a
+build-and-run launcher.
+
 ![JSON workflows, contracts and deployment profiles feed local rule installation; host acknowledgements precede the normal workflow start.](images/rpso-rule-deployment.svg)
 
 *Rule installation and runtime token flow are separate paths. Local installation
@@ -271,11 +308,18 @@ explains the observed-backlog probe and its separate output files.
 
 ## Execution examples
 
-These screenshots show captured runs on the Java execution fabric, rather than
-topology illustrations or simulated timings. They retain the chart settings and
-measurements used when captured; timing depends on the machine and run.
+Once the bindings and rules are installed, we can run the services and observe
+how the configured paths execute. The following captures connect the earlier
+models to measured workflow durations and queue waits on the Java execution
+fabric. They retain the chart settings and measurements used when captured;
+timing depends on the machine and run.
 
 ### Petri-net fork/join execution
+
+Return to the four-place example and follow its ten generated workflow roots.
+The chart groups each root with its fork children, letting us examine the
+elapsed time of the complete workflow family and its largest observed visit
+queue wait.
 
 ![Captured P1–P4 fork/join run: ten root workflows with elapsed-time bars and independent queue-wait diamonds.](images/execution/petrinet-p1-p4-run.png)
 
@@ -288,6 +332,10 @@ workflows. The lane maximum in this run is 1,499 ms.*
 
 ### Financial service execution
 
+This financial capture isolates the Validation function at P1. It lets us
+inspect a domain service using the same measurements as the Boolean model,
+before adding the remaining checks and decisions of the full loan workflow.
+
 ![Captured FinancialSystem P1 Simple run: ten root workflows with lighter queue-wait overlays inside red elapsed-time bars.](images/execution/financial-p1-run.png)
 
 *A run of [FinancialSystem_P1_Simple_BuildAndRun.xml](btsn.financial.ProjectLoader/FinancialSystem_P1_Simple_BuildAndRun.xml),
@@ -296,6 +344,11 @@ lower shading marks the maximum observed visit queue wait. The lane maximum is
 247 ms. This is the P1 example, not the full P1–P5 loan-application workflow.*
 
 ### Concurrent healthcare execution
+
+The previous captures each show one workflow version. Here, several healthcare
+processes run concurrently, bringing different routes and service demands into
+the same observation view. Read the process labels and lane scales together to
+understand which measurements can be compared directly.
 
 ![Captured concurrent healthcare viewport: v001 Federated Radiology, v002 Triage CanaryTest and v003 Emergency Department Patient workflows, with independently scaled lanes.](images/execution/healthcare-concurrent-run.png)
 
@@ -315,6 +368,11 @@ ten measured elapsed-time bars; run completeness should be checked against the
 analyzer's generated-root and completion counts.
 
 ## Observe and interpret a run
+
+The captures provide a visual overview. To assess a run, connect those pictures
+back to the recorded roots, service visits and completion events. The tools below
+let us check whether the workflows completed, trace where they spent time and
+replay their observed paths on the model.
 
 Monitor is an **observation service outside the active business-token path**.
 An explicit business `TerminateNode` defines completion in the migrated workflows;
@@ -366,6 +424,12 @@ This replays captured observations; it does not launch the distributed workflow.
 
 ## Project layout and build support
 
+We have followed a model from its service bindings through execution and
+analysis. The project map below shows where to find each part when working with
+the repository: the definitions to edit, the implementations to package, the
+launchers to run and the tools to inspect the results. The build commands then
+provide entry points for preparing the packaged runtime.
+
 | Project | Purpose |
 |---|---|
 | `btsn.common` | Shared source, business implementations, contracts, process definitions and rules |
@@ -408,6 +472,8 @@ The current diagrams are editable SVGs. Their source models, conventions and
 regeneration command are documented in [images/README.md](images/README.md).
 
 # License
+
+The licensing terms for the software and accompanying documentation follow.
 
 **Copyright (c) 2025 [Alexander Cameron]**
 
