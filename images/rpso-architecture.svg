@@ -29,7 +29,7 @@
 <text x="107.5" y="329" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Incoming token</text>
 <text x="107.5" y="355" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Generator / prior host</text>
 <rect x="935" y="300" width="165" height="90" rx="8" fill="#f5f6f8" stroke="#60738a" stroke-width="1.5"/>
-<text x="1017.5" y="329" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Declared outcome</text>
+<text x="1017.5" y="329" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Outcome</text>
 <text x="1017.5" y="355" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Publish to next host</text>
 <text x="1017.5" y="377" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">or terminate locally</text>
 <rect x="390" y="565" width="350" height="75" rx="8" fill="#edf7f5" stroke="#60738a" stroke-width="1.5"/>
