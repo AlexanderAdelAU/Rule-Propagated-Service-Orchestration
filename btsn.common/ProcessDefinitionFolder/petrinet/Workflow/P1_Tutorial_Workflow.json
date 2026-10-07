@@ -1,5 +1,5 @@
 {
-  "processType": "PetriNet",
+   "processType":"PetriNet",
   "elements": [
     {
       "id": "T_in_P1",
@@ -28,14 +28,8 @@
       "operations": [
         {
           "name": "processToken",
-          "returnAttribute": "token",
           "arguments": [
-            {
-              "name": "token",
-              "type": "String",
-              "value": "String",
-              "required": false
-            }
+            {"name": "token", "type": "String", "value": "String", "required": false}
           ]
         }
       ],
@@ -68,16 +62,18 @@
       "token_version": "v002"
     },
     {
-      "id": "T_in_Model_Terminate",
+      "id": "Terminate",
       "type": "TRANSITION",
-      "x": 860,
-      "y": 250,
+      "x": 470,
+      "y": 130,
       "width": 20,
       "height": 60,
       "label": "Terminate",
+      "rotation": 0.0,
       "node_type": "TerminateNode",
       "node_value": "TERMINATE_NODE",
-      "transition_type": "Other"
+      "transition_type": "Other",
+      "fill_color": "#CCCCCC"
     }
   ],
   "arrows": [
@@ -109,16 +105,13 @@
     },
     {
       "source": "T_out_P1",
-      "target": "T_in_Model_Terminate",
+      "target": "Terminate",
       "label": "true",
       "guardCondition": "DECISION_EQUAL_TO",
       "decision_value": "true",
       "endpoint": "",
       "waypoints": [
-        {
-          "x": 520,
-          "y": 160
-        }
+        {"x": 420, "y": 160}
       ],
       "labelOffsetX": 26,
       "labelOffsetY": -20,
@@ -133,14 +126,8 @@
       "decision_value": "false",
       "endpoint": "",
       "waypoints": [
-        {
-          "x": 380,
-          "y": 80
-        },
-        {
-          "x": 220,
-          "y": 80
-        }
+        {"x": 380, "y": 80},
+        {"x": 220, "y": 80}
       ],
       "labelOffsetX": -32,
       "labelOffsetY": -10
@@ -164,8 +151,8 @@
       "color": -16777216
     },
     {
-      "x": 410,
-      "y": 295,
+      "x": 453,
+      "y": 226,
       "text": "Monitor is an |observer only",
       "fontSize": 12,
       "fontStyle": 0,

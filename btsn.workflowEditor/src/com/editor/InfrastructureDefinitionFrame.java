@@ -30,10 +30,19 @@ public class InfrastructureDefinitionFrame extends JFrame {
     private final Preferences preferences = Preferences.userNodeForPackage(InfrastructureDefinitionFrame.class);
     private final JLabel statusLabel = new JLabel(" ");
     private File currentFile;
+    /** JSON of the definition as last opened/saved; compared with toJson() to detect unsaved changes. */
+    private String savedSnapshot;
 
     public InfrastructureDefinitionFrame() {
         super("Infrastructure Definition");
-        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        // Closing is routed through closeWindow() so unsaved changes can be offered for saving
+        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                closeWindow();
+            }
+        });
         setSize(1050, 720);
         setMinimumSize(new Dimension(900, 620));
         setLocationByPlatform(true);
@@ -90,12 +99,12 @@ public class InfrastructureDefinitionFrame extends JFrame {
         root.add(split, BorderLayout.CENTER);
 
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton load = new JButton("Load...");
         JButton save = new JButton("Save...");
         JButton generate = new JButton("Generate Configuration");
-        actions.add(load);
+        JButton close = new JButton("Close");
         actions.add(save);
         actions.add(generate);
+        actions.add(close);
 
         JPanel footer = new JPanel(new BorderLayout(6, 0));
         statusLabel.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 4));
@@ -189,8 +198,80 @@ public class InfrastructureDefinitionFrame extends JFrame {
         });
 
         save.addActionListener(e -> saveDefinition());
-        load.addActionListener(e -> loadDefinition());
         generate.addActionListener(e -> generateBindings());
+        close.addActionListener(e -> closeWindow());
+
+        // Any table change may alter the definition - refresh the "*" marker in the title
+        javax.swing.event.TableModelListener changeListener = e -> updateTitle();
+        nodeNetworkModel.addTableModelListener(changeListener);
+        capabilityModel.addTableModelListener(changeListener);
+        argumentModel.addTableModelListener(changeListener);
+
+        markSaved();
+    }
+
+    // ==================== Unsaved-change tracking / Close ====================
+
+    private void markSaved() {
+        savedSnapshot = toJson();
+        updateTitle();
+    }
+
+    private boolean isDirty() {
+        return !toJson().equals(savedSnapshot);
+    }
+
+    private void updateTitle() {
+        String title = "Infrastructure Definition";
+        if (currentFile != null) title += " - " + currentFile.getName();
+        if (isDirty()) title += " *";
+        setTitle(title);
+    }
+
+    /** Commit any cell still being edited so it counts as a change. */
+    private void stopTableEditing() {
+        for (JTable table : new JTable[] {nodeNetworkTable, capabilityTable, argumentTable}) {
+            if (table.isEditing() && !table.getCellEditor().stopCellEditing()) {
+                table.getCellEditor().cancelCellEditing();
+            }
+        }
+    }
+
+    /**
+     * Offer to save unsaved changes before this window goes away.
+     * @return true if OK to close, false if the user cancelled (or the save failed)
+     */
+    public boolean confirmClose() {
+        stopTableEditing();
+        if (!isDirty()) return true;
+
+        toFront();
+        String name = currentFile != null ? currentFile.getName() : "this Infrastructure Definition";
+        int result = JOptionPane.showConfirmDialog(this,
+            "You have unsaved changes to " + name + ". Do you want to save before closing?",
+            "Unsaved Changes",
+            JOptionPane.YES_NO_CANCEL_OPTION,
+            JOptionPane.WARNING_MESSAGE);
+        if (result == JOptionPane.YES_OPTION) return saveDefinition();
+        return result == JOptionPane.NO_OPTION;
+    }
+
+    private void closeWindow() {
+        if (confirmClose()) dispose();
+    }
+
+    /**
+     * Ask every open Infrastructure Definition window to confirm closing.
+     * Used by ProcessEditor before the application exits.
+     * @return false if the user cancelled for any window
+     */
+    public static boolean confirmCloseAll() {
+        for (Frame f : Frame.getFrames()) {
+            if (f instanceof InfrastructureDefinitionFrame && f.isDisplayable()) {
+                if (!((InfrastructureDefinitionFrame) f).confirmClose()) return false;
+            }
+        }
+        return true;
     }
 
     private void updateArgumentsTitle(Capability c) {
@@ -260,18 +341,21 @@ public class InfrastructureDefinitionFrame extends JFrame {
         return a.channel.equals(b.channel);
     }
 
-    private void saveDefinition() {
+    /** @return true if the definition was written to disk */
+    private boolean saveDefinition() {
+        stopTableEditing();
         List<String> errors = validateDefinition();
         if (!errors.isEmpty()) {
             JOptionPane.showMessageDialog(this, String.join("\n", errors),
                 "Invalid infrastructure definition", JOptionPane.ERROR_MESSAGE);
-            return;
+            return false;
         }
 
         JFileChooser chooser = createRememberingChooser(PREF_DEFINITION_DIR, null);
-        chooser.setDialogTitle("Save infrastructure definition");
+        chooser.setDialogTitle("Save Infrastructure Definition");
+        chooser.setFileFilter(createJsonFilter());
         chooser.setSelectedFile(currentFile != null ? currentFile : new File(chooser.getCurrentDirectory(), "InfrastructureDefinition.json"));
-        if (chooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
+        if (chooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return false;
         File file = chooser.getSelectedFile();
         if (!file.getName().toLowerCase(Locale.ROOT).endsWith(".json")) {
             file = new File(file.getParentFile(), file.getName() + ".json");
@@ -279,27 +363,84 @@ public class InfrastructureDefinitionFrame extends JFrame {
         try {
             Files.write(file.toPath(), toJson().getBytes(StandardCharsets.UTF_8));
             currentFile = file;
+            markSaved();
             rememberDirectory(PREF_DEFINITION_DIR, file.getParentFile());
             setStatus("Definition saved: " + file.getAbsolutePath(), file.getAbsolutePath());
+            return true;
         } catch (IOException ex) {
             showError("Could not save definition", ex);
+            return false;
         }
     }
 
-    private void loadDefinition() {
+    // ==================== Open (shared with ProcessEditor File > Open) ====================
+
+    /**
+     * True if the JSON was written by this editor (carries "definitionType": "Infrastructure").
+     * Process definitions never carry this marker, so it cleanly separates the two file types.
+     */
+    public static boolean isInfrastructureDefinition(String json) {
+        return json != null &&
+            json.matches("(?s).*\"definitionType\"\\s*:\\s*\"Infrastructure\".*");
+    }
+
+    /**
+     * File > Open > Infrastructure Definition: choose a file, and only show a
+     * new window if a valid infrastructure definition was actually opened.
+     */
+    public static void openInNewWindow(Component parent) {
+        InfrastructureDefinitionFrame frame = new InfrastructureDefinitionFrame();
+        if (frame.promptAndOpen(parent)) {
+            frame.setVisible(true);
+        } else {
+            frame.dispose();
+        }
+    }
+
+    /** Open a known file in a new window (used when ProcessEditor detects an infrastructure file). */
+    public static void openFileInNewWindow(Component parent, File file) {
+        InfrastructureDefinitionFrame frame = new InfrastructureDefinitionFrame();
+        if (frame.openFile(parent, file)) {
+            frame.setVisible(true);
+        } else {
+            frame.dispose();
+        }
+    }
+
+    /** Show the open dialog and load the chosen file. Returns true if a definition was loaded. */
+    private boolean promptAndOpen(Component dialogParent) {
         JFileChooser chooser = createRememberingChooser(PREF_DEFINITION_DIR, null);
-        chooser.setDialogTitle("Load infrastructure definition");
-        if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return;
+        chooser.setDialogTitle("Open Infrastructure Definition");
+        chooser.setFileFilter(createJsonFilter());
+        if (chooser.showOpenDialog(dialogParent) != JFileChooser.APPROVE_OPTION) return false;
+        return openFile(dialogParent, chooser.getSelectedFile());
+    }
+
+    private boolean openFile(Component dialogParent, File file) {
         try {
-            File file = chooser.getSelectedFile();
             String json = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+            if (!isInfrastructureDefinition(json)) {
+                JOptionPane.showMessageDialog(dialogParent,
+                    file.getName() + " is not an Infrastructure Definition.\n" +
+                    "Use File > Open > Process Definition for process files.",
+                    "Wrong Definition Type", JOptionPane.WARNING_MESSAGE);
+                return false;
+            }
             parseJson(json);
             currentFile = file;
+            markSaved();
             rememberDirectory(PREF_DEFINITION_DIR, file.getParentFile());
-            setStatus("Definition loaded: " + file.getAbsolutePath(), file.getAbsolutePath());
+            setStatus("Definition opened: " + file.getAbsolutePath(), file.getAbsolutePath());
+            return true;
         } catch (Exception ex) {
-            showError("Could not load definition", ex);
+            JOptionPane.showMessageDialog(dialogParent, "Could not open definition:\n" + ex.getMessage(),
+                "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
         }
+    }
+
+    private static javax.swing.filechooser.FileNameExtensionFilter createJsonFilter() {
+        return new javax.swing.filechooser.FileNameExtensionFilter("JSON files (*.json)", "json");
     }
 
     private String toJson() {

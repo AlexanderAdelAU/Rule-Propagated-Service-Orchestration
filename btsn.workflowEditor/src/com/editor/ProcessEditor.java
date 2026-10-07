@@ -126,12 +126,23 @@ public class ProcessEditor extends JFrame {
      * @return true if OK to proceed, false to cancel
      */
     private boolean checkUnsavedChanges() {
+        // Exiting the application also closes any Infrastructure Definition windows
+        return checkUnsavedChanges("exiting")
+            && InfrastructureDefinitionFrame.confirmCloseAll();
+    }
+    
+    /**
+     * Check for unsaved changes before an action that replaces the canvas
+     * @param action description used in the prompt, e.g. "opening another file"
+     * @return true if OK to proceed, false to cancel
+     */
+    private boolean checkUnsavedChanges(String action) {
         if (!isDirty) {
             return true; // No changes, OK to proceed
         }
         
         int result = JOptionPane.showConfirmDialog(this,
-            "You have unsaved changes. Do you want to save before exiting?",
+            "You have unsaved changes. Do you want to save before " + action + "?",
             "Unsaved Changes",
             JOptionPane.YES_NO_CANCEL_OPTION,
             JOptionPane.WARNING_MESSAGE);
@@ -631,36 +642,48 @@ public class ProcessEditor extends JFrame {
         JMenu newMenu = new JMenu("New");
         
         JMenuItem newProcessItem = new JMenuItem("Process Definition");
-        newProcessItem.addActionListener(e -> clearCanvas());
+        newProcessItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
+            InputEvent.CTRL_DOWN_MASK));
+        newProcessItem.addActionListener(e -> newProcessDefinition());
         newMenu.add(newProcessItem);
         
         JMenuItem newInfrastructureItem = new JMenuItem("Infrastructure Definition");
-        newInfrastructureItem.addActionListener(e -> {
-            InfrastructureDefinitionFrame frame = new InfrastructureDefinitionFrame();
-            frame.setVisible(true);
-        });
+        newInfrastructureItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
+            InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
+        newInfrastructureItem.addActionListener(e -> newInfrastructureDefinition());
         newMenu.add(newInfrastructureItem);
         
         fileMenu.add(newMenu);
+        
+        // Open menu - mirrors the New menu so both definition types are explicit
+        JMenu openMenu = new JMenu("Open");
+        
+        JMenuItem openProcessItem = new JMenuItem("Process Definition...");
+        openProcessItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
+            InputEvent.CTRL_DOWN_MASK));
+        openProcessItem.addActionListener(e -> openProcessDefinition());
+        openMenu.add(openProcessItem);
+        
+        JMenuItem openInfrastructureItem = new JMenuItem("Infrastructure Definition...");
+        openInfrastructureItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
+            InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
+        openInfrastructureItem.addActionListener(e -> openInfrastructureDefinition());
+        openMenu.add(openInfrastructureItem);
+        
+        fileMenu.add(openMenu);
         fileMenu.addSeparator();
         
-        JMenuItem saveItem = new JMenuItem("Save (.json)");
+        JMenuItem saveItem = new JMenuItem("Save Process Definition");
         saveItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, 
             InputEvent.CTRL_DOWN_MASK));
         saveItem.addActionListener(e -> saveToJSON());
         fileMenu.add(saveItem);
         
-        JMenuItem saveAsItem = new JMenuItem("Save As (.json)");
+        JMenuItem saveAsItem = new JMenuItem("Save Process Definition As...");
         saveAsItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, 
             InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
         saveAsItem.addActionListener(e -> saveAsToJSON());
         fileMenu.add(saveAsItem);
-        
-        JMenuItem loadItem = new JMenuItem("Load (.json)");
-        loadItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, 
-            InputEvent.CTRL_DOWN_MASK));
-        loadItem.addActionListener(e -> loadFromJSON());
-        fileMenu.add(loadItem);
         
         fileMenu.addSeparator();
         
@@ -1122,7 +1145,8 @@ public class ProcessEditor extends JFrame {
         if (lastDirectory != null) {
             fileChooser.setCurrentDirectory(lastDirectory);
         }
-        fileChooser.setDialogTitle("Save Petri Net");
+        fileChooser.setDialogTitle("Save Process Definition");
+        fileChooser.setFileFilter(createJsonFilter());
         
         // Use current filename as default, or "petri_net.json" if new
         if (currentFile != null) {
@@ -1133,7 +1157,7 @@ public class ProcessEditor extends JFrame {
         
         int result = fileChooser.showSaveDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
-            File file = fileChooser.getSelectedFile();
+            File file = ensureJsonExtension(fileChooser.getSelectedFile());
             saveLastDirectory(file.getParentFile());
             try (FileWriter writer = new FileWriter(file)) {
                 writer.write(canvas.saveToJSON());
@@ -1153,12 +1177,31 @@ public class ProcessEditor extends JFrame {
         }
     }
     
-    private void loadFromJSON() {
+    // ==================== New / Open ====================
+    
+    private void newProcessDefinition() {
+        clearCanvas();
+    }
+    
+    private void newInfrastructureDefinition() {
+        new InfrastructureDefinitionFrame().setVisible(true);
+    }
+    
+    private void openInfrastructureDefinition() {
+        InfrastructureDefinitionFrame.openInNewWindow(this);
+    }
+    
+    private void openProcessDefinition() {
+        if (!checkUnsavedChanges("opening another process definition")) {
+            return;
+        }
+        
         JFileChooser fileChooser = new JFileChooser();
         if (lastDirectory != null) {
             fileChooser.setCurrentDirectory(lastDirectory);
         }
-        fileChooser.setDialogTitle("Load Petri Net");
+        fileChooser.setDialogTitle("Open Process Definition");
+        fileChooser.setFileFilter(createJsonFilter());
         
         int result = fileChooser.showOpenDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
@@ -1172,6 +1215,21 @@ public class ProcessEditor extends JFrame {
                         content.append(line).append("\n");
                     }
                 }
+                
+                // Guard against opening an infrastructure file onto the process canvas
+                if (InfrastructureDefinitionFrame.isInfrastructureDefinition(content.toString())) {
+                    int choice = JOptionPane.showConfirmDialog(this,
+                        file.getName() + " is an Infrastructure Definition, not a Process Definition.\n" +
+                        "Open it in the Infrastructure Definition editor instead?",
+                        "Wrong Definition Type",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE);
+                    if (choice == JOptionPane.YES_OPTION) {
+                        InfrastructureDefinitionFrame.openFileInNewWindow(this, file);
+                    }
+                    return;
+                }
+                
                 canvas.loadFromJSON(content.toString());
                 documentationPanel.loadFromJSON(content.toString());  // Load documentation
                 undoRedoManager.clear();  // Clear undo/redo history after loading new file
@@ -1191,17 +1249,28 @@ public class ProcessEditor extends JFrame {
                 populateColorsFromCanvas();
                 
                 JOptionPane.showMessageDialog(this,
-                    "Loaded successfully!",
-                    "Load Successful",
+                    "Opened successfully!",
+                    "Open Successful",
                     JOptionPane.INFORMATION_MESSAGE);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this,
-                    "Error loading file: " + ex.getMessage(),
-                    "Load Error",
+                    "Error opening file: " + ex.getMessage(),
+                    "Open Error",
                     JOptionPane.ERROR_MESSAGE);
                 ex.printStackTrace();
             }
         }
+    }
+    
+    private static javax.swing.filechooser.FileNameExtensionFilter createJsonFilter() {
+        return new javax.swing.filechooser.FileNameExtensionFilter("JSON files (*.json)", "json");
+    }
+    
+    private static File ensureJsonExtension(File file) {
+        if (file.getName().toLowerCase().endsWith(".json")) {
+            return file;
+        }
+        return new File(file.getParentFile(), file.getName() + ".json");
     }
     
     private void clearCanvas() {
