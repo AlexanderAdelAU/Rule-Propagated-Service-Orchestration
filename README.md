@@ -5,6 +5,21 @@ orchestration architecture. It separates **process coordination** from
 **functionality at each place**: input transitions receive and synchronize tokens,
 a place invokes its bound function, and output transitions route the result.
 
+![RPSO execution sequence with light blue activation bars: T_in receives and buffers a token, synchronizes required inputs and invokes P; P returns its result; T_in hands it to T_out, which routes or terminates the workflow.](images/rpso-execution-sequence.svg)
+
+*The execution pattern within a generic host. T_in receives and synchronizes
+inputs, P performs the bound functionality, and T_out routes the result. Shaded
+activation bars show responsibility for one invocation; their lengths do not
+represent measured time.*
+
+**Synchronize required inputs** means waiting for any remaining inputs after
+the first token has been received and buffered. At a join, all declared inputs
+must be available before P is invoked; for a single-input operation, that
+requirement is immediately satisfied. T_in's activation ends after P's result
+has returned and been handed to T_out. T_out's activation ends after routing
+and publication, or after termination has been recorded. These are logical roles
+within the host, which remains available for subsequent tokens.
+
 **P1, P2, …, Pn are generic positions, not fixed business functions.** A place can
 return a simple Boolean, perform a financial calculation, or process a clinical
 result. The chosen service supplies its meaning; the process model supplies the

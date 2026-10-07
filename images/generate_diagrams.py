@@ -56,6 +56,41 @@ class Diagram:
     def save(self,name):
         (ROOT/name).write_text('\n'.join(self.parts)+ '\n</svg>\n')
 
+# Logical sequence for one invocation, not a Java call-stack or timing trace.
+d=Diagram(900,920,'RPSO execution sequence','Three logical lifelines within one generic host: input transition T_in, place function P, and output transition T_out. T_in receives and buffers a token, synchronizes the required inputs, and invokes P with arguments. P performs its function or calls the bound service, then returns the result. T_in hands the result to T_out and ends its activation. T_out applies routing rules, publishes tokens or records termination, then ends its activation. The activation bars are light blue; their lengths are conceptual, not measured durations.')
+for x,role,name in [(160,'T_in','Input transition'),(450,'P','Place function'),(740,'T_out','Output transition')]:
+    d.box(x-105,20,210,70,role,[name])
+    d.parts.append(f'<line x1="{x}" y1="90" x2="{x}" y2="865" stroke="#98a7b6" stroke-width="1.5" stroke-dasharray="5 5"/>')
+for x,top,bottom in [(160,105,535),(450,300,460),(740,535,835)]:
+    d.parts.append(f'<rect x="{x-9}" y="{top}" width="18" height="{bottom-top}" fill="#e1edf9" stroke="{BLUE}" stroke-width="1.5"/>')
+def sequence_note(x,y,w,lines):
+    height=len(lines)*24+18
+    d.parts.append(f'<rect x="{x-w/2}" y="{y}" width="{w}" height="{height}" fill="#f5f6f8" stroke="#98a7b6" stroke-width="1.2"/>')
+    d.text(x,y+26,lines,17)
+def sequence_message(source,target,y,label,returning=False):
+    start=source-9 if source>target else source+9
+    end=target+9 if source>target else target-9
+    dash=' stroke-dasharray="6 4"' if returning else ''
+    d.parts.append(f'<path d="M {start} {y} L {end} {y}" fill="none" stroke="{BLUE}" stroke-width="2"{dash} marker-end="url(#flow)"/>')
+    d.text((source+target)/2,y-16,label,17)
+sequence_note(160,120,200,['Receive and buffer','token'])
+sequence_note(160,195,230,['Synchronize required','inputs'])
+sequence_message(160,450,300,'Invoke with arguments')
+sequence_note(450,345,210,['Perform function','or call bound service'])
+sequence_message(450,160,460,'Return result',returning=True)
+sequence_message(160,740,535,'Hand off result')
+sequence_note(740,575,210,['Apply routing rules'])
+d.parts.append('<rect x="50" y="655" width="800" height="190" fill="none" stroke="#98a7b6" stroke-width="1.5"/>')
+d.text(70,683,'alt: continue workflow',17,True,'start')
+d.text(70,719,'Publish token or fork children',17,anchor='start')
+d.path('M 749 705 L 800 705 L 800 733 L 749 733')
+d.parts.append('<line x1="50" y1="750" x2="850" y2="750" stroke="#98a7b6" stroke-width="1.5" stroke-dasharray="5 5"/>')
+d.text(70,778,'OR end workflow',17,True,'start')
+d.text(70,814,'Record termination',17,anchor='start')
+d.path('M 749 798 L 800 798 L 800 826 L 749 826')
+d.text(450,898,'Shaded bars: activation for one invocation · Vertical order: sequence, not measured time',16)
+d.save('rpso-execution-sequence.svg')
+
 # Responsibility boundaries and the current local business-service call.
 d=Diagram(1120,690,'RPSO responsibility boundaries','Process and deployment definitions install local rules in a generic orchestration host. The host implements input transition, place invocation and output transition roles, invokes a separately packaged domain or token operation in-process, routes publications to other hosts, and supplies collected observations to Monitor outside the token path.')
 d.group(235,145,650,370,'Generic numbered host · P1–P6')
@@ -314,4 +349,4 @@ d.text(577,681,'collected host observations',14,anchor='start',colour=TEAL)
 d.text(560,798,'Circle: place · Bar: transition · AND: input join · Dot: illustrative token · Dashed blue: publication',14)
 d.text(560,820,'Every local triple is supported by the generic fabric; the bound operation gives its place meaning.',14)
 d.save('petrinet-double-join.svg')
-print('Generated seven editable SVG diagrams.')
+print('Generated eight editable SVG diagrams.')
