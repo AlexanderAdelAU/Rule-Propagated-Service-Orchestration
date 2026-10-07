@@ -7,6 +7,7 @@ content, not generated raster artwork.
 
 | Diagram | Meaning and source |
 |---|---|
+| `rpso-execution-sequence.svg` | Conceptual sequence of T_in receipt/buffering and synchronization, invocation/return at P, and handoff to T_out for routing/publication or termination. Light blue activation bars describe responsibility for one invocation, not measured durations or literal Java thread lifetimes. These are logical roles within one generic host. |
 | `rpso-architecture.svg` | Current responsibility boundaries: explicit T_in → Place P → T_out roles in a generic host, in-process invocation of a bound domain or token-operation JAR, separate Monitor collection. Based on `ServiceThread`, `ServiceHelper`, `RuleHandler` and the packaged runtime. |
 | `rpso-rule-deployment.svg` | JSON topology, canonical contracts and deployment profile feed binding/rule generation. Local acknowledgements and runtime token flow are distinct. Based on `TopologyBindingGenerator` and `RuleDeployer`. |
 | `financial-workflow.svg` | P1–P5 Validation → Credit/Fraud → Underwriting → Decision, with invalid/declined termination. Source: `btsn.common/ProcessDefinitionFolder/petrinet/Workflow/FinancialSystem_P1_P5_Workflow.json`. |
@@ -38,7 +39,7 @@ host process; separate packaging does not imply a separate network service.
 Monitor's arrow represents collected observations, not a mandatory business hop
 or a claim that every runtime event is streamed directly to Monitor.
 
-To regenerate all seven SVGs after editing their standard-library Python source:
+To regenerate all eight SVGs after editing their standard-library Python source:
 
 ```sh
 python3 images/generate_diagrams.py
@@ -71,7 +72,7 @@ The updated chart offers Wide/Narrow bars and displays unavailable-measurement
 notes only when applicable to the displayed roots. No raw observation database
 accompanies these captures: do not infer exact values from pixels, treat a
 viewport as proof of full-run accounting, or relabel them as a newer run.
-`generate_diagrams.py` regenerates only the seven SVG schematics, not these images.
+`generate_diagrams.py` regenerates only the eight SVG schematics, not these images.
 The journal screenshot `image(20261007-004731).png` was a layout reference only;
 its completion-order axis and percentage queue bands are not the current
 combined chart's arrival-order and measured queue-maximum semantics.
