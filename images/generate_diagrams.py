@@ -7,6 +7,7 @@ models named in images/README.md. Render and inspect after changing this file.
 """
 from pathlib import Path
 from html import escape
+import json
 
 ROOT = Path(__file__).resolve().parent
 INK = '#1b2b40'
@@ -28,15 +29,27 @@ class Diagram:
         weight='600' if bold else '400'
         for i, line in enumerate(lines):
             self.parts.append(f'<text x="{x}" y="{y+i*(size+7)}" font-family="Arial, Helvetica, sans-serif" font-size="{size}" font-weight="{weight}" text-anchor="{anchor}" fill="{colour}">{escape(line)}</text>')
-    def box(self, x,y,w,h,title,lines=(),kind='control'):
+    def box(self, x,y,w,h,title,lines=(),kind='control',identity=None):
         fills={'control':'#edf3fa','business':'#edf7f0','config':'#f3eff8','endpoint':'#f5f6f8','observe':'#edf7f5'}
-        self.parts.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="8" fill="{fills[kind]}" stroke="#60738a" stroke-width="1.5"/>')
+        node_id=f' id="{escape(identity)}"' if identity else ''
+        self.parts.append(f'<rect{node_id} x="{x}" y="{y}" width="{w}" height="{h}" rx="8" fill="{fills[kind]}" stroke="#60738a" stroke-width="1.5"/>')
         self.text(x+w/2,y+29,title,19,True)
         self.text(x+w/2,y+55,lines,15)
-    def path(self, d, kind='flow'):
-        colour={'flow':BLUE,'rule':PURPLE,'observe':TEAL,'ack':'#65758b'}[kind]
-        dash={'flow':'','rule':' stroke-dasharray="8 5"','observe':' stroke-dasharray="3 5"','ack':' stroke-dasharray="4 4"'}[kind]
-        self.parts.append(f'<path d="{d}" fill="none" stroke="{colour}" stroke-width="2"{dash} marker-end="url(#{kind})"/>')
+    def path(self, d, kind='flow', source=None, target=None):
+        colour={'flow':BLUE,'publication':BLUE,'rule':PURPLE,'observe':TEAL,'ack':'#65758b'}[kind]
+        dash={'flow':'','publication':' stroke-dasharray="6 4"','rule':' stroke-dasharray="8 5"','observe':' stroke-dasharray="3 5"','ack':' stroke-dasharray="4 4"'}[kind]
+        identity=f' data-source="{escape(source)}" data-target="{escape(target)}"' if source and target else ''
+        marker='flow' if kind=='publication' else kind
+        self.parts.append(f'<path d="{d}" fill="none" stroke="{colour}" stroke-width="2"{dash}{identity} marker-end="url(#{marker})"/>')
+    def place(self, x, y, identity, token=False):
+        self.parts.append(f'<circle id="{identity}" cx="{x}" cy="{y}" r="27" fill="#edf7f0" stroke="{INK}" stroke-width="2"/>')
+        self.text(x,y-3 if token else y+6,identity,18,True)
+        if token: self.parts.append(f'<circle cx="{x}" cy="{y+12}" r="4" fill="{INK}"/>')
+    def transition(self, x, y, identity, terminal=False, join=False):
+        width=28 if join else 16
+        self.parts.append(f'<rect id="{identity}" x="{x-width/2:g}" y="{y-24}" width="{width}" height="48" fill="{INK if terminal else BLUE}"/>')
+        if join: self.text(x,y+4,'AND',10,True,colour='#ffffff')
+        self.text(x,y+48,identity,13)
     def group(self,x,y,w,h,label):
         self.parts.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="12" fill="#fafbfc" stroke="#98a7b6" stroke-width="1.5"/>')
         self.text(x+18,y+27,label,17,True,'start')
@@ -44,14 +57,14 @@ class Diagram:
         (ROOT/name).write_text('\n'.join(self.parts)+ '\n</svg>\n')
 
 # Responsibility boundaries and the current local business-service call.
-d=Diagram(1120,690,'RPSO responsibility boundaries','Process and deployment definitions install local rules in a generic orchestration host. The host invokes a separately packaged business JAR in-process, routes token publications to other hosts, and supplies collected observations to Monitor outside the business path.')
+d=Diagram(1120,690,'RPSO responsibility boundaries','Process and deployment definitions install local rules in a generic orchestration host. The host implements input transition, place invocation and output transition roles, invokes a separately packaged domain or token operation in-process, routes publications to other hosts, and supplies collected observations to Monitor outside the token path.')
 d.group(235,145,650,370,'Generic numbered host · P1–P6')
 d.box(355,20,410,90,'Process and deployment definitions',['Topology · contracts · version · bindings'],'config')
 d.box(405,195,310,70,'Installed local RuleBase',kind='config')
 d.box(265,300,165,90,'T_in',['Buffer / synchronize'])
-d.box(475,300,175,90,'ServiceThread',['Validate / invoke'])
+d.box(475,300,175,90,'Place P',['Invoke bound operation'])
 d.box(695,300,160,90,'T_out',['Route / publish'])
-d.box(450,440,255,65,'Business-service JAR',['Domain objects and decisions'],'business')
+d.box(450,440,255,65,'Bound service JAR',['Domain or token operation'],'business')
 d.box(20,300,175,90,'Incoming token',['Generator / prior host'],'endpoint')
 d.box(935,300,165,90,'Outcome',['Publish to next host','or terminate locally'],'endpoint')
 d.box(390,565,350,75,'Monitor',['Collection · reconstruction · diagrams'],'observe')
@@ -173,33 +186,61 @@ d.text(550,93,'false: repeat the activity',15)
 d.path('M 550 295 L 550 340','observe')
 d.text(567,324,'collector',14,anchor='start',colour=TEAL)
 d.save('p1-tutorial.svg')
-# Deterministic model: real host execution with two successive input joins.
-d=Diagram(1120,720,'Live six-place Petri-net model execution','P1 BooleanTokenService selects a false terminal outcome or forks true into P2, P3 and P5. P4 receives both P2/P3 results, then P6 receives P4/P5 results and terminates. Model operations execute on the generic hosts and Monitor collects their measured queue, execution, join and elapsed intervals.')
-d.group(20,20,1080,550,'Live model execution · generic hosts and deterministic token services')
-d.box(35,90,190,65,'Generator',kind='endpoint')
-d.box(35,270,190,90,'P1 · Boolean',['BooleanTokenService'],'business')
-d.box(325,95,235,105,'P2 · Branch 2',['BranchTwoTokenService','token_branch2'],'business')
-d.box(325,270,235,105,'P3 · Branch 1',['BranchOneTokenService','token_branch1'],'business')
-d.box(325,455,235,90,'P5 · Side branch',['SideTokenService','token_branch1'],'business')
-d.box(670,185,190,105,'P4 · First join',['MergeTokenService','P2 + P3 inputs'],'business')
-d.box(900,270,185,105,'P6 · Second join',['FinalMergeTokenService','P4 + P5 inputs'],'business')
-d.box(35,485,190,65,'Terminate at P1',kind='endpoint')
-d.box(900,485,185,65,'Terminate at P6',kind='endpoint')
-d.path('M 130 155 L 130 270')
-d.path('M 225 315 L 325 147')
-d.path('M 225 315 L 325 322')
-d.path('M 225 315 L 325 500')
-d.text(267,289,['true:','fork'],14)
-d.path('M 130 360 L 130 485')
-d.text(145,425,'false',14,anchor='start')
-d.path('M 560 147 L 670 237')
-d.path('M 560 322 L 670 237')
-d.path('M 860 237 L 900 322')
-d.path('M 560 500 L 900 322')
-d.path('M 992 375 L 992 485')
-d.box(360,610,400,70,'Monitor · measured runtime',['Queueing · execution · joins · elapsed time'],'observe')
-d.path('M 560 570 L 560 610','observe')
-d.text(577,596,'collected place observations',14,anchor='start',colour=TEAL)
-d.text(560,709,'Activity boxes abbreviate local T_in → P → T_out roles; arrows show logical token publications.',15)
+# Executable RPSO Petri-net notation: explicit local triples, publication links.
+# All model nodes and arcs retain their JSON identities; coordinates are only layout.
+model_path=ROOT.parent/'btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_to_P6_Double_Join_Workflow.json'
+model=json.loads(model_path.read_text())
+nodes={node['id']:node for node in model['elements']}
+arcs={(arc['source'],arc['target']):arc for arc in model['arrows']}
+d=Diagram(1120,830,'Petri-net model executed by the RPSO fabric','Six circular places have explicit input and output transition bars. T_out_P1 forks true to P2, P3 and P5 or routes false to T_in_Terminate. T_in_P4 joins P2/P3; T_in_P6 joins P4/P5; T_out_P6 terminates. Each local transition-place-transition unit is implemented by the generic host with a bound token operation at its place. Dashed connections are publication channels in RPSO notation. The dot is an illustrative model token; Monitor observes outside the model.')
+d.group(20,20,1080,630,'Executable Petri-net model · T_in → P → T_out at every place')
+positions={'P1':(145,330),'P2':(415,130),'P3':(415,330),'P4':(695,230),'P5':(415,550),'P6':(975,420)}
+titles={'P1':'Boolean token','P2':'Branch 2','P3':'Branch 1','P4':'First input join','P5':'Side branch','P6':'Second input join'}
+drawn_arcs=set()
+def model_arc(source,target,path,publication=False):
+    assert (source,target) in arcs, f'Unknown model arc: {source} → {target}'
+    drawn_arcs.add((source,target))
+    d.path(path,'publication' if publication else 'flow',source,target)
+
+for place,(x,y) in positions.items():
+    tin,tout='T_in_'+place,'T_out_'+place
+    assert nodes[place]['type']=='PLACE'
+    assert nodes[tin]['transition_type']=='T_in' and nodes[tout]['transition_type']=='T_out'
+    d.group(x-115,y-60,230,125,titles[place])
+    d.place(x,y,place,token=place=='P1')
+    d.transition(x-80,y,tin,join=nodes[tin]['node_type']=='JoinNode')
+    d.transition(x+80,y,tout,terminal=nodes[tout]['node_type']=='TerminateNode')
+    model_arc(tin,place,f'M {x-(66 if nodes[tin]["node_type"]=="JoinNode" else 72)} {y} L {x-27} {y}')
+    model_arc(place,tout,f'M {x+27} {y} L {x+72} {y}')
+
+d.box(35,110,220,75,'Generator',['EVENT_GENERATOR'],'endpoint',identity='EVENT_GENERATOR')
+d.transition(145,550,'T_in_Terminate',terminal=True)
+d.text(145,620,'Terminate at P1',15,True)
+publications={
+    ('EVENT_GENERATOR','T_in_P1'):'M 145 185 L 42 232 L 42 330 L 57 330',
+    ('T_out_P1','T_in_P2'):'M 233 330 L 275 330 L 275 130 L 327 130',
+    ('T_out_P1','T_in_P3'):'M 233 330 L 327 330',
+    ('T_out_P1','T_in_P5'):'M 233 330 L 275 330 L 275 550 L 327 550',
+    ('T_out_P1','T_in_Terminate'):'M 225 354 L 225 450 L 145 450 L 145 526',
+    ('T_out_P2','T_in_P4'):'M 503 130 L 555 130 L 555 230 L 601 230',
+    ('T_out_P3','T_in_P4'):'M 503 330 L 555 330 L 555 230 L 601 230',
+    ('T_out_P4','T_in_P6'):'M 783 230 L 835 230 L 835 420 L 881 420',
+    ('T_out_P5','T_in_P6'):'M 503 550 L 835 550 L 835 420 L 881 420',
+}
+for (source,target),path in publications.items(): model_arc(source,target,path,True)
+assert drawn_arcs==set(arcs), 'Diagram must include every configured model arc'
+assert nodes['T_in_P4']['node_type']==nodes['T_in_P6']['node_type']=='JoinNode'
+assert all(arcs['T_out_P1',target]['decision_value']=='true' for target in ['T_in_P2','T_in_P3','T_in_P5'])
+assert arcs['T_out_P1','T_in_Terminate']['decision_value']=='false'
+d.text(300,242,'true: three-way fork',13,anchor='start')
+d.text(235,430,'false',13,anchor='start')
+d.text(695,326,'Wait for both P2 + P3 inputs',14)
+d.text(975,515,'Wait for both P4 + P5 inputs',14)
+d.text(975,539,'T_out_P6 terminates',14,True)
+d.box(360,700,400,70,'Monitor · observed execution',['Queueing · execution · joins · elapsed time'],'observe')
+d.path('M 560 650 L 560 700','observe')
+d.text(577,681,'collected host observations',14,anchor='start',colour=TEAL)
+d.text(560,798,'Circle: place · Bar: transition · AND: input join · Dot: illustrative token · Dashed blue: publication',14)
+d.text(560,820,'Every local triple is supported by the generic fabric; the bound operation gives its place meaning.',14)
 d.save('petrinet-double-join.svg')
 print('Generated six editable SVG diagrams.')

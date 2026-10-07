@@ -51,7 +51,7 @@ For an editable model walkthrough, see [Tutorial.md](Tutorial.md).
 
 ![Process definitions install local rules in generic hosts, which invoke separate business JARs and supply observations to Monitor.](images/rpso-architecture.svg)
 
-*Responsibility boundaries in the current Java implementation. Business-service
+*Responsibility boundaries in the current Java implementation. Bound service
 JARs are invoked in-process inside a numbered host. The dashed path configures
 local rules; the dotted path carries collected observations outside the business
 workflow.*
@@ -80,10 +80,11 @@ The execution pattern is **T_in → P → T_out**:
 - **T_out** applies the installed routing rules, publishes fork children or
   records a business termination.
 
-These are semantic roles within the local execution machinery. Activity boxes in
-the diagrams abbreviate those roles; the arrows represent logical publications,
-not a complete classical bipartite place/transition net. A process editor model
-retains the explicit transition and place nodes.
+These are semantic roles within the local execution machinery. The business
+activity boxes abbreviate a complete **T_in → P → T_out** execution unit; the
+Petri-net example below expands its transition and place nodes explicitly.
+The host implements the whole unit, with its bound operation giving P its
+computational meaning.
 
 There is no central engine making every runtime routing decision. Hosts use
 local rule fragments and communicate through tokens. This does not imply absence
@@ -149,20 +150,54 @@ proceed to Decision; `declined` terminates early. See
 
 ### Live Petri-net model execution
 
-![P1 forks to P2, P3 and P5; P4 joins P2/P3, then P6 joins P4/P5 and terminates. Monitor collects measured runtime observations.](images/petrinet-double-join.svg)
+![Explicit Petri-net execution units: transition bars surround each circular place. T_out_P1 forks to P2, P3 and P5; T_in_P4 joins P2/P3, T_in_P6 joins P4/P5, and T_out_P6 terminates. The generic fabric implements each unit.](images/petrinet-double-join.svg)
 
-RPSO also runs Petri-net models directly on the same execution fabric. The
-[six-place double-join definition](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_to_P6_Double_Join_Workflow.json)
-replaces domain calculations with small deterministic token operations:
+**The architecture implements the model's transition–place–transition structure.**
+In RPSO notation, each circular place P has an input transition T_in and an
+output transition T_out. Its generic orchestration host realizes the whole
+unit; the service bound to P supplies the operation performed there:
 
-| Place | Logical service | Model role |
+| Model role | Corresponding execution role | In the double-join example |
 |---|---|---|
-| P1 | `BooleanTokenService` | Select `true` or `false`; `true` forks into three branches, `false` terminates |
-| P2 | `BranchTwoTokenService` | Return `token_branch2` to the first join |
-| P3 | `BranchOneTokenService` | Return `token_branch1` to the first join |
-| P4 | `MergeTokenService` | Receive both P2/P3 results, return `token_branch2` |
-| P5 | `SideTokenService` | Return `token_branch1` to the second join |
-| P6 | `FinalMergeTokenService` | Receive P4/P5 results, return `token` and terminate |
+| **T_in** — input transition | Receive and buffer tokens; synchronize the declared inputs before invocation | `T_in_P4` waits for both P2/P3 results; `T_in_P6` waits for P4/P5 |
+| **P** — place with a bound operation | Invoke the configured operation through `ServiceThread` and `ServiceHelper` | P4 invokes `MergeTokenService`; P6 invokes `FinalMergeTokenService` |
+| **T_out** — output transition | Apply installed routing rules; publish fork children, forward results or terminate | `T_out_P1` forks on `true`; `T_out_P6` records termination |
+
+Thus **T_in → P → T_out** maps directly to **receive/synchronize → invoke →
+route/publish**. The joins belong to the input-transition role; the token-service
+operation runs when its required inputs are ready. The diagram's dot illustrates
+a model token. Execution observations are shown separately in the captured runs
+below, and Monitor collects outside the active token path.
+
+The Financial and healthcare activity boxes use this same execution unit.
+Binding P to a token operation gives a Petri-net model place; binding P to a
+clinical or financial operation gives the business activity its domain meaning.
+Contracts and routing rules specify the inputs and outcomes in either case.
+
+Solid local arcs connect transition bars and place circles. Dashed blue links
+show the publication channels between units in the executable RPSO notation;
+transition-to-transition publication links are distinct from the arcs of an
+ordinary bipartite P/T net. The figure maps the executable RPSO notation to its
+runtime roles.
+
+The
+[six-place double-join definition](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_to_P6_Double_Join_Workflow.json)
+binds its six places to small deterministic token operations:
+
+| Place | Bound service | What its operation does | Output attribute and transition route |
+|---|---|---|---|
+| P1 | `BooleanTokenService` | Read the supplied `outcome` (default `true`); record the Boolean value and routing decision | `token`; T_out forks to P2/P3/P5 on `true`, or terminates on `false` |
+| P2 | `BranchTwoTokenService` | Carry the incoming token data unchanged | `token_branch2` → P4 |
+| P3 | `BranchOneTokenService` | Carry the incoming token data unchanged | `token_branch1` → P4 |
+| P4 | `MergeTokenService` | Combine the two input objects into a JSON `branches` array after T_in synchronizes P2/P3 | `token_branch2` → P6 |
+| P5 | `SideTokenService` | Carry the incoming token data unchanged | `token_branch1` → P6 |
+| P6 | `FinalMergeTokenService` | Combine the P4/P5 input objects into a JSON `branches` array after T_in synchronizes them | `token`; T_out records workflow termination |
+
+**These six operations are deterministic.** The generator supplies P1's outcome
+through `token.outcome`; the default is `true`. P2/P3/P5 forward data and P4/P6
+combine it. The output names above are payload attributes carrying JSON objects.
+The legacy `Stochastic...` services remain available for older models; this
+launcher selects the deterministic services listed in the table.
 
 The generic fabric performs the forks, input synchronization and publication;
 the model services carry and combine the token data. P4 becomes eligible after
