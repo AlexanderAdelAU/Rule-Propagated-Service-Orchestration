@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1120" height="505" viewBox="0 0 1120 505" role="img" aria-labelledby="title desc">
-<title id="title">Financial loan-application workflow</title><desc id="desc">Submitted applications reach Validation on P1. Valid results fork to Credit Check on P2 and Fraud Check on P3. Underwriting on P4 joins both named results. Approved and conditional outcomes proceed to Decision on P5; invalid and declined applications terminate early. Monitor is not a business activity.</desc>
+<title id="title">Financial loan-application workflow</title><desc id="desc">Submitted applications reach Validation on P1. Valid results fork to Credit Check on P2 and Fraud Check on P3. Underwriting on P4 joins both named results. Approved and conditional outcomes proceed to Decision on P5; invalid and declined applications terminate early. Monitor is not a business activity. The top-right legend expands a rounded Credit Check activity into T_in, its service function at P, and T_out.</desc>
 <defs>
 <marker id="flow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#24598e"/></marker>
 <marker id="rule" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7350a2"/></marker>
@@ -46,5 +46,21 @@
 <path d="M 742 290 L 742 370" fill="none" stroke="#24598e" stroke-width="2" marker-end="url(#flow)"/>
 <text x="757" y="338" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="400" text-anchor="start" fill="#1b2b40">declined</text>
 <path d="M 1007 290 L 1007 370" fill="none" stroke="#24598e" stroke-width="2" marker-end="url(#flow)"/>
+<g id="activity-notation-legend" aria-label="Legend: each rounded service activity represents T_in, a service function at P, and T_out.">
+<text x="995" y="52" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#1b2b40">Legend: inside an activity</text>
+<rect x="890" y="70" width="210" height="90" rx="8" fill="#edf7f0" stroke="#60738a" stroke-width="1.5"/>
+<text x="995" y="99" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Credit Check</text>
+<rect x="913" y="112" width="8" height="24" fill="#24598e"/>
+<circle cx="995" cy="124" r="13" fill="#edf7f0" stroke="#1b2b40" stroke-width="2"/>
+<text x="995" y="129" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#1b2b40">P</text>
+<rect x="1069" y="112" width="8" height="24" fill="#24598e"/>
+<path d="M 921 124 L 976 124" fill="none" stroke="#24598e" stroke-width="1.5"/>
+<path d="M 976 121 L 982 124 L 976 127 Z" fill="#24598e"/>
+<path d="M 1008 124 L 1063 124" fill="none" stroke="#24598e" stroke-width="1.5"/>
+<path d="M 1063 121 L 1069 124 L 1063 127 Z" fill="#24598e"/>
+<text x="917" y="151" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="400" text-anchor="middle" fill="#1b2b40">T_in</text>
+<text x="995" y="151" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="400" text-anchor="middle" fill="#1b2b40">service function</text>
+<text x="1073" y="151" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="400" text-anchor="middle" fill="#1b2b40">T_out</text>
+</g>
 <text x="560" y="482" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Activity boxes abbreviate local T_in → P → T_out roles; arrows show logical publication.</text>
 </svg>

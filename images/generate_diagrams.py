@@ -148,7 +148,7 @@ d.text(560,750,'Local acknowledgements are not a global atomic-commit protocol.'
 d.save('rpso-rule-deployment.svg')
 
 # Financial logical activity schematic.
-d=Diagram(1120,505,'Financial loan-application workflow','Submitted applications reach Validation on P1. Valid results fork to Credit Check on P2 and Fraud Check on P3. Underwriting on P4 joins both named results. Approved and conditional outcomes proceed to Decision on P5; invalid and declined applications terminate early. Monitor is not a business activity.')
+d=Diagram(1120,505,'Financial loan-application workflow','Submitted applications reach Validation on P1. Valid results fork to Credit Check on P2 and Fraud Check on P3. Underwriting on P4 joins both named results. Approved and conditional outcomes proceed to Decision on P5; invalid and declined applications terminate early. Monitor is not a business activity. The top-right legend expands a rounded Credit Check activity into T_in, its service function at P, and T_out.')
 d.box(20,200,180,90,'Validation',['P1 · validationResults'],'business')
 d.box(290,70,210,90,'Credit Check',['P2 · creditCheckResults'],'business')
 d.box(290,330,210,90,'Fraud Check',['P3 · fraudCheckResults'],'business')
@@ -172,6 +172,24 @@ d.text(880,204,['approved /','conditional'],14)
 d.path('M 742 290 L 742 370')
 d.text(757,338,'declined',14,anchor='start')
 d.path('M 1007 290 L 1007 370')
+# Explain the change from explicit Petri-net units to named activity boxes.
+# Keep the example inside a labelled legend, clear of the workflow's routes.
+d.parts.append('<g id="activity-notation-legend" aria-label="Legend: each rounded service activity represents T_in, a service function at P, and T_out.">')
+d.text(995,52,'Legend: inside an activity',14,True)
+# Match the actual Credit Check activity's 210 x 90 box.
+d.parts.append('<rect x="890" y="70" width="210" height="90" rx="8" fill="#edf7f0" stroke="#60738a" stroke-width="1.5"/>')
+d.text(995,99,'Credit Check',19,True)
+d.parts.append(f'<rect x="913" y="112" width="8" height="24" fill="{BLUE}"/>')
+d.parts.append(f'<circle cx="995" cy="124" r="13" fill="#edf7f0" stroke="{INK}" stroke-width="2"/>')
+d.text(995,129,'P',14,True)
+d.parts.append(f'<rect x="1069" y="112" width="8" height="24" fill="{BLUE}"/>')
+for start, end in [(921,982),(1008,1069)]:
+    d.parts.append(f'<path d="M {start} 124 L {end-6} 124" fill="none" stroke="{BLUE}" stroke-width="1.5"/>')
+    d.parts.append(f'<path d="M {end-6} 121 L {end} 124 L {end-6} 127 Z" fill="{BLUE}"/>')
+d.text(917,151,'T_in',11)
+d.text(995,151,'service function',11)
+d.text(1073,151,'T_out',11)
+d.parts.append('</g>')
 d.text(560,482,'Activity boxes abbreviate local T_in → P → T_out roles; arrows show logical publication.',15)
 d.save('financial-workflow.svg')
 

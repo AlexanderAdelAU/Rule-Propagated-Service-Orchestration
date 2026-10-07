@@ -1,0 +1,17 @@
+{
+  "domain": "PetriNetModels",
+  "purpose": "Single-place tutorial: only the P1 stochastic entry capability is active.",
+  "services": [
+    {
+      "service": "StochasticEntryTokenService",
+      "implementationClass": "org.btsn.services.StochasticEntryTokenService",
+      "operation": "processToken",
+      "inputs": [
+        "token"
+      ],
+      "returnAttribute": "token",
+      "canonicalBinding": "ServiceAttributeBindings/StochasticEntryTokenService/StochasticEntryTokenService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    }
+  ]
+}
