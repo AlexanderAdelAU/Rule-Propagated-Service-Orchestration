@@ -1,6 +1,6 @@
 {
   "catalog": "BusinessServiceDefinitions/ForkModels.json",
-  "infrastructure": "ProcessDefinitionFolder/ForkModels_Infrastructure.json",
+  "infrastructure": "InfrastructureDefinitionFolder/petrinet/ForkModels_Infrastructure.json",
   "deploymentRules": "RuleBase/Generated/InfrastructureDeployment.ruleml.xml",
   "directServiceRules": [
     "RuleBase/PetriNet/ListofPetriNetInitializationServices.ruleml.xml",

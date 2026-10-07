@@ -1,6 +1,6 @@
 {
   "catalog": "BusinessServiceDefinitions/FinancialSystem.json",
-  "infrastructure": "ProcessDefinitionFolder/FinancialSystem_Infrastructure.json",
+  "infrastructure": "InfrastructureDefinitionFolder/financial/FinancialSystem_Infrastructure.json",
   "deploymentRules": "RuleBase/Generated/InfrastructureDeployment.ruleml.xml",
   "directServiceRules": [
     "RuleBase/PetriNet/ListofPetriNetInitializationServices.ruleml.xml",

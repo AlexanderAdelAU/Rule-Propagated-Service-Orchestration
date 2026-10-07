@@ -43,6 +43,20 @@ public final class LauncherRuntimeCheck {
             }
             Path common=Path.of(p.getProperty("common.project.dir"));
             check(!common.equals(root.resolve("btsn.common"))&&common.startsWith(root.resolve("btsn.services/target/launchers")),"Source configuration used as a runtime: "+build);
+            for(int task=0;task<tasks.getLength();task++) {
+                org.w3c.dom.Element java=(org.w3c.dom.Element)tasks.item(task);
+                if(!"${token.generator.class}".equals(java.getAttribute("classname")))continue;
+                org.w3c.dom.NodeList arguments=java.getElementsByTagName("arg");
+                for(int argument=0;argument<arguments.getLength();argument++) {
+                    if(!"-infrastructure".equals(((org.w3c.dom.Element)arguments.item(argument)).getAttribute("value")))continue;
+                    check(argument+1<arguments.getLength(),"Missing infrastructure name: "+build);
+                    String name=p.replaceProperties(((org.w3c.dom.Element)arguments.item(argument+1)).getAttribute("value"));
+                    if(name.endsWith(".json"))name=name.substring(0,name.length()-5);
+                    Path definition=common.resolve("InfrastructureDefinitionFolder").resolve(name+".json");
+                    check(Files.isRegularFile(definition),"Missing infrastructure definition: "+definition);
+                    check("Infrastructure".equals(json(definition).get("definitionType")),"Wrong infrastructure definition type: "+definition);
+                }
+            }
             BusinessCapabilityResolver resolver=new BusinessCapabilityResolver(common);
             JSONObject config=json(common.resolve("BusinessServiceDefinitions/Deployment.json"));
             JSONObject catalogue=json(common.resolve((String)config.get("catalog")));
@@ -86,7 +100,7 @@ public final class LauncherRuntimeCheck {
     private static JSONObject json(Path p) throws Exception { return (JSONObject)new JSONParser().parse(Files.readString(p)); }
     private static java.util.Map<Path,String> sourceConfiguration(Path root) throws Exception {
         java.util.Map<Path,String> hashes=new java.util.TreeMap<>();
-        for(String directory:Arrays.asList("RuleBase","ServiceAttributeBindings","BusinessServiceDefinitions","ProcessDefinitionFolder","RulePayLoad"))
+        for(String directory:Arrays.asList("RuleBase","ServiceAttributeBindings","BusinessServiceDefinitions","ProcessDefinitionFolder","InfrastructureDefinitionFolder","RulePayLoad"))
             try(java.util.stream.Stream<Path> files=Files.walk(root.resolve("btsn.common").resolve(directory))) {
                 for(Path file:(Iterable<Path>)files.filter(Files::isRegularFile)::iterator)
                     hashes.put(file,java.util.Base64.getEncoder().encodeToString(java.security.MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(file))));

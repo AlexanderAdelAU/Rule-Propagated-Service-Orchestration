@@ -3,7 +3,7 @@
     <description>Run P1_Tutorial_BuildAndRun.xml on one computer with the supplied loopback infrastructure.</description>
     <property name="launcher.profile.file" location="../btsn.services/deployments/models/P1_Tutorial_LocalDeployment.json"/>
     <property name="launcher.rules.file" location="../btsn.services/deployments/models/P1_Tutorial_LocalInfrastructure.ruleml.xml"/>
-    <property name="infrastructure.definition.name" value="P1_Tutorial_LocalInfrastructure"/>
+    <property name="infrastructure.definition.name" value="petrinet/P1_Tutorial_LocalInfrastructure"/>
     <import file="P1_Tutorial_BuildAndRun.xml"/>
     <property name="tutorial.results.dir" location="../btsn.services/target/tutorial-results/P1"/>
     <property name="tutorial.export.classes" location="../btsn.services/target/tutorial-export"/>

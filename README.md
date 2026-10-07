@@ -225,7 +225,7 @@ workflow.*
 |---|---|---|
 | Process model | Places, transitions, fork/join structure, guards and termination | `btsn.common/ProcessDefinitionFolder` |
 | Service contract | Logical service identity, operations, named inputs and returned attribute | `BusinessServiceDefinitions`, `ServiceAttributeBindings` in `btsn.common` |
-| Deployment | Map capabilities to implementation classes, hosts and channels | Infrastructure definitions and `btsn.services/deployments/{healthcare,financial,models}` |
+| Deployment | Map capabilities to implementation classes, hosts and channels | [Infrastructure definitions](btsn.common/InfrastructureDefinitionFolder/README.md) and `btsn.services/deployments/{healthcare,financial,models}` |
 | Generic execution fabric | Transport, buffering, synchronization, version selection, invocation and publication | `btsn.rpso.places.p1`–`p6`, shared infrastructure |
 | Business computation | Domain objects, calculations and decision symbols | `btsn.common/src/org/btsn/business`, packaged as independent service JARs |
 | Observation | Collect records, reconstruct workflow families and display measurements | `btsn.common.Monitor` |
@@ -432,7 +432,7 @@ provide entry points for preparing the packaged runtime.
 
 | Project | Purpose |
 |---|---|
-| `btsn.common` | Shared source, business implementations, contracts, process definitions and rules |
+| `btsn.common` | Shared source, business implementations, contracts, infrastructure/process definitions and rules |
 | `btsn.services` | Service packaging, shared Ant builds, deployment profiles and checks |
 | `btsn.rpso.places.p1`–`p6` | Generic numbered orchestration hosts |
 | `btsn.common.Monitor` | Collection, reconstruction and visualization |
@@ -441,6 +441,12 @@ provide entry points for preparing the packaged runtime.
 | `btsn.financial.ProjectLoader` | Financial launchers |
 | `btsn.petrinet.ProjectLoader` | Petri-net model launchers and utility phases |
 | `btsn.workflowEditor` | Model editor and observation animator |
+
+Editable node and capability settings are grouped by domain in
+[`InfrastructureDefinitionFolder`](btsn.common/InfrastructureDefinitionFolder/README.md).
+Their routing and guards belong in
+[`ProcessDefinitionFolder`](btsn.common/ProcessDefinitionFolder); the analysis
+folders hold observations from executing those models.
 
 `btsn.services` contains build support, not business implementation or execution
 handlers. Service JARs are grouped under

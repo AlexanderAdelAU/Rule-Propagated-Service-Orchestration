@@ -1,6 +1,6 @@
 {
   "catalog": "BusinessServiceDefinitions/Healthcare.json",
-  "infrastructure": "ProcessDefinitionFolder/Healthcare_Infrastructure.json",
+  "infrastructure": "InfrastructureDefinitionFolder/healthcare/Healthcare_Infrastructure.json",
   "deploymentRules": "RuleBase/Generated/InfrastructureDeployment.ruleml.xml",
   "directServiceRules": [
     "RuleBase/PetriNet/ListofPetriNetInitializationServices.ruleml.xml",

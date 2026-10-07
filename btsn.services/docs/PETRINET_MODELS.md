@@ -40,7 +40,7 @@ unchanged. Both model launchers import `btsn.services/model-runtime.xml` for
 shared build support.
 
 The model address settings are in
-`btsn.common/ProcessDefinitionFolder/PetriNetModels_Infrastructure.json` and
+`btsn.common/InfrastructureDefinitionFolder/petrinet/PetriNetModels_Infrastructure.json` and
 `btsn.services/deployments/models/InfrastructureDeployment.ruleml.xml`; keep their ip0
 addresses consistent. The usual `auto`, `local` and `remote` launch properties
 apply to P1, P2 and Monitor. This launcher uses the existing ServiceHelper
@@ -76,8 +76,9 @@ and its erroneous input-join label have been corrected.
 | P6 | FinalMergeTokenService | token_branch1, token_branch2 | token |
 
 The branch slots follow the incoming arc order in the existing model. The model
-address settings are `DoubleJoinModels_Infrastructure.json` in the common
-process definitions and `btsn.services/deployments/models/DoubleJoinInfrastructure.ruleml.xml`.
+address settings are
+`btsn.common/InfrastructureDefinitionFolder/petrinet/DoubleJoinModels_Infrastructure.json`
+and `btsn.services/deployments/models/DoubleJoinInfrastructure.ruleml.xml`.
 Keep their ip0 addresses consistent. Working place configuration is under
 `btsn.services/target/double-join-model-runtime`. Stop locally launched hosts
 before starting another run using these ports.

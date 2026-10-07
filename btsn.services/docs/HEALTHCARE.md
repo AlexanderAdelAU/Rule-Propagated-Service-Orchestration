@@ -28,11 +28,12 @@ still produces one JAR. The shared service support and Derby library accompany
 those JARs in `target/deployment/lib`. The infrastructure JAR excludes these
 implementations and their business base classes. No execution handler changed.
 
-`Healthcare.json` defines logical contracts; `Healthcare_Infrastructure.json`
+`Healthcare.json` defines logical contracts;
+`btsn.common/InfrastructureDefinitionFolder/healthcare/Healthcare_Infrastructure.json`
 maps them to hosts and ports. `healthcare-runtime.xml` builds a separate runtime
 configuration under `btsn.services/target/healthcare-runtime`; it leaves the
 source Financial deployment selection intact. The healthcare token generator
-accepts `-infrastructure Healthcare_Infrastructure` and `-format-service` to keep
+accepts `-infrastructure healthcare/Healthcare_Infrastructure` and `-format-service` to keep
 healthcare input formats independent of physical host names. It generates
 canonical bindings before deploying each workflow version.
 

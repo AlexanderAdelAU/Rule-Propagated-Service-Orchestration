@@ -24,7 +24,7 @@ These workflow definitions contain logical business-service identities only.
 
 Authoritative deployment mapping:
 
-- `ProcessDefinitionFolder/FinancialSystem_Infrastructure.json`
+- `InfrastructureDefinitionFolder/financial/FinancialSystem_Infrastructure.json`
 
 Current logical-to-physical mapping:
 

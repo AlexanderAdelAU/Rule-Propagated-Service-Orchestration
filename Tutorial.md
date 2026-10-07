@@ -52,6 +52,9 @@ previous results you need before running it.
 
 Infrastructure defines network resources and the service operation available
 on each physical node. It does not define the loop or its routing guards.
+Editable definitions are grouped by domain in
+[`InfrastructureDefinitionFolder`](btsn.common/InfrastructureDefinitionFolder/README.md);
+this tutorial uses its `petrinet` subfolder.
 
 ### Create the physical node
 
@@ -88,8 +91,9 @@ implementation.
 
 ### Save and generate the configuration
 
-1. Click **Save...** and save the definition as
-   `btsn.common/ProcessDefinitionFolder/P1_Tutorial_LocalInfrastructure.json`.
+1. Click **Save...**, open the `petrinet` subfolder of the infrastructure
+   definitions folder, and save the definition as
+   `btsn.common/InfrastructureDefinitionFolder/petrinet/P1_Tutorial_LocalInfrastructure.json`.
 2. Click **Generate Configuration**. The editor validates the definition and
    writes the service's canonical binding under `btsn.common/ServiceAttributeBindings`,
    plus `btsn.common/RuleBase/Generated/InfrastructureDeployment.ruleml.xml`.
@@ -99,7 +103,7 @@ implementation.
 
 Ready-to-use versions of both files are included:
 
-- [Editable infrastructure JSON](btsn.common/ProcessDefinitionFolder/P1_Tutorial_LocalInfrastructure.json).
+- [Editable infrastructure JSON](btsn.common/InfrastructureDefinitionFolder/petrinet/P1_Tutorial_LocalInfrastructure.json).
 - [Matching deployment rules](btsn.services/deployments/models/P1_Tutorial_LocalInfrastructure.ruleml.xml).
 - [Local deployment profile](btsn.services/deployments/models/P1_Tutorial_LocalDeployment.json), which selects that JSON, the P1-only service catalogue and the initialization/collection services.
 
@@ -114,7 +118,7 @@ or declare it as P1's business capability. P1 initialization and collection use
 the existing `P1_InitializationService` and `P1_CollectorService` definitions.
 
 The original launcher selects
-[`StochasticLoopModels_Infrastructure.json`](btsn.common/ProcessDefinitionFolder/StochasticLoopModels_Infrastructure.json)
+[`StochasticLoopModels_Infrastructure.json`](btsn.common/InfrastructureDefinitionFolder/petrinet/StochasticLoopModels_Infrastructure.json)
 and its [deployment snapshot](btsn.services/deployments/models/StochasticLoopInfrastructure.ruleml.xml).
 That infrastructure also declares a P2 capability for other stochastic models;
 this one-place tutorial uses P1 only. The supplied local variant needs one node and selects a P1-only catalogue.
@@ -393,7 +397,7 @@ observations does not deploy or rerun the process.
 
 | Artefact | Role |
 |---|---|
-| [P1_Tutorial_LocalInfrastructure.json](btsn.common/ProcessDefinitionFolder/P1_Tutorial_LocalInfrastructure.json) | Editable single-node infrastructure |
+| [P1_Tutorial_LocalInfrastructure.json](btsn.common/InfrastructureDefinitionFolder/petrinet/P1_Tutorial_LocalInfrastructure.json) | Editable single-node infrastructure |
 | [P1_Tutorial_LocalInfrastructure.ruleml.xml](btsn.services/deployments/models/P1_Tutorial_LocalInfrastructure.ruleml.xml) | Matching loopback network/capability deployment snapshot |
 | [P1_Tutorial_Local.json](btsn.common/BusinessServiceDefinitions/P1_Tutorial_Local.json) | Active catalogue containing the P1 entry capability only |
 | [P1_Tutorial_LocalDeployment.json](btsn.services/deployments/models/P1_Tutorial_LocalDeployment.json) | Catalogue and infrastructure selection |

@@ -14,7 +14,7 @@
     <!-- Shared packaged runtime; source deployment files and Eclipse outputs are not modified. -->
     <property name="launcher.profile.file" location="../btsn.services/deployments/financial/Deployment.json"/>
     <property name="launcher.rules.file" location="../btsn.services/deployments/financial/InfrastructureDeployment.ruleml.xml"/>
-    <property name="infrastructure.definition.name" value="FinancialSystem_Infrastructure"/>
+    <property name="infrastructure.definition.name" value="financial/FinancialSystem_Infrastructure"/>
     <import file="../btsn.services/launcher-runtime.xml"/>
 
 

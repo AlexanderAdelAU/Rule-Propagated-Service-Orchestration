@@ -69,7 +69,7 @@
         <fail unless="launcher.rules.file" message="Select launcher.rules.file before importing launcher-runtime.xml"/>
         <mkdir dir="${output.dir}"/>
         <copy todir="${common.project.dir}">
-            <fileset dir="${source.root}/btsn.common" includes="RuleBase/**,RulePayLoad/**,ServiceAttributeBindings/**,BusinessServiceDefinitions/**,ProcessDefinitionFolder/**,PayLoad/**"/>
+            <fileset dir="${source.root}/btsn.common" includes="RuleBase/**,RulePayLoad/**,ServiceAttributeBindings/**,BusinessServiceDefinitions/**,ProcessDefinitionFolder/**,InfrastructureDefinitionFolder/**,PayLoad/**"/>
         </copy>
         <copy file="${launcher.profile.file}" tofile="${common.project.dir}/BusinessServiceDefinitions/Deployment.json" overwrite="true"/>
         <copy file="${launcher.rules.file}" tofile="${local.channel.rules}" overwrite="true"/>

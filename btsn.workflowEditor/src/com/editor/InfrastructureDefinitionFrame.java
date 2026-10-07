@@ -351,7 +351,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
             return false;
         }
 
-        JFileChooser chooser = createRememberingChooser(PREF_DEFINITION_DIR, null);
+        JFileChooser chooser = createRememberingChooser(PREF_DEFINITION_DIR, findRepositoryInfrastructureDirectory());
         chooser.setDialogTitle("Save Infrastructure Definition");
         chooser.setFileFilter(createJsonFilter());
         chooser.setSelectedFile(currentFile != null ? currentFile : new File(chooser.getCurrentDirectory(), "InfrastructureDefinition.json"));
@@ -409,7 +409,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
 
     /** Show the open dialog and load the chosen file. Returns true if a definition was loaded. */
     private boolean promptAndOpen(Component dialogParent) {
-        JFileChooser chooser = createRememberingChooser(PREF_DEFINITION_DIR, null);
+        JFileChooser chooser = createRememberingChooser(PREF_DEFINITION_DIR, findRepositoryInfrastructureDirectory());
         chooser.setDialogTitle("Open Infrastructure Definition");
         chooser.setFileFilter(createJsonFilter());
         if (chooser.showOpenDialog(dialogParent) != JFileChooser.APPROVE_OPTION) return false;
@@ -833,7 +833,9 @@ public class InfrastructureDefinitionFrame extends JFrame {
 
     private JFileChooser createRememberingChooser(String preferenceKey, File preferredDirectory) {
         File directory = rememberedDirectory(preferenceKey);
-        if (directory == null) {
+        if (directory == null || (preferredDirectory != null &&
+                "ProcessDefinitionFolder".equals(directory.getName()) &&
+                directory.getParentFile().equals(preferredDirectory.getParentFile()))) {
             directory = preferredDirectory;
         }
         if (directory != null && directory.isDirectory()) {
@@ -853,6 +855,11 @@ public class InfrastructureDefinitionFrame extends JFrame {
         if (path == null || path.trim().isEmpty()) return null;
         File directory = new File(path);
         return directory.isDirectory() ? directory : null;
+    }
+
+    private File findRepositoryInfrastructureDirectory() {
+        File bindings = findRepositoryBindingsDirectory();
+        return bindings == null ? null : new File(bindings.getParentFile(), "InfrastructureDefinitionFolder");
     }
 
     private File findRepositoryBindingsDirectory() {

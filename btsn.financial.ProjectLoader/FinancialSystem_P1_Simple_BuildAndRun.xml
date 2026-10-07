@@ -49,7 +49,7 @@
 	<!-- Process names for each phase -->
 	<property name="init.process.name" value="petrinet/Initializers/P1_Initialization" />
 	<property name="workflow.process.name" value="FinancialSystem_P1_Simple" />
-	<property name="infrastructure.definition.name" value="FinancialSystem_Infrastructure" />
+	<property name="infrastructure.definition.name" value="financial/FinancialSystem_Infrastructure" />
 	<property name="collector.process.name" value="petrinet/Collectors/P1_Collector" />
 
 	<!-- Phase 1: Initialization parameters (v999 = admin/non-instrumented) -->

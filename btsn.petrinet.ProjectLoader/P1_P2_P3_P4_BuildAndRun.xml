@@ -18,7 +18,7 @@
     <!-- Shared packaged runtime; source deployment files and Eclipse outputs are not modified. -->
     <property name="launcher.profile.file" location="../btsn.services/deployments/models/ForkDeployment.json"/>
     <property name="launcher.rules.file" location="../btsn.services/deployments/models/ForkInfrastructure.ruleml.xml"/>
-    <property name="infrastructure.definition.name" value="ForkModels_Infrastructure"/>
+    <property name="infrastructure.definition.name" value="petrinet/ForkModels_Infrastructure"/>
     <import file="../btsn.services/launcher-runtime.xml"/>
 
 

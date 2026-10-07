@@ -23,7 +23,7 @@ public final class BusinessCapabilityResolverTest {
     private static int checks;
     private static Path common;
     private static final String CATALOG = "BusinessServiceDefinitions/FinancialSystem.json";
-    private static final String INFRASTRUCTURE = "ProcessDefinitionFolder/FinancialSystem_Infrastructure.json";
+    private static final String INFRASTRUCTURE = "InfrastructureDefinitionFolder/financial/FinancialSystem_Infrastructure.json";
     private static final String RULES = "RuleBase/Generated/InfrastructureDeployment.ruleml.xml";
     private static final String[] SERVICES = {"ValidationService", "CreditCheckService", "FraudCheckService",
             "UnderwritingService", "DecisionService"};

@@ -40,7 +40,7 @@
             </manifest>
         </jar>
         <copy todir="${place.release.root}/btsn.common">
-            <fileset dir="${common.dir}" includes="RuleBase/**,ServiceAttributeBindings/**,BusinessServiceDefinitions/**,ProcessDefinitionFolder/**,PayLoad/**"/>
+            <fileset dir="${common.dir}" includes="RuleBase/**,ServiceAttributeBindings/**,BusinessServiceDefinitions/**,ProcessDefinitionFolder/**,InfrastructureDefinitionFolder/**,PayLoad/**"/>
         </copy>
         <copy todir="${place.release.dir}">
             <fileset dir="${basedir}" includes="ServiceLoaderQueries/**,RuleFolder.*/**,resources/**,PayLoad/**" excludes="**/*.class,**/*.log"/>

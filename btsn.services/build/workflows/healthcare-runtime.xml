@@ -43,7 +43,7 @@
         <ant antfile="${services.project.dir}/build.xml" target="build-workflow-runtime" inheritall="false"/>
         <mkdir dir="${output.dir}"/>
         <copy todir="${common.project.dir}">
-            <fileset dir="${source.root}/btsn.common" includes="RuleBase/**,RulePayLoad/**,ServiceAttributeBindings/**,BusinessServiceDefinitions/**,ProcessDefinitionFolder/**,PayLoad/**"/>
+            <fileset dir="${source.root}/btsn.common" includes="RuleBase/**,RulePayLoad/**,ServiceAttributeBindings/**,BusinessServiceDefinitions/**,ProcessDefinitionFolder/**,InfrastructureDefinitionFolder/**,PayLoad/**"/>
         </copy>
         <copy file="${services.project.dir}/deployments/healthcare/Deployment.json" tofile="${common.project.dir}/BusinessServiceDefinitions/Deployment.json" overwrite="true"/>
         <copy file="${services.project.dir}/deployments/healthcare/InfrastructureDeployment.ruleml.xml" tofile="${local.channel.rules}" overwrite="true"/>

@@ -96,3 +96,9 @@ Pass `-Dtutorial.source.commit=<runtime-baseline-commit>` to identify the runtim
 revision. Preserve the matching configuration and update this measured-results
 page when replacing the reference. Never expect a new random run to reproduce
 the exact times or repeat counts shown here.
+
+The reference run was captured before the infrastructure folder was reorganized.
+Its `summary.json` retains the original paths and hashes as run provenance. The
+infrastructure JSON has moved, with identical contents, to
+[`InfrastructureDefinitionFolder/petrinet`](../../../../btsn.common/InfrastructureDefinitionFolder/petrinet).
+Current launchers and the export helper use that location.

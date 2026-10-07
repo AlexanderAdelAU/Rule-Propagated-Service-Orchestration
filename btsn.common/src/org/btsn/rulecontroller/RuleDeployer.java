@@ -72,6 +72,7 @@ public class RuleDeployer {
 		// Package: org.btsn.healthcare.rulecontroller → Common: btsn.healthcare.common
 		static final String COMMON_FOLDER = deriveCommonFolder();
 		static final String PROCESS_DEFINITION_FOLDER = COMMON_FOLDER + "/ProcessDefinitionFolder";
+		static final String INFRASTRUCTURE_DEFINITION_FOLDER = COMMON_FOLDER + "/InfrastructureDefinitionFolder";
 		static final String RULE_PAYLOAD_FOLDER = COMMON_FOLDER + "/RulePayLoad";
 		static final String SERVICE_ATTRIBUTE_BINDINGS_FOLDER = COMMON_FOLDER + "/ServiceAttributeBindings";
 		
@@ -366,7 +367,7 @@ public class RuleDeployer {
 			definitionName = definitionName.substring(0, definitionName.length() - 5);
 		}
 
-		File infrastructureFile = new File(commonPath + "/" + Config.PROCESS_DEFINITION_FOLDER + "/" +
+		File infrastructureFile = new File(commonPath + "/" + Config.INFRASTRUCTURE_DEFINITION_FOLDER + "/" +
 			definitionName + ".json");
 		if (!infrastructureFile.exists()) {
 			throw new RuleDeployerException("Infrastructure definition not found: " +

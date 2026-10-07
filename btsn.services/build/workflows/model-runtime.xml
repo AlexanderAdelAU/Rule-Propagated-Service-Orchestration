@@ -55,7 +55,7 @@
         <!-- Keep source deployment metadata separate; Monitor uses its usual working directory. -->
         <mkdir dir="${output.dir}"/>
         <copy todir="${common.project.dir}">
-            <fileset dir="${source.root}/btsn.common" includes="RuleBase/**,RulePayLoad/**,ServiceAttributeBindings/**,BusinessServiceDefinitions/**,ProcessDefinitionFolder/**,PayLoad/**"/>
+            <fileset dir="${source.root}/btsn.common" includes="RuleBase/**,RulePayLoad/**,ServiceAttributeBindings/**,BusinessServiceDefinitions/**,ProcessDefinitionFolder/**,InfrastructureDefinitionFolder/**,PayLoad/**"/>
         </copy>
         <copy file="${model.profile.file}" tofile="${common.project.dir}/BusinessServiceDefinitions/Deployment.json" overwrite="true"/>
         <copy file="${model.rules.file}" tofile="${local.channel.rules}" overwrite="true"/>

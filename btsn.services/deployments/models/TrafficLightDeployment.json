@@ -1,6 +1,6 @@
 {
   "catalog": "BusinessServiceDefinitions/TrafficLightModels.json",
-  "infrastructure": "ProcessDefinitionFolder/TrafficLightModels_Infrastructure.json",
+  "infrastructure": "InfrastructureDefinitionFolder/petrinet/TrafficLightModels_Infrastructure.json",
   "deploymentRules": "RuleBase/Generated/InfrastructureDeployment.ruleml.xml",
   "directServiceRules": [
     "RuleBase/PetriNet/ListofPetriNetInitializationServices.ruleml.xml",

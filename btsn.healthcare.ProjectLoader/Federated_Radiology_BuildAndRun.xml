@@ -267,7 +267,7 @@
 					<arg value="-operation" /><arg value="${target.operation}" />
 					<arg value="-tokens" /><arg value="0" />
 					<arg value="-expire" /><arg value="${token.expire}" />
-					<arg value="-generator" /><arg value="${event.generator.id}" />					<arg value="-infrastructure"/><arg value="Healthcare_Infrastructure"/>
+					<arg value="-generator" /><arg value="${event.generator.id}" />					<arg value="-infrastructure"/><arg value="healthcare/Healthcare_Infrastructure"/>
 					<arg value="-format-service"/><arg value="RadiologyService"/>
 				</java>
 				<sleep seconds="2" />
@@ -284,7 +284,7 @@
 					<arg value="-tokens" /><arg value="${token.count}" />
 					<arg value="-expire" /><arg value="${token.expire}" />
 					<arg value="-generator" /><arg value="${event.generator.id}" />
-					<arg value="-skipdeploy" />					<arg value="-infrastructure"/><arg value="Healthcare_Infrastructure"/>
+					<arg value="-skipdeploy" />					<arg value="-infrastructure"/><arg value="healthcare/Healthcare_Infrastructure"/>
 					<arg value="-format-service"/><arg value="RadiologyService"/>
 				</java>
 				<echo message="=== Phase 2 Complete ===" />
@@ -378,7 +378,7 @@
 					<arg value="-operation" /><arg value="${target.operation}" />
 					<arg value="-tokens" /><arg value="0" />
 					<arg value="-expire" /><arg value="${token.expire}" />
-					<arg value="-generator" /><arg value="${event.generator.id}" />					<arg value="-infrastructure"/><arg value="Healthcare_Infrastructure"/>
+					<arg value="-generator" /><arg value="${event.generator.id}" />					<arg value="-infrastructure"/><arg value="healthcare/Healthcare_Infrastructure"/>
 					<arg value="-format-service"/><arg value="RadiologyService"/>
 				</java>
 
@@ -394,7 +394,7 @@
 					<arg value="-tokens" /><arg value="${token.count}" />
 					<arg value="-expire" /><arg value="${token.expire}" />
 					<arg value="-generator" /><arg value="${event.generator.id}" />
-					<arg value="-skipdeploy" />					<arg value="-infrastructure"/><arg value="Healthcare_Infrastructure"/>
+					<arg value="-skipdeploy" />					<arg value="-infrastructure"/><arg value="healthcare/Healthcare_Infrastructure"/>
 					<arg value="-format-service"/><arg value="RadiologyService"/>
 				</java>
 
