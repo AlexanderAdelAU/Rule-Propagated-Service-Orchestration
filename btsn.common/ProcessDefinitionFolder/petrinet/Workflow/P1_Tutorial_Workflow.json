@@ -1,5 +1,5 @@
 {
-   "processType":"PetriNet",
+  "processType": "PetriNet",
   "elements": [
     {
       "id": "T_in_P1",
@@ -24,16 +24,22 @@
       "width": 50,
       "height": 50,
       "label": "P1",
-      "service": "StochasticEntryTokenService",
+      "service": "StochasticService",
       "operations": [
         {
           "name": "processToken",
           "arguments": [
-            {"name": "token", "type": "String", "value": "String", "required": false}
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
           ]
         }
       ],
-      "fill_color": "#33FF33"
+      "fill_color": "#33FF33",
+      "serviceInstance": "StochasticInstance1"
     },
     {
       "id": "T_out_P1",
@@ -111,7 +117,10 @@
       "decision_value": "true",
       "endpoint": "",
       "waypoints": [
-        {"x": 420, "y": 160}
+        {
+          "x": 420,
+          "y": 160
+        }
       ],
       "labelOffsetX": 26,
       "labelOffsetY": -20,
@@ -126,8 +135,14 @@
       "decision_value": "false",
       "endpoint": "",
       "waypoints": [
-        {"x": 380, "y": 80},
-        {"x": 220, "y": 80}
+        {
+          "x": 380,
+          "y": 80
+        },
+        {
+          "x": 220,
+          "y": 80
+        }
       ],
       "labelOffsetX": -32,
       "labelOffsetY": -10

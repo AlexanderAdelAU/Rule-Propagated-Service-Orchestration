@@ -7,13 +7,17 @@
             <pathelement location="${common.dir}/target/host-runtime/btsn-infrastructure.jar"/>
             <fileset dir="${target.dir}/deployment/services" includes="**/*.jar"/>
             <fileset dir="${target.dir}/deployment/lib" includes="*.jar"/>
+            <fileset dir="${common.dir}/lib" includes="*.jar" excludesfile="${target.dir}/runtime-library-excludes.txt"/>
             <pathelement location="${ant.home}/lib/ant.jar"/>
             <pathelement location="${ant.home}/lib/ant-launcher.jar"/>
         </path>
-        <javac srcdir="tests" destdir="${target.dir}/launcher-check/classes" includes="LauncherRuntimeCheck.java,SharedInfrastructureCheck.java"
+        <javac srcdir="tests" destdir="${target.dir}/launcher-check/classes" includes="LauncherRuntimeCheck.java,SharedInfrastructureCheck.java,ServiceSeparationCheck.java"
                release="${java.release}" includeantruntime="false" encoding="UTF-8">
             <classpath refid="launcher.check.classpath"/>
         </javac>
+        <java classname="ServiceSeparationCheck" fork="true" failonerror="true">
+            <classpath refid="launcher.check.classpath"/><arg file=".."/>
+        </java>
         <java classname="SharedInfrastructureCheck" fork="true" failonerror="true">
             <classpath refid="launcher.check.classpath"/><arg file=".."/>
         </java>
@@ -123,6 +127,7 @@
             <src path="${common.dir}/src"/><src path="${common.dir}/tests"/>
             <src path="../btsn.rpso.places.p1/src"/>
             <include name="org/btsn/invocation/BusinessCapabilityResolver.java"/>
+            <include name="org/btsn/invocation/BooleanTokenAdapter.java"/>
             <include name="org/btsn/deployment/DeploymentConfiguration.java"/>
             <include name="org/btsn/invocation/BusinessCapabilityResolverTest.java"/>
             <include name="org/btsn/json/jsonLibrary.java"/>

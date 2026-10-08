@@ -115,7 +115,7 @@
       "width": 50,
       "height": 50,
       "label": "NS_Green",
-      "service": "StochasticEntryJoinService",
+      "service": "StochasticService",
       "operations": [
         {
           "name": "processToken",
@@ -135,7 +135,8 @@
             }
           ]
         }
-      ]
+      ],
+      "serviceInstance": "StochasticInstance8"
     },
     {
       "id": "T_out_NS_Green",
@@ -172,7 +173,7 @@
       "width": 50,
       "height": 50,
       "label": "NS_Yellow",
-      "service": "StochasticBranchTwoTokenService",
+      "service": "StochasticService",
       "operations": [
         {
           "name": "processToken",
@@ -186,7 +187,8 @@
             }
           ]
         }
-      ]
+      ],
+      "serviceInstance": "StochasticInstance3"
     },
     {
       "id": "T_out_NS_Yellow",
@@ -223,7 +225,7 @@
       "width": 50,
       "height": 50,
       "label": "EW_Red_Hold",
-      "service": "StochasticBranchOneTokenService",
+      "service": "StochasticService",
       "operations": [
         {
           "name": "processToken",
@@ -237,7 +239,8 @@
             }
           ]
         }
-      ]
+      ],
+      "serviceInstance": "StochasticInstance4"
     },
     {
       "id": "T_out_EW_Red_Hold",
@@ -275,7 +278,7 @@
       "width": 50,
       "height": 50,
       "label": "EW_Green",
-      "service": "StochasticMergeTokenService",
+      "service": "StochasticService",
       "operations": [
         {
           "name": "processToken",
@@ -295,7 +298,8 @@
             }
           ]
         }
-      ]
+      ],
+      "serviceInstance": "StochasticInstance5"
     },
     {
       "id": "T_out_EW_Green",
@@ -332,7 +336,7 @@
       "width": 50,
       "height": 50,
       "label": "EW_Yellow",
-      "service": "StochasticReturnTokenService",
+      "service": "StochasticService",
       "operations": [
         {
           "name": "processToken",
@@ -346,7 +350,8 @@
             }
           ]
         }
-      ]
+      ],
+      "serviceInstance": "StochasticInstance7"
     },
     {
       "id": "T_out_EW_Yellow",
@@ -383,7 +388,7 @@
       "width": 50,
       "height": 50,
       "label": "NS_Red_Hold",
-      "service": "StochasticSideTokenService",
+      "service": "StochasticService",
       "operations": [
         {
           "name": "processToken",
@@ -397,7 +402,8 @@
             }
           ]
         }
-      ]
+      ],
+      "serviceInstance": "StochasticInstance6"
     },
     {
       "id": "T_out_NS_Red_Hold",

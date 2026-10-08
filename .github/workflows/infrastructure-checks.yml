@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - organize-infrastructure-definitions
+      - separate-service-and-gateway
   pull_request:
   workflow_dispatch:
 

@@ -27,6 +27,9 @@ public class PackagedServiceCheck {
                 + (System.currentTimeMillis() + 60000)
                 + ",\"application_id\":\"APP-001\",\"annual_income\":85000,\"requested_amount\":15000,\"credit_score\":720,\"fraud_risk\":\"low\",\"patientId\":\"PAT-001\",\"condition\":\"chest pain\"}");
         Object output = implementation.getMethod(args[2], types).invoke(service, inputs);
+        if ("boolean".equals(args[5])) {
+            if (!(output instanceof Boolean)) throw new AssertionError("Expected Boolean result: " + output);
+        } else {
         if (!(output instanceof String) || !((String) output).startsWith("{")) {
             throw new AssertionError("Service did not return JSON: " + output);
         }
@@ -36,8 +39,9 @@ public class PackagedServiceCheck {
         if (!(result.get(args[4]) instanceof java.util.Map)) {
             throw new AssertionError("Missing declared result attribute: " + args[4]);
         }
+        }
         // Other implementations must not leak into the shared support JAR.
-        for (int i = 5; i < args.length; i++) {
+        for (int i = 6; i < args.length; i++) {
             try {
                 Class.forName(args[i]);
                 throw new AssertionError("Unexpected implementation available: " + args[i]);

@@ -5,6 +5,7 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
@@ -77,7 +78,7 @@ public final class PackagedBundleCheck {
             List<String> command = new ArrayList<>(List.of(java, "-cp", args[1] + File.pathSeparator + jar,
                 "PackagedServiceCheck", service.get("implementationClass").toString(), jar.toString(),
                 service.get("operation").toString(), Integer.toString(((JSONArray) service.get("inputs")).size()),
-                service.get("returnAttribute").toString()));
+                service.get("returnAttribute").toString(), Objects.toString(service.get("resultType"), "json")));
             for (Object other : services) {
                 String otherClass = ((JSONObject) other).get("implementationClass").toString();
                 if (!otherClass.equals(service.get("implementationClass"))) command.add(otherClass);

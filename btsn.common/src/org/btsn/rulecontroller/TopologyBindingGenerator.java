@@ -249,7 +249,8 @@ public class TopologyBindingGenerator {
     }
 
     private void parsePlace(String block, String id, String label) {
-        String service = extractJsonValue(block, "service");
+        String service = extractJsonValue(block, "serviceInstance");
+        if (service == null || service.isEmpty()) service = extractJsonValue(block, "service");
         
         List<String> operationsList = new ArrayList<>();
         List<String> ops = extractJsonOperations(block, "operations");

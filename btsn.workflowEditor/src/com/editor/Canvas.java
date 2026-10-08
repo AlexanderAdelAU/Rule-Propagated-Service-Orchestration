@@ -1207,6 +1207,7 @@ public class Canvas extends JPanel {
         labelField.setPreferredSize(new Dimension(300, 25));
         panel.add(labelField);
         
+        JTextField instanceField = new JTextField(element.getServiceInstance(), 30);
         JTextField serviceField = null;
         JTextField operationField = null;
         JTextField nodeTypeField = null;
@@ -1217,6 +1218,8 @@ public class Canvas extends JPanel {
             serviceField = new JTextField(element.getService(), 30);
             serviceField.setPreferredSize(new Dimension(300, 25));
             panel.add(serviceField);
+            panel.add(new JLabel("Deployment instance:"));
+            panel.add(instanceField);
             
             panel.add(new JLabel("Operations:"));
             String operationsStr = String.join(", ", element.getOperations());
@@ -1270,6 +1273,7 @@ public class Canvas extends JPanel {
             element.setLabel(newLabel);
             if (element.getType() == ProcessElement.Type.PLACE) {
                 element.setService(finalServiceField.getText());
+                element.setServiceInstance(instanceField.getText().trim());
                 
                 // Parse comma-separated operations
                 String operationsText = finalOperationField.getText().trim();
@@ -2657,6 +2661,8 @@ public class Canvas extends JPanel {
             
             if (element.getType() == ProcessElement.Type.PLACE) {
                 json.append(",\n      \"service\": \"").append(escapeJSON(element.getService())).append("\"");
+                if (!element.getServiceInstance().isEmpty())
+                    json.append(",\n      \"serviceInstance\": \"").append(escapeJSON(element.getServiceInstance())).append("\"");
                 
                 // Save operations as array with arguments
                 json.append(",\n      \"operations\": [");
@@ -2875,6 +2881,7 @@ public class Canvas extends JPanel {
             if (type == ProcessElement.Type.PLACE) {
                 String service = extractValue(block, "service");
                 if (service != null) element.setService(service);
+                element.setServiceInstance(extractValue(block, "serviceInstance"));
                 
                 // Try to load operations - handle both new format (with arguments) and old format (string array)
                 try {
@@ -3934,6 +3941,7 @@ public class Canvas extends JPanel {
         // Copy Place attributes
         if (original.getType() == ProcessElement.Type.PLACE) {
             copy.setService(original.getService());
+            copy.setServiceInstance(original.getServiceInstance());
             // Deep copy ServiceOperations with their arguments
             for (ServiceOperation op : original.getServiceOperations()) {
                 ServiceOperation opCopy = new ServiceOperation(op);

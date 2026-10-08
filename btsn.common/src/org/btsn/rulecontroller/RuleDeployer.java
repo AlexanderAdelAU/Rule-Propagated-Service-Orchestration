@@ -194,6 +194,7 @@ public class RuleDeployer {
 	private static class DeploymentBinding {
 		final String node;
 		final String businessService;
+        String reusableService;
 		final String operation;
 		final String runtimeService;
 
@@ -377,9 +378,10 @@ public class RuleDeployer {
 			for (Object item : org.btsn.deployment.DeploymentConfiguration.array(config.serviceDeployment, "capabilities")) {
 				org.json.simple.JSONObject placement = (org.json.simple.JSONObject)item;
 				String node = org.btsn.deployment.DeploymentConfiguration.text(placement, "node");
-				String service = org.btsn.deployment.DeploymentConfiguration.text(placement, "service");
+				String service = placement.containsKey("instance") ? org.btsn.deployment.DeploymentConfiguration.text(placement, "instance") : org.btsn.deployment.DeploymentConfiguration.text(placement, "service");
 				String operation = org.btsn.deployment.DeploymentConfiguration.text(placement, "operation");
 				DeploymentBinding binding = new DeploymentBinding(node, service, operation);
+                binding.reusableService = org.btsn.deployment.DeploymentConfiguration.text(placement, "service");
 				if (deploymentBindings.put(deploymentKey(service, operation), binding) != null) {
 					throw new RuleDeployerException("Duplicate service deployment capability: " + service + "." + operation);
 				}
@@ -489,9 +491,12 @@ public class RuleDeployer {
 	                if (service != null && !service.isEmpty() && !operationsList.isEmpty()) {
 	                    // Use first operation as the primary operation for the ServiceNode
 	                    String primaryOperation = operationsList.get(0);
-	                    String businessService = service;
+	                    String instance = extractJsonValue(block, "serviceInstance");
+                    String businessService = instance != null && !instance.isEmpty() ? instance : service;
 	                    DeploymentBinding primaryBinding = requireDeploymentBinding(businessService, primaryOperation);
-	                    String runtimeService = primaryBinding != null ? primaryBinding.runtimeService : businessService;
+	                    if (primaryBinding != null && !primaryBinding.reusableService.equals(service))
+                        throw new RuleDeployerException("Deployment instance does not select service " + service + ": " + businessService);
+                    String runtimeService = primaryBinding != null ? primaryBinding.runtimeService : businessService;
 
 	                    // A single PLACE cannot span physical infrastructure nodes.
 	                    for (String operationName : operationsList) {

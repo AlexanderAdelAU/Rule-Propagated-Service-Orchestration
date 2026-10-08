@@ -63,6 +63,7 @@ public final class LauncherRuntimeCheck {
             BusinessCapabilityResolver resolver=new BusinessCapabilityResolver(common);
             JSONObject config=json(common.resolve("BusinessServiceDefinitions/Deployment.json"));
             JSONObject catalogue=json(common.resolve((String)config.get("catalog")));
+            JSONObject deployment=json(common.resolve((String)config.get("serviceDeployment")));
             for(String property:Arrays.asList("workflow.process.name","workflow1.process.name","workflow2.process.name","process.name","init.process.name","collector.process.name")) {
                 String process=p.getProperty(property); if(process==null) continue;
                 Path definition=common.resolve("ProcessDefinitionFolder").resolve(process+".json");
@@ -78,13 +79,22 @@ public final class LauncherRuntimeCheck {
                         for(Object operation:(JSONArray)node.get("operations")) {
                             JSONObject op=(JSONObject)operation;
                             if(!op.get("name").equals(capability.get("operation")))continue;
-                            JSONArray expected=(JSONArray)capability.get("inputs"),actual=(JSONArray)op.get("arguments");
+                            String instance=java.util.Objects.toString(node.get("serviceInstance"),service);
+                            JSONObject placement=null;
+                            for(Object entry:(JSONArray)deployment.get("capabilities")) {
+                                JSONObject candidatePlacement=(JSONObject)entry;
+                                if(instance.equals(java.util.Objects.toString(candidatePlacement.get("instance"),candidatePlacement.get("service").toString())) && op.get("name").equals(candidatePlacement.get("operation"))) placement=candidatePlacement;
+                            }
+                            check(placement!=null,"Missing deployment instance: "+instance);
+                            JSONArray expected=new JSONArray();
+                            for(Object input:(JSONArray)placement.get("arguments")) expected.add(((JSONObject)input).get("name"));
+                            JSONArray actual=(JSONArray)op.get("arguments");
                             if(actual!=null) {
                                 List<String> names=new ArrayList<>();for(Object argument:actual)names.add((String)((JSONObject)argument).get("name"));
                                 check(expected.equals(names),"Workflow/catalogue input order mismatch: "+process+" / "+service);
                             }
-                            check(java.util.Objects.toString(op.get("returnAttribute"),java.util.Objects.toString(node.get("returnAttribute"),"token")).equals(capability.get("returnAttribute")),"Workflow/catalogue return mismatch: "+service);
-                            String implementation=resolver.resolve(service,(String)capability.get("operation"),(String)capability.get("returnAttribute"),expected.size(),null);
+                            check(java.util.Objects.toString(op.get("returnAttribute"),java.util.Objects.toString(node.get("returnAttribute"),"token")).equals(placement.get("returnAttribute")),"Workflow/catalogue return mismatch: "+service);
+                            String implementation=resolver.resolve(instance,(String)capability.get("operation"),(String)placement.get("returnAttribute"),expected.size(),null);
                             check(implementation.equals(capability.get("implementationClass")),"Wrong configured implementation: "+service);
                             operations++;
                         }

@@ -3,7 +3,7 @@
   "capabilities": [
     {
       "node": "P1",
-      "service": "StochasticEntryJoinService",
+      "service": "StochasticService",
       "operation": "processToken",
       "returnAttribute": "token",
       "arguments": [
@@ -20,11 +20,13 @@
           "required": false
         }
       ],
-      "portSlot": 0
+      "portSlot": 0,
+      "instance": "StochasticInstance8",
+      "invocationAdapter": "boolean-token"
     },
     {
       "node": "P2",
-      "service": "StochasticBranchTwoTokenService",
+      "service": "StochasticService",
       "operation": "processToken",
       "returnAttribute": "token_branch2",
       "arguments": [
@@ -35,11 +37,13 @@
           "required": false
         }
       ],
-      "portSlot": 0
+      "portSlot": 0,
+      "instance": "StochasticInstance3",
+      "invocationAdapter": "boolean-token"
     },
     {
       "node": "P3",
-      "service": "StochasticBranchOneTokenService",
+      "service": "StochasticService",
       "operation": "processToken",
       "returnAttribute": "token_branch1",
       "arguments": [
@@ -50,11 +54,13 @@
           "required": false
         }
       ],
-      "portSlot": 0
+      "portSlot": 0,
+      "instance": "StochasticInstance4",
+      "invocationAdapter": "boolean-token"
     },
     {
       "node": "P4",
-      "service": "StochasticMergeTokenService",
+      "service": "StochasticService",
       "operation": "processToken",
       "returnAttribute": "token",
       "arguments": [
@@ -71,11 +77,13 @@
           "required": false
         }
       ],
-      "portSlot": 0
+      "portSlot": 0,
+      "instance": "StochasticInstance5",
+      "invocationAdapter": "boolean-token"
     },
     {
       "node": "P5",
-      "service": "StochasticReturnTokenService",
+      "service": "StochasticService",
       "operation": "processToken",
       "returnAttribute": "token_branch2",
       "arguments": [
@@ -86,11 +94,13 @@
           "required": false
         }
       ],
-      "portSlot": 0
+      "portSlot": 0,
+      "instance": "StochasticInstance7",
+      "invocationAdapter": "boolean-token"
     },
     {
       "node": "P6",
-      "service": "StochasticSideTokenService",
+      "service": "StochasticService",
       "operation": "processToken",
       "returnAttribute": "token_branch1",
       "arguments": [
@@ -101,7 +111,9 @@
           "required": false
         }
       ],
-      "portSlot": 0
+      "portSlot": 0,
+      "instance": "StochasticInstance6",
+      "invocationAdapter": "boolean-token"
     }
   ]
 }

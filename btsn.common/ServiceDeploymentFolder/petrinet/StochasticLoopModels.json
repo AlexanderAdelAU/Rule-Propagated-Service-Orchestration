@@ -3,7 +3,7 @@
   "capabilities": [
     {
       "node": "P1",
-      "service": "StochasticEntryTokenService",
+      "service": "StochasticService",
       "operation": "processToken",
       "returnAttribute": "token",
       "arguments": [
@@ -14,11 +14,13 @@
           "required": false
         }
       ],
-      "portSlot": 0
+      "portSlot": 0,
+      "instance": "StochasticInstance1",
+      "invocationAdapter": "boolean-token"
     },
     {
       "node": "P2",
-      "service": "StochasticForwardTokenService",
+      "service": "StochasticService",
       "operation": "processToken",
       "returnAttribute": "token",
       "arguments": [
@@ -29,7 +31,9 @@
           "required": false
         }
       ],
-      "portSlot": 0
+      "portSlot": 0,
+      "instance": "StochasticInstance2",
+      "invocationAdapter": "boolean-token"
     }
   ]
 }

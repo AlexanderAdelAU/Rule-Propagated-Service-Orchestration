@@ -3,13 +3,13 @@
 This tutorial builds and runs the process selected by
 [`P1_Tutorial_BuildAndRun.xml`](btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml).
 An event generator sends a token to P1. P1 invokes
-`StochasticEntryTokenService.processToken`; its function returns a fresh `true`
+`StochasticService.processToken`; its function returns a fresh `true`
 or `false` result. The output transition terminates on `true` and sends the same
 workflow back to P1 on `false`. Monitor collects observations separately.
 
-[![ProcessEditor showing the P1 tutorial design, its StochasticEntryTokenService binding and the true/false routes.](images/process-editor-p1-tutorial.png)](#2-define-the-process)
+[![ProcessEditor showing the P1 tutorial design, its StochasticService binding and the true/false routes.](images/process-editor-p1-tutorial.png)](#2-define-the-process)
 
-*The P1 process design in ProcessEditor. P1 invokes its bound function; `true`
+*The screenshot shows the earlier editor and binding names. Use the service and deployment-instance fields described below. The P1 process design in ProcessEditor. P1 invokes its bound function; `true`
 terminates and `false` loops back. Monitor observes outside the process path.*
 
 Follow the four stages below to build and run this example:
@@ -86,9 +86,9 @@ Choose **File → New → Service Deployment**. Its physical-node table previews
 `SingleHost.json`; those settings are read-only here. Select P1, click **Add
 capability**, and fill in **Node capabilities**:
 
-| Node | Service | Operation | Return Attribute | Port Slot |
-|---|---|---|---|---|
-| `P1` | `StochasticEntryTokenService` | `processToken` | `token` | `0` |
+| Node | Service | Instance | Operation | Return Attribute | Port Slot | Invocation Adapter |
+|---|---|---|---|---|---|---|
+| `P1` | `StochasticService` | `StochasticInstance1` | `processToken` | `token` | `0` | `boolean-token` |
 
 Slot `0` selects P1's fixed base port `4001`. Changing the service function
 preserves that endpoint. Select the capability, then click **Add argument**:
@@ -99,7 +99,7 @@ preserves that endpoint. Select the capability, then click **Add argument**:
 
 The contract is `token → token`. The service name selects the existing
 implementation in the [P1 tutorial service catalogue](btsn.common/BusinessServiceDefinitions/P1_Tutorial_Local.json).
-The packaged [service implementation](btsn.common/src/org/btsn/services/StochasticEntryTokenService.java)
+The packaged [service implementation](btsn.common/src/org/btsn/services/StochasticService.java)
 runs inside the generic P1 host; entering a service name does not create an
 implementation.
 
@@ -154,7 +154,7 @@ place, output transition and terminal transition from left to right.
 |---|---|---|
 | Event Generator | `P1_EVENTGENERATOR` | Rate (ms): `1000`; Version: `v001`; Fork Children: `0` |
 | Transition | `T_in_P1` | Transition Type: `T_in`; Node Type: `EdgeNode`; Buffer: `50` |
-| Place | `P1` | Service: `StochasticEntryTokenService` |
+| Place | `P1` | Service: `StochasticService`; Deployment instance: `StochasticInstance1` |
 | Transition | `T_out_P1` | Transition Type: `T_out`; Node Type: `GatewayNode` |
 | Transition | `Terminate` | Transition Type: `Other`; Node Type: `TerminateNode` |
 

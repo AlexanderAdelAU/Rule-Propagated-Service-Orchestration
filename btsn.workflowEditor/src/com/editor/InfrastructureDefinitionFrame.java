@@ -59,7 +59,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
         JTextArea explanation = new JTextArea(
             deploymentEditor ?
             "Assign business service operations to nodes and fixed port slots from the shared infrastructure. " +
-            "Slot 0 is the primary port; slot 1 is the second port, where defined. Network settings are read-only here." :
+            "Slot 0 is the primary port; slot 1 is the second port, where defined. Network settings are read-only here. Instance identifies a deployment; gateway types remain in the process definition." :
             "Define reusable physical nodes, channels, addresses and fixed base ports. " +
             "All service deployments reuse these settings. Comma-separated ports define slots 0, 1 and so on.");
         explanation.setEditable(false);
@@ -520,6 +520,8 @@ public class InfrastructureDefinitionFrame extends JFrame {
             b.append("    {\n");
             field(b, "node", c.node, true);
             field(b, "service", c.service, true);
+            if (!blank(c.instance)) field(b, "instance", c.instance, true);
+            if (!blank(c.adapter)) field(b, "invocationAdapter", c.adapter, true);
             field(b, "operation", c.operation, true);
             field(b, "returnAttribute", c.returnAttribute, true);
             b.append("      \"portSlot\": ").append(c.portSlot).append(",\n");
@@ -568,6 +570,8 @@ public class InfrastructureDefinitionFrame extends JFrame {
             Capability c = new Capability();
             c.node = stringValue(block, "node");
             c.service = stringValue(block, "service");
+            c.instance = stringValue(block, "instance");
+            c.adapter = stringValue(block, "invocationAdapter");
             c.operation = stringValue(block, "operation");
             c.returnAttribute = stringValue(block, "returnAttribute");
             c.portSlot = intValue(block, "portSlot");
@@ -707,7 +711,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
         try {
             Map<String, List<Capability>> byService = new LinkedHashMap<>();
             for (Capability cap : capabilities) {
-                byService.computeIfAbsent(cap.service, k -> new ArrayList<>()).add(cap);
+                byService.computeIfAbsent(blank(cap.instance) ? cap.service : cap.instance, k -> new ArrayList<>()).add(cap);
             }
 
             List<File> generatedFiles = new ArrayList<>();
@@ -760,6 +764,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
         }
         Set<String> allocatedSockets = new HashSet<>();
         Set<String> runtimeOperations = new HashSet<>();
+        Set<String> instances = new HashSet<>();
         for (int i = 0; i < capabilities.size(); i++) {
             Capability cap = capabilities.get(i);
             String identity = (blank(cap.node) ? "<node>" : cap.node) + " / " +
@@ -768,6 +773,10 @@ public class InfrastructureDefinitionFrame extends JFrame {
             if (blank(cap.node)) errors.add(identity + "Node is required.");
             if (blank(cap.service)) errors.add(identity + "Service is required.");
             if (blank(cap.operation)) errors.add(identity + "Operation is required.");
+            String instance = blank(cap.instance) ? cap.service : cap.instance;
+            if (!instance.matches("[A-Za-z][A-Za-z0-9]*")) errors.add(identity + "Instance must be an alphanumeric identifier starting with a letter.");
+            if (!instances.add(instance + "\u0000" + cap.operation)) errors.add(identity + "Instance operation is duplicated.");
+            if (!blank(cap.adapter) && !"boolean-token".equals(cap.adapter)) errors.add(identity + "Unknown invocation adapter.");
             if (blank(cap.returnAttribute)) errors.add(identity + "Return Attribute is required.");
 
             NodeNetwork node = findNode(cap.node);
@@ -949,7 +958,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
     }
 
     private final class CapabilityModel extends AbstractTableModel {
-        private final String[] columns = {"Node", "Service", "Operation", "Return Attribute", "Port Slot"};
+        private final String[] columns = {"Node", "Service", "Operation", "Return Attribute", "Port Slot", "Instance", "Invocation Adapter"};
         public int getRowCount() { return capabilities.size(); }
         public int getColumnCount() { return columns.length; }
         public String getColumnName(int c) { return columns[c]; }
@@ -963,6 +972,8 @@ public class InfrastructureDefinitionFrame extends JFrame {
                 case 2: return x.operation;
                 case 3: return x.returnAttribute;
                 case 4: return x.portSlot;
+                case 5: return x.instance;
+                case 6: return x.adapter;
                 default: return "";
             }
         }
@@ -980,6 +991,8 @@ public class InfrastructureDefinitionFrame extends JFrame {
             else if (c == 2) x.operation = s;
             else if (c == 3) x.returnAttribute = s;
             else if (c == 4) x.portSlot = parseTableInt(v);
+            else if (c == 5) x.instance = s;
+            else if (c == 6) x.adapter = s;
             fireTableCellUpdated(r, c);
         }
     }
@@ -1032,6 +1045,8 @@ public class InfrastructureDefinitionFrame extends JFrame {
     private static final class Capability {
         String node = "";
         String service = "";
+        String instance = "";
+        String adapter = "";
         String operation = "";
         String returnAttribute = "";
         int portSlot;

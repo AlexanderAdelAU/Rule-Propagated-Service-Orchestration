@@ -1,16 +1,16 @@
 {
   "domain": "PetriNetModels",
-  "purpose": "Single-place tutorial: only the P1 stochastic entry capability is active.",
+  "purpose": "Reusable stochastic Boolean operation; process topology and instance token contracts are defined separately.",
   "services": [
     {
-      "service": "StochasticEntryTokenService",
-      "implementationClass": "org.btsn.services.StochasticEntryTokenService",
+      "service": "StochasticService",
+      "implementationClass": "org.btsn.services.StochasticService",
       "operation": "processToken",
       "inputs": [
-        "token"
+        "data"
       ],
-      "returnAttribute": "token",
-      "canonicalBinding": "ServiceAttributeBindings/StochasticEntryTokenService/StochasticEntryTokenService-CanonicalBindings.ruleml.xml",
+      "returnAttribute": "decision",
+      "resultType": "boolean",
       "status": "active"
     }
   ]

@@ -161,6 +161,11 @@ public class EditorFrame extends JPanel {
                 element.setService(freshServiceField.getText());
             }));
             
+            JTextField instanceField = new JTextField();
+            addField("Deployment instance:", instanceField, element.getServiceInstance());
+            instanceField.getDocument().addDocumentListener(new SimpleDocumentListener(() -> {
+                element.setServiceInstance(instanceField.getText().trim());
+            }));
             // Operations with arguments
             addOperationsField("Operations:", element);
             

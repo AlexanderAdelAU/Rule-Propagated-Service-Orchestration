@@ -27,6 +27,7 @@ public class ProcessElement {
     
     // Additional attributes for Places
     private String service = "";
+    private String serviceInstance = "";
     private List<ServiceOperation> operations = new ArrayList<>();
     
     // Additional attributes for Transitions
@@ -496,6 +497,8 @@ public class ProcessElement {
     public String getLabel() { return label; }
     public String getId() { return id; }
     public String getService() { return service; }
+    public String getServiceInstance() { return serviceInstance; }
+    public void setServiceInstance(String instance) { serviceInstance = instance == null ? "" : instance; }
     public String getNodeType() { return nodeType; }
     public String getNodeValue() { return nodeValue; }
     public String getTransitionType() { return transitionType; }
