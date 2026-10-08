@@ -343,9 +343,11 @@ public class RuleDeployer {
 				String jsonContent = StringFileIO.readFileAsString(jsonFileName);
 				logger.info("Successfully loaded JSON workflow: " + jsonContent.length() + " characters");
                 try {
-                    if (deploymentConfiguration == null) throw new IllegalArgumentException("Choose infrastructure and service deployment before deploying a process.");
-                    deploymentConfiguration.validateWorkflow((org.json.simple.JSONObject)new org.json.simple.parser.JSONParser().parse(jsonContent));
-                } catch (org.json.simple.parser.ParseException | IllegalArgumentException invalid) {
+                    org.json.simple.JSONObject workflow = (org.json.simple.JSONObject)new org.json.simple.parser.JSONParser().parse(jsonContent);
+                    if (deploymentConfiguration == null)
+                        org.btsn.deployment.DeploymentConfiguration.validateDirectWorkflow(java.nio.file.Paths.get(commonPath, Config.COMMON_FOLDER), workflow);
+                    else deploymentConfiguration.validateWorkflow(workflow);
+                } catch (Exception invalid) {
                     throw new RuleDeployerException("Unresolved process service contract: " + invalid.getMessage(), invalid);
                 }
 				parseJsonWorkflow(jsonContent);
@@ -366,6 +368,7 @@ public class RuleDeployer {
 
 	private void loadInfrastructureDefinition(String commonPath) throws RuleDeployerException {
 		deploymentBindings.clear();
+        deploymentConfiguration = null;
 		if (infrastructureDefinitionName == null || infrastructureDefinitionName.trim().isEmpty()) {
 			return;
 		}

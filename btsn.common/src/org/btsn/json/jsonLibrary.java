@@ -57,7 +57,8 @@ public class jsonLibrary {
 			if (jsonString == null || jsonString.trim().isEmpty()) {
 				return null;
 			}
-			return (JSONObject) new JSONParser().parse(jsonString);
+			Object parsed = new JSONParser().parse(jsonString);
+			return parsed instanceof JSONObject ? (JSONObject) parsed : null;
 		} catch (Exception e) {
 			logger.error("Error parsing JSON string: " + jsonString, e);
 			return null;

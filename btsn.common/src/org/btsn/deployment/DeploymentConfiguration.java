@@ -112,6 +112,50 @@ public final class DeploymentConfiguration {
         }
     }
 
+    /** Administrative workflows use registered infrastructure operations, outside business placement. */
+    public static void validateDirectWorkflow(Path common, JSONObject workflow) throws Exception {
+        JSONObject profile = read(common.resolve("BusinessServiceDefinitions/Deployment.json"));
+        java.util.List<String> files = new java.util.ArrayList<>();
+        for (Object file : array(profile, "directServiceRules")) files.add(file.toString());
+        files.add("RuleBase/Monitor/ListofMonitorActiveServices.ruleml.xml");
+        Set<String> registered = new HashSet<>();
+        javax.xml.parsers.DocumentBuilderFactory factory = javax.xml.parsers.DocumentBuilderFactory.newInstance();
+        factory.setFeature(javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        factory.setAttribute(javax.xml.XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        factory.setAttribute(javax.xml.XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+        for (String file : files) {
+            String xml = Files.readString(common.resolve(file)).replaceFirst("^\\s*<\\?xml[^?]*\\?>", "");
+            org.w3c.dom.NodeList atoms = factory.newDocumentBuilder().parse(new org.xml.sax.InputSource(
+                    new java.io.StringReader("<facts>" + xml + "</facts>"))).getElementsByTagName("Atom");
+            for (int i = 0; i < atoms.getLength(); i++) {
+                org.w3c.dom.Element atom = (org.w3c.dom.Element)atoms.item(i);
+                boolean fact = true;
+                for (org.w3c.dom.Node parent = atom.getParentNode(); parent != null; parent = parent.getParentNode())
+                    if ("Implies".equals(parent.getNodeName()) || "Query".equals(parent.getNodeName())) fact = false;
+                org.w3c.dom.NodeList relations = atom.getElementsByTagName("Rel"), values = atom.getElementsByTagName("Ind");
+                if (fact && relations.getLength() == 1 && "activeService".equals(relations.item(0).getTextContent().trim()) && values.getLength() == 4)
+                    registered.add(values.item(0).getTextContent().trim() + "\u0000" + values.item(1).getTextContent().trim());
+            }
+        }
+        int places = 0;
+        for (Object item : array(workflow, "elements")) {
+            JSONObject place = (JSONObject)item;
+            if (!"PLACE".equals(place.get("type"))) continue;
+            places++;
+            String service = text(place, "service");
+            require(!place.containsKey("serviceInstance"), "Infrastructure workflow cannot select a business instance: " + service);
+            JSONArray operations = array(place, "operations");
+            require(!operations.isEmpty(), "Place has no operation: " + place.get("id"));
+            for (Object entry : operations) {
+                String operation = text((JSONObject)entry, "name");
+                require(registered.contains(service + "\u0000" + operation),
+                        "Choose infrastructure and service deployment for business operations; unregistered infrastructure operation: " + service + "." + operation);
+            }
+        }
+        require(places > 0, "Infrastructure workflow has no service places");
+    }
+
     public JSONObject node(String name) {
         JSONObject node = nodes.get(name);
         require(node != null, "Capability refers to an undefined node: " + name);

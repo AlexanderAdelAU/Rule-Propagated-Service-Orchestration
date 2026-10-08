@@ -11,7 +11,7 @@
             <pathelement location="${ant.home}/lib/ant.jar"/>
             <pathelement location="${ant.home}/lib/ant-launcher.jar"/>
         </path>
-        <javac srcdir="tests" destdir="${target.dir}/launcher-check/classes" includes="LauncherRuntimeCheck.java,SharedInfrastructureCheck.java,ServiceSeparationCheck.java"
+        <javac srcdir="tests" destdir="${target.dir}/launcher-check/classes" includes="LauncherRuntimeCheck.java,SharedInfrastructureCheck.java,ServiceSeparationCheck.java,AdminWorkflowCheck.java"
                release="${java.release}" includeantruntime="false" encoding="UTF-8">
             <classpath refid="launcher.check.classpath"/>
         </javac>

@@ -106,6 +106,18 @@ public final class LauncherRuntimeCheck {
                         check(!"MonitorService".equals(service)&&!service.matches("P[1-6]_Place"),"Physical host retained as a business capability: "+process+" / "+service);
                 }
             }
+            List<String> loaderCommand = new ArrayList<>(Arrays.asList(
+                    Path.of(System.getProperty("java.home"), "bin", "java").toString(),
+                    "-cp", System.getProperty("java.class.path"), "AdminWorkflowCheck"));
+            String business = p.getProperty("workflow.process.name");
+            if (business == null) business = p.getProperty("workflow1.process.name");
+            if (business == null) business = p.getProperty("process.name");
+            if (business != null && !business.contains("/Workflow/")) business = null;
+            for (String value : Arrays.asList(p.getProperty("init.process.name"), p.getProperty("collector.process.name"), business, p.getProperty("infrastructure.definition.name")))
+                loaderCommand.add(value == null ? "" : value);
+            Process loaderCheck = new ProcessBuilder(loaderCommand)
+                    .directory(Path.of(p.getProperty("generator.project.dir")).toFile()).inheritIO().start();
+            check(loaderCheck.waitFor() == 0, "Real process loader failed: " + build);
             check(Files.isRegularFile(Path.of(p.getProperty("generator.project.dir")).resolve("Payload/payLoad.xml")),"Admin payload alias missing");
             System.out.println("PASS: "+root.relativize(build));
         }
