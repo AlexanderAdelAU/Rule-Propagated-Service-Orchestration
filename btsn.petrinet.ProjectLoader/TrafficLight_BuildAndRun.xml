@@ -436,7 +436,7 @@
 				</java>
 				<sleep seconds="${collector.delay.seconds}" />
 
-				<!-- P2-P6 Collection (skip deployment) -->
+				<!-- P2-P6 Collection (each place deploys its collector routing) -->
 				<echo message="Collecting from P2_CollectorService..." />
 				<java classname="${collector.event.generator.class}"
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
@@ -462,7 +462,7 @@
 					<arg value="-process" /><arg value="${collector.process.name}" />
 					<arg value="-queryVersion" /><arg value="${query.version}" />
 					<arg value="-sequenceId" /><arg value="${sequence.id.collect.p3}" />
-					<arg value="-skipDeploy" />
+					<!-- Deploy collector route explicitly for P3; do not depend on previous host deployment. -->
 				</java>
 				<sleep seconds="${collector.delay.seconds}" />
 
@@ -476,7 +476,7 @@
 					<arg value="-process" /><arg value="${collector.process.name}" />
 					<arg value="-queryVersion" /><arg value="${query.version}" />
 					<arg value="-sequenceId" /><arg value="${sequence.id.collect.p4}" />
-					<arg value="-skipDeploy" />
+					<!-- Deploy collector route explicitly for P4; do not depend on previous host deployment. -->
 				</java>
 				<sleep seconds="${collector.delay.seconds}" />
 
@@ -490,7 +490,7 @@
 					<arg value="-process" /><arg value="${collector.process.name}" />
 					<arg value="-queryVersion" /><arg value="${query.version}" />
 					<arg value="-sequenceId" /><arg value="${sequence.id.collect.p5}" />
-					<arg value="-skipDeploy" />
+					<!-- Deploy collector route explicitly for P5; do not depend on previous host deployment. -->
 				</java>
 				<sleep seconds="${collector.delay.seconds}" />
 
@@ -504,7 +504,7 @@
 					<arg value="-process" /><arg value="${collector.process.name}" />
 					<arg value="-queryVersion" /><arg value="${query.version}" />
 					<arg value="-sequenceId" /><arg value="${sequence.id.collect.p6}" />
-					<arg value="-skipDeploy" />
+					<!-- Deploy collector route explicitly for P6; do not depend on previous host deployment. -->
 				</java>
 				<echo message="=== Phase 3 Complete ===" />
 
