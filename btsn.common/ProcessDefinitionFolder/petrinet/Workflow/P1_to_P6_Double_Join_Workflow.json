@@ -23,7 +23,7 @@
       "width": 50,
       "height": 50,
       "label": "P1",
-      "service": "BooleanTokenService",
+      "service": "StochasticService",
       "operations": [
         {
           "name": "processToken",
@@ -37,7 +37,8 @@
           ]
         }
       ],
-      "returnAttribute": "token"
+      "returnAttribute": "token",
+      "serviceInstance": "PetriNetInstance1"
     },
     {
       "id": "T_out_P1",
@@ -74,7 +75,7 @@
       "width": 50,
       "height": 50,
       "label": "P2",
-      "service": "BranchTwoTokenService",
+      "service": "StochasticService",
       "operations": [
         {
           "name": "processToken",
@@ -88,7 +89,8 @@
           ]
         }
       ],
-      "returnAttribute": "token_branch2"
+      "returnAttribute": "token_branch2",
+      "serviceInstance": "PetriNetInstance2"
     },
     {
       "id": "T_out_P2",
@@ -125,7 +127,7 @@
       "width": 50,
       "height": 50,
       "label": "P3",
-      "service": "BranchOneTokenService",
+      "service": "StochasticService",
       "operations": [
         {
           "name": "processToken",
@@ -139,7 +141,8 @@
           ]
         }
       ],
-      "returnAttribute": "token_branch1"
+      "returnAttribute": "token_branch1",
+      "serviceInstance": "PetriNetInstance3"
     },
     {
       "id": "T_out_P3",
@@ -176,7 +179,7 @@
       "width": 50,
       "height": 50,
       "label": "P4",
-      "service": "MergeTokenService",
+      "service": "StochasticService",
       "operations": [
         {
           "name": "processToken",
@@ -196,7 +199,8 @@
           ]
         }
       ],
-      "returnAttribute": "token_branch2"
+      "returnAttribute": "token_branch2",
+      "serviceInstance": "PetriNetInstance4"
     },
     {
       "id": "T_in_Terminate",
@@ -231,7 +235,7 @@
       "width": 50,
       "height": 50,
       "label": "P5",
-      "service": "SideTokenService",
+      "service": "StochasticService",
       "operations": [
         {
           "name": "processToken",
@@ -245,7 +249,8 @@
           ]
         }
       ],
-      "returnAttribute": "token_branch1"
+      "returnAttribute": "token_branch1",
+      "serviceInstance": "PetriNetInstance5"
     },
     {
       "id": "T_in_P5",
@@ -309,7 +314,7 @@
       "width": 50,
       "height": 50,
       "label": "P6",
-      "service": "FinalMergeTokenService",
+      "service": "StochasticService",
       "operations": [
         {
           "name": "processToken",
@@ -329,7 +334,8 @@
           ]
         }
       ],
-      "returnAttribute": "token"
+      "returnAttribute": "token",
+      "serviceInstance": "PetriNetInstance6"
     },
     {
       "id": "T_out_P6",

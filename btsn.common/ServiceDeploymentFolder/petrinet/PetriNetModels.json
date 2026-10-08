@@ -3,7 +3,7 @@
   "capabilities": [
     {
       "node": "P1",
-      "service": "BooleanTokenService",
+      "service": "StochasticService",
       "operation": "processToken",
       "returnAttribute": "token",
       "arguments": [
@@ -14,11 +14,13 @@
           "required": false
         }
       ],
-      "portSlot": 0
+      "portSlot": 0,
+      "instance": "PetriNetInstance1",
+      "invocationAdapter": "boolean-token"
     },
     {
       "node": "P2",
-      "service": "ForwardTokenService",
+      "service": "StochasticService",
       "operation": "processToken",
       "returnAttribute": "token",
       "arguments": [
@@ -29,7 +31,9 @@
           "required": false
         }
       ],
-      "portSlot": 0
+      "portSlot": 0,
+      "instance": "PetriNetInstance2",
+      "invocationAdapter": "boolean-token"
     }
   ]
 }

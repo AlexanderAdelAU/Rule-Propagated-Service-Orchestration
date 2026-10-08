@@ -1,0 +1,85 @@
+{
+  "domain": "PetriNetModels",
+  "purpose": "Compatibility checks for former Petri-net token services; no active deployment selects these types.",
+  "services": [
+    {
+      "service": "BooleanTokenService",
+      "implementationClass": "org.btsn.services.BooleanTokenService",
+      "operation": "processToken",
+      "inputs": [
+        "token"
+      ],
+      "returnAttribute": "token",
+      "canonicalBinding": "ServiceAttributeBindings/BooleanTokenService/BooleanTokenService-CanonicalBindings.ruleml.xml",
+      "status": "preserved-unbound"
+    },
+    {
+      "service": "ForwardTokenService",
+      "implementationClass": "org.btsn.services.ForwardTokenService",
+      "operation": "processToken",
+      "inputs": [
+        "token"
+      ],
+      "returnAttribute": "token",
+      "canonicalBinding": "ServiceAttributeBindings/ForwardTokenService/ForwardTokenService-CanonicalBindings.ruleml.xml",
+      "status": "preserved-unbound"
+    },
+    {
+      "service": "BranchTwoTokenService",
+      "implementationClass": "org.btsn.services.BranchTwoTokenService",
+      "operation": "processToken",
+      "inputs": [
+        "token"
+      ],
+      "returnAttribute": "token_branch2",
+      "canonicalBinding": "ServiceAttributeBindings/BranchTwoTokenService/BranchTwoTokenService-CanonicalBindings.ruleml.xml",
+      "status": "preserved-unbound"
+    },
+    {
+      "service": "BranchOneTokenService",
+      "implementationClass": "org.btsn.services.BranchOneTokenService",
+      "operation": "processToken",
+      "inputs": [
+        "token"
+      ],
+      "returnAttribute": "token_branch1",
+      "canonicalBinding": "ServiceAttributeBindings/BranchOneTokenService/BranchOneTokenService-CanonicalBindings.ruleml.xml",
+      "status": "preserved-unbound"
+    },
+    {
+      "service": "MergeTokenService",
+      "implementationClass": "org.btsn.services.MergeTokenService",
+      "operation": "processToken",
+      "inputs": [
+        "token_branch1",
+        "token_branch2"
+      ],
+      "returnAttribute": "token_branch2",
+      "canonicalBinding": "ServiceAttributeBindings/MergeTokenService/MergeTokenService-CanonicalBindings.ruleml.xml",
+      "status": "preserved-unbound"
+    },
+    {
+      "service": "SideTokenService",
+      "implementationClass": "org.btsn.services.SideTokenService",
+      "operation": "processToken",
+      "inputs": [
+        "token"
+      ],
+      "returnAttribute": "token_branch1",
+      "canonicalBinding": "ServiceAttributeBindings/SideTokenService/SideTokenService-CanonicalBindings.ruleml.xml",
+      "status": "preserved-unbound"
+    },
+    {
+      "service": "FinalMergeTokenService",
+      "implementationClass": "org.btsn.services.FinalMergeTokenService",
+      "operation": "processToken",
+      "inputs": [
+        "token_branch1",
+        "token_branch2"
+      ],
+      "returnAttribute": "token",
+      "canonicalBinding": "ServiceAttributeBindings/FinalMergeTokenService/FinalMergeTokenService-CanonicalBindings.ruleml.xml",
+      "status": "preserved-unbound"
+    }
+  ]
+}

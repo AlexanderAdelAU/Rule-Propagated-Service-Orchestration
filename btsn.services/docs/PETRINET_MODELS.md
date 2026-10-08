@@ -1,6 +1,6 @@
 # Running raw Petri-net models
 
-Packaged deterministic and stochastic service JARs are grouped under
+Packaged Petri-net service JARs are grouped under
 `btsn.services/target/deployment/services/models`; shared support stays in
 `btsn.services/target/deployment/lib`. This grouping does not change host placement.
 
@@ -11,21 +11,18 @@ appropriate, initializes the databases, deploys the process, sends ten tokens
 and requests collection. Remote hosts must already be running with matching
 model configuration.
 
-The model uses `BooleanTokenService` at P1 and `ForwardTokenService` at P2.
-P1 returns the selected boolean; P2 carries the token to termination.
-Both outcomes use the same unguarded connection in this first model. This checks
-execution and outcome propagation; it does not test two different guarded paths.
-Monitor receives collected measurements and is outside the token path.
+All active Petri-net profiles use `StochasticService.processToken(data)`.
+P1 and P2 select separate deployment instances of that same service. Each
+invocation returns a random Boolean; the explicit `boolean-token` adapter
+carries data and exposes the result to process guards. Both outcomes use the
+same unguarded connection in this two-place model.
 
-Set the Ant property `token.outcome` to `false` for the false case; its default
-is `true`. `token.count` defaults to ten. Stop the previous local Ant run before
-starting another. Local hosts remain running after collection, as in the
-existing Financial launcher. Stop that Ant run to close its local hosts.
-
-There is no random outcome, simulated service delay or service-side marking
-model. Execution, queueing and elapsed times are recorded by the existing
-platform. The launcher's waits allow startup, deployment and collection to finish;
-they do not add a delay inside the service operation.
+`token.count` defaults to ten. The older `token.outcome` launcher property is
+input data only; it does not force the service result. Node and gateway types,
+joins and routing are configured by the process independently of the service.
+Stop the previous local Ant run before starting another. Local hosts remain
+running after collection. Queueing and elapsed times are measured by the
+platform; there is no simulated service delay.
 
 The original output files are written to `btsn.petrinet.ProjectLoader`:
 `P1_Place.out.txt`, `P2_Place.out.txt` and `MonitorService.out.txt`.
@@ -48,8 +45,8 @@ apply to P1, P2 and Monitor. This launcher uses the existing ServiceHelper
 invocation mechanism and introduces no additional deployment protocol.
 
 For an isolated JAR contract check, select `check-model-services` in
-`btsn.services/build.xml`. The legacy stochastic implementation remains packaged
-for existing models but is not selected by this model.
+`btsn.services/build.xml`. Former token implementations are packaged only for compatibility checks;
+no active Petri-net deployment selects them.
 
 ## Six-place double join
 
@@ -61,20 +58,19 @@ Monitor uses its usual database and analyser.
 
 The existing true route forks into P2, P3 and P5. P4 joins P2/P3, then P6 joins
 P4/P5 and terminates the business token. Monitor observes collected data outside
-the token path. The existing false route terminates at P1. `token.outcome`
-defaults to `true`. Service implementations preserve the incoming branch data;
+the token path. The existing false route terminates at P1. Each invocation chooses a random Boolean. The adapter preserves branch data;
 the platform performs both joins and measures actual execution.
 The single-path P1 input is an edge transition; the duplicate generator arrow
 and its erroneous input-join label have been corrected.
 
 | Place | Logical service | Input attributes | Return attribute |
 | --- | --- | --- | --- |
-| P1 | BooleanTokenService | token | token |
-| P2 | BranchTwoTokenService | token | token_branch2 |
-| P3 | BranchOneTokenService | token | token_branch1 |
-| P4 | MergeTokenService | token_branch1, token_branch2 | token_branch2 |
-| P5 | SideTokenService | token | token_branch1 |
-| P6 | FinalMergeTokenService | token_branch1, token_branch2 | token |
+| P1 | StochasticService | token | token |
+| P2 | StochasticService | token | token_branch2 |
+| P3 | StochasticService | token | token_branch1 |
+| P4 | StochasticService | token_branch1, token_branch2 | token_branch2 |
+| P5 | StochasticService | token | token_branch1 |
+| P6 | FinalStochasticService | token_branch1, token_branch2 | token |
 
 The branch slots follow the incoming arc order in the existing model. Service
 placement is selected by `ServiceDeploymentFolder/petrinet/DoubleJoinModels.json`

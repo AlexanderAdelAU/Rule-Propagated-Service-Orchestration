@@ -24,7 +24,7 @@
       "width": 50,
       "height": 50,
       "label": "P1",
-      "service": "BooleanTokenService",
+      "service": "StochasticService",
       "operations": [
         {
           "name": "processToken",
@@ -39,7 +39,8 @@
         }
       ],
       "fill_color": "#33FF33",
-      "returnAttribute": "token"
+      "returnAttribute": "token",
+      "serviceInstance": "PetriNetInstance1"
     },
     {
       "id": "T_in_P2",
@@ -64,7 +65,7 @@
       "width": 50,
       "height": 50,
       "label": "P2",
-      "service": "ForwardTokenService",
+      "service": "StochasticService",
       "operations": [
         {
           "name": "processToken",
@@ -78,7 +79,8 @@
           ]
         }
       ],
-      "returnAttribute": "token"
+      "returnAttribute": "token",
+      "serviceInstance": "PetriNetInstance2"
     },
     {
       "id": "T_out_P2",

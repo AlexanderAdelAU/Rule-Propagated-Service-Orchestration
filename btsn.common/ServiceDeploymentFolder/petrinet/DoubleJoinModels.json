@@ -3,7 +3,7 @@
   "capabilities": [
     {
       "node": "P1",
-      "service": "BooleanTokenService",
+      "service": "StochasticService",
       "operation": "processToken",
       "returnAttribute": "token",
       "arguments": [
@@ -14,11 +14,13 @@
           "required": false
         }
       ],
-      "portSlot": 0
+      "portSlot": 0,
+      "instance": "PetriNetInstance1",
+      "invocationAdapter": "boolean-token"
     },
     {
       "node": "P2",
-      "service": "BranchTwoTokenService",
+      "service": "StochasticService",
       "operation": "processToken",
       "returnAttribute": "token_branch2",
       "arguments": [
@@ -29,11 +31,13 @@
           "required": false
         }
       ],
-      "portSlot": 0
+      "portSlot": 0,
+      "instance": "PetriNetInstance2",
+      "invocationAdapter": "boolean-token"
     },
     {
       "node": "P3",
-      "service": "BranchOneTokenService",
+      "service": "StochasticService",
       "operation": "processToken",
       "returnAttribute": "token_branch1",
       "arguments": [
@@ -44,11 +48,13 @@
           "required": false
         }
       ],
-      "portSlot": 0
+      "portSlot": 0,
+      "instance": "PetriNetInstance3",
+      "invocationAdapter": "boolean-token"
     },
     {
       "node": "P4",
-      "service": "MergeTokenService",
+      "service": "StochasticService",
       "operation": "processToken",
       "returnAttribute": "token_branch2",
       "arguments": [
@@ -65,11 +71,13 @@
           "required": false
         }
       ],
-      "portSlot": 0
+      "portSlot": 0,
+      "instance": "PetriNetInstance4",
+      "invocationAdapter": "boolean-token"
     },
     {
       "node": "P5",
-      "service": "SideTokenService",
+      "service": "StochasticService",
       "operation": "processToken",
       "returnAttribute": "token_branch1",
       "arguments": [
@@ -80,11 +88,13 @@
           "required": false
         }
       ],
-      "portSlot": 0
+      "portSlot": 0,
+      "instance": "PetriNetInstance5",
+      "invocationAdapter": "boolean-token"
     },
     {
       "node": "P6",
-      "service": "FinalMergeTokenService",
+      "service": "StochasticService",
       "operation": "processToken",
       "returnAttribute": "token",
       "arguments": [
@@ -101,7 +111,9 @@
           "required": false
         }
       ],
-      "portSlot": 0
+      "portSlot": 0,
+      "instance": "PetriNetInstance6",
+      "invocationAdapter": "boolean-token"
     }
   ]
 }
