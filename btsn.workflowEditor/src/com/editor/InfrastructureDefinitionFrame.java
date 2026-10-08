@@ -31,7 +31,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
             if (column == 0) { for (NodeNetwork node : nodes) values.add(node.node); }
             else if (column == 1) values.addAll(serviceRegistry.services());
             else if (column == 2) values.addAll(serviceRegistry.operations(cap.service));
-            else if (column == 6) { values.add(""); ServiceRegistry.Contract contract = serviceRegistry.contract(cap.service, cap.operation); if (contract != null && "boolean".equals(contract.resultType)) values.add("boolean-token"); }
+            else if (column == 6) { ServiceRegistry.Contract contract = serviceRegistry.contract(cap.service, cap.operation); if (contract != null && "boolean".equals(contract.resultType)) values.add("boolean-token"); }
             else return super.getCellEditor(row, column);
             return new DefaultCellEditor(ServiceRegistry.choices(values, current));
         }
@@ -522,11 +522,13 @@ public class InfrastructureDefinitionFrame extends JFrame {
                     "Wrong Definition Type", JOptionPane.WARNING_MESSAGE);
                 return false;
             }
-            parseJson(json);
             currentFile = file;
+            if (deploymentEditor) loadCatalogue();
+            parseJson(json);
             markSaved();
             rememberDirectory(preferenceKey(), file.getParentFile());
-            setStatus("Definition opened: " + file.getAbsolutePath(), file.getAbsolutePath());
+            if (!deploymentEditor || serviceRegistry.problem() == null)
+                setStatus("Definition opened: " + file.getAbsolutePath(), file.getAbsolutePath());
             return true;
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(dialogParent, "Could not open definition:\n" + ex.getMessage(),
@@ -1051,6 +1053,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
             Capability x = capabilities.get(r);
             String s = v == null ? "" : String.valueOf(v).trim();
             if (c == 0) {
+                if (s.equals(x.node)) return;
                 x.node = s;
                 x.portSlot = -1;
                 NodeNetwork n = findNode(s);
@@ -1058,13 +1061,13 @@ public class InfrastructureDefinitionFrame extends JFrame {
                 fireTableRowsUpdated(r, r);
                 return;
             } else if (c == 1) {
-                if (!serviceRegistry.services().contains(s)) return;
+                if (s.equals(x.service) || !serviceRegistry.services().contains(s)) return;
                 x.service = s; x.adapter = "";
                 List<String> operations = serviceRegistry.operations(s);
                 x.operation = operations.size() == 1 ? operations.get(0) : "";
                 useCatalogueContract(x); fireTableRowsUpdated(r, r); return;
             } else if (c == 2) {
-                if (!serviceRegistry.operations(x.service).contains(s)) return;
+                if (s.equals(x.operation) || !serviceRegistry.operations(x.service).contains(s)) return;
                 x.operation = s; useCatalogueContract(x); fireTableRowsUpdated(r, r); return;
             }
             else if (c == 3) x.returnAttribute = s;

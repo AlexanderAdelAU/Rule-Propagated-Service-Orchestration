@@ -67,7 +67,8 @@ jobs:
           mkdir -p ci-results
           set -o pipefail
           if [ "$ANT_TARGET" = check-editor ]; then
-            ant -noinput -f btsn.workflowEditor/build.xml clean jar check-contracts 2>&1 | tee "ci-results/$ANT_TARGET.log"
+            sudo apt-get install --yes xvfb
+            xvfb-run -a ant -noinput -f btsn.workflowEditor/build.xml clean jar check-deployment-editor 2>&1 | tee "ci-results/$ANT_TARGET.log"
             cp btsn.workflowEditor/build/contract-tests/attributes-preview.png ci-results/
           else
             ant -noinput -f btsn.services/build.xml clean "$ANT_TARGET" 2>&1 | tee "ci-results/$ANT_TARGET.log"

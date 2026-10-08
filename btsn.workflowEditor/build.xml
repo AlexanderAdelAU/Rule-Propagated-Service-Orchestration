@@ -130,6 +130,13 @@
         </java>
     </target>
 
+    <target name="check-deployment-editor" depends="check-contracts" description="Test real deployment table editors (requires a display or xvfb-run)">
+        <java classname="com.editor.DeploymentEditorCheck" fork="true" failonerror="true">
+            <classpath><pathelement location="${build.dir}/contract-tests"/><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
+            <arg file=".."/>
+        </java>
+    </target>
+
     <!-- Run the application -->
     <target name="run" depends="jar" description="Run the application">
         <echo message="Running Petri Net Editor..."/>
