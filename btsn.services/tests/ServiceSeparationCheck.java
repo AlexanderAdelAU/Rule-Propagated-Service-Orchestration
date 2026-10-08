@@ -40,6 +40,28 @@ public final class ServiceSeparationCheck {
             }
         }
         check(petriProfiles == 6, "Petri-net profile coverage changed");
+        // Validate each migrated process against its explicitly selected profile before deployment.
+        String[] modelNames = {"TrafficLight_Workflow", "P1_P2_Deterministic_Workflow", "P1_to_P6_Double_Join_Workflow", "P1_Tutorial_Workflow", "P1_P2_Workflow", "P1_P2_ForkCompanion_Workflow", "P1_P2_P3_P4_Fork_Join_Workflow"};
+        for (String modelName : modelNames) {
+            JSONObject model = DeploymentConfiguration.read(common.resolve("ProcessDefinitionFolder/petrinet/Workflow/" + modelName + ".json"));
+            JSONObject selectedProfile = null;
+            try (java.util.stream.Stream<Path> candidates = Files.walk(root.resolve("btsn.services/deployments/models"))) {
+                for (Path candidate : (Iterable<Path>)candidates.filter(p -> p.toString().endsWith(".json"))::iterator) {
+                    JSONObject data = DeploymentConfiguration.read(candidate);
+                    if (model.get("serviceDeployment").equals(data.get("serviceDeployment"))) { selectedProfile = data; break; }
+                }
+            }
+            check(selectedProfile != null, "Process has no deployment profile: " + modelName);
+            Path selectedFixture = Files.createTempDirectory("process-contract-");
+            for (String field : Arrays.asList("infrastructure", "serviceDeployment", "catalog")) {
+                Path relative = Path.of(selectedProfile.get(field).toString());
+                Files.createDirectories(selectedFixture.resolve(relative).getParent());
+                Files.copy(common.resolve(relative), selectedFixture.resolve(relative));
+            }
+            Files.createDirectories(selectedFixture.resolve("BusinessServiceDefinitions"));
+            Files.writeString(selectedFixture.resolve("BusinessServiceDefinitions/Deployment.json"), selectedProfile.toJSONString());
+            new DeploymentConfiguration(selectedFixture).validateWorkflow(model);
+        }
         JSONObject profile = DeploymentConfiguration.read(root.resolve("btsn.services/deployments/models/TrafficLightDeployment.json"));
         Path fixture = Files.createTempDirectory("service-instances-");
         for (String field : Arrays.asList("infrastructure", "serviceDeployment", "catalog")) {
@@ -55,6 +77,27 @@ public final class ServiceSeparationCheck {
         Files.writeString(fixture.resolve("BusinessServiceDefinitions/Deployment.json"), profile.toJSONString());
         GenerateDeploymentRules.main(new String[]{fixture.toString()});
         DeploymentConfiguration configuration = new DeploymentConfiguration(fixture);
+        JSONObject declaredWorkflow = DeploymentConfiguration.read(common.resolve("ProcessDefinitionFolder/petrinet/Workflow/TrafficLight_Workflow.json"));
+        configuration.validateWorkflow(declaredWorkflow);
+        JSONObject firstPlace = null;
+        for (Object item : (JSONArray)declaredWorkflow.get("elements")) if ("PLACE".equals(((JSONObject)item).get("type"))) { firstPlace = (JSONObject)item; break; }
+        String selectedService = firstPlace.get("service").toString();
+        firstPlace.put("service", "StochasticEntryJoinService");
+        try { configuration.validateWorkflow(declaredWorkflow); throw new AssertionError("Unknown process service accepted"); }
+        catch (IllegalArgumentException expected) { check(expected.getMessage().contains("Unresolved process instance"), expected.getMessage()); }
+        firstPlace.put("service", selectedService);
+        JSONObject firstOperation = (JSONObject)((JSONArray)firstPlace.get("operations")).get(0);
+        JSONObject firstInput = (JSONObject)((JSONArray)firstOperation.get("arguments")).get(0);
+        String selectedInput = firstInput.get("name").toString();
+        firstInput.put("name", "incorrect");
+        try { configuration.validateWorkflow(declaredWorkflow); throw new AssertionError("Mismatched process inputs accepted"); }
+        catch (IllegalArgumentException expected) { check(expected.getMessage().contains("Process inputs differ"), expected.getMessage()); }
+        firstInput.put("name", selectedInput);
+        firstOperation.put("returnAttribute", "incorrect");
+        try { configuration.validateWorkflow(declaredWorkflow); throw new AssertionError("Mismatched process result accepted"); }
+        catch (IllegalArgumentException expected) { check(expected.getMessage().contains("Process result differs"), expected.getMessage()); }
+        firstOperation.put("returnAttribute", "token");
+        configuration.validateWorkflow(declaredWorkflow);
         Path installed = fixture.resolve("RuleFolder.v001/processToken/Service.ruleml");
         Files.createDirectories(installed.getParent());
         BusinessCapabilityResolver resolver = new BusinessCapabilityResolver(fixture, fixture);

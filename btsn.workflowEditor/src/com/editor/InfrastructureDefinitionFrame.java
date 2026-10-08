@@ -24,13 +24,26 @@ public class InfrastructureDefinitionFrame extends JFrame {
     private final CapabilityModel capabilityModel = new CapabilityModel();
     private final ArgumentModel argumentModel = new ArgumentModel();
     private final JTable nodeNetworkTable = new JTable(nodeNetworkModel);
-    private final JTable capabilityTable = new JTable(capabilityModel);
+    private final JTable capabilityTable = new JTable(capabilityModel) {
+        @Override public javax.swing.table.TableCellEditor getCellEditor(int row, int column) {
+            Capability cap = capabilities.get(convertRowIndexToModel(row));
+            List<String> values = new ArrayList<>(); String current = String.valueOf(capabilityModel.getValueAt(row, column));
+            if (column == 0) { for (NodeNetwork node : nodes) values.add(node.node); }
+            else if (column == 1) values.addAll(serviceRegistry.services());
+            else if (column == 2) values.addAll(serviceRegistry.operations(cap.service));
+            else if (column == 6) { values.add(""); ServiceRegistry.Contract contract = serviceRegistry.contract(cap.service, cap.operation); if (contract != null && "boolean".equals(contract.resultType)) values.add("boolean-token"); }
+            else return super.getCellEditor(row, column);
+            return new DefaultCellEditor(ServiceRegistry.choices(values, current));
+        }
+    };
     private final JTable argumentTable = new JTable(argumentModel);
     private final TitledBorder argumentsBorder = BorderFactory.createTitledBorder("Arguments - select a capability");
     private static final String PREF_DEFINITION_DIR = "infrastructureDefinitionDir";
     private final Preferences preferences = Preferences.userNodeForPackage(InfrastructureDefinitionFrame.class);
     private final JLabel statusLabel = new JLabel(" ");
     private File currentFile;
+    private String catalogueReference = "";
+    private final ServiceRegistry serviceRegistry = new ServiceRegistry();
     /** JSON of the definition as last opened/saved; compared with toJson() to detect unsaved changes. */
     private String savedSnapshot;
 
@@ -94,6 +107,19 @@ public class InfrastructureDefinitionFrame extends JFrame {
         JButton removeCapability = new JButton("Remove capability");
         capButtons.add(addCapability);
         capButtons.add(removeCapability);
+        JButton reloadCatalogue = new JButton("Reload catalogue");
+        reloadCatalogue.addActionListener(e -> { loadCatalogue(); capabilityTable.repaint(); });
+        capButtons.add(reloadCatalogue);
+        JButton chooseCatalogue = new JButton("Choose catalogue...");
+        chooseCatalogue.addActionListener(e -> {
+            JFileChooser chooser = new JFileChooser();
+            File common = ServiceRegistry.findCommon(currentFile);
+            if (common != null) chooser.setCurrentDirectory(new File(common, "BusinessServiceDefinitions"));
+            if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return;
+            try { serviceRegistry.loadCatalogue(chooser.getSelectedFile()); catalogueReference = serviceRegistry.catalogueReference(); capabilityTable.repaint(); }
+            catch (Exception ex) { JOptionPane.showMessageDialog(this, ex.getMessage(), "Invalid catalogue", JOptionPane.ERROR_MESSAGE); }
+        });
+        capButtons.add(chooseCatalogue);
         capabilitiesPanel.add(capButtons, BorderLayout.SOUTH);
 
         JPanel argsPanel = new JPanel(new BorderLayout(4, 4));
@@ -130,6 +156,19 @@ public class InfrastructureDefinitionFrame extends JFrame {
 
         setContentPane(root);
 
+        capabilityTable.getTableHeader().setReorderingAllowed(false);
+        capabilityTable.setDefaultRenderer(String.class, new javax.swing.table.DefaultTableCellRenderer() {
+            @Override public Component getTableCellRendererComponent(JTable table, Object value, boolean selected, boolean focus, int row, int column) {
+                super.getTableCellRendererComponent(table, value, selected, focus, row, column);
+                Capability cap = capabilities.get(row);
+                List<String> names = new ArrayList<>(); for (Argument argument : cap.arguments) names.add(argument.name);
+                List<String> errors = serviceRegistry.validateEndpoint(cap.service, cap.operation, cap.returnAttribute, names, cap.adapter);
+                setToolTipText(errors.isEmpty() ? null : String.join("; ", errors));
+                if (!selected) setForeground(errors.isEmpty() ? table.getForeground() : Color.RED);
+                if ((column == 1 && !serviceRegistry.services().contains(cap.service)) || (column == 2 && !serviceRegistry.operations(cap.service).contains(cap.operation))) setText("Unresolved: " + value);
+                return this;
+            }
+        });
         capabilityTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         capabilityTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
@@ -200,6 +239,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
                 JOptionPane.showMessageDialog(this, "Select a capability first.");
                 return;
             }
+            if (c.adapter.isEmpty()) { JOptionPane.showMessageDialog(this, "Catalogue inputs are fixed. Select an explicit adapter to define transport aliases."); return; }
             c.arguments.add(new Argument());
             argumentModel.fireTableDataChanged();
         });
@@ -207,7 +247,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
         removeArgument.addActionListener(e -> {
             Capability c = argumentModel.capability;
             int row = argumentTable.getSelectedRow();
-            if (c != null && row >= 0) {
+            if (c != null && row >= 0 && !c.adapter.isEmpty()) {
                 c.arguments.remove(row);
                 argumentModel.fireTableDataChanged();
             }
@@ -405,6 +445,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
         try {
             Files.write(file.toPath(), toJson().getBytes(StandardCharsets.UTF_8));
             currentFile = file;
+            if (deploymentEditor) loadCatalogue();
             markSaved();
             rememberDirectory(preferenceKey(), file.getParentFile());
             setStatus("Definition saved: " + file.getAbsolutePath(), file.getAbsolutePath());
@@ -514,7 +555,9 @@ public class InfrastructureDefinitionFrame extends JFrame {
             }
             return b.append("  ]\n}\n").toString();
         }
-        b.append("{\n  \"definitionType\": \"ServiceDeployment\",\n  \"capabilities\": [\n");
+        b.append("{\n  \"definitionType\": \"ServiceDeployment\",\n");
+        if (!catalogueReference.isEmpty()) b.append("  \"catalog\": \"").append(escape(catalogueReference)).append("\",\n");
+        b.append("  \"capabilities\": [\n");
         for (int i = 0; i < capabilities.size(); i++) {
             Capability c = capabilities.get(i);
             b.append("    {\n");
@@ -560,6 +603,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
      */
     private void parseJson(String json) {
         capabilities.clear();
+        catalogueReference = stringValue(json, "catalog");
         if (!deploymentEditor) {
             loadPhysicalNodes(json);
             nodeNetworkModel.fireTableDataChanged();
@@ -693,6 +737,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
     }
 
     private void generateBindings() {
+        stopTableEditing();
         List<String> errors = validateDefinition();
         if (!errors.isEmpty()) {
             JOptionPane.showMessageDialog(this, String.join("\n", errors),
@@ -732,11 +777,36 @@ public class InfrastructureDefinitionFrame extends JFrame {
             showError("Could not generate service bindings", ex);
         }
     }
+    private void loadCatalogue() {
+        if (currentFile == null) return;
+        try { serviceRegistry.loadDeployment(currentFile); catalogueReference = serviceRegistry.catalogueReference(); }
+        catch (Exception ex) { setStatus("Unresolved catalogue: " + ex.getMessage(), ex.getMessage()); }
+    }
+
+    private void useCatalogueContract(Capability cap) {
+        ServiceRegistry.Contract contract = serviceRegistry.contract(cap.service, cap.operation);
+        if (contract == null || !cap.adapter.isEmpty()) return;
+        cap.returnAttribute = contract.output;
+        cap.arguments.clear();
+        for (String input : contract.inputs) { Argument argument = new Argument(); argument.name = input; argument.type = "String"; cap.arguments.add(argument); }
+        argumentModel.setCapability(cap);
+    }
+
     private List<String> validateDefinition() {
         List<String> errors = new ArrayList<>();
         if (nodes.isEmpty()) errors.add("No physical nodes have been defined.");
         if (deploymentEditor && capabilities.isEmpty()) errors.add("No capabilities have been defined.");
 
+        if (deploymentEditor) {
+            String associationError = serviceRegistry.catalogueAssociationError(currentFile);
+            if (associationError != null) errors.add(associationError);
+            if (serviceRegistry.problem() != null) errors.add(serviceRegistry.problem());
+            else for (Capability cap : capabilities) {
+                List<String> names = new ArrayList<>(); for (Argument input : cap.arguments) names.add(input.name);
+                for (String error : serviceRegistry.validateEndpoint(cap.service, cap.operation, cap.returnAttribute, names, cap.adapter))
+                    errors.add(cap.node + " / " + cap.service + "." + cap.operation + ": " + error);
+            }
+        }
         Set<String> nodeNames = new HashSet<>();
         Map<String, String> channelAddresses = new HashMap<>();
         for (NodeNetwork n : nodes) {
@@ -963,7 +1033,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
         public int getColumnCount() { return columns.length; }
         public String getColumnName(int c) { return columns[c]; }
         public Class<?> getColumnClass(int c) { return c == 4 ? Integer.class : String.class; }
-        public boolean isCellEditable(int r, int c) { return true; }
+        public boolean isCellEditable(int r, int c) { return c != 3 || !capabilities.get(r).adapter.isEmpty(); }
         public Object getValueAt(int r, int c) {
             Capability x = capabilities.get(r);
             switch (c) {
@@ -987,8 +1057,16 @@ public class InfrastructureDefinitionFrame extends JFrame {
                 if (n != null) x.portSlot = allocateSlot(n);
                 fireTableRowsUpdated(r, r);
                 return;
-            } else if (c == 1) x.service = s;
-            else if (c == 2) x.operation = s;
+            } else if (c == 1) {
+                if (!serviceRegistry.services().contains(s)) return;
+                x.service = s; x.adapter = "";
+                List<String> operations = serviceRegistry.operations(s);
+                x.operation = operations.size() == 1 ? operations.get(0) : "";
+                useCatalogueContract(x); fireTableRowsUpdated(r, r); return;
+            } else if (c == 2) {
+                if (!serviceRegistry.operations(x.service).contains(s)) return;
+                x.operation = s; useCatalogueContract(x); fireTableRowsUpdated(r, r); return;
+            }
             else if (c == 3) x.returnAttribute = s;
             else if (c == 4) x.portSlot = parseTableInt(v);
             else if (c == 5) x.instance = s;
@@ -1014,7 +1092,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
         public int getColumnCount() { return columns.length; }
         public String getColumnName(int c) { return columns[c]; }
         public Class<?> getColumnClass(int c) { return c == 3 ? Boolean.class : String.class; }
-        public boolean isCellEditable(int r, int c) { return true; }
+        public boolean isCellEditable(int r, int c) { return c == 2 || capability != null && !capability.adapter.isEmpty(); }
         public Object getValueAt(int r, int c) {
             Argument a = capability.arguments.get(r);
             switch (c) {

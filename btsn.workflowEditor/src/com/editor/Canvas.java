@@ -1217,15 +1217,20 @@ public class Canvas extends JPanel {
             panel.add(new JLabel("Service:"));
             serviceField = new JTextField(element.getService(), 30);
             serviceField.setPreferredSize(new Dimension(300, 25));
+            serviceField.setEditable(false);
             panel.add(serviceField);
             panel.add(new JLabel("Deployment instance:"));
+            instanceField.setEditable(false);
             panel.add(instanceField);
             
             panel.add(new JLabel("Operations:"));
             String operationsStr = String.join(", ", element.getOperations());
             operationField = new JTextField(operationsStr, 30);
             operationField.setPreferredSize(new Dimension(300, 25));
+            operationField.setEditable(false);
             panel.add(operationField);
+            panel.add(new JLabel("Service contract:"));
+            panel.add(new JLabel("Select service / operation / instance in Attributes."));
         } else {
             panel.add(new JLabel("Node Type:"));
             nodeTypeField = new JTextField(element.getNodeType(), 30);
@@ -1275,19 +1280,7 @@ public class Canvas extends JPanel {
                 element.setService(finalServiceField.getText());
                 element.setServiceInstance(instanceField.getText().trim());
                 
-                // Parse comma-separated operations
-                String operationsText = finalOperationField.getText().trim();
-                List<String> newOperations = new ArrayList<>();
-                if (!operationsText.isEmpty()) {
-                    String[] opsArray = operationsText.split(",");
-                    for (String op : opsArray) {
-                        String trimmed = op.trim();
-                        if (!trimmed.isEmpty()) {
-                            newOperations.add(trimmed);
-                        }
-                    }
-                }
-                element.setOperations(newOperations);
+
             } else {
                 element.setNodeType(finalNodeTypeField.getText());
                 element.setNodeValue(finalNodeValueField.getText());
@@ -2626,9 +2619,34 @@ public class Canvas extends JPanel {
         return dot.toString();
     }
     
+    private final ServiceRegistry serviceRegistry = new ServiceRegistry();
+    private String serviceDeploymentReference = "";
+    private java.io.File definitionLocation;
+    public void serviceContractChanged() { notifyChange(); repaint(); }
+    public ServiceRegistry getServiceRegistry() { return serviceRegistry; }
+    public void setDefinitionLocation(java.io.File file) { definitionLocation = file; }
+    public void chooseServiceDeployment(java.awt.Component parent) {
+        JFileChooser chooser = new JFileChooser();
+        java.io.File common = ServiceRegistry.findCommon(definitionLocation);
+        if (common != null) chooser.setCurrentDirectory(new java.io.File(common, "ServiceDeploymentFolder"));
+        chooser.setDialogTitle("Choose the process service deployment");
+        if (chooser.showOpenDialog(parent) != JFileChooser.APPROVE_OPTION) return;
+        try {
+            serviceRegistry.loadDeployment(chooser.getSelectedFile());
+            serviceDeploymentReference = serviceRegistry.reference();
+            notifyChange(); notifySelectionChanged(selectedElements.size() == 1 ? selectedElements.iterator().next() : null); repaint();
+        } catch (Exception ex) { JOptionPane.showMessageDialog(parent, ex.getMessage(), "Unresolved catalogue", JOptionPane.ERROR_MESSAGE); }
+    }
+    public List<String> validateServiceContracts() {
+        List<String> errors = new ArrayList<>();
+        for (ProcessElement element : elements) if (element.getType() == ProcessElement.Type.PLACE)
+            for (String error : serviceRegistry.validatePlace(element)) errors.add(element.getLabel() + ": " + error);
+        return errors;
+    }
     public String saveToJSON() {
         StringBuilder json = new StringBuilder();
         json.append("{\n");
+        if (!serviceDeploymentReference.isEmpty()) json.append("  \"serviceDeployment\": \"").append(escapeJSON(serviceDeploymentReference)).append("\",\n");
         
         // Include metadata if present
         if (metadataJSON != null && !metadataJSON.isEmpty()) {
@@ -2672,6 +2690,7 @@ public class Canvas extends JPanel {
                     json.append("\n        {\n");
                     json.append("          \"name\": \"").append(escapeJSON(op.getName())).append("\"");
                     
+                    if (!op.getReturnAttribute().isEmpty()) json.append(",\n          \"returnAttribute\": \"").append(escapeJSON(op.getReturnAttribute())).append("\"");
                     // Save arguments if present
                     List<ServiceArgument> args = op.getArguments();
                     if (!args.isEmpty()) {
@@ -2807,7 +2826,10 @@ public class Canvas extends JPanel {
     
     public void loadFromJSON(String json) throws Exception {
         clear();
-        
+        serviceDeploymentReference = extractValue(json, "serviceDeployment");
+        if (serviceDeploymentReference == null) serviceDeploymentReference = "";
+        serviceRegistry.loadReference(serviceDeploymentReference, definitionLocation);
+
         // Extract and store metadata section if present
         if (json.contains("\"metadata\"")) {
             metadataJSON = extractSectionAsJSON(json, "\"metadata\"");
@@ -2897,6 +2919,9 @@ public class Canvas extends JPanel {
                                 String opName = extractValue(opBlock, "name");
                                 if (opName != null && !opName.trim().isEmpty()) {
                                     ServiceOperation serviceOp = new ServiceOperation(opName.trim());
+                                    String result = extractValue(opBlock, "returnAttribute");
+                                    if (result == null) result = extractValue(block, "returnAttribute");
+                                    serviceOp.setReturnAttribute(result);
                                     
                                     // Try to load arguments
                                     String argsSection = extractArraySection(opBlock, "arguments");
@@ -3434,6 +3459,7 @@ public class Canvas extends JPanel {
      */
     public List<String> validatePetriNet() {
         List<String> errors = new ArrayList<>();
+        errors.addAll(validateServiceContracts());
         Map<String, List<ProcessElement>> labelMap = new HashMap<>();
         
         // Check for duplicate labels/IDs

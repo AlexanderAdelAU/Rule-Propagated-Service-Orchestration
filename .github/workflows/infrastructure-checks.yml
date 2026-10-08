@@ -34,6 +34,8 @@ jobs:
             target: check-model-services
           - name: Healthcare service regression
             target: check-healthcare-services
+          - name: Editor catalogue choices and contracts
+            target: check-editor
     steps:
       - name: Check out the tested revision
         uses: actions/checkout@v7
@@ -64,7 +66,12 @@ jobs:
         run: |
           mkdir -p ci-results
           set -o pipefail
-          ant -noinput -f btsn.services/build.xml clean "$ANT_TARGET" 2>&1 | tee "ci-results/$ANT_TARGET.log"
+          if [ "$ANT_TARGET" = check-editor ]; then
+            ant -noinput -f btsn.workflowEditor/build.xml clean jar check-contracts 2>&1 | tee "ci-results/$ANT_TARGET.log"
+            cp btsn.workflowEditor/build/contract-tests/attributes-preview.png ci-results/
+          else
+            ant -noinput -f btsn.services/build.xml clean "$ANT_TARGET" 2>&1 | tee "ci-results/$ANT_TARGET.log"
+          fi
 
       - name: Write result summary
         if: always()

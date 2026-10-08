@@ -28,6 +28,7 @@
 
     <!-- Classpath for compilation (includes external libraries if present) -->
     <path id="compile.classpath">
+        <fileset dir="../btsn.common/lib" includes="json-simple-1.1.1.jar"/>
         <fileset dir="${lib.dir}" erroronmissingdir="false">
             <include name="**/*.jar"/>
         </fileset>
@@ -100,6 +101,7 @@
             <fileset dir="${build.dir}">
                 <include name="**/*.class"/>
             </fileset>
+            <zipgroupfileset dir="../btsn.common/lib" includes="json-simple-1.1.1.jar"/>
             <!-- Include external libraries if present -->
             <zipgroupfileset dir="${lib.dir}" erroronmissingdir="false">
                 <include name="**/*.jar"/>
@@ -114,6 +116,18 @@
         <echo message="To run on Windows, double-click the JAR file"/>
         <echo message="or use: java -jar ${dist.dir}/${jar.name}"/>
         <echo message="========================================"/>
+    </target>
+
+    <target name="check-contracts" depends="compile" description="Check catalogue-backed Swing controls and process contracts">
+        <mkdir dir="${build.dir}/contract-tests"/>
+        <javac srcdir="tests" destdir="${build.dir}/contract-tests" source="1.8" target="1.8" includeantruntime="false" encoding="UTF-8">
+            <classpath><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
+        </javac>
+        <java classname="com.editor.ServiceRegistryCheck" fork="true" failonerror="true">
+            <jvmarg value="-Djava.awt.headless=true"/>
+            <classpath><pathelement location="${build.dir}/contract-tests"/><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
+            <arg file=".."/><arg file="${build.dir}/contract-tests/attributes-preview.png"/>
+        </java>
     </target>
 
     <!-- Run the application -->

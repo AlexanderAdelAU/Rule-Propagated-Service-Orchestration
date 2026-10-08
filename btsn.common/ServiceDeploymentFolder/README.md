@@ -87,3 +87,32 @@ It also checks that both workflow parsers preserve all ten existing routing/node
 types in either transition position (100 parser combinations). These are parser
 preservation checks, not claims that all combinations are valid runtime models.
 The existing launcher, host, financial and healthcare contract checks remain.
+
+
+The editors use the selected deployment's active business catalogue as their
+source of service and operation choices. In the process Attributes panel,
+select the deployment, service, operation and matching instance; its input
+aliases and result are displayed from that instance contract. These fields
+cannot be independently typed in the process editor. Unknown legacy names
+remain visible as unresolved until explicitly corrected.
+
+Process JSON stores a relative serviceDeployment editor reference and each operation's
+returnAttribute; those declarations survive editor load/save. Existing
+Petri-net examples include the reference. For other existing or new diagrams,
+use **Choose service deployment...** to select the intended profile. The
+deployment editor can select an existing catalogue and records its catalog
+reference. A runtime Deployment.json profile must select that same catalogue.
+
+Unknown operations, mismatched inputs/results and incompatible adapters block
+binding generation and deployment preparation. Process service-contract errors
+also block the editor's normal save; diagram structure warnings remain separate.
+The deployer validates process instance contracts against the runtime Deployment.json
+profile before generating process rules. A compatible profile may reuse the same
+process; the editor reference does not lock a process to a physical placement.
+Routing types remain separate selections; opening Attributes does not rewrite
+an existing type to match a filtered list.
+
+Run ant -f btsn.workflowEditor/build.xml clean jar check-contracts to rebuild
+the editor and test its catalogue choices, actual Swing selection behaviour,
+contract rejection and JSON round trips. CI runs this alongside the five
+existing service suites.

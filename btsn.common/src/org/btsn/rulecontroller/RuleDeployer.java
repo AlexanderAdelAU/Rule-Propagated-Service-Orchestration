@@ -326,6 +326,7 @@ public class RuleDeployer {
 	/**
 	 * Load workflow file - JSON format only
 	 */
+	private org.btsn.deployment.DeploymentConfiguration deploymentConfiguration;
 	private String loadWorkflow() throws RuleDeployerException {
 		try {
 			File commonBase = new File("../");
@@ -341,6 +342,12 @@ public class RuleDeployer {
 				logger.info("Loading JSON workflow from: " + jsonFileName);
 				String jsonContent = StringFileIO.readFileAsString(jsonFileName);
 				logger.info("Successfully loaded JSON workflow: " + jsonContent.length() + " characters");
+                try {
+                    if (deploymentConfiguration == null) throw new IllegalArgumentException("Choose infrastructure and service deployment before deploying a process.");
+                    deploymentConfiguration.validateWorkflow((org.json.simple.JSONObject)new org.json.simple.parser.JSONParser().parse(jsonContent));
+                } catch (org.json.simple.parser.ParseException | IllegalArgumentException invalid) {
+                    throw new RuleDeployerException("Unresolved process service contract: " + invalid.getMessage(), invalid);
+                }
 				parseJsonWorkflow(jsonContent);
 				debugParsedContent();
 				return jsonContent;
@@ -371,6 +378,7 @@ public class RuleDeployer {
 		try {
 			java.nio.file.Path common = java.nio.file.Paths.get(commonPath, Config.COMMON_FOLDER);
 			org.btsn.deployment.DeploymentConfiguration config = new org.btsn.deployment.DeploymentConfiguration(common);
+            deploymentConfiguration = config;
 			java.nio.file.Path requested = java.nio.file.Paths.get(commonPath, Config.INFRASTRUCTURE_DEFINITION_FOLDER, definitionName + ".json");
 			if (!requested.normalize().equals(config.infrastructureFile.normalize())) {
 				throw new RuleDeployerException("Infrastructure selection conflicts with Deployment.json: " + definitionName);

@@ -35,7 +35,8 @@
               "value": "String",
               "required": false
             }
-          ]
+          ],
+          "returnAttribute": "token"
         }
       ],
       "fill_color": "#33FF33",
@@ -173,5 +174,6 @@
       "fontStyle": 0,
       "color": -16777216
     }
-  ]
+  ],
+  "serviceDeployment": "ServiceDeploymentFolder/petrinet/P1_Tutorial.json"
 }

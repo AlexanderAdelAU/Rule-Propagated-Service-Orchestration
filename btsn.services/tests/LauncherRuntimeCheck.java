@@ -69,6 +69,8 @@ public final class LauncherRuntimeCheck {
                 Path definition=common.resolve("ProcessDefinitionFolder").resolve(process+".json");
                 check(Files.isRegularFile(definition),"Missing process definition: "+definition);
                 JSONObject data=json(definition);
+                if(property.startsWith("workflow")||property.equals("process.name")&&process.contains("/Workflow/"))
+                    new org.btsn.deployment.DeploymentConfiguration(common).validateWorkflow(data);
                 for(Object item:(JSONArray)data.get("elements")) {
                     JSONObject node=(JSONObject)item; if(!"PLACE".equals(node.get("type"))) continue;
                     String service=(String)node.get("service");

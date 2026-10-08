@@ -16,6 +16,8 @@ public final class DeploymentConfiguration {
     public final JSONObject infrastructure;
     public final JSONObject serviceDeployment;
     public final Path infrastructureFile;
+    private final Map<String, JSONObject> operations = new HashMap<>();
+    private final Map<String, JSONObject> placements = new HashMap<>();
     private final Map<String, JSONObject> nodes = new HashMap<>();
 
     public DeploymentConfiguration(Path common) throws Exception {
@@ -27,6 +29,14 @@ public final class DeploymentConfiguration {
         require(!infrastructure.containsKey("capabilities"), "Physical infrastructure must not contain service capabilities");
         require("ServiceDeployment".equals(serviceDeployment.get("definitionType")), "Selected definition is not ServiceDeployment");
         require(!serviceDeployment.containsKey("nodes"), "Service deployment must not contain physical nodes");
+        if (serviceDeployment.containsKey("catalog"))
+            require(text(profile, "catalog").equals(text(serviceDeployment, "catalog")), "Deployment catalogue conflicts with Deployment.json");
+        for (Object item : array(read(common.resolve(text(profile, "catalog"))), "services")) {
+            JSONObject service = (JSONObject)item;
+            if (!"active".equals(service.get("status"))) continue;
+            String key = text(service, "service") + "\u0000" + text(service, "operation");
+            require(operations.put(key, service) == null, "Duplicate catalogue capability: " + key.replace('\u0000', '.'));
+        }
         Set<String> sockets = new HashSet<>();
         Map<String,String> channels = new HashMap<>();
         for (Object item : array(infrastructure, "nodes")) {
@@ -49,6 +59,56 @@ public final class DeploymentConfiguration {
             require(!placement.containsKey("basePort") && !placement.containsKey("address") && !placement.containsKey("channel"),
                     "Service placement must select a fixed port slot, not network settings");
             port(placement);
+            String service = text(placement, "service"), operation = text(placement, "operation");
+            JSONObject definition = operations.get(service + "\u0000" + operation);
+            require(definition != null, "Undefined catalogue operation: " + service + "." + operation);
+            String instance = placement.containsKey("instance") ? text(placement, "instance") : service;
+            require(placements.put(instance + "\u0000" + operation, placement) == null, "Duplicate deployment capability: " + instance + "." + operation);
+            String adapter = placement.containsKey("invocationAdapter") ? text(placement, "invocationAdapter") : "";
+            java.util.List<String> inputs = inputNames(placement);
+            if (adapter.isEmpty()) {
+                require(!"boolean".equals(definition.get("resultType")), "Boolean service requires an explicit boolean-token adapter: " + service);
+                require(array(definition, "inputs").equals(inputs), "Placement inputs differ from catalogue: " + service + "." + operation);
+                require(text(definition, "returnAttribute").equals(text(placement, "returnAttribute")), "Conflicting return attribute between placement and catalogue: " + service + "." + operation);
+            } else {
+                require("boolean-token".equals(adapter) && "boolean".equals(definition.get("resultType")) &&
+                    array(definition, "inputs").equals(java.util.Arrays.asList("data")) && "decision".equals(definition.get("returnAttribute")),
+                    "Invalid Boolean adapter contract: " + service + "." + operation);
+                text(placement, "returnAttribute");
+            }
+            require(new HashSet<>(inputs).size() == inputs.size(), "Duplicate placement inputs: " + instance);
+        }
+    }
+
+    private static java.util.List<String> inputNames(JSONObject operation) {
+        java.util.List<String> names = new java.util.ArrayList<>();
+        for (Object item : array(operation, "arguments")) names.add(text((JSONObject)item, "name"));
+        return names;
+    }
+
+    /** Checks a process before rule generation; routing topology is validated separately. */
+    public void validateWorkflow(JSONObject workflow) {
+        // The editor association is a selection hint. Reusable processes may run under another
+        // profile, provided every instance operation has the same declared contract.
+        for (Object item : array(workflow, "elements")) {
+            JSONObject place = (JSONObject)item;
+            if (!"PLACE".equals(place.get("type"))) continue;
+            String service = text(place, "service");
+            String instance = place.containsKey("serviceInstance") ? text(place, "serviceInstance") : service;
+            JSONArray declared = array(place, "operations");
+            require(!declared.isEmpty(), "Place has no operation: " + place.get("id"));
+            Set<String> used = new HashSet<>();
+            for (Object op : declared) {
+                require(op instanceof JSONObject, "Process operation must declare its input and result contract: " + place.get("id"));
+                JSONObject operation = (JSONObject)op;
+                String name = text(operation, "name");
+                require(used.add(name), "Duplicate process operation: " + name);
+                JSONObject placement = placements.get(instance + "\u0000" + name);
+                require(placement != null && service.equals(placement.get("service")), "Unresolved process instance: " + service + "." + name + " / " + instance);
+                require(inputNames(placement).equals(inputNames(operation)), "Process inputs differ from deployment: " + instance + "." + name);
+                String output = operation.containsKey("returnAttribute") ? text(operation, "returnAttribute") : text(place, "returnAttribute");
+                require(output.equals(text(placement, "returnAttribute")), "Process result differs from deployment: " + instance + "." + name);
+            }
         }
     }
 

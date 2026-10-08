@@ -38,7 +38,20 @@ public final class SharedInfrastructureCheck {
             String rules = Files.readString(fixture.resolve((String)config.profile.get("deploymentRules")));
             JSONObject deployment = config.serviceDeployment;
             JSONObject first = (JSONObject)((JSONArray)deployment.get("capabilities")).get(0);
+            String originalService = first.get("service").toString();
             first.put("service", "AlternativeFunction");
+            Files.writeString(fixture.resolve((String)config.profile.get("serviceDeployment")), deployment.toJSONString());
+            rejects(() -> GenerateDeploymentRules.main(new String[]{fixture.toString()}), "Undefined catalogue operation");
+            check(rules.equals(Files.readString(fixture.resolve((String)config.profile.get("deploymentRules")))), "Invalid service wrote runtime rules");
+            JSONObject alternative = null;
+            for (Object entry : (JSONArray)catalog.get("services")) {
+                JSONObject definition = (JSONObject)entry;
+                if (originalService.equals(definition.get("service")) && first.get("operation").equals(definition.get("operation"))) alternative = new JSONObject(definition);
+            }
+            check(alternative != null, "Missing original catalogue operation");
+            alternative.put("service", "AlternativeFunction");
+            ((JSONArray)catalog.get("services")).add(alternative);
+            Files.writeString(fixture.resolve((String)config.profile.get("catalog")), catalog.toJSONString());
             Files.writeString(fixture.resolve((String)config.profile.get("serviceDeployment")), deployment.toJSONString());
             GenerateDeploymentRules.main(new String[]{fixture.toString()});
             check(physical.equals(Files.readString(config.infrastructureFile)), "Changing service function changed physical settings");

@@ -1053,6 +1053,11 @@ public class ProcessEditor extends JFrame {
             }
             
             // VALIDATE BEFORE SAVING
+            java.util.List<String> contractErrors = canvas.validateServiceContracts();
+            if (!contractErrors.isEmpty()) {
+                JOptionPane.showMessageDialog(this, String.join("\n", contractErrors), "Unresolved service contracts — cannot save", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             java.util.List<String> errors = canvas.validatePetriNet();
             
             // Check if processType is specified
@@ -1115,7 +1120,12 @@ public class ProcessEditor extends JFrame {
         }
         
         // VALIDATE BEFORE SAVING
-        java.util.List<String> errors = canvas.validatePetriNet();
+        java.util.List<String> contractErrors = canvas.validateServiceContracts();
+            if (!contractErrors.isEmpty()) {
+                JOptionPane.showMessageDialog(this, String.join("\n", contractErrors), "Unresolved service contracts — cannot save", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            java.util.List<String> errors = canvas.validatePetriNet();
         
         // Check if processType is specified
         String processType = canvas.getProcessType();
@@ -1236,6 +1246,7 @@ public class ProcessEditor extends JFrame {
                     return;
                 }
                 
+                canvas.setDefinitionLocation(file);
                 canvas.loadFromJSON(content.toString());
                 documentationPanel.loadFromJSON(content.toString());  // Load documentation
                 undoRedoManager.clear();  // Clear undo/redo history after loading new file

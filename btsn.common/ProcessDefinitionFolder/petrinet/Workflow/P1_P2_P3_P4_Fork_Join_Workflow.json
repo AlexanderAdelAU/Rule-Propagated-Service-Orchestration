@@ -438,5 +438,6 @@
       "fontStyle": 0,
       "color": -16777216
     }
-  ]
+  ],
+  "serviceDeployment": "ServiceDeploymentFolder/petrinet/ForkModels.json"
 }
