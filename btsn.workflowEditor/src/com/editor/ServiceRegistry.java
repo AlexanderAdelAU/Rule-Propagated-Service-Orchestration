@@ -27,7 +27,8 @@ public final class ServiceRegistry {
     public String problem() { return problem; }
     public File common() { return common; }
     public String reference() { return deployment == null ? "" : common.toPath().relativize(deployment.toPath()).toString().replace(File.separatorChar, '/'); }
-    public String description() { return deployment != null ? deployment.getName() + " / " + catalogue.getName() : catalogue != null ? catalogue.getName() : problem; }
+    public String selectionLabel() { return deployment != null ? "Deployment: " + deployment.getName() : catalogue != null ? "Catalogue: " + catalogue.getName() : problem; }
+    public String description() { return deployment != null ? "Deployment: " + reference() + " | Catalogue: " + common.toPath().relativize(catalogue.toPath()).toString().replace(File.separatorChar, '/') : selectionLabel(); }
     public static File findCommon(File anchor) {
         for (File cursor = anchor == null ? new File(System.getProperty("user.dir")) : anchor; cursor != null; cursor = cursor.getParentFile()) {
             if (new File(cursor, "BusinessServiceDefinitions").isDirectory()) return cursor;

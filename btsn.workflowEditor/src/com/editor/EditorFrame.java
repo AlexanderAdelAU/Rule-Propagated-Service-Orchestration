@@ -729,7 +729,7 @@ public class EditorFrame extends JPanel {
         JButton choose = new JButton("Choose service deployment...");
         choose.addActionListener(e -> { canvas.chooseServiceDeployment(this); updateSelection(element); });
         attributesPanel.add(choose);
-        JTextArea source = new JTextArea(registry.description());
+        JTextArea source = new JTextArea(registry.selectionLabel());
         source.setEditable(false); source.setOpaque(false); source.setLineWrap(true); source.setWrapStyleWord(true);
         source.setPreferredSize(new Dimension(220, 40)); source.setMinimumSize(new Dimension(0, 40)); source.setMaximumSize(new Dimension(Integer.MAX_VALUE, 55));
         source.setToolTipText(registry.description()); attributesPanel.add(source);
