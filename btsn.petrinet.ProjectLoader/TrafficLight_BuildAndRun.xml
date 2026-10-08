@@ -447,7 +447,8 @@
 					<arg value="-process" /><arg value="${collector.process.name}" />
 					<arg value="-queryVersion" /><arg value="${query.version}" />
 					<arg value="-sequenceId" /><arg value="${sequence.id.collect.p2}" />
-					<arg value="-skipDeploy" />
+					<!-- P2's v999 collector completed but had no deployed next-service route.
+					     Deploy its collector topology explicitly so the response reaches Monitor. -->
 				</java>
 				<sleep seconds="${collector.delay.seconds}" />
 
