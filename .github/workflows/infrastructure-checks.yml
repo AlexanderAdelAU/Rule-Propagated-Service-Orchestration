@@ -34,6 +34,8 @@ jobs:
             target: check-model-services
           - name: Healthcare service regression
             target: check-healthcare-services
+          - name: Circulating and terminating chart measurements
+            target: check-circulating-metrics
           - name: Editor catalogue choices and contracts
             target: check-editor
     steps:

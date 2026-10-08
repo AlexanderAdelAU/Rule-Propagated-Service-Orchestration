@@ -75,7 +75,7 @@ public final class CombinedWorkflowMetricsCheck {
         check(!find(rows,5000000).hasDuration()&&find(rows,5000000).maxQueueMs==90
                 &&find(rows,5000000).validQueueVisits==1,"Legacy queue data acquired fabricated elapsed time");
         check(!find(rows,6000000).hasDuration()&&!find(rows,6000000).hasQueueMaximum(),"PROCESS-only legacy row became measured");
-        SwingGanttChart_WithLatency_v1d panel=new SwingGanttChart_WithLatency_v1d();
+        SwingGanttChart_WithLatency_v1d panel=new SwingGanttChart_WithLatency_v1d(false);
         check(panel.generateLaTeXFigure().contains("(2.045,4.000) rectangle (2.645,4.800)"),
                 "Default publication bars did not retain the arrival slot centre");
         panel.setWideBars(false);

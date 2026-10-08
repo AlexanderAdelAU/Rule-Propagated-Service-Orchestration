@@ -1,5 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="workflow-analysis-checks" default="check-analysis" basedir="../..">
+    <target name="check-circulating-timings" depends="jar" description="Check stopped local service measurements without Monitor or completion records">
+        <delete dir="target/circulating-timings-check"/>
+        <mkdir dir="target/circulating-timings-check/classes"/>
+        <tempfile property="circulating.timings.runtime" destdir="${java.io.tmpdir}" prefix="btsn-circulating-"/>
+        <mkdir dir="${circulating.timings.runtime}"/>
+        <path id="circulating.timings.classpath">
+            <path refid="runtime.classpath"/>
+            <pathelement location="../btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+            <pathelement location="target/circulating-timings-check/classes"/>
+        </path>
+        <javac srcdir="../btsn.common.Monitor/tests" destdir="target/circulating-timings-check/classes"
+               includes="CirculatingServiceTimingsCheck.java" release="${java.release}" includeantruntime="false" encoding="UTF-8">
+            <classpath refid="circulating.timings.classpath"/>
+        </javac>
+        <java classname="org.btsn.derby.Analysis.CirculatingServiceTimingsCheck" fork="true" failonerror="true"
+              dir="${circulating.timings.runtime}">
+            <classpath refid="circulating.timings.classpath"/>
+            <jvmarg value="-Djava.awt.headless=true"/>
+        </java>
+    </target>
     <target name="check-process-labels" depends="jar" description="Check captured process names against exact GENERATED observations and chart exports">
         <delete dir="target/process-labels-check"/>
         <mkdir dir="target/process-labels-check/classes"/>
