@@ -436,7 +436,7 @@
 				</java>
 				<sleep seconds="${collector.delay.seconds}" />
 
-				<!-- P2-P6 Collection (each place deploys its collector routing) -->
+				<!-- P2-P6 Collection (skip deployment) -->
 				<echo message="Collecting from P2_CollectorService..." />
 				<java classname="${collector.event.generator.class}"
 				      fork="true" dir="${generator.project.dir}" failonerror="true">
@@ -447,8 +447,7 @@
 					<arg value="-process" /><arg value="${collector.process.name}" />
 					<arg value="-queryVersion" /><arg value="${query.version}" />
 					<arg value="-sequenceId" /><arg value="${sequence.id.collect.p2}" />
-					<!-- P2's v999 collector completed but had no deployed next-service route.
-					     Deploy its collector topology explicitly so the response reaches Monitor. -->
+					<arg value="-skipDeploy" />
 				</java>
 				<sleep seconds="${collector.delay.seconds}" />
 
@@ -462,7 +461,7 @@
 					<arg value="-process" /><arg value="${collector.process.name}" />
 					<arg value="-queryVersion" /><arg value="${query.version}" />
 					<arg value="-sequenceId" /><arg value="${sequence.id.collect.p3}" />
-					<!-- Deploy collector route explicitly for P3; do not depend on previous host deployment. -->
+					<arg value="-skipDeploy" />
 				</java>
 				<sleep seconds="${collector.delay.seconds}" />
 
@@ -476,7 +475,7 @@
 					<arg value="-process" /><arg value="${collector.process.name}" />
 					<arg value="-queryVersion" /><arg value="${query.version}" />
 					<arg value="-sequenceId" /><arg value="${sequence.id.collect.p4}" />
-					<!-- Deploy collector route explicitly for P4; do not depend on previous host deployment. -->
+					<arg value="-skipDeploy" />
 				</java>
 				<sleep seconds="${collector.delay.seconds}" />
 
@@ -490,7 +489,7 @@
 					<arg value="-process" /><arg value="${collector.process.name}" />
 					<arg value="-queryVersion" /><arg value="${query.version}" />
 					<arg value="-sequenceId" /><arg value="${sequence.id.collect.p5}" />
-					<!-- Deploy collector route explicitly for P5; do not depend on previous host deployment. -->
+					<arg value="-skipDeploy" />
 				</java>
 				<sleep seconds="${collector.delay.seconds}" />
 
@@ -504,7 +503,7 @@
 					<arg value="-process" /><arg value="${collector.process.name}" />
 					<arg value="-queryVersion" /><arg value="${query.version}" />
 					<arg value="-sequenceId" /><arg value="${sequence.id.collect.p6}" />
-					<!-- Deploy collector route explicitly for P6; do not depend on previous host deployment. -->
+					<arg value="-skipDeploy" />
 				</java>
 				<echo message="=== Phase 3 Complete ===" />
 
