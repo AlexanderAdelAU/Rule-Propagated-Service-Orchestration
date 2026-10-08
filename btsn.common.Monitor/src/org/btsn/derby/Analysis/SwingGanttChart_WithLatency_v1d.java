@@ -110,7 +110,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
     private boolean serviceVisitMode;
     private static List<String> startupDatabases = Collections.singletonList(System.getProperty("btsn.analysis.database", "ServiceAnalysisDataBase"));
     private List<String> databasePaths = new ArrayList<>(startupDatabases);
-    public SwingGanttChart_WithLatency_v1d() { this(true); }
+    public SwingGanttChart_WithLatency_v1d() { this(false); }
     public SwingGanttChart_WithLatency_v1d(boolean serviceVisits) {
         serviceVisitMode = serviceVisits;
         setBackground(Color.WHITE);

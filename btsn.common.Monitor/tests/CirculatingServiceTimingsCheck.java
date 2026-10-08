@@ -12,13 +12,13 @@ public final class CirculatingServiceTimingsCheck {
    s.executeUpdate("CREATE TABLE SERVICEMEASUREMENTS (sequenceID BIGINT, serviceName VARCHAR(100), operation VARCHAR(100), arrivalTime BIGINT, invocationTime BIGINT, publishTime BIGINT)");
    s.executeUpdate("INSERT INTO SERVICEMEASUREMENTS VALUES (1000001,'P1_Place','processToken',1000,1010,1040),(1000001,'P1_Place','processToken',2000,2015,2055),(1000001,'P1_Place','processToken',3000,3020,NULL),(1000001,'P1_Place','processToken',1000,1010,1040),(999000001,'P1_InitializationService','purgeAndInitialize',500,510,520)");
   }
-  SwingGanttChart_WithLatency_v1d chart=new SwingGanttChart_WithLatency_v1d();
+  SwingGanttChart_WithLatency_v1d chart=new SwingGanttChart_WithLatency_v1d(true);
   check(chart.tasks.size()==3,"Repeated visits, duplicate collection or admin filtering incorrect");
   check(chart.tasks.get(0).elapsedTime==30 && chart.tasks.get(0).queueTime==10,"Arrival/invocation/publish measurements were changed");
   check(chart.tasks.get(1).elapsedTime==40 && chart.tasks.get(1).queueTime==15,"Circulating token lost its second visit");
   check(!chart.tasks.get(2).hasElapsedTime && chart.tasks.get(2).queueTime==20,"Partial service visit invented completion or lost measured queue wait");
   String report=chart.generateWorkflowSummaryReport();
-  check(report.contains("3 recorded service invocations") && report.contains("No process completion or Monitor acknowledgement is required"),"Default view still depends on workflow completion");
+  check(report.contains("3 recorded service invocations") && report.contains("No process completion or Monitor acknowledgement is required"),"Service invocation view depends on workflow completion");
   chart.setLightQueueBars(true);
   check(chart.generateLaTeXFigure().contains("Service invocation arrival rank"),"Publication export lost visit semantics");
   check(chart.generateLaTeXTable().contains("Service (ms)"),"Publication table still reports workflow elapsed time");
@@ -38,7 +38,7 @@ public final class CirculatingServiceTimingsCheck {
   chart.setDatabasePaths(java.util.Arrays.asList("ServiceAnalysisDataBase","SecondHost","SecondHost"));
   check(chart.tasks.size()==4 && chart.tasks.get(1).sequenceId==1000002 && chart.tasks.get(1).elapsedTime==20,
         "Multiple stopped hosts were duplicated or lost chronological interleaving");
-  System.out.println("PASS: stopped local database, circulating visits, partial observations, duplicate/conflict handling, default chart and publication exports without Monitor or completion records");
+  System.out.println("PASS: stopped local database, circulating visits, partial observations, duplicate/conflict handling, service invocation chart and publication exports without Monitor or completion records");
  }
  private static void check(boolean condition,String message){if(!condition)throw new AssertionError(message);}
 }

@@ -75,7 +75,7 @@ public final class CombinedWorkflowMetricsCheck {
         check(!find(rows,5000000).hasDuration()&&find(rows,5000000).maxQueueMs==90
                 &&find(rows,5000000).validQueueVisits==1,"Legacy queue data acquired fabricated elapsed time");
         check(!find(rows,6000000).hasDuration()&&!find(rows,6000000).hasQueueMaximum(),"PROCESS-only legacy row became measured");
-        SwingGanttChart_WithLatency_v1d panel=new SwingGanttChart_WithLatency_v1d(false);
+        SwingGanttChart_WithLatency_v1d panel=new SwingGanttChart_WithLatency_v1d();
         check(panel.generateLaTeXFigure().contains("(2.045,4.000) rectangle (2.645,4.800)"),
                 "Default publication bars did not retain the arrival slot centre");
         panel.setWideBars(false);
@@ -231,7 +231,40 @@ public final class CombinedWorkflowMetricsCheck {
         panel.setMaxDisplayTasks(20);
         check(panel.generateLaTeXFigure().contains("Showing 20 of 40 observed root workflows")
                 &&panel.axisMaximum("v001")==219,"Truncation concealed omitted roots or changed the scale");
+        checkStage5WorkflowCount();
         System.out.println("PASS: measured serial/fork durations; nested genealogy queue maxima; no sum/fraction; duplicate/admin/orphan exclusion; incomplete/invalid/zero/legacy values; stable per-version/shared scales; publication exports; diamond/lower-shading and wide/narrow switching; unchanged heights, aligned proportional shading, root hover, conditional measurement notes and display-range counts");
+    }
+    private static void checkStage5WorkflowCount() throws Exception {
+        // Regression fixture only: 15 five-service urgent workflows and 40
+        // two-service background workflows must remain 55 workflow rows.
+        try(Connection c=DriverManager.getConnection("jdbc:derby:ServiceAnalysisDataBase"); Statement s=c.createStatement()) {
+            for(String table:new String[]{"CONSOLIDATED_TRANSITION_FIRINGS","CONSOLIDATED_TOKEN_GENEALOGY","SERVICECONTRIBUTION","PROCESSMEASUREMENTS",ServiceDisplayNames.TABLE})
+                s.executeUpdate("DELETE FROM "+table);
+            for(int version=1;version<=2;version++) {
+                int base=version*1000000;
+                int count=version==1?15:40;
+                for(int i=0;i<count;i++) {
+                    int root=base+i*10000;
+                    long start=10000+i*100+version;
+                    event(c,base,root,"GENERATED",start);
+                    event(c,base,root,"TERMINATE",start+70);
+                    if(version==1)
+                        s.executeUpdate("INSERT INTO CONSOLIDATED_TOKEN_GENEALOGY (workflowBase,parentTokenId,childTokenId) VALUES ("+base+","+root+","+(root+1)+"),("+base+","+root+","+(root+2)+")");
+                    for(int place=1;place<=(version==1?5:2);place++) {
+                        int token=version==1&&(place==2||place==3)?root+place-1:root;
+                        sample(c,base,token,start+place,5L,"P"+place);
+                    }
+                }
+            }
+        }
+        SwingGanttChart_WithLatency_v1d workflows=new SwingGanttChart_WithLatency_v1d();
+        check(workflows.tasks.size()==55,"Default Stage 5 chart counted service visits as workflows");
+        check(workflows.tasks.stream().filter(t->t.sequenceId/1000000==1).count()==15
+                &&workflows.tasks.stream().filter(t->t.sequenceId/1000000==2).count()==40,"Stage 5 version workflow counts changed");
+        check(workflows.generateWorkflowSummaryReport().contains("55 observed root workflows"),"Default count caption lost workflow semantics");
+        SwingGanttChart_WithLatency_v1d invocations=new SwingGanttChart_WithLatency_v1d(true);
+        check(invocations.tasks.size()==155,"Explicit invocation view lost individual service visits");
+        System.out.println("PASS: Stage 5 default = 55 workflow rows (15 v001 + 40 v002); explicit invocation view = 155 service visits");
     }
     private static int widestColourRun(BufferedImage image,int colour) {
         int longest=0;
