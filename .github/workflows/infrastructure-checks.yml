@@ -1,0 +1,99 @@
+name: Shared infrastructure regression checks
+
+on:
+  push:
+    branches:
+      - organize-infrastructure-definitions
+      - separate-service-and-gateway
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: infrastructure-checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  regression:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Service packaging and invocation boundaries
+            target: check
+          - name: Shared infrastructure and launcher preparation
+            target: check-launchers
+          - name: All six service hosts (P1-P6)
+            target: check-hosts
+          - name: Petri-net model service regression
+            target: check-model-services
+          - name: Healthcare service regression
+            target: check-healthcare-services
+          - name: Circulating and terminating chart measurements
+            target: check-circulating-metrics
+          - name: Editor catalogue choices and contracts
+            target: check-editor
+    steps:
+      - name: Check out the tested revision
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Ant
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes ant
+          java -version
+          ant -version
+
+      # Each suite gets a fresh runner and rebuilds its required components.
+      # These are the repository's regression checks; launcher preparation
+      # does not execute the full networked BuildAndRun workflows.
+      - name: Build and run regression suite
+        id: checks
+        shell: bash
+        env:
+          ANT_TARGET: ${{ matrix.target }}
+        run: |
+          mkdir -p ci-results
+          set -o pipefail
+          if [ "$ANT_TARGET" = check-editor ]; then
+            sudo apt-get install --yes xvfb
+            xvfb-run -a ant -noinput -f btsn.workflowEditor/build.xml clean jar check-deployment-editor 2>&1 | tee "ci-results/$ANT_TARGET.log"
+            cp btsn.workflowEditor/build/contract-tests/attributes-preview.png ci-results/
+          else
+            ant -noinput -f btsn.services/build.xml clean "$ANT_TARGET" 2>&1 | tee "ci-results/$ANT_TARGET.log"
+          fi
+
+      - name: Write result summary
+        if: always()
+        env:
+          SUITE_NAME: ${{ matrix.name }}
+          ANT_TARGET: ${{ matrix.target }}
+          CHECK_OUTCOME: ${{ steps.checks.outcome }}
+        run: |
+          {
+            printf '### %s\n\n' "$SUITE_NAME"
+            printf 'Ant target: `%s`\n\n' "$ANT_TARGET"
+            printf 'Result: **%s**\n' "$CHECK_OUTCOME"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload regression log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: infrastructure-${{ matrix.target }}-${{ github.run_attempt }}
+          path: ci-results/
+          if-no-files-found: warn
+          retention-days: 14

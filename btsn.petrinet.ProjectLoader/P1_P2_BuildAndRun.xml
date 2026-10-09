@@ -19,8 +19,7 @@
 	</description>
     <!-- Shared packaged runtime; source deployment files and Eclipse outputs are not modified. -->
     <property name="launcher.profile.file" location="../btsn.services/deployments/models/Deployment.json"/>
-    <property name="launcher.rules.file" location="../btsn.services/deployments/models/InfrastructureDeployment.ruleml.xml"/>
-    <property name="infrastructure.definition.name" value="PetriNetModels_Infrastructure"/>
+    <property name="infrastructure.definition.name" value="SingleHost"/>
     <import file="../btsn.services/launcher-runtime.xml"/>
 
 
@@ -183,7 +182,7 @@
 			<classpath refid="generator.classpath" />
 			<arg value="-version" /><arg value="${rule.version}" />
 			<arg value="-process" /><arg value="${workflow.process.name}" />
-            <arg value="-infrastructure"/><arg value="PetriNetModels_Infrastructure"/>
+            <arg value="-infrastructure"/><arg value="SingleHost"/>
 			<arg value="-place" /><arg value="${target.place}" />
 			<arg value="-operation" /><arg value="${target.operation}" />
 			<arg value="-tokens" /><arg value="${token.count}" />
@@ -202,7 +201,7 @@
 			<classpath refid="generator.classpath" />
 			<arg value="-version" /><arg value="${rule.version}" />
 			<arg value="-process" /><arg value="${workflow.process.name}" />
-            <arg value="-infrastructure"/><arg value="PetriNetModels_Infrastructure"/>
+            <arg value="-infrastructure"/><arg value="SingleHost"/>
 			<arg value="-place" /><arg value="${target.place}" />
 			<arg value="-operation" /><arg value="${target.operation}" />
 			<arg value="-expire" /><arg value="${token.expire}" />
@@ -337,7 +336,7 @@
 					<classpath refid="generator.classpath" />
 					<arg value="-version" /><arg value="${rule.version}" />
 					<arg value="-process" /><arg value="${workflow.process.name}" />
-            <arg value="-infrastructure"/><arg value="PetriNetModels_Infrastructure"/>
+            <arg value="-infrastructure"/><arg value="SingleHost"/>
 					<arg value="-place" /><arg value="${target.place}" />
 					<arg value="-operation" /><arg value="${target.operation}" />
 					<arg value="-tokens" /><arg value="0" />
@@ -464,7 +463,7 @@
 					<classpath refid="generator.classpath" />
 					<arg value="-version" /><arg value="${rule.version}" />
 					<arg value="-process" /><arg value="${workflow.process.name}" />
-            <arg value="-infrastructure"/><arg value="PetriNetModels_Infrastructure"/>
+            <arg value="-infrastructure"/><arg value="SingleHost"/>
 					<arg value="-place" /><arg value="${target.place}" />
 					<arg value="-operation" /><arg value="${target.operation}" />
 					<arg value="-tokens" /><arg value="0" />

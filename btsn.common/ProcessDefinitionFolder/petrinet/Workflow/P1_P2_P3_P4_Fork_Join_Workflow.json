@@ -23,7 +23,7 @@
       "width": 50,
       "height": 50,
       "label": "P1",
-      "service": "StochasticEntryTokenService",
+      "service": "StochasticService",
       "operations": [
         {
           "name": "processToken",
@@ -37,7 +37,8 @@
             }
           ]
         }
-      ]
+      ],
+      "serviceInstance": "StochasticInstance1"
     },
     {
       "id": "T_out_P1",
@@ -74,7 +75,7 @@
       "width": 50,
       "height": 50,
       "label": "P2",
-      "service": "StochasticBranchTwoTokenService",
+      "service": "StochasticService",
       "operations": [
         {
           "name": "processToken",
@@ -88,7 +89,8 @@
             }
           ]
         }
-      ]
+      ],
+      "serviceInstance": "StochasticInstance3"
     },
     {
       "id": "T_out_P2",
@@ -125,7 +127,7 @@
       "width": 50,
       "height": 50,
       "label": "P3",
-      "service": "StochasticBranchOneTokenService",
+      "service": "StochasticService",
       "operations": [
         {
           "name": "processToken",
@@ -139,7 +141,8 @@
             }
           ]
         }
-      ]
+      ],
+      "serviceInstance": "StochasticInstance4"
     },
     {
       "id": "T_out_P3",
@@ -176,7 +179,7 @@
       "width": 50,
       "height": 50,
       "label": "P4",
-      "service": "StochasticMergeTokenService",
+      "service": "StochasticService",
       "operations": [
         {
           "name": "processToken",
@@ -196,7 +199,8 @@
             }
           ]
         }
-      ]
+      ],
+      "serviceInstance": "StochasticInstance5"
     },
     {
       "id": "T_out_P4",
@@ -434,5 +438,6 @@
       "fontStyle": 0,
       "color": -16777216
     }
-  ]
+  ],
+  "serviceDeployment": "ServiceDeploymentFolder/petrinet/ForkModels.json"
 }

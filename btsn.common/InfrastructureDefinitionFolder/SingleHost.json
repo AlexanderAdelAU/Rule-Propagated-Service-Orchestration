@@ -1,0 +1,55 @@
+{
+  "definitionType": "Infrastructure",
+  "nodes": [
+    {
+      "node": "P1",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "basePorts": [
+        4001
+      ]
+    },
+    {
+      "node": "P2",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "basePorts": [
+        4002
+      ]
+    },
+    {
+      "node": "P3",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "basePorts": [
+        4003
+      ]
+    },
+    {
+      "node": "P4",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "basePorts": [
+        4004,
+        4007
+      ]
+    },
+    {
+      "node": "P5",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "basePorts": [
+        4005
+      ]
+    },
+    {
+      "node": "P6",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "basePorts": [
+        4006,
+        4008
+      ]
+    }
+  ]
+}

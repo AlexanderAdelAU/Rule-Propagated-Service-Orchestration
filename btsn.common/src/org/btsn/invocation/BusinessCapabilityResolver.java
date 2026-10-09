@@ -33,6 +33,7 @@ public final class BusinessCapabilityResolver {
     private final Path runtimeDirectory;
     private final Map<String, Capability> runtimeBindings = new HashMap<>();
     private final Map<String, Capability> logicalBindings = new HashMap<>();
+    private final Map<String, Capability> instanceBindings = new HashMap<>();
     private final Set<String> directOperations = new HashSet<>();
 
     public static BusinessCapabilityResolver forCurrentDeployment() throws Exception {
@@ -47,9 +48,10 @@ public final class BusinessCapabilityResolver {
 
     public BusinessCapabilityResolver(Path common, Path runtimeDirectory) throws Exception {
         this.runtimeDirectory = runtimeDirectory;
-        JSONObject config = json(common.resolve("BusinessServiceDefinitions/Deployment.json"));
+        org.btsn.deployment.DeploymentConfiguration deployment = new org.btsn.deployment.DeploymentConfiguration(common);
+        JSONObject config = deployment.profile;
         JSONObject catalog = json(common.resolve(text(config, "catalog")));
-        JSONObject infrastructure = json(common.resolve(text(config, "infrastructure")));
+        JSONObject infrastructure = deployment.infrastructure;
         require("Infrastructure".equals(text(infrastructure, "definitionType")),
                 "Selected definition is not Infrastructure");
         List<List<String>> deploymentFacts = facts(common.resolve(text(config, "deploymentRules")), "activeService");
@@ -67,13 +69,20 @@ public final class BusinessCapabilityResolver {
             require(logicalBindings.put(key, capability) == null, "Duplicate catalogue capability: " + key);
         }
         Set<String> deployed = new HashSet<>();
-        for (Object item : array(infrastructure, "capabilities")) {
+        for (Object item : array(deployment.serviceDeployment, "capabilities")) {
             JSONObject placement = object(item);
             String logicalKey = key(text(placement, "service"), text(placement, "operation"));
             Capability capability = logicalBindings.get(logicalKey);
             require(capability != null, "Deployment has no catalogue entry: " + logicalKey);
             require(capability.active, "Deployment selects an inactive/unbound capability: " + logicalKey);
-            require(deployed.add(logicalKey), "Duplicate deployment capability: " + logicalKey);
+            String instance = placement.containsKey("instance") ? text(placement, "instance") : capability.logicalService;
+            require(!placement.containsKey("instance") || instance.matches("[A-Za-z][A-Za-z0-9]*"), "Invalid deployment instance: " + instance);
+            String instanceKey = key(instance, capability.operation);
+            require(instance.equals(capability.logicalService) || !logicalBindings.containsKey(instanceKey), "Instance shadows a service identity: " + instanceKey);
+            require(!instanceBindings.containsKey(instanceKey), "Duplicate deployment capability: " + instanceKey);
+            deployed.add(logicalKey);
+            capability = capability.placement(placement, instance);
+            instanceBindings.put(instanceKey, capability);
             require(capability.returnAttribute.equals(text(placement, "returnAttribute")),
                     "Conflicting return attribute: " + logicalKey);
             List<String> arguments = new ArrayList<>();
@@ -96,7 +105,7 @@ public final class BusinessCapabilityResolver {
                 }
             }
             require(matchedChannels == 1, "Missing/duplicate deployment channel: " + channel);
-            String port = text(placement, "basePort");
+            String port = Integer.toString(deployment.port(placement));
             String runtime = null;
             for (List<String> fact : deploymentFacts) {
                 require(fact.size() == 4, "Malformed activeService deployment fact");
@@ -120,7 +129,7 @@ public final class BusinessCapabilityResolver {
             for (List<String> fact : facts(common.resolve(file.toString()), "activeService")) {
                 require(fact.size() == 4, "Malformed direct activeService fact");
                 String directKey = key(fact.get(0), fact.get(1));
-                require(!runtimeBindings.containsKey(directKey) && !logicalBindings.containsKey(directKey),
+                require(!runtimeBindings.containsKey(directKey) && !logicalBindings.containsKey(directKey) && !instanceBindings.containsKey(directKey),
                         "Business operation registered as infrastructure: " + directKey);
                 require(directOperations.add(directKey), "Duplicate direct operation: " + directKey);
             }
@@ -133,6 +142,7 @@ public final class BusinessCapabilityResolver {
         String identity = service.substring(service.lastIndexOf('.') + 1);
         String invocationKey = key(identity, operation);
         Capability capability = runtimeBindings.get(invocationKey);
+        if (capability == null) capability = instanceBindings.get(invocationKey);
         if (capability == null) capability = logicalBindings.get(invocationKey);
         if (capability == null) {
             require(directOperations.contains(invocationKey), "No configured capability: " + invocationKey);
@@ -146,11 +156,11 @@ public final class BusinessCapabilityResolver {
             require(operation.matches("[A-Za-z_$][A-Za-z0-9_$]*"), "Invalid operation: " + operation);
             Path installed = runtimeDirectory.resolve(Paths.get("RuleFolder." + ruleBaseVersion, operation, "Service.ruleml"));
             List<List<String>> identities = facts(installed, "localDefined");
-            require(identities.contains(java.util.Collections.singletonList(capability.logicalService)),
+            require(identities.contains(java.util.Collections.singletonList(capability.bindingIdentity)),
                     "Installed rulebase does not select logical service " + capability.logicalService + ": " + installed);
             int selections = 0;
             for (List<String> identityFact : identities) {
-                if (identityFact.size() == 1 && logicalBindings.containsKey(key(identityFact.get(0), operation))) selections++;
+                if (identityFact.size() == 1 && instanceBindings.containsKey(key(identityFact.get(0), operation))) selections++;
             }
             require(selections == 1, "Installed rulebase has ambiguous logical service identities: " + installed);
             List<List<String>> bindings = facts(installed, "canonicalBinding");
@@ -170,10 +180,23 @@ public final class BusinessCapabilityResolver {
     public String logicalService(String service, String operation, String ruleBaseVersion) throws Exception {
         String identity = service.substring(service.lastIndexOf('.') + 1);
         Capability capability = runtimeBindings.get(key(identity, operation));
+        if (capability == null) capability = instanceBindings.get(key(identity, operation));
         if (capability == null) capability = logicalBindings.get(key(identity, operation));
         if (capability == null) return null; // Infrastructure has no business label.
         resolve(service, operation, capability.returnAttribute, capability.inputs.size(), ruleBaseVersion);
         return capability.logicalService;
+    }
+
+    /** Only explicitly adapted placements enter this path; all other invocation remains unchanged. */
+    public String adaptedResult(String service, String operation, List<String> inputs,
+                                String outputAttribute, String version) throws Exception {
+        String identity = service.substring(service.lastIndexOf('.') + 1);
+        Capability capability = runtimeBindings.get(key(identity, operation));
+        if (capability == null) capability = instanceBindings.get(key(identity, operation));
+        if (capability == null || capability.adapter == null) return null;
+        String implementation = resolve(service, operation, outputAttribute, inputs.size(), version);
+
+        return BooleanTokenAdapter.invoke(implementation, operation, inputs, outputAttribute);
     }
 
     private static final class Capability {
@@ -183,9 +206,38 @@ public final class BusinessCapabilityResolver {
         final String returnAttribute;
         final List<String> inputs = new ArrayList<>();
         final boolean active;
+        final String bindingIdentity;
+        final String adapter;
+
+        Capability placement(JSONObject placement, String instance) {
+            if (!placement.containsKey("invocationAdapter")) {
+                require(returnAttribute.equals(text(placement, "returnAttribute")), "Conflicting return attribute: " + logicalService);
+                return new Capability(this, instance, null, inputs, returnAttribute);
+            }
+            String adapter = text(placement, "invocationAdapter");
+            require("boolean-token".equals(adapter), "Unknown invocation adapter: " + adapter);
+            require(inputs.equals(java.util.Collections.singletonList("data")) && "decision".equals(returnAttribute),
+                    "Boolean adapter requires the data -> decision service contract");
+            List<String> names = new ArrayList<>();
+            for (Object item : array(placement, "arguments")) names.add(text(object(item), "name"));
+            require(!names.isEmpty() && new HashSet<>(names).size() == names.size(), "Invalid adapted input contract");
+            return new Capability(this, instance, adapter, names, text(placement, "returnAttribute"));
+        }
+        Capability(Capability source, String instance, String adapter, List<String> inputs, String output) {
+            logicalService = source.logicalService;
+            operation = source.operation;
+            implementationClass = source.implementationClass;
+            active = source.active;
+            bindingIdentity = instance;
+            this.adapter = adapter;
+            this.inputs.addAll(inputs);
+            returnAttribute = output;
+        }
 
         Capability(JSONObject definition) {
             logicalService = text(definition, "service");
+            bindingIdentity = logicalService;
+            adapter = null;
             operation = text(definition, "operation");
             implementationClass = text(definition, "implementationClass");
             returnAttribute = text(definition, "returnAttribute");

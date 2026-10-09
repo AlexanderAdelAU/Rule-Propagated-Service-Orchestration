@@ -299,44 +299,17 @@ public class PetriNetAnalyzer {
                     group.childTokenIds = new ArrayList<>(children);
                     group.expectedCount = children.size();
                     
-                    // Check which children completed (have T_out from join place)
-                    // In a proper JOIN with base token reset:
-                    // - ALL children are consumed by the join (none complete individually)
-                    // - The PARENT (base) token continues after the join
+                    // A join consumes branches and continues the family; it does
+                    // not require the circulating parent to leave the process.
                     for (int childId : children) {
                         if (hasExitedWorkflow(childId, workflowBase)) {
                             group.completedChildren.add(childId);
-                        } else {
+                        } else if (hasObservedJoin(childId, parentId, children, workflowBase)) {
                             group.joinedChildren.add(childId);
                         }
                     }
-                    
-                    // A successful join can happen in two scenarios:
-                    //
-                    // SCENARIO 1 (Legacy - one child survives):
-                    //   One child completed (the "winning" sibling), others were joined
-                    //   completedChildren.size() == 1 && joinedChildren.size() == expectedCount - 1
-                    //
-                    // SCENARIO 2 (Base token reset - preferred):
-                    //   ALL children are consumed by the join (none complete individually)
-                    //   The PARENT token continues after the join and eventually terminates
-                    //   completedChildren.size() == 0 && joinedChildren.size() == expectedCount
-                    //   AND parent token has exited/terminated
-                    
-                    boolean legacyJoin = (group.completedChildren.size() == 1 && 
-                                         group.joinedChildren.size() == group.expectedCount - 1);
-                    
-                    boolean baseTokenResetJoin = (group.completedChildren.size() == 0 && 
-                                                  group.joinedChildren.size() == group.expectedCount &&
-                                                  hasExitedWorkflow(parentId, workflowBase));
-                    
-                    group.joinSuccessful = legacyJoin || baseTokenResetJoin;
-                    
-                    if (baseTokenResetJoin) {
-                        logger.debug("Join " + parentId + ": Base token reset pattern - all " + 
-                                   group.expectedCount + " children consumed, parent exited");
-                    }
-                    
+                    group.joinSuccessful = !group.joinedChildren.isEmpty();
+
                     analysis.forkGroups.add(group);
                     
                     if (group.joinSuccessful) {
@@ -357,46 +330,47 @@ public class PetriNetAnalyzer {
         return analysis;
     }
     
-    /**
-     * Check if a token has exited the workflow completely
-     * 
-     * A token has "exited" the workflow if:
-     * 1. It reached TERMINATE, OR
-     * 2. It has a T_out from a place that has NO further T_in (it's the final place), OR
-     * 3. For fork children: it exited the JOIN place (meaning it was the "surviving" token)
-     * 
-     * IMPORTANT: For forked child tokens (like 1000201, 1000202), the T_in/T_out count
-     * check is misleading because:
-     * - FORK creates a T_out record for the child (child "exits" from fork place)
-     * - Child enters intermediate place (T_in)
-     * - Child exits intermediate place (T_out) heading to JOIN
-     * - Child enters JOIN place (T_in)
-     * - At JOIN, the BASE token gets the T_out, not the child
-     * 
-     * So a properly joined child has T_in == T_out (e.g., 2 each), but this doesn't
-     * mean it "completed" - it was consumed by the join!
-     * 
-     * For forked tokens, we check if their LAST entry was to a place where the
-     * PARENT token has a T_out (indicating the join fired and parent continued).
-     * 
-     * NOTE: Termination records may be in CONSOLIDATED_TRANSITION_FIRINGS or in
-     * TRANSITION_FIRINGS (for observer services like MonitorService). We check both.
-     */
+    /** Only explicit business termination proves that a token left the process. */
     private boolean hasExitedWorkflow(int tokenId, int workflowBase) {
-        // First check if this is a forked token
-        boolean isForkedToken = isForkedChildToken(tokenId);
-        
-        if (isForkedToken) {
-            // For forked tokens, check if they were consumed by a join
-            // A forked token is "consumed" (not exited) if:
-            // - Its last T_in was to a place where the PARENT token has a T_out
-            return hasForkedTokenExited(tokenId, workflowBase);
-        }
-        
-        // For base tokens, use the standard check
-        return hasBaseTokenExited(tokenId, workflowBase);
+        return hasBusinessTermination(tokenId, workflowBase);
     }
-    
+
+    private boolean hasObservedJoin(int child, int parent, Set<Integer> siblings, int workflowBase) {
+        Set<Integer> continuations = new HashSet<>(siblings);
+        continuations.add(parent);
+        String placeholders = String.join(",", Collections.nCopies(continuations.size(), "?"));
+        // The continuing token's ENTER and this token's JOIN_CONSUMED are written by the same
+        // join firing, in either order. Anchor on this token's arrival (BUFFERED) at the join
+        // rather than on the consumption timestamp, so both orders count as an observed join.
+        String sql = "SELECT COUNT(*) FROM CONSOLIDATED_TRANSITION_FIRINGS consumed " +
+            "JOIN CONSOLIDATED_TRANSITION_FIRINGS arrived " +
+            "ON arrived.workflowBase = consumed.workflowBase " +
+            "AND arrived.tokenId = consumed.tokenId " +
+            "AND arrived.transitionId = consumed.transitionId " +
+            "AND arrived.eventType = 'BUFFERED' " +
+            "AND arrived.timestamp <= consumed.timestamp " +
+            "JOIN CONSOLIDATED_TRANSITION_FIRINGS entered " +
+            "ON entered.workflowBase = consumed.workflowBase " +
+            "AND entered.transitionId = consumed.transitionId " +
+            "AND entered.timestamp >= arrived.timestamp " +
+            "WHERE consumed.workflowBase = ? AND consumed.tokenId = ? " +
+            "AND consumed.eventType = 'JOIN_CONSUMED' AND entered.eventType = 'ENTER' " +
+            "AND entered.tokenId IN (" + placeholders + ")";
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, workflowBase);
+            pstmt.setInt(2, child);
+            int index = 3;
+            for (int token : continuations) pstmt.setInt(index++, token);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            logger.error("Error checking recorded join for tokenId=" + child, e);
+            return false;
+        }
+    }
+
     /**
      * Check if a token ID represents a forked child token
      * NEW ENCODING: childTokenId = parentTokenId + branchNumber
@@ -427,106 +401,32 @@ public class PetriNetAnalyzer {
      * If T_in == T_out but no TERMINATE, it was consumed by a join.
      */
     private boolean hasForkedTokenExited(int tokenId, int workflowBase) {
-        // For forked tokens, only TERMINATE counts as "exited"
-        // Equal T_in/T_out means consumed by join, not completed
-        String sql = 
-            "SELECT " +
-            "  (SELECT COUNT(*) FROM CONSOLIDATED_TRANSITION_FIRINGS " +
-            "   WHERE tokenId = ? AND workflowBase = ? AND toPlace = 'TERMINATE') as consolidatedTerminateCount, " +
-            "  (SELECT COUNT(*) FROM TRANSITION_FIRINGS " +
-            "   WHERE tokenId = ? AND workflowBase = ? AND toPlace = 'TERMINATE') as rawTerminateCount " +
-            "FROM SYSIBM.SYSDUMMY1";
-        
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setInt(1, tokenId);
-            pstmt.setInt(2, workflowBase);
-            pstmt.setInt(3, tokenId);
-            pstmt.setInt(4, workflowBase);
-            
-            ResultSet rs = pstmt.executeQuery();
-            
-            if (rs.next()) {
-                int terminateCount = rs.getInt("consolidatedTerminateCount") + rs.getInt("rawTerminateCount");
-                
-                // Forked token only "exits" if it reached TERMINATE
-                boolean exited = (terminateCount > 0);
-                
-                logger.debug("Forked token " + tokenId + " exit check: TERMINATE=" + terminateCount + 
-                           " -> exited=" + exited + " (forked tokens only exit via TERMINATE)");
-                
-                return exited;
-            }
-            
-        } catch (SQLException e) {
-            logger.error("Error checking forked token exit for tokenId=" + tokenId, e);
-        }
-        
-        return false;
+        return hasBusinessTermination(tokenId, workflowBase);
     }
-    
-    /**
-     * Check if a base (non-forked) token has exited the workflow
-     */
+
     private boolean hasBaseTokenExited(int tokenId, int workflowBase) {
-        // Check CONSOLIDATED_TRANSITION_FIRINGS for place-based counts
-        // and check BOTH tables for TERMINATE records (Monitor writes to TRANSITION_FIRINGS)
-        String sql = 
-            "SELECT " +
-            "  (SELECT COUNT(*) FROM CONSOLIDATED_TRANSITION_FIRINGS " +
-            "   WHERE tokenId = ? AND workflowBase = ? AND transitionId LIKE 'T_in_%') as inCount, " +
-            "  (SELECT COUNT(*) FROM CONSOLIDATED_TRANSITION_FIRINGS " +
-            "   WHERE tokenId = ? AND workflowBase = ? AND transitionId LIKE 'T_out_%') as outCount, " +
-            "  (SELECT COUNT(*) FROM CONSOLIDATED_TRANSITION_FIRINGS " +
-            "   WHERE tokenId = ? AND workflowBase = ? AND toPlace = 'TERMINATE') as consolidatedTerminateCount, " +
-            "  (SELECT COUNT(*) FROM TRANSITION_FIRINGS " +
-            "   WHERE tokenId = ? AND workflowBase = ? AND toPlace = 'TERMINATE') as rawTerminateCount " +
-            "FROM SYSIBM.SYSDUMMY1";  // Derby syntax for SELECT without table
-        
+        return hasBusinessTermination(tokenId, workflowBase);
+    }
+
+    // Administrative and observer records are outside the business process.
+    // Balanced ENTER/EXIT counts also do not prove completion of a circulating token.
+    private boolean hasBusinessTermination(int tokenId, int workflowBase) {
+        String sql = "SELECT COUNT(*) FROM CONSOLIDATED_TRANSITION_FIRINGS " +
+            "WHERE tokenId = ? AND workflowBase = ? " +
+            "AND (eventType = 'TERMINATE' OR toPlace = 'TERMINATE')";
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
             pstmt.setInt(1, tokenId);
             pstmt.setInt(2, workflowBase);
-            pstmt.setInt(3, tokenId);
-            pstmt.setInt(4, workflowBase);
-            pstmt.setInt(5, tokenId);
-            pstmt.setInt(6, workflowBase);
-            pstmt.setInt(7, tokenId);
-            pstmt.setInt(8, workflowBase);
-            
-            ResultSet rs = pstmt.executeQuery();
-            
-            if (rs.next()) {
-                int inCount = rs.getInt("inCount");
-                int outCount = rs.getInt("outCount");
-                int consolidatedTerminateCount = rs.getInt("consolidatedTerminateCount");
-                int rawTerminateCount = rs.getInt("rawTerminateCount");
-                
-                // Total terminate count from both tables
-                int terminateCount = consolidatedTerminateCount + rawTerminateCount;
-                
-                // Base token exited if:
-                // 1. It reached TERMINATE (in either table), or
-                // 2. Every place it entered, it also exited (inCount == outCount)
-                boolean exited = (terminateCount > 0) || (inCount > 0 && inCount == outCount);
-                
-                logger.debug("Base token " + tokenId + " exit check: T_in=" + inCount + 
-                           ", T_out=" + outCount + ", TERMINATE=" + terminateCount + 
-                           " (consolidated=" + consolidatedTerminateCount + ", raw=" + rawTerminateCount + ")" +
-                           " -> exited=" + exited);
-                
-                return exited;
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
             }
-            
         } catch (SQLException e) {
-            logger.error("Error checking base token exit for tokenId=" + tokenId, e);
+            logger.error("Error checking business termination for tokenId=" + tokenId, e);
+            return false;
         }
-        
-        return false;
     }
-    
+
     /**
      * Get incomplete tokens excluding those that were correctly joined
      * This filters out sibling tokens that were consumed by a join
@@ -2102,8 +2002,8 @@ public class PetriNetAnalyzer {
      *
      * This is the authoritative Stage-1 correctness view. BUFFERED is queue state,
      * ENTER is one logical place execution, JOIN_CONSUMED is a consumed branch,
-     * and workflow completion is an explicit business TERMINATE or a successful
-     * MonitorService.acknowledgeTokenArrival service execution.
+     * and workflow completion requires an explicit business TERMINATE.
+     * Monitor acknowledgements are observations only.
      */
     public CanonicalWorkflowAnalysis analyzeCanonicalWorkflows(int workflowBase) {
         CanonicalWorkflowAnalysis analysis = new CanonicalWorkflowAnalysis();
@@ -2201,6 +2101,9 @@ public class PetriNetAnalyzer {
                         continue;
                     }
                     
+                    // Keep observed visits even when root provenance was not collected.
+                    analysis.placeExecutions.put(place,
+                        analysis.placeExecutions.getOrDefault(place, 0) + 1);
                     int root = resolveRootToken(tokenId, parentByChild);
                     WorkflowInstanceSummary instance = analysis.instances.get(root);
                     if (instance == null) {
@@ -2211,8 +2114,6 @@ public class PetriNetAnalyzer {
                     instance.members.add(tokenId);
                     instance.placeExecutions.put(place,
                         instance.placeExecutions.getOrDefault(place, 0) + 1);
-                    analysis.placeExecutions.put(place,
-                        analysis.placeExecutions.getOrDefault(place, 0) + 1);
                 }
             }
             
@@ -2319,10 +2220,6 @@ public class PetriNetAnalyzer {
                     WorkflowInstanceSummary instance = analysis.instances.get(root);
                     if (instance != null) {
                         instance.monitorAcknowledged = true;
-                        long completedAt = rs.getLong("arrivalTime");
-                        if (completedAt > 0 && (instance.completedAt == 0 || completedAt < instance.completedAt)) {
-                            instance.completedAt = completedAt;
-                        }
                         analysis.monitorAcknowledgedRoots.add(root);
                     }
                 }
@@ -2364,7 +2261,6 @@ public class PetriNetAnalyzer {
         analysis.monitorAcknowledgements = analysis.monitorAcknowledgedRoots.size();
         analysis.businessTerminations = analysis.businessTerminatedRoots.size();
         
-        analysis.completedRoots.addAll(analysis.monitorAcknowledgedRoots);
         analysis.completedRoots.addAll(analysis.businessTerminatedRoots);
         analysis.completedWorkflows = analysis.completedRoots.size();
         
@@ -2414,27 +2310,29 @@ public class PetriNetAnalyzer {
         report.append("   Business terminations:     ").append(canonical.businessTerminations).append("\n");
         report.append("   Fork families:             ").append(canonical.forkFamilies).append("\n");
         report.append("   Fork children:             ").append(canonical.forkChildren).append("\n");
-        report.append("   Successful joins:          ").append(canonical.successfulJoins).append("\n");
+        report.append("   Observed join sites:        ").append(canonical.successfulJoins).append("\n");
         report.append("   Orphan fork children:      ").append(canonical.orphanForkChildren).append("\n");
         report.append("   Unassigned place visits:   ").append(canonical.unassignedPlaceVisits).append("\n");
         report.append("   Join-family violations:    ").append(canonical.joinFamilyViolations).append("\n");
-        report.append("   Incomplete workflows:      ").append(canonical.incompleteWorkflows).append("\n");
+        report.append("   Roots without business termination: ").append(canonical.incompleteWorkflows).append("\n");
         if (!canonical.incompleteRoots.isEmpty()) {
-            report.append("     Incomplete roots: ").append(canonical.incompleteRoots).append("\n");
+            report.append("     Roots still open at capture: ").append(canonical.incompleteRoots).append("\n");
         }
         
         boolean canonicalOk = canonical.generatedWorkflows > 0 &&
-                              canonical.incompleteWorkflows == 0 &&
                               canonical.orphanForkChildren == 0 &&
                               canonical.unassignedPlaceVisits == 0 &&
                               canonical.joinFamilyViolations == 0;
         report.append("   Structural result:         ")
-              .append(canonicalOk ? "[OK]" : "[CHECK]")
+              .append(canonical.generatedWorkflows == 0 ? "[UNAVAILABLE: no GENERATED provenance]" : (canonicalOk ? "[OK]" : "[CHECK]"))
               .append("\n\n");
         
+        if (canonical.generatedWorkflows == 0) {
+            report.append("   Root provenance: unavailable; recorded place visits remain measurable.\n\n");
+        }
         report.append("2. LOGICAL PLACE EXECUTIONS\n");
         if (canonical.placeExecutions.isEmpty()) {
-            report.append("   No ENTER events reconstructed\n");
+            report.append("   No ENTER events recorded\n");
         } else {
             for (Map.Entry<String, Integer> entry : canonical.placeExecutions.entrySet()) {
                 report.append("   ").append(names.describe(workflowBase, entry.getKey())).append(": ")
@@ -2882,6 +2780,7 @@ public class PetriNetAnalyzer {
             "FROM CONSOLIDATED_TRANSITION_FIRINGS " +
             "WHERE workflowBase = ? " +
             "  AND toPlace IS NOT NULL AND toPlace != '' " +
+            "  AND eventType IN ('ENTER', 'BUFFERED') " +
             "ORDER BY toPlace";
         
         try (Connection conn = getConnection();

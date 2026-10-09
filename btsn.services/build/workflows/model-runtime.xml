@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="petri-net-model-runtime-support" default="prepare-runtime" basedir="../.." xmlns:if="ant:if" xmlns:unless="ant:unless">
     <description>Shared Ant build support imported by the model launchers.</description>
+    <property name="host.address" value=""/>
     <property name="source.root" location=".."/>
     <property name="services.project.dir" location="../btsn.services"/>
     <property name="model.runtime.dir" location="${services.project.dir}/target/petrinet-model-runtime"/>
@@ -23,7 +24,6 @@
     <property name="workflow.drain.seconds" value="10"/>
     <property name="workflow.process.name" value="petrinet/Workflow/P1_P2_Deterministic_Workflow"/>
     <property name="model.profile.file" location="${services.project.dir}/deployments/models/Deployment.json"/>
-    <property name="model.rules.file" location="${services.project.dir}/deployments/models/InfrastructureDeployment.ruleml.xml"/>
     <import file="auto-deployment.xml"/>
     <path id="model.dependencies">
         <pathelement location="${source.root}/btsn.common/target/host-runtime/btsn-infrastructure.jar"/>
@@ -54,11 +54,15 @@
         <ant antfile="${services.project.dir}/build.xml" target="build-workflow-runtime" inheritall="false"/>
         <!-- Keep source deployment metadata separate; Monitor uses its usual working directory. -->
         <mkdir dir="${output.dir}"/>
+        <delete dir="${common.project.dir}/InfrastructureDefinitionFolder"/>
+        <delete dir="${common.project.dir}/ServiceDeploymentFolder"/>
         <copy todir="${common.project.dir}">
-            <fileset dir="${source.root}/btsn.common" includes="RuleBase/**,RulePayLoad/**,ServiceAttributeBindings/**,BusinessServiceDefinitions/**,ProcessDefinitionFolder/**,PayLoad/**"/>
+            <fileset dir="${source.root}/btsn.common" includes="RuleBase/**,RulePayLoad/**,ServiceAttributeBindings/**,BusinessServiceDefinitions/**,ProcessDefinitionFolder/**,InfrastructureDefinitionFolder/**,ServiceDeploymentFolder/**,PayLoad/**"/>
         </copy>
         <copy file="${model.profile.file}" tofile="${common.project.dir}/BusinessServiceDefinitions/Deployment.json" overwrite="true"/>
-        <copy file="${model.rules.file}" tofile="${local.channel.rules}" overwrite="true"/>
+        <java classname="org.btsn.deployment.GenerateDeploymentRules" fork="true" failonerror="true" dir="${common.project.dir}">
+            <classpath refid="generator.classpath"/><arg file="${common.project.dir}"/><arg value="${host.address}"/>
+        </java>
         <copy-model-component directory="btsn.rpso.places.p1"/>
         <copy-model-component directory="btsn.rpso.places.p2"/>
         <copy-model-component directory="btsn.rpso.places.p3"/>

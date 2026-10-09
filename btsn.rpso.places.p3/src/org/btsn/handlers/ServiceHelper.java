@@ -519,7 +519,9 @@ public class ServiceHelper {
 		String implementationClass = capabilityResolver.resolve(service, operation, buildVersion,
 		        cleanedArguments.size(), ruleBaseVersion);
 		logger.info("CAPABILITY RESOLVED: " + service + "." + operation + " -> " + implementationClass);
-		Class<?> serviceClass = Class.forName(implementationClass);
+		String adapted = capabilityResolver.adaptedResult(service, operation, cleanedArguments, buildVersion, ruleBaseVersion);
+        if (adapted != null) return adapted;
+        Class<?> serviceClass = Class.forName(implementationClass);
 		
 		// Check for singleton pattern first
 		Object serviceInstance = null;

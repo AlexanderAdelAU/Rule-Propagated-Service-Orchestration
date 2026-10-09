@@ -43,14 +43,34 @@ public final class LauncherRuntimeCheck {
             }
             Path common=Path.of(p.getProperty("common.project.dir"));
             check(!common.equals(root.resolve("btsn.common"))&&common.startsWith(root.resolve("btsn.services/target/launchers")),"Source configuration used as a runtime: "+build);
+            for(int task=0;task<tasks.getLength();task++) {
+                org.w3c.dom.Element java=(org.w3c.dom.Element)tasks.item(task);
+                if(!"${token.generator.class}".equals(java.getAttribute("classname")))continue;
+                org.w3c.dom.NodeList arguments=java.getElementsByTagName("arg");
+                for(int argument=0;argument<arguments.getLength();argument++) {
+                    if(!"-infrastructure".equals(((org.w3c.dom.Element)arguments.item(argument)).getAttribute("value")))continue;
+                    check(argument+1<arguments.getLength(),"Missing infrastructure name: "+build);
+                    String name=p.replaceProperties(((org.w3c.dom.Element)arguments.item(argument+1)).getAttribute("value"));
+                    if(name.endsWith(".json"))name=name.substring(0,name.length()-5);
+                    Path definition=common.resolve("InfrastructureDefinitionFolder").resolve(name+".json");
+                    check(Files.isRegularFile(definition),"Missing infrastructure definition: "+definition);
+                    check("Infrastructure".equals(json(definition).get("definitionType")),"Wrong infrastructure definition type: "+definition);
+                    check(!json(definition).containsKey("capabilities"),"Business capabilities retained in physical infrastructure: "+definition);
+                    JSONObject selected=json(common.resolve("BusinessServiceDefinitions/Deployment.json"));
+                    check(definition.equals(common.resolve((String)selected.get("infrastructure"))),"Launcher/profile infrastructure mismatch: "+build);
+                }
+            }
             BusinessCapabilityResolver resolver=new BusinessCapabilityResolver(common);
             JSONObject config=json(common.resolve("BusinessServiceDefinitions/Deployment.json"));
             JSONObject catalogue=json(common.resolve((String)config.get("catalog")));
+            JSONObject deployment=json(common.resolve((String)config.get("serviceDeployment")));
             for(String property:Arrays.asList("workflow.process.name","workflow1.process.name","workflow2.process.name","process.name","init.process.name","collector.process.name")) {
                 String process=p.getProperty(property); if(process==null) continue;
                 Path definition=common.resolve("ProcessDefinitionFolder").resolve(process+".json");
                 check(Files.isRegularFile(definition),"Missing process definition: "+definition);
                 JSONObject data=json(definition);
+                if(property.startsWith("workflow")||property.equals("process.name")&&process.contains("/Workflow/"))
+                    new org.btsn.deployment.DeploymentConfiguration(common).validateWorkflow(data);
                 for(Object item:(JSONArray)data.get("elements")) {
                     JSONObject node=(JSONObject)item; if(!"PLACE".equals(node.get("type"))) continue;
                     String service=(String)node.get("service");
@@ -61,13 +81,22 @@ public final class LauncherRuntimeCheck {
                         for(Object operation:(JSONArray)node.get("operations")) {
                             JSONObject op=(JSONObject)operation;
                             if(!op.get("name").equals(capability.get("operation")))continue;
-                            JSONArray expected=(JSONArray)capability.get("inputs"),actual=(JSONArray)op.get("arguments");
+                            String instance=java.util.Objects.toString(node.get("serviceInstance"),service);
+                            JSONObject placement=null;
+                            for(Object entry:(JSONArray)deployment.get("capabilities")) {
+                                JSONObject candidatePlacement=(JSONObject)entry;
+                                if(instance.equals(java.util.Objects.toString(candidatePlacement.get("instance"),candidatePlacement.get("service").toString())) && op.get("name").equals(candidatePlacement.get("operation"))) placement=candidatePlacement;
+                            }
+                            check(placement!=null,"Missing deployment instance: "+instance);
+                            JSONArray expected=new JSONArray();
+                            for(Object input:(JSONArray)placement.get("arguments")) expected.add(((JSONObject)input).get("name"));
+                            JSONArray actual=(JSONArray)op.get("arguments");
                             if(actual!=null) {
                                 List<String> names=new ArrayList<>();for(Object argument:actual)names.add((String)((JSONObject)argument).get("name"));
                                 check(expected.equals(names),"Workflow/catalogue input order mismatch: "+process+" / "+service);
                             }
-                            check(java.util.Objects.toString(op.get("returnAttribute"),java.util.Objects.toString(node.get("returnAttribute"),"token")).equals(capability.get("returnAttribute")),"Workflow/catalogue return mismatch: "+service);
-                            String implementation=resolver.resolve(service,(String)capability.get("operation"),(String)capability.get("returnAttribute"),expected.size(),null);
+                            check(java.util.Objects.toString(op.get("returnAttribute"),java.util.Objects.toString(node.get("returnAttribute"),"token")).equals(placement.get("returnAttribute")),"Workflow/catalogue return mismatch: "+service);
+                            String implementation=resolver.resolve(instance,(String)capability.get("operation"),(String)placement.get("returnAttribute"),expected.size(),null);
                             check(implementation.equals(capability.get("implementationClass")),"Wrong configured implementation: "+service);
                             operations++;
                         }
@@ -77,6 +106,18 @@ public final class LauncherRuntimeCheck {
                         check(!"MonitorService".equals(service)&&!service.matches("P[1-6]_Place"),"Physical host retained as a business capability: "+process+" / "+service);
                 }
             }
+            List<String> loaderCommand = new ArrayList<>(Arrays.asList(
+                    Path.of(System.getProperty("java.home"), "bin", "java").toString(),
+                    "-cp", System.getProperty("java.class.path"), "AdminWorkflowCheck"));
+            String business = p.getProperty("workflow.process.name");
+            if (business == null) business = p.getProperty("workflow1.process.name");
+            if (business == null) business = p.getProperty("process.name");
+            if (business != null && !business.contains("/Workflow/")) business = null;
+            for (String value : Arrays.asList(p.getProperty("init.process.name"), p.getProperty("collector.process.name"), business, p.getProperty("infrastructure.definition.name")))
+                loaderCommand.add(value == null ? "" : value);
+            Process loaderCheck = new ProcessBuilder(loaderCommand)
+                    .directory(Path.of(p.getProperty("generator.project.dir")).toFile()).inheritIO().start();
+            check(loaderCheck.waitFor() == 0, "Real process loader failed: " + build);
             check(Files.isRegularFile(Path.of(p.getProperty("generator.project.dir")).resolve("Payload/payLoad.xml")),"Admin payload alias missing");
             System.out.println("PASS: "+root.relativize(build));
         }
@@ -86,7 +127,7 @@ public final class LauncherRuntimeCheck {
     private static JSONObject json(Path p) throws Exception { return (JSONObject)new JSONParser().parse(Files.readString(p)); }
     private static java.util.Map<Path,String> sourceConfiguration(Path root) throws Exception {
         java.util.Map<Path,String> hashes=new java.util.TreeMap<>();
-        for(String directory:Arrays.asList("RuleBase","ServiceAttributeBindings","BusinessServiceDefinitions","ProcessDefinitionFolder","RulePayLoad"))
+        for(String directory:Arrays.asList("RuleBase","ServiceAttributeBindings","BusinessServiceDefinitions","ProcessDefinitionFolder","InfrastructureDefinitionFolder","ServiceDeploymentFolder","RulePayLoad"))
             try(java.util.stream.Stream<Path> files=Files.walk(root.resolve("btsn.common").resolve(directory))) {
                 for(Path file:(Iterable<Path>)files.filter(Files::isRegularFile)::iterator)
                     hashes.put(file,java.util.Base64.getEncoder().encodeToString(java.security.MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(file))));

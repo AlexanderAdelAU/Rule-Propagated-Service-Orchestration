@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Used by one numbered place at a time. No other place or business build is invoked. -->
 <project name="individual-place-release-support" basedir="../..">
+    <property name="host.address" value=""/>
     <property name="place.release.root" location="${host.target}/release"/>
     <property name="place.release.dir" location="${place.release.root}/${host.artifact}"/>
     <property name="place.release.jar" location="${place.release.dir}/${host.artifact}.jar"/>
@@ -40,8 +41,12 @@
             </manifest>
         </jar>
         <copy todir="${place.release.root}/btsn.common">
-            <fileset dir="${common.dir}" includes="RuleBase/**,ServiceAttributeBindings/**,BusinessServiceDefinitions/**,ProcessDefinitionFolder/**,PayLoad/**"/>
+            <fileset dir="${common.dir}" includes="RuleBase/**,ServiceAttributeBindings/**,BusinessServiceDefinitions/**,ProcessDefinitionFolder/**,InfrastructureDefinitionFolder/**,ServiceDeploymentFolder/**,PayLoad/**"/>
         </copy>
+        <java classname="org.btsn.deployment.GenerateDeploymentRules" fork="true" failonerror="true">
+            <classpath><pathelement location="${host.target}/place-classes"/><path refid="place.compile.dependencies"/></classpath>
+            <arg file="${place.release.root}/btsn.common"/><arg value="${host.address}"/>
+        </java>
         <copy todir="${place.release.dir}">
             <fileset dir="${basedir}" includes="ServiceLoaderQueries/**,RuleFolder.*/**,resources/**,PayLoad/**" excludes="**/*.class,**/*.log"/>
         </copy>

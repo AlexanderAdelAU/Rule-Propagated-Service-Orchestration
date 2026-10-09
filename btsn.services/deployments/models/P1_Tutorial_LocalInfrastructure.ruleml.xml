@@ -1,4 +1,0 @@
-<!-- Local P1 tutorial deployment; matches P1_Tutorial_LocalInfrastructure.json. -->
-<Atom><Rel>boundChannel</Rel><Ind>ip0</Ind><Ind>127.0.0.1</Ind></Atom>
-<Atom><Rel>localDefined</Rel><Ind>P1_Place</Ind></Atom>
-<Atom><Rel>activeService</Rel><Ind>P1_Place</Ind><Ind>processToken</Ind><Ind>ip0</Ind><Ind>4001</Ind></Atom>

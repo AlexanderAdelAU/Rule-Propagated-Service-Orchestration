@@ -1,0 +1,79 @@
+{
+  "definitionType": "ServiceDeployment",
+  "capabilities": [
+    {
+      "node": "P1",
+      "service": "StochasticService",
+      "operation": "processToken",
+      "returnAttribute": "token",
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "StochasticInstance1",
+      "invocationAdapter": "boolean-token"
+    },
+    {
+      "node": "P2",
+      "service": "StochasticService",
+      "operation": "processToken",
+      "returnAttribute": "token_branch2",
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "StochasticInstance3",
+      "invocationAdapter": "boolean-token"
+    },
+    {
+      "node": "P3",
+      "service": "StochasticService",
+      "operation": "processToken",
+      "returnAttribute": "token_branch1",
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "StochasticInstance4",
+      "invocationAdapter": "boolean-token"
+    },
+    {
+      "node": "P4",
+      "service": "StochasticService",
+      "operation": "processToken",
+      "returnAttribute": "token",
+      "arguments": [
+        {
+          "name": "token_branch1",
+          "type": "String",
+          "value": "String",
+          "required": false
+        },
+        {
+          "name": "token_branch2",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "StochasticInstance5",
+      "invocationAdapter": "boolean-token"
+    }
+  ]
+}

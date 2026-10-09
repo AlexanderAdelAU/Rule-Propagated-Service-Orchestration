@@ -3,7 +3,7 @@
   "catalogues": [
     "../btsn.common/BusinessServiceDefinitions/FinancialSystem.json",
     "catalogues/StochasticService.json",
-    "../btsn.common/BusinessServiceDefinitions/PetriNetModels.json",
+    "catalogues/LegacyPetriNetServices.json",
     "../btsn.common/BusinessServiceDefinitions/Healthcare.json"
   ],
   "runtimeLibraries": [
@@ -15,7 +15,7 @@
   "catalogueDomains": {
     "FinancialSystem.json": "financial",
     "StochasticService.json": "models",
-    "PetriNetModels.json": "models",
-    "Healthcare.json": "healthcare"
+    "Healthcare.json": "healthcare",
+    "LegacyPetriNetServices.json": "models"
   }
 }

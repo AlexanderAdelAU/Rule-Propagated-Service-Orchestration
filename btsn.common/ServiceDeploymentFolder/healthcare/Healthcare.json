@@ -1,0 +1,137 @@
+{
+  "definitionType": "ServiceDeployment",
+  "capabilities": [
+    {
+      "node": "P1",
+      "service": "TriageService",
+      "operation": "processTriageAssessment",
+      "returnAttribute": "triageResults",
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0
+    },
+    {
+      "node": "P2",
+      "service": "LaboratoryService",
+      "operation": "processLabRequest",
+      "returnAttribute": "laboratoryResults",
+      "arguments": [
+        {
+          "name": "triageResults",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0
+    },
+    {
+      "node": "P3",
+      "service": "CardiologyService",
+      "operation": "processCardiacAssessment",
+      "returnAttribute": "cardiologyResults",
+      "arguments": [
+        {
+          "name": "triageResults",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0
+    },
+    {
+      "node": "P4",
+      "service": "RadiologyService",
+      "operation": "processImagingRequest",
+      "returnAttribute": "radiologyResults",
+      "arguments": [
+        {
+          "name": "triageResults",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0
+    },
+    {
+      "node": "P4",
+      "service": "RadiologyService",
+      "operation": "federatedRadiologyRequest",
+      "returnAttribute": "radiologyResults",
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 1
+    },
+    {
+      "node": "P5",
+      "service": "DiagnosisService",
+      "operation": "processClinicalDecision",
+      "returnAttribute": "diagnosisResults",
+      "arguments": [
+        {
+          "name": "radiologyResults",
+          "type": "String",
+          "value": "String",
+          "required": false
+        },
+        {
+          "name": "laboratoryResults",
+          "type": "String",
+          "value": "String",
+          "required": false
+        },
+        {
+          "name": "cardiologyResults",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0
+    },
+    {
+      "node": "P6",
+      "service": "TreatmentService",
+      "operation": "executeTreatmentPlan",
+      "returnAttribute": "treatmentResults",
+      "arguments": [
+        {
+          "name": "diagnosisResults",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0
+    },
+    {
+      "node": "P6",
+      "service": "TreatmentService",
+      "operation": "executeDirectTreatment",
+      "returnAttribute": "treatmentResults",
+      "arguments": [
+        {
+          "name": "triageResults",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 1
+    }
+  ]
+}

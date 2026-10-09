@@ -652,6 +652,9 @@ public class ProcessEditor extends JFrame {
             InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
         newInfrastructureItem.addActionListener(e -> newInfrastructureDefinition());
         newMenu.add(newInfrastructureItem);
+        JMenuItem newDeploymentItem = new JMenuItem("Service Deployment");
+        newDeploymentItem.addActionListener(e -> new InfrastructureDefinitionFrame(true).setVisible(true));
+        newMenu.add(newDeploymentItem);
         
         fileMenu.add(newMenu);
         
@@ -669,6 +672,9 @@ public class ProcessEditor extends JFrame {
             InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
         openInfrastructureItem.addActionListener(e -> openInfrastructureDefinition());
         openMenu.add(openInfrastructureItem);
+        JMenuItem openDeploymentItem = new JMenuItem("Service Deployment...");
+        openDeploymentItem.addActionListener(e -> InfrastructureDefinitionFrame.openServiceDeploymentInNewWindow(this));
+        openMenu.add(openDeploymentItem);
         
         fileMenu.add(openMenu);
         fileMenu.addSeparator();
@@ -1047,6 +1053,11 @@ public class ProcessEditor extends JFrame {
             }
             
             // VALIDATE BEFORE SAVING
+            java.util.List<String> contractErrors = canvas.validateServiceContracts();
+            if (!contractErrors.isEmpty()) {
+                JOptionPane.showMessageDialog(this, String.join("\n", contractErrors), "Unresolved service contracts — cannot save", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             java.util.List<String> errors = canvas.validatePetriNet();
             
             // Check if processType is specified
@@ -1109,7 +1120,12 @@ public class ProcessEditor extends JFrame {
         }
         
         // VALIDATE BEFORE SAVING
-        java.util.List<String> errors = canvas.validatePetriNet();
+        java.util.List<String> contractErrors = canvas.validateServiceContracts();
+            if (!contractErrors.isEmpty()) {
+                JOptionPane.showMessageDialog(this, String.join("\n", contractErrors), "Unresolved service contracts — cannot save", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            java.util.List<String> errors = canvas.validatePetriNet();
         
         // Check if processType is specified
         String processType = canvas.getProcessType();
@@ -1219,8 +1235,8 @@ public class ProcessEditor extends JFrame {
                 // Guard against opening an infrastructure file onto the process canvas
                 if (InfrastructureDefinitionFrame.isInfrastructureDefinition(content.toString())) {
                     int choice = JOptionPane.showConfirmDialog(this,
-                        file.getName() + " is an Infrastructure Definition, not a Process Definition.\n" +
-                        "Open it in the Infrastructure Definition editor instead?",
+                        file.getName() + " is an infrastructure or service deployment definition, not a Process Definition.\n" +
+                        "Open it in its definition editor instead?",
                         "Wrong Definition Type",
                         JOptionPane.YES_NO_OPTION,
                         JOptionPane.QUESTION_MESSAGE);
@@ -1230,6 +1246,7 @@ public class ProcessEditor extends JFrame {
                     return;
                 }
                 
+                canvas.setDefinitionLocation(file);
                 canvas.loadFromJSON(content.toString());
                 documentationPanel.loadFromJSON(content.toString());  // Load documentation
                 undoRedoManager.clear();  // Clear undo/redo history after loading new file

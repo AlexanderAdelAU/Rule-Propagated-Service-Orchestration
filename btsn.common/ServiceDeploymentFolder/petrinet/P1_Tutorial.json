@@ -1,0 +1,22 @@
+{
+  "definitionType": "ServiceDeployment",
+  "capabilities": [
+    {
+      "node": "P1",
+      "service": "StochasticService",
+      "operation": "processToken",
+      "returnAttribute": "token",
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "StochasticInstance1",
+      "invocationAdapter": "boolean-token"
+    }
+  ]
+}

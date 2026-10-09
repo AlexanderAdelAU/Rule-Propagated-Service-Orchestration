@@ -24,7 +24,7 @@
       "width": 50,
       "height": 50,
       "label": "P1",
-      "service": "StochasticEntryTokenService",
+      "service": "StochasticService",
       "operations": [
         {
           "name": "processToken",
@@ -39,7 +39,8 @@
           ]
         }
       ],
-      "fill_color": "#33FF33"
+      "fill_color": "#33FF33",
+      "serviceInstance": "StochasticInstance1"
     },
     {
       "id": "T_in_P2",
@@ -64,7 +65,7 @@
       "width": 50,
       "height": 50,
       "label": "P2",
-      "service": "StochasticForwardTokenService",
+      "service": "StochasticService",
       "operations": [
         {
           "name": "processToken",
@@ -78,7 +79,8 @@
             }
           ]
         }
-      ]
+      ],
+      "serviceInstance": "StochasticInstance2"
     },
     {
       "id": "T_out_P2",
@@ -208,5 +210,6 @@
       "fontStyle": 0,
       "color": -16777216
     }
-  ]
+  ],
+  "serviceDeployment": "ServiceDeploymentFolder/petrinet/StochasticLoopModels.json"
 }

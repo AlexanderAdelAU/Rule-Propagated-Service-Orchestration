@@ -420,7 +420,7 @@
 					<arg value="-tokens" /><arg value="0" />
 					<arg value="-expire" /><arg value="${token.expire}" />
 					<arg value="-commitmentPort" /><arg value="${commitment.port}" />
-					<arg value="-generator" /><arg value="${event.generator.id}" />					<arg value="-infrastructure"/><arg value="Healthcare_Infrastructure"/>
+					<arg value="-generator" /><arg value="${event.generator.id}" />					<arg value="-infrastructure"/><arg value="SingleHost"/>
 					<arg value="-format-service"/><arg value="TriageService"/>
 				</java>
 
@@ -440,7 +440,7 @@
 					<arg value="-tokens" /><arg value="${token.count}" />
 					<arg value="-expire" /><arg value="${token.expire}" />
 					<arg value="-generator" /><arg value="${event.generator.id}" />
-					<arg value="-skipDeploy" />					<arg value="-infrastructure"/><arg value="Healthcare_Infrastructure"/>
+					<arg value="-skipDeploy" />					<arg value="-infrastructure"/><arg value="SingleHost"/>
 					<arg value="-format-service"/><arg value="TriageService"/>
 				</java>
 

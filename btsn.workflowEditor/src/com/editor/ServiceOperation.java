@@ -9,6 +9,9 @@ import java.util.List;
  */
 public class ServiceOperation {
     private String name;
+    private String returnAttribute = "";
+    public String getReturnAttribute() { return returnAttribute; }
+    public void setReturnAttribute(String value) { returnAttribute = value == null ? "" : value; }
     private List<ServiceArgument> arguments;
     
     /**
@@ -40,6 +43,7 @@ public class ServiceOperation {
      */
     public ServiceOperation(ServiceOperation other) {
         this.name = other.name;
+        this.returnAttribute = other.returnAttribute;
         this.arguments = new ArrayList<>();
         for (ServiceArgument arg : other.arguments) {
             this.arguments.add(new ServiceArgument(arg));

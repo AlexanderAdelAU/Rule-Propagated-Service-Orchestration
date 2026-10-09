@@ -22,9 +22,13 @@ These workflow definitions contain logical business-service identities only.
 
 ## Infrastructure definition
 
-Authoritative deployment mapping:
+All domains share `InfrastructureDefinitionFolder/SingleHost.json` for node
+addresses and fixed ports. Financial service placement is selected separately:
 
-- `ProcessDefinitionFolder/FinancialSystem_Infrastructure.json`
+- `ServiceDeploymentFolder/financial/FinancialSystem.json`
+
+Runtime preparation generates the deployment rules from those two definitions.
+Changing a financial service function preserves its node's fixed port slot.
 
 Current logical-to-physical mapping:
 

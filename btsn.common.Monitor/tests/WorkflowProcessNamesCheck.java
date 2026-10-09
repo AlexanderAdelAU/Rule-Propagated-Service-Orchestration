@@ -60,7 +60,7 @@ public final class WorkflowProcessNamesCheck {
             List<CombinedWorkflowMetrics.Workflow> workflows = CombinedWorkflowMetrics.load(c);
             check(workflows.stream().anyMatch(w -> w.rootTokenId==1000000 && w.process.equals(RADIOLOGY) && w.durationMs()==200),
                     "Process attachment changed timing or root membership");
-            SwingGanttChart_WithLatency_v1d chart = new SwingGanttChart_WithLatency_v1d();
+            SwingGanttChart_WithLatency_v1d chart = new SwingGanttChart_WithLatency_v1d(false);
             check(chart.processDescription(false).contains(EMERGENCY) && chart.processDescription(true).contains("v002: Triage CanaryTest Workflow"),
                     "Chart omitted the concurrent version/process mapping");
             chart.exportToLaTeX("process-labelled-workflow.tex");

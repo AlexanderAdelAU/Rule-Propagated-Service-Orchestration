@@ -72,6 +72,7 @@ public class RuleDeployer {
 		// Package: org.btsn.healthcare.rulecontroller → Common: btsn.healthcare.common
 		static final String COMMON_FOLDER = deriveCommonFolder();
 		static final String PROCESS_DEFINITION_FOLDER = COMMON_FOLDER + "/ProcessDefinitionFolder";
+		static final String INFRASTRUCTURE_DEFINITION_FOLDER = COMMON_FOLDER + "/InfrastructureDefinitionFolder";
 		static final String RULE_PAYLOAD_FOLDER = COMMON_FOLDER + "/RulePayLoad";
 		static final String SERVICE_ATTRIBUTE_BINDINGS_FOLDER = COMMON_FOLDER + "/ServiceAttributeBindings";
 		
@@ -193,6 +194,7 @@ public class RuleDeployer {
 	private static class DeploymentBinding {
 		final String node;
 		final String businessService;
+        String reusableService;
 		final String operation;
 		final String runtimeService;
 
@@ -324,6 +326,7 @@ public class RuleDeployer {
 	/**
 	 * Load workflow file - JSON format only
 	 */
+	private org.btsn.deployment.DeploymentConfiguration deploymentConfiguration;
 	private String loadWorkflow() throws RuleDeployerException {
 		try {
 			File commonBase = new File("../");
@@ -339,6 +342,14 @@ public class RuleDeployer {
 				logger.info("Loading JSON workflow from: " + jsonFileName);
 				String jsonContent = StringFileIO.readFileAsString(jsonFileName);
 				logger.info("Successfully loaded JSON workflow: " + jsonContent.length() + " characters");
+                try {
+                    org.json.simple.JSONObject workflow = (org.json.simple.JSONObject)new org.json.simple.parser.JSONParser().parse(jsonContent);
+                    if (deploymentConfiguration == null)
+                        org.btsn.deployment.DeploymentConfiguration.validateDirectWorkflow(java.nio.file.Paths.get(commonPath, Config.COMMON_FOLDER), workflow);
+                    else deploymentConfiguration.validateWorkflow(workflow);
+                } catch (Exception invalid) {
+                    throw new RuleDeployerException("Unresolved process service contract: " + invalid.getMessage(), invalid);
+                }
 				parseJsonWorkflow(jsonContent);
 				debugParsedContent();
 				return jsonContent;
@@ -357,6 +368,7 @@ public class RuleDeployer {
 
 	private void loadInfrastructureDefinition(String commonPath) throws RuleDeployerException {
 		deploymentBindings.clear();
+        deploymentConfiguration = null;
 		if (infrastructureDefinitionName == null || infrastructureDefinitionName.trim().isEmpty()) {
 			return;
 		}
@@ -366,44 +378,35 @@ public class RuleDeployer {
 			definitionName = definitionName.substring(0, definitionName.length() - 5);
 		}
 
-		File infrastructureFile = new File(commonPath + "/" + Config.PROCESS_DEFINITION_FOLDER + "/" +
-			definitionName + ".json");
-		if (!infrastructureFile.exists()) {
-			throw new RuleDeployerException("Infrastructure definition not found: " +
-				infrastructureFile.getAbsolutePath());
-		}
-
-		String json = StringFileIO.readFileAsString(infrastructureFile.getAbsolutePath());
-		if (json == null) {
-			throw new RuleDeployerException("Failed to read infrastructure definition: " +
-				infrastructureFile.getAbsolutePath());
-		}
-
-		String definitionType = extractJsonValue(json, "definitionType");
-		if (!"Infrastructure".equalsIgnoreCase(definitionType)) {
-			throw new RuleDeployerException("Not an Infrastructure definition: " +
-				infrastructureFile.getAbsolutePath());
-		}
-
-		String capabilitiesSection = extractJsonSection(json, "\"capabilities\"");
-		for (String block : splitJsonObjects(capabilitiesSection)) {
-			String node = extractJsonValue(block, "node");
-			String service = extractJsonValue(block, "service");
-			String operation = extractJsonValue(block, "operation");
-			if (node == null || node.isEmpty() || service == null || service.isEmpty() ||
-				operation == null || operation.isEmpty()) {
-				continue;
+		try {
+			java.nio.file.Path common = java.nio.file.Paths.get(commonPath, Config.COMMON_FOLDER);
+			org.btsn.deployment.DeploymentConfiguration config = new org.btsn.deployment.DeploymentConfiguration(common);
+            deploymentConfiguration = config;
+			java.nio.file.Path requested = java.nio.file.Paths.get(commonPath, Config.INFRASTRUCTURE_DEFINITION_FOLDER, definitionName + ".json");
+			if (!requested.normalize().equals(config.infrastructureFile.normalize())) {
+				throw new RuleDeployerException("Infrastructure selection conflicts with Deployment.json: " + definitionName);
 			}
-
-			DeploymentBinding binding = new DeploymentBinding(node, service, operation);
-			deploymentBindings.put(deploymentKey(service, operation), binding);
-			logger.info("INFRASTRUCTURE MAP: " + service + "." + operation + " -> " +
-				node + " (" + binding.runtimeService + ")");
+			for (Object item : org.btsn.deployment.DeploymentConfiguration.array(config.serviceDeployment, "capabilities")) {
+				org.json.simple.JSONObject placement = (org.json.simple.JSONObject)item;
+				String node = org.btsn.deployment.DeploymentConfiguration.text(placement, "node");
+				String service = placement.containsKey("instance") ? org.btsn.deployment.DeploymentConfiguration.text(placement, "instance") : org.btsn.deployment.DeploymentConfiguration.text(placement, "service");
+				String operation = org.btsn.deployment.DeploymentConfiguration.text(placement, "operation");
+				DeploymentBinding binding = new DeploymentBinding(node, service, operation);
+                binding.reusableService = org.btsn.deployment.DeploymentConfiguration.text(placement, "service");
+				if (deploymentBindings.put(deploymentKey(service, operation), binding) != null) {
+					throw new RuleDeployerException("Duplicate service deployment capability: " + service + "." + operation);
+				}
+				logger.info("SERVICE MAP: " + service + "." + operation + " -> " + node + " (" + binding.runtimeService + ")");
+			}
+		} catch (RuleDeployerException ex) {
+			throw ex;
+		} catch (Exception ex) {
+			throw new RuleDeployerException("Could not load infrastructure/service deployment: " + ex.getMessage(), ex);
 		}
 
 		if (deploymentBindings.isEmpty()) {
-			throw new RuleDeployerException("Infrastructure definition contains no usable capabilities: " +
-				infrastructureFile.getAbsolutePath());
+			throw new RuleDeployerException("Service deployment contains no usable capabilities for: " +
+				infrastructureDefinitionName);
 		}
 	}
 
@@ -419,7 +422,7 @@ public class RuleDeployer {
 
 		DeploymentBinding binding = deploymentBindings.get(deploymentKey(service, operation));
 		if (binding == null) {
-			throw new RuleDeployerException("No infrastructure mapping for " + service + "." + operation +
+			throw new RuleDeployerException("No service deployment mapping for " + service + "." + operation +
 				" in " + infrastructureDefinitionName);
 		}
 		return binding;
@@ -499,9 +502,12 @@ public class RuleDeployer {
 	                if (service != null && !service.isEmpty() && !operationsList.isEmpty()) {
 	                    // Use first operation as the primary operation for the ServiceNode
 	                    String primaryOperation = operationsList.get(0);
-	                    String businessService = service;
+	                    String instance = extractJsonValue(block, "serviceInstance");
+                    String businessService = instance != null && !instance.isEmpty() ? instance : service;
 	                    DeploymentBinding primaryBinding = requireDeploymentBinding(businessService, primaryOperation);
-	                    String runtimeService = primaryBinding != null ? primaryBinding.runtimeService : businessService;
+	                    if (primaryBinding != null && !primaryBinding.reusableService.equals(service))
+                        throw new RuleDeployerException("Deployment instance does not select service " + service + ": " + businessService);
+                    String runtimeService = primaryBinding != null ? primaryBinding.runtimeService : businessService;
 
 	                    // A single PLACE cannot span physical infrastructure nodes.
 	                    for (String operationName : operationsList) {

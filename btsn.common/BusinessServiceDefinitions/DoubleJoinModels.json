@@ -1,73 +1,16 @@
 {
   "domain": "PetriNetModels",
-  "purpose": "Plain services for the existing six-place double join.",
+  "purpose": "Reusable stochastic Boolean operation; process topology and instance token contracts are defined separately.",
   "services": [
     {
-      "service": "BooleanTokenService",
-      "implementationClass": "org.btsn.services.BooleanTokenService",
+      "service": "StochasticService",
+      "implementationClass": "org.btsn.services.StochasticService",
       "operation": "processToken",
       "inputs": [
-        "token"
+        "data"
       ],
-      "returnAttribute": "token",
-      "canonicalBinding": "ServiceAttributeBindings/BooleanTokenService/BooleanTokenService-CanonicalBindings.ruleml.xml",
-      "status": "active"
-    },
-    {
-      "service": "BranchTwoTokenService",
-      "implementationClass": "org.btsn.services.BranchTwoTokenService",
-      "operation": "processToken",
-      "inputs": [
-        "token"
-      ],
-      "returnAttribute": "token_branch2",
-      "canonicalBinding": "ServiceAttributeBindings/BranchTwoTokenService/BranchTwoTokenService-CanonicalBindings.ruleml.xml",
-      "status": "active"
-    },
-    {
-      "service": "BranchOneTokenService",
-      "implementationClass": "org.btsn.services.BranchOneTokenService",
-      "operation": "processToken",
-      "inputs": [
-        "token"
-      ],
-      "returnAttribute": "token_branch1",
-      "canonicalBinding": "ServiceAttributeBindings/BranchOneTokenService/BranchOneTokenService-CanonicalBindings.ruleml.xml",
-      "status": "active"
-    },
-    {
-      "service": "MergeTokenService",
-      "implementationClass": "org.btsn.services.MergeTokenService",
-      "operation": "processToken",
-      "inputs": [
-        "token_branch1",
-        "token_branch2"
-      ],
-      "returnAttribute": "token_branch2",
-      "canonicalBinding": "ServiceAttributeBindings/MergeTokenService/MergeTokenService-CanonicalBindings.ruleml.xml",
-      "status": "active"
-    },
-    {
-      "service": "SideTokenService",
-      "implementationClass": "org.btsn.services.SideTokenService",
-      "operation": "processToken",
-      "inputs": [
-        "token"
-      ],
-      "returnAttribute": "token_branch1",
-      "canonicalBinding": "ServiceAttributeBindings/SideTokenService/SideTokenService-CanonicalBindings.ruleml.xml",
-      "status": "active"
-    },
-    {
-      "service": "FinalMergeTokenService",
-      "implementationClass": "org.btsn.services.FinalMergeTokenService",
-      "operation": "processToken",
-      "inputs": [
-        "token_branch1",
-        "token_branch2"
-      ],
-      "returnAttribute": "token",
-      "canonicalBinding": "ServiceAttributeBindings/FinalMergeTokenService/FinalMergeTokenService-CanonicalBindings.ruleml.xml",
+      "returnAttribute": "decision",
+      "resultType": "boolean",
       "status": "active"
     }
   ]

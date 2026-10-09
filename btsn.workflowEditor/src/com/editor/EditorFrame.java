@@ -39,7 +39,10 @@ public class EditorFrame extends JPanel {
         {"XorMergeNode", "XOR_MERGE_NODE"},
         {"ForkNode", "FORK_NODE"},
         {"GatewayNode", "GATEWAY_NODE"},
-        {"TerminateNode", "TERMINATE_NODE"}
+        {"TerminateNode", "TERMINATE_NODE"},
+        {"DecisionNode", "DECISION_NODE"},
+        {"FeedFwdNode", "FEEDFWD_NODE"},
+        {"MonitorNode", "MONITOR_NODE"}
     };
     
     // Node types valid for T_in transitions - includes merge/join semantics
@@ -133,7 +136,6 @@ public class EditorFrame extends JPanel {
             
             // Create fresh text fields for each selection
             JTextField freshLabelField = new JTextField(15);
-            JTextField freshServiceField = new JTextField(15);
             
             // Label with validation
             addField("Label:", freshLabelField, element.getLabel());
@@ -155,15 +157,8 @@ public class EditorFrame extends JPanel {
                 }
             }));
             
-            // Service
-            addField("Service:", freshServiceField, element.getService());
-            freshServiceField.getDocument().addDocumentListener(new SimpleDocumentListener(() -> {
-                element.setService(freshServiceField.getText());
-            }));
-            
-            // Operations with arguments
-            addOperationsField("Operations:", element);
-            
+            addServiceSelection(element);
+
             // Colors section
             addColorField("Fill Color:", element.getFillColor(), Color.WHITE, 
                 color -> {
@@ -360,13 +355,9 @@ public class EditorFrame extends JPanel {
                 }
             }
             
-            // If current node type is not valid, default to EdgeNode
-            if (!nodeTypeValid) {
-                currentNodeType = "EdgeNode";
-                element.setNodeType("EdgeNode");
-                element.setNodeValue("EDGE_NODE");
-            }
-            
+            // Preserve unknown legacy types visibly; inspecting a node must never rewrite its routing.
+            if (!nodeTypeValid) currentNodeTypeCombo.addItem(currentNodeType);
+
             currentNodeTypeCombo.setSelectedItem(currentNodeType);
             addComboField("Node Type:", currentNodeTypeCombo, currentNodeType);
             
@@ -448,13 +439,7 @@ public class EditorFrame extends JPanel {
      * Get valid node types for a given transition type
      */
     private String[][] getNodeTypesForTransitionType(String transitionType) {
-        if ("T_in".equals(transitionType)) {
-            return NODE_TYPES_T_IN;
-        } else if ("T_out".equals(transitionType)) {
-            return NODE_TYPES_T_OUT;
-        } else {
-            return NODE_TYPES_ALL;
-        }
+        return NODE_TYPES_ALL;
     }
     
     private void showArrowAttributes(Arrow arrow) {
@@ -739,298 +724,62 @@ public class EditorFrame extends JPanel {
     /**
      * Add the operations field with collapsible arguments support
      */
-    private void addOperationsField(String labelText, ProcessElement element) {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBorder(BorderFactory.createTitledBorder(labelText));
-        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 400));
-        
-        // Add new operation panel - NOW AT THE TOP
-        JPanel addPanel = new JPanel(new BorderLayout(5, 0));
-        addPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
-        
-        JComboBox<String> operationCombo = new JComboBox<>();
-        operationCombo.setEditable(true);
-        operationCombo.setSelectedItem(""); // Empty default
-        
-        // Set placeholder text in the editor component
-        Component editorComponent = operationCombo.getEditor().getEditorComponent();
-        if (editorComponent instanceof JTextField) {
-            JTextField tf = (JTextField) editorComponent;
-            tf.putClientProperty("JTextField.placeholderText", "Enter operation name...");
-            // Custom placeholder rendering
-            tf.setForeground(Color.BLACK);
-        }
-        
-        addPanel.add(operationCombo, BorderLayout.CENTER);
-        
-        // Operations list panel - will be refreshed
-        JPanel operationsListPanel = new JPanel();
-        operationsListPanel.setLayout(new BoxLayout(operationsListPanel, BoxLayout.Y_AXIS));
-        
-        // Placeholder label for empty state
-        JLabel emptyLabel = new JLabel("No operations defined");
-        emptyLabel.setFont(emptyLabel.getFont().deriveFont(Font.ITALIC));
-        emptyLabel.setForeground(Color.GRAY);
-        emptyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        emptyLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
-        
-        // Refresh operations list - use array trick to allow self-reference
-        final Runnable[] refreshList = new Runnable[1];
-        refreshList[0] = () -> {
-            operationsListPanel.removeAll();
-            
-            List<ServiceOperation> serviceOps = element.getServiceOperations();
-            if (serviceOps.isEmpty()) {
-                // Show placeholder when empty
-                operationsListPanel.add(Box.createVerticalGlue());
-                operationsListPanel.add(emptyLabel);
-                operationsListPanel.add(Box.createVerticalGlue());
-            } else {
-                for (ServiceOperation op : serviceOps) {
-                    JPanel opPanel = createOperationPanel(op, element, refreshList[0]);
-                    operationsListPanel.add(opPanel);
-                    operationsListPanel.add(Box.createVerticalStrut(2));
-                }
+    private void addServiceSelection(ProcessElement element) {
+        ServiceRegistry registry = canvas.getServiceRegistry();
+        JButton choose = new JButton("Choose service deployment...");
+        choose.addActionListener(e -> { canvas.chooseServiceDeployment(this); updateSelection(element); });
+        attributesPanel.add(choose);
+        JTextArea source = new JTextArea(registry.selectionLabel());
+        source.setEditable(false); source.setOpaque(false); source.setLineWrap(true); source.setWrapStyleWord(true);
+        source.setPreferredSize(new Dimension(220, 40)); source.setMinimumSize(new Dimension(0, 40)); source.setMaximumSize(new Dimension(Integer.MAX_VALUE, 55));
+        source.setToolTipText(registry.description()); attributesPanel.add(source);
+        JComboBox<String> services = ServiceRegistry.choices(registry.services(), element.getService());
+        addComboField("Service:", services, element.getService());
+        services.addActionListener(e -> {
+            String value = (String)services.getSelectedItem();
+            if (!registry.services().contains(value) || value.equals(element.getService())) return;
+            element.setService(value); element.setServiceInstance(""); element.setServiceOperations(new ArrayList<>());
+            updateSelection(element); canvas.serviceContractChanged();
+        });
+        String op = element.getOperations().isEmpty() ? "" : element.getOperations().get(0);
+        JComboBox<String> operations = ServiceRegistry.choices(registry.operations(element.getService()), op);
+        addComboField("Operation:", operations, op);
+        JComboBox<String> instances = ServiceRegistry.choices(registry.instances(element.getService(), op.isEmpty() ? null : op), ServiceRegistry.identity(element));
+        addComboField("Deployment instance:", instances, ServiceRegistry.identity(element));
+        operations.addActionListener(e -> {
+            String value = (String)operations.getSelectedItem();
+            if (!registry.operations(element.getService()).contains(value)) return;
+            List<String> valid = registry.instances(element.getService(), value);
+            String identity = ServiceRegistry.identity(element);
+            if (valid.contains(identity)) registry.apply(element, value, identity);
+            else {
+                element.setServiceOperations(java.util.Arrays.asList(new ServiceOperation(value)));
+                element.setServiceInstance("");
+                if (valid.size() == 1) registry.apply(element, value, valid.get(0));
             }
-            
-            operationsListPanel.revalidate();
-            operationsListPanel.repaint();
-        };
-        
-        JButton addBtn = new JButton("+");
-        addBtn.setPreferredSize(new Dimension(30, 25));
-        addBtn.setToolTipText("Add operation");
-        addBtn.addActionListener(e -> {
-            String newOp = (String) operationCombo.getSelectedItem();
-            if (newOp != null) {
-                newOp = newOp.trim();
-                if (!newOp.isEmpty()) {
-                    element.addOperation(newOp);
-                    
-                    // Add to combo box if not already there
-                    boolean found = false;
-                    for (int i = 0; i < operationCombo.getItemCount(); i++) {
-                        if (operationCombo.getItemAt(i).equals(newOp)) {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        operationCombo.addItem(newOp);
-                    }
-                    
-                    operationCombo.setSelectedItem(""); // Reset to empty
-                    refreshList[0].run();
-                    canvas.repaint();
-                }
-            }
+            updateSelection(element); canvas.serviceContractChanged();
         });
-        addPanel.add(addBtn, BorderLayout.EAST);
-        
-        // Add components in new order: add panel first, then list
-        panel.add(addPanel);
-        panel.add(Box.createVerticalStrut(5));
-        
-        // Initial population
-        refreshList[0].run();
-        
-        JScrollPane scrollPane = new JScrollPane(operationsListPanel);
-        scrollPane.setPreferredSize(new Dimension(230, 180));
-        scrollPane.setMaximumSize(new Dimension(Integer.MAX_VALUE, 180));
-        panel.add(scrollPane);
-        
-        attributesPanel.add(panel);
-    }
-    
-    /**
-     * Create a panel for a single operation with expand/collapse and arguments
-     */
-    private JPanel createOperationPanel(ServiceOperation op, ProcessElement element, Runnable refreshCallback) {
-        JPanel opPanel = new JPanel();
-        opPanel.setLayout(new BoxLayout(opPanel, BoxLayout.Y_AXIS));
-        opPanel.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
-        opPanel.setBackground(new Color(250, 250, 250));
-        
-        // Header row with expand/collapse, name, and remove button
-        JPanel headerPanel = new JPanel(new BorderLayout(2, 0));
-        headerPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
-        headerPanel.setBackground(new Color(240, 240, 240));
-        
-        // Check if this operation is expanded
-        String opKey = element.getLabel() + ":" + op.getName();
-        boolean isExpanded = operationExpandedStates.getOrDefault(opKey, false);
-        
-        // Expand/collapse button
-        JButton expandBtn = new JButton(isExpanded ? "[-]" : "[+]");
-        expandBtn.setPreferredSize(new Dimension(35, 20));
-        expandBtn.setMargin(new Insets(0, 2, 0, 2));
-        expandBtn.setFont(expandBtn.getFont().deriveFont(Font.BOLD, 10.0f));
-        expandBtn.setToolTipText(isExpanded ? "Collapse arguments" : "Expand arguments");
-        expandBtn.addActionListener(e -> {
-            boolean currentState = operationExpandedStates.getOrDefault(opKey, false);
-            operationExpandedStates.put(opKey, !currentState);
-            refreshCallback.run();
+        instances.addActionListener(e -> {
+            String identity = (String)instances.getSelectedItem();
+            if (registry.endpoint(element.getService(), op, identity) == null) return;
+            registry.apply(element, op, identity); updateSelection(element); canvas.serviceContractChanged();
         });
-        headerPanel.add(expandBtn, BorderLayout.WEST);
-        
-        // Operation name label
-        JLabel opLabel = new JLabel(op.getName());
-        opLabel.setBorder(BorderFactory.createEmptyBorder(2, 5, 2, 5));
-        String argCount = op.hasArguments() ? " (" + op.getArgumentCount() + " args)" : "";
-        opLabel.setText(op.getName() + argCount);
-        headerPanel.add(opLabel, BorderLayout.CENTER);
-        
-        // Remove operation button
-        JButton removeBtn = new JButton("X");
-        removeBtn.setPreferredSize(new Dimension(25, 20));
-        removeBtn.setMargin(new Insets(0, 0, 0, 0));
-        removeBtn.setFont(removeBtn.getFont().deriveFont(Font.BOLD, 12.0f));
-        removeBtn.setToolTipText("Remove operation");
-        removeBtn.addActionListener(e -> {
-            element.removeServiceOperation(op);
-            operationExpandedStates.remove(opKey);
-            refreshCallback.run();
-            canvas.repaint();
-        });
-        headerPanel.add(removeBtn, BorderLayout.EAST);
-        
-        opPanel.add(headerPanel);
-        
-        // Arguments panel (shown when expanded)
-        if (isExpanded) {
-            JPanel argsPanel = createArgumentsPanel(op, refreshCallback);
-            opPanel.add(argsPanel);
+        for (ServiceOperation operation : element.getServiceOperations()) {
+            StringBuilder text = new StringBuilder(operation.getName()).append("(");
+            for (ServiceArgument argument : operation.getArguments()) { if (text.charAt(text.length()-1) != '(') text.append(", "); text.append(argument.getName()); }
+            text.append(") → ").append(operation.getReturnAttribute());
+            JTextArea detail = new JTextArea(text.toString()); detail.setEditable(false); detail.setLineWrap(true); detail.setWrapStyleWord(true);
+            detail.setBorder(BorderFactory.createTitledBorder("Deployment contract"));
+            detail.setPreferredSize(new Dimension(220, 70)); detail.setMinimumSize(new Dimension(0, 70)); detail.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
+            attributesPanel.add(detail);
         }
-        
-        return opPanel;
-    }
-    
-    /**
-     * Create the arguments panel for an operation
-     */
-    private JPanel createArgumentsPanel(ServiceOperation op, Runnable refreshCallback) {
-        JPanel argsPanel = new JPanel();
-        argsPanel.setLayout(new BoxLayout(argsPanel, BoxLayout.Y_AXIS));
-        argsPanel.setBorder(BorderFactory.createEmptyBorder(3, 15, 3, 3));
-        argsPanel.setBackground(new Color(250, 250, 250));
-        
-        // List existing arguments
-        for (ServiceArgument arg : op.getArguments()) {
-            JPanel argRow = createArgumentRow(arg, op, refreshCallback);
-            argsPanel.add(argRow);
-            argsPanel.add(Box.createVerticalStrut(2));
+        List<String> errors = registry.validatePlace(element);
+        if (!errors.isEmpty()) {
+            JTextArea warning = new JTextArea(String.join("\n", errors)); warning.setEditable(false); warning.setLineWrap(true); warning.setWrapStyleWord(true); warning.setForeground(Color.RED);
+            warning.setBorder(BorderFactory.createTitledBorder("Unresolved service contract")); attributesPanel.add(warning);
         }
-        
-        // Add new argument row
-        JPanel addArgPanel = new JPanel(new BorderLayout(2, 0));
-        addArgPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
-        addArgPanel.setBackground(new Color(250, 250, 250));
-        addArgPanel.setBorder(BorderFactory.createEmptyBorder(2, 0, 2, 0));
-        
-        JTextField newArgNameField = new JTextField();
-        newArgNameField.setToolTipText("Argument name");
-        
-        JPanel centerPanel = new JPanel(new BorderLayout(2, 0));
-        centerPanel.setBackground(new Color(250, 250, 250));
-        centerPanel.add(new JLabel(" = "), BorderLayout.WEST);
-        
-        JTextField newArgValueField = new JTextField();
-        newArgValueField.setToolTipText("Default value");
-        centerPanel.add(newArgValueField, BorderLayout.CENTER);
-        
-        JButton addArgBtn = new JButton("+");
-        addArgBtn.setPreferredSize(new Dimension(28, 20));
-        addArgBtn.setMargin(new Insets(0, 0, 0, 0));
-        addArgBtn.setToolTipText("Add argument");
-        addArgBtn.addActionListener(e -> {
-            String argName = newArgNameField.getText().trim();
-            if (!argName.isEmpty()) {
-                String argValue = newArgValueField.getText().trim();
-                op.addArgument(argName, argValue);
-                refreshCallback.run();
-                canvas.repaint();
-            }
-        });
-        
-        // Use GridLayout for equal width name/value fields
-        JPanel fieldsPanel = new JPanel(new GridLayout(1, 2, 2, 0));
-        fieldsPanel.setBackground(new Color(250, 250, 250));
-        fieldsPanel.add(newArgNameField);
-        fieldsPanel.add(centerPanel);
-        
-        addArgPanel.add(fieldsPanel, BorderLayout.CENTER);
-        addArgPanel.add(addArgBtn, BorderLayout.EAST);
-        
-        argsPanel.add(addArgPanel);
-        
-        return argsPanel;
     }
-    
-    /**
-     * Create a row for displaying/editing a single argument
-     */
-    private JPanel createArgumentRow(ServiceArgument arg, ServiceOperation op, Runnable refreshCallback) {
-        JPanel argRow = new JPanel(new BorderLayout(2, 0));
-        argRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
-        argRow.setBackground(new Color(250, 250, 250));
-        argRow.setBorder(BorderFactory.createEmptyBorder(2, 0, 2, 0));
-        
-        // Left side: name field
-        JTextField nameField = new JTextField(arg.getName());
-        nameField.setToolTipText("Argument name");
-        nameField.getDocument().addDocumentListener(new SimpleDocumentListener(() -> {
-            arg.setName(nameField.getText().trim());
-        }));
-        
-        // Center: "=" label and value field
-        JPanel centerPanel = new JPanel(new BorderLayout(2, 0));
-        centerPanel.setBackground(new Color(250, 250, 250));
-        centerPanel.add(new JLabel(" = "), BorderLayout.WEST);
-        
-        JTextField valueField = new JTextField(arg.getValue());
-        valueField.setToolTipText("Value");
-        valueField.getDocument().addDocumentListener(new SimpleDocumentListener(() -> {
-            arg.setValue(valueField.getText());
-        }));
-        centerPanel.add(valueField, BorderLayout.CENTER);
-        
-        // Right side: required checkbox and remove button
-        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 2, 0));
-        rightPanel.setBackground(new Color(250, 250, 250));
-        
-        JCheckBox reqCheck = new JCheckBox("R", arg.isRequired());
-        reqCheck.setToolTipText("Required");
-        reqCheck.setBackground(new Color(250, 250, 250));
-        reqCheck.addActionListener(e -> {
-            arg.setRequired(reqCheck.isSelected());
-        });
-        rightPanel.add(reqCheck);
-        
-        JButton removeArgBtn = new JButton("x");
-        removeArgBtn.setPreferredSize(new Dimension(20, 18));
-        removeArgBtn.setMargin(new Insets(0, 0, 0, 0));
-        removeArgBtn.setFont(removeArgBtn.getFont().deriveFont(10.0f));
-        removeArgBtn.setToolTipText("Remove argument");
-        removeArgBtn.addActionListener(e -> {
-            op.removeArgument(arg);
-            refreshCallback.run();
-            canvas.repaint();
-        });
-        rightPanel.add(removeArgBtn);
-        
-        // Use a split between name and value - roughly 40% name, 60% value
-        JPanel fieldsPanel = new JPanel(new GridLayout(1, 2, 2, 0));
-        fieldsPanel.setBackground(new Color(250, 250, 250));
-        fieldsPanel.add(nameField);
-        fieldsPanel.add(centerPanel);
-        
-        argRow.add(fieldsPanel, BorderLayout.CENTER);
-        argRow.add(rightPanel, BorderLayout.EAST);
-        
-        return argRow;
-    }
-    
+
     /**
      * Add network connectivity information showing incoming and outgoing arrows
      */

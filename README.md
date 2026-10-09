@@ -1,18 +1,23 @@
 # Rule-Propagated Service Orchestration (RPSO)
 
-RPSO executes Petri-net models and distributed business processes using the same
-orchestration architecture. It separates **process coordination** from
-**functionality at each place**: input transitions receive and synchronize tokens,
-a place invokes its bound function, and output transitions route the result.
+**RPSO runs Petri nets as live distributed systems.** Each place is a real
+service on a host, each transition is coordination logic installed as local
+rules on that host, and tokens are messages that travel between hosts. The model
+you draw in the editor is the process that executes, not a simulation of it.
 
-**P1, P2, …, Pn are generic positions, not fixed business functions.** A place can
-return a simple Boolean, perform a financial calculation, or process a clinical
-result. The chosen service supplies its meaning; the process model supplies the
-connections and routing rules. Functions conform to the declared input/output
-contract, while deployment selects their implementations and hosts.
+Because the places are generic, the same orchestration runs any process you can
+express as places, transitions, forks and joins: a Boolean Petri-net model, a
+loan application or an emergency-department workflow. Bind different services to
+the places and the process does different work. Change the deployment and the
+same process runs across different machines. No central engine routes the
+tokens; each host follows its own installed rules.
+
+Every run is measured as it happens (queue waits, service times, join waits and
+end-to-end workflow time) and can be replayed on the model. These are
+measurements, not guarantees of meeting hard real-time deadlines.
 
 Start with a Boolean-returning Petri-net example, then build towards the
-Financial and healthcare workflows. The repository also provides a workflow
+financial and healthcare workflows. The repository also provides a workflow
 editor, Ant build-and-run launchers, and observation/analysis tools.
 
 ![RPSO execution sequence with light blue activation bars: T_in receives and buffers a token, synchronizes required inputs and invokes P; P returns its result; T_in hands it to T_out, which routes or terminates the workflow.](images/rpso-execution-sequence.svg)
@@ -22,10 +27,67 @@ inputs, P performs the bound functionality, and T_out routes the result. Shaded
 activation bars show responsibility for one invocation; their lengths do not
 represent measured time.*
 
+## Quick start: run, observe and replay
+
+You need a JDK (15 or later; tested with 21) and Apache Ant 1.10. Eclipse is
+optional: every launcher is an Ant build file that you can also run as an
+**Ant Build** from Eclipse. The repository supplies the runtime libraries,
+including OOjDREW and embedded Derby, so no Maven or Python is needed.
+
+**1. Run a distributed workflow on one computer.** All launchers read node
+addresses from
+[`SingleHost.json`](btsn.common/InfrastructureDefinitionFolder/README.md), which
+defaults to `192.168.1.82`. On any other machine, every place resolves as remote
+and nothing starts, so pass the loopback address:
+
+```sh
+cd btsn.petrinet.ProjectLoader
+ant -f P1_P2_P3_P4_Concurrent_BuildAndRun.xml -Dhost.address=127.0.0.1
+```
+
+This starts four place hosts and Monitor as separate processes, installs each
+host's rules, fires two concurrent workflows (twenty tokens) through the
+fork-and-join model below, and collects the measurements. The first lines of the
+output should report each place as `local`. The hosts keep running after
+collection; stop the launcher before starting another one.
+
+**2. Analyse the run.** Save the analyzer's output so the editor can replay it.
+Keep `-emacs`: it removes Ant's `[java]` line prefix, without which the editor
+loads no events.
+
+```sh
+ant -emacs -f P1_P2_P3_P4_Concurrent_BuildAndRun.xml analyse > analysis.txt
+```
+
+**3. View the measurements.** `WorkflowSpatialView` (each token's visits, one
+lane per place) and `SwingGanttChart_WithLatency_v1d` (workflow elapsed time and
+queue waits) are Java applications in `btsn.common.Monitor`. In Eclipse, use
+**Run As → Java Application**. From a shell, run them from `btsn.common.Monitor`
+(use `;` instead of `:` on Windows):
+
+```sh
+java -cp "target/jar-runtime/btsn-monitor.jar:../btsn.common/target/host-runtime/btsn-infrastructure.jar:../btsn.common/lib/*" org.btsn.derby.Analysis.WorkflowSpatialView
+```
+
+**4. Replay it on the model.** Build and start the editor with
+`ant -f btsn.workflowEditor/build.xml clean jar run`, open
+`btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_P2_P3_P4_Fork_Join_Workflow.json`,
+load `analysis.txt` and press **Play**.
+
+**5. Spread it across machines.** Give each node its machine's address in a
+physical infrastructure definition, select it in the deployment profile, and
+start each numbered place from its portable ZIP on its own machine. The
+launcher then treats those places as remote and sends them rules and tokens
+over the network. See [physical infrastructure](btsn.common/InfrastructureDefinitionFolder/README.md)
+and [portable place releases](btsn.services/docs/PLACE_RELEASES.md).
+
+The sections below explain what you have just run, starting from a single place
+([Tutorial.md](Tutorial.md) walks through editing and running it).
+
 ## From the architecture pattern to a running service
 
 Here is an example of how the components of the architecture pattern come
-together to implement a real-time service workflow. A token arrives at an input
+together to implement a live service workflow. A token arrives at an input
 transition, the place invokes its bound service function, and an output
 transition uses the result to continue or complete the process. The interactions
 in the sequence diagram now become a running example.
@@ -88,11 +150,14 @@ incoming values to be `true` and does not compute their Boolean AND. `AND` on th
 input-transition bar denotes the required input arrivals. A result can be `false`
 without preventing an unguarded onward publication.
 
-Implementation detail: the packaged Boolean functions use
-[`BaseStochasticPetriNetPlace.evaluateGuard`](btsn.common/src/org/btsn/base/BaseStochasticPetriNetPlace.java)
-to select a fresh result (default probability of `true`: 0.5). This implements
-the place's Boolean function. The transitions receive inputs and route its result
-according to the model.
+Implementation detail: every place binds a separate deployment instance of the
+same reusable function,
+[`StochasticService.processToken`](btsn.common/src/org/btsn/services/StochasticService.java),
+which returns a fresh random Boolean (probability of `true`: 0.5). The
+[`boolean-token` adapter](btsn.common/src/org/btsn/invocation/BooleanTokenAdapter.java)
+carries the incoming data and exposes that result to the process guards; it
+never chooses a destination. The transitions receive inputs and route the
+result according to the model.
 
 Run [P1_P2_P3_P4_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_P3_P4_BuildAndRun.xml)
 to execute this model. Its captured results appear under
@@ -154,57 +219,49 @@ for contracts and host assignments.
 
 The domain examples give the places business meaning. We can also extend the
 coordination structure itself: this six-place model connects two joins, so the
-result of one synchronized activity becomes an input to another. Functions that
-carry and merge data deterministically make that dependency easier to trace.
+result of one synchronized activity becomes an input to another.
 
 ![Six explicit transition–place–transition units. P1 forks to P2, P3 and P5; P4 joins P2/P3, P6 joins P4/P5 and terminates.](images/petrinet-double-join.svg)
 
 The
 [six-place double-join definition](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_to_P6_Double_Join_Workflow.json)
-binds its six places to small deterministic token operations:
+binds every place to its own deployment instance of the same Boolean function,
+`StochasticService.processToken`. The adapter carries the incoming data, so the
+branch data is preserved through both joins:
 
-| Place | Bound service | What its operation does | Output attribute and transition route |
+| Place | Input attributes | Output attribute | What its surrounding transitions do |
 |---|---|---|---|
-| P1 | `BooleanTokenService` | Read the supplied `outcome` (default `true`); record the Boolean value and routing decision | `token`; T_out forks to P2/P3/P5 on `true`, or terminates on `false` |
-| P2 | `BranchTwoTokenService` | Carry the incoming token data unchanged | `token_branch2` → P4 |
-| P3 | `BranchOneTokenService` | Carry the incoming token data unchanged | `token_branch1` → P4 |
-| P4 | `MergeTokenService` | Combine the two input objects into a JSON `branches` array after T_in synchronizes P2/P3 | `token_branch2` → P6 |
-| P5 | `SideTokenService` | Carry the incoming token data unchanged | `token_branch1` → P6 |
-| P6 | `FinalMergeTokenService` | Combine the P4/P5 input objects into a JSON `branches` array after T_in synchronizes them | `token`; T_out records workflow termination |
+| P1 | `token` | `token` | T_out forks to P2/P3/P5 on `true`, or terminates on `false` |
+| P2 | `token` | `token_branch2` | Publish either result to P4 |
+| P3 | `token` | `token_branch1` | Publish either result to P4 |
+| P4 | `token_branch1`, `token_branch2` | `token_branch2` | T_in waits for both P2/P3 arrivals; T_out publishes either result to P6 |
+| P5 | `token` | `token_branch1` | Publish either result to P6 |
+| P6 | `token_branch1`, `token_branch2` | `token` | T_in waits for both P4/P5 arrivals; T_out records workflow termination |
 
-**These six operations are deterministic.** The generator supplies P1's outcome
-through `token.outcome`; the default is `true`. P2/P3/P5 forward data and P4/P6
-combine it. The output names above are payload attributes carrying JSON objects.
-This additional deployment illustrates other place functionality: carrying and
-combining data rather than generating a fresh Boolean at every place. Its
-behavior differs from the Boolean-function examples above.
-
-The generic fabric performs the forks, input synchronization and publication;
-the model services carry and combine the token data. P4 becomes eligible after
-both P2/P3 inputs are available, while P6 requires P4/P5. The topology constrains
-causal order; the running hosts determine when those steps actually execute.
+Only P1's result changes the route; the other places publish unconditionally.
+The generic fabric performs the forks, input synchronization and publication.
+P4 becomes eligible after both P2/P3 inputs are available, while P6 requires
+P4/P5. The topology constrains causal order; the running hosts determine when
+those steps actually execute.
 
 Run
 [P1_to_P6_Double_Join_Workflow.xml](btsn.petrinet.ProjectLoader/P1_to_P6_Double_Join_Workflow.xml)
 as an Ant Build with its default target. It builds the JARs, prepares the selected
 deployment, initializes, deploys, sends ten tokens and collects observations.
-`token.outcome` defaults to `true`; set it to `false` to exercise termination at
-P1. Another deterministic example is
-[P1_P2_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_BuildAndRun.xml), using
-Boolean and Forward token operations. See
-[the model guide](btsn.services/docs/PETRINET_MODELS.md) for profiles and contracts.
+The launcher's `token.outcome` property is input data only; it does not force
+P1's result. A smaller two-place example is
+[P1_P2_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_BuildAndRun.xml).
+See [the model guide](btsn.services/docs/PETRINET_MODELS.md) for profiles and contracts.
 
 This is live token execution with measured queueing, local execution, join
-waiting and workflow elapsed time. The deterministic services introduce no
-simulated processing delays; launcher waits support startup and collection.
-Monitor reconstructs the generated workflow families and the same analyzer,
-timing chart and spatial view can inspect their observations. ProcessEditor can
-then replay that captured execution on the topology. Observed timing is distinct
-from a guarantee to meet real-time deadlines.
+waiting and workflow elapsed time. The services introduce no simulated
+processing delays; launcher waits support startup and collection. Monitor
+reconstructs the generated workflow families and the same analyzer, timing
+chart and spatial view can inspect their observations. ProcessEditor can then
+replay that captured execution on the topology.
 
 These examples execute on the same generic host machinery. Their diagrams show
-configured paths; the captured runs show measured execution. Neither a topology
-nor one run establishes a guarantee to meet real-time deadlines.
+configured paths; the captured runs show measured execution.
 
 ## Architecture: coordination and business meaning
 
@@ -225,7 +282,7 @@ workflow.*
 |---|---|---|
 | Process model | Places, transitions, fork/join structure, guards and termination | `btsn.common/ProcessDefinitionFolder` |
 | Service contract | Logical service identity, operations, named inputs and returned attribute | `BusinessServiceDefinitions`, `ServiceAttributeBindings` in `btsn.common` |
-| Deployment | Map capabilities to implementation classes, hosts and channels | Infrastructure definitions and `btsn.services/deployments/{healthcare,financial,models}` |
+| Deployment | Map capabilities to implementation classes, hosts and channels | [Physical infrastructure](btsn.common/InfrastructureDefinitionFolder/README.md), [service deployments](btsn.common/ServiceDeploymentFolder/README.md) and `btsn.services/deployments/{healthcare,financial,models}` |
 | Generic execution fabric | Transport, buffering, synchronization, version selection, invocation and publication | `btsn.rpso.places.p1`–`p6`, shared infrastructure |
 | Business computation | Domain objects, calculations and decision symbols | `btsn.common/src/org/btsn/business`, packaged as independent service JARs |
 | Observation | Collect records, reconstruct workflow families and display measurements | `btsn.common.Monitor` |
@@ -385,7 +442,7 @@ The tools in `btsn.common.Monitor/src/org/btsn/derby/Analysis` include:
 |---|---|
 | `PetriNetAnalyzer` | Generated roots, fork genealogy, join consumption, canonical place visits, completion and structural/temporal checks |
 | `SwingGanttChart_WithLatency_v1d` | Workflow elapsed/queue figure, measured timeline, service queue comparisons, and publication exports |
-| `WorkflowSpatialView` | Service/host activity in a spatial view |
+| `WorkflowSpatialView` | Each token's visits over time, one lane per place, labelled with its service and node |
 
 The combined chart offers **Diamonds** and **Lower Queue Shading** from
 **View → Queue Display**. The bar shows measured workflow elapsed time; the marker
@@ -418,9 +475,15 @@ Keep this metadata with `ServiceAnalysisDataBase` when archiving results. Older
 runs without matching metadata show `Process not captured`.
 
 To animate observations, run `com.editor.ProcessEditor` from
-[btsn.workflowEditor](btsn.workflowEditor/src/com/editor/ProcessEditor.java), open
-the matching workflow JSON, load the saved analyzer output, then press **Play**.
-This replays captured observations; it does not launch the distributed workflow.
+[btsn.workflowEditor](btsn.workflowEditor/src/com/editor/ProcessEditor.java)
+(or `ant -f btsn.workflowEditor/build.xml clean jar run`), open the matching
+workflow JSON, load the analyzer output saved with `ant -emacs … analyse >
+analysis.txt`, then press **Play**. This replays captured observations; it does
+not launch the distributed workflow.
+Open the workflow from its place under `btsn.common/ProcessDefinitionFolder` so
+that its service deployment loads. The analyzer names places and transitions
+after their hosting node (`P1_Place`, `T_in_P1`), and the deployment maps those
+nodes to the labels on the canvas, such as `NS_Green` in the traffic-light model.
 
 ## Project layout and build support
 
@@ -432,7 +495,7 @@ provide entry points for preparing the packaged runtime.
 
 | Project | Purpose |
 |---|---|
-| `btsn.common` | Shared source, business implementations, contracts, process definitions and rules |
+| `btsn.common` | Shared source, business implementations, contracts, physical infrastructure, service deployments, process definitions and rules |
 | `btsn.services` | Service packaging, shared Ant builds, deployment profiles and checks |
 | `btsn.rpso.places.p1`–`p6` | Generic numbered orchestration hosts |
 | `btsn.common.Monitor` | Collection, reconstruction and visualization |
@@ -441,6 +504,14 @@ provide entry points for preparing the packaged runtime.
 | `btsn.financial.ProjectLoader` | Financial launchers |
 | `btsn.petrinet.ProjectLoader` | Petri-net model launchers and utility phases |
 | `btsn.workflowEditor` | Model editor and observation animator |
+
+All domains share the physical network and fixed ports in
+[`InfrastructureDefinitionFolder`](btsn.common/InfrastructureDefinitionFolder/README.md).
+Business operations are assigned to those nodes in
+[`ServiceDeploymentFolder`](btsn.common/ServiceDeploymentFolder/README.md).
+Their routing and guards belong in
+[`ProcessDefinitionFolder`](btsn.common/ProcessDefinitionFolder); the analysis
+folders hold observations from executing those models.
 
 `btsn.services` contains build support, not business implementation or execution
 handlers. Service JARs are grouped under
@@ -465,17 +536,15 @@ ant -f btsn.rpso.places.p1/build.xml
 See [shared build support](btsn.services/README.md),
 [portable releases](btsn.services/docs/PLACE_RELEASES.md), and
 [Petri-net model profiles](btsn.services/docs/PETRINET_MODELS.md).
-The repository supplies the runtime libraries, including OOjDREW and embedded
-Derby; the normal Ant workflow does not require Maven or Python.
 
 The current diagrams are editable SVGs. Their source models, conventions and
 regeneration command are documented in [images/README.md](images/README.md).
 
-# License
+## License
 
 The licensing terms for the software and accompanying documentation follow.
 
-**Copyright (c) 2025 [Alexander Cameron]**
+**Copyright (c) 2025 Alexander Cameron**
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to use, copy, modify, merge, and distribute the Software for non-commercial purposes, subject to the following conditions: the above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 

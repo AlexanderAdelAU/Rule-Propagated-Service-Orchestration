@@ -1,27 +1,16 @@
 {
   "domain": "PetriNetModels",
-  "purpose": "Preserves the existing stochastic model operations in independently packaged business services.",
+  "purpose": "Reusable stochastic Boolean operation; process topology and instance token contracts are defined separately.",
   "services": [
     {
-      "service": "StochasticEntryTokenService",
-      "implementationClass": "org.btsn.services.StochasticEntryTokenService",
+      "service": "StochasticService",
+      "implementationClass": "org.btsn.services.StochasticService",
       "operation": "processToken",
       "inputs": [
-        "token"
+        "data"
       ],
-      "returnAttribute": "token",
-      "canonicalBinding": "ServiceAttributeBindings/StochasticEntryTokenService/StochasticEntryTokenService-CanonicalBindings.ruleml.xml",
-      "status": "active"
-    },
-    {
-      "service": "StochasticForwardTokenService",
-      "implementationClass": "org.btsn.services.StochasticForwardTokenService",
-      "operation": "processToken",
-      "inputs": [
-        "token"
-      ],
-      "returnAttribute": "token",
-      "canonicalBinding": "ServiceAttributeBindings/StochasticForwardTokenService/StochasticForwardTokenService-CanonicalBindings.ruleml.xml",
+      "returnAttribute": "decision",
+      "resultType": "boolean",
       "status": "active"
     }
   ]

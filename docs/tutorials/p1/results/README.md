@@ -96,3 +96,9 @@ Pass `-Dtutorial.source.commit=<runtime-baseline-commit>` to identify the runtim
 revision. Preserve the matching configuration and update this measured-results
 page when replacing the reference. Never expect a new random run to reproduce
 the exact times or repeat counts shown here.
+
+The reference run was captured before the infrastructure definitions were
+consolidated. Its `summary.json` retains the original paths and hashes as run
+provenance. Current launchers and the export helper use the shared
+[SingleHost.json](../../../../btsn.common/InfrastructureDefinitionFolder/SingleHost.json)
+and separate [P1 service deployment](../../../../btsn.common/ServiceDeploymentFolder/petrinet/P1_Tutorial.json).

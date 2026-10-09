@@ -1142,7 +1142,7 @@ public class WorkflowSpatialView extends JPanel {
     }
     
     public String getPlaceDisplayName(String place) {
-        return serviceDisplayNames.laneLabel(place, selectedWorkflowBase);
+        return serviceDisplayNames.spatialLaneLabel(place, selectedWorkflowBase);
     }
 
     public Set<String> getAllPlaces() {
@@ -1558,7 +1558,7 @@ public class WorkflowSpatialView extends JPanel {
         
         for (String place : chart.getAllPlaces()) {
             boolean defaultVisible = !place.equals("MonitorService") && !place.equals("TERMINATE");
-            JCheckBoxMenuItem placeItem = new JCheckBoxMenuItem(chart.serviceDisplayNames.laneDescription(place, -1), defaultVisible);
+            JCheckBoxMenuItem placeItem = new JCheckBoxMenuItem(chart.serviceDisplayNames.spatialLaneLabel(place, -1), defaultVisible);
             placeItem.addActionListener(e -> chart.setPlaceVisible(place, placeItem.isSelected()));
             placesMenu.add(placeItem);
         }

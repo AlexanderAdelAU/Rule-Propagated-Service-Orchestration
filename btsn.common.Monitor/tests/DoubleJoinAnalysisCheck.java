@@ -38,8 +38,49 @@ public class DoubleJoinAnalysisCheck {
             event(c, 2000000, "generator", "GENERATED");
             event(c, 1000002, "T4", "JOIN_CONSUMED"); event(c, 1000001, "T4", "ENTER");
             expect(analyzer, 0, "different families do not make a join");
+            setup(c, 2);
+            try (Statement s = c.createStatement()) {
+                s.executeUpdate("DELETE FROM CONSOLIDATED_TRANSITION_FIRINGS");
+                s.execute("CREATE TABLE TRANSITION_FIRINGS (workflowBase INT, tokenId INT, toPlace VARCHAR(40))");
+                s.executeUpdate("INSERT INTO TRANSITION_FIRINGS VALUES (1000000,1000000,'TERMINATE')");
+            }
+            event(c, 1000001, "T4", "ENTER");
+            event(c, 1000001, "T4", "ENTER"); // duplicate collector observation
+            try (Statement s = c.createStatement()) {
+                s.executeUpdate("INSERT INTO CONSOLIDATED_TRANSITION_FIRINGS VALUES (1000000,1000001,'T4',2000,'model','ENTER')");
+                s.executeUpdate("INSERT INTO CONSOLIDATED_TRANSITION_FIRINGS VALUES (1000000,1000002,'T4',2000,'JOIN_CONSUMED','JOIN_CONSUMED')");
+            }
+            PetriNetAnalyzer.CanonicalWorkflowAnalysis partial = analyzer.analyzeCanonicalWorkflows(1000000);
+            if (partial.generatedWorkflows != 0 || partial.completedWorkflows != 0
+                    || partial.placeExecutions.getOrDefault("model", 0) != 2
+                    || partial.unassignedPlaceVisits != 2)
+                throw new AssertionError("partial capture must retain repeated visits without invented roots/completion");
+            if (analyzer.analyzeForkJoin(1000000).successfulJoins != 1)
+                throw new AssertionError("observed join must not require parent completion");
+            if (analyzer.getAllPlaces(1000000).contains("JOIN_CONSUMED"))
+                throw new AssertionError("event marker is not a physical place");
+            java.lang.reflect.Method exited = PetriNetAnalyzer.class.getDeclaredMethod("hasBaseTokenExited", int.class, int.class);
+            exited.setAccessible(true);
+            if ((Boolean) exited.invoke(analyzer, 1000000, 1000000))
+                throw new AssertionError("raw observer termination must not complete business token");
+            setup(c, 2);
+            try (Statement s = c.createStatement()) {
+                s.executeUpdate("INSERT INTO SERVICEMEASUREMENTS VALUES (1000000,1500,'MonitorService','acknowledgeTokenArrival')");
+            }
+            event(c, 1000001, "edge1", "ENTER");
+            event(c, 1000002, "edge2", "ENTER");
+            if (analyzer.analyzeForkJoin(1000000).successfulJoins != 0)
+                throw new AssertionError("uncompleted children and raw TERMINATE do not prove a join");
+            PetriNetAnalyzer.CanonicalWorkflowAnalysis observed = analyzer.analyzeCanonicalWorkflows(1000000);
+            if (observed.monitorAcknowledgements != 1 || observed.completedWorkflows != 0
+                    || observed.instances.get(1000000).completedAt != 0)
+                throw new AssertionError("Monitor acknowledgement is observation, not process completion");
+            event(c, 1000000, "end", "TERMINATE");
+            if (analyzer.analyzeCanonicalWorkflows(1000000).completedWorkflows != 1
+                    || !(Boolean) exited.invoke(analyzer, 1000000, 1000000))
+                throw new AssertionError("explicit business termination must remain supported");
         }
-        System.out.println("PASS: six recorded-event join-count cases");
+        System.out.println("PASS: six join cases and stopped-process analysis without root or Monitor completion");
     }
     private static void setup(Connection c, int children) throws Exception {
         try (Statement s = c.createStatement()) {

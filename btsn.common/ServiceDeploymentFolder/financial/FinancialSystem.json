@@ -1,0 +1,86 @@
+{
+  "definitionType": "ServiceDeployment",
+  "capabilities": [
+    {
+      "node": "P1",
+      "service": "ValidationService",
+      "operation": "processToken",
+      "returnAttribute": "validationResults",
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0
+    },
+    {
+      "node": "P2",
+      "service": "CreditCheckService",
+      "operation": "processToken",
+      "returnAttribute": "creditCheckResults",
+      "arguments": [
+        {
+          "name": "validationResults",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0
+    },
+    {
+      "node": "P3",
+      "service": "FraudCheckService",
+      "operation": "processToken",
+      "returnAttribute": "fraudCheckResults",
+      "arguments": [
+        {
+          "name": "validationResults",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0
+    },
+    {
+      "node": "P4",
+      "service": "UnderwritingService",
+      "operation": "processToken",
+      "returnAttribute": "underwritingResults",
+      "arguments": [
+        {
+          "name": "creditCheckResults",
+          "type": "String",
+          "value": "String",
+          "required": false
+        },
+        {
+          "name": "fraudCheckResults",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0
+    },
+    {
+      "node": "P5",
+      "service": "DecisionService",
+      "operation": "processToken",
+      "returnAttribute": "decisionResults",
+      "arguments": [
+        {
+          "name": "underwritingResults",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0
+    }
+  ]
+}

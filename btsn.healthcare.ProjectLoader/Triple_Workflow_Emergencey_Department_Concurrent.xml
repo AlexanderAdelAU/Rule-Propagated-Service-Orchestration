@@ -452,7 +452,7 @@
 					<arg value="-operation" /><arg value="${patient.target.operation}" />
 					<arg value="-tokens" /><arg value="0" />
 					<arg value="-expire" /><arg value="${patient.token.expire}" />
-					<arg value="-generator" /><arg value="${patient.generator.id}" />					<arg value="-infrastructure"/><arg value="Healthcare_Infrastructure"/>
+					<arg value="-generator" /><arg value="${patient.generator.id}" />					<arg value="-infrastructure"/><arg value="SingleHost"/>
 					<arg value="-format-service"/><arg value="TriageService"/>
 				</java>
 
@@ -467,7 +467,7 @@
 					<arg value="-operation" /><arg value="${canary.target.operation}" />
 					<arg value="-tokens" /><arg value="0" />
 					<arg value="-expire" /><arg value="${canary.token.expire}" />
-					<arg value="-generator" /><arg value="${canary.generator.id}" />					<arg value="-infrastructure"/><arg value="Healthcare_Infrastructure"/>
+					<arg value="-generator" /><arg value="${canary.generator.id}" />					<arg value="-infrastructure"/><arg value="SingleHost"/>
 					<arg value="-format-service"/><arg value="TriageService"/>
 				</java>
 
@@ -482,7 +482,7 @@
 					<arg value="-operation" /><arg value="${federated.target.operation}" />
 					<arg value="-tokens" /><arg value="0" />
 					<arg value="-expire" /><arg value="${federated.token.expire}" />
-					<arg value="-generator" /><arg value="${federated.generator.id}" />					<arg value="-infrastructure"/><arg value="Healthcare_Infrastructure"/>
+					<arg value="-generator" /><arg value="${federated.generator.id}" />					<arg value="-infrastructure"/><arg value="SingleHost"/>
 					<arg value="-format-service"/><arg value="RadiologyService"/>
 				</java>
 
@@ -504,7 +504,7 @@
 						<arg value="-tokens" /><arg value="${patient.token.count}" />
 						<arg value="-expire" /><arg value="${patient.token.expire}" />
 						<arg value="-generator" /><arg value="${patient.generator.id}" />
-						<arg value="-skipDeploy" />					<arg value="-infrastructure"/><arg value="Healthcare_Infrastructure"/>
+						<arg value="-skipDeploy" />					<arg value="-infrastructure"/><arg value="SingleHost"/>
 					<arg value="-format-service"/><arg value="TriageService"/>
 				</java>
 
@@ -519,7 +519,7 @@
 						<arg value="-tokens" /><arg value="${canary.token.count}" />
 						<arg value="-expire" /><arg value="${canary.token.expire}" />
 						<arg value="-generator" /><arg value="${canary.generator.id}" />
-						<arg value="-skipDeploy" />					<arg value="-infrastructure"/><arg value="Healthcare_Infrastructure"/>
+						<arg value="-skipDeploy" />					<arg value="-infrastructure"/><arg value="SingleHost"/>
 					<arg value="-format-service"/><arg value="TriageService"/>
 				</java>
 					
@@ -535,7 +535,7 @@
 						<arg value="-tokens" /><arg value="${federated.token.count}" />
 						<arg value="-expire" /><arg value="${federated.token.expire}" />
 						<arg value="-generator" /><arg value="${federated.generator.id}" />
-						<arg value="-skipDeploy" />					<arg value="-infrastructure"/><arg value="Healthcare_Infrastructure"/>
+						<arg value="-skipDeploy" />					<arg value="-infrastructure"/><arg value="SingleHost"/>
 					<arg value="-format-service"/><arg value="RadiologyService"/>
 				</java>
 				</parallel>
