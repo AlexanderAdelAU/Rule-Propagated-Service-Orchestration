@@ -339,11 +339,20 @@ public class PetriNetAnalyzer {
         Set<Integer> continuations = new HashSet<>(siblings);
         continuations.add(parent);
         String placeholders = String.join(",", Collections.nCopies(continuations.size(), "?"));
+        // The continuing token's ENTER and this token's JOIN_CONSUMED are written by the same
+        // join firing, in either order. Anchor on this token's arrival (BUFFERED) at the join
+        // rather than on the consumption timestamp, so both orders count as an observed join.
         String sql = "SELECT COUNT(*) FROM CONSOLIDATED_TRANSITION_FIRINGS consumed " +
+            "JOIN CONSOLIDATED_TRANSITION_FIRINGS arrived " +
+            "ON arrived.workflowBase = consumed.workflowBase " +
+            "AND arrived.tokenId = consumed.tokenId " +
+            "AND arrived.transitionId = consumed.transitionId " +
+            "AND arrived.eventType = 'BUFFERED' " +
+            "AND arrived.timestamp <= consumed.timestamp " +
             "JOIN CONSOLIDATED_TRANSITION_FIRINGS entered " +
             "ON entered.workflowBase = consumed.workflowBase " +
             "AND entered.transitionId = consumed.transitionId " +
-            "AND entered.timestamp >= consumed.timestamp " +
+            "AND entered.timestamp >= arrived.timestamp " +
             "WHERE consumed.workflowBase = ? AND consumed.tokenId = ? " +
             "AND consumed.eventType = 'JOIN_CONSUMED' AND entered.eventType = 'ENTER' " +
             "AND entered.tokenId IN (" + placeholders + ")";
