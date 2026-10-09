@@ -1,15 +1,20 @@
 # Rule-Propagated Service Orchestration (RPSO)
 
-RPSO executes Petri-net models and distributed business processes using the same
-orchestration architecture. It separates **process coordination** from
-**functionality at each place**: input transitions receive and synchronize tokens,
-a place invokes its bound function, and output transitions route the result.
+**RPSO runs Petri nets as live distributed systems.** Each place is a real
+service on a host, each transition is coordination logic installed as local
+rules on that host, and tokens are messages that travel between hosts. The model
+you draw in the editor is the process that executes, not a simulation of it.
 
-**P1, P2, …, Pn are generic positions, not fixed business functions.** A place can
-return a simple Boolean, perform a financial calculation, or process a clinical
-result. The chosen service supplies its meaning; the process model supplies the
-connections and routing rules. Functions conform to the declared input/output
-contract, while deployment selects their implementations and hosts.
+Because the places are generic, the same orchestration runs any process you can
+express as places, transitions, forks and joins: a Boolean Petri-net model, a
+loan application or an emergency-department workflow. Bind different services to
+the places and the process does different work. Change the deployment and the
+same process runs across different machines. No central engine routes the
+tokens; each host follows its own installed rules.
+
+Every run is measured as it happens (queue waits, service times, join waits and
+end-to-end workflow time) and can be replayed on the model. These are
+measurements, not guarantees of meeting hard real-time deadlines.
 
 Start with a Boolean-returning Petri-net example, then build towards the
 financial and healthcare workflows. The repository also provides a workflow
@@ -22,35 +27,67 @@ inputs, P performs the bound functionality, and T_out routes the result. Shaded
 activation bars show responsibility for one invocation; their lengths do not
 represent measured time.*
 
-## Quick start
+## Quick start: run, observe and replay
 
 You need a JDK (15 or later; tested with 21) and Apache Ant 1.10. Eclipse is
 optional: every launcher is an Ant build file that you can also run as an
 **Ant Build** from Eclipse. The repository supplies the runtime libraries,
 including OOjDREW and embedded Derby, so no Maven or Python is needed.
 
-All launchers read the host address from
+**1. Run a distributed workflow on one computer.** All launchers read node
+addresses from
 [`SingleHost.json`](btsn.common/InfrastructureDefinitionFolder/README.md), which
-defaults to `192.168.1.82`. On any other machine, every place resolves as
-remote and nothing starts. To run everything on one computer, pass the loopback
-address:
+defaults to `192.168.1.82`. On any other machine, every place resolves as remote
+and nothing starts, so pass the loopback address:
 
 ```sh
 cd btsn.petrinet.ProjectLoader
 ant -f P1_P2_P3_P4_Concurrent_BuildAndRun.xml -Dhost.address=127.0.0.1
 ```
 
-The launcher builds the JARs, starts the local hosts and Monitor, initializes
-their databases, deploys the rules, fires the tokens and collects the
-observations. Check the first lines of its output: each place should report
-`local`. The hosts keep running after collection; stop them before starting
-another launcher. Then inspect the run with the tools in
-[Observe and interpret a run](#observe-and-interpret-a-run).
+This starts four place hosts and Monitor as separate processes, installs each
+host's rules, fires two concurrent workflows (twenty tokens) through the
+fork-and-join model below, and collects the measurements. The first lines of the
+output should report each place as `local`. The hosts keep running after
+collection; stop the launcher before starting another one.
+
+**2. Analyse the run.** Save the analyzer's output so the editor can replay it.
+Keep `-emacs`: it removes Ant's `[java]` line prefix, without which the editor
+loads no events.
+
+```sh
+ant -emacs -f P1_P2_P3_P4_Concurrent_BuildAndRun.xml analyse > analysis.txt
+```
+
+**3. View the measurements.** `WorkflowSpatialView` (each token's visits, one
+lane per place) and `SwingGanttChart_WithLatency_v1d` (workflow elapsed time and
+queue waits) are Java applications in `btsn.common.Monitor`. In Eclipse, use
+**Run As → Java Application**. From a shell, run them from `btsn.common.Monitor`
+(use `;` instead of `:` on Windows):
+
+```sh
+java -cp "target/jar-runtime/btsn-monitor.jar:../btsn.common/target/host-runtime/btsn-infrastructure.jar:../btsn.common/lib/*" org.btsn.derby.Analysis.WorkflowSpatialView
+```
+
+**4. Replay it on the model.** Build and start the editor with
+`ant -f btsn.workflowEditor/build.xml clean jar run`, open
+`btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_P2_P3_P4_Fork_Join_Workflow.json`,
+load `analysis.txt` and press **Play**.
+
+**5. Spread it across machines.** Give each node its machine's address in a
+physical infrastructure definition, select it in the deployment profile, and
+start each numbered place from its portable ZIP on its own machine. The
+launcher then treats those places as remote and sends them rules and tokens
+over the network. See [physical infrastructure](btsn.common/InfrastructureDefinitionFolder/README.md)
+and [portable place releases](btsn.services/docs/PLACE_RELEASES.md).
+
+The sections below explain what you have just run, starting from a single place
+([Tutorial.md](Tutorial.md) walks through editing and running it).
 
 ## From the architecture pattern to a running service
 
 Here is an example of how the components of the architecture pattern come
-together to implement a real-time service workflow. A token arrives at an input
+together to implement a live service workflow. A token arrives at an input
 transition, the place invokes its bound service function, and an output
 transition uses the result to continue or complete the process. The interactions
 in the sequence diagram now become a running example.
@@ -224,8 +261,7 @@ chart and spatial view can inspect their observations. ProcessEditor can then
 replay that captured execution on the topology.
 
 These examples execute on the same generic host machinery. Their diagrams show
-configured paths; the captured runs show measured execution. Neither a topology
-nor one run establishes a guarantee to meet real-time deadlines.
+configured paths; the captured runs show measured execution.
 
 ## Architecture: coordination and business meaning
 
@@ -439,9 +475,11 @@ Keep this metadata with `ServiceAnalysisDataBase` when archiving results. Older
 runs without matching metadata show `Process not captured`.
 
 To animate observations, run `com.editor.ProcessEditor` from
-[btsn.workflowEditor](btsn.workflowEditor/src/com/editor/ProcessEditor.java), open
-the matching workflow JSON, load the saved analyzer output, then press **Play**.
-This replays captured observations; it does not launch the distributed workflow.
+[btsn.workflowEditor](btsn.workflowEditor/src/com/editor/ProcessEditor.java)
+(or `ant -f btsn.workflowEditor/build.xml clean jar run`), open the matching
+workflow JSON, load the analyzer output saved with `ant -emacs … analyse >
+analysis.txt`, then press **Play**. This replays captured observations; it does
+not launch the distributed workflow.
 Open the workflow from its place under `btsn.common/ProcessDefinitionFolder` so
 that its service deployment loads. The analyzer names places and transitions
 after their hosting node (`P1_Place`, `T_in_P1`), and the deployment maps those
