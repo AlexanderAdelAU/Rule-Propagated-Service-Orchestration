@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Vector;
 
 import nu.xom.Elements;
@@ -64,6 +65,21 @@ public class OOjdrewAPI {
 	public boolean hasNext = false;
 	public int rowsReturned = 0;
 
+	// jDREW keeps its SymbolTable in static fields shared by every OOjdrewAPI in the JVM.
+	// A reset, or two threads interning at once, used to invalidate the rule base another
+	// ServiceThread was querying, so its next-service query found nothing and the token was
+	// terminated (issue #15). All jDREW work now runs under one JVM-wide lock; the table is
+	// reset only when it grows large, and an instance whose rule base or open query predates
+	// the latest reset re-parses or re-runs it before continuing. Solutions stay lazy.
+	private static final Object ENGINE_LOCK = new Object();
+	private static final int SYMBOL_RESET_THRESHOLD = 5000;
+	private static long symbolEpoch = 0;
+	private String parsedKnowledgeBase = null;
+	private long parsedEpoch = -1;
+	private String lastQuery = null;
+	private long queryEpoch = -1;
+	private int solutionsReturned = 0;
+
 	// public void parseResult(boolean x, Object[][] result, int rowsReturned) {
 	// TODO Auto-generated method stub
 
@@ -118,20 +134,22 @@ public class OOjdrewAPI {
 	}
 
 	public void parseKnowledgeBase(String RuleBase, boolean loadFromFile) {
-		// BackwardReasoner backwardReasoner = new BackwardReasoner();
-		String knowledgeBase = null;
-		SymbolTable.reset();
-		if (loadFromFile)
-			knowledgeBase = getRuleBaset(RuleBase);
-		else
-			knowledgeBase = RuleBase;
-		backwardReasoner.clearClauses();
-
-		if (knowledgeBase.isEmpty()) {
-			return;
+		String knowledgeBase = loadFromFile ? getRuleBaset(RuleBase) : RuleBase;
+		synchronized (ENGINE_LOCK) {
+			// Parsing mints new generated symbols, so the shared table grows with every parse.
+			// Reset it only when large; instances parsed before the reset re-parse lazily.
+			if (SymbolTable.symbols.size() > SYMBOL_RESET_THRESHOLD) {
+				SymbolTable.reset();
+				symbolEpoch++;
+			}
+			backwardReasoner.clearClauses();
+			parsedKnowledgeBase = knowledgeBase;
+			parsedEpoch = symbolEpoch;
+			if (knowledgeBase == null || knowledgeBase.isEmpty()) {
+				return;
+			}
+			parseRuleMLKnowledeBase(knowledgeBase);
 		}
-		parseRuleMLKnowledeBase(knowledgeBase);
-
 	}
 
 	private void parseRuleMLKnowledeBase(String knowledgeBase) {
@@ -159,16 +177,32 @@ public class OOjdrewAPI {
 	}
 
 	public void issueRuleMLQuery(String query) {
-		// rmlParser.notify();
-		rmlParser.clear();
-		// System.err.println("in oojdrew printing query....\n\r" + query);
+		synchronized (ENGINE_LOCK) {
+			lastQuery = query;
+			runQuery(query);
+		}
+	}
 
+	/** Runs a query with ENGINE_LOCK held, re-parsing this rule base first if a reset invalidated it. */
+	private void runQuery(String query) {
+		if (parsedKnowledgeBase != null && parsedEpoch != symbolEpoch) {
+			// The shared symbol table was reset after this rule base was parsed; its
+			// clauses refer to symbols that no longer exist, so intern them again first.
+			backwardReasoner.clearClauses();
+			parsedEpoch = symbolEpoch;
+			if (!parsedKnowledgeBase.isEmpty()) {
+				parseRuleMLKnowledeBase(parsedKnowledgeBase);
+			}
+		}
+		queryEpoch = symbolEpoch;
+		rmlParser.clear();
 		try {
-			// System.err.println("entering DefiniteClause...");
 			DefiniteClause dc = rmlParser.parseRuleMLQuery(query);
-			// System.err.println("entering processQuery...");
 			processQuery(dc);
 		} catch (Exception e) {
+			solit = null;
+			hasNext = false;
+			rowsReturned = 0;
 			defaultExceptionHandler(e);
 		}
 	}
@@ -177,54 +211,25 @@ public class OOjdrewAPI {
 	// work with the current code base. This code should be rewritten in a much
 	// cleaner fashion.
 	private void processQuery(DefiniteClause dc) {
-		// TODO: Find a way to use the existing backwardReasoner (for the sake
-		// of dependency injection)
 		// Reinitialise the Array
 		Object[][] rowdata = new Object[MAXROWS][MAXCOLS];
 		System.arraycopy(rowdata, 0, rowData, 0, MAXROWS);
 		rowsReturned = 0;
+		hasNext = false;
+		solutionsReturned = 0;
 
 		backwardReasoner = new BackwardReasoner(backwardReasoner.clauses, backwardReasoner.oids);
-
 		solit = backwardReasoner.iterativeDepthFirstSolutionIterator(dc);
 
-		if (!solit.hasNext()) {
-
-		} else {
-			BackwardReasoner.GoalList gl = (BackwardReasoner.GoalList) solit.next();
-
-			Hashtable varbind = gl.varBindings;
-
-			int i = 0;
-			// Object[][] rowdata = new Object[varbind.size()][2];
-			// System.arraycopy( rowdata, 0, rowData, 0, i );
-
-			Enumeration e = varbind.keys();
-
-			while (e.hasMoreElements()) {
-				Object k = e.nextElement();
-				Object val = varbind.get(k);
-				String ks = (String) k;
-				rowData[i][0] = ks;
-				rowData[i][1] = val;
-				i++;
-			}
+		if (solit.hasNext()) {
+			showSolution((BackwardReasoner.GoalList) solit.next());
 			hasNext = solit.hasNext();
-			rowsReturned = i;
 		}
-
 	}
 
-	// TODO: This method was copied from the old GUI and has been modified to
-	// work with the current code base. This code should be rewritten in a much
-	// cleaner fashion.
-	public void nextSolution() {
-		BackwardReasoner.GoalList gl = (BackwardReasoner.GoalList) solit.next();
-		// System.out.println(gl.toString());
+	private void showSolution(BackwardReasoner.GoalList gl) {
 		Hashtable varbind = gl.varBindings;
-
 		int i = 0;
-		// Object[][] rowdata = new Object[varbind.size()][2];
 		Enumeration e = varbind.keys();
 		while (e.hasMoreElements()) {
 			Object k = e.nextElement();
@@ -234,10 +239,33 @@ public class OOjdrewAPI {
 			rowData[i][1] = val;
 			i++;
 		}
-		// rowData = rowdata;
-		hasNext = solit.hasNext();
 		rowsReturned = i;
+		solutionsReturned++;
+	}
 
+	// TODO: This method was copied from the old GUI and has been modified to
+	// work with the current code base. This code should be rewritten in a much
+	// cleaner fashion.
+	public void nextSolution() {
+		synchronized (ENGINE_LOCK) {
+			if (solit == null) {
+				throw new NoSuchElementException("No open OOjDREW query");
+			}
+			if (queryEpoch != symbolEpoch && lastQuery != null) {
+				// A reset invalidated the open iterator: re-run the query and skip the
+				// solutions this caller has already seen (the search order is deterministic).
+				int seen = solutionsReturned;
+				runQuery(lastQuery);
+				while (solutionsReturned < seen && solit != null && solit.hasNext()) {
+					showSolution((BackwardReasoner.GoalList) solit.next());
+				}
+				if (solit == null) {
+					throw new NoSuchElementException("OOjDREW query could not be re-run");
+				}
+			}
+			showSolution((BackwardReasoner.GoalList) solit.next());
+			hasNext = solit.hasNext();
+		}
 	}
 
 	// TODO: This method was copied from the old GUI and has been modified to

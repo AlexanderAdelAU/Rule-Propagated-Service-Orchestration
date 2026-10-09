@@ -79,6 +79,7 @@
             <src path="tests"/><src path="${common.dir}/tests"/>
             <include name="HostClasspathCheck.java"/>
             <include name="org/btsn/invocation/BusinessCapabilityResolverTest.java"/>
+            <include name="org/btsn/utils/OOjdrewConcurrencyTest.java"/>
             <classpath>
                 <pathelement location="../btsn.rpso.places.p1/target/btsn.rpso.places.p1.jar"/>
                 <path refid="host.check.dependencies"/>
@@ -112,6 +113,13 @@
         </macrodef>
         <check-host number="1"/><check-host number="2"/><check-host number="3"/>
         <check-host number="4"/><check-host number="5"/><check-host number="6"/>
+        <!-- Issue #15: concurrent rule-base parses must not break another instance's queries. -->
+        <java classname="org.btsn.utils.OOjdrewConcurrencyTest" fork="true" failonerror="true">
+            <classpath>
+                <pathelement location="${target.dir}/host-check/classes"/>
+                <path refid="host.check.dependencies"/>
+            </classpath>
+        </java>
     </target>
     <target name="check" depends="package" description="Check isolated JARs and all six invocation boundaries">
         <ant antfile="${target.dir}/service-tasks.xml" target="check" inheritall="false"/>
