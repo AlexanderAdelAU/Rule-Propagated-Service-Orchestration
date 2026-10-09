@@ -144,6 +144,18 @@ public final class ServiceDisplayNames {
     public String laneDescription(String place, long workflow) {
         return withPlace(laneLabel(place, workflow), place);
     }
+    /**
+     * Spatial-chart presentation only. The measured place remains P1_Place, etc.;
+     * the parenthesized identifier is the corresponding infrastructure node (P1).
+     * Do not invent a service name when the captured identity is unavailable.
+     */
+    public String spatialLaneLabel(String place, long workflow) {
+        String service = laneLabel(place, workflow);
+        if (service.equals(place)) return place;
+        String node = place.matches("P[1-9][0-9]*_Place")
+            ? place.substring(0, place.length() - "_Place".length()) : place;
+        return service + " (" + node + ")";
+    }
     public String visitLabel(long workflow, long token, String place, long entry) {
         return byVisit.getOrDefault(visitKey(workflow, token, place, entry), label(workflow, place));
     }
