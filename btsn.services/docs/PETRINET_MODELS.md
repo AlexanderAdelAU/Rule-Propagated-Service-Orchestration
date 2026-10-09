@@ -70,7 +70,7 @@ and its erroneous input-join label have been corrected.
 | P3 | StochasticService | token | token_branch1 |
 | P4 | StochasticService | token_branch1, token_branch2 | token_branch2 |
 | P5 | StochasticService | token | token_branch1 |
-| P6 | FinalStochasticService | token_branch1, token_branch2 | token |
+| P6 | StochasticService | token_branch1, token_branch2 | token |
 
 The branch slots follow the incoming arc order in the existing model. Service
 placement is selected by `ServiceDeploymentFolder/petrinet/DoubleJoinModels.json`
