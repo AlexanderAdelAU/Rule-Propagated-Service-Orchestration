@@ -16,7 +16,7 @@ public final class ServiceRegistry {
         public final List<String> inputs = new ArrayList<>();
     }
     public static final class Endpoint {
-        public String service, operation, instance, output, adapter;
+        public String service, operation, instance, output, adapter, node;
         public final List<String> inputs = new ArrayList<>();
         public final List<ServiceArgument> arguments = new ArrayList<>();
     }
@@ -81,6 +81,7 @@ public final class ServiceRegistry {
             Endpoint e = new Endpoint(); e.service = text(placement, "service"); e.operation = text(placement, "operation"); e.instance = text(placement, "instance");
             if (e.instance.isEmpty()) e.instance = e.service;
             e.output = text(placement, "returnAttribute"); e.adapter = text(placement, "invocationAdapter");
+            e.node = text(placement, "node");
             for (Object input : array(placement, "arguments")) {
                 JSONObject parameter = (JSONObject)input;
                 String name = text(parameter, "name"); e.inputs.add(name);
@@ -119,6 +120,16 @@ public final class ServiceRegistry {
     public List<String> operations(String service) { List<String> values = new ArrayList<>(); for (Contract c : contracts.values()) if (c.service.equals(service)) values.add(c.operation); return values; }
     public List<String> instances(String service, String op) { Set<String> values = new LinkedHashSet<>(); for (Endpoint e : endpoints) if (e.service.equals(service) && (op == null || op.equals(e.operation))) values.add(e.instance); return new ArrayList<>(values); }
     public Contract contract(String service, String op) { return contracts.get(key(service, op)); }
+    /** Infrastructure node (e.g. "P1") that hosts a deployment instance, or "" when unknown or ambiguous. */
+    public String nodeForInstance(String instance) {
+        String node = "";
+        for (Endpoint e : endpoints) {
+            if (!e.instance.equals(instance) || e.node == null || e.node.isEmpty()) continue;
+            if (!node.isEmpty() && !node.equals(e.node)) return "";
+            node = e.node;
+        }
+        return node;
+    }
     public Endpoint endpoint(String service, String op, String instance) {
         Endpoint result = null;
         for (Endpoint e : endpoints) if (e.service.equals(service) && e.operation.equals(op) && e.instance.equals(instance)) { if (result != null) return null; result = e; }

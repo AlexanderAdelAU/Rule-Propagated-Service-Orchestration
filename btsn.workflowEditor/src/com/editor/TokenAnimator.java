@@ -64,7 +64,10 @@ public class TokenAnimator {
     private Map<String, String> tOutToTerminate = new HashMap<>();
     private Set<String> terminateIds = new HashSet<>();
     private Map<String, Point> terminatePositions = new HashMap<>();
-    private Map<String, String> labelToService = new HashMap<>();  // Maps place label -> service name
+    private Map<String, String> labelToService = new HashMap<>();  // Maps place label -> place key
+    // Runtime (deployment node) names -> canvas names, e.g. P1_Place -> NS_Green, T_in_P1 -> T_in_NS_Green.
+    // Instrumentation names places and transitions after the hosting node, not the canvas label.
+    private Map<String, String> runtimeAliases = new HashMap<>();
     
     // Implicit fork tracking from Event Generators (fork_behavior in JSON)
     private Map<String, String> eventGenImplicitForkToJoin = new HashMap<>();  // eventGenId -> joinTInId
@@ -195,6 +198,12 @@ public class TokenAnimator {
         if (service != null) {
             return service;
         }
+
+        // Runtime node name (P1_Place, P1) -> canvas place
+        String alias = runtimeAliases.get(placeIdOrLabel);
+        if (alias != null && placeIds.contains(alias)) {
+            return alias;
+        }
         
         // Try common patterns: P1 -> P1_Place, NS_Green -> NS_Green (might be the service itself)
         String withSuffix = placeIdOrLabel + "_Place";
@@ -206,6 +215,29 @@ public class TokenAnimator {
         return placeIdOrLabel;
     }
     
+    /** Unique identity of a place on the canvas: its label, else its service name. */
+    private static String placeKey(ProcessElement place) {
+        String label = place.getLabel();
+        if (label != null && !label.isEmpty()) return label;
+        String service = place.getService();
+        return service == null ? "" : service;
+    }
+
+    /** Deployment node (e.g. "P1") hosting this place's service instance, or "" when not deployed. */
+    private String deploymentNode(ProcessElement place) {
+        if (canvas == null || canvas.getServiceRegistry() == null) return "";
+        String instance = place.getServiceInstance();
+        if (instance == null || instance.isEmpty()) return "";
+        return canvas.getServiceRegistry().nodeForInstance(instance);
+    }
+
+    /** Translate a runtime place/transition name into its canvas name; other names are unchanged. */
+    private String toCanvasName(String runtimeName) {
+        if (runtimeName == null) return null;
+        String alias = runtimeAliases.get(runtimeName);
+        return alias != null ? alias : runtimeName;
+    }
+
     // ==================== Topology Building ====================
     
     public void buildTopologyFromCanvas() {
@@ -229,6 +261,7 @@ public class TokenAnimator {
         terminateIds.clear();
         terminatePositions.clear();
         labelToService.clear();
+        runtimeAliases.clear();
         elementPositions.clear();
         arrowWaypoints.clear();
         eventGenImplicitForkToJoin.clear();
@@ -238,7 +271,16 @@ public class TokenAnimator {
         
         List<ProcessElement> elements = canvas.getElements();
         List<Arrow> arrows = canvas.getArrows();
-        
+
+        // Several places may share one reusable service type (e.g. StochasticService), so a
+        // service name only identifies a place when exactly one place uses it.
+        Map<String, Integer> serviceUse = new HashMap<>();
+        for (ProcessElement elem : elements) {
+            if (elem.getType() == ProcessElement.Type.PLACE && elem.getService() != null && !elem.getService().isEmpty()) {
+                serviceUse.merge(elem.getService(), 1, Integer::sum);
+            }
+        }
+
         // First pass: identify elements and store positions
         for (ProcessElement elem : elements) {
             // Store element center position for distance calculations
@@ -246,28 +288,33 @@ public class TokenAnimator {
                 elem.getX() + elem.getWidth() / 2,
                 elem.getY() + elem.getHeight() / 2
             );
-            
+
             if (elem.getType() == ProcessElement.Type.PLACE) {
+                String placeKey = placeKey(elem);
                 String serviceName = elem.getService();
                 String label = elem.getLabel();
-                if (serviceName == null || serviceName.isEmpty()) {
-                    serviceName = label;
+                placeIds.add(placeKey);
+
+                // Store position by place key (and by a service name that identifies only this place)
+                elementPositions.put(placeKey, center);
+                labelToService.put(placeKey, placeKey);
+                if (serviceName != null && !serviceName.isEmpty() && !serviceName.equals(placeKey)
+                        && serviceUse.getOrDefault(serviceName, 0) == 1) {
+                    elementPositions.put(serviceName, center);
+                    labelToService.put(serviceName, placeKey);
                 }
-                placeIds.add(serviceName);
-                
-                // Store position by service name
-                elementPositions.put(serviceName, center);
-                if (label != null && !label.equals(serviceName)) {
+                if (label != null && !label.isEmpty() && !label.equals(placeKey)) {
                     elementPositions.put(label, center);
+                    labelToService.put(label, placeKey);
                 }
-                
-                // Map label -> service (e.g., "P1" -> "P1_Place", "NS_Green" -> "NS_Green")
-                if (label != null && !label.equals(serviceName)) {
-                    labelToService.put(label, serviceName);
+
+                // Instrumentation names the place after its deployment node (e.g. P1_Place).
+                String node = deploymentNode(elem);
+                if (!node.isEmpty() && !node.equals(placeKey)) {
+                    runtimeAliases.put(node + "_Place", placeKey);
+                    runtimeAliases.put(node, placeKey);
                 }
-                // Also map service to itself for consistency
-                labelToService.put(serviceName, serviceName);
-                
+
             } else if (elem.getType() == ProcessElement.Type.EVENT_GENERATOR) {
                 String label = elem.getLabel();
                 eventGeneratorIds.add(label);
@@ -331,10 +378,7 @@ public class TokenAnimator {
             if (source.getType() == ProcessElement.Type.TRANSITION &&
                 target.getType() == ProcessElement.Type.PLACE &&
                 sourceLabel != null && sourceLabel.startsWith("T_in_")) {
-                String placeService = target.getService();
-                if (placeService == null || placeService.isEmpty()) {
-                    placeService = targetLabel;
-                }
+                String placeService = placeKey(target);
                 placeToTIn.put(placeService, sourceLabel);
                 tInToPlace.put(sourceLabel, placeService);
             }
@@ -343,10 +387,7 @@ public class TokenAnimator {
             if (source.getType() == ProcessElement.Type.PLACE &&
                 target.getType() == ProcessElement.Type.TRANSITION &&
                 targetLabel != null && targetLabel.startsWith("T_out_")) {
-                String placeService = source.getService();
-                if (placeService == null || placeService.isEmpty()) {
-                    placeService = sourceLabel;
-                }
+                String placeService = placeKey(source);
                 placeToTOut.put(placeService, targetLabel);
             }
             
@@ -414,6 +455,17 @@ public class TokenAnimator {
             }
         }
         
+        // Transitions are instrumented as T_in_<node>/T_out_<node>; map them to the canvas transitions.
+        for (Map.Entry<String, String> alias : new ArrayList<>(runtimeAliases.entrySet())) {
+            String node = alias.getKey();
+            if (node.endsWith("_Place")) continue;
+            String place = alias.getValue();
+            String tIn = placeToTIn.get(place), tOut = placeToTOut.get(place);
+            if (tIn != null && !tIn.equals("T_in_" + node)) runtimeAliases.put("T_in_" + node, tIn);
+            if (tOut != null && !tOut.equals("T_out_" + node)) runtimeAliases.put("T_out_" + node, tOut);
+        }
+        if (!runtimeAliases.isEmpty()) logger.info("Runtime aliases: " + runtimeAliases);
+
         logger.info("Topology built: " + placeIds.size() + " places, " +
             tInIds.size() + " T_ins, " + terminateIds.size() + " terminates");
         logger.info("Element positions stored: " + elementPositions.size() + 
@@ -554,6 +606,10 @@ public class TokenAnimator {
                         }
                     }
                     
+                    placeId = toCanvasName(placeId);
+                    toPlace = toCanvasName(toPlace);
+                    transitionId = toCanvasName(transitionId);
+
                     if (tokenId.isEmpty()) continue;
                     if (placeId.isEmpty() && !"GENERATED".equals(eventType)) continue;
                     if (marking < 0) continue; // Skip negative markings
@@ -3079,4 +3135,4 @@ public class TokenAnimator {
         logger.info("Implicit join T_ins: " + implicitJoinTIns);
         logger.info("Explicit join T_ins (JoinNode): " + explicitJoinTIns);
     }
-}
+}
