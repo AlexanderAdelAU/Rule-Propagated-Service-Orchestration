@@ -65,6 +65,7 @@ d.parts.append(f'''<!-- Headline -->
 <!-- LEFT: the model -->
 <rect x="24" y="100" width="300" height="300" rx="14" fill="#f4f7fb" stroke="#c9d6e3"/>
 <text x="174" y="126" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="{INK}" letter-spacing="1">1 · DRAW THE MODEL</text>
+<text x="174" y="145" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" font-style="italic" fill="#4a5d70">in ProcessEditor</text>
 <g font-family="Helvetica, Arial, sans-serif" font-size="13" fill="{INK}" text-anchor="middle">
   <!-- P1 -->
   <rect x="44" y="232" width="7" height="34" fill="{INK}"/>
@@ -105,6 +106,7 @@ d.parts.append(f'''<!-- Headline -->
 <line x1="332" y1="250" x2="398" y2="250" stroke="{PURPLE}" stroke-width="2.4" stroke-dasharray="7 4" marker-end="url(#rule)"/>
 <text x="365" y="236" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="{PURPLE}">deploy</text>
 <text x="365" y="272" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="{PURPLE}">local rules</text>
+<text x="365" y="290" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="10.5" font-style="italic" fill="#4a5d70">via Ant launcher</text>
 <!-- RIGHT: running hosts -->
 <rect x="406" y="100" width="570" height="300" rx="14" fill="#f7fbf9" stroke="#c9dccf"/>
 <text x="691" y="126" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="{INK}" letter-spacing="1">2 · RUN IT AS SEPARATE HOSTS</text>

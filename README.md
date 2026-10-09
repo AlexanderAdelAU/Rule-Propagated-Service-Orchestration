@@ -24,6 +24,15 @@ editor, Ant build-and-run launchers, and observation/analysis tools.
 
 *Draw the net, deploy its rules, run it as separate hosts. A place can be any service: a Boolean function, a credit check or a clinical diagnosis. The execution pattern inside each host is shown under [Architecture](#architecture-coordination-and-business-meaning).*
 
+How each step is done, worked through for a single place in [Tutorial.md](Tutorial.md):
+
+| Step | How | Walkthrough |
+|---|---|---|
+| **1 · Draw the model** | Place the elements, bind each place to a service and connect the transitions in ProcessEditor (`btsn.workflowEditor`) | [Define the process](Tutorial.md#2-define-the-process) |
+| **Deploy local rules** | One Ant launcher builds the JARs, starts the hosts and Monitor, then installs each host's rules and waits for its acknowledgement | [Rule deployment](#rule-deployment-and-token-execution) |
+| **2 · Run as separate hosts** | The same launcher fires the tokens and collects the observations; each host routes them by its own rules | [Run the tutorial](Tutorial.md#3-run-the-tutorial), [Quick start](#quick-start-run-observe-and-replay) |
+| **Analyse** | `PetriNetAnalyzer`, the timing chart and the spatial view read Monitor's data; ProcessEditor replays it on the model | [Show the results](Tutorial.md#4-show-the-results), [Observe a run](#observe-and-interpret-a-run) |
+
 ## Quick start: run, observe and replay
 
 You need a JDK (15 or later; tested with 21) and Apache Ant 1.10. Eclipse is
