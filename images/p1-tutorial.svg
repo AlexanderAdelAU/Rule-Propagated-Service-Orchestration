@@ -18,16 +18,16 @@
 <circle cx="520" cy="212" r="4" fill="#1b2b40"/>
 <rect id="T_out_P1" x="682" y="176" width="16" height="48" fill="#24598e"/>
 <text x="690" y="248" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#1b2b40">T_out_P1</text>
-<rect id="T_in_Model_Terminate" x="942" y="176" width="16" height="48" fill="#1b2b40"/>
-<text x="950" y="248" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#1b2b40">T_in_Model_Terminate</text>
+<rect id="Terminate" x="942" y="176" width="16" height="48" fill="#1b2b40"/>
+<text x="950" y="248" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#1b2b40">Terminate</text>
 <text x="350" y="280" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Receive / buffer</text>
 <text x="520" y="280" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#1b2b40">Function: true / false</text>
 <text x="690" y="280" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Route result</text>
-<text x="950" y="280" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#1b2b40">Terminate</text>
+<text x="950" y="280" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#1b2b40">End workflow</text>
 <path d="M 230 200 L 342 200" fill="none" stroke="#24598e" stroke-width="2" stroke-dasharray="6 4" data-source="P1_EVENTGENERATOR" data-target="T_in_P1" marker-end="url(#flow)"/>
 <path d="M 358 200 L 493 200" fill="none" stroke="#24598e" stroke-width="2" data-source="T_in_P1" data-target="P1" marker-end="url(#flow)"/>
 <path d="M 547 200 L 682 200" fill="none" stroke="#24598e" stroke-width="2" data-source="P1" data-target="T_out_P1" marker-end="url(#flow)"/>
-<path d="M 698 200 L 942 200" fill="none" stroke="#24598e" stroke-width="2" stroke-dasharray="6 4" data-source="T_out_P1" data-target="T_in_Model_Terminate" marker-end="url(#flow)"/>
+<path d="M 698 200 L 942 200" fill="none" stroke="#24598e" stroke-width="2" stroke-dasharray="6 4" data-source="T_out_P1" data-target="Terminate" marker-end="url(#flow)"/>
 <path d="M 690 176 L 690 115 L 350 115 L 350 176" fill="none" stroke="#24598e" stroke-width="2" stroke-dasharray="6 4" data-source="T_out_P1" data-target="T_in_P1" marker-end="url(#flow)"/>
 <text x="820" y="185" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">true</text>
 <text x="520" y="105" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">false: invoke the function again</text>

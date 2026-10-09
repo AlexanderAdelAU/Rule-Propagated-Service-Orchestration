@@ -7,6 +7,7 @@ content, not generated raster artwork.
 
 | Diagram | Meaning and source |
 |---|---|
+| `rpso-overview.svg` | Opening image: the four-place fork/join model on the left is deployed as local rules to four separate hosts on the right. Each host runs its own T_in → place function → T_out; tokens travel between hosts as messages with no central engine, and Monitor observes every host for complete Petri-net analysis. A place can be any service. Conceptual: host boxes stand for the numbered places, not a particular machine layout. |
 | `rpso-execution-sequence.svg` | Conceptual sequence of T_in receipt/buffering and synchronization, invocation/return at P, and handoff to T_out for routing/publication or termination. Light blue activation bars describe responsibility for one invocation, not measured durations or literal Java thread lifetimes. These are logical roles within one generic host. |
 | `rpso-architecture.svg` | Current responsibility boundaries: explicit T_in → Place P → T_out roles in a generic host, in-process invocation of a bound domain or token-operation JAR, separate Monitor collection. Based on `ServiceThread`, `ServiceHelper`, `RuleHandler` and the packaged runtime. |
 | `rpso-rule-deployment.svg` | JSON topology, canonical contracts and deployment profile feed binding/rule generation. Local acknowledgements and runtime token flow are distinct. Based on `TopologyBindingGenerator` and `RuleDeployer`. |
@@ -24,8 +25,8 @@ channels. These links are distinct from ordinary bipartite P/T-net arcs.
 The input transitions perform synchronization; the bound function supplies
 the place's computation; the output transitions route, fork or terminate.
 The tutorial and four-place diagrams label the simple function as returning
-true or false; the six-place deployment uses the separate deterministic
-Boolean/carry/merge functions described in the root README. The `AND` label
+true or false; the six-place model binds every place to the same
+Boolean `StochasticService` function, as described in the root README. The `AND` label
 denotes required arrivals at an input join, not an AND of their Boolean values.
 The dot is an illustrative token marking, not a measured execution snapshot.
 The diagram describes the executable RPSO model and its implementation mapping.
@@ -39,7 +40,7 @@ host process; separate packaging does not imply a separate network service.
 Monitor's arrow represents collected observations, not a mandatory business hop
 or a claim that every runtime event is streamed directly to Monitor.
 
-To regenerate all eight SVGs after editing their standard-library Python source:
+To regenerate all nine SVGs after editing their standard-library Python source:
 
 ```sh
 python3 images/generate_diagrams.py
