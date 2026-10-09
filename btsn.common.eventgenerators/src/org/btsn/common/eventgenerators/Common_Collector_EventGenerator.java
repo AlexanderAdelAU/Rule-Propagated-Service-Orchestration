@@ -47,7 +47,9 @@ public class Common_Collector_EventGenerator {
     private static String processName = null;
     private static String queryVersion = null;  // Comma-separated versions to collect
     private static int sequenceID = -1;
-    private static long timeToExpire = 10000;
+    // Collection requests expire this long after they are issued; each host collects every
+    // requested version in turn before replying, so slow hosts need a generous deadline.
+    private static long timeToExpire = 25000;
     private static String status = "active";
     
     private static boolean skipDeployment = false;
@@ -220,6 +222,19 @@ public class Common_Collector_EventGenerator {
                         return false;
                     }
                     break;
+                case "-expire":
+                    if (i + 1 < args.length) {
+                        try {
+                            timeToExpire = Long.parseLong(args[++i]);
+                        } catch (NumberFormatException e) {
+                            System.err.println("ERROR: Invalid expire value: " + args[i]);
+                            return false;
+                        }
+                    } else {
+                        System.err.println("ERROR: -expire requires a value in milliseconds");
+                        return false;
+                    }
+                    break;
                 case "-skipDeploy":
                     skipDeployment = true;
                     break;
@@ -279,6 +294,7 @@ public class Common_Collector_EventGenerator {
         System.err.println();
         System.err.println("Optional arguments:");
         System.err.println("  -skipDeploy                   Skip rule deployment");
+        System.err.println("  -expire <ms>                  Collection request deadline (default 25000)");
         System.err.println("  -noExit                       Don't exit after completion");
         System.err.println();
         System.err.println("Example:");
