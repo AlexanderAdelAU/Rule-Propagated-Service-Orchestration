@@ -60,7 +60,7 @@ public final class ServiceQueueTimingCheck {
             ServiceQueueTimingView panel=new ServiceQueueTimingView(data);
             render(panel,"service-queue-fixture.png");
             // Legacy observations retain queue markers but never acquire invented elapsed bars.
-            SwingGanttChart_WithLatency_v1d overview=new SwingGanttChart_WithLatency_v1d(false);
+            SwingGanttChart_WithLatency overview=new SwingGanttChart_WithLatency(false);
             String report=overview.generateWorkflowSummaryReport();
             if(!report.contains(CombinedWorkflowMetrics.CAPTION)||!report.contains("N/A")||report.contains("Maxima Ratio")||report.contains("SUM OF MAXIMA")||report.contains("v999"))
                 throw new AssertionError("Misleading overview totals remain");
