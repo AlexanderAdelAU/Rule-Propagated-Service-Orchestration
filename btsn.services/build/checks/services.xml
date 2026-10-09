@@ -5,6 +5,7 @@
         <ant antfile="workflow-runtime.xml" target="check-combined-workflow" inheritall="false"/>
         <ant antfile="workflow-runtime.xml" target="check-queue-view" inheritall="false"/>
         <ant antfile="workflow-runtime.xml" target="check-process-labels" inheritall="false"/>
+        <ant antfile="workflow-runtime.xml" target="check-service-names" inheritall="false"/>
     </target>
     <target name="check-launchers" depends="build-workflow-runtime" description="Configure and prepare every model/financial Ant launcher and standalone phase">
         <mkdir dir="${target.dir}/launcher-check/classes"/>
