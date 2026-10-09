@@ -56,6 +56,119 @@ class Diagram:
     def save(self,name):
         (ROOT/name).write_text('\n'.join(self.parts)+ '\n</svg>\n')
 
+# Opening image: the drawn Petri net becomes a set of independent hosts exchanging token messages.
+d=Diagram(1000,470,'The Petri net you draw is the system that runs','Left: a four-place Petri net model in which P1 forks to P2 and P3, which join before P4. A purple dashed arrow labelled deploy local rules leads to the right, where the same net runs as four separate hosts. Each host contains its own input transition, place function and output transition; a place can be any service. Tokens travel between hosts as messages along blue arrows, and P4\'s input transition waits for both P2 and P3. No central engine routes the tokens. Teal dotted lines carry observations from every host to Monitor, outside the token path, for complete Petri-net analysis.')
+d.parts.append('<defs><filter id="shadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#1f3b57" flood-opacity="0.18"/></filter></defs>')
+d.parts.append(f'''<!-- Headline -->
+<text x="500" y="44" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="26" font-weight="700" fill="{INK}">The Petri net you draw is the system that runs</text>
+<text x="500" y="72" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="15" fill="#4a5d70">A place can be any service · transitions become local rules · tokens become messages</text>
+<!-- LEFT: the model -->
+<rect x="24" y="100" width="300" height="300" rx="14" fill="#f4f7fb" stroke="#c9d6e3"/>
+<text x="174" y="126" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="{INK}" letter-spacing="1">1 · DRAW THE MODEL</text>
+<text x="174" y="145" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" font-style="italic" fill="#4a5d70">in ProcessEditor</text>
+<g font-family="Helvetica, Arial, sans-serif" font-size="13" fill="{INK}" text-anchor="middle">
+  <!-- P1 -->
+  <rect x="44" y="232" width="7" height="34" fill="{INK}"/>
+  <line x1="51" y1="249" x2="66" y2="249" stroke="{INK}" stroke-width="1.6"/>
+  <circle cx="82" cy="249" r="16" fill="#fff" stroke="{INK}" stroke-width="2"/>
+  <circle cx="82" cy="249" r="5" fill="#e8822a"/>
+  <text x="82" y="282">P1</text>
+  <line x1="98" y1="249" x2="110" y2="249" stroke="{INK}" stroke-width="1.6"/>
+  <rect x="110" y="232" width="7" height="34" fill="{INK}"/>
+  <!-- fork -->
+  <path d="M117,243 C140,243 140,190 160,190" fill="none" stroke="{BLUE}" stroke-width="1.6" stroke-dasharray="5 3" marker-end="url(#flow)"/>
+  <path d="M117,255 C140,255 140,308 160,308" fill="none" stroke="{BLUE}" stroke-width="1.6" stroke-dasharray="5 3" marker-end="url(#flow)"/>
+  <!-- P2 -->
+  <rect x="162" y="173" width="7" height="34" fill="{INK}"/>
+  <line x1="169" y1="190" x2="180" y2="190" stroke="{INK}" stroke-width="1.6"/>
+  <circle cx="196" cy="190" r="16" fill="#fff" stroke="{INK}" stroke-width="2"/>
+  <text x="196" y="160">P2</text>
+  <line x1="212" y1="190" x2="222" y2="190" stroke="{INK}" stroke-width="1.6"/>
+  <rect x="222" y="173" width="7" height="34" fill="{INK}"/>
+  <!-- P3 -->
+  <rect x="162" y="291" width="7" height="34" fill="{INK}"/>
+  <line x1="169" y1="308" x2="180" y2="308" stroke="{INK}" stroke-width="1.6"/>
+  <circle cx="196" cy="308" r="16" fill="#fff" stroke="{INK}" stroke-width="2"/>
+  <text x="196" y="345">P3</text>
+  <line x1="212" y1="308" x2="222" y2="308" stroke="{INK}" stroke-width="1.6"/>
+  <rect x="222" y="291" width="7" height="34" fill="{INK}"/>
+  <!-- join -->
+  <path d="M229,190 C250,190 250,243 266,243" fill="none" stroke="{BLUE}" stroke-width="1.6" stroke-dasharray="5 3" marker-end="url(#flow)"/>
+  <path d="M229,308 C250,308 250,255 266,255" fill="none" stroke="{BLUE}" stroke-width="1.6" stroke-dasharray="5 3" marker-end="url(#flow)"/>
+  <rect x="268" y="232" width="7" height="34" fill="{INK}"/>
+  <text x="271" y="226" font-size="10" fill="#4a5d70">AND</text>
+  <line x1="275" y1="249" x2="284" y2="249" stroke="{INK}" stroke-width="1.6"/>
+  <circle cx="300" cy="249" r="14" fill="#fff" stroke="{INK}" stroke-width="2"/>
+  <text x="300" y="282">P4</text>
+</g>
+<text x="174" y="384" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12.5" fill="#4a5d70">fork to P2 and P3 · join before P4</text>
+<!-- deploy arrow -->
+<line x1="332" y1="250" x2="398" y2="250" stroke="{PURPLE}" stroke-width="2.4" stroke-dasharray="7 4" marker-end="url(#rule)"/>
+<text x="365" y="236" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="{PURPLE}">deploy</text>
+<text x="365" y="272" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="{PURPLE}">local rules</text>
+<text x="365" y="290" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="10.5" font-style="italic" fill="#4a5d70">via Ant launcher</text>
+<!-- RIGHT: running hosts -->
+<rect x="406" y="100" width="570" height="300" rx="14" fill="#f7fbf9" stroke="#c9dccf"/>
+<text x="691" y="126" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="{INK}" letter-spacing="1">2 · RUN IT AS SEPARATE HOSTS</text>
+<g font-family="Helvetica, Arial, sans-serif" text-anchor="middle">
+  <!-- host template: rect + unit (bar circle bar) + labels -->
+  <!-- Host P1 -->
+  <g filter="url(#shadow)"><rect x="424" y="212" width="132" height="76" rx="10" fill="#fff" stroke="{BLUE}" stroke-width="1.6"/></g>
+  <text x="490" y="231" font-size="12" font-weight="700" fill="{INK}">Host P1</text>
+  <rect x="448" y="244" width="6" height="28" fill="{INK}"/><circle cx="490" cy="258" r="13" fill="#fff" stroke="{INK}" stroke-width="1.8"/><rect x="526" y="244" width="6" height="28" fill="{INK}"/>
+  <line x1="454" y1="258" x2="477" y2="258" stroke="{INK}" stroke-width="1.3"/><line x1="503" y1="258" x2="526" y2="258" stroke="{INK}" stroke-width="1.3"/>
+  <text x="490" y="282" font-size="9.5" fill="#4a5d70">T_in · P · T_out</text>
+  <!-- Host P2 -->
+  <g filter="url(#shadow)"><rect x="618" y="146" width="132" height="76" rx="10" fill="#fff" stroke="{BLUE}" stroke-width="1.6"/></g>
+  <text x="684" y="165" font-size="12" font-weight="700" fill="{INK}">Host P2</text>
+  <rect x="642" y="178" width="6" height="28" fill="{INK}"/><circle cx="684" cy="192" r="13" fill="#fff" stroke="{INK}" stroke-width="1.8"/><rect x="720" y="178" width="6" height="28" fill="{INK}"/>
+  <line x1="648" y1="192" x2="671" y2="192" stroke="{INK}" stroke-width="1.3"/><line x1="697" y1="192" x2="720" y2="192" stroke="{INK}" stroke-width="1.3"/>
+  <text x="684" y="216" font-size="9.5" fill="#4a5d70">T_in · P · T_out</text>
+  <!-- Host P3 -->
+  <g filter="url(#shadow)"><rect x="618" y="278" width="132" height="76" rx="10" fill="#fff" stroke="{BLUE}" stroke-width="1.6"/></g>
+  <text x="684" y="297" font-size="12" font-weight="700" fill="{INK}">Host P3</text>
+  <rect x="642" y="310" width="6" height="28" fill="{INK}"/><circle cx="684" cy="324" r="13" fill="#fff" stroke="{INK}" stroke-width="1.8"/><rect x="720" y="310" width="6" height="28" fill="{INK}"/>
+  <line x1="648" y1="324" x2="671" y2="324" stroke="{INK}" stroke-width="1.3"/><line x1="697" y1="324" x2="720" y2="324" stroke="{INK}" stroke-width="1.3"/>
+  <text x="684" y="348" font-size="9.5" fill="#4a5d70">T_in · P · T_out</text>
+  <!-- Host P4 -->
+  <g filter="url(#shadow)"><rect x="826" y="212" width="132" height="76" rx="10" fill="#fff" stroke="{BLUE}" stroke-width="1.6"/></g>
+  <text x="892" y="231" font-size="12" font-weight="700" fill="{INK}">Host P4</text>
+  <rect x="850" y="244" width="6" height="28" fill="{INK}"/><circle cx="892" cy="258" r="13" fill="#fff" stroke="{INK}" stroke-width="1.8"/><rect x="928" y="244" width="6" height="28" fill="{INK}"/>
+  <line x1="856" y1="258" x2="879" y2="258" stroke="{INK}" stroke-width="1.3"/><line x1="905" y1="258" x2="928" y2="258" stroke="{INK}" stroke-width="1.3"/>
+  <text x="892" y="282" font-size="9.5" fill="#4a5d70">waits for both inputs</text>
+</g>
+<!-- network messages (token flow) -->
+<path d="M556,238 C585,238 590,184 616,184" fill="none" stroke="{BLUE}" stroke-width="2" marker-end="url(#flow)"/>
+<path d="M556,262 C585,262 590,316 616,316" fill="none" stroke="{BLUE}" stroke-width="2" marker-end="url(#flow)"/>
+<path d="M750,184 C790,184 795,238 824,238" fill="none" stroke="{BLUE}" stroke-width="2" marker-end="url(#flow)"/>
+<path d="M750,316 C790,316 795,262 824,262" fill="none" stroke="{BLUE}" stroke-width="2" marker-end="url(#flow)"/>
+<!-- tokens in flight -->
+<g stroke="#ffffff" stroke-width="1.5">
+  <circle cx="588" cy="208" r="6.5" fill="#e8822a"/>
+  <circle cx="588" cy="291" r="6.5" fill="#e8822a"/>
+  <circle cx="790" cy="214" r="6.5" fill="#e8822a"/>
+</g>
+<text x="598" y="252" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="10.5" fill="{BLUE}">tokens</text>
+<text x="598" y="265" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="10.5" fill="{BLUE}">as messages</text>
+<text x="788" y="254" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="10.5" fill="{BLUE}">no central</text>
+<text x="788" y="267" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="10.5" fill="{BLUE}">engine</text>
+<!-- Monitor -->
+<rect x="560" y="372" width="260" height="24" rx="12" fill="#e7f5f2" stroke="{TEAL}"/>
+<text x="690" y="389" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="{TEAL}">Monitor · complete Petri-net analysis</text>
+<g fill="none" stroke="{TEAL}" stroke-width="1.4" stroke-dasharray="2 4">
+  <path d="M490,288 C490,330 530,384 558,384" marker-end="url(#observe)"/>
+  <path d="M684,354 L684,370" marker-end="url(#observe)"/>
+  <path d="M892,288 C892,330 850,384 822,384" marker-end="url(#observe)"/>
+</g>
+<!-- Footer legend -->
+<g font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#4a5d70">
+  <line x1="190" y1="440" x2="222" y2="440" stroke="{BLUE}" stroke-width="2" marker-end="url(#flow)"/><text x="230" y="444">token message</text>
+  <line x1="350" y1="440" x2="382" y2="440" stroke="{PURPLE}" stroke-width="2" stroke-dasharray="6 3" marker-end="url(#rule)"/><text x="390" y="444">rule installation</text>
+  <line x1="525" y1="440" x2="557" y2="440" stroke="{TEAL}" stroke-width="1.4" stroke-dasharray="2 4" marker-end="url(#observe)"/><text x="565" y="444">observation</text>
+  <circle cx="680" cy="440" r="6" fill="#e8822a"/><text x="692" y="444">token</text>
+</g>''')
+d.save('rpso-overview.svg')
+
 # Logical sequence for one invocation, not a Java call-stack or timing trace.
 d=Diagram(900,920,'RPSO execution sequence','Three logical lifelines within one generic host: input transition T_in, place function P, and output transition T_out. T_in receives and buffers a token, synchronizes the required inputs, and invokes P with arguments. P performs its function or calls the bound service, then returns the result. T_in hands the result to T_out and ends its activation. T_out applies routing rules, publishes tokens or records termination, then ends its activation. The activation bars are light blue; their lengths are conceptual, not measured durations.')
 for x,role,name in [(160,'T_in','Input transition'),(450,'P','Place function'),(740,'T_out','Output transition')]:
@@ -242,18 +355,18 @@ d.box(20,157,210,85,'Generator',['Workflow tokens'],'endpoint',identity='P1_EVEN
 d.transition(350,200,'T_in_P1')
 d.place(520,200,'P1',token=True)
 d.transition(690,200,'T_out_P1')
-d.transition(950,200,'T_in_Model_Terminate',terminal=True)
+d.transition(950,200,'Terminate',terminal=True)
 d.text(350,280,'Receive / buffer',15)
 d.text(520,280,'Function: true / false',15,True)
 d.text(690,280,'Route result',15)
-d.text(950,280,'Terminate',15,True)
+d.text(950,280,'End workflow',15,True)
 draw('P1_EVENTGENERATOR','T_in_P1','M 230 200 L 342 200',True)
 draw('T_in_P1','P1','M 358 200 L 493 200')
 draw('P1','T_out_P1','M 547 200 L 682 200')
-draw('T_out_P1','T_in_Model_Terminate','M 698 200 L 942 200',True)
+draw('T_out_P1','Terminate','M 698 200 L 942 200',True)
 draw('T_out_P1','T_in_P1','M 690 176 L 690 115 L 350 115 L 350 176',True)
 assert drawn==set(arcs)
-assert arcs['T_out_P1','T_in_Model_Terminate']['decision_value']=='true'
+assert arcs['T_out_P1','Terminate']['decision_value']=='true'
 assert arcs['T_out_P1','T_in_P1']['decision_value']=='false'
 d.text(820,185,'true',15)
 d.text(520,105,'false: invoke the function again',15)
@@ -367,4 +480,4 @@ d.text(577,681,'collected host observations',14,anchor='start',colour=TEAL)
 d.text(560,798,'Circle: place · Bar: transition · AND: input join · Dot: illustrative token · Dashed blue: publication',14)
 d.text(560,820,'Every local triple is supported by the generic fabric; the bound operation gives its place meaning.',14)
 d.save('petrinet-double-join.svg')
-print('Generated eight editable SVG diagrams.')
+print('Generated nine editable SVG diagrams.')

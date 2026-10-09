@@ -20,12 +20,18 @@ Start with a Boolean-returning Petri-net example, then build towards the
 financial and healthcare workflows. The repository also provides a workflow
 editor, Ant build-and-run launchers, and observation/analysis tools.
 
-![RPSO execution sequence with light blue activation bars: T_in receives and buffers a token, synchronizes required inputs and invokes P; P returns its result; T_in hands it to T_out, which routes or terminates the workflow.](images/rpso-execution-sequence.svg)
+![The Petri net you draw is the system that runs: a four-place model on the left, where P1 forks to P2 and P3 and they join before P4, is deployed as local rules to four separate hosts on the right. Each host runs its own T_in, place function and T_out; tokens travel between hosts as messages with no central engine, and Monitor observes every host for complete Petri-net analysis.](images/rpso-overview.svg)
 
-*The execution pattern within a generic host. T_in receives and synchronizes
-inputs, P performs the bound functionality, and T_out routes the result. Shaded
-activation bars show responsibility for one invocation; their lengths do not
-represent measured time.*
+*Draw the net, deploy its rules, run it as separate hosts. A place can be any service: a Boolean function, a credit check or a clinical diagnosis. The execution pattern inside each host is shown under [Architecture](#architecture-coordination-and-business-meaning).*
+
+How each step is done, worked through for a single place in [Tutorial.md](Tutorial.md):
+
+| Step | How | Walkthrough |
+|---|---|---|
+| **1 · Draw the model** | Place the elements, bind each place to a service and connect the transitions in ProcessEditor (`btsn.workflowEditor`) | [Define the process](Tutorial.md#2-define-the-process) |
+| **Deploy local rules** | One Ant launcher builds the JARs, starts the hosts and Monitor, then installs each host's rules and waits for its acknowledgement | [Rule deployment](#rule-deployment-and-token-execution) |
+| **2 · Run as separate hosts** | The same launcher fires the tokens and collects the observations; each host routes them by its own rules | [Run the tutorial](Tutorial.md#3-run-the-tutorial), [Quick start](#quick-start-run-observe-and-replay) |
+| **Analyse** | `PetriNetAnalyzer`, the timing chart and the spatial view read Monitor's data; ProcessEditor replays it on the model | [Show the results](Tutorial.md#4-show-the-results), [Observe a run](#observe-and-interpret-a-run) |
 
 ## Quick start: run, observe and replay
 
@@ -89,8 +95,8 @@ The sections below explain what you have just run, starting from a single place
 Here is an example of how the components of the architecture pattern come
 together to implement a live service workflow. A token arrives at an input
 transition, the place invokes its bound service function, and an output
-transition uses the result to continue or complete the process. The interactions
-in the sequence diagram now become a running example.
+transition uses the result to continue or complete the process. The hosts in the
+overview now become a running example.
 
 We present the workflow as a **Petri net**: circular places identify the bound
 functions, transition bars coordinate their execution, and arrows show the
@@ -301,6 +307,13 @@ The service interprets business meaning; the fabric matches the symbol against
 declared routes and resolves the destination. Logical service identity is
 separate from physical placement: P1 can host a clinical, financial or model
 capability according to the selected deployment.
+
+![RPSO execution sequence with light blue activation bars: T_in receives and buffers a token, synchronizes required inputs and invokes P; P returns its result; T_in hands it to T_out, which routes or terminates the workflow.](images/rpso-execution-sequence.svg)
+
+*The execution pattern within a generic host. T_in receives and synchronizes
+inputs, P performs the bound functionality, and T_out routes the result. Shaded
+activation bars show responsibility for one invocation; their lengths do not
+represent measured time.*
 
 The execution pattern is **T_in → P → T_out**:
 
