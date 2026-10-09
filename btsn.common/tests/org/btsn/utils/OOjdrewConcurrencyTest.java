@@ -28,6 +28,13 @@ public class OOjdrewConcurrencyTest {
             while (!done.get()) {
                 other.parseKnowledgeBase(reparsed, false);
                 parses.incrementAndGet();
+                // Pause briefly so the querying thread is not starved of the engine lock;
+                // hundreds of parses per second still overlap every query round.
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    return;
+                }
             }
         });
 
