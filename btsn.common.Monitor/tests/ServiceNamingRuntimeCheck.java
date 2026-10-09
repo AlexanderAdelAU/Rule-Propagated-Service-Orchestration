@@ -28,7 +28,7 @@ public class ServiceNamingRuntimeCheck {
             WorkflowSpatialView spatial = new WorkflowSpatialView();
             for (int i = 0; i < expected.length; i++) {
                 String place = "P" + (i+1) + "_Place";
-                if (!expected[i].equals(names.label(1000000, place)) || !expected[i].equals(spatial.getPlaceDisplayName(place)))
+                if (!expected[i].equals(names.label(1000000, place)) || !(expected[i] + " (P" + (i+1) + ")").equals(spatial.getPlaceDisplayName(place)))
                     throw new AssertionError("wrong runtime label at " + place);
             }
             render(spatial, "healthcare-service-names-spatial.png");
