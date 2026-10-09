@@ -1,4 +1,4 @@
-package org.btsn.derby.Analysis;
+package org.btsn.derby.Analysis.helper;
 
 import java.awt.FontMetrics;
 import java.nio.file.Files;

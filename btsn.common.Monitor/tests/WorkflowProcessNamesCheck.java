@@ -1,5 +1,10 @@
 package org.btsn.derby.Analysis;
 
+import org.btsn.derby.Analysis.helper.CombinedWorkflowMetrics;
+import org.btsn.derby.Analysis.helper.MeasuredWorkflowTimeline;
+import org.btsn.derby.Analysis.helper.ServiceQueueTimingView;
+import org.btsn.derby.Analysis.helper.WorkflowProcessNames;
+
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Field;

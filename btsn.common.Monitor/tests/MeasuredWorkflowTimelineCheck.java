@@ -1,5 +1,7 @@
 package org.btsn.derby.Analysis;
 
+import org.btsn.derby.Analysis.helper.MeasuredWorkflowTimeline;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.sql.Connection;

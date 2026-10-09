@@ -1,5 +1,9 @@
 package org.btsn.derby.Analysis;
 
+import org.btsn.derby.Analysis.helper.CombinedWorkflowMetrics;
+import org.btsn.derby.Analysis.helper.ServiceDisplayNames;
+import org.btsn.derby.Analysis.helper.ServiceQueueTimingView;
+
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;

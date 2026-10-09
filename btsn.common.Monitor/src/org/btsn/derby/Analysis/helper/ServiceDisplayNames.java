@@ -1,4 +1,4 @@
-package org.btsn.derby.Analysis;
+package org.btsn.derby.Analysis.helper;
 
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;

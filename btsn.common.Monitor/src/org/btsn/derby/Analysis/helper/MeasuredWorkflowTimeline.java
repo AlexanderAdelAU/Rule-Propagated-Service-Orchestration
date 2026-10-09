@@ -1,4 +1,6 @@
-package org.btsn.derby.Analysis;
+package org.btsn.derby.Analysis.helper;
+
+import org.btsn.derby.Analysis.PetriNetAnalyzer;
 
 import java.awt.Color;
 import java.awt.Dimension;
