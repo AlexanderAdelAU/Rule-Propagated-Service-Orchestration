@@ -661,6 +661,7 @@ private String extractServiceContextFromToken(String token) {
             "        AND t_between.workflowBase = t_in.workflowBase " +
             "        AND t_between.transitionId = t_out.transitionId " +
             "        AND t_between.ruleVersion = t_in.ruleVersion " +
+            "        AND t_between.eventType IN ('EXIT', 'TERMINATE') " +
             "        AND t_between.timestamp > t_in.timestamp " +
             "        AND t_between.timestamp < t_out.timestamp " +
             "  ) " +
@@ -831,6 +832,7 @@ private String extractServiceContextFromToken(String token) {
             "        AND t_between.workflowBase = t_in.workflowBase " +
             "        AND t_between.transitionId = t_out.transitionId " +
             "        AND t_between.ruleVersion = t_in.ruleVersion " +
+            "        AND t_between.eventType IN ('EXIT', 'TERMINATE') " +
             "        AND t_between.timestamp > t_in.timestamp " +
             "        AND t_between.timestamp < t_out.timestamp " +
             "  ) " +
