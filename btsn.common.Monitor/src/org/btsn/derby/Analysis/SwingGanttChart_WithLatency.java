@@ -26,7 +26,7 @@ import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
  * Recorded service invocation timings, with an optional workflow elapsed view.
  * Local host measurements work without process completion or a running Monitor.
  */
-public class SwingGanttChart_WithLatency_v1d extends JPanel {
+public class SwingGanttChart_WithLatency extends JPanel {
     private static final double BAR_SLOT_CENTER = 0.345;
     private static final double BAR_SLOT_WIDTH = 0.225;
     private boolean wideBars = true;
@@ -110,8 +110,8 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
     private boolean serviceVisitMode;
     private static List<String> startupDatabases = Collections.singletonList(System.getProperty("btsn.analysis.database", "ServiceAnalysisDataBase"));
     private List<String> databasePaths = new ArrayList<>(startupDatabases);
-    public SwingGanttChart_WithLatency_v1d() { this(false); }
-    public SwingGanttChart_WithLatency_v1d(boolean serviceVisits) {
+    public SwingGanttChart_WithLatency() { this(false); }
+    public SwingGanttChart_WithLatency(boolean serviceVisits) {
         serviceVisitMode = serviceVisits;
         setBackground(Color.WHITE);
         setPreferredSize(new Dimension(900, 600));
@@ -991,7 +991,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
         repaint();
     }
     
-    public static void createAndShowGUI(SwingGanttChart_WithLatency_v1d chart) {
+    public static void createAndShowGUI(SwingGanttChart_WithLatency chart) {
         JFrame frame = new JFrame(chart.chartTitle());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
@@ -1252,7 +1252,7 @@ public class SwingGanttChart_WithLatency_v1d extends JPanel {
             startupDatabases = paths;
         }
         SwingUtilities.invokeLater(() -> {
-            SwingGanttChart_WithLatency_v1d chart = new SwingGanttChart_WithLatency_v1d();
+            SwingGanttChart_WithLatency chart = new SwingGanttChart_WithLatency();
             createAndShowGUI(chart);
         });
     }
