@@ -40,11 +40,17 @@ public class ServiceNamingAnalysisCheck {
             // Captured identities survive catalogue ambiguity and different workflows.
             ServiceDisplayNames.record(c, 2000000, 2000000, "P1_Place", "processToken", 5000, "ValidationService");
             ServiceDisplayNames.record(c, 3000000, 3000000, "P1_Place", "processToken", 6000, "BooleanTokenService");
+            // Two instances of the same service must retain their distinct physical-node labels.
+            ServiceDisplayNames.record(c, 5000000, 5000001, "P3_Place", "processToken", 9000, "StochasticService");
+            ServiceDisplayNames.record(c, 5000000, 5000002, "P5_Place", "processToken", 9100, "StochasticService");
             ServiceDisplayNames names = ServiceDisplayNames.load(c, common);
             expect(names.label(2000000, "P1_Place"), "ValidationService");
             expect(names.label(3000000, "P1_Place"), "BooleanTokenService");
             expect(names.visitLabel(3000000, 3000000, "P1_Place", 6010), "BooleanTokenService");
             expect(names.describe(1000000, "P1_Place"), "TriageService (P1_Place)");
+            expect(names.spatialLaneLabel("P3_Place", -1), "StochasticService (P3)");
+            expect(names.spatialLaneLabel("P5_Place", -1), "StochasticService (P5)");
+            expect(names.spatialLaneLabel("UnidentifiedPlace", -1), "UnidentifiedPlace");
             if (!names.laneLabel("P1_Place", -1).contains("ValidationService")) throw new AssertionError("mixed lane lost a service");
             // Recorded identity remains sufficient when catalogue files are absent.
             expect(ServiceDisplayNames.load(c, Path.of("missing-catalogue")).label(2000000, "P1_Place"), "ValidationService");
@@ -63,7 +69,10 @@ public class ServiceNamingAnalysisCheck {
             if (!temporal.contains("Service: TriageService") || !temporal.contains("Orchestration place: P1_Place"))
                 throw new AssertionError(temporal);
             WorkflowSpatialView spatial = new WorkflowSpatialView();
-            expect(spatial.getPlaceDisplayName("P4_Place"), "RadiologyService");
+            expect(spatial.getPlaceDisplayName("P4_Place"), "RadiologyService (P4)");
+            expect(spatial.getPlaceDisplayName("P2_Place"), "CreditCheckService (P2)");
+            expect(spatial.getPlaceDisplayName("P3_Place"), "StochasticService (P3)");
+            expect(spatial.getPlaceDisplayName("P5_Place"), "StochasticService (P5)");
             if (!spatial.getAllPlaces().contains("P1_Place")) throw new AssertionError("physical keys changed");
             if (!spatial.generateSummaryReport().contains("TriageService (P1_Place)"))
                 throw new AssertionError("spatial summary missing service name");
