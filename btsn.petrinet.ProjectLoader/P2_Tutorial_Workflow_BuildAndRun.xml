@@ -9,10 +9,10 @@
     <property name="workflow.process.name" value="petrinet/Workflow/P2_Tutorial_Workflow"/>
     <property name="init.process.name" value="common/Initializers/P2_Initialization"/>
     <property name="collector.process.name" value="common/Collectors/P2_Collector"/>
-    <property name="rule.version" value="v001"/>
+    <property name="rule.version" value="v002"/>
 
     <!-- Tokens: event generator, target place and schedule -->
-    <property name="event.generator.id" value="EG11"/>
+    <property name="event.generator.id" value="EG6"/>
     <property name="target.place" value="P2_Place"/>
     <property name="target.operation" value="processToken"/>
     <property name="token.count" value="10"/>
