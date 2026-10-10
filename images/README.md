@@ -11,7 +11,7 @@ content, not generated raster artwork.
 | `rpso-execution-sequence.svg` | Conceptual sequence of T_in receipt/buffering and synchronization, invocation/return at P, and handoff to T_out for routing/publication or termination. Light blue activation bars describe responsibility for one invocation, not measured durations or literal Java thread lifetimes. These are logical roles within one generic host. |
 | `rpso-architecture.svg` | Current responsibility boundaries: explicit T_in → Place P → T_out roles in a generic host, in-process invocation of a bound domain or token-operation JAR, separate Monitor collection. Based on `ServiceThread`, `ServiceHelper`, `RuleHandler` and the packaged runtime. |
 | `rpso-rule-deployment.svg` | JSON topology, canonical contracts and deployment profile feed binding/rule generation. Local acknowledgements and runtime token flow are distinct. Based on `TopologyBindingGenerator` and `RuleDeployer`. |
-| `financial-workflow.svg` | P1–P5 Validation → Credit/Fraud → Underwriting → Decision, with invalid/declined termination. Its top-right legend expands a rounded Credit Check activity into T_in → service function at P → T_out. Source: `btsn.common/ProcessDefinitionFolder/petrinet/Workflow/FinancialSystem_P1_P5_Workflow.json`. |
+| `financial-workflow.svg` | P1–P5 Validation → Credit/Fraud → Underwriting → Decision, with invalid/declined termination. Its top-right legend expands a rounded Credit Check activity into T_in → service function at P → T_out. Source: `btsn.common/ProcessDefinitionFolder/financial/Workflow/FinancialSystem_P1_P5_Workflow.json`. |
 | `healthcare-workflow.svg` | P1 Triage, P2 Laboratory, P3 Cardiology, P4 Radiology, P5 Diagnosis and P6 Treatment, including the direct treatment path. Source: `btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Emergency_Department_Patient_Workflow.json`. |
 | `p1-tutorial.svg` | Explicit circular P1 between input/output transition bars: a Boolean-returning function, a false loop and true termination. All five JSON nodes/arcs are retained; observation is outside the token path. Source: `btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json`. |
 | `petrinet-fork-join.svg` | Boolean-returning functionality at every P1–P4 place; T_out_P1 forks on true or terminates on false. P2/P3 forward either result to the input join before P4. The join requires both arrivals, irrespective of their Boolean values. All fifteen JSON nodes/arcs are retained and checked during generation. Source: `btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_P2_P3_P4_Fork_Join_Workflow.json`. |
@@ -60,11 +60,24 @@ those images as descriptions of the migrated runtime.
 ## ProcessEditor tutorial screenshot
 
 `process-editor-p1-tutorial.png` is the unmodified user-supplied
-`image(20261007-065518).png`. The README and tutorial use it to show the live
+`image(20261007-065518).png`. The README uses it to show the live
 editor: the P1 loop on the canvas and its service/operation binding in the
 Attributes panel. The terminal is displayed as `Terminate`; Monitor is described
 as an observer outside the token path. This is an editor screenshot, not a
 captured execution or a regenerated diagram. The SVG generator does not alter it.
+
+## P2 tutorial screenshots
+
+[Tutorial.md](../Tutorial.md) uses three screenshots of the supplied P2 tutorial,
+painted from the editor's own windows at 100% zoom:
+
+| Image | Shows |
+|---|---|
+| `p2-tutorial-design.png` | ProcessEditor with `P2_Tutorial_Workflow.json` open and P2 selected: catalogue, service, operation, deployment instance, **Runs on** and contract in the Attributes panel; the node badge on the place |
+| `p2-tutorial-deploy.png` | The Deploy panel for that process: the read-only `SingleHost.json` nodes and the P2 capability row |
+| `p2-tutorial-build-and-run.png` | The Create Build and Run dialog with its defaults and the Write/Reuse/Replace summary |
+
+Retake them when these windows change, rather than editing the images.
 
 ## Captured execution examples
 

@@ -1,0 +1,18 @@
+{
+  "definitionType": "ServiceDeployment",
+  "catalog": "BusinessServiceDefinitions/petrinet/PetriNetModels.json",
+  "capabilities": [
+    {
+      "node": "P2",
+      "service": "StochasticService",
+      "instance": "StochasticInstance1",
+      "invocationAdapter": "boolean-token",
+      "operation": "processToken",
+      "returnAttribute": "token",
+      "portSlot": 0,
+      "arguments": [
+        {"name": "token", "type": "String", "value": "String", "required": false}
+      ]
+    }
+  ]
+}

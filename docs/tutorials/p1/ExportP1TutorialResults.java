@@ -119,7 +119,7 @@ public final class ExportP1TutorialResults {
         for (String name : new String[] {
                 "btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json",
                 "btsn.common/InfrastructureDefinitionFolder/SingleHost.json",
-                "btsn.common/BusinessServiceDefinitions/P1_Tutorial_Local.json",
+                "btsn.common/BusinessServiceDefinitions/petrinet/PetriNetModels.json",
                 "btsn.services/deployments/models/P1_Tutorial_LocalDeployment.json",
                 "btsn.common/ServiceDeploymentFolder/petrinet/P1_Tutorial.json",
                 "btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml",

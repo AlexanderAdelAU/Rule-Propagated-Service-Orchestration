@@ -16,7 +16,7 @@ public final class LauncherRuntimeCheck {
         Path root=Path.of(args[0]).toAbsolutePath();
         java.util.Map<Path,String> before=sourceConfiguration(root);
         List<Path> builds=new ArrayList<>();
-        for(Path dir:Arrays.asList(root.resolve("btsn.financial.ProjectLoader"),root.resolve("btsn.petrinet.ProjectLoader"),root.resolve("btsn.petrinet.ProjectLoader/utility files")))
+        for(Path dir:Arrays.asList(root.resolve("btsn.financial.ProjectLoader"),root.resolve("btsn.petrinet.ProjectLoader"),root.resolve("btsn.petrinet.ProjectLoader/utility files"),root.resolve("btsn.services/tests/launchers")))
             try(java.util.stream.Stream<Path> files=Files.list(dir)) { files.filter(p->p.toString().endsWith(".xml")).sorted().forEach(builds::add); }
         int operations=0;
         for(Path build:builds) {
@@ -69,8 +69,14 @@ public final class LauncherRuntimeCheck {
                 Path definition=common.resolve("ProcessDefinitionFolder").resolve(process+".json");
                 check(Files.isRegularFile(definition),"Missing process definition: "+definition);
                 JSONObject data=json(definition);
-                if(property.startsWith("workflow")||property.equals("process.name")&&process.contains("/Workflow/"))
+                if(property.startsWith("workflow")||property.equals("process.name")&&process.contains("/Workflow/")) {
+                    // A business process names its service deployment, which names its catalogue.
+                    check(data.get("serviceDeployment") instanceof String,"Process does not name its service deployment: "+definition);
+                    JSONObject declared=json(common.resolve((String)data.get("serviceDeployment")));
+                    check(declared.get("catalog") instanceof String&&Files.isRegularFile(common.resolve((String)declared.get("catalog"))),
+                        "Service deployment does not name an existing catalogue: "+data.get("serviceDeployment"));
                     new org.btsn.deployment.DeploymentConfiguration(common).validateWorkflow(data);
+                }
                 for(Object item:(JSONArray)data.get("elements")) {
                     JSONObject node=(JSONObject)item; if(!"PLACE".equals(node.get("type"))) continue;
                     String service=(String)node.get("service");

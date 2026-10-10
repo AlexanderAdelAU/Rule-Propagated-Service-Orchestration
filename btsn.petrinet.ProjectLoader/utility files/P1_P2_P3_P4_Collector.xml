@@ -17,7 +17,7 @@
 
 	<!-- COLLECTOR PARAMETERS -->
 	<property name="rule.version" value="v999" />
-	<property name="process.name" value="petrinet/Collectors/P1_P2_P3_P4_Collector" />
+	<property name="process.name" value="common/Collectors/P1_P2_P3_P4_Collector" />
 	<property name="service.operation" value="collectAllData" />
 	<property name="collection.delay.seconds" value="3" />
 

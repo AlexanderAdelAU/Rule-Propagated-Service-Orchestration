@@ -57,8 +57,9 @@ contract described above. **Return Attribute** and **Arguments** define the
 orchestration-facing instance contract when an adapter is selected.
 
 Select **Port Slot**: `0` is the node's primary port; `1` is its second fixed port,
-where defined. **Generate Bindings** writes a separate canonical contract for
-each instance. In the process editor, select that same **Deployment instance**
+where defined. Saving is the only step: each launcher generates the canonical
+contract for every instance, and the network rules, from the saved process and
+deployment. In the process editor, select that same **Deployment instance**
 on the PLACE; incoming and outgoing transition types are edited separately.
 
 A profile under `btsn.services/deployments` selects `catalog`, `infrastructure`
@@ -96,12 +97,29 @@ aliases and result are displayed from that instance contract. These fields
 cannot be independently typed in the process editor. Unknown legacy names
 remain visible as unresolved until explicitly corrected.
 
-Process JSON stores a relative serviceDeployment editor reference and each operation's
-returnAttribute; those declarations survive editor load/save. Existing
-Petri-net examples include the reference. For other existing or new diagrams,
-use **Choose service deployment...** to select the intended profile. The
-deployment editor can select an existing catalogue and records its catalog
-reference. A runtime Deployment.json profile must select that same catalogue.
+## From a process to its catalogue
+
+Every business process names its service deployment, and every service
+deployment names its catalogue:
+
+```
+ProcessDefinitionFolder/financial/Workflow/FinancialSystem_P1_P5_Workflow.json
+  "serviceDeployment": "ServiceDeploymentFolder/financial/FinancialSystem.json"
+      "catalog": "BusinessServiceDefinitions/financial/FinancialSystem.json"
+```
+
+The catalogue is shared, not copied: one catalogue serves every process of its
+domain. Process JSON also stores each operation's returnAttribute; these
+declarations survive editor load/save. For a new diagram, use **Choose service
+deployment...** to record the reference. The deployment editor records the
+catalog reference. A runtime Deployment.json profile must select that same
+catalogue. `check-launchers` fails if a launcher's business process lacks the
+reference, or if its deployment does not name an existing catalogue, and checks
+each process against a profile that selects its own deployment.
+
+Initializers and collectors under `ProcessDefinitionFolder/common` (and the
+labelled healthcare copies) call host administration services, not catalogue
+services, so they carry no service deployment.
 
 Unknown operations, mismatched inputs/results and incompatible adapters block
 binding generation and deployment preparation. Process service-contract errors

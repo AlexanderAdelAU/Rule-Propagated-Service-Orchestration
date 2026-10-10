@@ -309,10 +309,11 @@ public class TokenAnimator {
                 }
 
                 // Instrumentation names the place after its deployment node (e.g. P1_Place).
+                // A place labelled after its own node (place P2 on node P2) still needs P2_Place -> P2.
                 String node = deploymentNode(elem);
-                if (!node.isEmpty() && !node.equals(placeKey)) {
-                    runtimeAliases.put(node + "_Place", placeKey);
-                    runtimeAliases.put(node, placeKey);
+                if (!node.isEmpty()) {
+                    if (!(node + "_Place").equals(placeKey)) runtimeAliases.put(node + "_Place", placeKey);
+                    if (!node.equals(placeKey)) runtimeAliases.put(node, placeKey);
                 }
 
             } else if (elem.getType() == ProcessElement.Type.EVENT_GENERATOR) {
@@ -562,9 +563,25 @@ public class TokenAnimator {
     }
     
     /**
+     * An analysis file can hold several analyzer runs appended one after another (for example an
+     * output file opened in append mode). Each run starts with its "Auto-detected ... workflow bases"
+     * line; replay only the last run so earlier runs do not stretch the timeline.
+     * Output copied from an Ant console carries a "[java]" prefix on each line.
+     */
+    static String lastAnalyzerRun(String text) {
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("(?m)^[ \\t]*(?:\\[java\\][ \\t]*)?Auto-detected \\d+ workflow bases").matcher(text);
+        int last = -1, runs = 0;
+        while (m.find()) { last = m.start(); runs++; }
+        if (runs < 2) return text;
+        logger.warn("Analysis text contains " + runs + " analyzer runs; replaying only the last one.");
+        return text.substring(last);
+    }
+
+    /**
      * Parse events from analyzer text output
      */
     private void parseEventsFromText(String text) {
+        text = lastAnalyzerRun(text);
         String[] lines = text.split("\n");
         
         // Use a set to detect duplicates
@@ -572,6 +589,7 @@ public class TokenAnimator {
         
         for (String line : lines) {
             line = line.trim();
+            if (line.startsWith("[java]")) line = line.substring("[java]".length()).trim();  // copied from an Ant console
             
             // Parse: Time=xxx Token=xxx Place=xxx Marking=x Buffer=x ToPlace=xxx EventType=xxx TransitionId=xxx
             if (line.startsWith("Time=") && line.contains("Marking=")) {
@@ -1785,8 +1803,11 @@ public class TokenAnimator {
                 if (exitEvent != null) {
                     int exitIndex = tokenEvents.indexOf(exitEvent);
                     
-                    // AT_PLACE segment
+                    // AT_PLACE segment. A visit shorter than the usual move to T_out is split in half,
+                    // so a fast service still shows the token at its place (timestamps unchanged).
                     long atPlaceEnd = exitEvent.timestamp - TRAVEL_DURATION_TO_TOUT;
+                    if (atPlaceEnd <= current.timestamp && exitEvent.timestamp > current.timestamp)
+                        atPlaceEnd = current.timestamp + (exitEvent.timestamp - current.timestamp) / 2;
                     if (atPlaceEnd > current.timestamp) {
                         segments.add(new AnimationSegment(
                             tokenId, version, Phase.AT_PLACE,

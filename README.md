@@ -28,10 +28,10 @@ How each step is done, worked through for a single place in [Tutorial.md](Tutori
 
 | Step | How | Walkthrough |
 |---|---|---|
-| **1 · Draw the model** | Place the elements, bind each place to a service and connect the transitions in ProcessEditor (`btsn.workflowEditor`) | [Define the process](Tutorial.md#2-define-the-process) |
+| **1 · Draw the model** | Place the elements, bind each place to a service and connect the transitions in ProcessEditor (`btsn.workflowEditor`) | [Design the process](Tutorial.md#1-design-the-process), [Deploy it](Tutorial.md#2-deploy-the-process) |
 | **Deploy local rules** | One Ant launcher builds the JARs, starts the hosts and Monitor, then installs each host's rules and waits for its acknowledgement | [Rule deployment](#rule-deployment-and-token-execution) |
-| **2 · Run as separate hosts** | The same launcher fires the tokens and collects the observations; each host routes them by its own rules | [Run the tutorial](Tutorial.md#3-run-the-tutorial), [Quick start](#quick-start-run-observe-and-replay) |
-| **Analyse** | `PetriNetAnalyzer`, the timing chart and the spatial view read Monitor's data; ProcessEditor replays it on the model | [Show the results](Tutorial.md#4-show-the-results), [Observe a run](#observe-and-interpret-a-run) |
+| **2 · Run as separate hosts** | The same launcher fires the tokens and collects the observations; each host routes them by its own rules | [Build and Run](Tutorial.md#3-create-build-and-run), [Run it](Tutorial.md#4-run-it), [Quick start](#quick-start-run-observe-and-replay) |
+| **Analyse** | `PetriNetAnalyzer`, the timing chart and the spatial view read Monitor's data; ProcessEditor replays it on the model | [Show the results](Tutorial.md#5-show-the-results), [Observe a run](#observe-and-interpret-a-run) |
 
 ## Quick start: run, observe and replay
 

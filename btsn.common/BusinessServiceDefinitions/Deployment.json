@@ -1,5 +1,5 @@
 {
-  "catalog": "BusinessServiceDefinitions/FinancialSystem.json",
+  "catalog": "BusinessServiceDefinitions/financial/FinancialSystem.json",
   "infrastructure": "InfrastructureDefinitionFolder/SingleHost.json",
   "deploymentRules": "RuleBase/Generated/InfrastructureDeployment.ruleml.xml",
   "directServiceRules": [

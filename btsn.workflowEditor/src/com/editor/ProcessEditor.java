@@ -358,6 +358,8 @@ public class ProcessEditor extends JFrame {
         // Reset buttons when canvas cancels modes
         canvas.setCancelListener(() -> resetButtonColors());
         
+        canvas.setDeployAction(this::openDeployPanel);
+
         // Attributes panel
         attributesFrame = new EditorFrame(canvas);
         canvas.setSelectionListener(attributesFrame::updateSelection);
@@ -526,6 +528,22 @@ public class ProcessEditor extends JFrame {
         smallClearBtn.setFocusPainted(false);
         smallClearBtn.addActionListener(e -> clearCanvas());
         toolbar.add(smallClearBtn);
+
+        toolbar.add(Box.createHorizontalStrut(5));
+
+        JButton deployBtn = new JButton("Deploy");
+        deployBtn.setToolTipText("Choose the node each place runs on and save the service deployment");
+        deployBtn.setFocusPainted(false);
+        deployBtn.addActionListener(e -> openDeployPanel());
+        toolbar.add(deployBtn);
+
+        toolbar.add(Box.createHorizontalStrut(5));
+
+        JButton buildRunBtn = new JButton("Build and Run");
+        buildRunBtn.setToolTipText("Create an Ant launcher that initialises, runs and collects this deployed process");
+        buildRunBtn.setFocusPainted(false);
+        buildRunBtn.addActionListener(e -> createBuildAndRun());
+        toolbar.add(buildRunBtn);
         
         toolbar.addSeparator(new Dimension(20, 32));
         
@@ -1178,6 +1196,7 @@ public class ProcessEditor extends JFrame {
             try (FileWriter writer = new FileWriter(file)) {
                 writer.write(canvas.saveToJSON());
                 currentFile = file; // Remember this file for future saves
+                canvas.setDefinitionLocation(file);
                 setDirty(false); // Clear dirty flag after successful save
                 updateStatusBar(); // Update status bar to show new filename
                 JOptionPane.showMessageDialog(this,
@@ -1203,6 +1222,50 @@ public class ProcessEditor extends JFrame {
         new InfrastructureDefinitionFrame().setVisible(true);
     }
     
+    private InfrastructureDefinitionFrame deployFrame;
+
+    /** Deploy: the service deployment panel beside the editor, filled from the places of this process. */
+    private void openDeployPanel() {
+        java.util.List<String> problems = new ArrayList<>();
+        ServiceRegistry registry = canvas.getServiceRegistry();
+        if (registry.problem() != null) problems.add(registry.problem());
+        else if (canvas.getPlaces().isEmpty()) problems.add("Add at least one place before deploying.");
+        else problems.addAll(canvas.validateServiceContracts());
+        if (!problems.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Before deploying:\n" + String.join("\n", problems), "Deploy", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (deployFrame != null && deployFrame.isDisplayable()) {
+            deployFrame.refreshFromProcess();
+            deployFrame.toFront();
+            return;
+        }
+        deployFrame = InfrastructureDefinitionFrame.openForProcess(this, canvas, currentFile);
+    }
+
+    /** Create Build and Run: available once the process is saved, deployed and valid. */
+    private void createBuildAndRun() {
+        java.util.List<String> problems = new ArrayList<>();
+        if (currentFile == null || isDirty) problems.add("Save the process first.");
+        if (deployFrame != null && deployFrame.isDisplayable() && deployFrame.getTitle().endsWith("*")) problems.add("Save the deployment in the Deploy panel first.");
+        problems.addAll(canvas.validateServiceContracts());
+        BuildAndRunGenerator.Plan plan = BuildAndRunGenerator.plan(canvas, currentFile);
+        for (String problem : plan.problems) if (!problems.contains(problem)) problems.add(problem);
+        if (!problems.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Before creating Build and Run:\n" + String.join("\n", problems), "Build and Run", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        new BuildAndRunDialog(this, plan).setVisible(true);
+    }
+
+    /** The Deploy panel belongs to the process on the canvas; close it before another process replaces it. */
+    private void closeDeployPanel() {
+        if (deployFrame == null || !deployFrame.isDisplayable()) return;
+        deployFrame.confirmClose();
+        deployFrame.dispose();
+        deployFrame = null;
+    }
+
     private void openInfrastructureDefinition() {
         InfrastructureDefinitionFrame.openInNewWindow(this);
     }
@@ -1246,6 +1309,7 @@ public class ProcessEditor extends JFrame {
                     return;
                 }
                 
+                closeDeployPanel();
                 canvas.setDefinitionLocation(file);
                 canvas.loadFromJSON(content.toString());
                 documentationPanel.loadFromJSON(content.toString());  // Load documentation
@@ -1320,7 +1384,9 @@ public class ProcessEditor extends JFrame {
             JOptionPane.YES_NO_OPTION);
         
         if (result == JOptionPane.YES_OPTION) {
+            closeDeployPanel();
             canvas.clear();
+            canvas.setDefinitionLocation(null);
             documentationPanel.clear();  // Clear documentation
             resetButtonColors();
             processTypeCombo.setSelectedIndex(0);  // Reset process type dropdown

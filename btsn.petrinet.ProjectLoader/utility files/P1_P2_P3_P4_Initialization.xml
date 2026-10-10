@@ -30,7 +30,7 @@
     <property name="sequence.id.p4" value="999300000" />
     <property name="sequence.id.monitor" value="999400000" />
     <property name="db.init.operation" value="purgeAndInitialize" />
-    <property name="process.name" value="petrinet/Initializers/P1_P2_P3_P4_Initialization" />
+    <property name="process.name" value="common/Initializers/P1_P2_P3_P4_Initialization" />
 
     <!-- Timing -->
     <property name="port.release.seconds" value="5" />

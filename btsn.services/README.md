@@ -160,6 +160,22 @@ explicit `local` or `remote` overrides where those components occur in a workflo
 The build prints the address and each component's launch decision. Missing or
 conflicting ip0 facts fail the build rather than guessing a destination.
 
+### Generated launchers
+
+ProcessEditor's **Build and Run** button creates a launcher for a saved, deployed
+process. The launcher holds only what differs between processes (process,
+profile, event generator, target place, version, token count and schedule, and
+the hosts the deployment uses) and imports `process-runtime.xml`, which holds the
+shared phases: initialise, deploy and fire tokens, collect. The button also writes
+the token schedule under `btsn.common.eventgenerators/EventTriggeringFile`, a
+deployment profile under `deployments/` when none selects the service deployment
+yet, and an initialiser/collector pair under
+`btsn.common/ProcessDefinitionFolder/common` for a host set that has none.
+[`tests/launchers/P1_Tutorial_Generated_BuildAndRun.xml`](tests/launchers/P1_Tutorial_Generated_BuildAndRun.xml)
+is a generated example; `check-launchers` prepares it with the other launchers.
+Generated launchers cover one Petri-net or financial process per run; the
+hand-written launchers remain for multi-process and healthcare runs.
+
 `auto-deployment.xml` is a Java/Ant build helper, independent of business
 catalogues. Run its default check target to verify address and rule parsing.
 Only the launcher decision changes; handlers, token scheduling, service

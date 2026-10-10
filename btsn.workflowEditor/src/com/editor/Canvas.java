@@ -1087,19 +1087,11 @@ public class Canvas extends JPanel {
             }
         }
         
-        // Check if right-clicked on an arrow
-        Arrow clickedArrow = findClosestArrow(canvasX, canvasY);
-        if (clickedArrow != null) {
-            selectedArrow = clickedArrow;
-            selectedElements.clear();  // Clear element selection
-            showArrowContextMenu(e, clickedArrow, canvasX, canvasY);
-            repaint();
-            return;
-        }
-        
-        // Check if right-clicked on an element
+        // A shape under the pointer wins over arrows: arrows are hit-tested along the line
+        // between element centres, which runs through the middle of every place and transition.
         for (ProcessElement element : elements) {
             if (element.contains(canvasX, canvasY)) {
+                selectedArrow = null;
                 if (!selectedElements.contains(element)) {
                     selectedElements.clear();
                     selectedElements.add(element);
@@ -1108,6 +1100,16 @@ public class Canvas extends JPanel {
                 repaint();
                 return;
             }
+        }
+        
+        // Check if right-clicked on an arrow
+        Arrow clickedArrow = findClosestArrow(canvasX, canvasY);
+        if (clickedArrow != null) {
+            selectedArrow = clickedArrow;
+            selectedElements.clear();  // Clear element selection
+            showArrowContextMenu(e, clickedArrow, canvasX, canvasY);
+            repaint();
+            return;
         }
     }
     
@@ -1125,6 +1127,7 @@ public class Canvas extends JPanel {
     
     private void showArrowContextMenu(MouseEvent e, Arrow arrow, int canvasX, int canvasY) {
         JPopupMenu menu = new JPopupMenu();
+        lastContextMenu = menu;
         
         JMenuItem addWaypointItem = new JMenuItem("Add Control Point");
         addWaypointItem.addActionListener(ev -> {
@@ -1167,8 +1170,33 @@ public class Canvas extends JPanel {
         menu.show(this, e.getX(), e.getY());
     }
     
+    private void addDeployMenu(JPopupMenu menu, ProcessElement place) {
+        JMenu deployTo = new JMenu("Deploy to");
+        String current = nodeFor(place);
+        List<ServiceRegistry.Node> nodes = ServiceRegistry.infrastructureNodes(definitionLocation);
+        if (nodes.isEmpty()) { JMenuItem none = new JMenuItem("No infrastructure nodes found"); none.setEnabled(false); deployTo.add(none); }
+        for (ServiceRegistry.Node node : nodes) {
+            JRadioButtonMenuItem item = new JRadioButtonMenuItem(node.describe(), node.node.equals(current));
+            item.addActionListener(ev -> assignNode(place, node.node));
+            deployTo.add(item);
+        }
+        menu.add(deployTo);
+        JMenuItem panel = new JMenuItem("Deploy panel...");
+        panel.setEnabled(deployAction != null);
+        panel.addActionListener(ev -> deployAction.run());
+        menu.add(panel);
+    }
+
+    /** Last context menu shown (kept for checks of right-click behaviour). */
+    JPopupMenu lastContextMenu;
+
     private void showElementContextMenu(MouseEvent e) {
         JPopupMenu menu = new JPopupMenu();
+        lastContextMenu = menu;
+        if (selectedElements.size() == 1 && selectedElements.iterator().next().getType() == ProcessElement.Type.PLACE) {
+            addDeployMenu(menu, selectedElements.iterator().next());
+            menu.addSeparator();
+        }
         
         JMenuItem propertiesItem = new JMenuItem("Properties...");
         propertiesItem.addActionListener(ev -> {
@@ -1489,6 +1517,28 @@ public class Canvas extends JPanel {
         notifySelectionChanged(null);
     }
     
+    /** Small label at the lower right of each place naming the node it runs on (dashed while unsaved). */
+    private void drawDeploymentNodes(Graphics2D g2) {
+        Font previous = g2.getFont();
+        g2.setFont(previous.deriveFont(Font.BOLD, 10f));
+        FontMetrics metrics = g2.getFontMetrics();
+        for (ProcessElement place : getPlaces()) {
+            String node = nodeFor(place);
+            if (node.isEmpty()) continue;
+            boolean pending = hasPendingNode(place);
+            int w = metrics.stringWidth(node) + 8, h = metrics.getHeight();
+            int x = place.getX() + place.getWidth() - w / 2, y = place.getY() + place.getHeight() - h / 2;
+            g2.setColor(pending ? new Color(255, 243, 205) : new Color(225, 238, 255));
+            g2.fillRoundRect(x, y, w, h, 8, 8);
+            g2.setColor(pending ? new Color(176, 112, 0) : new Color(40, 80, 150));
+            g2.setStroke(pending ? new BasicStroke(1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10f, new float[] {3f, 2f}, 0f) : new BasicStroke(1f));
+            g2.drawRoundRect(x, y, w, h, 8, 8);
+            g2.drawString(node, x + 4, y + metrics.getAscent());
+        }
+        g2.setStroke(new BasicStroke(1));
+        g2.setFont(previous);
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -1544,6 +1594,8 @@ public class Canvas extends JPanel {
             element.draw(g2, isSelected);
         }
         
+        drawDeploymentNodes(g2);
+
         // Draw warning indicators for incomplete Places
         g2.setStroke(new BasicStroke(2));
         for (ProcessElement element : elements) {
@@ -2621,10 +2673,78 @@ public class Canvas extends JPanel {
     
     private final ServiceRegistry serviceRegistry = new ServiceRegistry();
     private String serviceDeploymentReference = "";
+    /** Catalogue of a process that has not been deployed yet; once deployed, the deployment names it. */
+    private String catalogueReference = "";
     private java.io.File definitionLocation;
+    /** Node choices made on the canvas (place id -> node) that the Deploy panel has not saved yet. */
+    private final Map<String, String> pendingNodes = new java.util.LinkedHashMap<>();
+    private Runnable deployAction;
+    private final List<Runnable> deploymentListeners = new ArrayList<>();
     public void serviceContractChanged() { notifyChange(); repaint(); }
     public ServiceRegistry getServiceRegistry() { return serviceRegistry; }
     public void setDefinitionLocation(java.io.File file) { definitionLocation = file; }
+    public java.io.File getDefinitionLocation() { return definitionLocation; }
+    public String getServiceDeploymentReference() { return serviceDeploymentReference; }
+    public String getCatalogueReference() { return serviceRegistry.hasDeployment() ? "" : serviceRegistry.catalogueReference(); }
+    /** Opens the Deploy panel; set by the editor window. */
+    public void setDeployAction(Runnable action) { deployAction = action; }
+    public void addDeploymentListener(Runnable listener) { deploymentListeners.add(listener); }
+    public void removeDeploymentListener(Runnable listener) { deploymentListeners.remove(listener); }
+    private void deploymentChanged() { for (Runnable listener : new ArrayList<>(deploymentListeners)) listener.run(); repaint(); }
+    public List<ProcessElement> getPlaces() {
+        List<ProcessElement> places = new ArrayList<>();
+        for (ProcessElement element : elements) if (element.getType() == ProcessElement.Type.PLACE) places.add(element);
+        return places;
+    }
+    /** Node a place runs on: an unsaved choice from the canvas or Deploy panel, else its deployed node. */
+    public String nodeFor(ProcessElement place) {
+        String pending = pendingNodes.get(place.getId());
+        return pending != null ? pending : serviceRegistry.nodeFor(place);
+    }
+    public boolean hasPendingNode(ProcessElement place) { return pendingNodes.containsKey(place.getId()); }
+    public void assignNode(ProcessElement place, String node) {
+        if (node == null || node.isEmpty() || node.equals(serviceRegistry.nodeFor(place))) pendingNodes.remove(place.getId());
+        else pendingNodes.put(place.getId(), node);
+        deploymentChanged();
+    }
+    /** Choose the service catalogue whose services the places of this process may use. */
+    public void chooseCatalogue(java.awt.Component parent) {
+        JFileChooser chooser = new JFileChooser();
+        java.io.File common = ServiceRegistry.findCommon(definitionLocation);
+        if (common != null) chooser.setCurrentDirectory(new java.io.File(common, "BusinessServiceDefinitions"));
+        chooser.setDialogTitle("Choose the service catalogue for this process");
+        if (chooser.showOpenDialog(parent) != JFileChooser.APPROVE_OPTION) return;
+        try {
+            serviceRegistry.loadCatalogue(chooser.getSelectedFile());
+            serviceDeploymentReference = "";
+            pendingNodes.clear();
+            notifyChange(); notifySelectionChanged(selectedElements.size() == 1 ? selectedElements.iterator().next() : null); deploymentChanged();
+        } catch (Exception ex) { JOptionPane.showMessageDialog(parent, ex.getMessage(), "Invalid catalogue", JOptionPane.ERROR_MESSAGE); }
+    }
+    /**
+     * Record a saved service deployment: the process links to it and each place uses its instance.
+     * The process itself becomes modified and is saved by the editor as usual.
+     */
+    public void linkDeployment(java.io.File deployment, Map<ProcessElement, String> instances) throws Exception {
+        serviceRegistry.loadDeployment(deployment);
+        serviceDeploymentReference = serviceRegistry.reference();
+        for (Map.Entry<ProcessElement, String> entry : instances.entrySet()) {
+            ProcessElement place = entry.getKey();
+            if (place.getServiceOperations().isEmpty()) continue;
+            for (ServiceOperation operation : new ArrayList<>(place.getServiceOperations()))
+                serviceRegistry.apply(place, operation.getName(), entry.getValue());
+        }
+        pendingNodes.clear();
+        notifyChange(); notifySelectionChanged(selectedElements.size() == 1 ? selectedElements.iterator().next() : null); deploymentChanged();
+    }
+    /** Places that the linked deployment does not run (only reported once a deployment is linked). */
+    public List<String> deploymentGaps() {
+        List<String> gaps = new ArrayList<>();
+        if (!serviceRegistry.hasDeployment()) return gaps;
+        for (ProcessElement place : getPlaces())
+            if (!serviceRegistry.isDeployed(place)) gaps.add("Place '" + place.getLabel() + "' is not in the linked service deployment; use Deploy to place it on a node.");
+        return gaps;
+    }
     public void chooseServiceDeployment(java.awt.Component parent) {
         JFileChooser chooser = new JFileChooser();
         java.io.File common = ServiceRegistry.findCommon(definitionLocation);
@@ -2647,6 +2767,7 @@ public class Canvas extends JPanel {
         StringBuilder json = new StringBuilder();
         json.append("{\n");
         if (!serviceDeploymentReference.isEmpty()) json.append("  \"serviceDeployment\": \"").append(escapeJSON(serviceDeploymentReference)).append("\",\n");
+        else if (!getCatalogueReference().isEmpty()) json.append("  \"catalog\": \"").append(escapeJSON(getCatalogueReference())).append("\",\n");
         
         // Include metadata if present
         if (metadataJSON != null && !metadataJSON.isEmpty()) {
@@ -2828,7 +2949,9 @@ public class Canvas extends JPanel {
         clear();
         serviceDeploymentReference = extractValue(json, "serviceDeployment");
         if (serviceDeploymentReference == null) serviceDeploymentReference = "";
-        serviceRegistry.loadReference(serviceDeploymentReference, definitionLocation);
+        catalogueReference = extractValue(json, "catalog");
+        if (catalogueReference == null) catalogueReference = "";
+        serviceRegistry.loadProcessReferences(serviceDeploymentReference, catalogueReference, definitionLocation);
 
         // Extract and store metadata section if present
         if (json.contains("\"metadata\"")) {
@@ -3437,8 +3560,11 @@ public class Canvas extends JPanel {
         metadataJSON = null;
         documentationJSON = null;
         processType = null;
+        serviceDeploymentReference = "";
+        pendingNodes.clear();
+        serviceRegistry.dropDeployment();
         notifySelectionChanged(null);  // Clear attributes panel
-        repaint();
+        deploymentChanged();
     }
     
     /**
@@ -3460,6 +3586,7 @@ public class Canvas extends JPanel {
     public List<String> validatePetriNet() {
         List<String> errors = new ArrayList<>();
         errors.addAll(validateServiceContracts());
+        errors.addAll(deploymentGaps());
         Map<String, List<ProcessElement>> labelMap = new HashMap<>();
         
         // Check for duplicate labels/IDs

@@ -32,7 +32,7 @@
     <property name="sequence.id.p6" value="999500000" />
     <property name="sequence.id.monitor" value="999600000" />
     <property name="db.init.operation" value="purgeAndInitialize" />
-    <property name="process.name" value="petrinet/Initializers/TrafficLight_Initialization" />
+    <property name="process.name" value="common/Initializers/TrafficLight_Initialization" />
 
     <!-- Timing -->
     <property name="port.release.seconds" value="5" />

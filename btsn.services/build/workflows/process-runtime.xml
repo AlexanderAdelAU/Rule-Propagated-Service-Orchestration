@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Shared phases for a single-process BuildAndRun launcher.
+
+  A launcher sets its properties and imports ../btsn.services/process-runtime.xml (the
+  ProcessEditor's "Create Build and Run" writes such launchers). The phases match the
+  hand-written launchers:
+    Phase 1  initialise the databases of the hosts in use and Monitor
+    Phase 2  deploy the workflow rules and fire tokens from the event generator
+    Phase 3  collect each host's records into Monitor
+
+  Required launcher properties
+    launcher.profile.file      deployment profile (catalogue + infrastructure + service deployment)
+    workflow.process.name      process under ProcessDefinitionFolder, e.g. petrinet/Workflow/X
+    init.process.name          initialiser covering the hosts in use
+    collector.process.name     collector covering the hosts in use
+    target.place, target.operation, event.generator.id
+    run.p1 ... run.p6          set for each host the deployment uses
+    first.node                 first host in use (p1 ... p6); its calls deploy the admin rules
+-->
+<project name="process-runtime" default="run-complete-workflow" basedir="../.."
+         xmlns:if="ant:if" xmlns:unless="ant:unless">
+
+    <import file="launcher-runtime.xml"/>
+
+    <property name="infrastructure.definition.name" value="SingleHost"/>
+    <property name="process.title" value="${workflow.process.name}"/>
+    <property name="rule.version" value="v001"/>
+    <property name="query.version" value="${rule.version}"/>
+    <property name="token.count" value="10"/>
+    <property name="token.expire" value="120000"/>
+    <property name="trigger.file" value=""/>
+
+    <property name="p1.mode" value="auto"/>
+    <property name="p2.mode" value="auto"/>
+    <property name="p3.mode" value="auto"/>
+    <property name="p4.mode" value="auto"/>
+    <property name="p5.mode" value="auto"/>
+    <property name="p6.mode" value="auto"/>
+    <property name="monitor.mode" value="auto"/>
+
+    <property name="init.version" value="v999"/>
+    <property name="db.init.operation" value="purgeAndInitialize"/>
+    <property name="collector.version" value="v999"/>
+    <property name="collector.operation" value="collectAllData"/>
+
+    <property name="service.startup.seconds" value="3"/>
+    <property name="init.delay.seconds" value="3"/>
+    <property name="phase.delay.seconds" value="5"/>
+    <property name="workflow.completion.seconds" value="10"/>
+    <property name="collector.delay.seconds" value="3"/>
+
+    <property name="output.dir" location="${basedir}"/>
+    <property name="monitor.output.file" location="${output.dir}/MonitorService.out.txt"/>
+
+    <property name="service.loader.class" value="org.btsn.handlers.ServiceLoader"/>
+    <property name="init.event.generator.class" value="org.btsn.common.eventgenerators.DatabaseInitialization_EventGenerator"/>
+    <property name="token.generator.class" value="org.btsn.petrinet.eventgenerators.GenericPetriNetTokenGenerator"/>
+    <property name="collector.event.generator.class" value="org.btsn.common.eventgenerators.Common_Collector_EventGenerator"/>
+
+    <condition property="trigger.file.set"><not><equals arg1="${trigger.file}" arg2=""/></not></condition>
+    <property name="${first.node}.first" value="true"/>
+
+    <!-- A host process for one node, started only when the deployment uses it and it runs here. -->
+    <macrodef name="start-host">
+        <attribute name="node"/><attribute name="label"/>
+        <sequential>
+            <echo message="  [@{node}] Skipping - running on remote host" if:set="run.@{node}" unless:set="@{node}.is.local"/>
+            <java failonerror="true" classname="${service.loader.class}" if:set="@{node}.launch"
+                  fork="true" timeout="600000" dir="${@{node}.project.dir}" output="${output.dir}/@{label}_Place.out.txt">
+                <classpath refid="@{node}.classpath"/>
+                <arg value="${@{node}.project.dir}"/>
+                <arg value="-version"/><arg value="${rule.version}"/>
+            </java>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="initialise-host">
+        <attribute name="node"/><attribute name="service"/><attribute name="sequence"/>
+        <sequential>
+            <java classname="${init.event.generator.class}" fork="true" dir="${generator.project.dir}" failonerror="true" if:set="run.@{node}">
+                <classpath refid="generator.classpath"/>
+                <arg value="-service"/><arg value="@{service}"/>
+                <arg value="-operation"/><arg value="${db.init.operation}"/>
+                <arg value="-version"/><arg value="${init.version}"/>
+                <arg value="-process"/><arg value="${init.process.name}"/>
+                <arg value="-sequenceId"/><arg value="@{sequence}"/>
+                <arg value="-tokens"/><arg value="1"/>
+                <arg value="-skipDeploy" unless:set="@{node}.first"/>
+            </java>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="collect-host">
+        <attribute name="node"/><attribute name="service"/><attribute name="sequence"/>
+        <sequential>
+            <echo message="Collecting from @{service}..." if:set="run.@{node}"/>
+            <java classname="${collector.event.generator.class}" fork="true" dir="${generator.project.dir}" failonerror="true" if:set="run.@{node}">
+                <classpath refid="generator.classpath"/>
+                <arg value="-service"/><arg value="@{service}"/>
+                <arg value="-operation"/><arg value="${collector.operation}"/>
+                <arg value="-version"/><arg value="${collector.version}"/>
+                <arg value="-process"/><arg value="${collector.process.name}"/>
+                <arg value="-queryVersion"/><arg value="${query.version}"/>
+                <arg value="-sequenceId"/><arg value="@{sequence}"/>
+                <arg value="-skipDeploy" unless:set="@{node}.first"/>
+            </java>
+            <sleep seconds="${collector.delay.seconds}" if:set="run.@{node}"/>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="resolve-host">
+        <attribute name="node"/>
+        <sequential>
+            <resolve-local-launch component="@{node}" mode="${@{node}.mode}" if:set="run.@{node}"/>
+            <condition property="@{node}.launch"><and><isset property="run.@{node}"/><isset property="@{node}.is.local"/></and></condition>
+        </sequential>
+    </macrodef>
+
+    <target name="resolve-deployment-modes" depends="prepare-runtime,detect-local-channel">
+        <resolve-host node="p1"/><resolve-host node="p2"/><resolve-host node="p3"/>
+        <resolve-host node="p4"/><resolve-host node="p5"/><resolve-host node="p6"/>
+        <resolve-local-launch component="monitor" mode="${monitor.mode}"/>
+    </target>
+
+    <target name="clean-output" description="Remove the previous host output files">
+        <delete quiet="true"><fileset dir="${output.dir}" includes="P?_Place.out.txt,MonitorService.out.txt"/></delete>
+    </target>
+
+    <target name="generate-workflow-bindings" depends="prepare-runtime" description="Generate canonical bindings from the process">
+        <java classname="org.btsn.rulecontroller.TopologyBindingGenerator" classpathref="generator.classpath"
+              dir="${common.project.dir}" fork="true" failonerror="true">
+            <arg value="${workflow.process.name}"/><arg value="${rule.version}"/>
+        </java>
+    </target>
+
+    <target name="rebuild-service-ruleml" depends="prepare-runtime,generate-workflow-bindings" description="Rebuild the master Service.ruleml">
+        <java classname="org.btsn.utils.BuildMasterServiceRuleBase" classpathref="generator.classpath"
+              dir="${common.project.dir}" fork="true" failonerror="true">
+            <arg value="${rule.version}"/><arg value="ALL"/>
+        </java>
+    </target>
+
+    <target name="deploy-workflow">
+        <echo message="Deploying ${workflow.process.name} (${rule.version})..."/>
+        <java classname="${token.generator.class}" fork="true" dir="${generator.project.dir}" failonerror="true">
+            <classpath refid="generator.classpath"/>
+            <arg value="-version"/><arg value="${rule.version}"/>
+            <arg value="-process"/><arg value="${workflow.process.name}"/>
+            <arg value="-infrastructure"/><arg value="${infrastructure.definition.name}"/>
+            <arg value="-place"/><arg value="${target.place}"/>
+            <arg value="-operation"/><arg value="${target.operation}"/>
+            <arg value="-tokens"/><arg value="0"/>
+            <arg value="-expire"/><arg value="${token.expire}"/>
+            <arg value="-generator"/><arg value="${event.generator.id}"/>
+        </java>
+    </target>
+
+    <target name="fire-tokens">
+        <echo message="Firing ${token.count} tokens from ${event.generator.id} to ${target.place}.${target.operation}..."/>
+        <java classname="${token.generator.class}" fork="true" dir="${generator.project.dir}" failonerror="true">
+            <classpath refid="generator.classpath"/>
+            <arg value="-version"/><arg value="${rule.version}"/>
+            <arg value="-process"/><arg value="${workflow.process.name}"/>
+            <arg value="-infrastructure"/><arg value="${infrastructure.definition.name}"/>
+            <arg value="-place"/><arg value="${target.place}"/>
+            <arg value="-operation"/><arg value="${target.operation}"/>
+            <arg value="-tokens"/><arg value="${token.count}"/>
+            <arg value="-expire"/><arg value="${token.expire}"/>
+            <arg value="-generator"/><arg value="${event.generator.id}"/>
+            <arg value="-triggerfile" if:set="trigger.file.set"/><arg value="${trigger.file}" if:set="trigger.file.set"/>
+            <arg value="-skipdeploy"/>
+        </java>
+    </target>
+
+    <target name="run-complete-workflow" depends="prepare-runtime,resolve-deployment-modes,clean-output,rebuild-service-ruleml"
+            description="Initialise, run the process and collect its records (default)">
+        <echo message="================================================================"/>
+        <echo message="  ${process.title}"/>
+        <echo message="  Version ${rule.version}, ${token.count} tokens from ${event.generator.id}"/>
+        <echo message="================================================================"/>
+        <parallel>
+            <start-host node="p1" label="P1"/><start-host node="p2" label="P2"/><start-host node="p3" label="P3"/>
+            <start-host node="p4" label="P4"/><start-host node="p5" label="P5"/><start-host node="p6" label="P6"/>
+            <echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local"/>
+            <java failonerror="true" classname="${service.loader.class}" if:set="monitor.is.local"
+                  fork="true" timeout="600000" dir="${monitor.project.dir}" output="${monitor.output.file}">
+                <classpath refid="monitor.classpath"/>
+                <arg value="${monitor.project.dir}"/>
+                <arg value="-version"/><arg value="${rule.version}"/>
+            </java>
+            <sequential>
+                <echo message="Waiting ${service.startup.seconds}s for services to start..."/>
+                <sleep seconds="${service.startup.seconds}"/>
+
+                <echo message="=== PHASE 1: DATABASE INITIALIZATION ==="/>
+                <initialise-host node="p1" service="P1_InitializationService" sequence="999000000"/>
+                <initialise-host node="p2" service="P2_InitializationService" sequence="999100000"/>
+                <initialise-host node="p3" service="P3_InitializationService" sequence="999200000"/>
+                <initialise-host node="p4" service="P4_InitializationService" sequence="999300000"/>
+                <initialise-host node="p5" service="P5_InitializationService" sequence="999400000"/>
+                <initialise-host node="p6" service="P6_InitializationService" sequence="999500000"/>
+                <java classname="${init.event.generator.class}" fork="true" dir="${generator.project.dir}" failonerror="true">
+                    <classpath refid="generator.classpath"/>
+                    <arg value="-service"/><arg value="Monitor_InitializationService"/>
+                    <arg value="-operation"/><arg value="${db.init.operation}"/>
+                    <arg value="-version"/><arg value="${init.version}"/>
+                    <arg value="-process"/><arg value="${init.process.name}"/>
+                    <arg value="-sequenceId"/><arg value="999600000"/>
+                    <arg value="-tokens"/><arg value="1"/>
+                    <arg value="-skipDeploy"/>
+                </java>
+                <sleep seconds="${init.delay.seconds}"/>
+                <echo message="=== Phase 1 Complete ==="/>
+                <sleep seconds="${phase.delay.seconds}"/>
+
+                <echo message="=== PHASE 2: WORKFLOW EXECUTION ==="/>
+                <antcall target="deploy-workflow"/>
+                <antcall target="fire-tokens"/>
+                <echo message="Waiting ${workflow.completion.seconds}s for the last workflows to finish..."/>
+                <sleep seconds="${workflow.completion.seconds}"/>
+                <echo message="=== Phase 2 Complete ==="/>
+
+                <echo message="=== PHASE 3: DATA COLLECTION ==="/>
+                <collect-host node="p1" service="P1_CollectorService" sequence="999010000"/>
+                <collect-host node="p2" service="P2_CollectorService" sequence="999020000"/>
+                <collect-host node="p3" service="P3_CollectorService" sequence="999030000"/>
+                <collect-host node="p4" service="P4_CollectorService" sequence="999040000"/>
+                <collect-host node="p5" service="P5_CollectorService" sequence="999050000"/>
+                <collect-host node="p6" service="P6_CollectorService" sequence="999060000"/>
+                <echo message="=== Phase 3 Complete ==="/>
+                <echo message="${process.title} COMPLETED SUCCESSFULLY"/>
+                <echo message="Analyse with: ant -f ${ant.file} analyse"/>
+                <echo message="Services are still running. Press Ctrl+C to stop."/>
+            </sequential>
+        </parallel>
+    </target>
+
+    <target name="help" description="Usage">
+        <echo message="ant                      initialise, run ${workflow.process.name} and collect (default)"/>
+        <echo message="ant analyse              analyse the Monitor database after a run"/>
+        <echo message="-Dtoken.count=N          tokens to fire (default ${token.count})"/>
+        <echo message="-Drule.version=v00N      rule version (default ${rule.version})"/>
+        <echo message="-Dhost.address=127.0.0.1 run every host on this machine"/>
+        <echo message="-Dp1.mode=local|remote   start or skip a host (default auto)"/>
+    </target>
+</project>

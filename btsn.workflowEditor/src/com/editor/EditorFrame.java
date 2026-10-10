@@ -726,10 +726,13 @@ public class EditorFrame extends JPanel {
      */
     private void addServiceSelection(ProcessElement element) {
         ServiceRegistry registry = canvas.getServiceRegistry();
-        JButton choose = new JButton("Choose service deployment...");
-        choose.addActionListener(e -> { canvas.chooseServiceDeployment(this); updateSelection(element); });
+        // Designing needs only the catalogue; where each place runs is decided later with Deploy.
+        JButton choose = new JButton("Choose catalogue...");
+        choose.addActionListener(e -> { canvas.chooseCatalogue(this); updateSelection(element); });
         attributesPanel.add(choose);
-        JTextArea source = new JTextArea(registry.selectionLabel());
+        String sourceText = registry.problem() != null ? registry.problem()
+            : "Catalogue: " + registry.catalogueFile().getName() + (registry.hasDeployment() ? "\nDeployment: " + registry.deploymentFile().getName() : "");
+        JTextArea source = new JTextArea(sourceText);
         source.setEditable(false); source.setOpaque(false); source.setLineWrap(true); source.setWrapStyleWord(true);
         source.setPreferredSize(new Dimension(220, 40)); source.setMinimumSize(new Dimension(0, 40)); source.setMaximumSize(new Dimension(Integer.MAX_VALUE, 55));
         source.setToolTipText(registry.description()); attributesPanel.add(source);
@@ -739,37 +742,46 @@ public class EditorFrame extends JPanel {
             String value = (String)services.getSelectedItem();
             if (!registry.services().contains(value) || value.equals(element.getService())) return;
             element.setService(value); element.setServiceInstance(""); element.setServiceOperations(new ArrayList<>());
+            List<String> available = registry.operations(value);
+            if (available.size() == 1) selectOperation(registry, element, available.get(0));
             updateSelection(element); canvas.serviceContractChanged();
         });
         String op = element.getOperations().isEmpty() ? "" : element.getOperations().get(0);
         JComboBox<String> operations = ServiceRegistry.choices(registry.operations(element.getService()), op);
         addComboField("Operation:", operations, op);
-        JComboBox<String> instances = ServiceRegistry.choices(registry.instances(element.getService(), op.isEmpty() ? null : op), ServiceRegistry.identity(element));
-        addComboField("Deployment instance:", instances, ServiceRegistry.identity(element));
         operations.addActionListener(e -> {
             String value = (String)operations.getSelectedItem();
             if (!registry.operations(element.getService()).contains(value)) return;
-            List<String> valid = registry.instances(element.getService(), value);
-            String identity = ServiceRegistry.identity(element);
-            if (valid.contains(identity)) registry.apply(element, value, identity);
-            else {
-                element.setServiceOperations(java.util.Arrays.asList(new ServiceOperation(value)));
-                element.setServiceInstance("");
-                if (valid.size() == 1) registry.apply(element, value, valid.get(0));
-            }
+            selectOperation(registry, element, value);
             updateSelection(element); canvas.serviceContractChanged();
         });
-        instances.addActionListener(e -> {
-            String identity = (String)instances.getSelectedItem();
-            if (registry.endpoint(element.getService(), op, identity) == null) return;
-            registry.apply(element, op, identity); updateSelection(element); canvas.serviceContractChanged();
-        });
+        if (registry.hasDeployment()) {
+            JComboBox<String> instances = ServiceRegistry.choices(registry.instances(element.getService(), op.isEmpty() ? null : op), ServiceRegistry.identity(element));
+            addComboField("Deployment instance:", instances, ServiceRegistry.identity(element));
+            instances.addActionListener(e -> {
+                String identity = (String)instances.getSelectedItem();
+                if (registry.endpoint(element.getService(), op, identity) == null) return;
+                registry.apply(element, op, identity); updateSelection(element); canvas.serviceContractChanged();
+            });
+        }
+        String node = canvas.nodeFor(element);
+        String where = "Not deployed yet. Right-click the place and choose Deploy to, or use Deploy.";
+        if (!node.isEmpty()) {
+            where = node;
+            for (ServiceRegistry.Node candidate : ServiceRegistry.infrastructureNodes(canvas.getDefinitionLocation()))
+                if (candidate.node.equals(node)) where = candidate.describe();
+            if (canvas.hasPendingNode(element)) where += " (not saved; use Deploy)";
+        }
+        JTextArea runsOn = new JTextArea(where); runsOn.setEditable(false); runsOn.setLineWrap(true); runsOn.setWrapStyleWord(true);
+        runsOn.setBorder(BorderFactory.createTitledBorder("Runs on"));
+        runsOn.setPreferredSize(new Dimension(220, 52)); runsOn.setMinimumSize(new Dimension(0, 52)); runsOn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
+        attributesPanel.add(runsOn);
         for (ServiceOperation operation : element.getServiceOperations()) {
             StringBuilder text = new StringBuilder(operation.getName()).append("(");
             for (ServiceArgument argument : operation.getArguments()) { if (text.charAt(text.length()-1) != '(') text.append(", "); text.append(argument.getName()); }
-            text.append(") → ").append(operation.getReturnAttribute());
+            text.append(") \u2192 ").append(operation.getReturnAttribute());
             JTextArea detail = new JTextArea(text.toString()); detail.setEditable(false); detail.setLineWrap(true); detail.setWrapStyleWord(true);
-            detail.setBorder(BorderFactory.createTitledBorder("Deployment contract"));
+            detail.setBorder(BorderFactory.createTitledBorder("Contract"));
             detail.setPreferredSize(new Dimension(220, 70)); detail.setMinimumSize(new Dimension(0, 70)); detail.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
             attributesPanel.add(detail);
         }
@@ -778,6 +790,17 @@ public class EditorFrame extends JPanel {
             JTextArea warning = new JTextArea(String.join("\n", errors)); warning.setEditable(false); warning.setLineWrap(true); warning.setWrapStyleWord(true); warning.setForeground(Color.RED);
             warning.setBorder(BorderFactory.createTitledBorder("Unresolved service contract")); attributesPanel.add(warning);
         }
+    }
+
+    /** Keep the place's deployed instance when it offers the operation; otherwise take the contract from the catalogue. */
+    private void selectOperation(ServiceRegistry registry, ProcessElement element, String operation) {
+        List<String> valid = registry.instances(element.getService(), operation);
+        String identity = ServiceRegistry.identity(element);
+        if (registry.hasDeployment() && valid.contains(identity)) { registry.apply(element, operation, identity); return; }
+        element.setServiceInstance("");
+        if (registry.hasDeployment() && valid.size() == 1) { registry.apply(element, operation, valid.get(0)); return; }
+        element.setServiceOperations(new ArrayList<>());
+        registry.applyCatalogue(element, operation);
     }
 
     /**

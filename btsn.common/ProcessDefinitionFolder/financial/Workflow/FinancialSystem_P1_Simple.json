@@ -84,5 +84,6 @@
     }
   ],
   "textElements": [
-  ]
+  ],
+  "serviceDeployment": "ServiceDeploymentFolder/financial/FinancialSystem.json"
 }

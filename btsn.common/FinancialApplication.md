@@ -9,11 +9,11 @@ this file.
 
 The Financial application currently has two active workflow definitions:
 
-- `ProcessDefinitionFolder/petrinet/Workflow/FinancialSystem_P1_P5_Workflow.json`
+- `ProcessDefinitionFolder/financial/Workflow/FinancialSystem_P1_P5_Workflow.json`
   - v001 full loan application workflow
   - Validation -> CreditCheck/FraudCheck -> Underwriting -> Decision
   - business terminates directly; Monitor is not part of the business route
-- `ProcessDefinitionFolder/petrinet/Workflow/FinancialSystem_Stage3_PreScreen_Workflow.json`
+- `ProcessDefinitionFolder/financial/Workflow/FinancialSystem_Stage3_PreScreen_Workflow.json`
   - v002 pre-screen workflow
   - Validation -> CreditCheck -> terminate
   - shares physical P1/P2 infrastructure with v001
@@ -47,7 +47,7 @@ workflow definitions and business implementation.
 
 Authoritative capability inventory:
 
-- `BusinessServiceDefinitions/FinancialSystem.json`
+- `BusinessServiceDefinitions/financial/FinancialSystem.json`
 
 Active implementations:
 
@@ -120,8 +120,7 @@ no additional queue-boundary instrumentation is part of this stable branch.
 The following files remain in the repository for historical, development, or
 single-node testing purposes and are not the authoritative application definitions:
 
-- `ProcessDefinitionFolder/FinancialSystem.json`
-- `ProcessDefinitionFolder/FinancialSystem_P1_Simple.json`
+- `ProcessDefinitionFolder/financial/Workflow/FinancialSystem_P1_Simple.json`
 - `../btsn.financial.ProjectLoader/FinancialSystem_P1_Simple_BuildAndRun.xml`
 - `../btsn.financial.ProjectLoader/FinancialSystem_Stage3_Concurrent_BuildAndRun.xml`
 - `../btsn.financial.ProjectLoader/FinancialSystem_Stage4_LiveDeployment_BuildAndRun.xml`
