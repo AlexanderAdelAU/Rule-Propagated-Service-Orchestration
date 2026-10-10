@@ -199,19 +199,31 @@ Click **Build and Run** in the toolbar. The editor first checks that:
 It lists anything missing. Healthcare processes use their own token generator
 and are not supported here yet.
 
-![The Create Build and Run dialog for the P2 tutorial: event generator EG11, rule version v001, 10 tokens, 1000 ms between tokens, 10 s wait after the last token, launcher name P2_Tutorial_Workflow_BuildAndRun.xml in btsn.petrinet.ProjectLoader, and a summary of the files it will write or reuse.](images/p2-tutorial-build-and-run.png)
+![The Create Build and Run dialog for the P2 tutorial with a second event generator: 10 tokens per generator, 10 s wait, launcher name P2_Tutorial_Workflow_BuildAndRun.xml in btsn.petrinet.ProjectLoader; an Event generators table with EG11 at v001 and EG6 at v002, both feeding P2_Place.processToken every 1000 ms; and a summary of the files it will write or reuse.](images/p2-tutorial-build-and-run.png)
 
-*Create Build and Run, shown for the supplied P2 tutorial. The summary marks each file as Write, Reuse or Replace before anything is written.*
+*Create Build and Run, shown for the P2 tutorial with a second generator, EG6, at v002. The summary marks each file as Write, Reuse or Replace before anything is written.*
 
 | Choice | Default | Meaning |
 |---|---|---|
-| **Event generator** | The first generator in the process | Which generator fires the tokens, and the place it feeds |
-| **Rule version** | The generator's Version | Version of the workflow rules and tokens (`v001`–`v003`) |
-| **Number of tokens** | `10` | Root workflows to start |
-| **Interval between tokens (ms)** | The generator's Rate | Spacing of the token schedule |
+| **Tokens per generator** | `10` | Root workflows each generator starts |
 | **Wait after last token (s)** | `10` | Time for the last workflows to finish before collection |
 | **Launcher name** | `<process>_BuildAndRun.xml` | File name of the launcher |
 | **Folder** | `btsn.<domain>.ProjectLoader` | Where the launcher is written |
+
+The **Event generators** table has one row per generator in the process:
+
+| Column | Default | Meaning |
+|---|---|---|
+| **Run** | Ticked | Untick a generator to leave it out of this launcher |
+| **Feeds** | From the design | The runtime place and operation the generator's tokens go to |
+| **Version** | The generator's Version | Rule version for its tokens (`v001`–`v003`) |
+| **Interval (ms)** | The generator's Rate | Spacing of its token schedule |
+
+With more than one generator:
+
+- **They all fire together.** Their workflows share the places and compete for them.
+- **Each needs its own version.** The version keeps their tokens apart, so Create stays disabled until no two ticked generators share one.
+- **The analysis separates them.** It reports each version on its own, and the replay shows all of them.
 
 Click **Create**. For `My_P2_Workflow` the editor writes:
 
@@ -219,7 +231,7 @@ Click **Create**. For `My_P2_Workflow` the editor writes:
 |---|---|
 | `btsn.petrinet.ProjectLoader/My_P2_Workflow_BuildAndRun.xml` | The launcher: your choices as properties, plus an import of the shared run phases |
 | `btsn.services/deployments/models/My_P2_WorkflowDeployment.json` | Deployment profile: catalogue, infrastructure and your service deployment. An existing profile for the same deployment is reused. |
-| `btsn.common.eventgenerators/EventTriggeringFile/My_P2_Workflow_BuildAndRun.csv` | Token schedule, one `time_ms,0,1` row per token |
+| `btsn.common.eventgenerators/EventTriggeringFile/My_P2_Workflow_BuildAndRun.csv` | Token schedule, one `time_ms,0,1` row per token. With several generators, each gets its own file, named after it (for example `..._BuildAndRun_EG6.csv`). |
 | `ProcessDefinitionFolder/common/Initializers/P2_Initialization.json` | Resets the hosts and Monitor. Reused when it exists; written for a new set of nodes (for example `P3_P5_Initialization`). |
 | `ProcessDefinitionFolder/common/Collectors/P2_Collector.json` | Collects the observations into Monitor. Reused or written the same way. |
 
@@ -274,7 +286,6 @@ launcher. The collected data is in `btsn.common.Monitor/ServiceAnalysisDataBase`
 |---|---|
 | `-Dtoken.count=5` | Fire only the first 5 tokens of the schedule. To fire more than it holds, recreate the launcher with a larger number. |
 | `-Dworkflow.completion.seconds=30` | Wait longer after the last token before collecting |
-| `-Drule.version=v002` | Run under another rule version |
 | `-Dhost.address=127.0.0.1` | Run every host on this machine |
 | `-Dp2.mode=local` or `remote` | Force a host to start here, or expect it elsewhere |
 

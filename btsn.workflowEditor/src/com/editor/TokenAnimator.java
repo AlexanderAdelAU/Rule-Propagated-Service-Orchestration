@@ -564,12 +564,13 @@ public class TokenAnimator {
     
     /**
      * An analysis file can hold several analyzer runs appended one after another (for example an
-     * output file opened in append mode). Each run starts with its "Auto-detected ... workflow bases"
-     * line; replay only the last run so earlier runs do not stretch the timeline.
+     * output file opened in append mode). Each run starts with an "Auto-detected ... workflow bases" line,
+     * or "Analyzing ALL ... workflow bases" when run with --all as the launchers' analyse target does;
+     * replay only the last run so earlier runs do not stretch the timeline.
      * Output copied from an Ant console carries a "[java]" prefix on each line.
      */
     static String lastAnalyzerRun(String text) {
-        java.util.regex.Matcher m = java.util.regex.Pattern.compile("(?m)^[ \\t]*(?:\\[java\\][ \\t]*)?Auto-detected \\d+ workflow bases").matcher(text);
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("(?m)^[ \\t]*(?:\\[java\\][ \\t]*)?(?:Auto-detected|Analyzing ALL) \\d+ workflow bases").matcher(text);
         int last = -1, runs = 0;
         while (m.find()) { last = m.start(); runs++; }
         if (runs < 2) return text;

@@ -6,7 +6,7 @@
   ProcessEditor's "Create Build and Run" writes such launchers). The phases match the
   hand-written launchers:
     Phase 1  initialise the databases of the hosts in use and Monitor
-    Phase 2  deploy the workflow rules and fire tokens from the event generator
+    Phase 2  deploy the workflow rules for each event generator's version, then fire all generators together
     Phase 3  collect each host's records into Monitor
 
   Required launcher properties
@@ -14,7 +14,11 @@
     workflow.process.name      process under ProcessDefinitionFolder, e.g. petrinet/Workflow/X
     init.process.name          initialiser covering the hosts in use
     collector.process.name     collector covering the hosts in use
-    target.place, target.operation, event.generator.id
+    eg1.id, eg1.version, eg1.place, eg1.operation, eg1.trigger.file
+                               one block per event generator (eg1 to eg3), each with its own rule
+                               version so their tokens stay apart; query.version lists the versions
+                               (e.g. v001,v002). A single-generator launcher may instead set
+                               event.generator.id, target.place, target.operation, rule.version, trigger.file
     run.p1 ... run.p6          set for each host the deployment uses
     first.node                 first host in use (p1 ... p6); its calls deploy the admin rules
 -->
@@ -58,7 +62,15 @@
     <property name="token.generator.class" value="org.btsn.petrinet.eventgenerators.GenericPetriNetTokenGenerator"/>
     <property name="collector.event.generator.class" value="org.btsn.common.eventgenerators.Common_Collector_EventGenerator"/>
 
-    <condition property="trigger.file.set"><not><equals arg1="${trigger.file}" arg2=""/></not></condition>
+    <!-- Single-generator launchers name their generator with event.generator.id; it becomes eg1. -->
+    <condition property="eg1.id" value="${event.generator.id}"><isset property="event.generator.id"/></condition>
+    <property name="eg1.version" value="${rule.version}"/>
+    <property name="eg1.place" value="${target.place}"/>
+    <property name="eg1.operation" value="${target.operation}"/>
+    <property name="eg1.trigger.file" value="${trigger.file}"/>
+    <condition property="eg1.trigger.set"><and><isset property="eg1.id"/><not><equals arg1="${eg1.trigger.file}" arg2=""/></not></and></condition>
+    <condition property="eg2.trigger.set"><and><isset property="eg2.trigger.file"/><not><equals arg1="${eg2.trigger.file}" arg2=""/></not></and></condition>
+    <condition property="eg3.trigger.set"><and><isset property="eg3.trigger.file"/><not><equals arg1="${eg3.trigger.file}" arg2=""/></not></and></condition>
     <property name="${first.node}.first" value="true"/>
 
     <!-- A host process for one node, started only when the deployment uses it and it runs here. -->
@@ -127,57 +139,83 @@
         <delete quiet="true"><fileset dir="${output.dir}" includes="P?_Place.out.txt,MonitorService.out.txt"/></delete>
     </target>
 
-    <target name="generate-workflow-bindings" depends="prepare-runtime" description="Generate canonical bindings from the process">
-        <java classname="org.btsn.rulecontroller.TopologyBindingGenerator" classpathref="generator.classpath"
-              dir="${common.project.dir}" fork="true" failonerror="true">
-            <arg value="${workflow.process.name}"/><arg value="${rule.version}"/>
-        </java>
+    <!-- Bindings and master rules for one event generator's version (skipped when the slot is unused). -->
+    <macrodef name="prepare-version">
+        <attribute name="slot"/>
+        <sequential>
+            <java classname="org.btsn.rulecontroller.TopologyBindingGenerator" classpathref="generator.classpath"
+                  dir="${common.project.dir}" fork="true" failonerror="true" if:set="@{slot}.id">
+                <arg value="${workflow.process.name}"/><arg value="${@{slot}.version}"/>
+            </java>
+            <java classname="org.btsn.utils.BuildMasterServiceRuleBase" classpathref="generator.classpath"
+                  dir="${common.project.dir}" fork="true" failonerror="true" if:set="@{slot}.id">
+                <arg value="${@{slot}.version}"/><arg value="ALL"/>
+            </java>
+        </sequential>
+    </macrodef>
+
+    <!-- Deploy the process under one generator's version. -->
+    <macrodef name="deploy-generator">
+        <attribute name="slot"/>
+        <sequential>
+            <echo message="Deploying ${workflow.process.name} (${@{slot}.version}) for ${@{slot}.id}..." if:set="@{slot}.id"/>
+            <java classname="${token.generator.class}" fork="true" dir="${generator.project.dir}" failonerror="true" if:set="@{slot}.id">
+                <classpath refid="generator.classpath"/>
+                <arg value="-version"/><arg value="${@{slot}.version}"/>
+                <arg value="-process"/><arg value="${workflow.process.name}"/>
+                <arg value="-infrastructure"/><arg value="${infrastructure.definition.name}"/>
+                <arg value="-place"/><arg value="${@{slot}.place}"/>
+                <arg value="-operation"/><arg value="${@{slot}.operation}"/>
+                <arg value="-tokens"/><arg value="0"/>
+                <arg value="-expire"/><arg value="${token.expire}"/>
+                <arg value="-generator"/><arg value="${@{slot}.id}"/>
+            </java>
+        </sequential>
+    </macrodef>
+
+    <!-- Fire one generator's tokens on its schedule. -->
+    <macrodef name="fire-generator">
+        <attribute name="slot"/>
+        <sequential>
+            <echo message="Firing ${token.count} tokens from ${@{slot}.id} (${@{slot}.version}) to ${@{slot}.place}.${@{slot}.operation}..." if:set="@{slot}.id"/>
+            <java classname="${token.generator.class}" fork="true" dir="${generator.project.dir}" failonerror="true" if:set="@{slot}.id">
+                <classpath refid="generator.classpath"/>
+                <arg value="-version"/><arg value="${@{slot}.version}"/>
+                <arg value="-process"/><arg value="${workflow.process.name}"/>
+                <arg value="-infrastructure"/><arg value="${infrastructure.definition.name}"/>
+                <arg value="-place"/><arg value="${@{slot}.place}"/>
+                <arg value="-operation"/><arg value="${@{slot}.operation}"/>
+                <arg value="-tokens"/><arg value="${token.count}"/>
+                <arg value="-expire"/><arg value="${token.expire}"/>
+                <arg value="-generator"/><arg value="${@{slot}.id}"/>
+                <arg value="-triggerfile" if:set="@{slot}.trigger.set"/><arg value="${@{slot}.trigger.file}" if:set="@{slot}.trigger.set"/>
+                <arg value="-skipdeploy"/>
+            </java>
+        </sequential>
+    </macrodef>
+
+    <target name="generate-workflow-bindings" depends="prepare-runtime" description="Generate canonical bindings and master rules for each generator's version">
+        <prepare-version slot="eg1"/><prepare-version slot="eg2"/><prepare-version slot="eg3"/>
     </target>
 
-    <target name="rebuild-service-ruleml" depends="prepare-runtime,generate-workflow-bindings" description="Rebuild the master Service.ruleml">
-        <java classname="org.btsn.utils.BuildMasterServiceRuleBase" classpathref="generator.classpath"
-              dir="${common.project.dir}" fork="true" failonerror="true">
-            <arg value="${rule.version}"/><arg value="ALL"/>
-        </java>
-    </target>
+    <target name="rebuild-service-ruleml" depends="prepare-runtime,generate-workflow-bindings" description="Rebuild the master Service.ruleml (done per version above)"/>
 
     <target name="deploy-workflow">
-        <echo message="Deploying ${workflow.process.name} (${rule.version})..."/>
-        <java classname="${token.generator.class}" fork="true" dir="${generator.project.dir}" failonerror="true">
-            <classpath refid="generator.classpath"/>
-            <arg value="-version"/><arg value="${rule.version}"/>
-            <arg value="-process"/><arg value="${workflow.process.name}"/>
-            <arg value="-infrastructure"/><arg value="${infrastructure.definition.name}"/>
-            <arg value="-place"/><arg value="${target.place}"/>
-            <arg value="-operation"/><arg value="${target.operation}"/>
-            <arg value="-tokens"/><arg value="0"/>
-            <arg value="-expire"/><arg value="${token.expire}"/>
-            <arg value="-generator"/><arg value="${event.generator.id}"/>
-        </java>
+        <deploy-generator slot="eg1"/><deploy-generator slot="eg2"/><deploy-generator slot="eg3"/>
     </target>
 
+    <!-- All generators fire together, so their workflows run concurrently. -->
     <target name="fire-tokens">
-        <echo message="Firing ${token.count} tokens from ${event.generator.id} to ${target.place}.${target.operation}..."/>
-        <java classname="${token.generator.class}" fork="true" dir="${generator.project.dir}" failonerror="true">
-            <classpath refid="generator.classpath"/>
-            <arg value="-version"/><arg value="${rule.version}"/>
-            <arg value="-process"/><arg value="${workflow.process.name}"/>
-            <arg value="-infrastructure"/><arg value="${infrastructure.definition.name}"/>
-            <arg value="-place"/><arg value="${target.place}"/>
-            <arg value="-operation"/><arg value="${target.operation}"/>
-            <arg value="-tokens"/><arg value="${token.count}"/>
-            <arg value="-expire"/><arg value="${token.expire}"/>
-            <arg value="-generator"/><arg value="${event.generator.id}"/>
-            <arg value="-triggerfile" if:set="trigger.file.set"/><arg value="${trigger.file}" if:set="trigger.file.set"/>
-            <arg value="-skipdeploy"/>
-        </java>
+        <parallel>
+            <fire-generator slot="eg1"/><fire-generator slot="eg2"/><fire-generator slot="eg3"/>
+        </parallel>
     </target>
 
     <target name="run-complete-workflow" depends="prepare-runtime,resolve-deployment-modes,clean-output,rebuild-service-ruleml"
             description="Initialise, run the process and collect its records (default)">
         <echo message="================================================================"/>
         <echo message="  ${process.title}"/>
-        <echo message="  Version ${rule.version}, ${token.count} tokens from ${event.generator.id}"/>
+        <echo message="  Versions ${query.version}: ${token.count} tokens from each event generator"/>
         <echo message="================================================================"/>
         <parallel>
             <start-host node="p1" label="P1"/><start-host node="p2" label="P2"/><start-host node="p3" label="P3"/>
@@ -240,7 +278,6 @@
         <echo message="ant                      initialise, run ${workflow.process.name} and collect (default)"/>
         <echo message="ant analyse              analyse the Monitor database after a run"/>
         <echo message="-Dtoken.count=N          tokens to fire (default ${token.count})"/>
-        <echo message="-Drule.version=v00N      rule version (default ${rule.version})"/>
         <echo message="-Dhost.address=127.0.0.1 run every host on this machine"/>
         <echo message="-Dp1.mode=local|remote   start or skip a host (default auto)"/>
     </target>
