@@ -536,6 +536,14 @@ public class ProcessEditor extends JFrame {
         deployBtn.setFocusPainted(false);
         deployBtn.addActionListener(e -> openDeployPanel());
         toolbar.add(deployBtn);
+
+        toolbar.add(Box.createHorizontalStrut(5));
+
+        JButton buildRunBtn = new JButton("Build and Run");
+        buildRunBtn.setToolTipText("Create an Ant launcher that initialises, runs and collects this deployed process");
+        buildRunBtn.setFocusPainted(false);
+        buildRunBtn.addActionListener(e -> createBuildAndRun());
+        toolbar.add(buildRunBtn);
         
         toolbar.addSeparator(new Dimension(20, 32));
         
@@ -1233,6 +1241,21 @@ public class ProcessEditor extends JFrame {
             return;
         }
         deployFrame = InfrastructureDefinitionFrame.openForProcess(this, canvas, currentFile);
+    }
+
+    /** Create Build and Run: available once the process is saved, deployed and valid. */
+    private void createBuildAndRun() {
+        java.util.List<String> problems = new ArrayList<>();
+        if (currentFile == null || isDirty) problems.add("Save the process first.");
+        if (deployFrame != null && deployFrame.isDisplayable() && deployFrame.getTitle().endsWith("*")) problems.add("Save the deployment in the Deploy panel first.");
+        problems.addAll(canvas.validateServiceContracts());
+        BuildAndRunGenerator.Plan plan = BuildAndRunGenerator.plan(canvas, currentFile);
+        for (String problem : plan.problems) if (!problems.contains(problem)) problems.add(problem);
+        if (!problems.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Before creating Build and Run:\n" + String.join("\n", problems), "Build and Run", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        new BuildAndRunDialog(this, plan).setVisible(true);
     }
 
     /** The Deploy panel belongs to the process on the canvas; close it before another process replaces it. */

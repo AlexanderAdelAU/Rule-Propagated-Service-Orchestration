@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Entry point for generated single-process launchers; see build/workflows/process-runtime.xml. -->
+<project name="process-runtime-entry" default="run-complete-workflow" basedir=".">
+    <import file="build/workflows/process-runtime.xml"/>
+</project>

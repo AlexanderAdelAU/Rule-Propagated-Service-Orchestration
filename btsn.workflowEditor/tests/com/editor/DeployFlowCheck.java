@@ -32,6 +32,9 @@ public final class DeployFlowCheck {
         Path scratchCommon = scratch.resolve("btsn.common");
         copy(common.toPath().resolve("BusinessServiceDefinitions"), scratchCommon.resolve("BusinessServiceDefinitions"));
         copy(common.toPath().resolve("InfrastructureDefinitionFolder"), scratchCommon.resolve("InfrastructureDefinitionFolder"));
+        copy(common.toPath().resolve("ProcessDefinitionFolder/common"), scratchCommon.resolve("ProcessDefinitionFolder/common"));
+        Files.createDirectories(scratch.resolve("btsn.services/deployments/models"));
+        Files.createDirectories(scratch.resolve("btsn.petrinet.ProjectLoader"));
         Files.createDirectories(scratchCommon.resolve("ServiceDeploymentFolder/petrinet"));
         Path processFile = scratchCommon.resolve("ProcessDefinitionFolder/petrinet/Workflow/TrafficLight_Design.json");
         Files.createDirectories(processFile.getParent());
@@ -116,6 +119,36 @@ public final class DeployFlowCheck {
                 JSONObject linkedJson = (JSONObject)new JSONParser().parse(linked);
                 check(linkedJson.containsKey("serviceDeployment") && !linkedJson.containsKey("catalog"), "Linked process should name its deployment only");
 
+                // Create Build and Run: the launcher, profile and schedule come from the saved, deployed process.
+                Files.write(processFile, linked.getBytes(StandardCharsets.UTF_8));
+                BuildAndRunGenerator.Plan plan = BuildAndRunGenerator.plan(canvas, processFile.toFile());
+                check(plan.problems.isEmpty(), "Deployed process not ready for Build and Run: " + plan.problems);
+                check("petrinet/Workflow/TrafficLight_Design".equals(plan.processName) && plan.nodes.size() == 6 && "P1_to_P6".equals(plan.nodeSetName), "Plan: " + plan.processName + plan.nodes);
+                check(plan.initializerExists && plan.collectorExists && !plan.profileExists, "Existing P1_to_P6 admin processes not reused / profile not new");
+                String target = canvas.nodeFor(green) + "_Place";
+                check(target.equals(plan.targets.get("TRAFFICLIGHT_EVENTGENERATOR")), "Generator target: " + plan.targets);
+                BuildAndRunDialog dialog = new BuildAndRunDialog(null, plan);
+                dialog.tokens.setValue(4); dialog.interval.setValue(250);
+                File launcher = dialog.createFiles(); dialog.dispose();
+                check(launcher.equals(scratch.resolve("btsn.petrinet.ProjectLoader/TrafficLight_Design_BuildAndRun.xml").toFile()), "Launcher location: " + launcher);
+                String xml = read(launcher.toPath());
+                for (String expected : new String[] {"value=\"petrinet/Workflow/TrafficLight_Design\"", "value=\"common/Initializers/P1_to_P6_Initialization\"",
+                        "name=\"target.place\" value=\"" + target + "\"", "name=\"token.count\" value=\"4\"", "name=\"run.p6\" value=\"true\"",
+                        "location=\"../btsn.services/deployments/models/TrafficLight_DesignDeployment.json\"", "<import file=\"../btsn.services/process-runtime.xml\"/>"})
+                    check(xml.contains(expected), "Launcher lacks " + expected + "\n" + xml);
+                javax.xml.parsers.DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(launcher);
+                check(read(scratch.resolve("btsn.common.eventgenerators/EventTriggeringFile/TrafficLight_Design_BuildAndRun.csv")).equals("0,0,1\n250,0,1\n500,0,1\n750,0,1\n"), "Token schedule");
+                JSONObject profile = (JSONObject)new JSONParser().parse(read(scratch.resolve("btsn.services/deployments/models/TrafficLight_DesignDeployment.json")));
+                check("ServiceDeploymentFolder/petrinet/TrafficLight_Design.json".equals(profile.get("serviceDeployment"))
+                    && "BusinessServiceDefinitions/petrinet/PetriNetModels.json".equals(profile.get("catalog")), "Profile: " + profile);
+                // A host set without admin processes gets a generated initialiser and collector.
+                JSONObject collector = (JSONObject)new JSONParser().parse(BuildAndRunGenerator.adminProcess(Arrays.asList("P3", "P5"), false, "P3_P5"));
+                JSONObject initializer = (JSONObject)new JSONParser().parse(BuildAndRunGenerator.adminProcess(Arrays.asList("P3", "P5"), true, "P3_P5"));
+                check(collector.toJSONString().contains("P5_CollectorService") && collector.toJSONString().contains("writeCollectorData")
+                    && initializer.toJSONString().contains("P3_InitializationService") && initializer.toJSONString().contains("Monitor_InitializationService"), "Generated admin processes");
+                Canvas undeployed = new Canvas(); undeployed.setDefinitionLocation(processFile.toFile()); undeployed.loadFromJSON(design);
+                check(BuildAndRunGenerator.plan(undeployed, processFile.toFile()).problems.stream().anyMatch(p -> p.startsWith("Deploy the process first")), "Undeployed process accepted for Build and Run");
+
                 // Reopening shows the deployed nodes; a new place is reported until it is deployed.
                 Canvas reopened = new Canvas(); reopened.setDefinitionLocation(processFile.toFile()); reopened.loadFromJSON(linked);
                 for (ProcessElement place : reopened.getPlaces()) check(!reopened.nodeFor(place).isEmpty(), "Reopened place lost its node: " + place.getLabel());
@@ -178,7 +211,7 @@ public final class DeployFlowCheck {
             finally { if (panel != null) panel.dispose(); }
         });
         if (failure[0] != null) throw new AssertionError("Existing deployment regression", failure[0]);
-        System.out.println("PASS: catalogue-only design, right-click Deploy to, filled Deploy panel with Place column, two-way node edits, save links process and instances, reopen, existing deployment unchanged");
+        System.out.println("PASS: catalogue-only design, right-click Deploy to, filled Deploy panel with Place column, two-way node edits, save links process and instances, reopen, existing deployment unchanged, Create Build and Run files");
     }
 
     private static int rowOf(JTable table, String place) {
