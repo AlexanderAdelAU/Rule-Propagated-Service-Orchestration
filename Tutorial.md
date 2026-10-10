@@ -18,8 +18,8 @@ on** box show the node it is deployed to.*
 |---|---|---|
 | **1. Design the process** | Draw the net, choose the service and operation for P2, set the guards, then save | [Design](#1-design-the-process) |
 | **2. Deploy the process** | Choose the node P2 runs on, then save the service deployment | [Deploy](#2-deploy-the-process) |
-| **3. Create Build and Run** | Pick the event generator and the number of tokens; the editor writes the Ant launcher | [Build and Run](#3-create-build-and-run) |
-| **4. Run it** | Run the launcher as an Ant Build | [Run](#4-run-it) |
+| **3. Create Build and Run** | Choose the event generators and the number of tokens; the editor writes the Ant launcher | [Build and Run](#3-create-build-and-run) |
+| **4. Run it** | Click **Run**: the editor runs the launcher, analyses the run and loads the replay | [Run](#4-run-it) |
 | **5. Show the results** | Analyse the run, view the charts and replay the tokens on the design | [Results](#5-show-the-results) |
 
 Finished copies of every file are included as `P2_Tutorial_*` ([list](#repository-artefacts)):
@@ -243,7 +243,29 @@ Click **Create**. For `My_P2_Workflow` the editor writes:
 
 ## 4. Run it
 
-### Start the launcher
+### Run from the editor
+
+Click **Run** in the toolbar. The Run window finds the process's launcher and does the whole run:
+
+1. **Builds and starts** the hosts, then follows the launcher through its three phases.
+2. **Settles and stops.** When collection is done, it waits for Monitor to finish writing, then stops the launcher and every host it started.
+3. **Analyses.** It runs `analyse` and saves the report to `btsn.common/AnalysisFolder/PetriNet/Analysis_My_P2_Workflow.txt`, replacing any earlier analysis of the process.
+4. **Loads the replay.** It loads the analysis into the editor, so you can press **Play** straight away ([step 5](#replay-the-tokens-on-the-design)).
+
+![The Run window after a completed run of the P2 tutorial: the launcher, the option to run every host on this computer, the Ant location, the analysis file, the seven steps from Build and start to Replay all completed, and the analyzer report in the output.](images/p2-tutorial-run.png)
+
+*A finished run of the P2 tutorial (here with its two generators). Each step turns green as the run reaches it.*
+
+- **Hosts**: **Run every host on this computer** (ticked) adds `-Dhost.address=127.0.0.1`.
+- **Ant**: the editor calls Apache Ant.
+  - Leave the field blank to use `ANT_HOME` or `ant` on the PATH.
+  - Otherwise choose the `ant` program (`ant.bat` on Windows) in Ant's `bin` folder.
+  - Eclipse includes one under `plugins/org.apache.ant_*/bin`.
+- **Stop**: stops the run, and its hosts, at any point.
+- **Close**: closing the window during a run stops it too.
+- **Save first**: Run uses the saved process and the launcher from [step 3](#3-create-build-and-run).
+
+### Or run the launcher yourself
 
 - **In Eclipse**: refresh `btsn.petrinet.ProjectLoader`, right-click
   **My_P2_Workflow_BuildAndRun.xml**, then choose **Run As → Ant Build**.
@@ -388,7 +410,7 @@ The supplied P2 tutorial, built with exactly these steps:
 | [SingleHost.json](btsn.common/InfrastructureDefinitionFolder/SingleHost.json) | Shared nodes P1–P6, addresses and fixed ports |
 | [P2_Tutorial_WorkflowDeployment.json](btsn.services/deployments/models/P2_Tutorial_WorkflowDeployment.json) | Deployment profile written by Build and Run |
 | [P2_Tutorial_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P2_Tutorial_Workflow_BuildAndRun.xml) | Launcher written by Build and Run |
-| [P2_Tutorial_Workflow_BuildAndRun.csv](btsn.common.eventgenerators/EventTriggeringFile/P2_Tutorial_Workflow_BuildAndRun.csv) | Token schedule |
+| [`P2_Tutorial_Workflow_BuildAndRun*.csv`](btsn.common.eventgenerators/EventTriggeringFile) | Token schedules, one per event generator |
 | [P2_Initialization.json](btsn.common/ProcessDefinitionFolder/common/Initializers/P2_Initialization.json) / [P2_Collector.json](btsn.common/ProcessDefinitionFolder/common/Collectors/P2_Collector.json) | Administrative processes for node P2 |
 | [Analysis_P2_Tutorial_Workflow.txt](btsn.common/AnalysisFolder/PetriNet/Analysis_P2_Tutorial_Workflow.txt) | Analysis of a ten-token run, ready to replay |
 | [process-runtime.xml](btsn.services/process-runtime.xml) | Shared phases imported by every generated launcher |

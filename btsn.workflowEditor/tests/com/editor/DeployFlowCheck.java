@@ -220,7 +220,8 @@ public final class DeployFlowCheck {
         String allRun = "Analyzing ALL 2 workflow bases: [1000000, 2000000]\nTime=1791616256378 Token=1000000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=EG11 EventType=GENERATED\n";
         check(TokenAnimator.lastAnalyzerRun(older + allRun).equals(allRun), "Appended --all analyzer runs not separated");
         // Output copied from an Ant console ("[java]" on every line) replays like the analyzer's own output.
-        String analysis = read(common.toPath().resolve("AnalysisFolder/PetriNet/Analysis_P2_Tutorial_Workflow.txt"));
+        // A fixed copy: runs from the editor rewrite the analyses under AnalysisFolder.
+        String analysis = read(repository.toPath().resolve("btsn.workflowEditor/tests/fixtures/Analysis_P2_single_generator.txt"));
         String prefixed = analysis.replaceAll("(?m)^", "     [java] ");
         String lastRun = TokenAnimator.lastAnalyzerRun(prefixed + prefixed);
         check(lastRun.length() < prefixed.length() && lastRun.trim().startsWith("[java] Auto-detected"), "Ant-prefixed analyzer runs not separated");

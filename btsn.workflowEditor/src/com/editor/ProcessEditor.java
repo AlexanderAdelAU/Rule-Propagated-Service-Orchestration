@@ -544,6 +544,14 @@ public class ProcessEditor extends JFrame {
         buildRunBtn.setFocusPainted(false);
         buildRunBtn.addActionListener(e -> createBuildAndRun());
         toolbar.add(buildRunBtn);
+
+        toolbar.add(Box.createHorizontalStrut(5));
+
+        JButton runBtn = new JButton("Run");
+        runBtn.setToolTipText("Run this process's Build and Run launcher, then analyse it and load the result into the replay");
+        runBtn.setFocusPainted(false);
+        runBtn.addActionListener(e -> openRunWindow());
+        toolbar.add(runBtn);
         
         toolbar.addSeparator(new Dimension(20, 32));
         
@@ -1256,6 +1264,37 @@ public class ProcessEditor extends JFrame {
             return;
         }
         new BuildAndRunDialog(this, plan).setVisible(true);
+    }
+
+    private RunWindow runWindow;
+
+    /** Run the process's launcher from the editor; the analysis is loaded into the replay when it finishes. */
+    private void openRunWindow() {
+        if (runWindow != null && runWindow.isDisplayable()) { runWindow.toFront(); return; }
+        if (currentFile == null || isDirty) {
+            JOptionPane.showMessageDialog(this, "Save the process first; the launcher runs the saved file.", "Run", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        java.io.File common = ServiceRegistry.findCommon(currentFile);
+        java.nio.file.Path processes = common == null ? null : new java.io.File(common, "ProcessDefinitionFolder").toPath().toAbsolutePath().normalize();
+        java.nio.file.Path location = currentFile.toPath().toAbsolutePath().normalize();
+        if (processes == null || !location.startsWith(processes)) {
+            JOptionPane.showMessageDialog(this, "Save the process under btsn.common/ProcessDefinitionFolder.", "Run", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        String processName = processes.relativize(location).toString().replace(java.io.File.separatorChar, '/').replaceFirst("\\.json$", "");
+        java.io.File root = common.getParentFile();
+        java.util.List<java.io.File> launchers = LauncherRun.launchersFor(root, processName);
+        if (launchers.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No launcher runs " + processName + " yet. Use Build and Run to create one first.", "Run", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        final java.io.File processFile = currentFile;
+        runWindow = new RunWindow(this, root, processName, launchers, analysis -> {
+            if (processFile.equals(currentFile)) animationPanel.loadAnalysisFile(analysis);
+            else JOptionPane.showMessageDialog(this, "The run finished, but another process is open now. Its analysis is in " + analysis.getName() + ".", "Run", JOptionPane.INFORMATION_MESSAGE);
+        });
+        runWindow.setVisible(true);
     }
 
     /** The Deploy panel belongs to the process on the canvas; close it before another process replaces it. */
