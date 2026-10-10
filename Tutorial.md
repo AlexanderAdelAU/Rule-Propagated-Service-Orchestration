@@ -62,8 +62,11 @@ Set **Transition Type** before **Node Type**; **Node Value** follows automatical
 | Transition | `T_out_P2` | Transition Type: `T_out`; Node Type: `GatewayNode` |
 | Transition | `Terminate` | Transition Type: `Other`; Node Type: `TerminateNode` |
 
-- Labels must be unique. Name each transition after the place it serves
-  (`T_in_P2`, `T_out_P2`).
+- Labels must be unique.
+- Name each place's transitions after that place: either its label or the node it is deployed to.
+  - Use the same name on the T_in and the T_out.
+  - Here both are `P2`, so `T_in_P2` and `T_out_P2`. If you relabel the place `TRUEORFALSE` and deploy it to P2, then `T_in_P2` or `T_in_TRUEORFALSE` both pass.
+  - Business models use the label, for example `T_in_Validation`.
 - The generator's **Rate** and **Version** become the defaults in
   [Build and Run](#3-create-build-and-run).
 - The supplied `P2_Tutorial_Workflow.json` stores `T_out_P2` as a `DecisionNode`. The runtime accepts it too, and both route on the guards below.
@@ -354,7 +357,7 @@ ant -f btsn.petrinet.ProjectLoader/P1_Tutorial_Local_BuildAndRun.xml export-tuto
 
 | Observation | Check |
 |---|---|
-| Build and Run lists problems | Save the process and the deployment; deploy every place on P1–P6; connect the generator to a `T_in` |
+| Build and Run lists problems | Save the process and the deployment; deploy every place on P1–P6, each on its own node; connect the generator to a `T_in` |
 | The Deploy panel's node table is empty | Start ProcessEditor with `btsn.workflowEditor` as its working directory |
 | A host or Monitor was skipped at startup | Add `-Dhost.address=127.0.0.1`, or start that host on its configured machine |
 | Derby reports another active instance | Stop the previous run, and any viewer holding the database, before analysing |

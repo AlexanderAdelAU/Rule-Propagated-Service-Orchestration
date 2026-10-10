@@ -77,6 +77,7 @@ public final class BuildAndRunGenerator {
             else if (!NODES.contains(node)) plan.problems.add("Place " + place.getLabel() + " runs on " + node + "; launchers start hosts P1 to P6 only.");
             else used.add(node);
         }
+        plan.problems.addAll(canvas.nodeConflicts());
         plan.nodes.addAll(used);
 
         for (ProcessElement element : canvas.getElements()) {
