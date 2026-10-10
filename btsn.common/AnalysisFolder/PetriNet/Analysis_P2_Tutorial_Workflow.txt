@@ -8,9 +8,9 @@ WORKFLOW BASE: 1000000 (v001)
  INFO [main] (PetriNetAnalyzer.java:2273) - Canonical reconstruction: generated=10, completed=10, monitorAck=0, forks=0, joins=0, orphanChildren=0
  INFO [main] (PetriNetAnalyzer.java:325) - Fork/Join analysis: 0 forks, 0 joined fork families
  INFO [main] (PetriNetAnalyzer.java:120) - Place ENTER/EXIT pairing check: all ENTER events paired
- INFO [main] (PetriNetAnalyzer.java:474) - Place P2_Place statistics: 22 paired logical visits, avg=152.0ms
+ INFO [main] (PetriNetAnalyzer.java:474) - Place P2_Place statistics: 15 paired logical visits, avg=99.0ms
  INFO [main] (PetriNetAnalyzer.java:1072) - Capacity verification for P2_Place: max marking=1, capacity=50 - PASS
- INFO [main] (PetriNetAnalyzer.java:229) - Retrieved 22 logical place paths for workflowBase=1000000
+ INFO [main] (PetriNetAnalyzer.java:229) - Retrieved 15 logical place paths for workflowBase=1000000
 === PETRI NET ANALYSIS REPORT ===
 Workflow Base: 1000000
 
@@ -30,7 +30,7 @@ Workflow Base: 1000000
    Structural result:         [OK]
 
 2. LOGICAL PLACE EXECUTIONS
-   StochasticService (P2_Place): 22 executions
+   StochasticService (P2_Place): 15 executions
 
 3. FORK/JOIN DETAIL
    Forks detected (legacy cross-check): 0
@@ -41,16 +41,16 @@ Workflow Base: 1000000
 
 5. PLACE RESIDENCE SAMPLES
    Service/place: StochasticService (P2_Place)
-     Logical executions: 22
-     Paired timing samples: 22
-     Avg residence: 152.0ms
-     Min/Max: 45/757ms
+     Logical executions: 15
+     Paired timing samples: 15
+     Avg residence: 99.0ms
+     Min/Max: 39/131ms
 
 6. CAPACITY VERIFICATION
    StochasticService (P2_Place): [OK] BOUNDED
 
 7. DATA QUALITY
-   Reconstructed place paths: 22
+   Reconstructed place paths: 15
    [OK] All paired residence times are non-negative
    NOTE: temporal distributions and canonical throughput are reported in Stage 2.
 
@@ -113,8 +113,8 @@ Family rooted at 1040000:
   Total members: 1
   Direct descendants: 0
  INFO [main] (PetriNetAnalyzer.java:2273) - Canonical reconstruction: generated=10, completed=10, monitorAck=0, forks=0, joins=0, orphanChildren=0
- INFO [main] (PetriNetAnalyzer.java:229) - Retrieved 22 logical place paths for workflowBase=1000000
- INFO [main] (PetriNetAnalyzer.java:1387) - Place correlation: 22 matched, 0 unmatched out of 22
+ INFO [main] (PetriNetAnalyzer.java:229) - Retrieved 15 logical place paths for workflowBase=1000000
+ INFO [main] (PetriNetAnalyzer.java:1387) - Place correlation: 15 matched, 0 unmatched out of 15
 
 === STAGE 2 TEMPORAL ANALYSIS ===
 Workflow Base: 1000000
@@ -122,22 +122,22 @@ Workflow Base: 1000000
 1. END-TO-END WORKFLOW LATENCY
    Canonical completed workflows: 10
    Timed completion samples:      10
-   Latency: n=10, avg=4966.4ms, p50=5297ms, p95=7203ms, min/max=928/7203ms
-   Observation window: 14288ms
-   Completion throughput: 0.700 workflows/sec
+   Latency: n=10, avg=408.4ms, p50=260ms, p95=885ms, min/max=152/885ms
+   Observation window: 9181ms
+   Completion throughput: 1.089 workflows/sec
 
 2. WORKLOAD GENERATION
-   Root inter-arrival: n=9, avg=999.0ms, p50=997ms, p95=1229ms, min/max=766/1229ms
+   Root inter-arrival: n=9, avg=998.6ms, p50=1000ms, p95=1001ms, min/max=989/1001ms
 
 3. PLACE RESIDENCE DISTRIBUTIONS
-   StochasticService (P2_Place): n=22, avg=152.5ms, p50=88ms, p95=664ms, min/max=45/757ms
+   StochasticService (P2_Place): n=15, avg=99.9ms, p50=108ms, p95=131ms, min/max=39/131ms
 
 4. SERVICE EXECUTION TIMING
    Service: StochasticService
      Orchestration place: P2_Place
-     Queue: n=22, avg=1946.5ms, p50=222ms, p95=6039ms, min/max=158/6446ms
-     Service: n=22, avg=289.5ms, p50=170ms, p95=1128ms, min/max=75/1492ms
-     Total: n=22, avg=2236.0ms, p50=474ms, p95=6114ms, min/max=243/6650ms
+     Queue: n=15, avg=140.4ms, p50=124ms, p95=207ms, min/max=108/207ms
+     Service: n=15, avg=150.1ms, p50=136ms, p95=240ms, min/max=90/240ms
+     Total: n=15, avg=290.5ms, p50=291ms, p95=361ms, min/max=210/361ms
    Unmatched service timing samples: 0
    Service timing/place-count mismatches: 0
 
@@ -152,122 +152,94 @@ Workflow Base: 1000000
 
 
 === TOKEN PATHS ===
- INFO [main] (PetriNetAnalyzer.java:229) - Retrieved 22 logical place paths for workflowBase=1000000
-Token 1000000 at StochasticService (P2_Place): residence=69ms
-Token 1000000 at StochasticService (P2_Place): residence=123ms
-Token 1000000 at StochasticService (P2_Place): residence=45ms
-Token 1010000 at StochasticService (P2_Place): residence=110ms
-Token 1010000 at StochasticService (P2_Place): residence=231ms
-Token 1020000 at StochasticService (P2_Place): residence=664ms
-Token 1020000 at StochasticService (P2_Place): residence=757ms
-Token 1020000 at StochasticService (P2_Place): residence=291ms
-Token 1030000 at StochasticService (P2_Place): residence=89ms
-Token 1030000 at StochasticService (P2_Place): residence=46ms
-Token 1040000 at StochasticService (P2_Place): residence=58ms
-Token 1050000 at StochasticService (P2_Place): residence=111ms
-Token 1050000 at StochasticService (P2_Place): residence=102ms
-Token 1050000 at StochasticService (P2_Place): residence=56ms
-Token 1060000 at StochasticService (P2_Place): residence=88ms
-Token 1070000 at StochasticService (P2_Place): residence=64ms
-Token 1080000 at StochasticService (P2_Place): residence=85ms
-Token 1090000 at StochasticService (P2_Place): residence=105ms
-Token 1090000 at StochasticService (P2_Place): residence=100ms
-Token 1090000 at StochasticService (P2_Place): residence=54ms
-Token 1090000 at StochasticService (P2_Place): residence=59ms
-Token 1090000 at StochasticService (P2_Place): residence=48ms
+ INFO [main] (PetriNetAnalyzer.java:229) - Retrieved 15 logical place paths for workflowBase=1000000
+Token 1000000 at StochasticService (P2_Place): residence=74ms
+Token 1010000 at StochasticService (P2_Place): residence=131ms
+Token 1020000 at StochasticService (P2_Place): residence=39ms
+Token 1030000 at StochasticService (P2_Place): residence=117ms
+Token 1040000 at StochasticService (P2_Place): residence=123ms
+Token 1040000 at StochasticService (P2_Place): residence=106ms
+Token 1050000 at StochasticService (P2_Place): residence=113ms
+Token 1050000 at StochasticService (P2_Place): residence=117ms
+Token 1050000 at StochasticService (P2_Place): residence=113ms
+Token 1060000 at StochasticService (P2_Place): residence=108ms
+Token 1070000 at StochasticService (P2_Place): residence=91ms
+Token 1070000 at StochasticService (P2_Place): residence=108ms
+Token 1080000 at StochasticService (P2_Place): residence=81ms
+Token 1080000 at StochasticService (P2_Place): residence=107ms
+Token 1090000 at StochasticService (P2_Place): residence=71ms
 
 === MARKING EVOLUTION ===
  INFO [main] (PetriNetAnalyzer.java:1042) - Retrieved 10 GENERATED events for workflowBase 1000000
-Time=1791616256378 Token=1000000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=EG11 EventType=GENERATED
-Time=1791616257367 Token=1010000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=EG11 EventType=GENERATED
-Time=1791616258364 Token=1020000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=EG11 EventType=GENERATED
-Time=1791616259395 Token=1030000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=EG11 EventType=GENERATED
-Time=1791616260484 Token=1040000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=EG11 EventType=GENERATED
-Time=1791616261366 Token=1050000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=EG11 EventType=GENERATED
-Time=1791616262387 Token=1060000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=EG11 EventType=GENERATED
-Time=1791616263374 Token=1070000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=EG11 EventType=GENERATED
-Time=1791616264603 Token=1080000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=EG11 EventType=GENERATED
-Time=1791616265369 Token=1090000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=EG11 EventType=GENERATED
- INFO [main] (PetriNetAnalyzer.java:1000) - Retrieved 66 marking snapshots for P2_Place
-Time=1791616256548 Token=1000000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
-Time=1791616256561 Token=1000000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
-Time=1791616256630 Token=1000000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P2 EventType=EXIT
-Time=1791616256918 Token=1000000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
-Time=1791616256924 Token=1000000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
-Time=1791616257047 Token=1000000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P2 EventType=EXIT
-Time=1791616257256 Token=1000000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
-Time=1791616257261 Token=1000000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
-Time=1791616257306 Token=1000000 Place=P2_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P2 EventType=TERMINATE
-Time=1791616257607 Token=1010000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
-Time=1791616257614 Token=1010000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
-Time=1791616257724 Token=1010000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P2 EventType=EXIT
-Time=1791616258234 Token=1010000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
-Time=1791616258254 Token=1010000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
-Time=1791616258485 Token=1010000 Place=P2_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P2 EventType=TERMINATE
-Time=1791616259297 Token=1020000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
-Time=1791616259347 Token=1020000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
-Time=1791616260011 Token=1020000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P2 EventType=EXIT
-Time=1791616261986 Token=1020000 Place=P2_Place Marking=1 Buffer=2 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
-Time=1791616262097 Token=1020000 Place=P2_Place Marking=1 Buffer=2 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
-Time=1791616262854 Token=1020000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P2 EventType=EXIT
-Time=1791616264894 Token=1020000 Place=P2_Place Marking=1 Buffer=5 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
-Time=1791616264934 Token=1020000 Place=P2_Place Marking=1 Buffer=5 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
-Time=1791616265225 Token=1020000 Place=P2_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P2 EventType=TERMINATE
-Time=1791616266142 Token=1030000 Place=P2_Place Marking=1 Buffer=6 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
-Time=1791616266149 Token=1030000 Place=P2_Place Marking=1 Buffer=6 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
-Time=1791616266238 Token=1030000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P2 EventType=EXIT
-Time=1791616266547 Token=1030000 Place=P2_Place Marking=1 Buffer=6 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
-Time=1791616266552 Token=1030000 Place=P2_Place Marking=1 Buffer=6 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
-Time=1791616266598 Token=1030000 Place=P2_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P2 EventType=TERMINATE
-Time=1791616266839 Token=1040000 Place=P2_Place Marking=1 Buffer=5 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
-Time=1791616266843 Token=1040000 Place=P2_Place Marking=1 Buffer=5 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
-Time=1791616266901 Token=1040000 Place=P2_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P2 EventType=TERMINATE
-Time=1791616267112 Token=1050000 Place=P2_Place Marking=1 Buffer=4 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
-Time=1791616267118 Token=1050000 Place=P2_Place Marking=1 Buffer=4 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
-Time=1791616267229 Token=1050000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P2 EventType=EXIT
-Time=1791616267451 Token=1050000 Place=P2_Place Marking=1 Buffer=4 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
-Time=1791616267458 Token=1050000 Place=P2_Place Marking=1 Buffer=4 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
-Time=1791616267560 Token=1050000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P2 EventType=EXIT
-Time=1791616267833 Token=1050000 Place=P2_Place Marking=1 Buffer=4 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
-Time=1791616267838 Token=1050000 Place=P2_Place Marking=1 Buffer=4 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
-Time=1791616267894 Token=1050000 Place=P2_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P2 EventType=TERMINATE
-Time=1791616268136 Token=1060000 Place=P2_Place Marking=1 Buffer=3 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
-Time=1791616268140 Token=1060000 Place=P2_Place Marking=1 Buffer=3 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
-Time=1791616268228 Token=1060000 Place=P2_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P2 EventType=TERMINATE
-Time=1791616268493 Token=1070000 Place=P2_Place Marking=1 Buffer=2 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
-Time=1791616268498 Token=1070000 Place=P2_Place Marking=1 Buffer=2 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
-Time=1791616268562 Token=1070000 Place=P2_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P2 EventType=TERMINATE
-Time=1791616268797 Token=1080000 Place=P2_Place Marking=1 Buffer=1 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
-Time=1791616268801 Token=1080000 Place=P2_Place Marking=1 Buffer=1 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
-Time=1791616268886 Token=1080000 Place=P2_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P2 EventType=TERMINATE
-Time=1791616269112 Token=1090000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
-Time=1791616269115 Token=1090000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
-Time=1791616269220 Token=1090000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P2 EventType=EXIT
-Time=1791616269555 Token=1090000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
-Time=1791616269559 Token=1090000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
-Time=1791616269659 Token=1090000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P2 EventType=EXIT
-Time=1791616269935 Token=1090000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
-Time=1791616269939 Token=1090000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
-Time=1791616269993 Token=1090000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P2 EventType=EXIT
-Time=1791616270260 Token=1090000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
-Time=1791616270265 Token=1090000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
-Time=1791616270324 Token=1090000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P2 EventType=EXIT
-Time=1791616270612 Token=1090000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
-Time=1791616270618 Token=1090000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
-Time=1791616270666 Token=1090000 Place=P2_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P2 EventType=TERMINATE
+Time=1791617244927 Token=1000000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=EG11 EventType=GENERATED
+Time=1791617245916 Token=1010000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=EG11 EventType=GENERATED
+Time=1791617246914 Token=1020000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=EG11 EventType=GENERATED
+Time=1791617247913 Token=1030000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=EG11 EventType=GENERATED
+Time=1791617248914 Token=1040000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=EG11 EventType=GENERATED
+Time=1791617249915 Token=1050000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=EG11 EventType=GENERATED
+Time=1791617250913 Token=1060000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=EG11 EventType=GENERATED
+Time=1791617251914 Token=1070000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=EG11 EventType=GENERATED
+Time=1791617252914 Token=1080000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=EG11 EventType=GENERATED
+Time=1791617253914 Token=1090000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=EG11 EventType=GENERATED
+ INFO [main] (PetriNetAnalyzer.java:1000) - Retrieved 45 marking snapshots for P2_Place
+Time=1791617245113 Token=1000000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1791617245125 Token=1000000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1791617245199 Token=1000000 Place=P2_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P2 EventType=TERMINATE
+Time=1791617246037 Token=1010000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1791617246045 Token=1010000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1791617246176 Token=1010000 Place=P2_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P2 EventType=TERMINATE
+Time=1791617247020 Token=1020000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1791617247027 Token=1020000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1791617247066 Token=1020000 Place=P2_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P2 EventType=TERMINATE
+Time=1791617248034 Token=1030000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1791617248038 Token=1030000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1791617248155 Token=1030000 Place=P2_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P2 EventType=TERMINATE
+Time=1791617249019 Token=1040000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1791617249023 Token=1040000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1791617249146 Token=1040000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P2 EventType=EXIT
+Time=1791617249368 Token=1040000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1791617249374 Token=1040000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1791617249480 Token=1040000 Place=P2_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P2 EventType=TERMINATE
+Time=1791617250023 Token=1050000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1791617250026 Token=1050000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1791617250139 Token=1050000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P2 EventType=EXIT
+Time=1791617250350 Token=1050000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1791617250353 Token=1050000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1791617250470 Token=1050000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P2 EventType=EXIT
+Time=1791617250682 Token=1050000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1791617250687 Token=1050000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1791617250800 Token=1050000 Place=P2_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P2 EventType=TERMINATE
+Time=1791617251024 Token=1060000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1791617251028 Token=1060000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1791617251136 Token=1060000 Place=P2_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P2 EventType=TERMINATE
+Time=1791617252030 Token=1070000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1791617252033 Token=1070000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1791617252124 Token=1070000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P2 EventType=EXIT
+Time=1791617252447 Token=1070000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1791617252453 Token=1070000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1791617252561 Token=1070000 Place=P2_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P2 EventType=TERMINATE
+Time=1791617253031 Token=1080000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1791617253035 Token=1080000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1791617253116 Token=1080000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P2 EventType=EXIT
+Time=1791617253446 Token=1080000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1791617253450 Token=1080000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1791617253557 Token=1080000 Place=P2_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P2 EventType=TERMINATE
+Time=1791617254033 Token=1090000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1791617254037 Token=1090000 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1791617254108 Token=1090000 Place=P2_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P2 EventType=TERMINATE
 
 ================================================================================
 CROSS-VERSION PRIORITY ANALYSIS
 ================================================================================
- INFO [main] (PetriNetAnalyzer.java:1387) - Place correlation: 22 matched, 0 unmatched out of 22
+ INFO [main] (PetriNetAnalyzer.java:1387) - Place correlation: 15 matched, 0 unmatched out of 15
  INFO [main] (PetriNetAnalyzer.java:1273) - Shared services (cross-version): []
- INFO [main] (PetriNetAnalyzer.java:1302) - Priority analysis complete: 22 samples (22 root, 0 forked), 0 shared services, 0 shared-service contention points, 0 shared-service inversions
+ INFO [main] (PetriNetAnalyzer.java:1302) - Priority analysis complete: 15 samples (15 root, 0 forked), 0 shared services, 0 shared-service contention points, 0 shared-service inversions
 
 === STAGE 3 SHARED-SERVICE CONCURRENCY ANALYSIS ===
 
 1. SERVICE EXECUTION SAMPLE BREAKDOWN
-   Total logical service executions: 22
-   Root-token executions:            22
+   Total logical service executions: 15
+   Root-token executions:            15
    Fork-derived executions:          0
    Shared-service executions:        0
    NOTE: fork-derived executions are included when they consume a shared service.
@@ -279,7 +251,7 @@ CROSS-VERSION PRIORITY ANALYSIS
 3. VERSION STATISTICS (All Logical Service Executions)
    Version  Tokens     Avg Queue    Min Queue    Max Queue    Avg Service 
    ----------------------------------------------------------------------
-   v001     22         1946.5       158          6446         289.5       
+   v001     15         140.4        108          207          150.1       
 
 4. SHARED SERVICE CONTENTION CANDIDATES (Both Arrived Before Invocation)
    Total candidate comparisons: 0
@@ -303,4 +275,3 @@ CROSS-VERSION PRIORITY ANALYSIS
 === END STAGE 3 REPORT ===
 
  INFO [main] (PetriNetAnalyzer.java:1879) - Generated priority analysis report
- 
