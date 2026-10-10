@@ -16,9 +16,11 @@ public final class ServiceRegistryCheck {
         // Every catalogued operation says what it does and what it returns, so the editor can explain it.
         List<Path> catalogues = new ArrayList<>();
         try (java.util.stream.Stream<Path> walk = Files.walk(common.toPath().resolve("BusinessServiceDefinitions"))) { walk.filter(p -> p.toString().endsWith(".json")).forEach(catalogues::add); }
-        check(catalogues.size() >= 3, "Catalogues not found");
+        int catalogued = 0;
         for (Path catalogue : catalogues) {
             JSONObject data = (JSONObject)new JSONParser().parse(new String(Files.readAllBytes(catalogue), java.nio.charset.StandardCharsets.UTF_8));
+            if (!(data.get("services") instanceof JSONArray)) continue;  // e.g. the Deployment.json profile beside the catalogues
+            catalogued++;
             for (Object item : (JSONArray)data.get("services")) {
                 JSONObject service = (JSONObject)item;
                 String name = service.get("service") + "." + service.get("operation");
@@ -26,6 +28,7 @@ public final class ServiceRegistryCheck {
                     check(service.get(field) instanceof String && !((String)service.get(field)).trim().isEmpty(), catalogue.getFileName() + ": " + name + " has no " + field);
             }
         }
+        check(catalogued >= 3, "Catalogues not found: " + catalogued);
         registry.loadCatalogue(common.toPath().resolve("BusinessServiceDefinitions/healthcare/Healthcare.json").toFile());
         check(registry.describe("RadiologyService").split("\n").length == 2, "A service with two operations should describe both");
         check(registry.describe("TriageService", "processTriageAssessment").contains("\nReturns: "), "Operation description lacks its result");
