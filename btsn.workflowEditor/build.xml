@@ -56,8 +56,8 @@
                destdir="${build.dir}"
                includeantruntime="false"
                encoding="UTF-8"
-               source="1.8"
-               target="1.8"
+               source="11"
+               target="11"
                debug="true">
             <classpath refid="compile.classpath"/>
             <!-- Ignore PDF exporter if iText library is not present -->
@@ -120,7 +120,7 @@
 
     <target name="check-contracts" depends="compile" description="Check catalogue-backed Swing controls and process contracts">
         <mkdir dir="${build.dir}/contract-tests"/>
-        <javac srcdir="tests" destdir="${build.dir}/contract-tests" source="1.8" target="1.8" includeantruntime="false" encoding="UTF-8">
+        <javac srcdir="tests" destdir="${build.dir}/contract-tests" source="11" target="11" includeantruntime="false" encoding="UTF-8">
             <classpath><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
         </javac>
         <java classname="com.editor.ServiceRegistryCheck" fork="true" failonerror="true">
@@ -138,6 +138,10 @@
         <java classname="com.editor.DeployFlowCheck" fork="true" failonerror="true">
             <classpath><pathelement location="${build.dir}/contract-tests"/><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
             <arg file=".."/><arg file="${build.dir}/contract-tests"/>
+        </java>
+        <java classname="com.editor.RunFromEditorCheck" fork="true" failonerror="true">
+            <classpath><pathelement location="${build.dir}/contract-tests"/><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
+            <arg file=".."/>
         </java>
     </target>
 
