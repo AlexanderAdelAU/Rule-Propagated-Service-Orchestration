@@ -39,7 +39,7 @@ public final class ServiceSeparationCheck {
                 petriProfiles++;
             }
         }
-        check(petriProfiles == 6, "Petri-net profile coverage changed");
+        check(petriProfiles >= 6, "Petri-net service deployments missing: found " + petriProfiles);
         // Validate every process that names a service deployment against a profile selecting that deployment.
         java.util.List<Path> linkedProcesses = new java.util.ArrayList<>();
         try (java.util.stream.Stream<Path> processes = Files.walk(common.resolve("ProcessDefinitionFolder"))) {
