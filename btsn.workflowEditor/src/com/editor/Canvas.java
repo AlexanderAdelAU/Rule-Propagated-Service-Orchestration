@@ -2737,6 +2737,25 @@ public class Canvas extends JPanel {
         pendingNodes.clear();
         notifyChange(); notifySelectionChanged(selectedElements.size() == 1 ? selectedElements.iterator().next() : null); deploymentChanged();
     }
+    /** "T_in_A" or "T_in_A' or 'T_in_B": the transition names a place accepts. */
+    private static String either(String prefix, List<String> names) {
+        List<String> quoted = new ArrayList<>();
+        for (String name : names) quoted.add("'" + prefix + name + "'");
+        return String.join(" or ", quoted);
+    }
+    /** Each node runs one place (its own T_in, place and T_out), so two places on one node cannot both run. */
+    public List<String> nodeConflicts() {
+        Map<String, List<String>> byNode = new java.util.LinkedHashMap<>();
+        for (ProcessElement place : getPlaces()) {
+            String node = nodeFor(place);
+            if (!node.isEmpty()) byNode.computeIfAbsent(node, k -> new ArrayList<>()).add("'" + place.getLabel() + "'");
+        }
+        List<String> conflicts = new ArrayList<>();
+        for (Map.Entry<String, List<String>> entry : byNode.entrySet())
+            if (entry.getValue().size() > 1)
+                conflicts.add("Places " + String.join(" and ", entry.getValue()) + " are deployed to the same node, " + entry.getKey() + "; each node runs one place, so deploy them to different nodes.");
+        return conflicts;
+    }
     /** Places that the linked deployment does not run (only reported once a deployment is linked). */
     public List<String> deploymentGaps() {
         List<String> gaps = new ArrayList<>();
@@ -3587,6 +3606,7 @@ public class Canvas extends JPanel {
         List<String> errors = new ArrayList<>();
         errors.addAll(validateServiceContracts());
         errors.addAll(deploymentGaps());
+        errors.addAll(nodeConflicts());
         Map<String, List<ProcessElement>> labelMap = new HashMap<>();
         
         // Check for duplicate labels/IDs
@@ -3822,74 +3842,37 @@ public class Canvas extends JPanel {
                 }
             }
             
-            // Check T_in_ naming pattern
+            // T_in_<name> and T_out_<name> are named after the place: its label, or the node it is
+            // deployed to (the runtime names a host's transitions after its node, e.g. T_in_P2).
+            List<String> names = new ArrayList<>(); names.add(placeName);
+            String node = nodeFor(place);
+            if (!node.isEmpty() && !node.equals(placeName)) names.add(node);
+            String inName = null, outName = null;
             for (ProcessElement inTransition : incomingTransitions) {
                 String inLabel = inTransition.getLabel();
-                if (inLabel.startsWith("T_in_")) {
-                    String expectedName = inLabel.substring(5); // Remove "T_in_"
-                    if (!expectedName.equals(placeName)) {
-                        namingMismatches.add(
-                            "T_in transition '" + inLabel + "' should connect to Place '" + 
-                            expectedName + "' but connects to '" + placeName + "'"
-                        );
-                    }
-                }
+                if (!inLabel.startsWith("T_in_")) continue;
+                String suffix = inLabel.substring(5);
+                if (names.contains(suffix)) { if (inName == null) inName = suffix; }
+                else namingMismatches.add("T_in transition '" + inLabel + "' connects to Place '" + placeName + "' (expected " + either("T_in_", names) + ")");
             }
-            
-            // Check T_out_ naming pattern
             for (ProcessElement outTransition : outgoingTransitions) {
                 String outLabel = outTransition.getLabel();
-                if (outLabel.startsWith("T_out_")) {
-                    String expectedName = outLabel.substring(6); // Remove "T_out_"
-                    if (!expectedName.equals(placeName)) {
-                        namingMismatches.add(
-                            "T_out transition '" + outLabel + "' should connect to Place '" + 
-                            expectedName + "' but connects to '" + placeName + "'"
-                        );
-                    }
-                }
+                if (!outLabel.startsWith("T_out_")) continue;
+                String suffix = outLabel.substring(6);
+                if (names.contains(suffix)) { if (outName == null) outName = suffix; }
+                else namingMismatches.add("T_out transition '" + outLabel + "' connects to Place '" + placeName + "' (expected " + either("T_out_", names) + ")");
             }
-            
-            // NEW: Check if Place has T_in_<name> then it MUST have T_out_<name>
-            boolean hasCorrectTIn = false;
-            for (ProcessElement inTransition : incomingTransitions) {
-                String inLabel = inTransition.getLabel();
-                if (inLabel.equals("T_in_" + placeName)) {
-                    hasCorrectTIn = true;
-                    break;
+            // A place with T_in_<name> must leave through T_out_<the same name>.
+            if (inName != null && outName == null) {
+                if (outgoingTransitions.isEmpty()) {
+                    namingMismatches.add("Place '" + placeName + "' has 'T_in_" + inName + "' but no outgoing transition (expected 'T_out_" + inName + "')");
+                } else {
+                    List<String> outNames = new ArrayList<>();
+                    for (ProcessElement outTransition : outgoingTransitions) outNames.add("'" + outTransition.getLabel() + "'");
+                    namingMismatches.add("Place '" + placeName + "' has 'T_in_" + inName + "' but connects to " + String.join(", ", outNames) + " instead of 'T_out_" + inName + "'");
                 }
-            }
-            
-            if (hasCorrectTIn) {
-                // This place has T_in_<name>, so it MUST have T_out_<name>
-                boolean hasCorrectTOut = false;
-                for (ProcessElement outTransition : outgoingTransitions) {
-                    String outLabel = outTransition.getLabel();
-                    if (outLabel.equals("T_out_" + placeName)) {
-                        hasCorrectTOut = true;
-                        break;
-                    }
-                }
-                
-                if (!hasCorrectTOut) {
-                    // Report what it's actually connected to
-                    if (outgoingTransitions.isEmpty()) {
-                        namingMismatches.add(
-                            "Place '" + placeName + "' has 'T_in_" + placeName + 
-                            "' but has no outgoing transition (expected 'T_out_" + placeName + "')"
-                        );
-                    } else {
-                        StringBuilder outNames = new StringBuilder();
-                        for (int i = 0; i < outgoingTransitions.size(); i++) {
-                            if (i > 0) outNames.append(", ");
-                            outNames.append("'").append(outgoingTransitions.get(i).getLabel()).append("'");
-                        }
-                        namingMismatches.add(
-                            "Place '" + placeName + "' has 'T_in_" + placeName + 
-                            "' but connects to " + outNames + " instead of 'T_out_" + placeName + "'"
-                        );
-                    }
-                }
+            } else if (inName != null && !inName.equals(outName)) {
+                namingMismatches.add("Place '" + placeName + "' has 'T_in_" + inName + "' and 'T_out_" + outName + "'; use the same name on both");
             }
         }
         
@@ -3897,7 +3880,7 @@ public class Canvas extends JPanel {
             StringBuilder message = new StringBuilder(
                 "Naming pattern inconsistencies detected. " +
                 "When using T_in_<name> or T_out_<name> transitions, " +
-                "the <name> should match the connected Place name:\n"
+                "the <name> should be the connected Place's label or the node it is deployed to:\n"
             );
             for (String issue : namingMismatches) {
                 message.append("\n  - ").append(issue);

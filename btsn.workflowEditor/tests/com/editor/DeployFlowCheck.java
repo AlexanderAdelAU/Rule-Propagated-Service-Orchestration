@@ -224,7 +224,41 @@ public final class DeployFlowCheck {
         TokenAnimator clean = new TokenAnimator(), ant = new TokenAnimator();
         clean.parseOutput(analysis); ant.parseOutput(prefixed);
         check(!clean.getEvents().isEmpty() && clean.getEvents().size() == ant.getEvents().size(), "Ant-prefixed analysis parsed differently: " + clean.getEvents().size() + " vs " + ant.getEvents().size());
-        System.out.println("PASS: catalogue-only design, right-click Deploy to, filled Deploy panel with Place column, two-way node edits, save links process and instances, reopen, existing deployment unchanged, Create Build and Run files, Ant-prefixed analysis replay, What it does");
+        // Transition names follow the place's label or the node it is deployed to; each node runs one place.
+        final Throwable[] naming = new Throwable[1];
+        SwingUtilities.invokeAndWait(() -> {
+            try {
+                Path workflows = common.toPath().resolve("ProcessDefinitionFolder");
+                try (java.util.stream.Stream<Path> files = Files.walk(workflows)) {
+                    for (Path file : (Iterable<Path>)files.filter(f -> f.toString().endsWith(".json") && f.toString().contains("Workflow"))::iterator) {
+                        Canvas any = new Canvas(); any.setDefinitionLocation(file.toFile()); any.loadFromJSON(read(file));
+                        for (String error : any.validatePetriNet()) check(!error.startsWith("Naming pattern"), file.getFileName() + ": " + error);
+                    }
+                }
+                Path p2 = workflows.resolve("petrinet/Workflow/P2_Tutorial_Workflow.json");
+                Canvas tutorial = new Canvas(); tutorial.setDefinitionLocation(p2.toFile()); tutorial.loadFromJSON(read(p2));
+                Map<String, ProcessElement> byLabel = new HashMap<>();
+                for (ProcessElement e : tutorial.getElements()) byLabel.put(e.getLabel(), e);
+                byLabel.get("P2").setLabel("TRUEORFALSE");
+                check(tutorial.validatePetriNet().stream().noneMatch(e -> e.startsWith("Naming pattern")), "T_in_P2 rejected for a place deployed to P2: " + tutorial.validatePetriNet());
+                byLabel.get("T_out_P2").setLabel("T_out_TRUEORFALSE");
+                check(tutorial.validatePetriNet().stream().anyMatch(e -> e.contains("use the same name on both")), "Mixed T_in/T_out names accepted");
+                byLabel.get("T_out_P2").setLabel("T_out_P2");
+                byLabel.get("T_in_P2").setLabel("T_in_Wrong");
+                check(tutorial.validatePetriNet().stream().anyMatch(e -> e.contains("expected 'T_in_TRUEORFALSE' or 'T_in_P2'")), "Wrong T_in name not reported with both choices: " + tutorial.validatePetriNet());
+
+                // Two places on one node: reported by Validate and by Build and Run.
+                Path lights = workflows.resolve("petrinet/Workflow/TrafficLight_Workflow.json");
+                Canvas traffic = new Canvas(); traffic.setDefinitionLocation(lights.toFile()); traffic.loadFromJSON(read(lights));
+                check(traffic.nodeConflicts().isEmpty(), "Supplied traffic light shares a node: " + traffic.nodeConflicts());
+                List<ProcessElement> lightPlaces = traffic.getPlaces();
+                traffic.assignNode(lightPlaces.get(1), traffic.nodeFor(lightPlaces.get(0)));
+                check(traffic.nodeConflicts().size() == 1 && traffic.validatePetriNet().stream().anyMatch(e -> e.contains("deployed to the same node")), "Two places on one node not reported");
+                check(BuildAndRunGenerator.plan(traffic, lights.toFile()).problems.stream().anyMatch(e -> e.contains("deployed to the same node")), "Build and Run allows two places on one node");
+            } catch (Throwable ex) { naming[0] = ex; }
+        });
+        if (naming[0] != null) throw new AssertionError("Transition naming", naming[0]);
+        System.out.println("PASS: catalogue-only design, right-click Deploy to, filled Deploy panel with Place column, two-way node edits, save links process and instances, reopen, existing deployment unchanged, Create Build and Run files, Ant-prefixed analysis replay, What it does, transition names by label or node, one place per node");
     }
 
     private static int rowOf(JTable table, String place) {
