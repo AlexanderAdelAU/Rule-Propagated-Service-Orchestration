@@ -562,9 +562,24 @@ public class TokenAnimator {
     }
     
     /**
+     * An analysis file can hold several analyzer runs appended one after another (for example an
+     * output file opened in append mode). Each run starts with its "Auto-detected ... workflow bases"
+     * line; replay only the last run so earlier runs do not stretch the timeline.
+     */
+    static String lastAnalyzerRun(String text) {
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("(?m)^Auto-detected \\d+ workflow bases").matcher(text);
+        int last = -1, runs = 0;
+        while (m.find()) { last = m.start(); runs++; }
+        if (runs < 2) return text;
+        logger.warn("Analysis text contains " + runs + " analyzer runs; replaying only the last one.");
+        return text.substring(last);
+    }
+
+    /**
      * Parse events from analyzer text output
      */
     private void parseEventsFromText(String text) {
+        text = lastAnalyzerRun(text);
         String[] lines = text.split("\n");
         
         // Use a set to detect duplicates

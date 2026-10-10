@@ -211,6 +211,10 @@ public final class DeployFlowCheck {
             finally { if (panel != null) panel.dispose(); }
         });
         if (failure[0] != null) throw new AssertionError("Existing deployment regression", failure[0]);
+        // An analysis file with an earlier run appended in front replays only its last run.
+        String older = "Auto-detected 1 workflow bases: [1000000]\nTime=1770648319905 Token=1000000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=EG EventType=GENERATED\n";
+        String latest = "Auto-detected 1 workflow bases: [1000000]\nTime=1791616256378 Token=1000000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=EG11 EventType=GENERATED\n";
+        check(TokenAnimator.lastAnalyzerRun(older + latest).equals(latest) && TokenAnimator.lastAnalyzerRun(latest).equals(latest), "Appended analyzer runs not separated");
         System.out.println("PASS: catalogue-only design, right-click Deploy to, filled Deploy panel with Place column, two-way node edits, save links process and instances, reopen, existing deployment unchanged, Create Build and Run files");
     }
 
