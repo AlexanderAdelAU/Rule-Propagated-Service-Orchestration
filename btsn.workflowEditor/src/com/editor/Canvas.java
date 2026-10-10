@@ -1087,19 +1087,11 @@ public class Canvas extends JPanel {
             }
         }
         
-        // Check if right-clicked on an arrow
-        Arrow clickedArrow = findClosestArrow(canvasX, canvasY);
-        if (clickedArrow != null) {
-            selectedArrow = clickedArrow;
-            selectedElements.clear();  // Clear element selection
-            showArrowContextMenu(e, clickedArrow, canvasX, canvasY);
-            repaint();
-            return;
-        }
-        
-        // Check if right-clicked on an element
+        // A shape under the pointer wins over arrows: arrows are hit-tested along the line
+        // between element centres, which runs through the middle of every place and transition.
         for (ProcessElement element : elements) {
             if (element.contains(canvasX, canvasY)) {
+                selectedArrow = null;
                 if (!selectedElements.contains(element)) {
                     selectedElements.clear();
                     selectedElements.add(element);
@@ -1108,6 +1100,16 @@ public class Canvas extends JPanel {
                 repaint();
                 return;
             }
+        }
+        
+        // Check if right-clicked on an arrow
+        Arrow clickedArrow = findClosestArrow(canvasX, canvasY);
+        if (clickedArrow != null) {
+            selectedArrow = clickedArrow;
+            selectedElements.clear();  // Clear element selection
+            showArrowContextMenu(e, clickedArrow, canvasX, canvasY);
+            repaint();
+            return;
         }
     }
     
@@ -1125,6 +1127,7 @@ public class Canvas extends JPanel {
     
     private void showArrowContextMenu(MouseEvent e, Arrow arrow, int canvasX, int canvasY) {
         JPopupMenu menu = new JPopupMenu();
+        lastContextMenu = menu;
         
         JMenuItem addWaypointItem = new JMenuItem("Add Control Point");
         addWaypointItem.addActionListener(ev -> {
@@ -1184,8 +1187,12 @@ public class Canvas extends JPanel {
         menu.add(panel);
     }
 
+    /** Last context menu shown (kept for checks of right-click behaviour). */
+    JPopupMenu lastContextMenu;
+
     private void showElementContextMenu(MouseEvent e) {
         JPopupMenu menu = new JPopupMenu();
+        lastContextMenu = menu;
         if (selectedElements.size() == 1 && selectedElements.iterator().next().getType() == ProcessElement.Type.PLACE) {
             addDeployMenu(menu, selectedElements.iterator().next());
             menu.addSeparator();

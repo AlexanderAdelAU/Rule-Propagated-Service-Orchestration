@@ -18,7 +18,13 @@ import org.json.simple.parser.JSONParser;
  * saves the deployment and checks that the process is linked to it (requires a display or xvfb-run).
  */
 public final class DeployFlowCheck {
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
+        // Always exit: a failed check can leave Swing windows open, which would keep the JVM running.
+        try { run(args); System.exit(0); }
+        catch (Throwable failure) { failure.printStackTrace(); System.exit(1); }
+    }
+
+    private static void run(String[] args) throws Exception {
         File repository = new File(args[0]).getCanonicalFile(), common = new File(repository, "btsn.common");
         File output = new File(args[1]);
         // A scratch project, so the check never writes into the repository's definition folders.
@@ -148,6 +154,18 @@ public final class DeployFlowCheck {
             try {
                 File traffic = new File(common, "ProcessDefinitionFolder/petrinet/Workflow/TrafficLight_Workflow.json");
                 Canvas canvas = new Canvas(); canvas.setDefinitionLocation(traffic); canvas.loadFromJSON(read(traffic.toPath()));
+                // A real right-click in the middle of a place, where its arrows also pass, opens the place menu.
+                JFrame window = new JFrame(); window.add(new JScrollPane(canvas)); window.setSize(1200, 650); window.setVisible(true);
+                for (ProcessElement place : canvas.getPlaces()) {
+                    Point centre = place.getCenter();
+                    canvas.dispatchEvent(new java.awt.event.MouseEvent(canvas, java.awt.event.MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(),
+                        java.awt.event.InputEvent.BUTTON3_DOWN_MASK, centre.x, centre.y, 1, true, java.awt.event.MouseEvent.BUTTON3));
+                    check(canvas.lastContextMenu != null && canvas.lastContextMenu.getComponent(0) instanceof JMenu
+                        && "Deploy to".equals(((JMenu)canvas.lastContextMenu.getComponent(0)).getText()), "Right-click on " + place.getLabel() + " opened the arrow menu");
+                    canvas.lastContextMenu.setVisible(false);
+                }
+                window.dispose();
+                canvas.setDefinitionLocation(traffic);
                 panel = InfrastructureDefinitionFrame.openForProcess(null, canvas, traffic);
                 JTable table = (JTable)field(panel, "capabilityTable");
                 check(table.getRowCount() == 6 && !panel.getTitle().endsWith("*"), "Existing deployment changed by Deploy");
