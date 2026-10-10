@@ -57,8 +57,9 @@ contract described above. **Return Attribute** and **Arguments** define the
 orchestration-facing instance contract when an adapter is selected.
 
 Select **Port Slot**: `0` is the node's primary port; `1` is its second fixed port,
-where defined. **Generate Bindings** writes a separate canonical contract for
-each instance. In the process editor, select that same **Deployment instance**
+where defined. Saving is the only step: each launcher generates the canonical
+contract for every instance, and the network rules, from the saved process and
+deployment. In the process editor, select that same **Deployment instance**
 on the PLACE; incoming and outgoing transition types are edited separately.
 
 A profile under `btsn.services/deployments` selects `catalog`, `infrastructure`

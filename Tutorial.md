@@ -103,13 +103,13 @@ The packaged [service implementation](btsn.common/src/org/btsn/services/Stochast
 runs inside the generic P1 host; entering a service name does not create an
 implementation.
 
-### Save and generate the configuration
+### Save the deployment
 
-1. Click **Save...** and save the service deployment as
-   `btsn.common/ServiceDeploymentFolder/petrinet/P1_Tutorial.json`.
-2. Click **Generate Bindings** to validate the placement and write the service's
-   canonical contract under `btsn.common/ServiceAttributeBindings`.
-3. Inspect the [local deployment profile](btsn.services/deployments/models/P1_Tutorial_LocalDeployment.json).
+1. Click **Save deployment...** and save the service deployment as
+   `btsn.common/ServiceDeploymentFolder/petrinet/P1_Tutorial.json`. Saving
+   validates the placement; the launcher generates the service's canonical
+   contract and network rules from the saved files when it runs.
+2. Inspect the [local deployment profile](btsn.services/deployments/models/P1_Tutorial_LocalDeployment.json).
    It selects `SingleHost.json`, this service deployment and the Petri-net service catalogue.
    Runtime preparation combines them and generates its network RuleML automatically.
 

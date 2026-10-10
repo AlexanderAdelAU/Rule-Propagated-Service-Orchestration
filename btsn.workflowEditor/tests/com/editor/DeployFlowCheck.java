@@ -172,6 +172,8 @@ public final class DeployFlowCheck {
                 int green = rowOf(table, "NS_Green");
                 check(green >= 0 && "P1".equals(table.getModel().getValueAt(green, 0)), "NS_Green not shown on P1");
                 for (int row = 0; row < table.getRowCount(); row++) check(!String.valueOf(table.getValueAt(row, 0)).isEmpty(), "Row without place");
+                List<String> buttons = texts(panel.getContentPane());
+                check(buttons.contains("Save deployment...") && !buttons.contains("Generate Bindings"), "Deploy panel should offer Save deployment only: " + buttons);
             } catch (Throwable ex) { failure[0] = ex; }
             finally { if (panel != null) panel.dispose(); }
         });
