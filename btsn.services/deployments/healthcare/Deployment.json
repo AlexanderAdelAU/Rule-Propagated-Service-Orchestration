@@ -1,5 +1,5 @@
 {
-  "catalog": "BusinessServiceDefinitions/Healthcare.json",
+  "catalog": "BusinessServiceDefinitions/healthcare/Healthcare.json",
   "infrastructure": "InfrastructureDefinitionFolder/SingleHost.json",
   "deploymentRules": "RuleBase/Generated/InfrastructureDeployment.ruleml.xml",
   "directServiceRules": [

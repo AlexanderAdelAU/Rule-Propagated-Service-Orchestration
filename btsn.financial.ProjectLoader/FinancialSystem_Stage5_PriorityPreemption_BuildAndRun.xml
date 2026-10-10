@@ -43,8 +43,8 @@
 	<!-- Process names for each phase -->
 	<property name="init.process.name" value="petrinet/Initializers/P1_P2_P3_P4_P5_Initialization" />
 	<!-- Each workflow has its own topology/rule version; physical services remain shared. -->
-	<property name="workflow1.process.name" value="petrinet/Workflow/FinancialSystem_P1_P5_Workflow" />
-	<property name="workflow2.process.name" value="petrinet/Workflow/FinancialSystem_Stage3_PreScreen_Workflow" />
+	<property name="workflow1.process.name" value="financial/Workflow/FinancialSystem_P1_P5_Workflow" />
+	<property name="workflow2.process.name" value="financial/Workflow/FinancialSystem_Stage3_PreScreen_Workflow" />
 	<property name="infrastructure.definition.name" value="SingleHost" />
 	<property name="collector.process.name" value="petrinet/Collectors/P1_P2_P3_P4_P5_Collector" />
 

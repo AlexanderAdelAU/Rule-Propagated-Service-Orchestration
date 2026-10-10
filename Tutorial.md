@@ -98,7 +98,7 @@ preserves that endpoint. Select the capability, then click **Add argument**:
 | `token` | `String` | `String` | Unchecked |
 
 The contract is `token → token`. The service name selects the existing
-implementation in the [P1 tutorial service catalogue](btsn.common/BusinessServiceDefinitions/P1_Tutorial_Local.json).
+implementation in the [Petri-net service catalogue](btsn.common/BusinessServiceDefinitions/petrinet/PetriNetModels.json).
 The packaged [service implementation](btsn.common/src/org/btsn/services/StochasticService.java)
 runs inside the generic P1 host; entering a service name does not create an
 implementation.
@@ -110,7 +110,7 @@ implementation.
 2. Click **Generate Bindings** to validate the placement and write the service's
    canonical contract under `btsn.common/ServiceAttributeBindings`.
 3. Inspect the [local deployment profile](btsn.services/deployments/models/P1_Tutorial_LocalDeployment.json).
-   It selects `SingleHost.json`, this service deployment and the P1-only catalogue.
+   It selects `SingleHost.json`, this service deployment and the Petri-net service catalogue.
    Runtime preparation combines them and generates its network RuleML automatically.
 
 Ready-to-use definitions are included:
@@ -132,8 +132,8 @@ The original launcher selects the same physical infrastructure with
 [`StochasticLoopModels.json`](btsn.common/ServiceDeploymentFolder/petrinet/StochasticLoopModels.json).
 That service deployment also selects P2 for other stochastic models; the local
 walkthrough selects P1 only. Every active catalogue operation must have a matching
-deployed capability; using the two-service catalogue with only P1 would prevent
-capability resolution.
+deployed capability; the catalogue's single `StochasticService` operation is
+deployed on P1, so P1 alone satisfies it.
 
 <a id="build-this-process-in-processeditor"></a>
 
@@ -409,7 +409,7 @@ observations does not deploy or rerun the process.
 |---|---|
 | [SingleHost.json](btsn.common/InfrastructureDefinitionFolder/SingleHost.json) | Shared P1–P6 network settings and fixed port slots |
 | [P1_Tutorial.json](btsn.common/ServiceDeploymentFolder/petrinet/P1_Tutorial.json) | P1 entry-service placement and contract |
-| [P1_Tutorial_Local.json](btsn.common/BusinessServiceDefinitions/P1_Tutorial_Local.json) | Active catalogue containing the P1 entry capability only |
+| [PetriNetModels.json](btsn.common/BusinessServiceDefinitions/petrinet/PetriNetModels.json) | Petri-net service catalogue shared by all model profiles (the reusable `StochasticService`) |
 | [P1_Tutorial_LocalDeployment.json](btsn.services/deployments/models/P1_Tutorial_LocalDeployment.json) | Catalogue, infrastructure and service deployment selection |
 | [P1_Tutorial_Workflow.json](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json) | Editable process design |
 | [process-editor-p1-tutorial.png](images/process-editor-p1-tutorial.png) | Process-editor image used in this tutorial |

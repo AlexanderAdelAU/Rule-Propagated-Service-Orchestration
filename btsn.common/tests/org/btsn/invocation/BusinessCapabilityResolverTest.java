@@ -22,7 +22,7 @@ import org.json.simple.parser.JSONParser;
 public final class BusinessCapabilityResolverTest {
     private static int checks;
     private static Path common;
-    private static final String CATALOG = "BusinessServiceDefinitions/FinancialSystem.json";
+    private static final String CATALOG = "BusinessServiceDefinitions/financial/FinancialSystem.json";
     private static final String INFRASTRUCTURE = "InfrastructureDefinitionFolder/SingleHost.json";
     private static final String PLACEMENT = "ServiceDeploymentFolder/financial/FinancialSystem.json";
     private static final String RULES = "RuleBase/Generated/InfrastructureDeployment.ruleml.xml";

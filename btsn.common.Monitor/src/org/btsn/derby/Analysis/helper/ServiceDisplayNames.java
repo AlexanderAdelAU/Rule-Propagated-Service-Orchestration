@@ -183,7 +183,7 @@ public final class ServiceDisplayNames {
         Map<String, Set<String>> result = new HashMap<>();
         Path directory = common.resolve("BusinessServiceDefinitions");
         if (!Files.isDirectory(directory)) return result;
-        try (Stream<Path> files = Files.list(directory)) {
+        try (Stream<Path> files = Files.walk(directory)) { // catalogues are grouped in domain folders
             for (Path file : (Iterable<Path>) files.filter(p -> p.toString().endsWith(".json"))
                     .sorted()::iterator) {
                 try (Reader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {

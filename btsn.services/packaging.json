@@ -1,10 +1,10 @@
 {
   "sourceRoot": "../btsn.common/src",
   "catalogues": [
-    "../btsn.common/BusinessServiceDefinitions/FinancialSystem.json",
+    "../btsn.common/BusinessServiceDefinitions/financial/FinancialSystem.json",
     "catalogues/StochasticService.json",
     "catalogues/LegacyPetriNetServices.json",
-    "../btsn.common/BusinessServiceDefinitions/Healthcare.json"
+    "../btsn.common/BusinessServiceDefinitions/healthcare/Healthcare.json"
   ],
   "runtimeLibraries": [
     "../btsn.common/lib/json-simple-1.1.1.jar",

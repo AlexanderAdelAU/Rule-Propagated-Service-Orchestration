@@ -53,7 +53,7 @@
 
 	<!-- Process names for each phase -->
 	<property name="init.process.name" value="petrinet/Initializers/P1_P2_P3_P4_P5_Initialization" />
-	<property name="workflow.process.name" value="petrinet/Workflow/FinancialSystem_P1_P5_Workflow" />
+	<property name="workflow.process.name" value="financial/Workflow/FinancialSystem_P1_P5_Workflow" />
 	<property name="infrastructure.definition.name" value="SingleHost" />
 	<property name="collector.process.name" value="petrinet/Collectors/P1_P2_P3_P4_P5_Collector" />
 
