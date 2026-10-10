@@ -1,0 +1,142 @@
+{
+  "serviceDeployment": "ServiceDeploymentFolder/petrinet/P2_Tutorial.json",
+   "processType":"PetriNet",
+  "elements": [
+    {
+      "id": "EG11",
+      "type": "EVENT_GENERATOR",
+      "x": 88,
+      "y": 130,
+      "width": 24,
+      "height": 60,
+      "label": "EG11",
+      "rotation": 0.0,
+      "generator_rate": "1000",
+      "token_version": "v001"
+    },
+    {
+      "id": "T_in_P2",
+      "type": "TRANSITION",
+      "x": 168,
+      "y": 130,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P2",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10",
+      "fill_color": "#FF9933"
+    },
+    {
+      "id": "P2",
+      "type": "PLACE",
+      "x": 255,
+      "y": 135,
+      "width": 50,
+      "height": 50,
+      "label": "P2",
+      "service": "StochasticService",
+      "serviceInstance": "StochasticInstance1",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "token",
+          "arguments": [
+            {"name": "token", "type": "String", "value": "String", "required": false}
+          ]
+        }
+      ],
+      "fill_color": "#00FF33"
+    },
+    {
+      "id": "T_out_P2",
+      "type": "TRANSITION",
+      "x": 368,
+      "y": 130,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P2",
+      "rotation": 0.0,
+      "node_type": "DecisionNode",
+      "node_value": "DECISION_NODE",
+      "transition_type": "T_out",
+      "fill_color": "#FF9933"
+    },
+    {
+      "id": "Terminate",
+      "type": "TRANSITION",
+      "x": 468,
+      "y": 130,
+      "width": 24,
+      "height": 60,
+      "label": "Terminate",
+      "rotation": 0.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "EG11",
+      "target": "T_in_P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P2",
+      "target": "P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P2",
+      "target": "T_out_P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P2",
+      "target": "T_in_P2",
+      "label": "false",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "false",
+      "endpoint": "",
+      "waypoints": [
+        {"x": 380, "y": 80},
+        {"x": 180, "y": 80}
+      ],
+      "labelOffsetX": 98,
+      "labelOffsetY": 11,
+      "connection_type": "NETWORK",
+      "availability": 1.0
+    },
+    {
+      "source": "P2",
+      "target": "T_out_P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P2",
+      "target": "Terminate",
+      "label": "true",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "true",
+      "endpoint": ""
+    }
+  ],
+  "textElements": [
+  ]
+}
