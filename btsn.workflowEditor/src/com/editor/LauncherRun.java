@@ -200,10 +200,15 @@ public final class LauncherRun {
 
     /** The Ant home at or above a file or folder: the first folder with lib/ant-launcher.jar (symbolic links followed). */
     static File homeAround(File start) {
-        File f;
-        try { f = start.toPath().toRealPath().toFile(); } catch (IOException | InvalidPathException ex) { f = start.getAbsoluteFile(); }
-        for (int i = 0; f != null && i < 4; i++, f = f.getParentFile())
-            if (new File(f, "lib/ant-launcher.jar").isFile()) return f;
+        // As given first (a packaged Ant links lib/ant-launcher.jar to a shared jar), then with links resolved
+        // (a PATH entry such as /usr/bin/ant links into Ant's folder).
+        List<File> starts = new ArrayList<>(Collections.singletonList(start.getAbsoluteFile()));
+        try { starts.add(start.toPath().toRealPath().toFile()); } catch (IOException | InvalidPathException ignored) { }
+        for (File first : starts) {
+            File f = first;
+            for (int up = 0; f != null && up < 4; up++, f = f.getParentFile())
+                if (new File(f, "lib/ant-launcher.jar").isFile()) return f;
+        }
         return null;
     }
 

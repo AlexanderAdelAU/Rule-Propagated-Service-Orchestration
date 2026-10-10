@@ -31,6 +31,21 @@ public final class RunFromEditorCheck {
         try { LauncherRun.antHome(new File(repository, "btsn.petrinet.ProjectLoader/P2_Tutorial_Workflow_BuildAndRun.xml").getPath()); check(false, "Launcher accepted as Ant"); }
         catch (java.io.IOException expected) { check(expected.getMessage().contains("holds a launcher"), "Wrong message: " + expected.getMessage()); }
         check(LauncherRun.antLaunch(antHome).contains("org.apache.tools.ant.launch.Launcher"), "Ant not run through its launcher class");
+        // A packaged Ant (as on Ubuntu): /usr/bin/ant links into Ant's folder, whose lib/ant-launcher.jar links to a shared jar.
+        if (!LauncherRun.windows()) {
+            Path pkg = Files.createTempDirectory("packaged-ant-");
+            Path shared = Files.createDirectories(pkg.resolve("usr/share/java"));
+            Files.write(shared.resolve("ant-launcher-1.10.14.jar"), new byte[0]);
+            Path antDir = pkg.resolve("usr/share/ant");
+            Files.createDirectories(antDir.resolve("lib")); Files.createDirectories(antDir.resolve("bin"));
+            Files.createSymbolicLink(antDir.resolve("lib/ant-launcher.jar"), shared.resolve("ant-launcher-1.10.14.jar"));
+            Files.write(antDir.resolve("bin/ant"), new byte[0]);
+            Path usrBin = Files.createDirectories(pkg.resolve("usr/bin"));
+            Files.createSymbolicLink(usrBin.resolve("ant"), antDir.resolve("bin/ant"));
+            File expected = antDir.toFile().getCanonicalFile();
+            check(expected.equals(LauncherRun.antHome(usrBin.resolve("ant").toString()).getCanonicalFile()), "Packaged Ant not found from /usr/bin/ant");
+            check(expected.equals(LauncherRun.antHome(antDir.resolve("lib/ant-launcher.jar").toString()).getCanonicalFile()), "Packaged Ant not found from its linked launcher jar");
+        }
         // Eclipse's own Ant, found from the Java Eclipse ships inside its plugins folder.
         Path eclipse = Files.createTempDirectory("eclipse-");
         for (String version : new String[] {"org.apache.ant_1.10.12.v20211102-1452", "org.apache.ant_1.10.14.v20230922-1200"}) {
