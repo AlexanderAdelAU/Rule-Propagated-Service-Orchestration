@@ -69,8 +69,14 @@ public final class LauncherRuntimeCheck {
                 Path definition=common.resolve("ProcessDefinitionFolder").resolve(process+".json");
                 check(Files.isRegularFile(definition),"Missing process definition: "+definition);
                 JSONObject data=json(definition);
-                if(property.startsWith("workflow")||property.equals("process.name")&&process.contains("/Workflow/"))
+                if(property.startsWith("workflow")||property.equals("process.name")&&process.contains("/Workflow/")) {
+                    // A business process names its service deployment, which names its catalogue.
+                    check(data.get("serviceDeployment") instanceof String,"Process does not name its service deployment: "+definition);
+                    JSONObject declared=json(common.resolve((String)data.get("serviceDeployment")));
+                    check(declared.get("catalog") instanceof String&&Files.isRegularFile(common.resolve((String)declared.get("catalog"))),
+                        "Service deployment does not name an existing catalogue: "+data.get("serviceDeployment"));
                     new org.btsn.deployment.DeploymentConfiguration(common).validateWorkflow(data);
+                }
                 for(Object item:(JSONArray)data.get("elements")) {
                     JSONObject node=(JSONObject)item; if(!"PLACE".equals(node.get("type"))) continue;
                     String service=(String)node.get("service");

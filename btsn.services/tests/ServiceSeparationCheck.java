@@ -40,12 +40,18 @@ public final class ServiceSeparationCheck {
             }
         }
         check(petriProfiles == 6, "Petri-net profile coverage changed");
-        // Validate each migrated process against its explicitly selected profile before deployment.
-        String[] modelNames = {"TrafficLight_Workflow", "P1_P2_Deterministic_Workflow", "P1_to_P6_Double_Join_Workflow", "P1_Tutorial_Workflow", "P1_P2_Workflow", "P1_P2_ForkCompanion_Workflow", "P1_P2_P3_P4_Fork_Join_Workflow"};
-        for (String modelName : modelNames) {
-            JSONObject model = DeploymentConfiguration.read(common.resolve("ProcessDefinitionFolder/petrinet/Workflow/" + modelName + ".json"));
+        // Validate every process that names a service deployment against a profile selecting that deployment.
+        java.util.List<Path> linkedProcesses = new java.util.ArrayList<>();
+        try (java.util.stream.Stream<Path> processes = Files.walk(common.resolve("ProcessDefinitionFolder"))) {
+            for (Path path : (Iterable<Path>)processes.filter(p -> p.toString().endsWith(".json")).sorted()::iterator)
+                if (DeploymentConfiguration.read(path).containsKey("serviceDeployment")) linkedProcesses.add(path);
+        }
+        check(linkedProcesses.size() >= 14, "Process/service-deployment links missing: " + linkedProcesses.size());
+        for (Path processPath : linkedProcesses) {
+            String modelName = common.relativize(processPath).toString();
+            JSONObject model = DeploymentConfiguration.read(processPath);
             JSONObject selectedProfile = null;
-            try (java.util.stream.Stream<Path> candidates = Files.walk(root.resolve("btsn.services/deployments/models"))) {
+            try (java.util.stream.Stream<Path> candidates = Files.walk(root.resolve("btsn.services/deployments"))) {
                 for (Path candidate : (Iterable<Path>)candidates.filter(p -> p.toString().endsWith(".json"))::iterator) {
                     JSONObject data = DeploymentConfiguration.read(candidate);
                     if (model.get("serviceDeployment").equals(data.get("serviceDeployment"))) { selectedProfile = data; break; }

@@ -520,5 +520,6 @@
       "fontStyle": 2,
       "color": -16777216
     }
-  ]
+  ],
+  "serviceDeployment": "ServiceDeploymentFolder/financial/FinancialSystem.json"
 }

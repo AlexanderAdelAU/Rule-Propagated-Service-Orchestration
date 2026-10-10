@@ -28,7 +28,7 @@
     <property name="sequence.id.p2" value="999100000" />
     <property name="sequence.id.monitor" value="999600000" />
     <property name="db.init.operation" value="purgeAndInitialize" />
-    <property name="process.name" value="petrinet/Initializers/P1_P2_Initialization" />
+    <property name="process.name" value="common/Initializers/P1_P2_Initialization" />
 
     <!-- Timing -->
     <property name="port.release.seconds" value="5" />

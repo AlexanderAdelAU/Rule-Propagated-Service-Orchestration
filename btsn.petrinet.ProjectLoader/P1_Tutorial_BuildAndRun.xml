@@ -45,9 +45,9 @@
 	<property name="rule.version" value="v001" />
 
 	<!-- Process names for each phase -->
-	<property name="init.process.name" value="petrinet/Initializers/P1_Initialization" />
+	<property name="init.process.name" value="common/Initializers/P1_Initialization" />
 	<property name="workflow.process.name" value="petrinet/Workflow/P1_Tutorial_Workflow" />
-	<property name="collector.process.name" value="petrinet/Collectors/P1_Collector" />
+	<property name="collector.process.name" value="common/Collectors/P1_Collector" />
 
 	<!-- Phase 1: Initialization parameters (v999 = admin/non-instrumented) -->
 	<property name="init.version" value="v999" />

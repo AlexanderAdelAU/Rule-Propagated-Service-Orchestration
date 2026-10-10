@@ -1,5 +1,6 @@
 {
   "definitionType": "ServiceDeployment",
+  "catalog": "BusinessServiceDefinitions/healthcare/Healthcare.json",
   "capabilities": [
     {
       "node": "P1",

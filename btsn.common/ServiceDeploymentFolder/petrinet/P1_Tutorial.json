@@ -1,5 +1,6 @@
 {
   "definitionType": "ServiceDeployment",
+  "catalog": "BusinessServiceDefinitions/petrinet/PetriNetModels.json",
   "capabilities": [
     {
       "node": "P1",

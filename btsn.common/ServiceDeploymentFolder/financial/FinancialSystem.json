@@ -1,5 +1,6 @@
 {
   "definitionType": "ServiceDeployment",
+  "catalog": "BusinessServiceDefinitions/financial/FinancialSystem.json",
   "capabilities": [
     {
       "node": "P1",

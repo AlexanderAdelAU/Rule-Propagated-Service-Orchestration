@@ -26,9 +26,13 @@ public final class ServiceRegistryCheck {
         check(registry.validateEndpoint(c.service, c.operation, c.output, c.inputs, "").isEmpty(), "Ordinary JSON service rejected");
         check(!registry.validateEndpoint(c.service, c.operation, c.output, c.inputs, "boolean-token").isEmpty(), "JSON service accepted Boolean adapter");
         Canvas canvas = new Canvas();
-        String[] models = {"TrafficLight_Workflow", "P1_P2_Deterministic_Workflow", "P1_to_P6_Double_Join_Workflow", "P1_Tutorial_Workflow", "P1_P2_Workflow", "P1_P2_ForkCompanion_Workflow", "P1_P2_P3_P4_Fork_Join_Workflow"};
+        String[] models = {"petrinet/Workflow/TrafficLight_Workflow", "petrinet/Workflow/P1_P2_Deterministic_Workflow", "petrinet/Workflow/P1_to_P6_Double_Join_Workflow",
+            "petrinet/Workflow/P1_Tutorial_Workflow", "petrinet/Workflow/P1_P2_Workflow", "petrinet/Workflow/P1_P2_ForkCompanion_Workflow", "petrinet/Workflow/P1_P2_P3_P4_Fork_Join_Workflow",
+            // Business processes open with the catalogue reached through their own service deployment.
+            "financial/Workflow/FinancialSystem_P1_P5_Workflow", "financial/Workflow/FinancialSystem_Stage3_PreScreen_Workflow", "financial/Workflow/FinancialSystem_P1_Simple",
+            "healthcare/Workflow/Emergency_Department_Patient_Workflow", "healthcare/Workflow/Federated_Radiology_Workflow", "healthcare/Workflow/Triage_Workflow", "healthcare/Workflow/Triage_CanaryTest_Workflow"};
         for (String model : models) {
-            File file = new File(common, "ProcessDefinitionFolder/petrinet/Workflow/" + model + ".json");
+            File file = new File(common, "ProcessDefinitionFolder/" + model + ".json");
             canvas.setDefinitionLocation(file);
             canvas.loadFromJSON(new String(Files.readAllBytes(file.toPath()), java.nio.charset.StandardCharsets.UTF_8));
             check(canvas.validateServiceContracts().isEmpty(), model + ": " + canvas.validateServiceContracts());

@@ -40,11 +40,11 @@
 	<!-- ======================================================================= -->
 
 	<!-- Process names for each phase -->
-	<property name="init.process.name" value="petrinet/Initializers/P1_P2_P3_P4_P5_Initialization" />
+	<property name="init.process.name" value="common/Initializers/P1_P2_P3_P4_P5_Initialization" />
 	<!-- Each workflow has its own topology/rule version; physical services remain shared. -->
 	<property name="workflow1.process.name" value="financial/Workflow/FinancialSystem_P1_P5_Workflow" />
 	<property name="workflow2.process.name" value="financial/Workflow/FinancialSystem_Stage3_PreScreen_Workflow" />
-	<property name="collector.process.name" value="petrinet/Collectors/P1_P2_P3_P4_P5_Collector" />
+	<property name="collector.process.name" value="common/Collectors/P1_P2_P3_P4_P5_Collector" />
 
 	<!-- Phase 1: Initialization parameters (v999 = admin/non-instrumented) -->
 	<property name="init.version" value="v999" />

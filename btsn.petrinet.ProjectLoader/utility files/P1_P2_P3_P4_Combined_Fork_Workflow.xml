@@ -27,9 +27,9 @@
 	<property name="rule.version" value="v001" />
 
 	<!-- Process names for each phase -->
-	<property name="init.process.name" value="petrinet/Initializers/P1_P2_P3_P4_Initialization" />
+	<property name="init.process.name" value="common/Initializers/P1_P2_P3_P4_Initialization" />
 	<property name="workflow.process.name" value="petrinet/Workflow/P1_P2_P3_P4_Fork_Join_Workflow" />
-	<property name="collector.process.name" value="petrinet/Collectors/P1_P2_P3_P4_Collector" />
+	<property name="collector.process.name" value="common/Collectors/P1_P2_P3_P4_Collector" />
 
 	<!-- Phase 1: Initialization parameters -->
 	<property name="db.init.operation" value="purgeAndInitialize" />

@@ -274,9 +274,9 @@ runtime phases have a different purpose:
 
 | XML phase | Action | Definition used |
 |---|---|---|
-| 1 — Database initialization | Initialize P1 and Monitor using administrative version `v999` | [P1_Initialization.json](btsn.common/ProcessDefinitionFolder/petrinet/Initializers/P1_Initialization.json) |
+| 1 — Database initialization | Initialize P1 and Monitor using administrative version `v999` | [P1_Initialization.json](btsn.common/ProcessDefinitionFolder/common/Initializers/P1_Initialization.json) |
 | 2 — Workflow execution | Deploy the P1 loop as `v001`, then fire up to ten root tokens | [P1_Tutorial_Workflow.json](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json) |
-| 3 — Data collection | Request P1 observations for `v001` and write them to Monitor | [P1_Collector.json](btsn.common/ProcessDefinitionFolder/petrinet/Collectors/P1_Collector.json) |
+| 3 — Data collection | Request P1 observations for `v001` and write them to Monitor | [P1_Collector.json](btsn.common/ProcessDefinitionFolder/common/Collectors/P1_Collector.json) |
 
 The console reports each phase and prints the P1 and Monitor output paths.
 Locally launched hosts remain running after the completion banner. Allow
