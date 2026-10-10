@@ -12,7 +12,7 @@ public final class CirculatingServiceTimingsCheck {
    s.executeUpdate("CREATE TABLE SERVICEMEASUREMENTS (sequenceID BIGINT, serviceName VARCHAR(100), operation VARCHAR(100), arrivalTime BIGINT, invocationTime BIGINT, publishTime BIGINT)");
    s.executeUpdate("INSERT INTO SERVICEMEASUREMENTS VALUES (1000001,'P1_Place','processToken',1000,1010,1040),(1000001,'P1_Place','processToken',2000,2015,2055),(1000001,'P1_Place','processToken',3000,3020,NULL),(1000001,'P1_Place','processToken',1000,1010,1040),(999000001,'P1_InitializationService','purgeAndInitialize',500,510,520)");
   }
-  SwingGanttChart_WithLatency_v1d chart=new SwingGanttChart_WithLatency_v1d(true);
+  SwingGanttChart_WithLatency chart=new SwingGanttChart_WithLatency(true);
   check(chart.tasks.size()==3,"Repeated visits, duplicate collection or admin filtering incorrect");
   check(chart.tasks.get(0).elapsedTime==30 && chart.tasks.get(0).queueTime==10,"Arrival/invocation/publish measurements were changed");
   check(chart.tasks.get(1).elapsedTime==40 && chart.tasks.get(1).queueTime==15,"Circulating token lost its second visit");

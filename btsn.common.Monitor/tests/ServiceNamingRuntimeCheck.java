@@ -1,5 +1,7 @@
 package org.btsn.derby.Analysis;
 
+import org.btsn.derby.Analysis.helper.ServiceDisplayNames;
+
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -32,9 +34,9 @@ public class ServiceNamingRuntimeCheck {
                     throw new AssertionError("wrong runtime label at " + place);
             }
             render(spatial, "healthcare-service-names-spatial.png");
-            SwingGanttChart_WithLatency_v1d gantt = new SwingGanttChart_WithLatency_v1d(false);
+            SwingGanttChart_WithLatency gantt = new SwingGanttChart_WithLatency(false);
             if (gantt.tasks.size() != 10) throw new AssertionError("wrong Gantt workflow count");
-            for (SwingGanttChart_WithLatency_v1d.Task task : gantt.tasks) {
+            for (SwingGanttChart_WithLatency.Task task : gantt.tasks) {
                 if (!task.businessServices.contains("TriageService") || !task.businessServices.contains("TreatmentService"))
                     throw new AssertionError("Gantt missing service identities");
             }

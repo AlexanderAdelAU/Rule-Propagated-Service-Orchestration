@@ -1,5 +1,8 @@
 package org.btsn.derby.Analysis;
 
+import org.btsn.derby.Analysis.helper.CombinedWorkflowMetrics;
+import org.btsn.derby.Analysis.helper.ServiceDisplayNames;
+
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -75,7 +78,7 @@ public final class CombinedWorkflowMetricsCheck {
         check(!find(rows,5000000).hasDuration()&&find(rows,5000000).maxQueueMs==90
                 &&find(rows,5000000).validQueueVisits==1,"Legacy queue data acquired fabricated elapsed time");
         check(!find(rows,6000000).hasDuration()&&!find(rows,6000000).hasQueueMaximum(),"PROCESS-only legacy row became measured");
-        SwingGanttChart_WithLatency_v1d panel=new SwingGanttChart_WithLatency_v1d();
+        SwingGanttChart_WithLatency panel=new SwingGanttChart_WithLatency();
         check(panel.generateLaTeXFigure().contains("(2.045,4.000) rectangle (2.645,4.800)"),
                 "Default publication bars did not retain the arrival slot centre");
         panel.setWideBars(false);
@@ -119,7 +122,7 @@ public final class CombinedWorkflowMetricsCheck {
         boolean forkMarker=false,zeroMarker=false;
         for(int y=90;y<image.getHeight()-90;y++) for(int x=150;x<image.getWidth()-35;x++) {
             if((image.getRGB(x,y)&0xffffff)!=0) continue;
-            SwingGanttChart_WithLatency_v1d.Task t=panel.getTaskAt(x,y);
+            SwingGanttChart_WithLatency.Task t=panel.getTaskAt(x,y);
             if(t!=null&&t.sequenceId==2000000) forkMarker=true;
             if(t!=null&&t.sequenceId==3001000) zeroMarker=true;
         }
@@ -148,8 +151,8 @@ public final class CombinedWorkflowMetricsCheck {
         check(longestColourRun(lightImage,darkRed)==longestColourRun(image,darkRed)
                 &&longestColourRun(lightImage,darkBlue)==longestColourRun(image,darkBlue),
                 "Lower queue shading changed the original bar outline height");
-        int paleBlue=SwingGanttChart_WithLatency_v1d.queueBarColor(new java.awt.Color(0x3498db)).getRGB()&0xffffff;
-        int paleGreen=SwingGanttChart_WithLatency_v1d.queueBarColor(new java.awt.Color(0x2ecc71)).getRGB()&0xffffff;
+        int paleBlue=SwingGanttChart_WithLatency.queueBarColor(new java.awt.Color(0x3498db)).getRGB()&0xffffff;
+        int paleGreen=SwingGanttChart_WithLatency.queueBarColor(new java.awt.Color(0x2ecc71)).getRGB()&0xffffff;
         int[] blueBounds=colourColumns(image,0x3498db),shadeBounds=colourColumns(lightImage,paleBlue);
         check(blueBounds[0]==shadeBounds[0]&&blueBounds[1]==shadeBounds[1],
                 "Queue shading is not aligned inside the original bar");
@@ -160,13 +163,13 @@ public final class CombinedWorkflowMetricsCheck {
         for(int y=112;y<lightImage.getHeight()-90;y++) for(int x=150;x<lightImage.getWidth()-35;x++) {
             int colour=lightImage.getRGB(x,y)&0xffffff;
             if(colour!=paleBlue&&colour!=paleGreen) continue;
-            SwingGanttChart_WithLatency_v1d.Task t=panel.getTaskAt(x,y);
+            SwingGanttChart_WithLatency.Task t=panel.getTaskAt(x,y);
             if(t!=null&&t.sequenceId==2000000) lightFork=true;
             if(t!=null&&t.sequenceId==3001000) lightZero=true;
             if(t!=null&&t.sequenceId==3000000) lightIncomplete=true;
         }
         check(lightFork&&lightZero&&lightIncomplete,"Queue bar hover lost fork, measured zero or incomplete workflow");
-        SwingGanttChart_WithLatency_v1d.Task forkTask=panel.tasks.stream().filter(t->t.sequenceId==2000000).findFirst().orElseThrow();
+        SwingGanttChart_WithLatency.Task forkTask=panel.tasks.stream().filter(t->t.sequenceId==2000000).findFirst().orElseThrow();
         long originalWait=forkTask.queueTime; forkTask.queueTime=300;
         check(panel.axisMaximum("v002")==250,"Oversized queue observation changed the workflow-duration scale");
         String capped=panel.generateLaTeXFigure();
@@ -185,7 +188,7 @@ public final class CombinedWorkflowMetricsCheck {
         panel.tasks.clear();
         for(int i=0;i<40;i++) {
             int version=i%3+1;
-            SwingGanttChart_WithLatency_v1d.Task t=new SwingGanttChart_WithLatency_v1d.Task(i+1,
+            SwingGanttChart_WithLatency.Task t=new SwingGanttChart_WithLatency.Task(i+1,
                     "v00"+version,version*1000000+(i/3)*10000,0);
             t.hasElapsedTime=true; t.hasQueueTime=true; t.canonical=true;
             t.elapsedTime=version==1?180+i:version==2?450+i:2300+i*3;
@@ -220,7 +223,7 @@ public final class CombinedWorkflowMetricsCheck {
         boolean wideHover=false;
         for(int y=160;y<wideImage.getHeight()-90;y++) for(int x=150;x<wideImage.getWidth()-35;x++) {
             if((wideImage.getRGB(x,y)&0xffffff)!=0xe74c3c) continue;
-            SwingGanttChart_WithLatency_v1d.Task t=panel.getTaskAt(x,y);
+            SwingGanttChart_WithLatency.Task t=panel.getTaskAt(x,y);
             if(t!=null&&t.sequenceId==1000000) wideHover=true;
         }
         check(wideHover,"Wide style lost root hover identity");
@@ -257,12 +260,12 @@ public final class CombinedWorkflowMetricsCheck {
                 }
             }
         }
-        SwingGanttChart_WithLatency_v1d workflows=new SwingGanttChart_WithLatency_v1d();
+        SwingGanttChart_WithLatency workflows=new SwingGanttChart_WithLatency();
         check(workflows.tasks.size()==55,"Default Stage 5 chart counted service visits as workflows");
         check(workflows.tasks.stream().filter(t->t.sequenceId/1000000==1).count()==15
                 &&workflows.tasks.stream().filter(t->t.sequenceId/1000000==2).count()==40,"Stage 5 version workflow counts changed");
         check(workflows.generateWorkflowSummaryReport().contains("55 observed root workflows"),"Default count caption lost workflow semantics");
-        SwingGanttChart_WithLatency_v1d invocations=new SwingGanttChart_WithLatency_v1d(true);
+        SwingGanttChart_WithLatency invocations=new SwingGanttChart_WithLatency(true);
         check(invocations.tasks.size()==155,"Explicit invocation view lost individual service visits");
         System.out.println("PASS: Stage 5 default = 55 workflow rows (15 v001 + 40 v002); explicit invocation view = 155 service visits");
     }

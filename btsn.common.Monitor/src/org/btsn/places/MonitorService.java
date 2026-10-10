@@ -270,7 +270,7 @@ public class MonitorService extends BaseStochasticPetriNetPlace {
 	                    String logical = getStringValue(record, "logicalService", "");
 	                    if (!logical.isEmpty()) {
 	                        try (Connection connection = getConnection()) {
-	                            org.btsn.derby.Analysis.ServiceDisplayNames.record(connection,
+	                            org.btsn.derby.Analysis.helper.ServiceDisplayNames.record(connection,
 	                                VersionConstants.getWorkflowBase(VersionConstants.getVersionFromSequenceId(sequenceId)),
 	                                sequenceId, place, operation, arrivalTime, logical);
 	                        }
