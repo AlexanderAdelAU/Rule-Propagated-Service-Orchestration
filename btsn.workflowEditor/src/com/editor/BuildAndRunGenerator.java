@@ -12,22 +12,31 @@ import org.json.simple.parser.JSONParser;
 /**
  * Writes a BuildAndRun launcher for a saved, deployed process. The launcher holds only the choices
  * that differ between processes and imports btsn.services/process-runtime.xml for the shared phases.
- * Missing supporting files are written too: the deployment profile, the token schedule (CSV) and an
- * initialiser/collector pair for the hosts the deployment uses. Existing files are reused.
+ * Missing supporting files are written too: the deployment profile, a token schedule (CSV) per event
+ * generator and an initialiser/collector pair for the hosts the deployment uses. Existing files are reused.
+ * Every event generator in the process runs, each under its own rule version, so their tokens stay apart.
  */
 public final class BuildAndRunGenerator {
     public static final List<String> VERSIONS = Arrays.asList("v001", "v002", "v003");
     private static final List<String> NODES = Arrays.asList("P1", "P2", "P3", "P4", "P5", "P6");
 
+    /** One event generator's run: its rule version and the spacing of its tokens. */
+    public static final class Run {
+        public String generatorId = "";
+        public String version = "v001";
+        public int intervalMs = 1000;
+        public boolean enabled = true;
+        Run copy() { Run r = new Run(); r.generatorId = generatorId; r.version = version; r.intervalMs = intervalMs; r.enabled = enabled; return r; }
+    }
+
     /** Choices the user makes; defaults come from the process. */
     public static final class Options {
         public String launcherName = "";
         public File folder;
-        public String generatorId = "";
-        public String version = "v001";
-        public int tokens = 10;
-        public int intervalMs = 1000;
+        public final List<Run> runs = new ArrayList<>();   // one per event generator, in canvas order
+        public int tokens = 10;                            // per generator
         public int completionSeconds = 10;
+        public List<Run> enabled() { List<Run> on = new ArrayList<>(); for (Run r : runs) if (r.enabled) on.add(r); return on; }
     }
 
     /** What the launcher will use, worked out from the process, its deployment and the options. */
@@ -48,7 +57,11 @@ public final class BuildAndRunGenerator {
         public Options defaults = new Options();
 
         public File launcher(Options o) { return new File(o.folder, o.launcherName.endsWith(".xml") ? o.launcherName : o.launcherName + ".xml"); }
-        public File schedule(Options o) { return new File(root, "btsn.common.eventgenerators/EventTriggeringFile/" + baseName(o) + ".csv"); }
+        /** One schedule per generator; a single generator keeps the plain launcher name. */
+        public File schedule(Options o, Run run) {
+            String suffix = o.enabled().size() > 1 ? "_" + run.generatorId.replaceAll("[^A-Za-z0-9_.-]", "_") : "";
+            return new File(root, "btsn.common.eventgenerators/EventTriggeringFile/" + baseName(o) + suffix + ".csv");
+        }
         public String baseName(Options o) { return launcher(o).getName().replaceFirst("\\.xml$", ""); }
     }
 
@@ -115,10 +128,24 @@ public final class BuildAndRunGenerator {
         Options o = plan.defaults;
         o.folder = preferred.isDirectory() ? preferred : plan.folders.isEmpty() ? plan.root : plan.folders.get(0);
         o.launcherName = base + "_BuildAndRun.xml";
-        o.generatorId = plan.targets.keySet().iterator().next();
-        o.intervalMs = plan.rates.get(o.generatorId);
-        o.version = plan.versions.get(o.generatorId);
+        for (String id : plan.targets.keySet()) {
+            Run run = new Run(); run.generatorId = id; run.intervalMs = plan.rates.get(id); run.version = plan.versions.get(id);
+            o.runs.add(run);
+        }
         return plan;
+    }
+
+    /** Choices that cannot run: no generator chosen, or two generators sharing a version (their tokens would collide). */
+    public static List<String> problems(Plan plan, Options o) {
+        List<String> problems = new ArrayList<>();
+        List<Run> on = o.enabled();
+        if (on.isEmpty()) problems.add("Choose at least one event generator to run.");
+        Map<String, String> byVersion = new LinkedHashMap<>();
+        for (Run run : on) {
+            String other = byVersion.put(run.version, run.generatorId);
+            if (other != null) problems.add(other + " and " + run.generatorId + " both use " + run.version + "; give each event generator its own version.");
+        }
+        return problems;
     }
 
     /** Files the launcher needs, in the order they will be written ("reuse" when they exist). */
@@ -126,22 +153,29 @@ public final class BuildAndRunGenerator {
         List<String> lines = new ArrayList<>();
         lines.add((plan.launcher(o).exists() ? "Replace  " : "Write    ") + relative(plan.root, plan.launcher(o)));
         lines.add((plan.profileExists ? "Reuse    " : "Write    ") + relative(plan.root, plan.profile));
-        lines.add((plan.schedule(o).exists() ? "Replace  " : "Write    ") + relative(plan.root, plan.schedule(o)));
+        for (Run run : o.enabled()) lines.add((plan.schedule(o, run).exists() ? "Replace  " : "Write    ") + relative(plan.root, plan.schedule(o, run)));
         lines.add((plan.initializerExists ? "Reuse    " : "Write    ") + relative(plan.root, plan.initializer));
         lines.add((plan.collectorExists ? "Reuse    " : "Write    ") + relative(plan.root, plan.collector));
         lines.add("Hosts    " + String.join(", ", plan.nodes) + " and Monitor");
-        lines.add("Tokens   " + o.tokens + " from " + o.generatorId + " to " + plan.targets.get(o.generatorId) + "." + plan.operations.get(o.generatorId)
-            + ", one every " + o.intervalMs + " ms, version " + o.version);
+        for (Run run : o.enabled())
+            lines.add("Tokens   " + o.tokens + " from " + run.generatorId + " to " + plan.targets.get(run.generatorId) + "." + plan.operations.get(run.generatorId)
+                + ", one every " + run.intervalMs + " ms, version " + run.version);
+        if (o.enabled().size() > 1) lines.add("         The generators fire together; the analysis reports each version separately.");
+        for (String problem : problems(plan, o)) lines.add("Problem  " + problem);
         return lines;
     }
 
     /** Writes the launcher and any missing supporting files; returns the launcher. */
     public static File write(Plan plan, Options o) throws IOException {
         if (!plan.problems.isEmpty()) throw new IOException(String.join("\n", plan.problems));
+        List<String> choices = problems(plan, o);
+        if (!choices.isEmpty()) throw new IOException(String.join("\n", choices));
         if (!plan.profileExists) writeText(plan.profile, profileJson(plan));
-        StringBuilder csv = new StringBuilder();
-        for (int i = 0; i < o.tokens; i++) csv.append((long)i * o.intervalMs).append(",0,1\n");
-        writeText(plan.schedule(o), csv.toString());
+        for (Run run : o.enabled()) {
+            StringBuilder csv = new StringBuilder();
+            for (int i = 0; i < o.tokens; i++) csv.append((long)i * run.intervalMs).append(",0,1\n");
+            writeText(plan.schedule(o, run), csv.toString());
+        }
         if (!plan.initializerExists) writeText(plan.initializer, adminProcess(plan.nodes, true, plan.nodeSetName));
         if (!plan.collectorExists) writeText(plan.collector, adminProcess(plan.nodes, false, plan.nodeSetName));
         File launcher = plan.launcher(o);
@@ -164,13 +198,21 @@ public final class BuildAndRunGenerator {
         x.append("    <property name=\"workflow.process.name\" value=\"").append(xml(plan.processName)).append("\"/>\n");
         x.append("    <property name=\"init.process.name\" value=\"common/Initializers/").append(plan.nodeSetName).append("_Initialization\"/>\n");
         x.append("    <property name=\"collector.process.name\" value=\"common/Collectors/").append(plan.nodeSetName).append("_Collector\"/>\n");
-        x.append("    <property name=\"rule.version\" value=\"").append(o.version).append("\"/>\n\n");
-        x.append("    <!-- Tokens: event generator, target place and schedule -->\n");
-        x.append("    <property name=\"event.generator.id\" value=\"").append(xml(o.generatorId)).append("\"/>\n");
-        x.append("    <property name=\"target.place\" value=\"").append(plan.targets.get(o.generatorId)).append("\"/>\n");
-        x.append("    <property name=\"target.operation\" value=\"").append(xml(plan.operations.get(o.generatorId))).append("\"/>\n");
+        List<Run> on = o.enabled();
+        List<String> versions = new ArrayList<>(); for (Run run : on) versions.add(run.version);
+        x.append("    <property name=\"rule.version\" value=\"").append(on.get(0).version).append("\"/>\n");
+        x.append("    <property name=\"query.version\" value=\"").append(String.join(",", versions)).append("\"/>\n\n");
+        x.append("    <!-- Tokens: one block per event generator, each with its own rule version, target place and schedule.\n");
+        x.append("         The generators fire together. -->\n");
+        for (int i = 0; i < on.size(); i++) {
+            Run run = on.get(i); String slot = "eg" + (i + 1);
+            x.append("    <property name=\"").append(slot).append(".id\" value=\"").append(xml(run.generatorId)).append("\"/>\n");
+            x.append("    <property name=\"").append(slot).append(".version\" value=\"").append(run.version).append("\"/>\n");
+            x.append("    <property name=\"").append(slot).append(".place\" value=\"").append(plan.targets.get(run.generatorId)).append("\"/>\n");
+            x.append("    <property name=\"").append(slot).append(".operation\" value=\"").append(xml(plan.operations.get(run.generatorId))).append("\"/>\n");
+            x.append("    <property name=\"").append(slot).append(".trigger.file\" location=\"").append(xml(relative(dir, plan.schedule(o, run)))).append("\"/>\n");
+        }
         x.append("    <property name=\"token.count\" value=\"").append(o.tokens).append("\"/>\n");
-        x.append("    <property name=\"trigger.file\" location=\"").append(xml(relative(dir, plan.schedule(o)))).append("\"/>\n");
         x.append("    <property name=\"workflow.completion.seconds\" value=\"").append(o.completionSeconds).append("\"/>\n\n");
         x.append("    <!-- Hosts used by the service deployment -->\n");
         for (String node : plan.nodes) x.append("    <property name=\"run.").append(node.toLowerCase(Locale.ROOT)).append("\" value=\"true\"/>\n");

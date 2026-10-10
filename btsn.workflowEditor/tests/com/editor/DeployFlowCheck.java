@@ -128,12 +128,12 @@ public final class DeployFlowCheck {
                 String target = canvas.nodeFor(green) + "_Place";
                 check(target.equals(plan.targets.get("TRAFFICLIGHT_EVENTGENERATOR")), "Generator target: " + plan.targets);
                 BuildAndRunDialog dialog = new BuildAndRunDialog(null, plan);
-                dialog.tokens.setValue(4); dialog.interval.setValue(250);
+                dialog.tokens.setValue(4); dialog.generators.setValueAt(250, 0, 4);
                 File launcher = dialog.createFiles(); dialog.dispose();
                 check(launcher.equals(scratch.resolve("btsn.petrinet.ProjectLoader/TrafficLight_Design_BuildAndRun.xml").toFile()), "Launcher location: " + launcher);
                 String xml = read(launcher.toPath());
                 for (String expected : new String[] {"value=\"petrinet/Workflow/TrafficLight_Design\"", "value=\"common/Initializers/P1_to_P6_Initialization\"",
-                        "name=\"target.place\" value=\"" + target + "\"", "name=\"token.count\" value=\"4\"", "name=\"run.p6\" value=\"true\"",
+                        "name=\"eg1.place\" value=\"" + target + "\"", "name=\"eg1.id\" value=\"TRAFFICLIGHT_EVENTGENERATOR\"", "name=\"query.version\" value=\"v001\"", "name=\"token.count\" value=\"4\"", "name=\"run.p6\" value=\"true\"",
                         "location=\"../btsn.services/deployments/models/TrafficLight_DesignDeployment.json\"", "<import file=\"../btsn.services/process-runtime.xml\"/>"})
                     check(xml.contains(expected), "Launcher lacks " + expected + "\n" + xml);
                 javax.xml.parsers.DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(launcher);
@@ -216,6 +216,9 @@ public final class DeployFlowCheck {
         String older = "Auto-detected 1 workflow bases: [1000000]\nTime=1770648319905 Token=1000000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=EG EventType=GENERATED\n";
         String latest = "Auto-detected 1 workflow bases: [1000000]\nTime=1791616256378 Token=1000000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=EG11 EventType=GENERATED\n";
         check(TokenAnimator.lastAnalyzerRun(older + latest).equals(latest) && TokenAnimator.lastAnalyzerRun(latest).equals(latest), "Appended analyzer runs not separated");
+        // The launchers' analyse target runs with --all, which starts each run with "Analyzing ALL".
+        String allRun = "Analyzing ALL 2 workflow bases: [1000000, 2000000]\nTime=1791616256378 Token=1000000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=EG11 EventType=GENERATED\n";
+        check(TokenAnimator.lastAnalyzerRun(older + allRun).equals(allRun), "Appended --all analyzer runs not separated");
         // Output copied from an Ant console ("[java]" on every line) replays like the analyzer's own output.
         String analysis = read(common.toPath().resolve("AnalysisFolder/PetriNet/Analysis_P2_Tutorial_Workflow.txt"));
         String prefixed = analysis.replaceAll("(?m)^", "     [java] ");
@@ -235,11 +238,26 @@ public final class DeployFlowCheck {
                         for (String error : any.validatePetriNet()) check(!error.startsWith("Naming pattern"), file.getFileName() + ": " + error);
                     }
                 }
+                // Two event generators: both run, each under its own version, collected together.
+                Path twoGenerators = workflows.resolve("petrinet/Workflow/P2_Tutorial_Workflow.json");
+                Canvas both = new Canvas(); both.setDefinitionLocation(twoGenerators.toFile()); both.loadFromJSON(read(twoGenerators));
+                BuildAndRunGenerator.Plan bothPlan = BuildAndRunGenerator.plan(both, twoGenerators.toFile());
+                BuildAndRunGenerator.Options bothOptions = bothPlan.defaults;
+                check(bothPlan.problems.isEmpty() && bothOptions.runs.size() == 2 && BuildAndRunGenerator.problems(bothPlan, bothOptions).isEmpty(), "Two generators not both planned: " + bothPlan.problems + bothOptions.runs.size());
+                String bothXml = BuildAndRunGenerator.launcherXml(bothPlan, bothOptions);
+                for (String expected : new String[] {"name=\"eg1.id\" value=\"EG11\"", "name=\"eg1.version\" value=\"v001\"", "name=\"eg2.id\" value=\"EG6\"",
+                        "name=\"eg2.version\" value=\"v002\"", "name=\"query.version\" value=\"v001,v002\"", "P2_Tutorial_Workflow_BuildAndRun_EG6.csv"})
+                    check(bothXml.contains(expected), "Two-generator launcher lacks " + expected + "\n" + bothXml);
+                bothOptions.runs.get(1).version = "v001";
+                check(BuildAndRunGenerator.problems(bothPlan, bothOptions).stream().anyMatch(e -> e.contains("both use v001")), "Shared version accepted");
+                bothOptions.runs.get(1).version = "v002"; bothOptions.runs.get(1).enabled = false;
+                String oneXml = BuildAndRunGenerator.launcherXml(bothPlan, bothOptions);
+                check(!oneXml.contains("eg2.id") && oneXml.contains("name=\"query.version\" value=\"v001\"") && oneXml.contains("P2_Tutorial_Workflow_BuildAndRun.csv"), "Unticked generator still runs\n" + oneXml);
                 Path p2 = workflows.resolve("petrinet/Workflow/P2_Tutorial_Workflow.json");
                 Canvas tutorial = new Canvas(); tutorial.setDefinitionLocation(p2.toFile()); tutorial.loadFromJSON(read(p2));
                 Map<String, ProcessElement> byLabel = new HashMap<>();
                 for (ProcessElement e : tutorial.getElements()) byLabel.put(e.getLabel(), e);
-                byLabel.get("P2").setLabel("TRUEORFALSE");
+                tutorial.getPlaces().get(0).setLabel("TRUEORFALSE");  // whatever the supplied label is, the place runs on P2
                 check(tutorial.validatePetriNet().stream().noneMatch(e -> e.startsWith("Naming pattern")), "T_in_P2 rejected for a place deployed to P2: " + tutorial.validatePetriNet());
                 byLabel.get("T_out_P2").setLabel("T_out_TRUEORFALSE");
                 check(tutorial.validatePetriNet().stream().anyMatch(e -> e.contains("use the same name on both")), "Mixed T_in/T_out names accepted");
@@ -258,7 +276,7 @@ public final class DeployFlowCheck {
             } catch (Throwable ex) { naming[0] = ex; }
         });
         if (naming[0] != null) throw new AssertionError("Transition naming", naming[0]);
-        System.out.println("PASS: catalogue-only design, right-click Deploy to, filled Deploy panel with Place column, two-way node edits, save links process and instances, reopen, existing deployment unchanged, Create Build and Run files, Ant-prefixed analysis replay, What it does, transition names by label or node, one place per node");
+        System.out.println("PASS: catalogue-only design, right-click Deploy to, filled Deploy panel with Place column, two-way node edits, save links process and instances, reopen, existing deployment unchanged, Create Build and Run files, Ant-prefixed analysis replay, What it does, transition names by label or node, one place per node, several event generators");
     }
 
     private static int rowOf(JTable table, String place) {

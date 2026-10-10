@@ -9,14 +9,22 @@
     <property name="workflow.process.name" value="petrinet/Workflow/P2_Tutorial_Workflow"/>
     <property name="init.process.name" value="common/Initializers/P2_Initialization"/>
     <property name="collector.process.name" value="common/Collectors/P2_Collector"/>
-    <property name="rule.version" value="v002"/>
+    <property name="rule.version" value="v001"/>
+    <property name="query.version" value="v001,v002"/>
 
-    <!-- Tokens: event generator, target place and schedule -->
-    <property name="event.generator.id" value="EG6"/>
-    <property name="target.place" value="P2_Place"/>
-    <property name="target.operation" value="processToken"/>
+    <!-- Tokens: one block per event generator, each with its own rule version, target place and schedule.
+         The generators fire together. -->
+    <property name="eg1.id" value="EG11"/>
+    <property name="eg1.version" value="v001"/>
+    <property name="eg1.place" value="P2_Place"/>
+    <property name="eg1.operation" value="processToken"/>
+    <property name="eg1.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/P2_Tutorial_Workflow_BuildAndRun_EG11.csv"/>
+    <property name="eg2.id" value="EG6"/>
+    <property name="eg2.version" value="v002"/>
+    <property name="eg2.place" value="P2_Place"/>
+    <property name="eg2.operation" value="processToken"/>
+    <property name="eg2.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/P2_Tutorial_Workflow_BuildAndRun_EG6.csv"/>
     <property name="token.count" value="10"/>
-    <property name="trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/P2_Tutorial_Workflow_BuildAndRun.csv"/>
     <property name="workflow.completion.seconds" value="10"/>
 
     <!-- Hosts used by the service deployment -->
