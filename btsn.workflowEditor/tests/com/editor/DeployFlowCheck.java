@@ -215,7 +215,15 @@ public final class DeployFlowCheck {
         String older = "Auto-detected 1 workflow bases: [1000000]\nTime=1770648319905 Token=1000000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=EG EventType=GENERATED\n";
         String latest = "Auto-detected 1 workflow bases: [1000000]\nTime=1791616256378 Token=1000000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=EG11 EventType=GENERATED\n";
         check(TokenAnimator.lastAnalyzerRun(older + latest).equals(latest) && TokenAnimator.lastAnalyzerRun(latest).equals(latest), "Appended analyzer runs not separated");
-        System.out.println("PASS: catalogue-only design, right-click Deploy to, filled Deploy panel with Place column, two-way node edits, save links process and instances, reopen, existing deployment unchanged, Create Build and Run files");
+        // Output copied from an Ant console ("[java]" on every line) replays like the analyzer's own output.
+        String analysis = read(common.toPath().resolve("AnalysisFolder/PetriNet/Analysis_P2_Tutorial_Workflow.txt"));
+        String prefixed = analysis.replaceAll("(?m)^", "     [java] ");
+        String lastRun = TokenAnimator.lastAnalyzerRun(prefixed + prefixed);
+        check(lastRun.length() < prefixed.length() && lastRun.trim().startsWith("[java] Auto-detected"), "Ant-prefixed analyzer runs not separated");
+        TokenAnimator clean = new TokenAnimator(), ant = new TokenAnimator();
+        clean.parseOutput(analysis); ant.parseOutput(prefixed);
+        check(!clean.getEvents().isEmpty() && clean.getEvents().size() == ant.getEvents().size(), "Ant-prefixed analysis parsed differently: " + clean.getEvents().size() + " vs " + ant.getEvents().size());
+        System.out.println("PASS: catalogue-only design, right-click Deploy to, filled Deploy panel with Place column, two-way node edits, save links process and instances, reopen, existing deployment unchanged, Create Build and Run files, Ant-prefixed analysis replay");
     }
 
     private static int rowOf(JTable table, String place) {

@@ -60,11 +60,24 @@ those images as descriptions of the migrated runtime.
 ## ProcessEditor tutorial screenshot
 
 `process-editor-p1-tutorial.png` is the unmodified user-supplied
-`image(20261007-065518).png`. The README and tutorial use it to show the live
+`image(20261007-065518).png`. The README uses it to show the live
 editor: the P1 loop on the canvas and its service/operation binding in the
 Attributes panel. The terminal is displayed as `Terminate`; Monitor is described
 as an observer outside the token path. This is an editor screenshot, not a
 captured execution or a regenerated diagram. The SVG generator does not alter it.
+
+## P2 tutorial screenshots
+
+[Tutorial.md](../Tutorial.md) uses three screenshots of the supplied P2 tutorial,
+painted from the editor's own windows at 100% zoom:
+
+| Image | Shows |
+|---|---|
+| `p2-tutorial-design.png` | ProcessEditor with `P2_Tutorial_Workflow.json` open and P2 selected: catalogue, service, operation, deployment instance, **Runs on** and contract in the Attributes panel; the node badge on the place |
+| `p2-tutorial-deploy.png` | The Deploy panel for that process: the read-only `SingleHost.json` nodes and the P2 capability row |
+| `p2-tutorial-build-and-run.png` | The Create Build and Run dialog with its defaults and the Write/Reuse/Replace summary |
+
+Retake them when these windows change, rather than editing the images.
 
 ## Captured execution examples
 

@@ -2,8 +2,8 @@
 
 These artefacts come from an actual run of the supplied P1 process on one
 computer, using the local infrastructure and the existing runtime and chart
-implementations. Follow the [full tutorial](../../../../Tutorial.md) to
-reconstruct, run and inspect the same model.
+implementations. The [tutorial](../../../../Tutorial.md) builds the same loop on node P2 from the
+editor and uses this run as its reference.
 
 ## Reference run
 

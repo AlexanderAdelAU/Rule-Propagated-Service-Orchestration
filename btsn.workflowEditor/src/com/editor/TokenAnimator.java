@@ -566,9 +566,10 @@ public class TokenAnimator {
      * An analysis file can hold several analyzer runs appended one after another (for example an
      * output file opened in append mode). Each run starts with its "Auto-detected ... workflow bases"
      * line; replay only the last run so earlier runs do not stretch the timeline.
+     * Output copied from an Ant console carries a "[java]" prefix on each line.
      */
     static String lastAnalyzerRun(String text) {
-        java.util.regex.Matcher m = java.util.regex.Pattern.compile("(?m)^Auto-detected \\d+ workflow bases").matcher(text);
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("(?m)^[ \\t]*(?:\\[java\\][ \\t]*)?Auto-detected \\d+ workflow bases").matcher(text);
         int last = -1, runs = 0;
         while (m.find()) { last = m.start(); runs++; }
         if (runs < 2) return text;
@@ -588,6 +589,7 @@ public class TokenAnimator {
         
         for (String line : lines) {
             line = line.trim();
+            if (line.startsWith("[java]")) line = line.substring("[java]".length()).trim();  // copied from an Ant console
             
             // Parse: Time=xxx Token=xxx Place=xxx Marking=x Buffer=x ToPlace=xxx EventType=xxx TransitionId=xxx
             if (line.startsWith("Time=") && line.contains("Marking=")) {

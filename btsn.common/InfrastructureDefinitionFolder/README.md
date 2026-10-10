@@ -57,4 +57,4 @@ when distributing nodes; those operations currently use their existing channels.
 
 The previous domain/model infrastructure files have been replaced by this shared
 physical definition and separate service deployments. See the
-[P1 tutorial](../../Tutorial.md#1-define-the-infrastructure) for an editor-to-run walkthrough.
+[tutorial](../../Tutorial.md#2-deploy-the-process) for an editor-to-run walkthrough.
