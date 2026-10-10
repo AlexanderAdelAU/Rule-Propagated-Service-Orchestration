@@ -44,7 +44,7 @@ public final class RunWindow extends JFrame {
             }
         });
         ant.setText(prefs.get(ANT_PREF, ""));
-        ant.setToolTipText("Leave blank to use ANT_HOME or 'ant' on the PATH. Eclipse includes Ant under plugins/org.apache.ant_*/bin.");
+        ant.setToolTipText("Ant's folder. Leave empty to use ANT_HOME, 'ant' on the PATH, or the Ant inside Eclipse (plugins/org.apache.ant_*).");
         JButton chooseAnt = new JButton("Choose...");
         chooseAnt.addActionListener(e -> chooseAnt());
 
@@ -53,7 +53,7 @@ public final class RunWindow extends JFrame {
         c.insets = new Insets(3, 6, 3, 6); c.anchor = GridBagConstraints.WEST; c.fill = GridBagConstraints.HORIZONTAL;
         c.gridy = 0; c.gridx = 0; form.add(new JLabel("Launcher:"), c); c.gridx = 1; c.weightx = 1; c.gridwidth = 2; form.add(launcher, c);
         c.gridy = 1; c.gridx = 0; c.weightx = 0; c.gridwidth = 1; form.add(new JLabel("Hosts:"), c); c.gridx = 1; c.gridwidth = 2; form.add(allHostsHere, c);
-        c.gridy = 2; c.gridx = 0; c.gridwidth = 1; form.add(new JLabel("Ant:"), c); c.gridx = 1; c.weightx = 1; form.add(ant, c); c.gridx = 2; c.weightx = 0; form.add(chooseAnt, c);
+        c.gridy = 2; c.gridx = 0; c.gridwidth = 1; form.add(new JLabel("Ant folder:"), c); c.gridx = 1; c.weightx = 1; form.add(ant, c); c.gridx = 2; c.weightx = 0; form.add(chooseAnt, c);
         c.gridy = 3; c.gridx = 0; form.add(new JLabel("Analysis:"), c);
         c.gridx = 1; c.gridwidth = 2;
         form.add(new JLabel(LauncherRun.analysisFileFor(root, processName).getAbsolutePath().replace(root.getAbsolutePath() + File.separator, "")), c);
@@ -65,7 +65,7 @@ public final class RunWindow extends JFrame {
             steps[i].setOpaque(true);
             steps[i].setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY), BorderFactory.createEmptyBorder(3, 8, 3, 8)));
             progress.add(steps[i]);
-            if (i < steps.length - 1) progress.add(new JLabel("→"));
+            if (i < steps.length - 1) progress.add(new JLabel("\u2192"));
         }
         resetSteps();
 
@@ -100,6 +100,8 @@ public final class RunWindow extends JFrame {
     void startRun() {
         File selected = (File)launcher.getSelectedItem();
         if (selected == null) return;
+        try { LauncherRun.antHome(ant.getText()); }
+        catch (java.io.IOException ex) { status.setText(ex.getMessage()); JOptionPane.showMessageDialog(this, ex.getMessage(), "Ant", JOptionPane.WARNING_MESSAGE); return; }
         prefs.put(ANT_PREF, ant.getText().trim());
         console.setText("");
         resetSteps();
@@ -149,7 +151,8 @@ public final class RunWindow extends JFrame {
 
     private void chooseAnt() {
         JFileChooser chooser = new JFileChooser();
-        chooser.setDialogTitle("Choose the Ant program (ant, or ant.bat on Windows, in Ant's bin folder)");
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.setDialogTitle("Choose Ant's folder (it contains bin and lib)");
         if (!ant.getText().trim().isEmpty()) chooser.setSelectedFile(new File(ant.getText().trim()));
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) ant.setText(chooser.getSelectedFile().getAbsolutePath());
     }

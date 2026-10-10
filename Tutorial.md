@@ -257,10 +257,12 @@ Click **Run** in the toolbar. The Run window finds the process's launcher and do
 *A finished run of the P2 tutorial (here with its two generators). Each step turns green as the run reaches it.*
 
 - **Hosts**: **Run every host on this computer** (ticked) adds `-Dhost.address=127.0.0.1`.
-- **Ant**: the editor calls Apache Ant.
-  - Leave the field blank to use `ANT_HOME` or `ant` on the PATH.
-  - Otherwise choose the `ant` program (`ant.bat` on Windows) in Ant's `bin` folder.
-  - Eclipse includes one under `plugins/org.apache.ant_*/bin`.
+- **Ant folder**: leave it empty. The editor finds Apache Ant by itself, trying in order:
+  - `ANT_HOME`;
+  - `ant` on the PATH;
+  - the Ant inside the Eclipse that started the editor (`plugins/org.apache.ant_*`).
+
+  If none is found, choose Ant's folder (the one holding `bin` and `lib`), not a launcher. Ant runs on the editor's own Java, so the editor must run on a JDK (Eclipse's default).
 - **Stop**: stops the run, and its hosts, at any point.
 - **Close**: closing the window during a run stops it too.
 - **Save first**: Run uses the saved process and the launcher from [step 3](#3-create-build-and-run).

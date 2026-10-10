@@ -93,7 +93,7 @@ public final class LauncherRun {
         listener.finished(outcome, analysis, message);
     }
 
-    /** Runs the default target; true once it reports completion (the hosts are then still running). */
+    /** Runs the default target; true once it reports its last line (the hosts are then still running). */
     private boolean runLauncher() throws IOException, InterruptedException {
         List<String> args = new ArrayList<>(Arrays.asList("-emacs", "-f", launcher.getName()));
         if (allHostsHere) args.add("-Dhost.address=127.0.0.1");
@@ -148,28 +148,84 @@ public final class LauncherRun {
     }
 
     private Process start(List<String> args, File output) throws IOException {
-        List<String> command = new ArrayList<>(antCommand(antCommand));
+        File home = antHome(antCommand);
+        List<String> command = antLaunch(home);
         command.addAll(args);
         ProcessBuilder builder = new ProcessBuilder(command).directory(launcher.getParentFile()).redirectErrorStream(true);
-        // Ant needs a JDK; the editor's own Java is one when it runs from Eclipse or a JDK.
-        if (System.getenv("JAVA_HOME") == null) builder.environment().put("JAVA_HOME", System.getProperty("java.home"));
-        listener.line("[editor] " + String.join(" ", command));
-        try { return builder.start(); }
-        catch (IOException ex) {
-            throw new IOException("Could not start Ant (" + command.get(windows() ? 2 : 0) + "). Install Apache Ant, or choose its location in this window: "
-                + "the 'ant' program in Ant's bin folder (Eclipse includes one under plugins/org.apache.ant_*/bin).", ex);
-        }
+        builder.environment().put("ANT_HOME", home.getPath());
+        listener.line("[editor] Ant " + home.getPath() + " on Java " + command.get(0));
+        listener.line("[editor] ant " + String.join(" ", args));
+        return builder.start();
     }
 
-    /** The Ant program: the chosen one, else ANT_HOME's, else 'ant' on the PATH. Windows runs it through cmd. */
-    static List<String> antCommand(String configured) {
-        String exe = configured == null ? "" : configured.trim();
-        if (exe.isEmpty()) {
-            String home = System.getenv("ANT_HOME");
-            File fromHome = home == null ? null : new File(home, "bin/" + (windows() ? "ant.bat" : "ant"));
-            exe = fromHome != null && fromHome.isFile() ? fromHome.getPath() : "ant";
+    /**
+     * Ant runs through its own launcher class on the editor's Java (a JDK, which Ant needs to compile),
+     * exactly as Ant's scripts do, but without a shell: no cmd.exe quoting, no JAVA_HOME to set.
+     */
+    static List<String> antLaunch(File home) {
+        File java = javaProgram(new File(System.getProperty("java.home")));
+        String env = System.getenv("JAVA_HOME");
+        if (!hasCompiler(new File(System.getProperty("java.home"))) && env != null && hasCompiler(new File(env))) java = javaProgram(new File(env));
+        return new ArrayList<>(Arrays.asList(java.getPath(), "-Dant.home=" + home.getPath(),
+            "-cp", new File(home, "lib/ant-launcher.jar").getPath(), "org.apache.tools.ant.launch.Launcher"));
+    }
+    private static File javaProgram(File javaHome) { return new File(javaHome, "bin/" + (windows() ? "java.exe" : "java")); }
+    private static boolean hasCompiler(File javaHome) { return new File(javaHome, "bin/" + (windows() ? "javac.exe" : "javac")).isFile(); }
+
+    /**
+     * Ant's folder (the one holding lib/ant-launcher.jar): the chosen folder or a file inside it, else
+     * ANT_HOME, else the 'ant' on the PATH, else the Ant inside the Eclipse that started the editor.
+     */
+    static File antHome(String configured) throws IOException {
+        String chosen = configured == null ? "" : configured.trim();
+        if (!chosen.isEmpty()) {
+            if (chosen.toLowerCase(Locale.ROOT).endsWith(".xml"))
+                throw new IOException("The Ant box holds a launcher (" + new File(chosen).getName() + "). Choose Ant's folder instead, or leave the box empty to find Ant automatically.");
+            File home = homeAround(new File(chosen));
+            if (home == null) throw new IOException("No Ant found at " + chosen + ". Choose Ant's folder (it contains lib/ant-launcher.jar), or leave the box empty.");
+            return home;
         }
-        return windows() ? Arrays.asList("cmd.exe", "/c", exe) : Collections.singletonList(exe);
+        List<File> candidates = new ArrayList<>();
+        String env = System.getenv("ANT_HOME");
+        if (env != null && !env.isEmpty()) candidates.add(new File(env));
+        String path = System.getenv("PATH");
+        if (path != null) for (String dir : path.split(File.pathSeparator))
+            for (String name : new String[] {"ant", "ant.bat", "ant.cmd"}) { File f = new File(dir, name); if (f.isFile()) candidates.add(f); }
+        for (File home : candidates) { File found = homeAround(home); if (found != null) return found; }
+        File eclipse = eclipseAnt();
+        if (eclipse != null) return eclipse;
+        throw new IOException("Ant was not found (no ANT_HOME, no 'ant' on the PATH, no Ant in Eclipse's plugins). "
+            + "Choose Ant's folder in this window: an Apache Ant install, or Eclipse's plugins/org.apache.ant_* folder.");
+    }
+
+    /** The Ant home at or above a file or folder: the first folder with lib/ant-launcher.jar (symbolic links followed). */
+    static File homeAround(File start) {
+        File f;
+        try { f = start.toPath().toRealPath().toFile(); } catch (IOException | InvalidPathException ex) { f = start.getAbsoluteFile(); }
+        for (int i = 0; f != null && i < 4; i++, f = f.getParentFile())
+            if (new File(f, "lib/ant-launcher.jar").isFile()) return f;
+        return null;
+    }
+
+    /** Eclipse ships Ant as plugins/org.apache.ant_<version>; look beside the Java and programs that started the editor. */
+    static File eclipseAnt() {
+        List<File> places = new ArrayList<>();
+        places.add(new File(System.getProperty("java.home")));
+        for (Optional<ProcessHandle> p = ProcessHandle.current().parent(); p.isPresent(); p = p.get().parent())
+            p.get().info().command().ifPresent(c -> places.add(new File(c)));
+        return eclipseAnt(places);
+    }
+
+    /** The newest plugins/org.apache.ant_* found at or above any of these files. */
+    static File eclipseAnt(List<File> places) {
+        for (File place : places) {
+            for (File dir = place.getAbsoluteFile(); dir != null; dir = dir.getParentFile()) {
+                File plugins = "plugins".equals(dir.getName()) ? dir : new File(dir, "plugins");
+                File[] ants = plugins.listFiles(f -> f.isDirectory() && f.getName().startsWith("org.apache.ant_") && new File(f, "lib/ant-launcher.jar").isFile());
+                if (ants != null && ants.length > 0) { Arrays.sort(ants); return ants[ants.length - 1]; }
+            }
+        }
+        return null;
     }
 
     static boolean windows() { return System.getProperty("os.name", "").toLowerCase(Locale.ROOT).startsWith("windows"); }
