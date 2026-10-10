@@ -13,6 +13,8 @@ import org.json.simple.parser.JSONParser;
 public final class ServiceRegistry {
     public static final class Contract {
         public String service, operation, output, resultType;
+        /** What the operation does and what it returns, in the catalogue's words (blank when not described). */
+        public String description = "", returns = "";
         public final List<String> inputs = new ArrayList<>();
     }
     public static final class Endpoint {
@@ -139,6 +141,7 @@ public final class ServiceRegistry {
             JSONObject definition = (JSONObject)item;
             if (!"active".equals(text(definition, "status"))) continue;
             Contract c = new Contract(); c.service = text(definition, "service"); c.operation = text(definition, "operation"); c.output = text(definition, "returnAttribute"); c.resultType = text(definition, "resultType");
+            c.description = text(definition, "description"); c.returns = text(definition, "returns");
             for (Object input : array(definition, "inputs")) c.inputs.add(input.toString());
             if (loaded.put(key(c.service, c.operation), c) != null) throw new IOException("Duplicate catalogue operation: " + c.service + "." + c.operation);
         }
@@ -158,6 +161,27 @@ public final class ServiceRegistry {
     public List<String> operations(String service) { List<String> values = new ArrayList<>(); for (Contract c : contracts.values()) if (c.service.equals(service)) values.add(c.operation); return values; }
     public List<String> instances(String service, String op) { Set<String> values = new LinkedHashSet<>(); for (Endpoint e : endpoints) if (e.service.equals(service) && (op == null || op.equals(e.operation))) values.add(e.instance); return new ArrayList<>(values); }
     public Contract contract(String service, String op) { return contracts.get(key(service, op)); }
+    /** What a service does: its one operation's description, or one line per operation. */
+    public String describe(String service) {
+        List<String> ops = operations(service);
+        if (ops.size() == 1) return describe(service, ops.get(0));
+        List<String> lines = new ArrayList<>();
+        for (String op : ops) { Contract c = contract(service, op); if (!c.description.isEmpty()) lines.add(op + ": " + c.description); }
+        return String.join("\n", lines);
+    }
+    /** What one operation does, followed by what it returns. */
+    public String describe(String service, String op) {
+        Contract c = contract(service, op);
+        if (c == null) return service == null || service.isEmpty() ? "" : describe(service);
+        if (c.description.isEmpty()) return "";
+        return c.description + (c.returns.isEmpty() ? "" : "\nReturns: " + c.returns);
+    }
+    /** Tooltip text that wraps instead of running off the screen. */
+    public static String tooltip(String text) {
+        if (text == null || text.isEmpty()) return null;
+        String html = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>");
+        return "<html><div style='width:300px'>" + html + "</div></html>";
+    }
     /** Infrastructure node (e.g. "P1") that hosts a deployment instance, or "" when unknown or ambiguous. */
     public String nodeForInstance(String instance) {
         String node = "";
@@ -310,7 +334,9 @@ public final class ServiceRegistry {
         place.setServiceInstance(instance); place.setServiceOperations(selected);
     }
     /** Keep unresolved values visible without making them legitimate choices. */
-    public static JComboBox<String> choices(List<String> valid, String current) {
+    public static JComboBox<String> choices(List<String> valid, String current) { return choices(valid, current, null); }
+    /** As above; each choice also shows a description when hovered in the open list. */
+    public static JComboBox<String> choices(List<String> valid, String current, java.util.function.Function<String, String> describe) {
         JComboBox<String> combo = new JComboBox<>(); combo.addItem("");
         for (String value : valid) combo.addItem(value);
         if (current != null && !current.isEmpty() && !valid.contains(current)) combo.addItem(current);
@@ -321,9 +347,14 @@ public final class ServiceRegistry {
                 super.getListCellRendererComponent(list, value, index, selected, focus);
                 String name = value == null ? "" : value.toString();
                 if (!name.isEmpty() && !valid.contains(name)) { setText("Unresolved: " + name); if (!selected) setForeground(java.awt.Color.RED); }
+                setToolTipText(describe == null || name.isEmpty() || !valid.contains(name) ? null : tooltip(describe.apply(name)));
                 return this;
             }
         });
+        if (describe != null) {
+            Runnable tip = () -> { Object v = combo.getSelectedItem(); combo.setToolTipText(v == null || !valid.contains(v.toString()) ? null : tooltip(describe.apply(v.toString()))); };
+            combo.addActionListener(e -> tip.run()); tip.run();
+        }
         return combo;
     }
 }

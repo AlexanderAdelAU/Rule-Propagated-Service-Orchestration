@@ -34,7 +34,9 @@ public class InfrastructureDefinitionFrame extends JFrame {
             else if (column == 2) values.addAll(serviceRegistry.operations(cap.service));
             else if (column == 6) { ServiceRegistry.Contract contract = serviceRegistry.contract(cap.service, cap.operation); if (contract != null && "boolean".equals(contract.resultType)) values.add("boolean-token"); }
             else return super.getCellEditor(row, column);
-            return new DefaultCellEditor(ServiceRegistry.choices(values, current));
+            java.util.function.Function<String, String> describe = column == 1 ? serviceRegistry::describe
+                : column == 2 ? (op -> serviceRegistry.describe(cap.service, op)) : null;
+            return new DefaultCellEditor(ServiceRegistry.choices(values, current, describe));
         }
     };
     private final JTable argumentTable = new JTable(argumentModel);
@@ -172,7 +174,8 @@ public class InfrastructureDefinitionFrame extends JFrame {
                 Capability cap = capabilities.get(row);
                 List<String> names = new ArrayList<>(); for (Argument argument : cap.arguments) names.add(argument.name);
                 List<String> errors = serviceRegistry.validateEndpoint(cap.service, cap.operation, cap.returnAttribute, names, cap.adapter);
-                setToolTipText(errors.isEmpty() ? null : String.join("; ", errors));
+                String described = column == 1 ? serviceRegistry.describe(cap.service) : column == 2 ? serviceRegistry.describe(cap.service, cap.operation) : "";
+                setToolTipText(!errors.isEmpty() ? String.join("; ", errors) : ServiceRegistry.tooltip(described));
                 if (!selected) setForeground(errors.isEmpty() ? table.getForeground() : Color.RED);
                 if ((column == 1 && !serviceRegistry.services().contains(cap.service)) || (column == 2 && !serviceRegistry.operations(cap.service).contains(cap.operation))) setText("Unresolved: " + value);
                 return this;

@@ -13,6 +13,26 @@ public final class ServiceRegistryCheck {
     public static void main(String[] args) throws Exception {
         File root = new File(args[0]).getCanonicalFile(), common = new File(root, "btsn.common");
         ServiceRegistry registry = new ServiceRegistry();
+        // Every catalogued operation says what it does and what it returns, so the editor can explain it.
+        List<Path> catalogues = new ArrayList<>();
+        try (java.util.stream.Stream<Path> walk = Files.walk(common.toPath().resolve("BusinessServiceDefinitions"))) { walk.filter(p -> p.toString().endsWith(".json")).forEach(catalogues::add); }
+        int catalogued = 0;
+        for (Path catalogue : catalogues) {
+            JSONObject data = (JSONObject)new JSONParser().parse(new String(Files.readAllBytes(catalogue), java.nio.charset.StandardCharsets.UTF_8));
+            if (!(data.get("services") instanceof JSONArray)) continue;  // e.g. the Deployment.json profile beside the catalogues
+            catalogued++;
+            for (Object item : (JSONArray)data.get("services")) {
+                JSONObject service = (JSONObject)item;
+                String name = service.get("service") + "." + service.get("operation");
+                for (String field : new String[] {"description", "returns"})
+                    check(service.get(field) instanceof String && !((String)service.get(field)).trim().isEmpty(), catalogue.getFileName() + ": " + name + " has no " + field);
+            }
+        }
+        check(catalogued >= 3, "Catalogues not found: " + catalogued);
+        registry.loadCatalogue(common.toPath().resolve("BusinessServiceDefinitions/healthcare/Healthcare.json").toFile());
+        check(registry.describe("RadiologyService").split("\n").length == 2, "A service with two operations should describe both");
+        check(registry.describe("TriageService", "processTriageAssessment").contains("\nReturns: "), "Operation description lacks its result");
+        check(ServiceRegistry.tooltip("a < b\nc").equals("<html><div style='width:300px'>a &lt; b<br>c</div></html>"), "Tooltip not escaped and wrapped");
         registry.loadDeployment(new File(common, "ServiceDeploymentFolder/petrinet/TrafficLightModels.json"));
         check(registry.services().equals(Arrays.asList("StochasticService")), "Petri-net dropdown contains another service");
         check(registry.instances("StochasticService", "processToken").size() == 6, "Repeated instances missing");
@@ -82,7 +102,7 @@ public final class ServiceRegistryCheck {
                 javax.imageio.ImageIO.write(image, "png", new File(args[1]));
             } catch (Exception ex) { throw new RuntimeException(ex); }
         });
-        System.out.println("PASS: seven workflow contract round trips, real dropdown repair, legacy/unknown references, JSON/Boolean adapter isolation, argument/result rejection and routing preservation");
+        System.out.println("PASS: every catalogue operation described, seven workflow contract round trips, real dropdown repair, legacy/unknown references, JSON/Boolean adapter isolation, argument/result rejection and routing preservation");
     }
     private static boolean contains(JComboBox<?> combo, String value) { for (int i=0;i<combo.getItemCount();i++) if(value.equals(combo.getItemAt(i))) return true; return false; }
     private static List<JComboBox<?>> combos(Container parent) { List<JComboBox<?>> result = new ArrayList<>(); for(Component c:parent.getComponents()) { if(c instanceof JComboBox) result.add((JComboBox<?>)c); else if(c instanceof Container) result.addAll(combos((Container)c)); } return result; }

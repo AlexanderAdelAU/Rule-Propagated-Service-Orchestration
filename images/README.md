@@ -73,7 +73,7 @@ painted from the editor's own windows at 100% zoom:
 
 | Image | Shows |
 |---|---|
-| `p2-tutorial-design.png` | ProcessEditor with `P2_Tutorial_Workflow.json` open and P2 selected: catalogue, service, operation, deployment instance, **Runs on** and contract in the Attributes panel; the node badge on the place |
+| `p2-tutorial-design.png` | ProcessEditor with `P2_Tutorial_Workflow.json` open and P2 selected: catalogue, service, operation, **What it does**, deployment instance, **Runs on** and contract in the Attributes panel; the node badge on the place |
 | `p2-tutorial-deploy.png` | The Deploy panel for that process: the read-only `SingleHost.json` nodes and the P2 capability row |
 | `p2-tutorial-build-and-run.png` | The Create Build and Run dialog with its defaults and the Write/Reuse/Replace summary |
 

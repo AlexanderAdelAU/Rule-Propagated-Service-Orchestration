@@ -6,6 +6,8 @@
       "service": "StochasticService",
       "implementationClass": "org.btsn.services.StochasticService",
       "operation": "processToken",
+      "description": "Decides at random: returns true or false with equal chance. Use it to model a step that sometimes has to be repeated, such as a check that can fail.",
+      "returns": "true or false. Route on it from the T_out with guards true and false.",
       "inputs": [
         "data"
       ],
