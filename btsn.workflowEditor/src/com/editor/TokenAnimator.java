@@ -309,10 +309,11 @@ public class TokenAnimator {
                 }
 
                 // Instrumentation names the place after its deployment node (e.g. P1_Place).
+                // A place labelled after its own node (place P2 on node P2) still needs P2_Place -> P2.
                 String node = deploymentNode(elem);
-                if (!node.isEmpty() && !node.equals(placeKey)) {
-                    runtimeAliases.put(node + "_Place", placeKey);
-                    runtimeAliases.put(node, placeKey);
+                if (!node.isEmpty()) {
+                    if (!(node + "_Place").equals(placeKey)) runtimeAliases.put(node + "_Place", placeKey);
+                    if (!node.equals(placeKey)) runtimeAliases.put(node, placeKey);
                 }
 
             } else if (elem.getType() == ProcessElement.Type.EVENT_GENERATOR) {
@@ -1800,8 +1801,11 @@ public class TokenAnimator {
                 if (exitEvent != null) {
                     int exitIndex = tokenEvents.indexOf(exitEvent);
                     
-                    // AT_PLACE segment
+                    // AT_PLACE segment. A visit shorter than the usual move to T_out is split in half,
+                    // so a fast service still shows the token at its place (timestamps unchanged).
                     long atPlaceEnd = exitEvent.timestamp - TRAVEL_DURATION_TO_TOUT;
+                    if (atPlaceEnd <= current.timestamp && exitEvent.timestamp > current.timestamp)
+                        atPlaceEnd = current.timestamp + (exitEvent.timestamp - current.timestamp) / 2;
                     if (atPlaceEnd > current.timestamp) {
                         segments.add(new AnimationSegment(
                             tokenId, version, Phase.AT_PLACE,
