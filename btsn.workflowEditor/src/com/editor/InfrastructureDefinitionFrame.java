@@ -27,6 +27,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
     private final JTable capabilityTable = new JTable(capabilityModel) {
         @Override public javax.swing.table.TableCellEditor getCellEditor(int row, int column) {
             Capability cap = capabilities.get(convertRowIndexToModel(row));
+            column = convertColumnIndexToModel(column);
             List<String> values = new ArrayList<>(); String current = String.valueOf(capabilityModel.getValueAt(row, column));
             if (column == 0) { for (NodeNetwork node : nodes) values.add(node.node); }
             else if (column == 1) values.addAll(serviceRegistry.services());
@@ -46,6 +47,14 @@ public class InfrastructureDefinitionFrame extends JFrame {
     private final ServiceRegistry serviceRegistry = new ServiceRegistry();
     /** JSON of the definition as last opened/saved; compared with toJson() to detect unsaved changes. */
     private String savedSnapshot;
+    /** Process being deployed when opened with Deploy; null for a free-standing deployment window. */
+    private Canvas processCanvas;
+    private File suggestedFile;
+    /** Rows that deploy a place of the process (one per place operation). */
+    private final Map<Capability, ProcessElement> placeRows = new IdentityHashMap<>();
+    private final Set<Capability> rowsAddedForProcess = Collections.newSetFromMap(new IdentityHashMap<>());
+    private final Runnable processListener = () -> SwingUtilities.invokeLater(this::refreshFromProcess);
+    private boolean refreshing;
 
     public InfrastructureDefinitionFrame() {
         this(false);
@@ -160,6 +169,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
         capabilityTable.setDefaultRenderer(String.class, new javax.swing.table.DefaultTableCellRenderer() {
             @Override public Component getTableCellRendererComponent(JTable table, Object value, boolean selected, boolean focus, int row, int column) {
                 super.getTableCellRendererComponent(table, value, selected, focus, row, column);
+                column = table.convertColumnIndexToModel(column);
                 Capability cap = capabilities.get(row);
                 List<String> names = new ArrayList<>(); for (Argument argument : cap.arguments) names.add(argument.name);
                 List<String> errors = serviceRegistry.validateEndpoint(cap.service, cap.operation, cap.returnAttribute, names, cap.adapter);
@@ -436,12 +446,17 @@ public class InfrastructureDefinitionFrame extends JFrame {
         JFileChooser chooser = createRememberingChooser(preferenceKey(), definitionDirectory());
         chooser.setDialogTitle("Save " + definitionTitle());
         chooser.setFileFilter(createJsonFilter());
-        chooser.setSelectedFile(currentFile != null ? currentFile : new File(chooser.getCurrentDirectory(), deploymentEditor ? "ServiceDeployment.json" : "SingleHost.json"));
+        File proposed = currentFile != null ? currentFile : suggestedFile;
+        if (proposed != null && proposed.getParentFile() != null && proposed.getParentFile().isDirectory()) chooser.setCurrentDirectory(proposed.getParentFile());
+        chooser.setSelectedFile(proposed != null ? proposed : new File(chooser.getCurrentDirectory(), deploymentEditor ? "ServiceDeployment.json" : "SingleHost.json"));
         if (chooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return false;
         File file = chooser.getSelectedFile();
         if (!file.getName().toLowerCase(Locale.ROOT).endsWith(".json")) {
             file = new File(file.getParentFile(), file.getName() + ".json");
         }
+        if (file.exists() && !file.equals(currentFile) && JOptionPane.showConfirmDialog(this,
+                file.getName() + " already exists. Replace it?", "Replace " + definitionTitle(),
+                JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) != JOptionPane.YES_OPTION) return false;
         try {
             Files.write(file.toPath(), toJson().getBytes(StandardCharsets.UTF_8));
             currentFile = file;
@@ -449,8 +464,9 @@ public class InfrastructureDefinitionFrame extends JFrame {
             markSaved();
             rememberDirectory(preferenceKey(), file.getParentFile());
             setStatus("Definition saved: " + file.getAbsolutePath(), file.getAbsolutePath());
+            if (processCanvas != null) linkProcess(file);
             return true;
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             showError("Could not save definition", ex);
             return false;
         }
@@ -488,6 +504,167 @@ public class InfrastructureDefinitionFrame extends JFrame {
         InfrastructureDefinitionFrame frame = new InfrastructureDefinitionFrame(true);
         if (frame.promptAndOpen(parent)) frame.setVisible(true);
         else frame.dispose();
+    }
+
+    /**
+     * Deploy: a service deployment window beside the process editor, filled from the process.
+     * Each place operation gets a row; the Place column shows which place a row deploys.
+     */
+    public static InfrastructureDefinitionFrame openForProcess(Window owner, Canvas canvas, File processFile) {
+        InfrastructureDefinitionFrame frame = new InfrastructureDefinitionFrame(true);
+        frame.attachProcess(canvas, processFile);
+        frame.placeBeside(owner);
+        frame.setVisible(true);
+        return frame;
+    }
+
+    private void attachProcess(Canvas canvas, File processFile) {
+        processCanvas = canvas;
+        ServiceRegistry processRegistry = canvas.getServiceRegistry();
+        if (processRegistry.hasDeployment()) {
+            openFile(this, processRegistry.deploymentFile());
+        } else {
+            try { serviceRegistry.loadCatalogue(processRegistry.catalogueFile()); catalogueReference = serviceRegistry.catalogueReference(); }
+            catch (Exception ex) { setStatus("Unresolved catalogue: " + ex.getMessage(), ex.getMessage()); }
+            suggestedFile = suggestedDeploymentFile(processFile);
+        }
+        capabilityModel.fireTableStructureChanged();
+        capabilityTable.moveColumn(capabilityModel.getColumnCount() - 1, 0);
+        refreshFromProcess();
+        markSaved();
+        // Rows filled from the process are new work until saved.
+        if (rowsAddedForProcess.size() > 0 || processHasPendingNodes()) savedSnapshot = "";
+        updateTitle();
+        canvas.addDeploymentListener(processListener);
+        String name = processFile == null ? "unsaved process" : processFile.getName();
+        setStatus("Deploying " + name + ": choose a node for each place, then Save.", "Rows were filled from the process. Saving writes the deployment and links the process to it.");
+    }
+
+    private boolean processHasPendingNodes() {
+        for (ProcessElement place : processCanvas.getPlaces()) if (processCanvas.hasPendingNode(place)) return true;
+        return false;
+    }
+
+    /** ServiceDeploymentFolder/<domain>/<process>.json for a process saved under ProcessDefinitionFolder/<domain>. */
+    private File suggestedDeploymentFile(File processFile) {
+        File folder = definitionDirectory();
+        if (folder == null) return null;
+        String domain = "", name = "ServiceDeployment";
+        if (processFile != null) {
+            name = processFile.getName().replaceFirst("(?i)\\.json$", "");
+            for (File cursor = processFile.getParentFile(); cursor != null && cursor.getParentFile() != null; cursor = cursor.getParentFile())
+                if ("ProcessDefinitionFolder".equals(cursor.getParentFile().getName())) { domain = cursor.getName(); break; }
+        }
+        File target = domain.isEmpty() ? folder : new File(folder, domain);
+        return new File(target, name + ".json");
+    }
+
+    private void placeBeside(Window owner) {
+        if (owner == null) return;
+        Rectangle screen = owner.getGraphicsConfiguration().getBounds();
+        int width = Math.min(getWidth(), Math.max(700, screen.width / 2));
+        setSize(width, Math.min(getHeight(), screen.height));
+        int x = owner.getX() + owner.getWidth();
+        if (x + width > screen.x + screen.width) x = screen.x + screen.width - width;
+        setLocation(Math.max(screen.x, x), Math.max(screen.y, owner.getY()));
+    }
+
+    @Override public void dispose() {
+        if (processCanvas != null) processCanvas.removeDeploymentListener(processListener);
+        super.dispose();
+    }
+
+    /** Bring rows in line with the process: a row for every place operation, nodes chosen on the canvas applied. */
+    public void refreshFromProcess() {
+        if (processCanvas == null || refreshing) return;
+        refreshing = true;
+        try {
+            stopTableEditing();
+            List<ProcessElement> places = processCanvas.getPlaces();
+            // Rows for places that were removed from the process and never saved are dropped.
+            for (Iterator<Map.Entry<Capability, ProcessElement>> it = placeRows.entrySet().iterator(); it.hasNext();) {
+                Map.Entry<Capability, ProcessElement> entry = it.next();
+                if (places.contains(entry.getValue())) continue;
+                if (rowsAddedForProcess.remove(entry.getKey())) capabilities.remove(entry.getKey());
+                it.remove();
+            }
+            Set<String> taken = new HashSet<>();
+            for (Capability c : capabilities) taken.add(blank(c.instance) ? c.service : c.instance);
+            for (ProcessElement place : places) {
+                if (blank(place.getService())) continue;
+                for (ServiceOperation operation : place.getServiceOperations()) {
+                    Capability row = rowFor(place, operation.getName());
+                    String chosen = processCanvas.nodeFor(place);
+                    if (row == null) {
+                        row = new Capability();
+                        row.service = place.getService();
+                        row.operation = operation.getName();
+                        String identity = ServiceRegistry.identity(place);
+                        row.instance = !place.getServiceInstance().isEmpty() && !taken.contains(identity) ? identity : ServiceRegistry.instanceNameFor(place.getLabel(), taken);
+                        taken.add(row.instance);
+                        row.returnAttribute = operation.getReturnAttribute();
+                        for (ServiceArgument input : operation.getArguments()) {
+                            Argument a = new Argument(); a.name = input.getName();
+                            if (!blank(input.getType())) a.type = input.getType();
+                            if (input.getValue() != null) a.value = input.getValue();
+                            a.required = input.isRequired(); row.arguments.add(a);
+                        }
+                        ServiceRegistry.Contract contract = serviceRegistry.contract(row.service, row.operation);
+                        if (contract != null && "boolean".equals(contract.resultType)) row.adapter = "boolean-token";
+                        row.node = blank(chosen) ? suggestNode(row.operation) : chosen;
+                        NodeNetwork n = findNode(row.node);
+                        row.portSlot = n == null ? 0 : Math.max(0, allocateSlot(n));
+                        capabilities.add(row);
+                        rowsAddedForProcess.add(row);
+                    } else if (!blank(chosen) && !chosen.equals(row.node)) {
+                        row.node = chosen;
+                        row.portSlot = -1;
+                        NodeNetwork n = findNode(chosen);
+                        row.portSlot = n == null ? 0 : Math.max(0, allocateSlot(n));
+                    }
+                    placeRows.put(row, place);
+                }
+            }
+            int selected = capabilityTable.getSelectedRow();
+            capabilityModel.fireTableDataChanged();
+            if (selected >= 0 && selected < capabilities.size()) capabilityTable.setRowSelectionInterval(selected, selected);
+            updateTitle();
+        } finally { refreshing = false; }
+    }
+
+    private Capability rowFor(ProcessElement place, String operation) {
+        for (Map.Entry<Capability, ProcessElement> entry : placeRows.entrySet())
+            if (entry.getValue() == place && operation.equals(entry.getKey().operation)) return entry.getKey();
+        if (place.getServiceInstance().isEmpty() && !processCanvas.getServiceRegistry().isDeployed(place)) return null;
+        String identity = ServiceRegistry.identity(place);
+        for (Capability c : capabilities)
+            if (!placeRows.containsKey(c) && place.getService().equals(c.service) && operation.equals(c.operation) && identity.equals(blank(c.instance) ? c.service : c.instance)) return c;
+        return null;
+    }
+
+    /** First node that does not already run this operation and still has a free port slot. */
+    private String suggestNode(String operation) {
+        for (NodeNetwork n : nodes) {
+            boolean used = false;
+            for (Capability c : capabilities) if (n.node.equals(c.node) && operation.equals(c.operation)) used = true;
+            if (!used && allocateSlot(n) >= 0) return n.node;
+        }
+        return nodes.isEmpty() ? "" : nodes.get(0).node;
+    }
+
+    private String placeLabel(Capability c) {
+        ProcessElement place = placeRows.get(c);
+        return place == null ? "" : place.getLabel();
+    }
+
+    /** After saving: the process links to this deployment and each place uses its row's instance. */
+    private void linkProcess(File file) throws Exception {
+        Map<ProcessElement, String> instances = new LinkedHashMap<>();
+        for (Map.Entry<Capability, ProcessElement> entry : placeRows.entrySet())
+            instances.put(entry.getValue(), blank(entry.getKey().instance) ? entry.getKey().service : entry.getKey().instance);
+        processCanvas.linkDeployment(file, instances);
+        rowsAddedForProcess.clear();
+        setStatus("Deployment saved and linked to the process. Save the process to keep the link.", file.getAbsolutePath());
     }
 
     /** Open a known file in a new window (used when ProcessEditor detects an infrastructure file). */
@@ -798,6 +975,8 @@ public class InfrastructureDefinitionFrame extends JFrame {
         List<String> errors = new ArrayList<>();
         if (nodes.isEmpty()) errors.add("No physical nodes have been defined.");
         if (deploymentEditor && capabilities.isEmpty()) errors.add("No capabilities have been defined.");
+        if (processCanvas != null) for (ProcessElement place : processCanvas.getPlaces())
+            if (!placeRows.containsValue(place)) errors.add("Place " + place.getLabel() + " has no service and operation to deploy.");
 
         if (deploymentEditor) {
             String associationError = serviceRegistry.catalogueAssociationError(currentFile);
@@ -1030,15 +1209,16 @@ public class InfrastructureDefinitionFrame extends JFrame {
     }
 
     private final class CapabilityModel extends AbstractTableModel {
-        private final String[] columns = {"Node", "Service", "Operation", "Return Attribute", "Port Slot", "Instance", "Invocation Adapter"};
+        private final String[] columns = {"Node", "Service", "Operation", "Return Attribute", "Port Slot", "Instance", "Invocation Adapter", "Place"};
         public int getRowCount() { return capabilities.size(); }
-        public int getColumnCount() { return columns.length; }
+        public int getColumnCount() { return processCanvas == null ? columns.length - 1 : columns.length; }
         public String getColumnName(int c) { return columns[c]; }
         public Class<?> getColumnClass(int c) { return c == 4 ? Integer.class : String.class; }
-        public boolean isCellEditable(int r, int c) { return c != 3 || !capabilities.get(r).adapter.isEmpty(); }
+        public boolean isCellEditable(int r, int c) { return c != 7 && (c != 3 || !capabilities.get(r).adapter.isEmpty()); }
         public Object getValueAt(int r, int c) {
             Capability x = capabilities.get(r);
             switch (c) {
+                case 7: return placeLabel(x);
                 case 0: return x.node;
                 case 1: return x.service;
                 case 2: return x.operation;
@@ -1059,6 +1239,8 @@ public class InfrastructureDefinitionFrame extends JFrame {
                 NodeNetwork n = findNode(s);
                 if (n != null) x.portSlot = allocateSlot(n);
                 fireTableRowsUpdated(r, r);
+                ProcessElement place = placeRows.get(x);
+                if (processCanvas != null && place != null && !refreshing) { refreshing = true; try { processCanvas.assignNode(place, s); } finally { refreshing = false; } }
                 return;
             } else if (c == 1) {
                 if (s.equals(x.service) || !serviceRegistry.services().contains(s)) return;

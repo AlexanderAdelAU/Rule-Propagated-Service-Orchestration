@@ -135,6 +135,10 @@
             <classpath><pathelement location="${build.dir}/contract-tests"/><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
             <arg file=".."/>
         </java>
+        <java classname="com.editor.DeployFlowCheck" fork="true" failonerror="true">
+            <classpath><pathelement location="${build.dir}/contract-tests"/><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
+            <arg file=".."/><arg file="${build.dir}/contract-tests"/>
+        </java>
     </target>
 
     <!-- Run the application -->

@@ -23,7 +23,8 @@ public final class ServiceRegistry {
     private final Map<String, Contract> contracts = new LinkedHashMap<>();
     private final List<Endpoint> endpoints = new ArrayList<>();
     private File common, deployment, catalogue;
-    private String problem = "Choose a service deployment to load its catalogue.";
+    private static final String NO_CATALOGUE = "Choose a service catalogue for this process.";
+    private String problem = NO_CATALOGUE;
     public String problem() { return problem; }
     public File common() { return common; }
     public String reference() { return deployment == null ? "" : common.toPath().relativize(deployment.toPath()).toString().replace(File.separatorChar, '/'); }
@@ -49,7 +50,44 @@ public final class ServiceRegistry {
         try { loadDeployment(new File(root, reference)); }
         catch (Exception ex) { problem = ex.getMessage(); }
     }
-    private void reset() { contracts.clear(); endpoints.clear(); deployment = null; catalogue = null; common = null; problem = "Choose a service deployment to load its catalogue."; }
+    private void reset() { contracts.clear(); endpoints.clear(); deployment = null; catalogue = null; common = null; problem = NO_CATALOGUE; }
+    public boolean hasDeployment() { return deployment != null; }
+    public File deploymentFile() { return deployment; }
+    public File catalogueFile() { return catalogue; }
+
+    /**
+     * Load what a process refers to: its service deployment once it has been deployed, otherwise its
+     * catalogue, otherwise the single catalogue of the domain folder the process is saved in.
+     */
+    public void loadProcessReferences(String deploymentReference, String catalogueReference, File anchor) {
+        if (deploymentReference != null && !deploymentReference.isEmpty()) { loadReference(deploymentReference, anchor); return; }
+        reset();
+        File root = findCommon(anchor);
+        if (root == null) return;
+        String reference = catalogueReference == null || catalogueReference.isEmpty() ? domainCatalogue(root, anchor) : catalogueReference;
+        if (reference.isEmpty()) return;
+        try { loadCatalogue(new File(root, reference)); }
+        catch (Exception ex) { problem = ex.getMessage(); }
+    }
+    /** Keep the catalogue but forget the deployment, e.g. when a new process is started. */
+    public void dropDeployment() {
+        if (deployment == null) return;
+        File source = catalogue;
+        try { loadCatalogue(source); } catch (Exception ex) { reset(); }
+    }
+    /** BusinessServiceDefinitions/<domain>/X.json when a process lies under ProcessDefinitionFolder/<domain> and that folder has one catalogue. */
+    static String domainCatalogue(File root, File anchor) {
+        if (anchor == null) return "";
+        try {
+            java.nio.file.Path processes = new File(root, "ProcessDefinitionFolder").getCanonicalFile().toPath();
+            java.nio.file.Path location = anchor.getCanonicalFile().toPath();
+            if (!location.startsWith(processes) || location.equals(processes)) return "";
+            String domain = processes.relativize(location).getName(0).toString();
+            File[] candidates = new File(root, "BusinessServiceDefinitions/" + domain).listFiles((dir, name) -> name.endsWith(".json"));
+            if (candidates == null || candidates.length != 1) return "";
+            return "BusinessServiceDefinitions/" + domain + "/" + candidates[0].getName();
+        } catch (IOException ex) { return ""; }
+    }
     public void loadDeployment(File selected) throws Exception {
         reset();
         File root = findCommon(selected.getAbsoluteFile().getParentFile());
@@ -176,14 +214,89 @@ public final class ServiceRegistry {
         Set<String> used = new HashSet<>();
         for (ServiceOperation operation : place.getServiceOperations()) {
             if (!used.add(operation.getName())) errors.add("Duplicate operation: " + operation.getName());
-            Endpoint e = endpoint(place.getService(), operation.getName(), identity(place));
-            if (e == null) { errors.add("No unique deployment instance for " + place.getService() + "." + operation.getName() + " / " + identity(place)); continue; }
-            errors.addAll(validateEndpoint(e.service, e.operation, e.output, e.inputs, e.adapter));
             List<String> names = new ArrayList<>(); for (ServiceArgument input : operation.getArguments()) names.add(input.getName());
-            if (!e.inputs.equals(names)) errors.add("Process inputs differ from deployment " + e.instance + ": expected " + e.inputs);
-            if (!e.output.equals(operation.getReturnAttribute())) errors.add("Process result differs from deployment " + e.instance + ": expected " + e.output);
+            Endpoint e = endpoint(place.getService(), operation.getName(), identity(place));
+            if (e != null) {
+                errors.addAll(validateEndpoint(e.service, e.operation, e.output, e.inputs, e.adapter));
+                if (!e.inputs.equals(names)) errors.add("Process inputs differ from deployment " + e.instance + ": expected " + e.inputs);
+                if (!e.output.equals(operation.getReturnAttribute())) errors.add("Process result differs from deployment " + e.instance + ": expected " + e.output);
+                continue;
+            }
+            // Not deployed yet: the catalogue fixes the contract. Deployment is a later, separate step.
+            Contract c = contract(place.getService(), operation.getName());
+            if (c == null) { errors.add("Undefined catalogue operation: " + place.getService() + "." + operation.getName()); continue; }
+            if ("boolean".equals(c.resultType)) {
+                if (names.isEmpty() || names.contains("") || new HashSet<>(names).size() != names.size() || operation.getReturnAttribute().isEmpty())
+                    errors.add("A Boolean service needs unique, nonempty token input and result names.");
+            } else {
+                if (!c.inputs.equals(names)) errors.add("Process inputs differ from catalogue: expected " + c.inputs);
+                if (!c.output.equals(operation.getReturnAttribute())) errors.add("Process result differs from catalogue: expected " + c.output);
+            }
         }
         return errors;
+    }
+    /** True when every operation of the place resolves to an instance of the linked deployment. */
+    public boolean isDeployed(ProcessElement place) {
+        if (deployment == null || place.getServiceOperations().isEmpty()) return false;
+        for (ServiceOperation operation : place.getServiceOperations())
+            if (endpoint(place.getService(), operation.getName(), identity(place)) == null) return false;
+        return true;
+    }
+    /** Node of the linked deployment that runs this place, or "" when it is not deployed. */
+    public String nodeFor(ProcessElement place) {
+        if (!isDeployed(place)) return "";
+        return endpoint(place.getService(), place.getServiceOperations().get(0).getName(), identity(place)).node;
+    }
+    /** Set an operation's contract from the catalogue. Boolean services keep their token aliases (default token -> token). */
+    public void applyCatalogue(ProcessElement place, String operation) {
+        Contract c = contract(place.getService(), operation);
+        if (c == null) throw new IllegalArgumentException("Choose a catalogue operation.");
+        ServiceOperation existing = null;
+        for (ServiceOperation candidate : place.getServiceOperations()) if (operation.equals(candidate.getName())) existing = candidate;
+        ServiceOperation op = new ServiceOperation(operation);
+        if ("boolean".equals(c.resultType)) {
+            if (existing != null && !existing.getArguments().isEmpty()) for (ServiceArgument argument : existing.getArguments()) op.addArgument(new ServiceArgument(argument));
+            else op.addArgument(new ServiceArgument("token", "String", "String", false));
+            op.setReturnAttribute(existing != null && !existing.getReturnAttribute().isEmpty() ? existing.getReturnAttribute() : "token");
+        } else {
+            for (String input : c.inputs) op.addArgument(new ServiceArgument(input, "String", "String", false));
+            op.setReturnAttribute(c.output);
+        }
+        List<ServiceOperation> selected = new ArrayList<>(place.getServiceOperations());
+        selected.removeIf(other -> operation.equals(other.getName()));
+        selected.add(op);
+        place.setServiceOperations(selected);
+    }
+
+    /** A physical node of the shared infrastructure. */
+    public static final class Node {
+        public String node = "", channel = "", address = "";
+        public final List<Integer> ports = new ArrayList<>();
+        public String describe() { return node + " \u2014 " + address + (ports.isEmpty() ? "" : ":" + ports.get(0)); }
+    }
+    /** Nodes of InfrastructureDefinitionFolder/SingleHost.json, the infrastructure the editors use by default. */
+    public static List<Node> infrastructureNodes(File anchor) {
+        List<Node> nodes = new ArrayList<>();
+        File root = findCommon(anchor);
+        File file = root == null ? null : new File(root, "InfrastructureDefinitionFolder/SingleHost.json");
+        if (file == null || !file.isFile()) return nodes;
+        try {
+            for (Object item : array(read(file), "nodes")) {
+                JSONObject data = (JSONObject)item; Node n = new Node();
+                n.node = text(data, "node"); n.channel = text(data, "channel"); n.address = text(data, "address");
+                for (Object port : array(data, "basePorts")) n.ports.add(((Number)port).intValue());
+                nodes.add(n);
+            }
+        } catch (Exception ex) { nodes.clear(); }
+        return nodes;
+    }
+    /** Deployment instance name derived from a place label: letters and digits only, unique among taken names. */
+    public static String instanceNameFor(String label, Set<String> taken) {
+        String base = label == null ? "" : label.replaceAll("[^A-Za-z0-9]", "");
+        if (base.isEmpty() || !Character.isLetter(base.charAt(0))) base = "Place" + base;
+        String name = base;
+        for (int i = 2; taken.contains(name); i++) name = base + i;
+        return name;
     }
     public static String identity(ProcessElement place) { return place.getServiceInstance().isEmpty() ? place.getService() : place.getServiceInstance(); }
     public void apply(ProcessElement place, String operation, String instance) {
