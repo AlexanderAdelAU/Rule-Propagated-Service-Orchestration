@@ -81,7 +81,7 @@ public class EditorFrame extends JPanel {
         add(titleLabel, BorderLayout.NORTH);
         
         // Attributes panel
-        attributesPanel = new JPanel();
+        attributesPanel = new ViewportWidthPanel();
         attributesPanel.setLayout(new BoxLayout(attributesPanel, BoxLayout.Y_AXIS));
         JScrollPane scrollPane = new JScrollPane(attributesPanel);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -736,7 +736,7 @@ public class EditorFrame extends JPanel {
         source.setEditable(false); source.setOpaque(false); source.setLineWrap(true); source.setWrapStyleWord(true);
         source.setPreferredSize(new Dimension(220, 40)); source.setMinimumSize(new Dimension(0, 40)); source.setMaximumSize(new Dimension(Integer.MAX_VALUE, 55));
         source.setToolTipText(registry.description()); attributesPanel.add(source);
-        JComboBox<String> services = ServiceRegistry.choices(registry.services(), element.getService());
+        JComboBox<String> services = ServiceRegistry.choices(registry.services(), element.getService(), registry::describe);
         addComboField("Service:", services, element.getService());
         services.addActionListener(e -> {
             String value = (String)services.getSelectedItem();
@@ -747,8 +747,9 @@ public class EditorFrame extends JPanel {
             updateSelection(element); canvas.serviceContractChanged();
         });
         String op = element.getOperations().isEmpty() ? "" : element.getOperations().get(0);
-        JComboBox<String> operations = ServiceRegistry.choices(registry.operations(element.getService()), op);
+        JComboBox<String> operations = ServiceRegistry.choices(registry.operations(element.getService()), op, name -> registry.describe(element.getService(), name));
         addComboField("Operation:", operations, op);
+        addWhatItDoes(registry, element.getService(), op);
         operations.addActionListener(e -> {
             String value = (String)operations.getSelectedItem();
             if (!registry.operations(element.getService()).contains(value)) return;
@@ -790,6 +791,49 @@ public class EditorFrame extends JPanel {
             JTextArea warning = new JTextArea(String.join("\n", errors)); warning.setEditable(false); warning.setLineWrap(true); warning.setWrapStyleWord(true); warning.setForeground(Color.RED);
             warning.setBorder(BorderFactory.createTitledBorder("Unresolved service contract")); attributesPanel.add(warning);
         }
+    }
+
+    /** Fits the scroll area's width, so long text wraps instead of running under the scrollbar. */
+    private static final class ViewportWidthPanel extends JPanel implements Scrollable {
+        public Dimension getPreferredScrollableViewportSize() { return getPreferredSize(); }
+        public int getScrollableUnitIncrement(Rectangle visible, int orientation, int direction) { return 16; }
+        public int getScrollableBlockIncrement(Rectangle visible, int orientation, int direction) { return orientation == SwingConstants.VERTICAL ? visible.height : visible.width; }
+        public boolean getScrollableTracksViewportWidth() { return true; }
+        public boolean getScrollableTracksViewportHeight() { return false; }
+    }
+
+    /** The catalogue's description of the chosen service, shown without hovering. */
+    private void addWhatItDoes(ServiceRegistry registry, String service, String op) {
+        String text;
+        if (service == null || service.isEmpty()) text = "Choose a service to see what it does.";
+        else {
+            text = registry.describe(service, op);
+            if (text.isEmpty()) text = "The catalogue has no description for " + service + ".";
+        }
+        JTextArea box = new JTextArea(text); box.setEditable(false); box.setLineWrap(true); box.setWrapStyleWord(true);
+        box.setBorder(BorderFactory.createTitledBorder("What it does"));
+        box.setToolTipText(ServiceRegistry.tooltip(text));
+        // Measure the wrapped text at the panel's current width (220 before the panel is first shown).
+        Container viewport = attributesPanel.getParent();
+        int width = viewport != null && viewport.getWidth() > 40 ? viewport.getWidth() - 10 : 220;
+        box.setSize(width, Short.MAX_VALUE);
+        int height = box.getPreferredSize().height + 4;
+        fitHeight(box, 220, height);
+        // Re-measure when the panel is resized, so the box never clips or leaves a gap.
+        box.addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override public void componentResized(java.awt.event.ComponentEvent e) {
+                JTextArea measure = new JTextArea(box.getText()); measure.setLineWrap(true); measure.setWrapStyleWord(true);
+                measure.setFont(box.getFont()); measure.setBorder(box.getBorder());
+                measure.setSize(box.getWidth(), Short.MAX_VALUE);
+                int fitted = measure.getPreferredSize().height + 4;
+                if (fitted != box.getPreferredSize().height) { fitHeight(box, box.getWidth(), fitted); attributesPanel.revalidate(); }
+            }
+        });
+        attributesPanel.add(box);
+    }
+
+    private static void fitHeight(JComponent c, int width, int height) {
+        c.setPreferredSize(new Dimension(width, height)); c.setMinimumSize(new Dimension(0, height)); c.setMaximumSize(new Dimension(Integer.MAX_VALUE, height));
     }
 
     /** Keep the place's deployed instance when it offers the operation; otherwise take the contract from the catalogue. */

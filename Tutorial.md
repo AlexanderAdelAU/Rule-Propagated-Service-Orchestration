@@ -9,7 +9,7 @@ from ProcessEditor:
   back to P2.
 - **Observation**: Monitor records every step from outside the token path.
 
-![ProcessEditor with the P2 tutorial: EG11 feeds T_in_P2, place P2 runs StochasticService.processToken on node P2, T_out_P2 routes true to Terminate and false back to T_in_P2. The Attributes panel shows the catalogue, service, operation, deployment instance, the node P2 runs on and the contract processToken(token) → token.](images/p2-tutorial-design.png)
+![ProcessEditor with the P2 tutorial: EG11 feeds T_in_P2, place P2 runs StochasticService.processToken on node P2, T_out_P2 routes true to Terminate and false back to T_in_P2. The Attributes panel shows the catalogue, service, operation, a description of what the service does, the deployment instance, the node P2 runs on and the contract processToken(token) → token.](images/p2-tutorial-design.png)
 
 *The P2 tutorial process. P2 is selected. The badge on the place and the **Runs
 on** box show the node it is deployed to.*
@@ -76,15 +76,23 @@ of services and their operations that the hosts can run.
 1. **Catalogue**: the panel names the catalogue in use. If the **Service** list is empty, click **Choose catalogue...** and open
    [`BusinessServiceDefinitions/petrinet/PetriNetModels.json`](btsn.common/BusinessServiceDefinitions/petrinet/PetriNetModels.json).
    Once the process is saved under `ProcessDefinitionFolder/petrinet`, the editor selects this catalogue itself.
-2. **Service**: choose `StochasticService`. Its only operation, `processToken`, is
+2. **Service**: hover over each entry in the list to see what it does. Choose `StochasticService`. Its only operation, `processToken`, is
    selected for you.
-3. **Contract**: the box shows `processToken(token) → token`. The catalogue
+3. **What it does**: the box under the Operation says what the service does and what it returns, so you know how to route its result:
+
+   > Decides at random: returns true or false with equal chance. Use it to model a step that sometimes has to be repeated, such as a check that can fail.<br>
+   > Returns: true or false. Route on it from the T_out with guards true and false.
+
+4. **Contract**: the box shows `processToken(token) → token`. The catalogue
    supplies the arguments; you do not type them.
-4. **Runs on**: the box reads **Not deployed yet**. Where P2 runs is decided in [step 2](#2-deploy-the-process).
+5. **Runs on**: the box reads **Not deployed yet**. Where P2 runs is decided in [step 2](#2-deploy-the-process).
 
 Choosing a service does not create one. `StochasticService` is already packaged
 ([source](btsn.common/src/org/btsn/services/StochasticService.java)) and runs
 inside the generic host on whichever node you deploy P2 to.
+
+The descriptions come from the catalogue, where each service has a
+`description` and a `returns` entry. The Deploy panel shows the same text when you hover over a Service or Operation cell. When you add a service to a catalogue, describe it there as well; the editor checks require both entries.
 
 ### Connect the elements and set the guards
 
@@ -104,8 +112,7 @@ Use **Arrow (drag)**, or **Arrow (click waypoints)** to bend the return route.
   - T_in receives and buffers the token.
   - P2 invokes `processToken`.
   - T_out routes on the result: `false` repeats the visit with the same token, and `true` completes the workflow.
-- `StochasticService` returns `true` with probability 0.5.
-- It also adds a short acceptance delay, so timings reflect the demo service as well as the fabric.
+- `StochasticService` returns `true` with probability 0.5, so on average each workflow visits P2 twice.
 
 ### Validate and save
 

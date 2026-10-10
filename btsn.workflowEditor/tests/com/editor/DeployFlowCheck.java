@@ -160,6 +160,7 @@ public final class DeployFlowCheck {
                 List<String> texts = texts(attributes);
                 check(texts.contains("Choose catalogue...") && !texts.contains("Choose service deployment..."), "Attributes still ask for a deployment first");
                 check(texts.stream().anyMatch(t -> t.startsWith("P6")), "Attributes do not show the node: " + texts);
+                check(texts.stream().anyMatch(t -> t.startsWith("Decides at random") && t.contains("Returns: true or false")), "Attributes do not say what the service does: " + texts);
 
                 // Pictures for review: the canvas with node labels, and the Deploy panel.
                 canvas.setSize(1150, 560); canvas.setPreferredSize(new Dimension(1150, 560));
@@ -223,7 +224,7 @@ public final class DeployFlowCheck {
         TokenAnimator clean = new TokenAnimator(), ant = new TokenAnimator();
         clean.parseOutput(analysis); ant.parseOutput(prefixed);
         check(!clean.getEvents().isEmpty() && clean.getEvents().size() == ant.getEvents().size(), "Ant-prefixed analysis parsed differently: " + clean.getEvents().size() + " vs " + ant.getEvents().size());
-        System.out.println("PASS: catalogue-only design, right-click Deploy to, filled Deploy panel with Place column, two-way node edits, save links process and instances, reopen, existing deployment unchanged, Create Build and Run files, Ant-prefixed analysis replay");
+        System.out.println("PASS: catalogue-only design, right-click Deploy to, filled Deploy panel with Place column, two-way node edits, save links process and instances, reopen, existing deployment unchanged, Create Build and Run files, Ant-prefixed analysis replay, What it does");
     }
 
     private static int rowOf(JTable table, String place) {

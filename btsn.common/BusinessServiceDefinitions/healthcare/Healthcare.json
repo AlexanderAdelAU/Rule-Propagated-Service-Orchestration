@@ -6,6 +6,8 @@
       "service": "TriageService",
       "implementationClass": "org.btsn.business.healthcare.TriageService",
       "operation": "processTriageAssessment",
+      "description": "Assesses the arriving patient: sets a priority, orders tests, and sends the patient to diagnostics or straight to treatment. Simulated, with some random variation.",
+      "returns": "Triage results with priority CRITICAL, URGENT or STANDARD. Routes on \"STANDARD_WORKFLOW\" (to the diagnostic tests) or \"DIRECT_TO_TREATMENT\".",
       "inputs": [
         "token"
       ],
@@ -17,6 +19,8 @@
       "service": "LaboratoryService",
       "implementationClass": "org.btsn.business.healthcare.LaboratoryService",
       "operation": "processLabRequest",
+      "description": "Runs the ordered lab tests (simulated) and flags abnormal or critical values.",
+      "returns": "Laboratory results and a clinical summary. No routing value.",
       "inputs": [
         "triageResults"
       ],
@@ -28,6 +32,8 @@
       "service": "CardiologyService",
       "implementationClass": "org.btsn.business.healthcare.CardiologyService",
       "operation": "processCardiacAssessment",
+      "description": "Simulates an ECG and grades the patient's cardiac risk.",
+      "returns": "Cardiology results with risk CRITICAL, HIGH, MODERATE or LOW. No routing value.",
       "inputs": [
         "triageResults"
       ],
@@ -39,6 +45,8 @@
       "service": "RadiologyService",
       "implementationClass": "org.btsn.business.healthcare.RadiologyService",
       "operation": "processImagingRequest",
+      "description": "Chooses the imaging study for the presenting complaint and writes a simulated report.",
+      "returns": "Radiology findings, impression and recommendations. No routing value.",
       "inputs": [
         "triageResults"
       ],
@@ -50,6 +58,8 @@
       "service": "RadiologyService",
       "implementationClass": "org.btsn.business.healthcare.RadiologyService",
       "operation": "federatedRadiologyRequest",
+      "description": "Performs the same imaging study for another hospital and records an audit trail of the cross-facility request.",
+      "returns": "Radiology results plus the requesting hospital and audit fields. No routing value.",
       "inputs": [
         "token"
       ],
@@ -61,6 +71,8 @@
       "service": "DiagnosisService",
       "implementationClass": "org.btsn.business.healthcare.DiagnosisService",
       "operation": "processClinicalDecision",
+      "description": "Combines the lab, cardiology and radiology results into a diagnosis, a disposition and a treatment plan.",
+      "returns": "Diagnosis results with a disposition: ICU, urgent admission, observation or outpatient follow-up. No routing value.",
       "inputs": [
         "radiologyResults",
         "laboratoryResults",
@@ -74,6 +86,8 @@
       "service": "TreatmentService",
       "implementationClass": "org.btsn.business.healthcare.TreatmentService",
       "operation": "executeTreatmentPlan",
+      "description": "Gives the planned medications and procedures, judges the patient's response (simulated) and decides whether the patient can be discharged.",
+      "returns": "Treatment results including discharge_ready. No routing value.",
       "inputs": [
         "diagnosisResults"
       ],
@@ -85,6 +99,8 @@
       "service": "TreatmentService",
       "implementationClass": "org.btsn.business.healthcare.TreatmentService",
       "operation": "executeDirectTreatment",
+      "description": "Treats a simple case sent straight from triage; a complex case is marked as needing a full workup.",
+      "returns": "Treatment results with status TREATMENT_COMPLETE. No routing value.",
       "inputs": [
         "triageResults"
       ],
