@@ -156,6 +156,11 @@ public final class DeploymentConfiguration {
         require(places > 0, "Infrastructure workflow has no service places");
     }
 
+    /** The infrastructure node with this name, or null when the infrastructure does not define it. */
+    public JSONObject findNode(String name) {
+        return nodes.get(name);
+    }
+
     public JSONObject node(String name) {
         JSONObject node = nodes.get(name);
         require(node != null, "Capability refers to an undefined node: " + name);

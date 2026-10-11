@@ -31,6 +31,8 @@
         <java classname="LauncherRuntimeCheck" fork="true" failonerror="true" maxmemory="256m">
             <classpath refid="launcher.check.classpath"/><arg file=".."/>
         </java>
+        <!-- Which hosts start here: by each host's own channel address, and Monitor by ip0. -->
+        <ant antfile="auto-deployment.xml" target="check-local-channel" inheritall="false"/>
     </target>
     <target name="check-model-services" depends="package" description="Check deterministic model outcomes using packaged service JARs">
         <mkdir dir="${target.dir}/model-check"/>
@@ -113,6 +115,25 @@
         </macrodef>
         <check-host number="1"/><check-host number="2"/><check-host number="3"/>
         <check-host number="4"/><check-host number="5"/><check-host number="6"/>
+        <!-- Hosts for other machines: package the inventory example's two hosts and start one from an empty folder. -->
+        <ant antfile="../btsn.petrinet.ProjectLoader/Inventory_Workflow_BuildAndRun.xml" target="host-packages" inheritall="false">
+            <property name="host.packages" value="all"/>
+            <property name="host.address" value="127.0.0.1"/>
+            <property name="launcher.skip.build" value="true"/>
+        </ant>
+        <javac srcdir="tests" destdir="${target.dir}/host-check/classes" includes="HostPackageCheck.java"
+               release="${java.release}" includeantruntime="false" encoding="UTF-8">
+            <classpath refid="host.check.dependencies"/>
+        </javac>
+        <java classname="HostPackageCheck" fork="true" failonerror="true">
+            <classpath>
+                <pathelement location="${target.dir}/host-check/classes"/>
+                <path refid="host.check.dependencies"/>
+            </classpath>
+            <arg file=".."/>
+            <arg file="${target.dir}/host-packages/Inventory_Workflow_BuildAndRun"/>
+            <arg file="${target.dir}/launchers/Inventory_Workflow_BuildAndRun"/>
+        </java>
         <!-- Issue #15: concurrent rule-base parses must not break another instance's queries. -->
         <java classname="org.btsn.utils.OOjdrewConcurrencyTest" fork="true" failonerror="true">
             <classpath>

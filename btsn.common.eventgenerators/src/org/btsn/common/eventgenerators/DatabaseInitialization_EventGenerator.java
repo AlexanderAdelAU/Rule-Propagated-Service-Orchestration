@@ -463,7 +463,10 @@ public class DatabaseInitialization_EventGenerator {
         DatagramSocket udpSocket = null;
         try {
             udpSocket = new DatagramSocket();
-            InetAddress targetAddress = InetAddress.getLoopbackAddress();
+            // The service's own host: its channel's address (another machine in a distributed deployment).
+            boolean remote = resolvedChannel != null && !resolvedChannel.isEmpty()
+                && !resolvedChannel.equals("localhost") && !resolvedChannel.equals("127.0.0.1");
+            InetAddress targetAddress = remote ? InetAddress.getByName(resolvedChannel) : InetAddress.getLoopbackAddress();
             
             int channelNumber;
             if (!resolvedChannelId.startsWith("ip")) {
@@ -486,7 +489,7 @@ public class DatabaseInitialization_EventGenerator {
             
             int targetPort = 10000 + (channelNumber * 1000) + basePort;
             
-            System.out.println("Sending to localhost:" + targetPort + 
+            System.out.println("Sending to " + targetAddress.getHostAddress() + ":" + targetPort + 
                 " (channel: " + resolvedChannelId + ", base: " + basePort + ")");
             
             byte[] data = payload.getBytes();

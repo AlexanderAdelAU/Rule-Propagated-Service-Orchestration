@@ -79,6 +79,20 @@ public class BuildRuleBase {
 	 * Build operation-specific rule base
 	 * Searches RuleBase directory recursively for rule files
 	 */
+	/**
+	 * The folder that contains btsn.common: normally the parent of the working folder. A launcher can
+	 * point a process at its own generated copy with -Dbtsn.common.dir=<that btsn.common folder>, so a
+	 * service that runs from elsewhere (Monitor) reads the same master ruleset as the hosts.
+	 */
+	static File commonRoot() {
+		String common = System.getProperty("btsn.common.dir");
+		if (common != null && !common.trim().isEmpty()) {
+			File parent = new File(common.trim()).getAbsoluteFile().getParentFile();
+			if (parent != null) return parent;
+		}
+		return new File("../");
+	}
+
 	static public boolean buildOperationRuleBase(String serviceName, String operationName, String lbuildVersion)
 			throws java.io.IOException {
 		return buildOperationRuleBase(serviceName, serviceName, operationName, lbuildVersion);
@@ -101,7 +115,7 @@ public class BuildRuleBase {
 
 		PrintWriter pw = new PrintWriter(new FileOutputStream(operationRulePath + "/Service.ruleml"));
 
-		File commonBase = new File("../");
+		File commonBase = commonRoot();
 		String commonPath = commonBase.getCanonicalPath();
 
 		String contractService = (bindingServiceName == null || bindingServiceName.trim().isEmpty())
@@ -405,7 +419,7 @@ public class BuildRuleBase {
 		File appBase = new File("");
 		String localPath = appBase.getAbsolutePath();
 		
-		File commonBase = new File("../");
+		File commonBase = commonRoot();
 		String commonPath = commonBase.getCanonicalPath();
 		
 		// Determine output location based on context

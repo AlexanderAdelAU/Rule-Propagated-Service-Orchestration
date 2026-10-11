@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Imported by PN launchers; all places use the same channel decision. -->
-<project name="automatic-channel-launch-support" default="check-local-channel" basedir="../..">
+<!-- Imported by PN launchers. Each host starts here when its own channel's address is this machine;
+     Monitor follows ip0. -->
+<project name="automatic-channel-launch-support" default="check-local-channel" basedir="../.."
+         xmlns:if="ant:if" xmlns:unless="ant:unless">
     <property name="local.channel.project.dir" location="../btsn.services"/>
     <property name="local.channel.rules" location="../btsn.common/RuleBase/Generated/InfrastructureDeployment.ruleml.xml"/>
     <property name="local.channel.tools.dir" location="${local.channel.project.dir}/target/local-channel"/>
@@ -10,7 +12,7 @@
         <javac srcdir="${local.channel.project.dir}/src" destdir="${local.channel.tools.dir}/classes"
                includes="org/btsn/build/LocalChannelCheck.java" release="15" includeantruntime="false" encoding="UTF-8"/>
     </target>
-    <target name="detect-local-channel" depends="compile-local-channel-check" description="Check whether the configured ip0 address belongs to this machine">
+    <target name="detect-local-channel" depends="compile-local-channel-check" description="Check which configured host addresses belong to this machine">
         <delete file="${local.channel.result}"/>
         <java classname="org.btsn.build.LocalChannelCheck" fork="true" failonerror="true">
             <classpath><pathelement location="${local.channel.tools.dir}/classes"/></classpath>
@@ -30,12 +32,14 @@
             </fail>
             <condition property="@{component}.is.local"><or>
                 <equals arg1="@{mode}" arg2="local"/>
-                <and><equals arg1="@{mode}" arg2="auto"/><isset property="ip0.is.local"/></and>
+                <and><equals arg1="@{mode}" arg2="auto"/><isset property="@{component}.channel.is.local"/></and>
+                <and><equals arg1="@{mode}" arg2="auto"/><not><isset property="@{component}.channel"/></not><isset property="ip0.is.local"/></and>
             </or></condition>
             <condition property="@{component}.resolved.mode" value="local" else="remote">
                 <isset property="@{component}.is.local"/>
             </condition>
-            <echo message="@{component}: ${@{component}.resolved.mode} (requested @{mode}; ip0=${ip0.address})"/>
+            <property name="@{component}.address" value="${ip0.address}"/>
+            <echo message="@{component}: ${@{component}.resolved.mode} (requested @{mode}; ${@{component}.address})"/>
         </sequential>
     </macrodef>
     <target name="check-local-channel" depends="compile-local-channel-check" description="Verify local, remote and invalid channel decisions">
