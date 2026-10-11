@@ -24,7 +24,17 @@ and healthcare workflows show larger processes.
 
 ![The Petri net you draw is the system that runs: a four-place model on the left, where P1 forks to P2 and P3 and they join before P4, is deployed as local rules to four separate hosts on the right. Each host runs its own T_in, place function and T_out; tokens travel between hosts as messages with no central engine, and Monitor observes every host for complete Petri-net analysis.](images/rpso-overview.svg)
 
-*Draw the net, deploy its rules, run it as separate hosts. A place can be any service: a Boolean function, a credit check or a clinical diagnosis. The execution pattern inside each host is shown under [Architecture](#architecture-coordination-and-business-meaning).*
+*Draw the net, deploy its rules, run it as separate hosts. A place can be any service: a Boolean function, a credit check or a clinical diagnosis.*
+
+### Inside each host
+
+Every host runs the same pattern, whatever service its place is bound to: **T_in** receives a token and waits until the inputs it needs have arrived, **P** does the work, and **T_out** sends the result on to the next host or ends the workflow.
+
+![RPSO execution sequence with light blue activation bars: T_in receives and buffers a token, synchronizes required inputs and invokes P; P returns its result; T_in hands it to T_out, which routes or terminates the workflow.](images/rpso-execution-sequence.svg)
+
+*The execution pattern within a generic host. Shaded activation bars show responsibility for one invocation; their lengths do not represent measured time. More under [Architecture](#architecture-coordination-and-business-meaning).*
+
+### From design to a measured run
 
 How each step is done in the editor (ProcessEditor, `btsn.workflowEditor`), worked through for a single place in [Tutorial.md](Tutorial.md):
 
@@ -332,14 +342,7 @@ declared routes and resolves the destination. Logical service identity is
 separate from physical placement: P1 can host a clinical, financial or model
 capability according to the selected deployment.
 
-![RPSO execution sequence with light blue activation bars: T_in receives and buffers a token, synchronizes required inputs and invokes P; P returns its result; T_in hands it to T_out, which routes or terminates the workflow.](images/rpso-execution-sequence.svg)
-
-*The execution pattern within a generic host. T_in receives and synchronizes
-inputs, P performs the bound functionality, and T_out routes the result. Shaded
-activation bars show responsibility for one invocation; their lengths do not
-represent measured time.*
-
-The execution pattern is **T_in → P → T_out**:
+The execution pattern, shown in the [sequence diagram](#inside-each-host) at the top of this page, is **T_in → P → T_out**:
 
 - **T_in** receives and buffers inputs, accumulating the required named values
   for joins. Readiness also depends on version, validity and available capacity.
