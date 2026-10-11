@@ -4,7 +4,8 @@
     "../btsn.common/BusinessServiceDefinitions/financial/FinancialSystem.json",
     "catalogues/StochasticService.json",
     "catalogues/LegacyPetriNetServices.json",
-    "../btsn.common/BusinessServiceDefinitions/healthcare/Healthcare.json"
+    "../btsn.common/BusinessServiceDefinitions/healthcare/Healthcare.json",
+    "../btsn.common/BusinessServiceDefinitions/inventory/Inventory.json"
   ],
   "runtimeLibraries": [
     "../btsn.common/lib/json-simple-1.1.1.jar",
@@ -16,6 +17,7 @@
     "FinancialSystem.json": "financial",
     "StochasticService.json": "models",
     "Healthcare.json": "healthcare",
-    "LegacyPetriNetServices.json": "models"
+    "LegacyPetriNetServices.json": "models",
+    "Inventory.json": "inventory"
   }
 }

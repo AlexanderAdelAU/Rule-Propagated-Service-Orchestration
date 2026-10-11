@@ -21,6 +21,7 @@ on** box show the node it is deployed to.*
 | **3. Create Build and Run** | Choose the event generators and the number of tokens; the editor writes the Ant launcher | [Build and Run](#3-create-build-and-run) |
 | **4. Run it** | Click **Run on hosts**: the editor runs the launcher on real hosts, analyses the run and loads the replay | [Run](#4-run-it) |
 | **5. Show the results** | Analyse the run, view the charts and replay the tokens on the design | [Results](#5-show-the-results) |
+| **6. Add your own service** | Write a service, describe it in a catalogue, and use it like StochasticService (worked example: an inventory and a supplier) | [Your own service](#6-add-your-own-service) |
 
 Finished copies of every file are included as `P2_Tutorial_*` ([list](#repository-artefacts)):
 
@@ -433,6 +434,67 @@ ant -f btsn.petrinet.ProjectLoader/P1_Tutorial_Local_BuildAndRun.xml export-tuto
 | Replay shows no tokens, or tokens skip a place | Load the analysis with the process that produced it, and check it is that run's file |
 | A design change did not run | Save the process. If you changed places, redeploy and save the deployment first. |
 
+## 6. Add your own service
+
+StochasticService only tosses a coin. Any Java class can be a place's service, and the rest of the flow (design, Deploy, Build and Run, Run on hosts, replay) stays the same. The supplied **inventory example** shows how, in a deliberately small process: it is an example of extending RPSO, not a full business process.
+
+![The inventory example in the editor: ORDERS feeds the Inventory place on P1; T_out_Inventory routes reserved to Shipped and out_of_stock to the Supplier place on P2, whose T_out routes restocked back to Inventory and unavailable to Cancelled. The Attributes panel shows InventoryService.reserve and what it does.](images/inventory-design.png)
+
+*The inventory example. Inventory runs on P1 and Supplier on P2. The **What it does** box comes from the new catalogue.*
+
+### What it shows
+
+| | Inventory (P1) `InventoryService.reserve` | Supplier (P2) `SupplierService.restock` |
+|---|---|---|
+| **State** | Stock count, 5 at start | Deliveries left, 1 at start (3 units each) |
+| **Routes** | `reserved` to **Shipped**; `out_of_stock` to Supplier | `restocked` back to Inventory, carrying the units; `unavailable` to **Cancelled** |
+
+- **State in a service.** The host keeps the stock between orders, so early orders behave differently from later ones.
+- **Routing on any value.** The T_out guards test string results (`reserved`, `out_of_stock`, ...), not just `true` and `false`.
+- **Hosts working together.** An order can go from P1 to P2 and back. The hosts share no memory, so the supplier's delivery travels back to the inventory inside the order itself.
+- **Real concurrency.** Ten orders always give 8 shipped and 2 cancelled, but which orders are cancelled depends on timing between the hosts. In our runs, order 7 reached the inventory while order 6 was still returning from the supplier with the only delivery; it found no stock, and was cancelled. On a faster machine it could be orders 9 and 10. The replay shows it happening.
+
+### Run it
+
+1. Open [`inventory/Workflow/Inventory_Workflow.json`](btsn.common/ProcessDefinitionFolder/inventory/Workflow/Inventory_Workflow.json).
+2. Click **Run on hosts**. The supplied launcher runs P1, P2 and Monitor.
+
+![The Run window after the inventory example: all steps completed; P1_Place and P2_Place each committed rules v999 and v001, with 11 and 3 service calls; and the summary.](images/inventory-run.png)
+
+*P1 made 11 service calls: 10 orders, plus order 6 back from the supplier. P2 made 3: order 6 restocked, and two orders it could not restock.*
+
+### The files for a new service
+
+| File | What to put in it |
+|---|---|
+| [`InventoryService.java`](btsn.common/src/org/btsn/business/inventory/InventoryService.java), [`SupplierService.java`](btsn.common/src/org/btsn/business/inventory/SupplierService.java) | The services, in a package under `org.btsn.business` |
+| [`BusinessServiceDefinitions/inventory/Inventory.json`](btsn.common/BusinessServiceDefinitions/inventory/Inventory.json) | The catalogue: class, operation, inputs, result, `description` and `returns` |
+| [`btsn.services/packaging.json`](btsn.services/packaging.json) | Add the catalogue to `catalogues`, and its domain to `catalogueDomains` |
+| [`ServiceDeploymentFolder/inventory/Inventory.json`](btsn.common/ServiceDeploymentFolder/inventory/Inventory.json) | Written by **Deploy**: the node each service runs on |
+| [`ProcessDefinitionFolder/inventory/Workflow/Inventory_Workflow.json`](btsn.common/ProcessDefinitionFolder/inventory/Workflow/Inventory_Workflow.json) | The process, drawn in the editor |
+| [`Inventory_Workflow_BuildAndRun.xml`](btsn.petrinet.ProjectLoader/Inventory_Workflow_BuildAndRun.xml) | Written by **Build and Run** |
+
+### Writing a service
+
+```java
+public class InventoryService extends BaseBusinessService {
+    public InventoryService(String sequenceId) { ... }          // the host passes the order's token id
+    public String reserve(String token) {                        // one String (JSON) per catalogue input
+        int delivered = (int)numberValue(token, "delivered_units", 0);
+        ...
+        result.put("routing_decision", routingDecision(reserved ? "reserved" : "out_of_stock"));
+        return businessResult("inventoryResults", result);      // the catalogue's returnAttribute
+    }
+}
+```
+
+- **Its own catalogue and domain.** Use a new folder under `BusinessServiceDefinitions` (here `inventory`). Save the process under a matching `ProcessDefinitionFolder/inventory`, so the editor selects the catalogue, and **Deploy** saves to `ServiceDeploymentFolder/inventory`.
+- **Inputs and results.** Each catalogue input arrives as a JSON string. The method's result is `{returnAttribute: {...}}`, and its `routing_decision.routing_path` is the value the guards test.
+- **GatewayNode on the T_out.** It routes on the value and passes the whole result on. (A DecisionNode passes on only the route.)
+- **State lives in one host.** Use `static` fields, made thread-safe, as the examples do; they start again whenever the host starts. Hosts never share memory: send anything another host needs inside the result.
+- **Going back to an earlier place.** Return your result under the name that place takes as input. The supplier returns `token`, which is the inventory's input.
+- **Describe it.** The editor checks require `description` and `returns` for every catalogue entry.
+
 ## Repository artefacts
 
 The supplied P2 tutorial, built with exactly these steps:
@@ -471,6 +533,7 @@ Every launcher runs the same way:
 |---|---|
 | Single place (this tutorial) | [P2_Tutorial_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P2_Tutorial_Workflow_BuildAndRun.xml) |
 | Single place, P1 reference | [P1_Tutorial_Local_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_Tutorial_Local_BuildAndRun.xml) |
+| Your own service: inventory and supplier | [Inventory_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/Inventory_Workflow_BuildAndRun.xml) |
 | P1–P4 fork/join model | [P1_P2_P3_P4_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_P3_P4_BuildAndRun.xml) |
 | Six-place double-join model | [P1_to_P6_Double_Join_Workflow.xml](btsn.petrinet.ProjectLoader/P1_to_P6_Double_Join_Workflow.xml) |
 | Emergency department | [Emergency_Department_BuildAndRun.xml](btsn.healthcare.ProjectLoader/Emergency_Department_BuildAndRun.xml) |

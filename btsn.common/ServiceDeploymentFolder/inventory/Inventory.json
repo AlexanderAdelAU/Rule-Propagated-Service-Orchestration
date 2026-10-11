@@ -1,0 +1,26 @@
+{
+  "definitionType": "ServiceDeployment",
+  "catalog": "BusinessServiceDefinitions/inventory/Inventory.json",
+  "capabilities": [
+    {
+      "node": "P1",
+      "service": "InventoryService",
+      "operation": "reserve",
+      "returnAttribute": "inventoryResults",
+      "arguments": [
+        {"name": "token", "type": "String", "value": "String", "required": false}
+      ],
+      "portSlot": 0
+    },
+    {
+      "node": "P2",
+      "service": "SupplierService",
+      "operation": "restock",
+      "returnAttribute": "token",
+      "arguments": [
+        {"name": "inventoryResults", "type": "String", "value": "String", "required": false}
+      ],
+      "portSlot": 0
+    }
+  ]
+}

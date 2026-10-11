@@ -16,22 +16,27 @@ Every run is measured as it happens (queue waits, service times, join waits and
 end-to-end workflow time) and can be replayed on the model. These are
 measurements, not guarantees of meeting hard real-time deadlines.
 
-Start with a Boolean-returning Petri-net example, then build towards the
-financial and healthcare workflows. The repository also provides a workflow
-editor, Ant build-and-run launchers, and observation/analysis tools.
+The workflow editor takes a process from design to a measured run: draw it,
+deploy its places to hosts, create its launcher, run it on the hosts and replay
+the recorded run. Start with a Boolean-returning Petri-net example. The
+inventory example then shows how to add your own services, and the financial
+and healthcare workflows show larger processes.
 
 ![The Petri net you draw is the system that runs: a four-place model on the left, where P1 forks to P2 and P3 and they join before P4, is deployed as local rules to four separate hosts on the right. Each host runs its own T_in, place function and T_out; tokens travel between hosts as messages with no central engine, and Monitor observes every host for complete Petri-net analysis.](images/rpso-overview.svg)
 
 *Draw the net, deploy its rules, run it as separate hosts. A place can be any service: a Boolean function, a credit check or a clinical diagnosis. The execution pattern inside each host is shown under [Architecture](#architecture-coordination-and-business-meaning).*
 
-How each step is done, worked through for a single place in [Tutorial.md](Tutorial.md):
+How each step is done in the editor (ProcessEditor, `btsn.workflowEditor`), worked through for a single place in [Tutorial.md](Tutorial.md):
 
 | Step | How | Walkthrough |
 |---|---|---|
-| **1 · Draw the model** | Place the elements, bind each place to a service and connect the transitions in ProcessEditor (`btsn.workflowEditor`) | [Design the process](Tutorial.md#1-design-the-process), [Deploy it](Tutorial.md#2-deploy-the-process) |
-| **Deploy local rules** | One Ant launcher builds the JARs, starts the hosts and Monitor, then installs each host's rules and waits for its acknowledgement | [Rule deployment](#rule-deployment-and-token-execution) |
-| **2 · Run as separate hosts** | The same launcher fires the tokens and collects the observations; each host routes them by its own rules | [Build and Run](Tutorial.md#3-create-build-and-run), [Run it](Tutorial.md#4-run-it), [Quick start](#quick-start-run-observe-and-replay) |
-| **Analyse** | `PetriNetAnalyzer`, the timing chart and the spatial view read Monitor's data; ProcessEditor replays it on the model | [Show the results](Tutorial.md#5-show-the-results), [Observe a run](#observe-and-interpret-a-run) |
+| **1 · Design** | Draw the net and choose each place's service from a catalogue; the editor says what each service does | [Design the process](Tutorial.md#1-design-the-process) |
+| **2 · Deploy** | Choose the node (host) each place runs on and save the service deployment | [Deploy the process](Tutorial.md#2-deploy-the-process) |
+| **3 · Build and Run** | The editor writes an Ant launcher: the hosts, the event generators with their versions, and the token schedule | [Create Build and Run](Tutorial.md#3-create-build-and-run) |
+| **4 · Run on hosts** | The launcher starts each place as its own host process, plus Monitor. It installs each host's rules and waits for every host to commit to them, then fires the tokens and collects the observations | [Run it](Tutorial.md#4-run-it), [Rule deployment](#rule-deployment-and-token-execution) |
+| **5 · Results** | The editor analyses the run and replays the recorded tokens on the design; Monitor's charts show timing and activity | [Show the results](Tutorial.md#5-show-the-results), [Observe a run](#observe-and-interpret-a-run) |
+
+To give places your own services, follow the inventory example in [Add your own service](Tutorial.md#6-add-your-own-service).
 
 ## Quick start: run, observe and replay
 
@@ -39,6 +44,25 @@ You need a JDK (15 or later; tested with 21) and Apache Ant 1.10. Eclipse is
 optional: every launcher is an Ant build file that you can also run as an
 **Ant Build** from Eclipse. The repository supplies the runtime libraries,
 including OOjDREW and embedded Derby, so no Maven or Python is needed.
+
+### From the editor
+
+1. **Start the editor.** In Eclipse, run `com.editor.ProcessEditor` (`btsn.workflowEditor`) as a Java application, or run
+   `ant -f btsn.workflowEditor/build.xml clean jar run`.
+2. **Open a process** that has a launcher, for example:
+   - `btsn.common/ProcessDefinitionFolder/inventory/Workflow/Inventory_Workflow.json`, an inventory and a supplier on two hosts;
+   - `btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P2_Tutorial_Workflow.json`, the tutorial's single place.
+
+   For another process, click **Build and Run** first to create its launcher.
+3. **Click Run on hosts.** The Run window starts every host on this computer and shows each one: its process, the rules it has committed and the service calls it makes. When collection is done, it stops the hosts, analyses the run and summarises it.
+4. **Choose a next step:**
+   - **Replay the recorded run** on the design;
+   - open the **Elapsed time and queue wait chart** or the **Token spatial view**;
+   - read the analysis report.
+
+The editor finds Apache Ant by itself (`ANT_HOME`, the PATH, or the Ant inside Eclipse).
+
+### From the command line
 
 **1. Run a distributed workflow on one computer.** All launchers read node
 addresses from
@@ -58,27 +82,24 @@ output should report each place as `local`. The hosts keep running after
 collection; stop the launcher before starting another one.
 
 **2. Analyse the run.** Save the analyzer's output so the editor can replay it.
-Keep `-emacs`: it removes Ant's `[java]` line prefix, without which the editor
-loads no events.
+`-emacs` keeps the saved output free of Ant's `[java]` line prefixes.
 
 ```sh
 ant -emacs -f P1_P2_P3_P4_Concurrent_BuildAndRun.xml analyse > analysis.txt
 ```
 
-**3. View the measurements.** `WorkflowSpatialView` (each token's visits, one
-lane per place) and `SwingGanttChart_WithLatency` (workflow elapsed time and
-queue waits) are Java applications in `btsn.common.Monitor`. In Eclipse, use
-**Run As → Java Application**. From a shell, run them from `btsn.common.Monitor`
-(use `;` instead of `:` on Windows):
+**3. View the measurements.** Every launcher opens Monitor's two charts,
+`SwingGanttChart_WithLatency` (workflow elapsed time and queue waits) and
+`WorkflowSpatialView` (each token's visits, one lane per place):
 
 ```sh
-java -cp "target/jar-runtime/btsn-monitor.jar:../btsn.common/target/host-runtime/btsn-infrastructure.jar:../btsn.common/lib/*" org.btsn.derby.Analysis.WorkflowSpatialView
+ant -f P1_P2_P3_P4_Concurrent_BuildAndRun.xml chart-timing
+ant -f P1_P2_P3_P4_Concurrent_BuildAndRun.xml chart-spatial
 ```
 
-**4. Replay it on the model.** Build and start the editor with
-`ant -f btsn.workflowEditor/build.xml clean jar run`, open
+**4. Replay it on the model.** Start the editor, open
 `btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_P2_P3_P4_Fork_Join_Workflow.json`,
-load `analysis.txt` and press **Play**.
+click **Load Analysis...**, choose `analysis.txt` and press **Play**.
 
 **5. Spread it across machines.** Give each node its machine's address in a
 physical infrastructure definition, select it in the deployment profile, and
@@ -189,6 +210,9 @@ the same **T_in → P → T_out** unit.
 | Boolean Petri-net model | Produce `true` or `false` | Conditional routing, fork, buffering and input join |
 | Financial application | Validate, check credit/fraud, underwrite and decide | Fork checks, synchronize their results and route declared outcomes |
 | Emergency department | Triage, perform diagnostic operations, diagnose and treat | Select direct/diagnostic paths, fork diagnostics and synchronize results |
+| Inventory example | Reserve stock (stateful), restock with a lead time | Route on string results, loop between two hosts, carry state changes as messages |
+
+To add your own service, follow the inventory example in [Tutorial.md](Tutorial.md#6-add-your-own-service).
 
 P1–Pn denotes the general model positions. This repository currently packages
 six numbered host projects; deployment determines which functions they run.
@@ -487,12 +511,14 @@ New runs capture their process definitions in
 Keep this metadata with `ServiceAnalysisDataBase` when archiving results. Older
 runs without matching metadata show `Process not captured`.
 
-To animate observations, run `com.editor.ProcessEditor` from
-[btsn.workflowEditor](btsn.workflowEditor/src/com/editor/ProcessEditor.java)
-(or `ant -f btsn.workflowEditor/build.xml clean jar run`), open the matching
-workflow JSON, load the analyzer output saved with `ant -emacs … analyse >
-analysis.txt`, then press **Play**. This replays captured observations; it does
-not launch the distributed workflow.
+After **Run on hosts**, the editor
+([ProcessEditor](btsn.workflowEditor/src/com/editor/ProcessEditor.java)) loads
+the run's analysis itself and highlights **Play**. To replay an earlier run,
+open the matching workflow JSON, click **Load Analysis...** and choose the
+analyzer output: the files under `btsn.common/AnalysisFolder`, or one saved with
+`ant -emacs … analyse > analysis.txt`. Replaying shows recorded observations; it
+does not run the workflow again. Every launcher also opens the two charts with
+its `chart-timing` and `chart-spatial` targets.
 Open the workflow from its place under `btsn.common/ProcessDefinitionFolder` so
 that its service deployment loads. The analyzer names places and transitions
 after their hosting node (`P1_Place`, `T_in_P1`), and the deployment maps those
@@ -515,9 +541,11 @@ provide entry points for preparing the packaged runtime.
 | `btsn.common.eventgenerators` | Shared workflow and administration generators |
 | `btsn.healthcare.ProjectLoader` | Healthcare launchers and process tests |
 | `btsn.financial.ProjectLoader` | Financial launchers |
-| `btsn.petrinet.ProjectLoader` | Petri-net model launchers and utility phases |
-| `btsn.workflowEditor` | Model editor and observation animator |
+| `btsn.petrinet.ProjectLoader` | Petri-net model launchers and utility phases; launchers that Build and Run writes for domains without their own loader (such as the inventory example) |
+| `btsn.workflowEditor` | ProcessEditor: design, deploy, Build and Run, Run on hosts, and replay of recorded runs |
 
+Each domain describes its services in a catalogue under
+[`BusinessServiceDefinitions`](btsn.common/BusinessServiceDefinitions).
 All domains share the physical network and fixed ports in
 [`InfrastructureDefinitionFolder`](btsn.common/InfrastructureDefinitionFolder/README.md).
 Business operations are assigned to those nodes in

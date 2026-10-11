@@ -277,7 +277,21 @@ public final class DeployFlowCheck {
             } catch (Throwable ex) { naming[0] = ex; }
         });
         if (naming[0] != null) throw new AssertionError("Transition naming", naming[0]);
-        System.out.println("PASS: catalogue-only design, right-click Deploy to, filled Deploy panel with Place column, two-way node edits, save links process and instances, reopen, existing deployment unchanged, Create Build and Run files, Ant-prefixed analysis replay, What it does, transition names by label or node, one place per node, several event generators");
+        // Replay maps host events onto the design when the deployment names services without instances.
+        final Throwable[] replay = new Throwable[1];
+        SwingUtilities.invokeAndWait(() -> {
+            try {
+                Path inventoryProcess = common.toPath().resolve("ProcessDefinitionFolder/inventory/Workflow/Inventory_Workflow.json");
+                Canvas inventory = new Canvas(); inventory.setDefinitionLocation(inventoryProcess.toFile()); inventory.loadFromJSON(read(inventoryProcess));
+                TokenAnimator animator = new TokenAnimator(); animator.setCanvas(inventory);
+                animator.parseOutput(read(repository.toPath().resolve("btsn.workflowEditor/tests/fixtures/Analysis_Inventory.txt")));
+                Set<String> places = new TreeSet<>();
+                for (Object event : animator.getEvents()) { Field f = event.getClass().getDeclaredField("placeId"); f.setAccessible(true); places.add(String.valueOf(f.get(event))); }
+                check(places.equals(new TreeSet<>(Arrays.asList("Inventory", "Supplier"))), "Inventory replay places: " + places);
+            } catch (Throwable ex) { replay[0] = ex; }
+        });
+        if (replay[0] != null) throw new AssertionError("Inventory replay", replay[0]);
+        System.out.println("PASS: catalogue-only design, right-click Deploy to, filled Deploy panel with Place column, two-way node edits, save links process and instances, reopen, existing deployment unchanged, Create Build and Run files, Ant-prefixed analysis replay, What it does, transition names by label or node, one place per node, several event generators, inventory replay mapped by service");
     }
 
     private static int rowOf(JTable table, String place) {
