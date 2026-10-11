@@ -87,7 +87,7 @@ public final class ExportP1TutorialResults {
         write(output.resolve("analysis.txt"), Files.readString(output.resolve("analysis.txt")));
         SwingUtilities.invokeAndWait(() -> {
             try {
-                SwingGanttChart_WithLatency_v1d timing = new SwingGanttChart_WithLatency_v1d();
+                SwingGanttChart_WithLatency timing = new SwingGanttChart_WithLatency();
                 write(output.resolve("workflow-summary.txt"), timing.generateWorkflowSummaryReport());
                 write(output.resolve("workflow-timing.tex"), timing.generateLaTeXFigure());
                 write(output.resolve("workflow-table.tex"), timing.generateLaTeXTable());
@@ -125,7 +125,7 @@ public final class ExportP1TutorialResults {
                 "btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml",
                 "btsn.petrinet.ProjectLoader/P1_Tutorial_Local_BuildAndRun.xml",
                 "btsn.common.eventgenerators/EventTriggeringFile/V001_EventTriggeringFile.csv",
-                "btsn.common.Monitor/src/org/btsn/derby/Analysis/SwingGanttChart_WithLatency_v1d.java"}) {
+                "btsn.common.Monitor/src/org/btsn/derby/Analysis/SwingGanttChart_WithLatency.java"}) {
             byte[] digest = MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(repository.resolve(name)));
             StringBuilder hex = new StringBuilder();
             for (byte value : digest) hex.append(String.format("%02x", value & 0xff));

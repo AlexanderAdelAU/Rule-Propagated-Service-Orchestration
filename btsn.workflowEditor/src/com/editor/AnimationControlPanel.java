@@ -79,7 +79,7 @@ public class AnimationControlPanel extends JPanel {
         loadLastAnalysisDirectory();
         
         setLayout(new BorderLayout(5, 5));
-        setBorder(BorderFactory.createTitledBorder("Token Animation"));
+        setBorder(BorderFactory.createTitledBorder("Token replay (a recorded run, not a simulation)"));
         setPreferredSize(new Dimension(0, 140));
         
         initComponents();
@@ -278,7 +278,7 @@ public class AnimationControlPanel extends JPanel {
             }
             
             loadAnalysisText(content.toString());
-            statusLabel.setText("Loaded: " + file.getName());
+            statusLabel.setText("Recorded run: " + file.getName() + ", saved " + new java.text.SimpleDateFormat("d MMM HH:mm").format(new java.util.Date(file.lastModified())) + " (events measured at the hosts)");
             
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
@@ -386,6 +386,7 @@ public class AnimationControlPanel extends JPanel {
      */
     public void startPlayback() {
         if (!animator.hasData()) return;
+        highlightPlay(false);
         
         playing = true;
         playPauseButton.setText("Pause");
@@ -396,6 +397,15 @@ public class AnimationControlPanel extends JPanel {
         }
     }
     
+    /** Draw attention to Play after a run from the editor has loaded its analysis; cleared on Play. */
+    public void highlightPlay(boolean on) {
+        playPauseButton.setFont(playPauseButton.getFont().deriveFont(on ? Font.BOLD : Font.PLAIN));
+        playPauseButton.setBackground(on ? new Color(0xD8EFD8) : null);
+        playPauseButton.setOpaque(on);
+        playPauseButton.setToolTipText(on ? "The run has been analysed: press Play to replay it" : null);
+        if (on) playPauseButton.requestFocusInWindow();
+    }
+
     /**
      * Stop playback
      */

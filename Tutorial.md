@@ -18,8 +18,8 @@ on** box show the node it is deployed to.*
 |---|---|---|
 | **1. Design the process** | Draw the net, choose the service and operation for P2, set the guards, then save | [Design](#1-design-the-process) |
 | **2. Deploy the process** | Choose the node P2 runs on, then save the service deployment | [Deploy](#2-deploy-the-process) |
-| **3. Create Build and Run** | Pick the event generator and the number of tokens; the editor writes the Ant launcher | [Build and Run](#3-create-build-and-run) |
-| **4. Run it** | Run the launcher as an Ant Build | [Run](#4-run-it) |
+| **3. Create Build and Run** | Choose the event generators and the number of tokens; the editor writes the Ant launcher | [Build and Run](#3-create-build-and-run) |
+| **4. Run it** | Click **Run on hosts**: the editor runs the launcher on real hosts, analyses the run and loads the replay | [Run](#4-run-it) |
 | **5. Show the results** | Analyse the run, view the charts and replay the tokens on the design | [Results](#5-show-the-results) |
 
 Finished copies of every file are included as `P2_Tutorial_*` ([list](#repository-artefacts)):
@@ -243,7 +243,52 @@ Click **Create**. For `My_P2_Workflow` the editor writes:
 
 ## 4. Run it
 
-### Start the launcher
+### Run from the editor
+
+Click **Run on hosts** in the toolbar. The Run window finds the process's launcher and does the whole run:
+
+1. **Builds and starts** the hosts, then follows the launcher through its three phases. The **Hosts** table shows each host process as it runs: its endpoint, its process number and machine, its state, and how many service calls it has completed.
+2. **Settles and stops.** When collection is done, it waits for Monitor to finish writing, then stops the launcher and every host it started.
+3. **Analyses.** It runs `analyse` and saves the report to `btsn.common/AnalysisFolder/PetriNet/Analysis_My_P2_Workflow.txt`, replacing any earlier analysis of the process.
+4. **Loads the replay.** It loads the analysis into the editor and highlights **Play** ([step 5](#replay-the-tokens-on-the-design)).
+
+The output ends with a summary of the run:
+
+- **Per version**, measured: for example `v001: 10 generated, 10 completed, structure OK, latency 275 to 1220 ms (median 663 ms)`. It flags any version whose workflows did not all complete.
+- **Where and when it ran**: for example `Ran 17:51:00 to 17:52:15 (75 s) on P2_Place at 127.0.0.1:4002 (process 1084 on my-pc, 41 service calls); Monitor (...)`.
+
+Below it, **Next steps** offers:
+
+| Button | Opens |
+|---|---|
+| **Replay the recorded run** | The editor, replaying the recorded tokens on the design |
+| **Elapsed time and queue wait chart** | Monitor's per-workflow timing chart, for each version |
+| **Token spatial view** | Monitor's view of activity at each place over time |
+| **Open analysis report** | The full analyzer report |
+
+> **This is a real run, not a simulation.**
+>
+> - **Real hosts.** Each place runs as its own host process, a generic RPSO host carrying that place's rules. Tokens travel between hosts as network messages on the endpoints shown in the Hosts table.
+> - **Real records.** Every host records what it did, with its own timestamps. After the run, Monitor collects those records from the hosts.
+> - **A replay, not a model.** The analysis, the charts and the replay are all built from those collected records: the replay shows what happened, in the order and at the times the hosts recorded it.
+> - **Across machines.** Untick **Run every host on this computer**, and the same launcher drives hosts on the machines named in `SingleHost.json`.
+
+![The Run window after a completed run of the P2 tutorial: the launcher, the option to run every host on this computer, the Ant location, the analysis file, the seven steps from Build and start to Replay all completed, and the analyzer report in the output.](images/p2-tutorial-run.png)
+
+*A finished run of the P2 tutorial (here with its two generators). Each step turns green as the run reaches it.*
+
+- **Hosts**: **Run every host on this computer** (ticked) adds `-Dhost.address=127.0.0.1`.
+- **Ant folder**: leave it empty. The editor finds Apache Ant by itself, trying in order:
+  - `ANT_HOME`;
+  - `ant` on the PATH;
+  - the Ant inside the Eclipse that started the editor (`plugins/org.apache.ant_*`).
+
+  If none is found, choose Ant's folder (the one holding `bin` and `lib`), not a launcher. Ant runs on the editor's own Java, so the editor must run on a JDK (Eclipse's default).
+- **Stop**: stops the run, and its hosts, at any point.
+- **Close**: closing the window during a run stops it too.
+- **Save first**: Run uses the saved process and the launcher from [step 3](#3-create-build-and-run).
+
+### Or run the launcher yourself
 
 - **In Eclipse**: refresh `btsn.petrinet.ProjectLoader`, right-click
   **My_P2_Workflow_BuildAndRun.xml**, then choose **Run As → Ant Build**.
@@ -342,11 +387,18 @@ Use the process that produced the run: the replay matches log entries to the pla
 
 ### Timing chart and spatial view
 
-Run these from `btsn.common.Monitor`, with that project as the working directory:
+After a run from the editor, open these from **Next steps**. Otherwise, run them from the launcher once its hosts have stopped:
+
+```sh
+ant -f btsn.petrinet.ProjectLoader/My_P2_Workflow_BuildAndRun.xml chart-timing
+ant -f btsn.petrinet.ProjectLoader/My_P2_Workflow_BuildAndRun.xml chart-spatial
+```
+
+You can also run them as Java applications from `btsn.common.Monitor`, with that project as the working directory:
 
 | Viewer | What it shows |
 |---|---|
-| `org.btsn.derby.Analysis.SwingGanttChart_WithLatency_v1d` | Elapsed time per workflow, with the longest queue wait observed on a service visit |
+| `org.btsn.derby.Analysis.SwingGanttChart_WithLatency` | Elapsed time per workflow, with the longest queue wait observed on a service visit |
 | `org.btsn.derby.Analysis.WorkflowSpatialView` | Activity at each place over time, including repeat visits |
 
 ![Workflow elapsed-time chart for the captured ten-token P1 reference run.](docs/tutorials/p1/results/workflow-timing.png)
@@ -388,7 +440,7 @@ The supplied P2 tutorial, built with exactly these steps:
 | [SingleHost.json](btsn.common/InfrastructureDefinitionFolder/SingleHost.json) | Shared nodes P1–P6, addresses and fixed ports |
 | [P2_Tutorial_WorkflowDeployment.json](btsn.services/deployments/models/P2_Tutorial_WorkflowDeployment.json) | Deployment profile written by Build and Run |
 | [P2_Tutorial_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P2_Tutorial_Workflow_BuildAndRun.xml) | Launcher written by Build and Run |
-| [P2_Tutorial_Workflow_BuildAndRun.csv](btsn.common.eventgenerators/EventTriggeringFile/P2_Tutorial_Workflow_BuildAndRun.csv) | Token schedule |
+| [`P2_Tutorial_Workflow_BuildAndRun*.csv`](btsn.common.eventgenerators/EventTriggeringFile) | Token schedules, one per event generator |
 | [P2_Initialization.json](btsn.common/ProcessDefinitionFolder/common/Initializers/P2_Initialization.json) / [P2_Collector.json](btsn.common/ProcessDefinitionFolder/common/Collectors/P2_Collector.json) | Administrative processes for node P2 |
 | [Analysis_P2_Tutorial_Workflow.txt](btsn.common/AnalysisFolder/PetriNet/Analysis_P2_Tutorial_Workflow.txt) | Analysis of a ten-token run, ready to replay |
 | [process-runtime.xml](btsn.services/process-runtime.xml) | Shared phases imported by every generated launcher |

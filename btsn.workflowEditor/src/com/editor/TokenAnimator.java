@@ -94,14 +94,15 @@ public class TokenAnimator {
     }
     
     private void initializeColors() {
-        versionColors.put("v001", new Color(0, 100, 200));
-        versionColors.put("v002", new Color(200, 50, 50));
-        versionColors.put("v003", new Color(50, 150, 50));
-        versionColors.put("v004", new Color(150, 100, 200));
-        versionColors.put("v005", new Color(200, 150, 50));
-        versionColors.put("v006", new Color(50, 150, 150));
-        versionColors.put("v007", new Color(150, 50, 150));
-        versionColors.put("v008", new Color(100, 100, 100));
+        // The same colours as Monitor's charts (WorkflowSpatialView, SwingGanttChart_WithLatency).
+        versionColors.put("v001", new Color(231, 76, 60));    // red
+        versionColors.put("v002", new Color(52, 152, 219));   // blue
+        versionColors.put("v003", new Color(46, 204, 113));   // green
+        versionColors.put("v004", new Color(155, 89, 182));   // purple
+        versionColors.put("v005", new Color(243, 156, 18));   // orange
+        versionColors.put("v006", new Color(26, 188, 156));   // teal
+        versionColors.put("v007", new Color(241, 196, 15));   // yellow
+        versionColors.put("v008", new Color(52, 73, 94));     // dark grey
     }
     
     public void setCanvas(Canvas canvas) {

@@ -1253,7 +1253,7 @@ public class SwingGanttChart_WithLatency extends JPanel {
             List<String> paths = new ArrayList<>();
             for (int i=0; i<args.length; i+=2) {
                 if (i+1>=args.length || !"-db".equals(args[i]))
-                    throw new IllegalArgumentException("Usage: SwingGanttChart_WithLatency_v1d [-db stopped-host-database-path]...");
+                    throw new IllegalArgumentException("Usage: SwingGanttChart_WithLatency [-db stopped-host-database-path]...");
                 paths.add(args[i+1]);
             }
             startupDatabases = paths;

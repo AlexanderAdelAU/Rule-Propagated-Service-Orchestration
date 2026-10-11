@@ -1,6 +1,6 @@
 # Recorded service timings
 
-`SwingGanttChart_WithLatency_v1d` opens the workflow elapsed view by default: one row per observed workflow root. A complete Stage 5 dataset therefore shows 55 workflows (15 v001 and 40 v002), regardless of how many services each workflow invokes.
+`SwingGanttChart_WithLatency` opens the workflow elapsed view by default: one row per observed workflow root. A complete Stage 5 dataset therefore shows 55 workflows (15 v001 and 40 v002), regardless of how many services each workflow invokes.
 
 Choose **View → Recorded Service Invocations** to inspect individual service executions. In that view, each bar is one recorded invocation, ordered by its arrival time. Repeated visits by a circulating token remain separate. Service time and queue wait are independent recorded measurements, not workflow completion times.
 

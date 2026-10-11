@@ -96,4 +96,15 @@
             <classpath refid="monitor.classpath"/><arg value="--all"/>
         </java>
     </target>
+    <!-- Monitor's viewers for the last run (stop the hosts first; the charts open Monitor's database). -->
+    <target name="chart-timing" description="Chart: elapsed time and queue wait per workflow, for each version">
+        <java classname="org.btsn.derby.Analysis.SwingGanttChart_WithLatency" fork="true" failonerror="true" dir="${monitor.project.dir}">
+            <classpath refid="monitor.classpath"/>
+        </java>
+    </target>
+    <target name="chart-spatial" description="Chart: token activity at each place over time">
+        <java classname="org.btsn.derby.Analysis.WorkflowSpatialView" fork="true" failonerror="true" dir="${monitor.project.dir}">
+            <classpath refid="monitor.classpath"/>
+        </java>
+    </target>
 </project>
