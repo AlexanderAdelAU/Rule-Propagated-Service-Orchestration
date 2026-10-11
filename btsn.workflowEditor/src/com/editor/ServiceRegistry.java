@@ -298,11 +298,49 @@ public final class ServiceRegistry {
         public final List<Integer> ports = new ArrayList<>();
         public String describe() { return node + " \u2014 " + address + (ports.isEmpty() ? "" : ":" + ports.get(0)); }
     }
-    /** Nodes of InfrastructureDefinitionFolder/SingleHost.json, the infrastructure the editors use by default. */
+    /** The infrastructure every example deploys to unless another is chosen. */
+    public static final String DEFAULT_INFRASTRUCTURE = "SingleHost";
+    private static final String INFRASTRUCTURE_PREF = "infrastructure";
+
+    /**
+     * The machines the editor shows places on and runs them on: the name of an infrastructure definition in
+     * InfrastructureDefinitionFolder (SingleHost, TwoHost, ...). A process's deployment only names nodes; this
+     * choice gives the nodes their addresses. -Drpso.infrastructure=Name overrides it (used by the checks).
+     */
+    public static String selectedInfrastructure() {
+        String forced = System.getProperty("rpso.infrastructure");
+        if (forced != null && !forced.trim().isEmpty()) return forced.trim();
+        return java.util.prefs.Preferences.userNodeForPackage(ServiceRegistry.class).get(INFRASTRUCTURE_PREF, DEFAULT_INFRASTRUCTURE);
+    }
+    public static void selectInfrastructure(String name) {
+        java.util.prefs.Preferences.userNodeForPackage(ServiceRegistry.class).put(INFRASTRUCTURE_PREF,
+            name == null || name.trim().isEmpty() ? DEFAULT_INFRASTRUCTURE : name.trim());
+    }
+    /** The infrastructure definitions available (their names, SingleHost first), from InfrastructureDefinitionFolder. */
+    public static List<String> infrastructures(File anchor) {
+        List<String> names = new ArrayList<>();
+        File root = findCommon(anchor);
+        File[] files = root == null ? null : new File(root, "InfrastructureDefinitionFolder").listFiles((dir, name) -> name.endsWith(".json"));
+        if (files != null) {
+            java.util.Arrays.sort(files);
+            for (File file : files) {
+                try { if ("Infrastructure".equals(read(file).get("definitionType"))) names.add(file.getName().replaceFirst("\\.json$", "")); }
+                catch (Exception ignored) { }
+            }
+        }
+        if (names.remove(DEFAULT_INFRASTRUCTURE) || names.isEmpty()) names.add(0, DEFAULT_INFRASTRUCTURE);
+        return names;
+    }
+    /** Nodes of the selected infrastructure (SingleHost when the selected one is missing). */
     public static List<Node> infrastructureNodes(File anchor) {
+        List<Node> nodes = infrastructureNodes(anchor, selectedInfrastructure());
+        return nodes.isEmpty() ? infrastructureNodes(anchor, DEFAULT_INFRASTRUCTURE) : nodes;
+    }
+    /** Nodes of InfrastructureDefinitionFolder/name.json. */
+    public static List<Node> infrastructureNodes(File anchor, String name) {
         List<Node> nodes = new ArrayList<>();
         File root = findCommon(anchor);
-        File file = root == null ? null : new File(root, "InfrastructureDefinitionFolder/SingleHost.json");
+        File file = root == null ? null : new File(root, "InfrastructureDefinitionFolder/" + name + ".json");
         if (file == null || !file.isFile()) return nodes;
         try {
             for (Object item : array(read(file), "nodes")) {
@@ -313,6 +351,12 @@ public final class ServiceRegistry {
             }
         } catch (Exception ex) { nodes.clear(); }
         return nodes;
+    }
+    /** True when the nodes are on more than one machine (more than one address). */
+    public static boolean severalMachines(List<Node> nodes) {
+        Set<String> addresses = new java.util.HashSet<>();
+        for (Node node : nodes) addresses.add(node.address);
+        return addresses.size() > 1;
     }
     /** Deployment instance name derived from a place label: letters and digits only, unique among taken names. */
     public static String instanceNameFor(String label, Set<String> taken) {

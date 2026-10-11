@@ -33,6 +33,10 @@ public final class RunWindow extends JFrame {
     private JScrollPane hostPane;
     final JComboBox<File> launcher;
     final JCheckBox allHostsHere = new JCheckBox("Run every host on this computer (127.0.0.1)", true);
+    /** The machines chosen in the editor (Machines on the toolbar), and whether they are more than one. */
+    final String machines;
+    final boolean severalMachines;
+    final JButton packages = new JButton("Build host packages");
     final JTextField ant = new JTextField(28);
     final JTextArea console = new JTextArea(24, 110);
     final JButton start = new JButton("Run"), stop = new JButton("Stop"), close = new JButton("Close");
@@ -45,6 +49,15 @@ public final class RunWindow extends JFrame {
     public RunWindow(Window owner, File root, String processName, List<File> launchers, Consumer<File> onAnalysis, Runnable onPlay) {
         super("Run on hosts: " + processName);
         this.root = root; this.processName = processName; this.onAnalysis = onAnalysis; this.onPlay = onPlay;
+        machines = ServiceRegistry.selectedInfrastructure();
+        java.util.List<ServiceRegistry.Node> nodes = ServiceRegistry.infrastructureNodes(new File(root, "btsn.common/ProcessDefinitionFolder"), machines);
+        severalMachines = ServiceRegistry.severalMachines(nodes);
+        if (severalMachines) {
+            // 127.0.0.1 would put every host here; the hosts on other machines run from their packages instead.
+            allHostsHere.setSelected(false);
+            allHostsHere.setEnabled(false);
+            allHostsHere.setText("Run every host on this computer (not with " + machines + ")");
+        }
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() { @Override public void windowClosing(java.awt.event.WindowEvent e) { closeWindow(); } });
 
@@ -66,8 +79,16 @@ public final class RunWindow extends JFrame {
         c.insets = new Insets(3, 6, 3, 6); c.anchor = GridBagConstraints.WEST; c.fill = GridBagConstraints.HORIZONTAL;
         c.gridy = 0; c.gridx = 0; form.add(new JLabel("Launcher:"), c); c.gridx = 1; c.weightx = 1; c.gridwidth = 2; form.add(launcher, c);
         c.gridy = 1; c.gridx = 0; c.weightx = 0; c.gridwidth = 1; form.add(new JLabel("Hosts:"), c); c.gridx = 1; c.gridwidth = 2; form.add(allHostsHere, c);
-        c.gridy = 2; c.gridx = 0; c.gridwidth = 1; form.add(new JLabel("Ant folder:"), c); c.gridx = 1; c.weightx = 1; form.add(ant, c); c.gridx = 2; c.weightx = 0; form.add(chooseAnt, c);
-        c.gridy = 3; c.gridx = 0; form.add(new JLabel("Analysis:"), c);
+        c.gridy = 2; c.gridx = 0; c.gridwidth = 1; c.weightx = 0; form.add(new JLabel("Machines:"), c);
+        c.gridx = 1; c.weightx = 1; form.add(new JLabel(describeMachines(machines, nodes)), c);
+        c.gridx = 2; c.weightx = 0; form.add(packages, c);
+        packages.setEnabled(severalMachines);
+        packages.setToolTipText(severalMachines
+            ? "Build a self-contained package for each host on another machine; unzip it there and run launch.bat before Run"
+            : "Every host runs on this computer; choose other Machines on the editor toolbar to run on several");
+        packages.addActionListener(e -> buildPackages());
+        c.gridy = 3; c.gridx = 0; c.gridwidth = 1; form.add(new JLabel("Ant folder:"), c); c.gridx = 1; c.weightx = 1; form.add(ant, c); c.gridx = 2; c.weightx = 0; form.add(chooseAnt, c);
+        c.gridy = 4; c.gridx = 0; form.add(new JLabel("Analysis:"), c);
         c.gridx = 1; c.gridwidth = 2;
         form.add(new JLabel(LauncherRun.analysisFileFor(root, processName).getAbsolutePath().replace(root.getAbsolutePath() + File.separator, "")), c);
 
@@ -137,9 +158,45 @@ public final class RunWindow extends JFrame {
         pack();
         setLocationRelativeTo(owner);
         status.setText("Runs the launcher, stops its hosts when collection is done, analyses the run and loads it into the replay.");
+        if (severalMachines) status.setText("Runs on " + machines + ". First build the host packages and start each one on its machine (launch.bat), then Run.");
     }
 
     public boolean isRunning() { return run != null && run.isRunning(); }
+
+    /** "TwoHost: P1, P3, P5 on 192.168.1.82; P2, P4, P6 on 192.168.1.152". */
+    static String describeMachines(String name, java.util.List<ServiceRegistry.Node> nodes) {
+        java.util.Map<String, java.util.List<String>> byAddress = new java.util.LinkedHashMap<>();
+        for (ServiceRegistry.Node node : nodes) byAddress.computeIfAbsent(node.address, a -> new java.util.ArrayList<>()).add(node.node);
+        java.util.List<String> parts = new java.util.ArrayList<>();
+        for (java.util.Map.Entry<String, java.util.List<String>> e : byAddress.entrySet()) parts.add(String.join(", ", e.getValue()) + " on " + e.getKey());
+        return name + (parts.isEmpty() ? "" : ": " + String.join("; ", parts));
+    }
+
+    /** The launcher's host-packages target, for the machines chosen. */
+    void buildPackages() {
+        File selected = (File)launcher.getSelectedItem();
+        if (selected == null) return;
+        try { LauncherRun.antHome(ant.getText()); }
+        catch (java.io.IOException ex) { status.setText(ex.getMessage()); JOptionPane.showMessageDialog(this, ex.getMessage(), "Ant", JOptionPane.WARNING_MESSAGE); return; }
+        prefs.put(ANT_PREF, ant.getText().trim());
+        console.setText("");
+        resetSteps();
+        start.setEnabled(false); packages.setEnabled(false); stop.setEnabled(true); launcher.setEnabled(false);
+        status.setText("Building host packages for " + machines + "...");
+        run = new LauncherRun(selected, root, LauncherRun.analysisFileFor(root, processName), false, ant.getText(), new LauncherRun.Listener() {
+            public void line(String text) { SwingUtilities.invokeLater(() -> append(text)); }
+            public void phase(LauncherRun.Phase phase, String detail) { }
+            public void finished(LauncherRun.Phase outcome, File analysis, String message) { SwingUtilities.invokeLater(() -> {
+                start.setEnabled(true); packages.setEnabled(severalMachines); stop.setEnabled(false); launcher.setEnabled(true);
+                status.setText(message);
+                File folder = new File(root, "btsn.services/target/host-packages/" + selected.getName().replaceFirst("\\.xml$", ""));
+                if (outcome == LauncherRun.Phase.DONE && folder.isDirectory() && java.awt.Desktop.isDesktopSupported()) {
+                    try { java.awt.Desktop.getDesktop().open(folder); } catch (Exception ignored) { }
+                }
+            }); }
+        }).infrastructure(machines).packagesOnly();
+        run.start();
+    }
 
     void startRun() {
         File selected = (File)launcher.getSelectedItem();
@@ -154,13 +211,13 @@ public final class RunWindow extends JFrame {
         runStartedAt = System.currentTimeMillis();
         hosts.started(runStartedAt);
         hostTimer.start();
-        start.setEnabled(false); stop.setEnabled(true); launcher.setEnabled(false); allHostsHere.setEnabled(false);
-        status.setText("Running " + selected.getName() + "...");
+        start.setEnabled(false); stop.setEnabled(true); launcher.setEnabled(false); allHostsHere.setEnabled(false); packages.setEnabled(false);
+        status.setText("Running " + selected.getName() + (severalMachines ? " on " + machines : "") + "...");
         run = new LauncherRun(selected, root, LauncherRun.analysisFileFor(root, processName), allHostsHere.isSelected(), ant.getText(), new LauncherRun.Listener() {
             public void line(String text) { SwingUtilities.invokeLater(() -> { append(text); hostLine(text); }); }
             public void phase(LauncherRun.Phase phase, String detail) { SwingUtilities.invokeLater(() -> showPhase(phase)); }
             public void finished(LauncherRun.Phase outcome, File analysis, String message) { SwingUtilities.invokeLater(() -> done(outcome, analysis, message)); }
-        });
+        }).infrastructure(machines);
         run.start();
     }
 
@@ -188,7 +245,7 @@ public final class RunWindow extends JFrame {
     }
 
     private void done(LauncherRun.Phase outcome, File analysis, String message) {
-        start.setEnabled(true); stop.setEnabled(false); launcher.setEnabled(true); allHostsHere.setEnabled(true);
+        start.setEnabled(true); stop.setEnabled(false); launcher.setEnabled(true); allHostsHere.setEnabled(!severalMachines); packages.setEnabled(severalMachines);
         hostTimer.stop();
         hosts.refresh(); hosts.stopped(); hostModel.fireTableDataChanged();
         java.text.SimpleDateFormat clock = new java.text.SimpleDateFormat("HH:mm:ss");
@@ -212,7 +269,7 @@ public final class RunWindow extends JFrame {
     private void planHosts() {
         File selected = (File)launcher.getSelectedItem();
         if (selected == null || isRunning()) return;
-        hosts = RunHosts.forLauncher(selected, root, allHostsHere.isSelected());
+        hosts = RunHosts.forLauncher(selected, root, allHostsHere.isSelected(), machines);
         hostModel.fireTableDataChanged();
         // Just tall enough for this launcher's hosts (up to six places and Monitor).
         hostPane.setPreferredSize(new Dimension(700, 20 * Math.min(7, hosts.hosts.size()) + 50));

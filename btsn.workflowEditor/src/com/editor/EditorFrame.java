@@ -109,6 +109,11 @@ public class EditorFrame extends JPanel {
         }
     }
     
+    /** Show the current selection again, after something it depends on changed (the machines chosen, say). */
+    public void refreshSelection() {
+        updateSelection(currentSelection);
+    }
+
     public void updateSelection(Object selection) {
         currentSelection = selection;
         
@@ -771,6 +776,8 @@ public class EditorFrame extends JPanel {
             where = node;
             for (ServiceRegistry.Node candidate : ServiceRegistry.infrastructureNodes(canvas.getDefinitionLocation()))
                 if (candidate.node.equals(node)) where = candidate.describe();
+            String machines = ServiceRegistry.selectedInfrastructure();
+            if (!ServiceRegistry.DEFAULT_INFRASTRUCTURE.equals(machines)) where += " (" + machines + ")";
             if (canvas.hasPendingNode(element)) where += " (not saved; use Deploy)";
         }
         JTextArea runsOn = new JTextArea(where); runsOn.setEditable(false); runsOn.setLineWrap(true); runsOn.setWrapStyleWord(true);

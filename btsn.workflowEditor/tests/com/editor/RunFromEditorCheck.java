@@ -40,6 +40,18 @@ public final class RunFromEditorCheck {
         RunHosts here = RunHosts.forLauncher(p2Launcher, repository, true);
         check(here.hosts.size() == 2 && here.hosts.get(0).name.equals("P2_Place") && here.hosts.get(0).endpoint.equals("127.0.0.1:4002") && here.hosts.get(1).name.equals("Monitor"), "Hosts: " + here.describe());
         check(RunHosts.forLauncher(p2Launcher, repository, false).hosts.get(0).endpoint.matches("\\d+\\.\\d+\\.\\d+\\.\\d+:4002"), "Configured address not used");
+        // Machines: the editor's choice of infrastructure gives the nodes their addresses and is passed to Ant.
+        File processes = new File(repository, "btsn.common/ProcessDefinitionFolder");
+        List<String> machines = ServiceRegistry.infrastructures(processes);
+        check(machines.get(0).equals("SingleHost") && machines.contains("TwoHost") && machines.contains("MultiHost"), "Machines: " + machines);
+        check(!ServiceRegistry.severalMachines(ServiceRegistry.infrastructureNodes(processes, "SingleHost"))
+            && ServiceRegistry.severalMachines(ServiceRegistry.infrastructureNodes(processes, "TwoHost")), "Several machines not recognised");
+        check(ServiceRegistry.selectedInfrastructure().equals("SingleHost"), "The checks run on SingleHost");
+        check(RunHosts.forLauncher(p2Launcher, repository, false, "TwoHost").hosts.get(0).endpoint.equals("192.168.1.152:4002"), "P2 not on the TwoHost address");
+        check(RunWindow.describeMachines("TwoHost", ServiceRegistry.infrastructureNodes(processes, "TwoHost"))
+            .equals("TwoHost: P1, P3, P5 on 192.168.1.82; P2, P4, P6 on 192.168.1.152"), "Machines description");
+        LauncherRun plain = new LauncherRun(p2Launcher, repository, new File(repository, "unused.txt"), false, "", null);
+        check(plain.infrastructureArgs().isEmpty() && plain.infrastructure("TwoHost").infrastructureArgs().equals(List.of("-Dinfrastructure=TwoHost")), "Ant option for the machines");
         Path logDir = Files.createTempDirectory("run-hosts-");
         Path fakeLauncher = logDir.resolve("X_BuildAndRun.xml");
         Files.write(fakeLauncher, "<property name=\"run.p2\" value=\"true\"/>".getBytes(StandardCharsets.UTF_8));

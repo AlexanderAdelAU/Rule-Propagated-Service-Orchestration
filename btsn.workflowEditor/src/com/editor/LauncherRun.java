@@ -38,6 +38,10 @@ public final class LauncherRun {
     private final Listener listener;
     /** How long Monitor's database must stay unchanged before the hosts are stopped, and the longest wait. */
     long settleMillis = 6000, settleLimitMillis = 120000, pollMillis = 2000;
+    /** The machines to run on (InfrastructureDefinitionFolder/name.json); SingleHost needs no option. */
+    private String infrastructure = ServiceRegistry.DEFAULT_INFRASTRUCTURE;
+    /** Build the host packages for the other machines instead of running. */
+    private boolean packagesOnly;
     private volatile Process process;
     private volatile boolean stopRequested;
     private Thread worker, shutdownHook;
@@ -45,6 +49,20 @@ public final class LauncherRun {
     public LauncherRun(File launcher, File root, File analysisFile, boolean allHostsHere, String antCommand, Listener listener) {
         this.launcher = real(launcher); this.root = real(root); this.analysisFile = real(analysisFile);
         this.allHostsHere = allHostsHere; this.antCommand = antCommand; this.listener = listener;
+    }
+
+    /** Run on these machines: passes -Dinfrastructure=name unless it is SingleHost. */
+    public LauncherRun infrastructure(String name) {
+        this.infrastructure = name == null || name.trim().isEmpty() ? ServiceRegistry.DEFAULT_INFRASTRUCTURE : name.trim();
+        return this;
+    }
+
+    /** Only build the packages for hosts on other machines (the launcher's host-packages target). */
+    public LauncherRun packagesOnly() { this.packagesOnly = true; return this; }
+
+    /** -Dinfrastructure=name, or nothing for the default single machine. */
+    List<String> infrastructureArgs() {
+        return ServiceRegistry.DEFAULT_INFRASTRUCTURE.equals(infrastructure) ? new ArrayList<>() : new ArrayList<>(List.of("-Dinfrastructure=" + infrastructure));
     }
 
     public boolean isRunning() { return worker != null && worker.isAlive(); }
@@ -67,6 +85,7 @@ public final class LauncherRun {
 
     private void runAll() {
         Phase outcome = Phase.FAILED; File analysis = null; String message;
+        if (packagesOnly) { runPackages(); return; }
         try {
             listener.phase(Phase.BUILD, "Building and starting the hosts");
             boolean completed = runLauncher();
@@ -101,6 +120,7 @@ public final class LauncherRun {
     private boolean runLauncher() throws IOException, InterruptedException {
         List<String> args = new ArrayList<>(Arrays.asList("-emacs", "-f", launcher.getName()));
         if (allHostsHere) args.add("-Dhost.address=127.0.0.1");
+        args.addAll(infrastructureArgs());
         process = start(args, null);
         boolean completed = false;
         Phase current = Phase.BUILD;
@@ -116,6 +136,43 @@ public final class LauncherRun {
         }
         if (!completed) process.waitFor(10, TimeUnit.SECONDS);
         return completed && !stopRequested;
+    }
+
+    /** The host-packages target: one ZIP for each host whose address is another machine. */
+    private void runPackages() {
+        Phase outcome = Phase.FAILED; String message = "Packaging failed; see the output above.";
+        try {
+            listener.phase(Phase.BUILD, "Building the host packages");
+            List<String> args = new ArrayList<>(Arrays.asList("-emacs", "-f", launcher.getName(), "host-packages"));
+            args.addAll(infrastructureArgs());
+            process = start(args, null);
+            List<String> zips = new ArrayList<>();
+            boolean none = false;
+            try (BufferedReader out = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+                for (String line; (line = out.readLine()) != null; ) {
+                    listener.line(line);
+                    java.util.regex.Matcher zip = java.util.regex.Pattern.compile("(P\\d): (.+\\.zip)\\s+\\(copy to (\\S+)").matcher(line);
+                    if (zip.find()) zips.add(zip.group(1) + " for " + zip.group(3) + ": " + zip.group(2));
+                    if (line.contains("nothing to package")) none = true;
+                }
+            }
+            int exit = process.waitFor();
+            if (stopRequested) { outcome = Phase.STOPPED; message = "Stopped."; }
+            else if (exit == 0) {
+                outcome = Phase.DONE;
+                message = none ? "Every host runs on this machine; nothing to package."
+                    : "Packages: " + String.join("; ", zips) + ". Unzip each on its machine and run launch.bat, then Run.";
+            }
+        } catch (IOException ex) {
+            message = ex.getMessage();
+        } catch (InterruptedException ex) {
+            outcome = Phase.STOPPED; message = "Stopped.";
+        } finally {
+            process = null;
+            try { Runtime.getRuntime().removeShutdownHook(shutdownHook); } catch (IllegalStateException ignored) { }
+        }
+        listener.phase(outcome, "");
+        listener.finished(outcome, null, message);
     }
 
     /** Runs the analyse target, saving its output (the analyzer report) as the analysis file. */
