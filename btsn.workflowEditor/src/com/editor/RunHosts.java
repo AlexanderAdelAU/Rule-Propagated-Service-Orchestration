@@ -20,6 +20,8 @@ public final class RunHosts {
         final File log;
         public String state = "waiting", process = "";
         public int calls;
+        /** Rule versions this host has confirmed (its commitments), in the order received. */
+        public final List<String> committed = new ArrayList<>();
         public boolean remote, seen;
         private long offset;
         private final StringBuilder partial = new StringBuilder();
@@ -28,10 +30,13 @@ public final class RunHosts {
 
     private static final Pattern PROCESS = Pattern.compile("Host process: (\\d+) on (\\S+)");
     private static final Pattern CALL = Pattern.compile("SERVICE COMPLETE: org\\.btsn\\.places\\.\\w+_Place\\.");
+    private static final Pattern CONFIRMATION = Pattern.compile("commitment confirmation received: (v\\d+):\\d+");
+    private static final Pattern COMMITTED = Pattern.compile("Commitment confirmed for (\\w+):\\w+");
     private static final Pattern SKIPPED = Pattern.compile("\\[(p\\d|monitor)\\] Skipping - running on remote host");
 
     public final List<Host> hosts = new ArrayList<>();
     private long runStart;
+    private String confirmingVersion = "";
 
     /** The hosts a launcher starts (its run.pN properties) and Monitor, with their endpoints from SingleHost.json. */
     public static RunHosts forLauncher(File launcher, File root, boolean allHostsHere) {
@@ -89,15 +94,37 @@ public final class RunHosts {
     /** A new run: earlier logs (written before this moment) are ignored until the hosts write new ones. */
     public void started(long when) {
         runStart = when;
-        for (Host h : hosts) { h.state = "waiting"; h.process = ""; h.calls = 0; h.remote = false; h.seen = false; h.offset = 0; h.partial.setLength(0); }
+        for (Host h : hosts) { h.state = "waiting"; h.process = ""; h.calls = 0; h.remote = false; h.seen = false; h.offset = 0; h.partial.setLength(0); h.committed.clear(); }
+        confirmingVersion = "";
     }
 
-    /** A line of the launcher's own output: it reports hosts it leaves to other machines. */
+    /**
+     * A line of the launcher's own output: it reports hosts it leaves to other machines, and each host's
+     * commitment to the rules sent to it ("confirmation received: v001:1", then "Commitment confirmed for
+     * P2_Place:processToken"). Admin services commit for their host: P2_InitializationService is P2's.
+     */
     public void launcherLine(String line) {
+        Matcher v = CONFIRMATION.matcher(line);
+        if (v.find()) { confirmingVersion = v.group(1); return; }
+        Matcher c = COMMITTED.matcher(line);
+        if (c.find() && !confirmingVersion.isEmpty()) {
+            Host h = hostOfService(c.group(1));
+            if (h != null && !h.committed.contains(confirmingVersion)) h.committed.add(confirmingVersion);
+            return;
+        }
         Matcher m = SKIPPED.matcher(line);
         if (!m.find()) return;
         String node = m.group(1).equalsIgnoreCase("monitor") ? "monitor" : m.group(1).toUpperCase(Locale.ROOT);
         for (Host h : hosts) if (h.node.equals(node)) { h.remote = true; h.state = "remote host (not started here)"; }
+    }
+
+    /** P2_Place, P2_InitializationService, P2_CollectorService -> P2_Place; Monitor... -> Monitor. */
+    Host hostOfService(String service) {
+        if (service.startsWith("Monitor")) { for (Host h : hosts) if ("Monitor".equals(h.name)) return h; return null; }
+        Matcher node = Pattern.compile("^(P\\d)_").matcher(service);
+        if (!node.find()) return null;
+        for (Host h : hosts) if (node.group(1).equals(h.node)) return h;
+        return null;
     }
 
     /** Reads what each host has added to its log since the last refresh. */
@@ -137,6 +164,7 @@ public final class RunHosts {
         for (Host h : hosts) {
             List<String> detail = new ArrayList<>();
             if (!h.process.isEmpty()) detail.add(h.process);
+            if (!h.committed.isEmpty()) detail.add("rules " + String.join(", ", h.committed) + " committed");
             if (h.remote) detail.add("remote host");
             if (!"Monitor".equals(h.name)) detail.add(h.calls + " service calls");
             parts.add(h.name + (h.endpoint.isEmpty() || "Monitor".equals(h.name) ? "" : " at " + h.endpoint) + (detail.isEmpty() ? "" : " (" + String.join(", ", detail) + ")"));
