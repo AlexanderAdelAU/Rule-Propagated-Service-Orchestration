@@ -39,7 +39,7 @@ public final class LauncherRun {
     private Thread worker, shutdownHook;
 
     public LauncherRun(File launcher, File root, File analysisFile, boolean allHostsHere, String antCommand, Listener listener) {
-        this.launcher = launcher; this.root = root; this.analysisFile = analysisFile;
+        this.launcher = real(launcher); this.root = real(root); this.analysisFile = real(analysisFile);
         this.allHostsHere = allHostsHere; this.antCommand = antCommand; this.listener = listener;
     }
 
@@ -153,6 +153,7 @@ public final class LauncherRun {
         command.addAll(args);
         ProcessBuilder builder = new ProcessBuilder(command).directory(launcher.getParentFile()).redirectErrorStream(true);
         builder.environment().put("ANT_HOME", home.getPath());
+        listener.line("[editor] Launcher " + launcher.getPath());
         listener.line("[editor] Ant " + home.getPath() + " on Java " + command.get(0));
         listener.line("[editor] ant " + String.join(" ", args));
         return builder.start();
@@ -233,6 +234,12 @@ public final class LauncherRun {
         return null;
     }
 
+    /** The real absolute path: no "." or ".." segments, links resolved where the file exists. */
+    public static File real(File file) {
+        try { return file.getCanonicalFile(); }
+        catch (IOException ex) { return file.toPath().toAbsolutePath().normalize().toFile(); }
+    }
+
     static boolean windows() { return System.getProperty("os.name", "").toLowerCase(Locale.ROOT).startsWith("windows"); }
 
     /** Stops a process and everything it started, politely first, then forcibly. */
@@ -258,6 +265,7 @@ public final class LauncherRun {
     /** BuildAndRun launchers in the project-loader folders that run this process; Build and Run's own name first. */
     public static List<File> launchersFor(File root, String processName) {
         List<File> found = new ArrayList<>();
+        root = real(root);
         File[] loaders = root.listFiles(f -> f.isDirectory() && f.getName().matches("btsn\\..+\\.ProjectLoader"));
         if (loaders == null) return found;
         String property = "name=\"workflow.process.name\" value=\"" + processName + "\"";
@@ -280,6 +288,6 @@ public final class LauncherRun {
         String folder = "petrinet".equals(domain) || domain.isEmpty() ? "PetriNet"
             : Character.toUpperCase(domain.charAt(0)) + domain.substring(1);
         String base = processName.substring(processName.lastIndexOf('/') + 1);
-        return new File(root, "btsn.common/AnalysisFolder/" + folder + "/Analysis_" + base + ".txt");
+        return new File(real(root), "btsn.common/AnalysisFolder/" + folder + "/Analysis_" + base + ".txt");
     }
 }

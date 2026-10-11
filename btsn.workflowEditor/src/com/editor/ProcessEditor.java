@@ -1275,9 +1275,11 @@ public class ProcessEditor extends JFrame {
             JOptionPane.showMessageDialog(this, "Save the process first; the launcher runs the saved file.", "Run", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        java.io.File common = ServiceRegistry.findCommon(currentFile);
-        java.nio.file.Path processes = common == null ? null : new java.io.File(common, "ProcessDefinitionFolder").toPath().toAbsolutePath().normalize();
-        java.nio.file.Path location = currentFile.toPath().toAbsolutePath().normalize();
+        // Real, absolute paths only: a process opened through "..\\" must not carry ".." into the launcher's paths.
+        java.io.File processPath = LauncherRun.real(currentFile);
+        java.io.File common = ServiceRegistry.findCommon(processPath);
+        java.nio.file.Path processes = common == null ? null : new java.io.File(common, "ProcessDefinitionFolder").toPath();
+        java.nio.file.Path location = processPath.toPath();
         if (processes == null || !location.startsWith(processes)) {
             JOptionPane.showMessageDialog(this, "Save the process under btsn.common/ProcessDefinitionFolder.", "Run", JOptionPane.WARNING_MESSAGE);
             return;

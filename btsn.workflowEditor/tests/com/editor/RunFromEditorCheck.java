@@ -22,6 +22,11 @@ public final class RunFromEditorCheck {
         check(LauncherRun.phaseOf("=== PHASE 2: WORKFLOW EXECUTION ===") == LauncherRun.Phase.RUN && LauncherRun.phaseOf("Deploying") == null, "Phase lines");
         List<File> launchers = LauncherRun.launchersFor(repository, "petrinet/Workflow/P2_Tutorial_Workflow");
         check(!launchers.isEmpty() && launchers.get(0).getName().equals("P2_Tutorial_Workflow_BuildAndRun.xml"), "P2 launcher not found first: " + launchers);
+        // A project reached through ".." (e.g. a process opened as ...\\btsn.workflowEditor\\..\\btsn.common\\...) gives real paths.
+        File dotted = new File(repository, "btsn.workflowEditor/..");
+        List<File> viaDots = LauncherRun.launchersFor(dotted, "petrinet/Workflow/P2_Tutorial_Workflow");
+        check(!viaDots.isEmpty() && !viaDots.get(0).getPath().contains("..") && viaDots.get(0).equals(launchers.get(0)), "Launcher path keeps '..': " + viaDots);
+        check(!LauncherRun.analysisFileFor(dotted, "petrinet/Workflow/P2_Tutorial_Workflow").getPath().contains(".."), "Analysis path keeps '..'");
         check(LauncherRun.analysisFileFor(repository, "petrinet/Workflow/P2_Tutorial_Workflow").getPath().replace('\\', '/')
             .endsWith("btsn.common/AnalysisFolder/PetriNet/Analysis_P2_Tutorial_Workflow.txt"), "Analysis file location");
         // Ant is found from its folder or anything inside it; a launcher in the Ant box is refused.
@@ -69,7 +74,9 @@ public final class RunFromEditorCheck {
 
         // A complete run: completion seen, hosts stopped, analysis saved.
         Recorder complete = new Recorder();
-        LauncherRun run = new LauncherRun(launcher.toFile(), scratch.toFile(), analysis, true, ant.toString(), complete);
+        // Reached through "..", as when the process was opened through a relative folder.
+        File dottedLauncher = scratch.resolve("btsn.petrinet.ProjectLoader/../btsn.petrinet.ProjectLoader/Demo_BuildAndRun.xml").toFile();
+        LauncherRun run = new LauncherRun(dottedLauncher, scratch.resolve("btsn.petrinet.ProjectLoader/..").toFile(), analysis, true, ant.toString(), complete);
         run.settleMillis = 300; run.pollMillis = 100;
         run.start();
         check(complete.done.await(60, TimeUnit.SECONDS), "Run did not finish");
