@@ -66,7 +66,7 @@ ant -emacs -f P1_P2_P3_P4_Concurrent_BuildAndRun.xml analyse > analysis.txt
 ```
 
 **3. View the measurements.** `WorkflowSpatialView` (each token's visits, one
-lane per place) and `SwingGanttChart_WithLatency_v1d` (workflow elapsed time and
+lane per place) and `SwingGanttChart_WithLatency` (workflow elapsed time and
 queue waits) are Java applications in `btsn.common.Monitor`. In Eclipse, use
 **Run As → Java Application**. From a shell, run them from `btsn.common.Monitor`
 (use `;` instead of `:` on Windows):
@@ -454,7 +454,7 @@ The tools in `btsn.common.Monitor/src/org/btsn/derby/Analysis` include:
 | Tool | Use |
 |---|---|
 | `PetriNetAnalyzer` | Generated roots, fork genealogy, join consumption, canonical place visits, completion and structural/temporal checks |
-| `SwingGanttChart_WithLatency_v1d` | Workflow elapsed/queue figure, measured timeline, service queue comparisons, and publication exports |
+| `SwingGanttChart_WithLatency` | Workflow elapsed/queue figure, measured timeline, service queue comparisons, and publication exports |
 | `WorkflowSpatialView` | Each token's visits over time, one lane per place, labelled with its service and node |
 
 The combined chart offers **Diamonds** and **Lower Queue Shading** from

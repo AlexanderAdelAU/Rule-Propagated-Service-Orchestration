@@ -250,7 +250,16 @@ Click **Run** in the toolbar. The Run window finds the process's launcher and do
 1. **Builds and starts** the hosts, then follows the launcher through its three phases.
 2. **Settles and stops.** When collection is done, it waits for Monitor to finish writing, then stops the launcher and every host it started.
 3. **Analyses.** It runs `analyse` and saves the report to `btsn.common/AnalysisFolder/PetriNet/Analysis_My_P2_Workflow.txt`, replacing any earlier analysis of the process.
-4. **Loads the replay.** It loads the analysis into the editor, so you can press **Play** straight away ([step 5](#replay-the-tokens-on-the-design)).
+4. **Loads the replay.** It loads the analysis into the editor and highlights **Play** ([step 5](#replay-the-tokens-on-the-design)).
+
+The output ends with a summary of the run, for example `v001: 10 generated, 10 completed, structure OK`. It flags any version whose workflows did not all complete. Below it, **Next steps** offers:
+
+| Button | Opens |
+|---|---|
+| **Play the replay** | The editor, replaying the tokens on the design |
+| **Elapsed time and queue wait chart** | Monitor's per-workflow timing chart, for each version |
+| **Token spatial view** | Monitor's view of activity at each place over time |
+| **Open analysis report** | The full analyzer report |
 
 ![The Run window after a completed run of the P2 tutorial: the launcher, the option to run every host on this computer, the Ant location, the analysis file, the seven steps from Build and start to Replay all completed, and the analyzer report in the output.](images/p2-tutorial-run.png)
 
@@ -366,11 +375,18 @@ Use the process that produced the run: the replay matches log entries to the pla
 
 ### Timing chart and spatial view
 
-Run these from `btsn.common.Monitor`, with that project as the working directory:
+After a run from the editor, open these from **Next steps**. Otherwise, run them from the launcher once its hosts have stopped:
+
+```sh
+ant -f btsn.petrinet.ProjectLoader/My_P2_Workflow_BuildAndRun.xml chart-timing
+ant -f btsn.petrinet.ProjectLoader/My_P2_Workflow_BuildAndRun.xml chart-spatial
+```
+
+You can also run them as Java applications from `btsn.common.Monitor`, with that project as the working directory:
 
 | Viewer | What it shows |
 |---|---|
-| `org.btsn.derby.Analysis.SwingGanttChart_WithLatency_v1d` | Elapsed time per workflow, with the longest queue wait observed on a service visit |
+| `org.btsn.derby.Analysis.SwingGanttChart_WithLatency` | Elapsed time per workflow, with the longest queue wait observed on a service visit |
 | `org.btsn.derby.Analysis.WorkflowSpatialView` | Activity at each place over time, including repeat visits |
 
 ![Workflow elapsed-time chart for the captured ten-token P1 reference run.](docs/tutorials/p1/results/workflow-timing.png)

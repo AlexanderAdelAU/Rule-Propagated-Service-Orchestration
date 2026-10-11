@@ -125,7 +125,57 @@ public final class LauncherRun {
         process = null;
         if (exit != 0 || stopRequested) return false;
         Files.write(analysisFile.toPath(), report.toString().getBytes(StandardCharsets.UTF_8));
+        // Ant's own last line is the analyse step's "BUILD SUCCESSFUL"; end with what the run did instead.
+        listener.line("");
+        for (String line : summarise(report.toString())) listener.line(line);
+        listener.line("Analysis saved to " + analysisFile.getPath());
         return true;
+    }
+
+    /**
+     * The run in a few lines, per version, from the analyzer report:
+     * "v001: 10 generated, 10 completed, structure OK".
+     */
+    static List<String> summarise(String report) {
+        List<String> lines = new ArrayList<>();
+        lines.add("=== RUN COMPLETE ===");
+        java.util.regex.Matcher base = java.util.regex.Pattern.compile("(?m)^WORKFLOW BASE: \\d+ \\((v\\d+)\\)").matcher(report);
+        List<int[]> spans = new ArrayList<>(); List<String> versions = new ArrayList<>();
+        while (base.find()) { versions.add(base.group(1)); spans.add(new int[] {base.start(), report.length()}); }
+        for (int i = 0; i + 1 < spans.size(); i++) spans.get(i)[1] = spans.get(i + 1)[0];
+        for (int i = 0; i < versions.size(); i++) {
+            String part = report.substring(spans.get(i)[0], spans.get(i)[1]);
+            String generated = first(part, "Generated workflows:\\s+(\\d+)"), completed = first(part, "Completed workflows:\\s+(\\d+)");
+            String structure = first(part, "Structural result:\\s+\\[(\\w+)\\]");
+            if (generated == null && completed == null) continue;
+            String line = versions.get(i) + ": " + generated + " generated, " + completed + " completed";
+            if (structure != null) line += ", structure " + structure;
+            if (generated != null && completed != null && !generated.equals(completed)) line += "  <-- " + (Integer.parseInt(generated) - Integer.parseInt(completed)) + " did not complete";
+            lines.add(line);
+        }
+        if (lines.size() == 1) lines.add("No workflows found in the analysis; see the report above.");
+        return lines;
+    }
+    private static String first(String text, String regex) {
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile(regex).matcher(text);
+        return m.find() ? m.group(1) : null;
+    }
+
+    /**
+     * Opens one of the launcher's viewer targets (chart-timing, chart-spatial) in the background.
+     * It runs on its own, so closing the chart or the Run window does not affect the other.
+     */
+    public void openTarget(String target) {
+        Thread viewer = new Thread(() -> {
+            try {
+                Process p = start(Arrays.asList("-emacs", "-f", launcher.getName(), target), null);
+                try (BufferedReader out = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8))) {
+                    for (String line; (line = out.readLine()) != null; ) listener.line("[" + target + "] " + line);
+                }
+            } catch (IOException ex) { listener.line("[" + target + "] " + ex.getMessage()); }
+        }, "viewer-" + target);
+        viewer.setDaemon(true);
+        viewer.start();
     }
 
     /** Monitor writes collected records after the last collector returns; wait until its database is quiet. */

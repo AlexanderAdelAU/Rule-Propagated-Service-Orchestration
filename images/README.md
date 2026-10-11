@@ -76,7 +76,7 @@ painted from the editor's own windows at 100% zoom:
 | `p2-tutorial-design.png` | ProcessEditor with `P2_Tutorial_Workflow.json` open and P2 selected: catalogue, service, operation, **What it does**, deployment instance, **Runs on** and contract in the Attributes panel; the node badge on the place |
 | `p2-tutorial-deploy.png` | The Deploy panel for that process: the read-only `SingleHost.json` nodes and the P2 capability row |
 | `p2-tutorial-build-and-run.png` | The Create Build and Run dialog with its defaults and the Write/Reuse/Replace summary |
-| `p2-tutorial-run.png` | The Run window after a completed run: every step from Build and start to Replay done, with the analyzer report in the output |
+| `p2-tutorial-run.png` | The Run window after a completed run: every step from Build and start to Replay done, the closing summary per version, and the Next steps panel |
 
 Retake them when these windows change, rather than editing the images.
 

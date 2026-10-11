@@ -386,6 +386,7 @@ public class AnimationControlPanel extends JPanel {
      */
     public void startPlayback() {
         if (!animator.hasData()) return;
+        highlightPlay(false);
         
         playing = true;
         playPauseButton.setText("Pause");
@@ -396,6 +397,15 @@ public class AnimationControlPanel extends JPanel {
         }
     }
     
+    /** Draw attention to Play after a run from the editor has loaded its analysis; cleared on Play. */
+    public void highlightPlay(boolean on) {
+        playPauseButton.setFont(playPauseButton.getFont().deriveFont(on ? Font.BOLD : Font.PLAIN));
+        playPauseButton.setBackground(on ? new Color(0xD8EFD8) : null);
+        playPauseButton.setOpaque(on);
+        playPauseButton.setToolTipText(on ? "The run has been analysed: press Play to replay it" : null);
+        if (on) playPauseButton.requestFocusInWindow();
+    }
+
     /**
      * Stop playback
      */

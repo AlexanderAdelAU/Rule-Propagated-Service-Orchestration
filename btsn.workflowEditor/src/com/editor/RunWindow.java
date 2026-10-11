@@ -18,6 +18,12 @@ public final class RunWindow extends JFrame {
     private final File root;
     private final String processName;
     private final Consumer<File> onAnalysis;
+    private final Runnable onPlay;
+    /** What to do once a run has been analysed; shown when the run completes. */
+    final JPanel nextSteps = new JPanel(new GridBagLayout());
+    final JButton play = new JButton("\u25B6 Play the replay"), timing = new JButton("Elapsed time and queue wait chart"),
+        spatial = new JButton("Token spatial view"), report = new JButton("Open analysis report");
+    private File lastAnalysis;
     final JComboBox<File> launcher;
     final JCheckBox allHostsHere = new JCheckBox("Run every host on this computer (127.0.0.1)", true);
     final JTextField ant = new JTextField(28);
@@ -29,9 +35,9 @@ public final class RunWindow extends JFrame {
 
     private static final String[] STEP_NAMES = {"Build and start", "1 Initialise", "2 Run", "3 Collect", "Settle", "Analyse", "Replay"};
 
-    public RunWindow(Window owner, File root, String processName, List<File> launchers, Consumer<File> onAnalysis) {
+    public RunWindow(Window owner, File root, String processName, List<File> launchers, Consumer<File> onAnalysis, Runnable onPlay) {
         super("Run " + processName);
-        this.root = root; this.processName = processName; this.onAnalysis = onAnalysis;
+        this.root = root; this.processName = processName; this.onAnalysis = onAnalysis; this.onPlay = onPlay;
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() { @Override public void windowClosing(java.awt.event.WindowEvent e) { closeWindow(); } });
 
@@ -84,11 +90,25 @@ public final class RunWindow extends JFrame {
         bottom.add(status, BorderLayout.CENTER); bottom.add(buttons, BorderLayout.EAST);
         status.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
 
+        nextSteps.setBorder(BorderFactory.createTitledBorder("Next steps"));
+        addStep(0, play, "Watch the tokens move through the design in the editor");
+        addStep(1, timing, "Elapsed time and the longest queue wait per workflow, for each version");
+        addStep(2, spatial, "Token activity at each place over time");
+        addStep(3, report, "The full analyzer report");
+        play.setFont(play.getFont().deriveFont(Font.BOLD));
+        play.addActionListener(e -> { onPlay.run(); status.setText("Replaying in the editor."); });
+        timing.addActionListener(e -> openViewer("chart-timing", "elapsed time chart"));
+        spatial.addActionListener(e -> openViewer("chart-spatial", "spatial view"));
+        report.addActionListener(e -> showReport());
+        nextSteps.setVisible(false);
+        JPanel south = new JPanel(new BorderLayout(6, 6));
+        south.add(nextSteps, BorderLayout.NORTH); south.add(bottom, BorderLayout.SOUTH);
+
         JPanel north = new JPanel(new BorderLayout());
         north.add(form, BorderLayout.NORTH); north.add(progress, BorderLayout.SOUTH);
         JPanel content = new JPanel(new BorderLayout(6, 6));
         content.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
-        content.add(north, BorderLayout.NORTH); content.add(consolePane, BorderLayout.CENTER); content.add(bottom, BorderLayout.SOUTH);
+        content.add(north, BorderLayout.NORTH); content.add(consolePane, BorderLayout.CENTER); content.add(south, BorderLayout.SOUTH);
         setContentPane(content);
         pack();
         setLocationRelativeTo(owner);
@@ -105,6 +125,7 @@ public final class RunWindow extends JFrame {
         prefs.put(ANT_PREF, ant.getText().trim());
         console.setText("");
         resetSteps();
+        nextSteps.setVisible(false);
         start.setEnabled(false); stop.setEnabled(true); launcher.setEnabled(false); allHostsHere.setEnabled(false);
         status.setText("Running " + selected.getName() + "...");
         run = new LauncherRun(selected, root, LauncherRun.analysisFileFor(root, processName), allHostsHere.isSelected(), ant.getText(), new LauncherRun.Listener() {
@@ -142,10 +163,43 @@ public final class RunWindow extends JFrame {
         start.setEnabled(true); stop.setEnabled(false); launcher.setEnabled(true); allHostsHere.setEnabled(true);
         if (outcome == LauncherRun.Phase.DONE && analysis != null) {
             onAnalysis.accept(analysis);
-            status.setText(message + " Loaded into the replay: press Play in the editor.");
+            lastAnalysis = analysis;
+            nextSteps.setVisible(true);
+            getContentPane().revalidate();
+            play.requestFocusInWindow();
+            getRootPane().setDefaultButton(play);
+            status.setText("Run complete. " + message);
         } else {
             for (JLabel step : steps) if (step.getBackground().equals(new Color(0xFFF1C2))) step.setBackground(new Color(0xF6D0D0));
             status.setText(message);
+        }
+    }
+
+    private void addStep(int row, JButton button, String what) {
+        GridBagConstraints c = new GridBagConstraints();
+        c.gridy = row; c.insets = new Insets(2, 6, 2, 6); c.anchor = GridBagConstraints.WEST;
+        c.gridx = 0; c.fill = GridBagConstraints.HORIZONTAL; nextSteps.add(button, c);
+        c.gridx = 1; c.weightx = 1; c.fill = GridBagConstraints.NONE; nextSteps.add(new JLabel(what), c);
+    }
+
+    /** The Monitor viewers run through the launcher's chart targets, like analyse. */
+    private void openViewer(String target, String name) {
+        if (run == null) return;
+        append("[editor] Opening the " + name + " (ant " + target + ")...");
+        status.setText("Opening the " + name + "; it appears in its own window.");
+        run.openTarget(target);
+    }
+
+    private void showReport() {
+        if (lastAnalysis == null) return;
+        try {
+            JTextArea text = new JTextArea(new String(java.nio.file.Files.readAllBytes(lastAnalysis.toPath()), java.nio.charset.StandardCharsets.UTF_8));
+            text.setEditable(false); text.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12)); text.setCaretPosition(0);
+            JFrame frame = new JFrame(lastAnalysis.getName());
+            frame.setContentPane(new JScrollPane(text));
+            frame.setSize(900, 700); frame.setLocationRelativeTo(this); frame.setVisible(true);
+        } catch (java.io.IOException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Analysis report", JOptionPane.ERROR_MESSAGE);
         }
     }
 

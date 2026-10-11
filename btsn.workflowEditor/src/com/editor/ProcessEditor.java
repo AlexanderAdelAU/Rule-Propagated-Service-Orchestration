@@ -1293,8 +1293,16 @@ public class ProcessEditor extends JFrame {
         }
         final java.io.File processFile = currentFile;
         runWindow = new RunWindow(this, root, processName, launchers, analysis -> {
-            if (processFile.equals(currentFile)) animationPanel.loadAnalysisFile(analysis);
+            if (processFile.equals(currentFile)) {
+                animationPanel.loadAnalysisFile(analysis);
+                animationPanel.highlightPlay(true);
+                statusLabel.setText(" Run finished and analysed: press Play to replay it");
+            }
             else JOptionPane.showMessageDialog(this, "The run finished, but another process is open now. Its analysis is in " + analysis.getName() + ".", "Run", JOptionPane.INFORMATION_MESSAGE);
+        }, () -> {
+            if (!processFile.equals(currentFile)) return;
+            setState(java.awt.Frame.NORMAL); toFront(); requestFocus();
+            animationPanel.startPlayback();
         });
         runWindow.setVisible(true);
     }

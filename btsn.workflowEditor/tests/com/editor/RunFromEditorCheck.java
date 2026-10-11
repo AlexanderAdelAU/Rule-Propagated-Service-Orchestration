@@ -22,6 +22,14 @@ public final class RunFromEditorCheck {
         check(LauncherRun.phaseOf("=== PHASE 2: WORKFLOW EXECUTION ===") == LauncherRun.Phase.RUN && LauncherRun.phaseOf("Deploying") == null, "Phase lines");
         List<File> launchers = LauncherRun.launchersFor(repository, "petrinet/Workflow/P2_Tutorial_Workflow");
         check(!launchers.isEmpty() && launchers.get(0).getName().equals("P2_Tutorial_Workflow_BuildAndRun.xml"), "P2 launcher not found first: " + launchers);
+        // The closing summary: per version, generated and completed, flagged when some did not complete.
+        String single = new String(Files.readAllBytes(repository.toPath().resolve("btsn.workflowEditor/tests/fixtures/Analysis_P2_single_generator.txt")), StandardCharsets.UTF_8);
+        List<String> summary = LauncherRun.summarise(single);
+        check(summary.get(0).equals("=== RUN COMPLETE ===") && summary.contains("v001: 10 generated, 10 completed, structure OK"), "Summary: " + summary);
+        String twoVersions = "WORKFLOW BASE: 1000000 (v001)\n   Generated workflows:       10\n   Completed workflows:       10\n   Structural result:         [OK]\n"
+            + "WORKFLOW BASE: 2000000 (v002)\n   Generated workflows:       10\n   Completed workflows:       8\n";
+        List<String> partial = LauncherRun.summarise(twoVersions);
+        check(partial.contains("v001: 10 generated, 10 completed, structure OK") && partial.contains("v002: 10 generated, 8 completed  <-- 2 did not complete"), "Partial summary: " + partial);
         // A project reached through ".." (e.g. a process opened as ...\\btsn.workflowEditor\\..\\btsn.common\\...) gives real paths.
         File dotted = new File(repository, "btsn.workflowEditor/..");
         List<File> viaDots = LauncherRun.launchersFor(dotted, "petrinet/Workflow/P2_Tutorial_Workflow");
@@ -87,6 +95,7 @@ public final class RunFromEditorCheck {
         String saved = new String(Files.readAllBytes(analysis.toPath()), StandardCharsets.UTF_8);
         check(saved.contains("Analyzing ALL 1 workflow bases") && saved.contains("EventType=GENERATED"), "Analysis not saved: " + saved);
         check(!alive(hostPid), "Host left running after the run");
+        check(complete.lines.contains("=== RUN COMPLETE ===") && complete.lines.stream().anyMatch(l -> l.startsWith("Analysis saved to ")), "Run does not end with its summary: " + complete.lines);
 
         // Stop while the run is still in Phase 2.
         Files.deleteIfExists(hostPid);
@@ -100,7 +109,7 @@ public final class RunFromEditorCheck {
         check(stopped.done.await(30, TimeUnit.SECONDS) && stopped.outcome == LauncherRun.Phase.STOPPED, "Stop did not stop the run: " + stopped.outcome);
         check(!alive(hostPid), "Host left running after Stop");
         check(!scratch.resolve("unused.txt").toFile().exists(), "Stopped run wrote an analysis");
-        System.out.println("PASS: Run from the editor: phases followed, hosts stopped with the launcher, analysis saved, Stop mid-run");
+        System.out.println("PASS: Run from the editor: phases followed, hosts stopped with the launcher, analysis saved and summarised, Stop mid-run");
     }
 
     /** Builds Ant's folder layout with a Launcher class that behaves like a BuildAndRun launcher. */
