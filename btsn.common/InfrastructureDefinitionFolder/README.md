@@ -49,6 +49,10 @@ initialisation and collector services follow it onto its channel, and
 `ant host-packages` builds a self-contained package for every host on another
 machine. See the [tutorial](../../Tutorial.md#7-run-on-several-machines).
 
+[TwoHost.json](TwoHost.json) is the two-machine test arrangement: P1, P3 and P5 on
+`ip0` (192.168.1.82, the launcher's machine) and P2, P4 and P6 on `ip1`
+(192.168.1.152).
+
 ## Follow the configuration
 
 | Location | Purpose |
