@@ -124,6 +124,7 @@
             <classpath><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
         </javac>
         <java classname="com.editor.ServiceRegistryCheck" fork="true" failonerror="true">
+            <sysproperty key="rpso.infrastructure" value="SingleHost"/><!-- not this computer's Machines choice -->
             <jvmarg value="-Djava.awt.headless=true"/>
             <classpath><pathelement location="${build.dir}/contract-tests"/><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
             <arg file=".."/><arg file="${build.dir}/contract-tests/attributes-preview.png"/>
@@ -132,14 +133,17 @@
 
     <target name="check-deployment-editor" depends="check-contracts" description="Test real deployment table editors (requires a display or xvfb-run)">
         <java classname="com.editor.DeploymentEditorCheck" fork="true" failonerror="true">
+            <sysproperty key="rpso.infrastructure" value="SingleHost"/><!-- not this computer's Machines choice -->
             <classpath><pathelement location="${build.dir}/contract-tests"/><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
             <arg file=".."/>
         </java>
         <java classname="com.editor.DeployFlowCheck" fork="true" failonerror="true">
+            <sysproperty key="rpso.infrastructure" value="SingleHost"/><!-- not this computer's Machines choice -->
             <classpath><pathelement location="${build.dir}/contract-tests"/><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
             <arg file=".."/><arg file="${build.dir}/contract-tests"/>
         </java>
         <java classname="com.editor.RunFromEditorCheck" fork="true" failonerror="true">
+            <sysproperty key="rpso.infrastructure" value="SingleHost"/><!-- not this computer's Machines choice -->
             <classpath><pathelement location="${build.dir}/contract-tests"/><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
             <arg file=".."/>
         </java>

@@ -32,6 +32,9 @@ public class ProcessEditor extends JFrame {
     
     // Process type selector
     private JComboBox<String> processTypeCombo;
+    /** The machines (infrastructure definition) places are shown and run on. */
+    private final JComboBox<String> machinesCombo = new JComboBox<>();
+    private boolean fillingMachines;
     
     // Zoom label
     private JLabel zoomLabel;
@@ -561,6 +564,28 @@ public class ProcessEditor extends JFrame {
         toolbar.add(Box.createHorizontalStrut(5));
         processTypeCombo.setMaximumSize(new Dimension(90, 26));
         toolbar.add(processTypeCombo);
+
+        toolbar.addSeparator(new Dimension(20, 32));
+        toolbar.add(new JLabel("Machines:"));
+        toolbar.add(Box.createHorizontalStrut(5));
+        machinesCombo.setToolTipText("The infrastructure definition that gives the nodes their machines: what Runs on shows, and what Run on hosts runs on");
+        machinesCombo.setMaximumSize(new Dimension(120, 26));
+        fillMachines();
+        machinesCombo.addPopupMenuListener(new javax.swing.event.PopupMenuListener() {
+            public void popupMenuWillBecomeVisible(javax.swing.event.PopupMenuEvent e) { fillMachines(); }
+            public void popupMenuWillBecomeInvisible(javax.swing.event.PopupMenuEvent e) { }
+            public void popupMenuCanceled(javax.swing.event.PopupMenuEvent e) { }
+        });
+        machinesCombo.addActionListener(e -> {
+            if (fillingMachines || machinesCombo.getSelectedItem() == null) return;
+            String name = (String)machinesCombo.getSelectedItem();
+            if (name.equals(ServiceRegistry.selectedInfrastructure())) return;
+            ServiceRegistry.selectInfrastructure(name);
+            attributesFrame.refreshSelection();
+            canvas.repaint();
+            statusLabel.setText(" Machines: " + name + " - places run on " + describeMachines(name));
+        });
+        toolbar.add(machinesCombo);
         
         toolbar.addSeparator(new Dimension(20, 32));
         
@@ -1267,6 +1292,31 @@ public class ProcessEditor extends JFrame {
     }
 
     private RunWindow runWindow;
+
+    /** Fill the Machines list from InfrastructureDefinitionFolder, keeping the chosen one selected. */
+    private void fillMachines() {
+        fillingMachines = true;
+        try {
+            java.io.File anchor = currentFile != null ? currentFile : new java.io.File(System.getProperty("user.dir"));
+            String selected = ServiceRegistry.selectedInfrastructure();
+            machinesCombo.removeAllItems();
+            for (String name : ServiceRegistry.infrastructures(anchor)) machinesCombo.addItem(name);
+            machinesCombo.setSelectedItem(selected);
+        } finally {
+            fillingMachines = false;
+        }
+    }
+
+    /** "P1 192.168.1.82, P2 192.168.1.152, ..." for the status line. */
+    private String describeMachines(String name) {
+        java.io.File anchor = currentFile != null ? currentFile : new java.io.File(System.getProperty("user.dir"));
+        java.util.Map<String, java.util.List<String>> byAddress = new java.util.LinkedHashMap<>();
+        for (ServiceRegistry.Node node : ServiceRegistry.infrastructureNodes(anchor, name))
+            byAddress.computeIfAbsent(node.address, a -> new java.util.ArrayList<>()).add(node.node);
+        java.util.List<String> parts = new java.util.ArrayList<>();
+        for (java.util.Map.Entry<String, java.util.List<String>> e : byAddress.entrySet()) parts.add(String.join(", ", e.getValue()) + " on " + e.getKey());
+        return String.join("; ", parts);
+    }
 
     /** Run the process's launcher from the editor; the analysis is loaded into the replay when it finishes. */
     private void openRunWindow() {

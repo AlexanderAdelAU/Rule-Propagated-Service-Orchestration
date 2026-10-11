@@ -40,10 +40,15 @@ public final class RunHosts {
 
     /** The hosts a launcher starts (its run.pN properties) and Monitor, with their endpoints from SingleHost.json. */
     public static RunHosts forLauncher(File launcher, File root, boolean allHostsHere) {
+        return forLauncher(launcher, root, allHostsHere, ServiceRegistry.DEFAULT_INFRASTRUCTURE);
+    }
+
+    /** As above, with the endpoints of InfrastructureDefinitionFolder/infrastructure.json. */
+    public static RunHosts forLauncher(File launcher, File root, boolean allHostsHere, String infrastructure) {
         RunHosts run = new RunHosts();
         String xml;
         try { xml = new String(Files.readAllBytes(launcher.toPath()), StandardCharsets.UTF_8); } catch (IOException ex) { xml = ""; }
-        Map<String, String> endpoints = endpoints(new File(root, "btsn.common/InfrastructureDefinitionFolder/SingleHost.json"), allHostsHere);
+        Map<String, String> endpoints = endpoints(new File(root, "btsn.common/InfrastructureDefinitionFolder/" + infrastructure + ".json"), allHostsHere);
         Matcher m = Pattern.compile("name=\"run\\.(p\\d)\"\\s+value=\"true\"").matcher(xml);
         Set<String> nodes = new TreeSet<>();
         while (m.find()) nodes.add(m.group(1).toUpperCase(Locale.ROOT));

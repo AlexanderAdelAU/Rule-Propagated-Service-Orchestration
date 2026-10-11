@@ -547,7 +547,7 @@ Rebuild the packages whenever the process, its deployment or the infrastructure 
 
 - **Network.** Use a local network or a VPN. Tokens and rules travel as plain UDP, without authentication or encryption.
 - **Firewalls.** Each package's README lists the ports its host listens on. The `ip0` machine must accept UDP from the others for Monitor and for rule commitments (ports 35000 and up).
-- **From the editor.** **Run on hosts** runs every host on one machine. For several machines, use the commands above.
+- **From the editor.** Choose the infrastructure under **Machines** on the toolbar (for example `TwoHost`). **Runs on** then shows each place's machine. In **Run on hosts**, **Build host packages** builds the packages; start them on their machines, then click **Run**, which passes `-Dinfrastructure` for you.
 
 ## Repository artefacts
 

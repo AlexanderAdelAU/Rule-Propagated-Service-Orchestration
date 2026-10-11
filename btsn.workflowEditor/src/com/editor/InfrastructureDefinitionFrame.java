@@ -275,15 +275,18 @@ public class InfrastructureDefinitionFrame extends JFrame {
         argumentModel.addTableModelListener(changeListener);
 
         if (deploymentEditor) {
+            // Preview the machines chosen in the editor (Machines on the toolbar); the deployment itself names only nodes.
             File folder = findRepositoryInfrastructureDirectory();
-            File physical = folder == null ? null : new File(folder, "SingleHost.json");
+            File physical = folder == null ? null : new File(folder, ServiceRegistry.selectedInfrastructure() + ".json");
+            if (physical == null || !physical.isFile()) physical = folder == null ? null : new File(folder, ServiceRegistry.DEFAULT_INFRASTRUCTURE + ".json");
             if (physical != null && physical.isFile()) {
                 try {
                     loadPhysicalNodes(new String(Files.readAllBytes(physical.toPath()), StandardCharsets.UTF_8));
                     nodeNetworkModel.fireTableDataChanged();
                     nodeNetworkTable.setRowSelectionInterval(0, 0);
+                    setStatus("Machines: " + physical.getName() + " (preview)", "The deployment names nodes; the run's infrastructure gives them their machines.");
                 }
-                catch (Exception ex) { setStatus("Could not load SingleHost.json", ex.getMessage()); }
+                catch (Exception ex) { setStatus("Could not load " + physical.getName(), ex.getMessage()); }
             }
         }
         markSaved();
