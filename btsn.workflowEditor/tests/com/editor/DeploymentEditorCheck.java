@@ -38,7 +38,15 @@ public final class DeploymentEditorCheck {
             finally { frame.dispose(); }
         });
         if (failure[0] != null) throw new AssertionError("Deployment window regression", failure[0]);
-        System.out.println("PASS: real deployment Open loads dropdowns immediately; six rows preserve aliases/adapters/ports; switching definitions replaces the catalogue");
+        // Open dialogs start in the folder for their kind of definition, not wherever another dialog last was.
+        File infrastructure = new File(common, "InfrastructureDefinitionFolder"), deployments = new File(common, "ServiceDeploymentFolder");
+        check(InfrastructureDefinitionFrame.wrongRepositoryFolder(new File(common, "BusinessServiceDefinitions"), infrastructure), "A catalogue folder was kept for infrastructure");
+        check(InfrastructureDefinitionFrame.wrongRepositoryFolder(new File(common, "BusinessServiceDefinitions/inventory"), infrastructure), "A catalogue subfolder was kept for infrastructure");
+        check(InfrastructureDefinitionFrame.wrongRepositoryFolder(infrastructure, deployments), "The infrastructure folder was kept for deployments");
+        check(!InfrastructureDefinitionFrame.wrongRepositoryFolder(infrastructure, infrastructure), "The right folder was replaced");
+        check(!InfrastructureDefinitionFrame.wrongRepositoryFolder(new File(deployments, "inventory"), deployments), "A deployment subfolder was replaced");
+        check(!InfrastructureDefinitionFrame.wrongRepositoryFolder(new File(System.getProperty("java.io.tmpdir")), infrastructure), "A folder outside btsn.common was replaced");
+        System.out.println("PASS: real deployment Open loads dropdowns immediately; six rows preserve aliases/adapters/ports; switching definitions replaces the catalogue; Open starts in the right definition folder");
     }
     private static void selectCurrent(JTable table,int row,int column,String value) {
         check(table.editCellAt(row,column), "Cell not editable: "+row+"/"+column);

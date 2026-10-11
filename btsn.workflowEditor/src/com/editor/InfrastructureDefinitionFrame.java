@@ -1022,15 +1022,29 @@ public class InfrastructureDefinitionFrame extends JFrame {
 
     private JFileChooser createRememberingChooser(String preferenceKey, File preferredDirectory) {
         File directory = rememberedDirectory(preferenceKey);
-        if (directory == null || (preferredDirectory != null &&
-                "ProcessDefinitionFolder".equals(directory.getName()) &&
-                directory.getParentFile().equals(preferredDirectory.getParentFile()))) {
+        if (directory == null || wrongRepositoryFolder(directory, preferredDirectory)) {
             directory = preferredDirectory;
         }
         if (directory != null && directory.isDirectory()) {
             return new JFileChooser(directory);
         }
         return new JFileChooser();
+    }
+
+    /**
+     * A remembered folder elsewhere in the same btsn.common (BusinessServiceDefinitions, ProcessDefinitionFolder, ...)
+     * is the wrong place to look for this kind of definition: start in the right folder instead. A folder inside the
+     * right one, or outside btsn.common altogether, is kept.
+     */
+    static boolean wrongRepositoryFolder(File remembered, File preferred) {
+        if (remembered == null || preferred == null || !preferred.isDirectory() || preferred.getParentFile() == null) return false;
+        try {
+            java.nio.file.Path folder = remembered.getCanonicalFile().toPath();
+            java.nio.file.Path right = preferred.getCanonicalFile().toPath();
+            return folder.startsWith(right.getParent()) && !folder.startsWith(right);
+        } catch (java.io.IOException ex) {
+            return false;
+        }
     }
 
     private void rememberDirectory(String preferenceKey, File directory) {
