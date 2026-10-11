@@ -111,12 +111,16 @@ ant -f P1_P2_P3_P4_Concurrent_BuildAndRun.xml chart-spatial
 `btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_P2_P3_P4_Fork_Join_Workflow.json`,
 click **Load Analysis...**, choose `analysis.txt` and press **Play**.
 
-**5. Spread it across machines.** Give each node its machine's address in a
-physical infrastructure definition, select it in the deployment profile, and
-start each numbered place from its portable ZIP on its own machine. The
-launcher then treats those places as remote and sends them rules and tokens
-over the network. See [physical infrastructure](btsn.common/InfrastructureDefinitionFolder/README.md)
-and [portable place releases](btsn.services/docs/PLACE_RELEASES.md).
+**5. Spread it across machines.** Give each machine its own channel and address
+in an infrastructure definition such as
+[`MultiHost.json`](btsn.common/InfrastructureDefinitionFolder/MultiHost.json).
+`ant -f <launcher> host-packages -Dinfrastructure=MultiHost` then builds a
+self-contained package for each host on another machine. Each package holds the
+host, its business services and the master ruleset this deployment generated.
+Start each package on its machine, then run the launcher with the same
+`-Dinfrastructure`. It sends rules and tokens to those hosts over UDP and collects
+their records into Monitor. See
+[Run on several machines](Tutorial.md#7-run-on-several-machines).
 
 The sections below explain what you have just run, starting from a single place
 ([Tutorial.md](Tutorial.md) walks through editing and running it).

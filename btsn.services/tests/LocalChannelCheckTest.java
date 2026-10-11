@@ -16,6 +16,10 @@ public final class LocalChannelCheckTest {
     private static String fact(String channel, String address) {
         return "<Atom><Rel>boundChannel</Rel><Ind>" + channel + "</Ind><Ind>" + address + "</Ind></Atom>";
     }
+    private static String service(String runtime, String channel, String port) {
+        return "<Atom><Rel>activeService</Rel><Ind>" + runtime + "</Ind><Ind>processToken</Ind><Ind>" + channel
+            + "</Ind><Ind>" + port + "</Ind></Atom>";
+    }
     private static Path rules(String xml) throws Exception {
         Path file = Files.createTempFile("channel-facts", ".xml");
         file.toFile().deleteOnExit(); Files.writeString(file, xml); return file;
@@ -54,6 +58,24 @@ public final class LocalChannelCheckTest {
         result.clear();
         try (java.io.Reader reader = Files.newBufferedReader(output)) { result.load(reader); }
         require("remote".equals(result.getProperty("ip0.mode")) && !result.containsKey("ip0.is.local"), "Stale local flag in remote result");
+
+        // A distributed deployment: each host is decided by its own channel, not by ip0.
+        String distributed = fact("ip0", "127.0.0.1") + fact("ip1", "192.0.2.123")
+            + service("P1_Place", "ip0", "4001") + service("P3_Place", "ip1", "4003")
+            + service("P3_Place", "ip1", "4007") + service("P3_InitializationService", "ip1", "4302");
+        LocalChannelCheck.main(new String[]{rules(distributed).toString(), output.toString()});
+        result.clear();
+        try (java.io.Reader reader = Files.newBufferedReader(output)) { result.load(reader); }
+        require(result.containsKey("ip0.is.local") && result.containsKey("p1.channel.is.local"), "P1 on ip0 here must start locally");
+        require("ip1".equals(result.getProperty("p3.channel")) && "192.0.2.123".equals(result.getProperty("p3.address"))
+            && !result.containsKey("p3.channel.is.local"), "P3 on another machine must not start locally");
+        require(!result.containsKey("p2.channel"), "A host the deployment does not use has no channel");
+        try { LocalChannelCheck.nodeChannels(rules(service("P2_Place", "ip0", "4002") + service("P2_Place", "ip1", "4007")));
+              throw new AssertionError("Accepted a place on two channels"); }
+        catch (IllegalArgumentException expected) { checks++; }
+        try { LocalChannelCheck.main(new String[]{rules(fact("ip0", "127.0.0.1") + service("P4_Place", "ip2", "4004")).toString(), output.toString()});
+              throw new AssertionError("Accepted a host channel without an address"); }
+        catch (IllegalArgumentException expected) { checks++; }
         System.out.println("PASS: " + checks + " local-channel checks");
     }
 }

@@ -22,6 +22,7 @@ on** box show the node it is deployed to.*
 | **4. Run it** | Click **Run on hosts**: the editor runs the launcher on real hosts, analyses the run and loads the replay | [Run](#4-run-it) |
 | **5. Show the results** | Analyse the run, view the charts and replay the tokens on the design | [Results](#5-show-the-results) |
 | **6. Add your own service** | Write a service, describe it in a catalogue, and use it like StochasticService (worked example: an inventory and a supplier) | [Your own service](#6-add-your-own-service) |
+| **7. Run on several machines** | Describe the machines, package each host for its machine, start them, then run the launcher | [Several machines](#7-run-on-several-machines) |
 
 Finished copies of every file are included as `P2_Tutorial_*` ([list](#repository-artefacts)):
 
@@ -495,6 +496,59 @@ public class InventoryService extends BaseBusinessService {
 - **Going back to an earlier place.** Return your result under the name that place takes as input. The supplier returns `token`, which is the inventory's input.
 - **Describe it.** The editor checks require `description` and `returns` for every catalogue entry.
 
+## 7. Run on several machines
+
+Each host talks to the others only by UDP messages, so a host can run on any machine on your network. The machine that runs the launcher also runs Monitor and the event generators. Each other machine runs a **host package**: a folder holding everything that host needs. The example below spreads the inventory example over two machines.
+
+### Describe the machines
+
+1. Choose **File → Open → Infrastructure Definition** and open [`MultiHost.json`](btsn.common/InfrastructureDefinitionFolder/MultiHost.json), an example for three machines.
+2. Give each machine its own channel and put its address on it:
+
+   | Channel | Machine | Nodes in the example |
+   |---|---|---|
+   | `ip0` | The one you run the launcher on. Monitor runs here. | P1, P2 |
+   | `ip1` | Second machine | P3, P4 |
+   | `ip2` | Third machine | P5, P6 |
+
+   For the inventory example, put P1 on `ip0` and P2 on `ip1`. Nodes on the same machine share its channel. The channel number also shifts the ports (`ip1` adds 1000), so use `ip0` to `ip4`.
+3. Save it. Keep [`SingleHost.json`](btsn.common/InfrastructureDefinitionFolder/SingleHost.json) for runs on one machine.
+
+### Package the hosts for the other machines
+
+On the `ip0` machine:
+
+```sh
+cd btsn.petrinet.ProjectLoader
+ant -f Inventory_Workflow_BuildAndRun.xml host-packages -Dinfrastructure=MultiHost
+```
+
+The launcher generates the rules for this deployment and writes one ZIP for each host whose address is another machine, for example `btsn.services/target/host-packages/Inventory_Workflow_BuildAndRun/Inventory_Workflow_BuildAndRun-P2.zip`. Each package holds:
+
+- **The host**: its JAR and the shared infrastructure JAR, with no business classes inside.
+- **Its services**: only the business service JARs the deployment places on that host (here `SupplierService.jar`), kept as separate JARs.
+- **The master ruleset**: the rules and bindings the launcher generated, the same files the hosts on the `ip0` machine read. `README.txt` gives its digest.
+- **Launch scripts and a README**: the host's address, its ports and how to start it.
+
+Rebuild the packages whenever the process, its deployment or the infrastructure changes.
+
+### Start the hosts, then run
+
+1. Copy each ZIP to its machine and extract it. That machine needs Java 15 or later; it does not need Ant or this repository.
+2. Run `launch.bat` (Windows) or `sh launch.sh`. When Windows asks, let Java use private networks. Wait for `Service Handler is listening`.
+3. On the `ip0` machine, run the launcher with the same infrastructure:
+
+   ```sh
+   ant -f Inventory_Workflow_BuildAndRun.xml -Dinfrastructure=MultiHost
+   ```
+
+   It starts its own hosts and Monitor, skips the others (`[p2] Skipping - running on remote host`), and prints `Master ruleset …`. That digest must match the one in each package's README. It then deploys the rules to every host and waits for each one to commit, fires the tokens and collects every host's records into Monitor.
+4. Analyse and chart the run on the `ip0` machine as usual.
+
+- **Network.** Use a local network or a VPN. Tokens and rules travel as plain UDP, without authentication or encryption.
+- **Firewalls.** Each package's README lists the ports its host listens on. The `ip0` machine must accept UDP from the others for Monitor and for rule commitments (ports 35000 and up).
+- **From the editor.** **Run on hosts** runs every host on one machine. For several machines, use the commands above.
+
 ## Repository artefacts
 
 The supplied P2 tutorial, built with exactly these steps:
@@ -545,8 +599,8 @@ Every launcher runs the same way:
   [healthcare](btsn.healthcare.ProjectLoader/README.md),
   [Financial](btsn.financial.ProjectLoader/README.md) and
   [Petri-net models](btsn.petrinet.ProjectLoader/README.md).
-- **Remote hosts**: these must already be running with matching JARs and configuration; see
-  [portable place releases](btsn.services/docs/PLACE_RELEASES.md).
+- **Remote hosts**: start them from host packages built for the same deployment; see
+  [Run on several machines](#7-run-on-several-machines).
 - **One run at a time**: stop one run before starting another on the same ports.
 
 ## Author

@@ -27,8 +27,11 @@
 
     <import file="launcher-runtime.xml"/>
 
-    <property name="infrastructure.definition.name" value="SingleHost"/>
     <property name="process.title" value="${workflow.process.name}"/>
+    <!-- -Dinfrastructure=MultiHost selects InfrastructureDefinitionFolder/MultiHost.json; every profile defaults to SingleHost. -->
+    <condition property="infrastructure.definition.name" value="${infrastructure}" else="SingleHost">
+        <not><equals arg1="${infrastructure}" arg2=""/></not>
+    </condition>
     <property name="rule.version" value="v001"/>
     <property name="query.version" value="${rule.version}"/>
     <property name="token.count" value="10"/>
@@ -133,6 +136,15 @@
         <resolve-host node="p1"/><resolve-host node="p2"/><resolve-host node="p3"/>
         <resolve-host node="p4"/><resolve-host node="p5"/><resolve-host node="p6"/>
         <resolve-local-launch component="monitor" mode="${monitor.mode}"/>
+        <condition property="remote.hosts.present"><or>
+            <and><isset property="run.p1"/><not><isset property="p1.is.local"/></not></and>
+            <and><isset property="run.p2"/><not><isset property="p2.is.local"/></not></and>
+            <and><isset property="run.p3"/><not><isset property="p3.is.local"/></not></and>
+            <and><isset property="run.p4"/><not><isset property="p4.is.local"/></not></and>
+            <and><isset property="run.p5"/><not><isset property="p5.is.local"/></not></and>
+            <and><isset property="run.p6"/><not><isset property="p6.is.local"/></not></and>
+        </or></condition>
+        <echo message="Infrastructure: ${infrastructure.definition.name}"/>
     </target>
 
     <target name="clean-output" description="Remove the previous host output files">
@@ -224,10 +236,16 @@
             <java failonerror="true" classname="${service.loader.class}" if:set="monitor.is.local"
                   fork="true" timeout="600000" dir="${monitor.project.dir}" output="${monitor.output.file}">
                 <classpath refid="monitor.classpath"/>
+                <!-- Monitor runs from its own project; it reads this run's generated master ruleset, as the hosts do. -->
+                <jvmarg value="-Dbtsn.common.dir=${common.project.dir}"/>
                 <arg value="${monitor.project.dir}"/>
                 <arg value="-version"/><arg value="${rule.version}"/>
             </java>
             <sequential>
+                <!-- Hosts on other machines must run packages built from this same master ruleset (see their README). -->
+                <java classname="org.btsn.deployment.HostPackage" fork="true" failonerror="true" classpathref="generator.classpath" if:set="remote.hosts.present">
+                    <arg value="digest"/><arg file="${common.project.dir}"/>
+                </java>
                 <echo message="Waiting ${service.startup.seconds}s for services to start..."/>
                 <sleep seconds="${service.startup.seconds}"/>
 
@@ -274,11 +292,51 @@
         </parallel>
     </target>
 
+    <!-- One self-contained package per host that runs on another machine. -->
+    <property name="host.packages" value="remote"/>
+    <property name="host.packages.dir" location="${services.project.dir}/target/host-packages/${ant.project.name}"/>
+    <macrodef name="package-host">
+        <attribute name="node"/><attribute name="label"/>
+        <sequential>
+            <condition property="@{node}.package"><and>
+                <isset property="run.@{node}"/>
+                <or><not><isset property="@{node}.is.local"/></not><equals arg1="${host.packages}" arg2="all"/></or>
+            </and></condition>
+            <java classname="org.btsn.deployment.HostPackage" fork="true" failonerror="true" classpathref="generator.classpath" if:set="@{node}.package">
+                <arg value="node=@{label}"/><arg value="version=${rule.version}"/><arg value="launcher=${ant.project.name}"/>
+                <arg value="runtime=${launcher.runtime.dir}"/><arg value="source=${source.root}"/><arg value="bundle=${service.bundle.dir}"/>
+                <arg value="infrastructureJar=${infrastructure.jar}"/><arg value="libs=${lib.dir}"/>
+                <arg value="libExcludes=${services.project.dir}/target/runtime-library-excludes.txt"/><arg value="out=${host.packages.dir}"/>
+            </java>
+            <delete file="${host.packages.dir}/${ant.project.name}-@{label}.zip" if:set="@{node}.package"/>
+            <zip destfile="${host.packages.dir}/${ant.project.name}-@{label}.zip" if:set="@{node}.package">
+                <zipfileset dir="${host.packages.dir}/${ant.project.name}-@{label}" prefix="${ant.project.name}-@{label}" excludes="launch.sh"/>
+                <zipfileset dir="${host.packages.dir}/${ant.project.name}-@{label}" prefix="${ant.project.name}-@{label}" includes="launch.sh" filemode="755"/>
+            </zip>
+            <echo message="  @{label}: ${host.packages.dir}/${ant.project.name}-@{label}.zip  (copy to ${@{node}.address} and run launch.bat or launch.sh)" if:set="@{node}.package"/>
+        </sequential>
+    </macrodef>
+
+    <target name="host-packages" depends="prepare-runtime,resolve-deployment-modes,generate-workflow-bindings"
+            description="Package each host that runs on another machine (-Dhost.packages=all packages every host)">
+        <echo message="Packaging hosts for ${process.title} on ${infrastructure.definition.name}, rules ${rule.version}..."/>
+        <package-host node="p1" label="P1"/><package-host node="p2" label="P2"/><package-host node="p3" label="P3"/>
+        <package-host node="p4" label="P4"/><package-host node="p5" label="P5"/><package-host node="p6" label="P6"/>
+        <condition property="host.packages.none"><not><or>
+            <isset property="p1.package"/><isset property="p2.package"/><isset property="p3.package"/>
+            <isset property="p4.package"/><isset property="p5.package"/><isset property="p6.package"/>
+        </or></not></condition>
+        <echo message="Every host this deployment uses runs on this machine; nothing to package (-Dhost.packages=all packages them anyway)." if:set="host.packages.none"/>
+        <echo message="Start each packaged host on its machine, then run this launcher here (the ip0 machine, ${ip0.address}) with the same settings." unless:set="host.packages.none"/>
+    </target>
+
     <target name="help" description="Usage">
         <echo message="ant                      initialise, run ${workflow.process.name} and collect (default)"/>
         <echo message="ant analyse              analyse the Monitor database after a run"/>
         <echo message="-Dtoken.count=N          tokens to fire (default ${token.count})"/>
         <echo message="-Dhost.address=127.0.0.1 run every host on this machine"/>
         <echo message="-Dp1.mode=local|remote   start or skip a host (default auto)"/>
+        <echo message="-Dinfrastructure=MultiHost  use InfrastructureDefinitionFolder/MultiHost.json"/>
+        <echo message="ant host-packages        package each host that runs on another machine"/>
     </target>
 </project>

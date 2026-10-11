@@ -1,7 +1,8 @@
 # Physical infrastructure
 
 All Petri-net, healthcare and financial examples share
-[SingleHost.json](SingleHost.json). It defines the physical P1–P6 nodes, their
+[SingleHost.json](SingleHost.json); [MultiHost.json](MultiHost.json) spreads the
+same nodes over three machines. Each defines the physical P1–P6 nodes, their
 channels, address and fixed base ports. Service functions and workflow topology
 are selected separately, so changing a service function leaves its network
 endpoint unchanged.
@@ -34,16 +35,19 @@ host override to its isolated copy of the shared definition and generates the
 matching RuleML; source configuration is preserved. Service choice does not
 select an address or allocate a port.
 
-The token generators use `-infrastructure SingleHost`. Each deployment profile
-selects this physical file and a [service deployment](../ServiceDeploymentFolder/README.md),
+The token generators use the infrastructure the run selects (`SingleHost` unless
+`-Dinfrastructure` names another). Each deployment profile selects this physical file and a [service deployment](../ServiceDeploymentFolder/README.md),
 then runtime preparation generates `RuleBase/Generated/InfrastructureDeployment.ruleml.xml`.
 There are no per-model network snapshots to synchronize manually.
 
-For a distributed arrangement, create another physical definition with the
-appropriate node/channel/address mapping and fixed ports, then select it in the
-deployment profile and launcher. The `host.address` override is restricted to
-single-host arrangements. Review the existing administrative service placement
-when distributing nodes; those operations currently use their existing channels.
+For several machines, use [MultiHost.json](MultiHost.json) as the starting point:
+one channel per machine (`ip0` is the machine that runs the launcher and Monitor,
+then `ip1`, `ip2`, ...), each with that machine's address. Select it for a run with
+`-Dinfrastructure=MultiHost`; the profile's own choice stays unchanged. The
+`host.address` override is restricted to single-host arrangements. Each host's
+initialisation and collector services follow it onto its channel, and
+`ant host-packages` builds a self-contained package for every host on another
+machine. See the [tutorial](../../Tutorial.md#7-run-on-several-machines).
 
 ## Follow the configuration
 
