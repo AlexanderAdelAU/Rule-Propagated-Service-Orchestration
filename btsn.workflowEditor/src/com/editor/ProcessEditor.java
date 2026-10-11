@@ -547,8 +547,8 @@ public class ProcessEditor extends JFrame {
 
         toolbar.add(Box.createHorizontalStrut(5));
 
-        JButton runBtn = new JButton("Run");
-        runBtn.setToolTipText("Run this process's Build and Run launcher, then analyse it and load the result into the replay");
+        JButton runBtn = new JButton("Run on hosts");
+        runBtn.setToolTipText("Run this process on its hosts (real processes) with its Build and Run launcher, then analyse the recorded run and load it into the replay");
         runBtn.setFocusPainted(false);
         runBtn.addActionListener(e -> openRunWindow());
         toolbar.add(runBtn);
@@ -1296,7 +1296,7 @@ public class ProcessEditor extends JFrame {
             if (processFile.equals(currentFile)) {
                 animationPanel.loadAnalysisFile(analysis);
                 animationPanel.highlightPlay(true);
-                statusLabel.setText(" Run finished and analysed: press Play to replay it");
+                statusLabel.setText(" Run on the hosts finished and analysed: press Play to replay the recorded run");
             }
             else JOptionPane.showMessageDialog(this, "The run finished, but another process is open now. Its analysis is in " + analysis.getName() + ".", "Run", JOptionPane.INFORMATION_MESSAGE);
         }, () -> {

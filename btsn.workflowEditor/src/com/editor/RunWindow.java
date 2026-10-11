@@ -2,6 +2,7 @@ package com.editor;
 
 import java.awt.*;
 import java.io.File;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.prefs.Preferences;
@@ -21,9 +22,15 @@ public final class RunWindow extends JFrame {
     private final Runnable onPlay;
     /** What to do once a run has been analysed; shown when the run completes. */
     final JPanel nextSteps = new JPanel(new GridBagLayout());
-    final JButton play = new JButton("\u25B6 Play the replay"), timing = new JButton("Elapsed time and queue wait chart"),
+    final JButton play = new JButton("\u25B6 Replay the recorded run"), timing = new JButton("Elapsed time and queue wait chart"),
         spatial = new JButton("Token spatial view"), report = new JButton("Open analysis report");
     private File lastAnalysis;
+    /** The real host processes behind the run, from their own logs. */
+    private RunHosts hosts;
+    final HostModel hostModel = new HostModel();
+    private final javax.swing.Timer hostTimer = new javax.swing.Timer(1000, e -> refreshHosts());
+    private long runStartedAt;
+    private JScrollPane hostPane;
     final JComboBox<File> launcher;
     final JCheckBox allHostsHere = new JCheckBox("Run every host on this computer (127.0.0.1)", true);
     final JTextField ant = new JTextField(28);
@@ -33,10 +40,10 @@ public final class RunWindow extends JFrame {
     private final JLabel status = new JLabel(" ");
     private LauncherRun run;
 
-    private static final String[] STEP_NAMES = {"Build and start", "1 Initialise", "2 Run", "3 Collect", "Settle", "Analyse", "Replay"};
+    private static final String[] STEP_NAMES = {"Build and start hosts", "1 Initialise", "2 Run", "3 Collect", "Settle", "Analyse", "Replay"};
 
     public RunWindow(Window owner, File root, String processName, List<File> launchers, Consumer<File> onAnalysis, Runnable onPlay) {
-        super("Run " + processName);
+        super("Run on hosts: " + processName);
         this.root = root; this.processName = processName; this.onAnalysis = onAnalysis; this.onPlay = onPlay;
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() { @Override public void windowClosing(java.awt.event.WindowEvent e) { closeWindow(); } });
@@ -77,8 +84,24 @@ public final class RunWindow extends JFrame {
 
         console.setEditable(false);
         console.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        console.setRows(16);
         JScrollPane consolePane = new JScrollPane(console);
         consolePane.setBorder(BorderFactory.createTitledBorder("Output"));
+
+        JTable hostTable = new JTable(hostModel);
+        hostTable.setRowHeight(20);
+        hostTable.setFillsViewportHeight(true);
+        hostTable.getColumnModel().getColumn(0).setPreferredWidth(90);
+        hostTable.getColumnModel().getColumn(1).setPreferredWidth(150);
+        hostTable.getColumnModel().getColumn(2).setPreferredWidth(190);
+        hostTable.getColumnModel().getColumn(3).setPreferredWidth(170);
+        hostTable.getColumnModel().getColumn(4).setPreferredWidth(95);
+        hostTable.setToolTipText("Each row is a real host process started for this run, read from its own log beside the launcher");
+        hostPane = new JScrollPane(hostTable);
+        hostPane.setBorder(BorderFactory.createTitledBorder("Hosts (real processes, from their own logs)"));
+        launcher.addActionListener(e -> planHosts());
+        allHostsHere.addActionListener(e -> planHosts());
+        planHosts();
 
         start.addActionListener(e -> startRun());
         stop.addActionListener(e -> { if (run != null) { status.setText("Stopping..."); stop.setEnabled(false); new Thread(run::stop, "stop-run").start(); } });
@@ -91,7 +114,7 @@ public final class RunWindow extends JFrame {
         status.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
 
         nextSteps.setBorder(BorderFactory.createTitledBorder("Next steps"));
-        addStep(0, play, "Watch the tokens move through the design in the editor");
+        addStep(0, play, "Watch the recorded tokens move through the design (events measured at the hosts)");
         addStep(1, timing, "Elapsed time and the longest queue wait per workflow, for each version");
         addStep(2, spatial, "Token activity at each place over time");
         addStep(3, report, "The full analyzer report");
@@ -105,7 +128,7 @@ public final class RunWindow extends JFrame {
         south.add(nextSteps, BorderLayout.NORTH); south.add(bottom, BorderLayout.SOUTH);
 
         JPanel north = new JPanel(new BorderLayout());
-        north.add(form, BorderLayout.NORTH); north.add(progress, BorderLayout.SOUTH);
+        north.add(form, BorderLayout.NORTH); north.add(progress, BorderLayout.CENTER); north.add(hostPane, BorderLayout.SOUTH);
         JPanel content = new JPanel(new BorderLayout(6, 6));
         content.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         content.add(north, BorderLayout.NORTH); content.add(consolePane, BorderLayout.CENTER); content.add(south, BorderLayout.SOUTH);
@@ -126,10 +149,14 @@ public final class RunWindow extends JFrame {
         console.setText("");
         resetSteps();
         nextSteps.setVisible(false);
+        planHosts();
+        runStartedAt = System.currentTimeMillis();
+        hosts.started(runStartedAt);
+        hostTimer.start();
         start.setEnabled(false); stop.setEnabled(true); launcher.setEnabled(false); allHostsHere.setEnabled(false);
         status.setText("Running " + selected.getName() + "...");
         run = new LauncherRun(selected, root, LauncherRun.analysisFileFor(root, processName), allHostsHere.isSelected(), ant.getText(), new LauncherRun.Listener() {
-            public void line(String text) { SwingUtilities.invokeLater(() -> append(text)); }
+            public void line(String text) { SwingUtilities.invokeLater(() -> { append(text); hostLine(text); }); }
             public void phase(LauncherRun.Phase phase, String detail) { SwingUtilities.invokeLater(() -> showPhase(phase)); }
             public void finished(LauncherRun.Phase outcome, File analysis, String message) { SwingUtilities.invokeLater(() -> done(outcome, analysis, message)); }
         });
@@ -161,6 +188,12 @@ public final class RunWindow extends JFrame {
 
     private void done(LauncherRun.Phase outcome, File analysis, String message) {
         start.setEnabled(true); stop.setEnabled(false); launcher.setEnabled(true); allHostsHere.setEnabled(true);
+        hostTimer.stop();
+        hosts.refresh(); hosts.stopped(); hostModel.fireTableDataChanged();
+        java.text.SimpleDateFormat clock = new java.text.SimpleDateFormat("HH:mm:ss");
+        long end = System.currentTimeMillis();
+        if (outcome == LauncherRun.Phase.DONE)
+            append("Ran " + clock.format(new Date(runStartedAt)) + " to " + clock.format(new Date(end)) + " (" + (end - runStartedAt) / 1000 + " s) on " + hosts.describe());
         if (outcome == LauncherRun.Phase.DONE && analysis != null) {
             onAnalysis.accept(analysis);
             lastAnalysis = analysis;
@@ -172,6 +205,42 @@ public final class RunWindow extends JFrame {
         } else {
             for (JLabel step : steps) if (step.getBackground().equals(new Color(0xFFF1C2))) step.setBackground(new Color(0xF6D0D0));
             status.setText(message);
+        }
+    }
+
+    private void planHosts() {
+        File selected = (File)launcher.getSelectedItem();
+        if (selected == null || isRunning()) return;
+        hosts = RunHosts.forLauncher(selected, root, allHostsHere.isSelected());
+        hostModel.fireTableDataChanged();
+        // Just tall enough for this launcher's hosts (up to six places and Monitor).
+        hostPane.setPreferredSize(new Dimension(700, 20 * Math.min(7, hosts.hosts.size()) + 50));
+        hostPane.revalidate();
+    }
+
+    private void refreshHosts() { if (hosts != null) { hosts.refresh(); hostModel.fireTableDataChanged(); } }
+
+    private void hostLine(String text) {
+        if (hosts == null) return;
+        hosts.launcherLine(text);
+        if (text.startsWith("[editor] Hosts stopped")) { hosts.refresh(); hosts.stopped(); hostModel.fireTableDataChanged(); }
+    }
+
+    /** Host | Endpoint | Process | State | Service calls */
+    final class HostModel extends javax.swing.table.AbstractTableModel {
+        private final String[] columns = {"Host", "Endpoint", "Process", "State", "Service calls"};
+        public int getRowCount() { return hosts == null ? 0 : hosts.hosts.size(); }
+        public int getColumnCount() { return columns.length; }
+        @Override public String getColumnName(int c) { return columns[c]; }
+        public Object getValueAt(int row, int column) {
+            RunHosts.Host h = hosts.hosts.get(row);
+            switch (column) {
+                case 0: return h.name;
+                case 1: return h.endpoint;
+                case 2: return h.process;
+                case 3: return h.state;
+                default: return "Monitor".equals(h.name) ? "" : String.valueOf(h.calls);
+            }
         }
     }
 

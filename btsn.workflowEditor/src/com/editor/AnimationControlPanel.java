@@ -79,7 +79,7 @@ public class AnimationControlPanel extends JPanel {
         loadLastAnalysisDirectory();
         
         setLayout(new BorderLayout(5, 5));
-        setBorder(BorderFactory.createTitledBorder("Token Animation"));
+        setBorder(BorderFactory.createTitledBorder("Token replay (a recorded run, not a simulation)"));
         setPreferredSize(new Dimension(0, 140));
         
         initComponents();
@@ -278,7 +278,7 @@ public class AnimationControlPanel extends JPanel {
             }
             
             loadAnalysisText(content.toString());
-            statusLabel.setText("Loaded: " + file.getName());
+            statusLabel.setText("Recorded run: " + file.getName() + ", saved " + new java.text.SimpleDateFormat("d MMM HH:mm").format(new java.util.Date(file.lastModified())) + " (events measured at the hosts)");
             
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,

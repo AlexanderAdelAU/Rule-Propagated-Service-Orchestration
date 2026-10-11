@@ -150,6 +150,8 @@ public final class LauncherRun {
             if (generated == null && completed == null) continue;
             String line = versions.get(i) + ": " + generated + " generated, " + completed + " completed";
             if (structure != null) line += ", structure " + structure;
+            String low = first(part, "Latency: n=\\d+.*?min/max=(\\d+)/"), high = first(part, "Latency: n=\\d+.*?min/max=\\d+/(\\d+)ms"), median = first(part, "Latency: n=\\d+.*?p50=(\\d+)ms");
+            if (low != null && high != null) line += ", latency " + low + " to " + high + " ms" + (median == null ? "" : " (median " + median + " ms)");
             if (generated != null && completed != null && !generated.equals(completed)) line += "  <-- " + (Integer.parseInt(generated) - Integer.parseInt(completed)) + " did not complete";
             lines.add(line);
         }

@@ -19,7 +19,7 @@ on** box show the node it is deployed to.*
 | **1. Design the process** | Draw the net, choose the service and operation for P2, set the guards, then save | [Design](#1-design-the-process) |
 | **2. Deploy the process** | Choose the node P2 runs on, then save the service deployment | [Deploy](#2-deploy-the-process) |
 | **3. Create Build and Run** | Choose the event generators and the number of tokens; the editor writes the Ant launcher | [Build and Run](#3-create-build-and-run) |
-| **4. Run it** | Click **Run**: the editor runs the launcher, analyses the run and loads the replay | [Run](#4-run-it) |
+| **4. Run it** | Click **Run on hosts**: the editor runs the launcher on real hosts, analyses the run and loads the replay | [Run](#4-run-it) |
 | **5. Show the results** | Analyse the run, view the charts and replay the tokens on the design | [Results](#5-show-the-results) |
 
 Finished copies of every file are included as `P2_Tutorial_*` ([list](#repository-artefacts)):
@@ -245,21 +245,33 @@ Click **Create**. For `My_P2_Workflow` the editor writes:
 
 ### Run from the editor
 
-Click **Run** in the toolbar. The Run window finds the process's launcher and does the whole run:
+Click **Run on hosts** in the toolbar. The Run window finds the process's launcher and does the whole run:
 
-1. **Builds and starts** the hosts, then follows the launcher through its three phases.
+1. **Builds and starts** the hosts, then follows the launcher through its three phases. The **Hosts** table shows each host process as it runs: its endpoint, its process number and machine, its state, and how many service calls it has completed.
 2. **Settles and stops.** When collection is done, it waits for Monitor to finish writing, then stops the launcher and every host it started.
 3. **Analyses.** It runs `analyse` and saves the report to `btsn.common/AnalysisFolder/PetriNet/Analysis_My_P2_Workflow.txt`, replacing any earlier analysis of the process.
 4. **Loads the replay.** It loads the analysis into the editor and highlights **Play** ([step 5](#replay-the-tokens-on-the-design)).
 
-The output ends with a summary of the run, for example `v001: 10 generated, 10 completed, structure OK`. It flags any version whose workflows did not all complete. Below it, **Next steps** offers:
+The output ends with a summary of the run:
+
+- **Per version**, measured: for example `v001: 10 generated, 10 completed, structure OK, latency 275 to 1220 ms (median 663 ms)`. It flags any version whose workflows did not all complete.
+- **Where and when it ran**: for example `Ran 17:51:00 to 17:52:15 (75 s) on P2_Place at 127.0.0.1:4002 (process 1084 on my-pc, 41 service calls); Monitor (...)`.
+
+Below it, **Next steps** offers:
 
 | Button | Opens |
 |---|---|
-| **Play the replay** | The editor, replaying the tokens on the design |
+| **Replay the recorded run** | The editor, replaying the recorded tokens on the design |
 | **Elapsed time and queue wait chart** | Monitor's per-workflow timing chart, for each version |
 | **Token spatial view** | Monitor's view of activity at each place over time |
 | **Open analysis report** | The full analyzer report |
+
+> **This is a real run, not a simulation.**
+>
+> - **Real hosts.** Each place runs as its own host process, a generic RPSO host carrying that place's rules. Tokens travel between hosts as network messages on the endpoints shown in the Hosts table.
+> - **Real records.** Every host records what it did, with its own timestamps. After the run, Monitor collects those records from the hosts.
+> - **A replay, not a model.** The analysis, the charts and the replay are all built from those collected records: the replay shows what happened, in the order and at the times the hosts recorded it.
+> - **Across machines.** Untick **Run every host on this computer**, and the same launcher drives hosts on the machines named in `SingleHost.json`.
 
 ![The Run window after a completed run of the P2 tutorial: the launcher, the option to run every host on this computer, the Ant location, the analysis file, the seven steps from Build and start to Replay all completed, and the analyzer report in the output.](images/p2-tutorial-run.png)
 

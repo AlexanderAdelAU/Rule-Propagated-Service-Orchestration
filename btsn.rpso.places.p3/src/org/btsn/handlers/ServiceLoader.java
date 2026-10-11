@@ -449,6 +449,8 @@ public class ServiceLoader {
 
     public static void main(String[] args) throws Exception {
         logger.info("=== Starting Rule-Driven ServiceLoader ===");
+        // "pid@hostname": lets the editor's Run window show which real process and machine this host is.
+        logger.info("Host process: " + java.lang.management.ManagementFactory.getRuntimeMXBean().getName().replaceFirst("@", " on "));
         
         // Parse command-line arguments first
         parseArguments(args);

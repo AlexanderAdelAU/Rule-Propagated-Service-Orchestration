@@ -25,11 +25,41 @@ public final class RunFromEditorCheck {
         // The closing summary: per version, generated and completed, flagged when some did not complete.
         String single = new String(Files.readAllBytes(repository.toPath().resolve("btsn.workflowEditor/tests/fixtures/Analysis_P2_single_generator.txt")), StandardCharsets.UTF_8);
         List<String> summary = LauncherRun.summarise(single);
-        check(summary.get(0).equals("=== RUN COMPLETE ===") && summary.contains("v001: 10 generated, 10 completed, structure OK"), "Summary: " + summary);
+        check(summary.get(0).equals("=== RUN COMPLETE ===") && summary.contains("v001: 10 generated, 10 completed, structure OK, latency 152 to 885 ms (median 260 ms)"), "Summary: " + summary);
         String twoVersions = "WORKFLOW BASE: 1000000 (v001)\n   Generated workflows:       10\n   Completed workflows:       10\n   Structural result:         [OK]\n"
             + "WORKFLOW BASE: 2000000 (v002)\n   Generated workflows:       10\n   Completed workflows:       8\n";
         List<String> partial = LauncherRun.summarise(twoVersions);
         check(partial.contains("v001: 10 generated, 10 completed, structure OK") && partial.contains("v002: 10 generated, 8 completed  <-- 2 did not complete"), "Partial summary: " + partial);
+        // Hosts: the launcher's hosts and endpoints, then live state from each host's own log.
+        File p2Launcher = launchers.get(0);
+        RunHosts here = RunHosts.forLauncher(p2Launcher, repository, true);
+        check(here.hosts.size() == 2 && here.hosts.get(0).name.equals("P2_Place") && here.hosts.get(0).endpoint.equals("127.0.0.1:4002") && here.hosts.get(1).name.equals("Monitor"), "Hosts: " + here.describe());
+        check(RunHosts.forLauncher(p2Launcher, repository, false).hosts.get(0).endpoint.matches("\\d+\\.\\d+\\.\\d+\\.\\d+:4002"), "Configured address not used");
+        Path logDir = Files.createTempDirectory("run-hosts-");
+        Path fakeLauncher = logDir.resolve("X_BuildAndRun.xml");
+        Files.write(fakeLauncher, "<property name=\"run.p2\" value=\"true\"/>".getBytes(StandardCharsets.UTF_8));
+        Path p2Log = logDir.resolve("P2_Place.out.txt");
+        Files.write(p2Log, "old run\n".getBytes(StandardCharsets.UTF_8));
+        p2Log.toFile().setLastModified(System.currentTimeMillis() - 60_000);
+        RunHosts live = RunHosts.forLauncher(fakeLauncher.toFile(), repository, true);
+        live.started(System.currentTimeMillis());
+        live.refresh();
+        check(live.hosts.get(0).state.equals("waiting"), "An earlier run's log was read: " + live.hosts.get(0).state);
+        Files.write(p2Log, (" INFO [main] (?:?) - Host process: 4242 on lab-pc\n Service Handler is listening on UDP port: 14002\n"
+            + " INFO - SERVICE COMPLETE: org.btsn.places.P2_Place.processToken completed in 3ms\n INFO - SERVICE COMPLE").getBytes(StandardCharsets.UTF_8));
+        live.refresh();
+        RunHosts.Host p2 = live.hosts.get(0);
+        check(p2.state.equals("running") && p2.process.equals("process 4242 on lab-pc") && p2.calls == 1, "Live host: " + p2.state + " / " + p2.process + " / " + p2.calls);
+        Files.write(p2Log, ("TE: org.btsn.places.P2_Place.processToken completed in 4ms\n INFO - SERVICE COMPLETE: org.btsn.places.P2_CollectorService.collectAllData completed\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+        live.refresh();
+        check(p2.calls == 2, "A call split across refreshes, or an admin call, counted wrongly: " + p2.calls);
+        live.stopped();
+        check(p2.state.equals("stopped") && live.describe().startsWith("P2_Place at 127.0.0.1:4002 (process 4242 on lab-pc, 2 service calls)"), "Described: " + live.describe());
+        RunHosts away = RunHosts.forLauncher(fakeLauncher.toFile(), repository, false);
+        away.started(System.currentTimeMillis());
+        away.launcherLine("  [p2] Skipping - running on remote host");
+        check(away.hosts.get(0).remote && away.hosts.get(0).state.startsWith("remote host"), "Remote host not shown");
+
         // A project reached through ".." (e.g. a process opened as ...\\btsn.workflowEditor\\..\\btsn.common\\...) gives real paths.
         File dotted = new File(repository, "btsn.workflowEditor/..");
         List<File> viaDots = LauncherRun.launchersFor(dotted, "petrinet/Workflow/P2_Tutorial_Workflow");
@@ -109,7 +139,7 @@ public final class RunFromEditorCheck {
         check(stopped.done.await(30, TimeUnit.SECONDS) && stopped.outcome == LauncherRun.Phase.STOPPED, "Stop did not stop the run: " + stopped.outcome);
         check(!alive(hostPid), "Host left running after Stop");
         check(!scratch.resolve("unused.txt").toFile().exists(), "Stopped run wrote an analysis");
-        System.out.println("PASS: Run from the editor: phases followed, hosts stopped with the launcher, analysis saved and summarised, Stop mid-run");
+        System.out.println("PASS: Run from the editor: phases followed, hosts stopped with the launcher, analysis saved and summarised, hosts read from their own logs, Stop mid-run");
     }
 
     /** Builds Ant's folder layout with a Launcher class that behaves like a BuildAndRun launcher. */
