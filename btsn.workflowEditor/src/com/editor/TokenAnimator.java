@@ -227,9 +227,10 @@ public class TokenAnimator {
     /** Deployment node (e.g. "P1") hosting this place's service instance, or "" when not deployed. */
     private String deploymentNode(ProcessElement place) {
         if (canvas == null || canvas.getServiceRegistry() == null) return "";
-        String instance = place.getServiceInstance();
-        if (instance == null || instance.isEmpty()) return "";
-        return canvas.getServiceRegistry().nodeForInstance(instance);
+        // The node the canvas shows for the place (its badge): by deployment instance, or by service
+        // when the deployment names services without instances (as the inventory example does).
+        String node = canvas.nodeFor(place);
+        return node == null ? "" : node;
     }
 
     /** Translate a runtime place/transition name into its canvas name; other names are unchanged. */

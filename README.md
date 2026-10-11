@@ -189,6 +189,9 @@ the same **T_in → P → T_out** unit.
 | Boolean Petri-net model | Produce `true` or `false` | Conditional routing, fork, buffering and input join |
 | Financial application | Validate, check credit/fraud, underwrite and decide | Fork checks, synchronize their results and route declared outcomes |
 | Emergency department | Triage, perform diagnostic operations, diagnose and treat | Select direct/diagnostic paths, fork diagnostics and synchronize results |
+| Inventory example | Reserve stock (stateful), restock with a lead time | Route on string results, loop between two hosts, carry state changes as messages |
+
+To add your own service, follow the inventory example in [Tutorial.md](Tutorial.md#6-add-your-own-service).
 
 P1–Pn denotes the general model positions. This repository currently packages
 six numbered host projects; deployment determines which functions they run.

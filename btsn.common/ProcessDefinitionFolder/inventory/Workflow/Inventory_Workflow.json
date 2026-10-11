@@ -1,0 +1,234 @@
+{
+  "serviceDeployment": "ServiceDeploymentFolder/inventory/Inventory.json",
+   "processType":"PetriNet",
+  "elements": [
+    {
+      "id": "ORDERS",
+      "type": "EVENT_GENERATOR",
+      "x": 60,
+      "y": 160,
+      "width": 24,
+      "height": 60,
+      "label": "ORDERS",
+      "rotation": 0.0,
+      "generator_rate": "1000",
+      "token_version": "v001"
+    },
+    {
+      "id": "T_in_Inventory",
+      "type": "TRANSITION",
+      "x": 150,
+      "y": 160,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_Inventory",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10",
+      "fill_color": "#FF9933"
+    },
+    {
+      "id": "Inventory",
+      "type": "PLACE",
+      "x": 235,
+      "y": 165,
+      "width": 50,
+      "height": 50,
+      "label": "Inventory",
+      "service": "InventoryService",
+      "operations": [
+        {
+          "name": "reserve",
+          "returnAttribute": "inventoryResults",
+          "arguments": [
+            {"name": "token", "type": "String", "value": "String", "required": false}
+          ]
+        }
+      ],
+      "fill_color": "#66CCFF"
+    },
+    {
+      "id": "T_out_Inventory",
+      "type": "TRANSITION",
+      "x": 340,
+      "y": 160,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_Inventory",
+      "rotation": 0.0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out",
+      "fill_color": "#FF9933"
+    },
+    {
+      "id": "Shipped",
+      "type": "TRANSITION",
+      "x": 470,
+      "y": 160,
+      "width": 24,
+      "height": 60,
+      "label": "Shipped",
+      "rotation": 0.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    },
+    {
+      "id": "T_in_Supplier",
+      "type": "TRANSITION",
+      "x": 470,
+      "y": 300,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_Supplier",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10",
+      "fill_color": "#FF9933"
+    },
+    {
+      "id": "Supplier",
+      "type": "PLACE",
+      "x": 555,
+      "y": 305,
+      "width": 50,
+      "height": 50,
+      "label": "Supplier",
+      "service": "SupplierService",
+      "operations": [
+        {
+          "name": "restock",
+          "returnAttribute": "token",
+          "arguments": [
+            {"name": "inventoryResults", "type": "String", "value": "String", "required": false}
+          ]
+        }
+      ],
+      "fill_color": "#FFCC66"
+    },
+    {
+      "id": "T_out_Supplier",
+      "type": "TRANSITION",
+      "x": 660,
+      "y": 300,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_Supplier",
+      "rotation": 0.0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out",
+      "fill_color": "#FF9933"
+    },
+    {
+      "id": "Cancelled",
+      "type": "TRANSITION",
+      "x": 790,
+      "y": 300,
+      "width": 24,
+      "height": 60,
+      "label": "Cancelled",
+      "rotation": 0.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "ORDERS",
+      "target": "T_in_Inventory",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Inventory",
+      "target": "Inventory",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Inventory",
+      "target": "T_out_Inventory",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_Inventory",
+      "target": "Shipped",
+      "label": "reserved",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "reserved",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_Inventory",
+      "target": "T_in_Supplier",
+      "label": "out_of_stock",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "out_of_stock",
+      "endpoint": "",
+      "connection_type": "NETWORK",
+      "availability": 1.0
+    },
+    {
+      "source": "T_in_Supplier",
+      "target": "Supplier",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Supplier",
+      "target": "T_out_Supplier",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_Supplier",
+      "target": "T_in_Inventory",
+      "label": "restocked",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "restocked",
+      "endpoint": "",
+      "waypoints": [
+        {"x": 672, "y": 420},
+        {"x": 162, "y": 420}
+      ],
+      "connection_type": "NETWORK",
+      "availability": 1.0
+    },
+    {
+      "source": "T_out_Supplier",
+      "target": "Cancelled",
+      "label": "unavailable",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "unavailable",
+      "endpoint": ""
+    }
+  ],
+  "textElements": [
+    {
+      "x": 60,
+      "y": 60,
+      "text": "Inventory example: a stateful inventory (P1) and a supplier (P2) - see Tutorial.md, Add your own service",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    }
+  ]
+}

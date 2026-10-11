@@ -1,0 +1,26 @@
+{
+  "domain": "Inventory",
+  "purpose": "Example of extending RPSO with your own services: a stateful inventory and a supplier on separate hosts, routed on string results. Physical placement is defined separately by the service deployment.",
+  "services": [
+    {
+      "service": "InventoryService",
+      "implementationClass": "org.btsn.business.inventory.InventoryService",
+      "operation": "reserve",
+      "description": "Reserves one unit of stock for each order. The host keeps the stock count (5 at start) and adds any units the supplier delivered with the order.",
+      "returns": "Inventory results with the order and the stock left. Routes on \"reserved\" (ship the order) or \"out_of_stock\" (send it to the supplier).",
+      "inputs": ["token"],
+      "returnAttribute": "inventoryResults",
+      "status": "active"
+    },
+    {
+      "service": "SupplierService",
+      "implementationClass": "org.btsn.business.inventory.SupplierService",
+      "operation": "restock",
+      "description": "Restocks a backordered order after a lead time (300 ms), while it has deliveries left (1 at start, 3 units each).",
+      "returns": "The order, carrying the delivered units back to the inventory as its token. Routes on \"restocked\" (back to the inventory) or \"unavailable\" (cancel the order).",
+      "inputs": ["inventoryResults"],
+      "returnAttribute": "token",
+      "status": "active"
+    }
+  ]
+}

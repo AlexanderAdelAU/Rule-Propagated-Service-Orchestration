@@ -125,8 +125,10 @@ public final class BuildAndRunGenerator {
         File[] loaders = plan.root.listFiles(f -> f.isDirectory() && f.getName().matches("btsn\\..+\\.ProjectLoader"));
         if (loaders != null) { Arrays.sort(loaders); plan.folders.addAll(Arrays.asList(loaders)); }
         File preferred = new File(plan.root, "btsn." + (plan.domain.isEmpty() ? "petrinet" : plan.domain) + ".ProjectLoader");
+        // A domain without its own loader folder (e.g. one you add) uses the general models folder.
+        File models = new File(plan.root, "btsn.petrinet.ProjectLoader");
         Options o = plan.defaults;
-        o.folder = preferred.isDirectory() ? preferred : plan.folders.isEmpty() ? plan.root : plan.folders.get(0);
+        o.folder = preferred.isDirectory() ? preferred : models.isDirectory() ? models : plan.folders.isEmpty() ? plan.root : plan.folders.get(0);
         o.launcherName = base + "_BuildAndRun.xml";
         for (String id : plan.targets.keySet()) {
             Run run = new Run(); run.generatorId = id; run.intervalMs = plan.rates.get(id); run.version = plan.versions.get(id);
