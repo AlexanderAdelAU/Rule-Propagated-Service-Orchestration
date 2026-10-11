@@ -19,7 +19,11 @@ import java.util.stream.Collectors;
  * especially), holding their ports and Monitor's database. Stopping always takes the whole tree.
  */
 public final class LauncherRun {
-    public enum Phase { BUILD, INITIALISE, RUN, COLLECT, SETTLE, ANALYSE, DONE, FAILED, STOPPED }
+    /**
+     * The run's steps. Rules reach every host before any token flows: DEPLOY sends each version's rules,
+     * COMMIT is the hosts confirming them (their commitments), and only then are tokens fired.
+     */
+    public enum Phase { BUILD, INITIALISE, DEPLOY, COMMIT, FIRE, COLLECT, SETTLE, ANALYSE, DONE, FAILED, STOPPED }
 
     public interface Listener {
         void line(String text);
@@ -99,11 +103,12 @@ public final class LauncherRun {
         if (allHostsHere) args.add("-Dhost.address=127.0.0.1");
         process = start(args, null);
         boolean completed = false;
+        Phase current = Phase.BUILD;
         try (BufferedReader out = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
             for (String line; (line = out.readLine()) != null; ) {
                 listener.line(line);
-                Phase phase = phaseOf(line);
-                if (phase != null) listener.phase(phase, line.trim());
+                Phase phase = phaseOf(line, current);
+                if (phase != null && phase != current) { current = phase; listener.phase(phase, line.trim()); }
                 // The launcher's last line; earlier steps also print "... COMPLETED SUCCESSFULLY".
                 if (line.contains("Services are still running")) { completed = true; break; }
                 if (line.startsWith("BUILD FAILED")) break;
@@ -306,11 +311,18 @@ public final class LauncherRun {
         }
     }
 
-    /** The phase a launcher output line starts, if any. */
-    static Phase phaseOf(String line) {
+    /**
+     * The step a launcher output line moves the run to, if any. Commitments are also exchanged in
+     * initialisation and collection (their own rules); only those after the workflow's rules are sent
+     * mark the Commitments step, which is complete once tokens start to fire.
+     */
+    static Phase phaseOf(String line, Phase current) {
         if (line.contains("PHASE 1:")) return Phase.INITIALISE;
-        if (line.contains("PHASE 2:")) return Phase.RUN;
+        if (line.contains("PHASE 2:")) return Phase.DEPLOY;
         if (line.contains("PHASE 3:")) return Phase.COLLECT;
+        if ((current == Phase.DEPLOY || current == Phase.COMMIT) && line.contains("Commitment confirmed for")) return Phase.COMMIT;
+        if ((current == Phase.DEPLOY || current == Phase.COMMIT) && line.matches("^Deploying .*\\((v\\d+)\\).*")) return Phase.DEPLOY;
+        if ((current == Phase.DEPLOY || current == Phase.COMMIT) && line.matches("^Firing \\d+ tokens from .*")) return Phase.FIRE;
         return null;
     }
 

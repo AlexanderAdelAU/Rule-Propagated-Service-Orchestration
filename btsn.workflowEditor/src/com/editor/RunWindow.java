@@ -40,7 +40,7 @@ public final class RunWindow extends JFrame {
     private final JLabel status = new JLabel(" ");
     private LauncherRun run;
 
-    private static final String[] STEP_NAMES = {"Build and start hosts", "1 Initialise", "2 Run", "3 Collect", "Settle", "Analyse", "Replay"};
+    private static final String[] STEP_NAMES = {"Build and start hosts", "Initialise", "Deploy rules", "Commitments received", "Fire tokens", "Collect", "Settle", "Analyse", "Replay"};
 
     public RunWindow(Window owner, File root, String processName, List<File> launchers, Consumer<File> onAnalysis, Runnable onPlay) {
         super("Run on hosts: " + processName);
@@ -95,7 +95,8 @@ public final class RunWindow extends JFrame {
         hostTable.getColumnModel().getColumn(1).setPreferredWidth(150);
         hostTable.getColumnModel().getColumn(2).setPreferredWidth(190);
         hostTable.getColumnModel().getColumn(3).setPreferredWidth(170);
-        hostTable.getColumnModel().getColumn(4).setPreferredWidth(95);
+        hostTable.getColumnModel().getColumn(4).setPreferredWidth(130);
+        hostTable.getColumnModel().getColumn(5).setPreferredWidth(95);
         hostTable.setToolTipText("Each row is a real host process started for this run, read from its own log beside the launcher");
         hostPane = new JScrollPane(hostTable);
         hostPane.setBorder(BorderFactory.createTitledBorder("Hosts (real processes, from their own logs)"));
@@ -174,9 +175,9 @@ public final class RunWindow extends JFrame {
     private void showPhase(LauncherRun.Phase phase) {
         int index;
         switch (phase) {
-            case BUILD: index = 0; break; case INITIALISE: index = 1; break; case RUN: index = 2; break;
-            case COLLECT: index = 3; break; case SETTLE: index = 4; break; case ANALYSE: index = 5; break;
-            case DONE: index = 6; break;
+            case BUILD: index = 0; break; case INITIALISE: index = 1; break; case DEPLOY: index = 2; break;
+            case COMMIT: index = 3; break; case FIRE: index = 4; break; case COLLECT: index = 5; break;
+            case SETTLE: index = 6; break; case ANALYSE: index = 7; break; case DONE: index = 8; break;
             default: return;
         }
         for (int i = 0; i < steps.length; i++) {
@@ -228,7 +229,7 @@ public final class RunWindow extends JFrame {
 
     /** Host | Endpoint | Process | State | Service calls */
     final class HostModel extends javax.swing.table.AbstractTableModel {
-        private final String[] columns = {"Host", "Endpoint", "Process", "State", "Service calls"};
+        private final String[] columns = {"Host", "Endpoint", "Process", "State", "Rules committed", "Service calls"};
         public int getRowCount() { return hosts == null ? 0 : hosts.hosts.size(); }
         public int getColumnCount() { return columns.length; }
         @Override public String getColumnName(int c) { return columns[c]; }
@@ -239,6 +240,7 @@ public final class RunWindow extends JFrame {
                 case 1: return h.endpoint;
                 case 2: return h.process;
                 case 3: return h.state;
+                case 4: return String.join(", ", h.committed);
                 default: return "Monitor".equals(h.name) ? "" : String.valueOf(h.calls);
             }
         }

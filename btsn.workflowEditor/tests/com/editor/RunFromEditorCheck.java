@@ -19,7 +19,12 @@ public final class RunFromEditorCheck {
 
     private static void run(String[] args) throws Exception {
         File repository = new File(args[0]).getCanonicalFile();
-        check(LauncherRun.phaseOf("=== PHASE 2: WORKFLOW EXECUTION ===") == LauncherRun.Phase.RUN && LauncherRun.phaseOf("Deploying") == null, "Phase lines");
+        // Steps: commitments in initialisation (v999) are not the workflow's; those after its rules are sent are.
+        check(LauncherRun.phaseOf("=== PHASE 2: WORKFLOW EXECUTION ===", LauncherRun.Phase.INITIALISE) == LauncherRun.Phase.DEPLOY, "Phase 2 starts rule deployment");
+        check(LauncherRun.phaseOf("DEBUG [main] (?:?) - Commitment confirmed for P2_InitializationService:purgeAndInitialize in 100ms", LauncherRun.Phase.INITIALISE) == null, "Initialisation commitment taken as the workflow's");
+        check(LauncherRun.phaseOf("DEBUG [main] (?:?) - Commitment confirmed for P2_Place:processToken in 101ms", LauncherRun.Phase.DEPLOY) == LauncherRun.Phase.COMMIT, "Workflow commitment not seen");
+        check(LauncherRun.phaseOf("Deploying petrinet/Workflow/X (v002) for EG6...", LauncherRun.Phase.COMMIT) == LauncherRun.Phase.DEPLOY, "Second version's deployment not seen");
+        check(LauncherRun.phaseOf("Firing 10 tokens from EG11 (v001) to P2_Place.processToken...", LauncherRun.Phase.COMMIT) == LauncherRun.Phase.FIRE, "Firing not seen");
         List<File> launchers = LauncherRun.launchersFor(repository, "petrinet/Workflow/P2_Tutorial_Workflow");
         check(!launchers.isEmpty() && launchers.get(0).getName().equals("P2_Tutorial_Workflow_BuildAndRun.xml"), "P2 launcher not found first: " + launchers);
         // The closing summary: per version, generated and completed, flagged when some did not complete.
@@ -58,6 +63,20 @@ public final class RunFromEditorCheck {
         RunHosts away = RunHosts.forLauncher(fakeLauncher.toFile(), repository, false);
         away.started(System.currentTimeMillis());
         away.launcherLine("  [p2] Skipping - running on remote host");
+        // Commitments, per host: admin services commit for their host.
+        RunHosts committing = RunHosts.forLauncher(fakeLauncher.toFile(), repository, true);
+        committing.started(System.currentTimeMillis());
+        for (String line : new String[] {
+                " INFO [CommitmentListener-v999] (?:?) - [OK] UDP commitment confirmation received: v999:1",
+                "DEBUG [main] (?:?) - Commitment confirmed for P2_InitializationService:purgeAndInitialize in 100ms",
+                " INFO [CommitmentListener-v999] (?:?) - [OK] UDP commitment confirmation received: v999:2",
+                "DEBUG [main] (?:?) - Commitment confirmed for Monitor_InitializationService:purgeAndInitialize in 101ms",
+                " INFO [CommitmentListener-v001] (?:?) - [OK] UDP commitment confirmation received: v001:1",
+                "DEBUG [main] (?:?) - Commitment confirmed for P2_Place:processToken in 101ms",
+                " INFO [CommitmentListener-v002] (?:?) - [OK] UDP commitment confirmation received: v002:1",
+                "DEBUG [main] (?:?) - Commitment confirmed for P2_Place:processToken in 101ms"})
+            committing.launcherLine(line);
+        check(committing.hosts.get(0).committed.equals(Arrays.asList("v999", "v001", "v002")) && committing.hosts.get(1).committed.equals(Arrays.asList("v999")), "Commitments: " + committing.hosts.get(0).committed + " / " + committing.hosts.get(1).committed);
         check(away.hosts.get(0).remote && away.hosts.get(0).state.startsWith("remote host"), "Remote host not shown");
 
         // A project reached through ".." (e.g. a process opened as ...\\btsn.workflowEditor\\..\\btsn.common\\...) gives real paths.
@@ -119,7 +138,7 @@ public final class RunFromEditorCheck {
         run.start();
         check(complete.done.await(60, TimeUnit.SECONDS), "Run did not finish");
         check(complete.outcome == LauncherRun.Phase.DONE && analysis.equals(complete.analysis), "Run outcome " + complete.outcome + ": " + complete.message + "\n" + complete.lines);
-        check(complete.phases.containsAll(Arrays.asList(LauncherRun.Phase.BUILD, LauncherRun.Phase.INITIALISE, LauncherRun.Phase.RUN,
+        check(complete.phases.containsAll(Arrays.asList(LauncherRun.Phase.BUILD, LauncherRun.Phase.INITIALISE, LauncherRun.Phase.DEPLOY, LauncherRun.Phase.COMMIT, LauncherRun.Phase.FIRE,
             LauncherRun.Phase.COLLECT, LauncherRun.Phase.SETTLE, LauncherRun.Phase.ANALYSE, LauncherRun.Phase.DONE)), "Phases " + complete.phases);
         check(complete.lines.stream().anyMatch(l -> l.contains("-Dhost.address=127.0.0.1")), "Local hosts option not passed");
         String saved = new String(Files.readAllBytes(analysis.toPath()), StandardCharsets.UTF_8);
@@ -139,7 +158,7 @@ public final class RunFromEditorCheck {
         check(stopped.done.await(30, TimeUnit.SECONDS) && stopped.outcome == LauncherRun.Phase.STOPPED, "Stop did not stop the run: " + stopped.outcome);
         check(!alive(hostPid), "Host left running after Stop");
         check(!scratch.resolve("unused.txt").toFile().exists(), "Stopped run wrote an analysis");
-        System.out.println("PASS: Run from the editor: phases followed, hosts stopped with the launcher, analysis saved and summarised, hosts read from their own logs, Stop mid-run");
+        System.out.println("PASS: Run from the editor: phases followed, hosts stopped with the launcher, analysis saved and summarised, hosts read from their own logs, rule commitments per host, Stop mid-run");
     }
 
     /** Builds Ant's folder layout with a Launcher class that behaves like a BuildAndRun launcher. */
@@ -160,6 +179,10 @@ public final class RunFromEditorCheck {
             + "    System.out.println(\"=== PHASE 1: DATABASE INITIALIZATION ===\");\n"
             + "    System.out.println(\" INFO [main] (?:?) - === JSON-BASED DEPLOYMENT COMPLETED SUCCESSFULLY ===\");\n"
             + "    System.out.println(\"=== PHASE 2: WORKFLOW EXECUTION ===\");\n"
+            + "    System.out.println(\"Deploying petrinet/Workflow/Demo (v001) for EG11...\");\n"
+            + "    System.out.println(\" INFO [CommitmentListener-v001] (?:?) - [OK] UDP commitment confirmation received: v001:1\");\n"
+            + "    System.out.println(\"DEBUG [main] (?:?) - Commitment confirmed for P2_Place:processToken in 101ms\");\n"
+            + "    System.out.println(\"Firing 10 tokens from EG11 (v001) to P2_Place.processToken...\");\n"
             + "    Process host = new ProcessBuilder(\"sleep\", \"600\").start();\n"
             + "    Files.write(scratch.resolve(\"host.pid\"), String.valueOf(host.pid()).getBytes());\n"
             + "    if (Files.exists(scratch.resolve(\"hang\"))) { host.waitFor(); return; }\n"

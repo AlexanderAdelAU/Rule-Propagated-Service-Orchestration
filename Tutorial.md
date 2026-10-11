@@ -247,7 +247,12 @@ Click **Create**. For `My_P2_Workflow` the editor writes:
 
 Click **Run on hosts** in the toolbar. The Run window finds the process's launcher and does the whole run:
 
-1. **Builds and starts** the hosts, then follows the launcher through its three phases. The **Hosts** table shows each host process as it runs: its endpoint, its process number and machine, its state, and how many service calls it has completed.
+1. **Builds and starts** the hosts, then follows the launcher step by step:
+
+   **Initialise → Deploy rules → Commitments received → Fire tokens → Collect**
+
+   - **Rules before tokens.** No token is fired until every host has committed to its rules. Each host confirms each version of the rules it is sent, and the launcher waits for those confirmations.
+   - **Hosts table.** It shows each host process as it runs: its endpoint, its process number and machine, its state, the rule versions it has committed (for example `v999, v001, v002`) and how many service calls it has completed.
 2. **Settles and stops.** When collection is done, it waits for Monitor to finish writing, then stops the launcher and every host it started.
 3. **Analyses.** It runs `analyse` and saves the report to `btsn.common/AnalysisFolder/PetriNet/Analysis_My_P2_Workflow.txt`, replacing any earlier analysis of the process.
 4. **Loads the replay.** It loads the analysis into the editor and highlights **Play** ([step 5](#replay-the-tokens-on-the-design)).
@@ -311,7 +316,7 @@ The default target `run-complete-workflow` does everything:
 | Phase | What happens | Definition used |
 |---|---|---|
 | 1 — Database initialization | Reset P2 and Monitor (administrative version `v999`) | `common/Initializers/P2_Initialization` |
-| 2 — Workflow execution | Generate the rules for P2, deploy the process as `v001`, then fire the tokens from EG11 | `petrinet/Workflow/My_P2_Workflow` |
+| 2 — Workflow execution | Generate the rules for P2 and send them as `v001`. P2 commits to them (a confirmation per version), and only then are the tokens fired from EG11 | `petrinet/Workflow/My_P2_Workflow` |
 | 3 — Data collection | Request P2's observations and write them to Monitor | `common/Collectors/P2_Collector` |
 
 ### Stop it when collection finishes
