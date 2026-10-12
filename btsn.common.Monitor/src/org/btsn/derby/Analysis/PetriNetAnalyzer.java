@@ -703,6 +703,8 @@ public class PetriNetAnalyzer {
             }
 
             analysis.clockOffsets.putAll(clockOffsetBounds(conn, workflowBase, contributions));
+            analysis.clockAlignment = ClockAlignment.estimate(analysis.clockOffsets, ClockAlignment.placeChannels());
+            clockAlignments.put(workflowBase, analysis.clockAlignment);
 
             Map<Integer, Integer> parentByChild = new HashMap<>();
             String genealogySql =
@@ -944,6 +946,14 @@ public class PetriNetAnalyzer {
                 report.append("     ").append(bound.describe()).append("\n");
                 if (bound.contradictory()) clocksConsistent = false;
             }
+        }
+        ClockAlignment alignment = temporal.clockAlignment;
+        if (alignment.problem() != null) {
+            report.append("   Host clocks: not aligned: ").append(alignment.problem()).append(" [CHECK]\n");
+            clocksConsistent = false;
+        } else if (!alignment.channels().isEmpty()) {
+            report.append("   Host clocks relative to ip0 (estimated from these bounds; the replay is shown on the ip0 clock):\n");
+            for (ClockAlignment.Channel c : alignment.channels()) report.append("     ").append(c.describe()).append("\n");
         }
         report.append("   Temporal result: ")
               .append(invalidSamples == 0 &&
@@ -2895,6 +2905,16 @@ public class PetriNetAnalyzer {
         public Map<String, JoinTimingSummary> joinTiming = new TreeMap<>();
         /** Bounds on the offset between the clocks of two places' hosts, from tokens sent between them. */
         public Map<String, ClockOffsetBound> clockOffsets = new TreeMap<>();
+        /** Each other host's clock relative to ip0, estimated from clockOffsets; used to align replays. */
+        public ClockAlignment clockAlignment = ClockAlignment.none();
+    }
+
+    private final Map<Integer, ClockAlignment> clockAlignments = new HashMap<>();
+
+    /** The alignment the temporal analysis found for this workflow base (computing it if not yet analysed). */
+    public ClockAlignment clockAlignment(int workflowBase) {
+        ClockAlignment alignment = clockAlignments.get(workflowBase);
+        return alignment != null ? alignment : analyzeTemporal(workflowBase).clockAlignment;
     }
 
     /**
@@ -3159,6 +3179,11 @@ public class PetriNetAnalyzer {
             
             // Get marking evolution for ALL places (legacy format)
             System.out.println("\n=== MARKING EVOLUTION ===");
+            ClockAlignment alignment = analyzer.clockAlignment(workflowBase);
+            if (alignment.shiftsAnything()) {
+                System.out.println("Times are on the ip0 clock; each other host's own timestamps are shifted by its estimated offset:");
+                for (ClockAlignment.Channel c : alignment.channels()) System.out.println("  " + c.describe());
+            }
             
             // First, output GENERATED events from Event Generator
             // These are needed by TokenAnimator to know when child tokens were created
@@ -3180,7 +3205,7 @@ public class PetriNetAnalyzer {
             for (String placeName : allPlaces) {
                 ArrayList<MarkingSnapshot> markings = analyzer.getMarkingEvolution(placeName, workflowBase);
                 for (MarkingSnapshot snap : markings) {
-                    System.out.println("Time=" + snap.timestamp + 
+                    System.out.println("Time=" + alignment.toReference(placeName, snap.timestamp) + 
                                      " Token=" + snap.tokenId + 
                                      " Place=" + placeName +
                                      " Marking=" + snap.marking + 

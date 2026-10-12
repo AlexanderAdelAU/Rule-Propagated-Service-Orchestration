@@ -580,6 +580,8 @@ The join measures (time from first arrival to ENTER, and the skew between branch
 
 - **Per-place times are on one clock.** Queue, service and residence times, and the join measures, are differences between timestamps taken by one host, so the clocks of different machines don't affect them.
 - **Measures that cross machines also carry the clocks' offset.** The analysis bounds that offset under **Temporal data quality**, for example `clock(P2_Place) - clock(P1_Place) between -291 and -12 ms`, using the rule that a token cannot arrive before it was sent. No setup is needed beyond the operating system's time service.
+- **The replay and spatial view use the `ip0` clock.** Places on one channel share a machine's clock. When tokens go to another machine and come back (P1 → P2 → P4 above), its offset is bounded from both sides. The analysis then reports an estimate such as `ip1 [P2_Place]: -22487 ms (bounds -22680..-22294 ms)`, and shifts that machine's times by it for the animation and the spatial view. The database keeps each machine's own timestamps.
+- **A machine whose clock is more than 2 minutes ahead of `ip0` drops every token.** Tokens expire 120 s after the event generator creates them, by each receiving machine's own clock. The host's output shows `EVENT REJECTED BY SCHEDULER`. Check the date as well as the time.
 - **Coarse clocks on some Windows machines.** On some Windows machines (Windows 7, for example) the clock advances in 15.6 ms steps, so times measured there are resolved to about ±16 ms.
 
 ### Network and firewalls
