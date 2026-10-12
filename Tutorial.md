@@ -502,56 +502,86 @@ public class InventoryService extends BaseBusinessService {
 
 ## 7. Run on several machines
 
-Each host talks to the others only by UDP messages, so a host can run on any machine on your network. The machine that runs the launcher also runs Monitor and the event generators. Each other machine runs a **host package**: a folder holding everything that host needs. The example below spreads the inventory example over two machines.
+Hosts talk to each other only by UDP messages, so the same process runs unchanged when its hosts are on different machines. The machine you run the launcher on also runs Monitor and the event generators. Each other machine runs a **host package**: a folder holding everything its host needs.
 
-### Describe the machines
+The worked example spreads the four-place fork/join over three machines. P1 forks to P2 and P3, which run on two other machines, and their results join at P4, back on the first machine. Each branch reaches the join over its own network path.
 
-1. Choose **File → Open → Infrastructure Definition** and open [`MultiHost.json`](btsn.common/InfrastructureDefinitionFolder/MultiHost.json), an example for three machines.
-2. Give each machine its own channel and put its address on it:
+### Choose the machines
 
-   | Channel | Machine | Nodes in the example |
-   |---|---|---|
-   | `ip0` | The one you run the launcher on. Monitor runs here. | P1, P2 |
-   | `ip1` | Second machine | P3, P4 |
-   | `ip2` | Third machine | P5, P6 |
+An infrastructure definition gives each node its machine. Three are supplied:
 
-   For the inventory example, put P1 on `ip0` and P2 on `ip1`. Nodes on the same machine share its channel. The channel number also shifts the ports (`ip1` adds 1000), so use `ip0` to `ip4`.
-3. Save it. Keep [`SingleHost.json`](btsn.common/InfrastructureDefinitionFolder/SingleHost.json) for runs on one machine.
+| Definition | Machines |
+|---|---|
+| [`TwoHost.json`](btsn.common/InfrastructureDefinitionFolder/TwoHost.json) | P1, P3, P5 on 192.168.1.82; P2, P4, P6 on 192.168.1.152. Use it for the inventory example (Supplier on the second machine). |
+| [`ThreeHost.json`](btsn.common/InfrastructureDefinitionFolder/ThreeHost.json) | P1, P4 on 192.168.1.82; P2, P5 on 192.168.1.152; P3, P6 on 192.168.1.90. Use it for the fork/join. |
+| [`MultiHost.json`](btsn.common/InfrastructureDefinitionFolder/MultiHost.json) | A template for three machines, two nodes on each. |
 
-### Package the hosts for the other machines
+1. Choose **File → Open → Infrastructure Definition** and open `ThreeHost.json`. Opening it makes it the editor's **Machines** (shown on the toolbar).
+2. Change the addresses to your machines and save. The rules:
+   - **One channel per machine**, each with that machine's address. Nodes on the same machine share its channel.
+   - **`ip0` is the machine you run the launcher on.** Monitor runs there.
+   - **Use `ip0` to `ip4`.** The channel number also shifts the ports (`ip1` adds 1000).
+3. Open [`P1_P2_P3_P4_Fork_Join_Workflow.json`](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_P2_P3_P4_Fork_Join_Workflow.json) and select P2. **Runs on** shows `P2 — 192.168.1.152:4002 (ThreeHost)`.
 
-On the `ip0` machine:
+Keep [`SingleHost.json`](btsn.common/InfrastructureDefinitionFolder/SingleHost.json) for runs on one machine: choose it under **Machines** to go back.
 
-```sh
-cd btsn.petrinet.ProjectLoader
-ant -f Inventory_Workflow_BuildAndRun.xml host-packages -Dinfrastructure=MultiHost
+### Build the host packages
+
+Click **Build**. The dialog shows the machines, and its summary lists one package for each host on another machine:
+
+```
+Package  P2 for 192.168.1.152 (Build host packages; start it on its machine)
+Package  P3 for 192.168.1.90 (Build host packages; start it on its machine)
 ```
 
-The launcher generates the rules for this deployment and writes one ZIP for each host whose address is another machine, for example `btsn.services/target/host-packages/Inventory_Workflow_BuildAndRun/Inventory_Workflow_BuildAndRun-P2.zip`. Each package holds:
+Click **Build host packages**. It writes the launcher, builds one ZIP per listed host in `btsn.services/target/host-packages/P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun/`, and opens that folder. Each package holds:
 
 - **The host**: its JAR and the shared infrastructure JAR, with no business classes inside.
-- **Its services**: only the business service JARs the deployment places on that host (here `SupplierService.jar`), kept as separate JARs.
+- **Its services**: only the business service JARs the deployment places on that host, kept as separate JARs.
 - **The master ruleset**: the rules and bindings the launcher generated, the same files the hosts on the `ip0` machine read. `README.txt` gives its digest.
 - **Launch scripts and a README**: the host's address, its ports and how to start it.
 
-Rebuild the packages whenever the process, its deployment or the infrastructure changes.
+Build the packages again whenever the process, its deployment or the machines change.
+
+From the command line, on the `ip0` machine:
+
+```sh
+cd btsn.petrinet.ProjectLoader
+ant -f P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.xml host-packages -Dinfrastructure=ThreeHost
+```
 
 ### Start the hosts, then run
 
-1. Copy each ZIP to its machine and extract it. That machine needs Java 15 or later; it does not need Ant or this repository.
+1. Copy each ZIP to its machine and extract it. Those machines need Java 15 or later; they do not need Ant or this repository.
 2. Run `launch.bat` (Windows) or `sh launch.sh`. When Windows asks, let Java use private networks. Wait for `Service Handler is listening`.
-3. On the `ip0` machine, run the launcher with the same infrastructure:
+3. On the `ip0` machine, click **Run on hosts**, then **Run**. From the command line:
 
    ```sh
-   ant -f Inventory_Workflow_BuildAndRun.xml -Dinfrastructure=MultiHost
+   ant -f P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.xml -Dinfrastructure=ThreeHost
    ```
 
-   It starts its own hosts and Monitor, skips the others (`[p2] Skipping - running on remote host`), and prints `Master ruleset …`. That digest must match the one in each package's README. It then deploys the rules to every host and waits for each one to commit, fires the tokens and collects every host's records into Monitor.
-4. Analyse and chart the run on the `ip0` machine as usual.
+   The launcher starts P1, P4 and Monitor, and skips P2 and P3 (`[p2] Skipping - running on remote host`). It prints `Master ruleset …`, which must match each package's README. It then:
+   - deploys the rules to every host and waits for each one to commit;
+   - fires the tokens;
+   - collects every host's records into Monitor.
+4. The editor analyses the run and loads the replay as usual.
+
+**What to look for in the analysis.** The structural results are the same as on one machine:
+- **Forks and joins:** `Fork families` equals `Observed join sites`, and `Orphan fork children` is 0.
+- **Branch executions:** P2 and P3 each execute once per fork.
+
+The join measures (time from first arrival to ENTER, and the skew between branch arrivals) now include each branch's network path.
+
+### Timing across machines
+
+- **Per-place times are on one clock.** Queue, service and residence times, and the join measures, are differences between timestamps taken by one host, so the clocks of different machines don't affect them.
+- **Measures that cross machines also carry the clocks' offset.** The analysis bounds that offset under **Temporal data quality**, for example `clock(P2_Place) - clock(P1_Place) between -291 and -12 ms`, using the rule that a token cannot arrive before it was sent. No setup is needed beyond the operating system's time service.
+- **Coarse clocks on some Windows machines.** On some Windows machines (Windows 7, for example) the clock advances in 15.6 ms steps, so times measured there are resolved to about ±16 ms.
+
+### Network and firewalls
 
 - **Network.** Use a local network or a VPN. Tokens and rules travel as plain UDP, without authentication or encryption.
-- **Firewalls.** Each package's README lists the ports its host listens on. The `ip0` machine must accept UDP from the others for Monitor and for rule commitments (ports 35000 and up).
-- **From the editor.** Choose the infrastructure under **Machines** on the toolbar (for example `TwoHost`); opening or saving an infrastructure definition in `InfrastructureDefinitionFolder` chooses it too. **Runs on** and **Deploy to** then show each node's machine. In the **Build** dialog, **Build host packages** writes the launcher and then builds the packages for the other machines, opening their folder. Start each package on its machine, then click **Run on hosts** and **Run**, which passes `-Dinfrastructure` for you.
+- **Firewalls.** Each package's README lists the ports its host listens on. The `ip0` machine must accept UDP from the others for Monitor and for rule commitments (ports 35000 and up). If ping between the machines fails, allow ICMP echo in the firewall to check the path.
 
 ## Repository artefacts
 
