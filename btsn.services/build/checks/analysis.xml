@@ -41,6 +41,22 @@
             <arg file="../btsn.common.Monitor"/>
         </java>
     </target>
+    <target name="check-clock-offsets" depends="jar" description="Check clock-offset bounds between hosts from tokens sent between them">
+        <delete dir="target/clock-offset-check"/>
+        <mkdir dir="target/clock-offset-check/classes"/>
+        <path id="clock.offset.check.classpath">
+            <path refid="runtime.classpath"/>
+            <pathelement location="../btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+            <pathelement location="target/clock-offset-check/classes"/>
+        </path>
+        <javac srcdir="../btsn.common.Monitor/tests" destdir="target/clock-offset-check/classes"
+               includes="ClockOffsetBoundsCheck.java" release="${java.release}" includeantruntime="false" encoding="UTF-8">
+            <classpath refid="clock.offset.check.classpath"/>
+        </javac>
+        <java classname="ClockOffsetBoundsCheck" fork="true" failonerror="true">
+            <classpath refid="clock.offset.check.classpath"/>
+        </java>
+    </target>
     <target name="check-analysis" depends="jar" description="Check recorded-event reconstruction of single and double joins">
         <delete dir="target/analysis-check"/>
         <mkdir dir="target/analysis-check/classes"/>
