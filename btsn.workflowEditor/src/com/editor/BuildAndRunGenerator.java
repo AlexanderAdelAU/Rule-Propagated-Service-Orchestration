@@ -134,7 +134,22 @@ public final class BuildAndRunGenerator {
             Run run = new Run(); run.generatorId = id; run.intervalMs = plan.rates.get(id); run.version = plan.versions.get(id);
             o.runs.add(run);
         }
+        keepRunLength(plan.launcher(o), o);
         return plan;
+    }
+
+    /** Replacing a launcher keeps its token count and completion wait, so a 100-token evaluation stays one. */
+    static void keepRunLength(File launcher, Options o) {
+        if (!launcher.isFile()) return;
+        try {
+            String text = read(launcher);
+            o.tokens = Math.max(1, Math.min(100, intProperty(text, "token.count", o.tokens)));
+            o.completionSeconds = intProperty(text, "workflow.completion.seconds", o.completionSeconds);
+        } catch (IOException ignored) { }
+    }
+    private static int intProperty(String xml, String name, int fallback) {
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("<property\\s+name=\"" + java.util.regex.Pattern.quote(name) + "\"\\s+value=\"(\\d+)\"").matcher(xml);
+        return m.find() ? Integer.parseInt(m.group(1)) : fallback;
     }
 
     /** Choices that cannot run: no generator chosen, or two generators sharing a version (their tokens would collide). */
@@ -142,6 +157,8 @@ public final class BuildAndRunGenerator {
         List<String> problems = new ArrayList<>();
         List<Run> on = o.enabled();
         if (on.isEmpty()) problems.add("Choose at least one event generator to run.");
+        // Each version's workflows are numbered base + n x 10000 within a range of 1,000,000.
+        if (o.tokens > 100) problems.add("At most 100 tokens per generator: each version numbers 100 workflows.");
         Map<String, String> byVersion = new LinkedHashMap<>();
         for (Run run : on) {
             String other = byVersion.put(run.version, run.generatorId);

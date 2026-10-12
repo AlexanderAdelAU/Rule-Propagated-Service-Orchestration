@@ -237,8 +237,20 @@
       "height": 60,
       "label": "EVENT_GENERATOR",
       "rotation": 0.0,
-      "generator_rate": "1000",
+      "generator_rate": "2000",
       "token_version": "v001"
+    },
+    {
+      "id": "EVENT_GENERATOR_V002",
+      "type": "EVENT_GENERATOR",
+      "x": 28,
+      "y": 340,
+      "width": 24,
+      "height": 60,
+      "label": "EVENT_GENERATOR_V002",
+      "rotation": 0.0,
+      "generator_rate": "2000",
+      "token_version": "v002"
     },
     {
       "id": "T_in_Model_Terminate",
@@ -390,6 +402,14 @@
     },
     {
       "source": "EVENT_GENERATOR",
+      "target": "T_in_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "EVENT_GENERATOR_V002",
       "target": "T_in_P1",
       "label": "",
       "guardCondition": "",
