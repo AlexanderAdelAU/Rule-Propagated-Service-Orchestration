@@ -780,7 +780,7 @@ public class EditorFrame extends JPanel {
             if (!ServiceRegistry.DEFAULT_INFRASTRUCTURE.equals(machines)) where += " (" + machines + ")";
             if (canvas.hasPendingNode(element)) where += " (not saved; use Deploy)";
         }
-        JTextArea runsOn = new JTextArea(where); runsOn.setEditable(false); runsOn.setLineWrap(true); runsOn.setWrapStyleWord(true);
+        JTextArea runsOn = new JTextArea(where); runsOn.setEditable(false); runsOn.setLineWrap(true); runsOn.setWrapStyleWord(true); runsOn.setFont(fieldFont());
         runsOn.setBorder(BorderFactory.createTitledBorder("Runs on"));
         runsOn.setPreferredSize(new Dimension(220, 52)); runsOn.setMinimumSize(new Dimension(0, 52)); runsOn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
         attributesPanel.add(runsOn);
@@ -788,7 +788,7 @@ public class EditorFrame extends JPanel {
             StringBuilder text = new StringBuilder(operation.getName()).append("(");
             for (ServiceArgument argument : operation.getArguments()) { if (text.charAt(text.length()-1) != '(') text.append(", "); text.append(argument.getName()); }
             text.append(") \u2192 ").append(operation.getReturnAttribute());
-            JTextArea detail = new JTextArea(text.toString()); detail.setEditable(false); detail.setLineWrap(true); detail.setWrapStyleWord(true);
+            JTextArea detail = new JTextArea(text.toString()); detail.setEditable(false); detail.setLineWrap(true); detail.setWrapStyleWord(true); detail.setFont(fieldFont());
             detail.setBorder(BorderFactory.createTitledBorder("Contract"));
             detail.setPreferredSize(new Dimension(220, 70)); detail.setMinimumSize(new Dimension(0, 70)); detail.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
             attributesPanel.add(detail);
@@ -817,26 +817,23 @@ public class EditorFrame extends JPanel {
             text = registry.describe(service, op);
             if (text.isEmpty()) text = "The catalogue has no description for " + service + ".";
         }
-        JTextArea box = new JTextArea(text); box.setEditable(false); box.setLineWrap(true); box.setWrapStyleWord(true);
-        box.setBorder(BorderFactory.createTitledBorder("What it does"));
+        // Three lines in the fields' own font; longer descriptions scroll, so the box never crowds the design fields.
+        JTextArea box = new JTextArea(text, 3, 1); box.setEditable(false); box.setLineWrap(true); box.setWrapStyleWord(true);
+        box.setFont(fieldFont());
         box.setToolTipText(ServiceRegistry.tooltip(text));
-        // Measure the wrapped text at the panel's current width (220 before the panel is first shown).
-        Container viewport = attributesPanel.getParent();
-        int width = viewport != null && viewport.getWidth() > 40 ? viewport.getWidth() - 10 : 220;
-        box.setSize(width, Short.MAX_VALUE);
-        int height = box.getPreferredSize().height + 4;
-        fitHeight(box, 220, height);
-        // Re-measure when the panel is resized, so the box never clips or leaves a gap.
-        box.addComponentListener(new java.awt.event.ComponentAdapter() {
-            @Override public void componentResized(java.awt.event.ComponentEvent e) {
-                JTextArea measure = new JTextArea(box.getText()); measure.setLineWrap(true); measure.setWrapStyleWord(true);
-                measure.setFont(box.getFont()); measure.setBorder(box.getBorder());
-                measure.setSize(box.getWidth(), Short.MAX_VALUE);
-                int fitted = measure.getPreferredSize().height + 4;
-                if (fitted != box.getPreferredSize().height) { fitHeight(box, box.getWidth(), fitted); attributesPanel.revalidate(); }
-            }
-        });
-        attributesPanel.add(box);
+        box.setCaretPosition(0);
+        JScrollPane scroll = new JScrollPane(box, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scroll.setBorder(BorderFactory.createTitledBorder("What it does"));
+        Insets insets = scroll.getBorder().getBorderInsets(scroll);
+        int height = box.getPreferredScrollableViewportSize().height + insets.top + insets.bottom;
+        fitHeight(scroll, 220, height);
+        attributesPanel.add(scroll);
+    }
+
+    /** The font of the panel's text fields and lists, for the read-only boxes as well. */
+    private static Font fieldFont() {
+        Font font = UIManager.getFont("TextField.font");
+        return font != null ? font : new JTextField().getFont();
     }
 
     private static void fitHeight(JComponent c, int width, int height) {

@@ -161,6 +161,20 @@ public final class DeployFlowCheck {
                 check(texts.contains("Choose catalogue...") && !texts.contains("Choose service deployment..."), "Attributes still ask for a deployment first");
                 check(texts.stream().anyMatch(t -> t.startsWith("P6")), "Attributes do not show the node: " + texts);
                 check(texts.stream().anyMatch(t -> t.startsWith("Decides at random") && t.contains("Returns: true or false")), "Attributes do not say what the service does: " + texts);
+                // What it does: three lines in the fields' font, scrolling rather than pushing the design fields down.
+                javax.swing.JScrollPane what = null;
+                java.util.Deque<java.awt.Component> todo = new java.util.ArrayDeque<>(List.of(attributes));
+                while (!todo.isEmpty()) {
+                    java.awt.Component c = todo.pop();
+                    if (c instanceof javax.swing.JScrollPane && ((javax.swing.JComponent)c).getBorder() instanceof javax.swing.border.TitledBorder
+                            && "What it does".equals(((javax.swing.border.TitledBorder)((javax.swing.JComponent)c).getBorder()).getTitle())) what = (javax.swing.JScrollPane)c;
+                    if (c instanceof java.awt.Container) for (java.awt.Component child : ((java.awt.Container)c).getComponents()) todo.push(child);
+                }
+                check(what != null, "No scrolling What it does box");
+                javax.swing.JTextArea whatText = (javax.swing.JTextArea)what.getViewport().getView();
+                int line = whatText.getFontMetrics(whatText.getFont()).getHeight();
+                check(what.getPreferredSize().height < 5 * line, "What it does is taller than three lines: " + what.getPreferredSize().height + " for lines of " + line);
+                check(whatText.getFont().equals(javax.swing.UIManager.getFont("TextField.font")), "What it does is not in the fields' font: " + whatText.getFont());
 
                 // Pictures for review: the canvas with node labels, and the Deploy panel.
                 canvas.setSize(1150, 560); canvas.setPreferredSize(new Dimension(1150, 560));
