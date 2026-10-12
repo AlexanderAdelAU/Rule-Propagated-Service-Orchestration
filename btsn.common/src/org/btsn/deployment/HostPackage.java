@@ -174,6 +174,22 @@ public final class HostPackage {
             + "rem Starts " + hostProject + " with the rules and services packaged beside it. Extra arguments go to the ServiceLoader.\n"
             + "cd /d \"%~dp0" + hostProject + "\"\n"
             + "java -cp \"" + windows + "\" org.btsn.handlers.ServiceLoader . -version " + version + " %*\n").replace("\n", "\r\n"));
+        // The same host with its output in a file beside the scripts, as the launcher keeps it for local hosts.
+        String log = logName(hostProject);
+        Files.writeString(pkg.resolve("launch-to-file.sh"), "#!/bin/sh\n"
+            + "# Starts " + hostProject + " as launch.sh does, writing everything it prints to " + log + ".\n"
+            + "out=\"$(cd \"$(dirname \"$0\")\" && pwd)/" + log + "\"\n"
+            + "echo \"Writing output to $out (follow it with: tail -f " + log + "). Ctrl+C stops the host.\"\n"
+            + "exec sh \"$(dirname \"$0\")/launch.sh\" \"$@\" > \"$out\" 2>&1\n");
+        Files.writeString(pkg.resolve("launch-to-file.bat"), ("@echo off\n"
+            + "rem Starts " + hostProject + " as launch.bat does, writing everything it prints to " + log + ".\n"
+            + "echo Writing output to \"%~dp0" + log + "\" - open it in Notepad to follow the run. Ctrl+C here stops the host.\n"
+            + "call \"%~dp0launch.bat\" %* > \"%~dp0" + log + "\" 2>&1\n").replace("\n", "\r\n"));
+    }
+
+    /** P3's output file is P3_Place.out.txt, the name the launcher uses for a local P3. */
+    static String logName(String hostProject) {
+        return hostProject.substring(hostProject.lastIndexOf('.') + 1).toUpperCase(Locale.ROOT) + "_Place.out.txt";
     }
 
     /** SHA-256 of each rule and binding file, and one digest over them all: compare it with the launcher's. */
@@ -216,9 +232,11 @@ public final class HostPackage {
          .append("  1. Install Java 15 or later on this machine. Ant and the source repository are not needed.\n")
          .append("  2. Make sure this machine's address is ").append(address).append(".\n")
          .append("  3. Allow Java to receive UDP on the ports below (Windows asks the first time; choose Private networks).\n")
-         .append("  4. Windows: run launch.bat.  Linux or macOS: sh launch.sh.\n")
+         .append("  4. Start it one of two ways (Linux or macOS: sh launch.sh / sh launch-to-file.sh):\n")
+         .append("       launch.bat           output in the window\n")
+         .append("       launch-to-file.bat   output in ").append(logName(hostProject)).append(" in this folder (open it in Notepad)\n")
          .append("     Wait for \"Service Handler is listening\", then run the launcher on the ip0 machine.\n")
-         .append("  5. Stop it with Ctrl+C when the run is finished.\n\n")
+         .append("  5. Nothing stops it on a timer: it runs until you press Ctrl+C. Keep the machine from sleeping.\n\n")
          .append("Ports this host listens on (event port and rule port per operation)\n");
         for (Map.Entry<String, String> p : ports.entrySet()) r.append("  ").append(String.format("%-46s", p.getKey())).append(p.getValue()).append('\n');
         r.append("\nThe ip0 machine must accept UDP from this one: Monitor's ports, and 35000+ for rule commitments.\n\n")
