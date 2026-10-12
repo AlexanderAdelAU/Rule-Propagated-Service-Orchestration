@@ -112,18 +112,24 @@ public final class HostPackageCheck {
         }
         check(Files.readString(pkg.resolve("launch.bat")).contains("\r\n"), node + ": launch.bat needs Windows line endings");
         check(Files.readString(pkg.resolve("launch.sh")).contains("org.btsn.handlers.ServiceLoader . -version v001"), node + ": launch.sh must start the ServiceLoader");
+        String toFile = Files.readString(pkg.resolve("launch-to-file.bat"));
+        check(toFile.contains("\r\n") && toFile.contains("call \"%~dp0launch.bat\" %* > \"%~dp0" + node + "_Place.out.txt\" 2>&1"),
+            node + ": launch-to-file.bat must run launch.bat into " + node + "_Place.out.txt");
+        check(Files.readString(pkg.resolve("launch-to-file.sh")).contains(node + "_Place.out.txt"), node + ": launch-to-file.sh must write " + node + "_Place.out.txt");
+        check(Files.readString(pkg.resolve("README.txt")).contains("launch-to-file.bat"), node + ": README must explain both launches");
     }
 
-    /** Starts the host from its unpacked folder and waits for its service handlers; it must build its rules from the package. */
+    /** Starts the host with launch-to-file.sh (which runs launch.sh) from its unpacked folder and waits for its service handlers in its output file; it must build its rules from the package. */
     static void starts(Path pkg, String hostProject, int handlers) throws Exception {
-        Path output = pkg.resolve("host.out.txt");
-        Process host = new ProcessBuilder("sh", "launch.sh").directory(pkg.toFile()).redirectErrorStream(true)
-            .redirectOutput(output.toFile()).start();
+        String node = hostProject.substring(hostProject.lastIndexOf('.') + 1).toUpperCase();
+        Path output = pkg.resolve(node + "_Place.out.txt");
+        Process host = new ProcessBuilder("sh", "launch-to-file.sh").directory(pkg.toFile()).redirectErrorStream(true)
+            .redirectOutput(ProcessBuilder.Redirect.DISCARD).start();
         try {
             long deadline = System.currentTimeMillis() + 90_000;
             int listening = 0;
             while (System.currentTimeMillis() < deadline && host.isAlive()) {
-                listening = count(Files.readString(output, StandardCharsets.ISO_8859_1), "Service Handler is listening");
+                if (Files.isRegularFile(output)) listening = count(Files.readString(output, StandardCharsets.ISO_8859_1), "Service Handler is listening");
                 if (listening >= handlers) break;
                 Thread.sleep(500);
             }
@@ -176,6 +182,7 @@ public final class HostPackageCheck {
         return n;
     }
     private static String tail(Path file) throws Exception {
+        if (!Files.isRegularFile(file)) return "(no " + file.getFileName() + ")";
         String text = Files.readString(file, StandardCharsets.ISO_8859_1);
         return text.substring(Math.max(0, text.length() - 3000));
     }

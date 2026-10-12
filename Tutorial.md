@@ -553,7 +553,11 @@ ant -f P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.xml host-packages -Dinfrastruc
 ### Start the hosts, then run
 
 1. Copy each ZIP to its machine and extract it. Those machines need Java 15 or later; they do not need Ant or this repository.
-2. Run `launch.bat` (Windows) or `sh launch.sh`. When Windows asks, let Java use private networks. Wait for `Service Handler is listening`.
+2. Start the host in one of two ways. When Windows asks, let Java use private networks. Wait for `Service Handler is listening`.
+   - `launch.bat` (or `sh launch.sh`) shows the output in the window.
+   - `launch-to-file.bat` (or `sh launch-to-file.sh`) writes it to `Pn_Place.out.txt` in the package folder, the same file a local host writes. Open it in Notepad to follow the run.
+
+   Nothing stops a remote host on a timer: it runs until you press Ctrl+C. Keep the machine from sleeping.
 3. On the `ip0` machine, click **Run on hosts**, then **Run**. From the command line:
 
    ```sh
