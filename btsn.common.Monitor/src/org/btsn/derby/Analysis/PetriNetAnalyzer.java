@@ -702,6 +702,8 @@ public class PetriNetAnalyzer {
                 }
             }
 
+            analysis.clockOffsets.putAll(clockOffsetBounds(conn, workflowBase, contributions));
+
             Map<Integer, Integer> parentByChild = new HashMap<>();
             String genealogySql =
                 "SELECT DISTINCT parentTokenId, childTokenId " +
@@ -934,11 +936,20 @@ public class PetriNetAnalyzer {
 
         report.append("6. TEMPORAL DATA QUALITY\n");
         report.append("   Negative/invalid timing samples: ").append(invalidSamples).append("\n");
+        // Per-place times are differences on one host's clock; only measures across hosts depend on these offsets.
+        boolean clocksConsistent = true;
+        if (!temporal.clockOffsets.isEmpty()) {
+            report.append("   Clock offsets between places' hosts (a token cannot arrive before it was sent):\n");
+            for (ClockOffsetBound bound : temporal.clockOffsets.values()) {
+                report.append("     ").append(bound.describe()).append("\n");
+                if (bound.contradictory()) clocksConsistent = false;
+            }
+        }
         report.append("   Temporal result: ")
               .append(invalidSamples == 0 &&
                       temporal.workflowLatency.samples == temporal.expectedCompletedWorkflows &&
                       temporal.unmatchedServiceTimingSamples == 0 &&
-                      temporal.serviceTimingCountMismatches == 0 ? "[OK]" : "[CHECK]")
+                      temporal.serviceTimingCountMismatches == 0 && clocksConsistent ? "[OK]" : "[CHECK]")
               .append("\n");
         report.append("\n=== END STAGE 2 REPORT ===\n");
 
@@ -2882,6 +2893,80 @@ public class PetriNetAnalyzer {
         public Map<String, TimingDistribution> placeResidence = new TreeMap<>();
         public Map<String, ServiceTimingSummary> serviceTiming = new TreeMap<>();
         public Map<String, JoinTimingSummary> joinTiming = new TreeMap<>();
+        /** Bounds on the offset between the clocks of two places' hosts, from tokens sent between them. */
+        public Map<String, ClockOffsetBound> clockOffsets = new TreeMap<>();
+    }
+
+    /**
+     * clock(placeB) - clock(placeA) lies between lower and upper (either may be open). Every timestamp is taken by the
+     * host that records it, so a hop A -> B whose arrival is stamped d ms after its send says the offset is at most d,
+     * and a hop B -> A says it is at least -d: a token cannot arrive before it was sent.
+     */
+    public static class ClockOffsetBound {
+        public String placeA, placeB;
+        public Long lower, upper;
+        public int hopsAtoB, hopsBtoA;
+        public boolean contradictory() { return lower != null && upper != null && lower > upper; }
+        public String describe() {
+            String range = lower != null && upper != null ? "between " + lower + " and " + upper + " ms"
+                : upper != null ? "at most " + upper + " ms" : "at least " + lower + " ms";
+            return "clock(" + placeB + ") - clock(" + placeA + ") " + range + " (" + hopsAtoB + " hops " + placeA + "->" + placeB
+                + ", " + hopsBtoA + " back)" + (contradictory() ? " [CHECK] no single offset fits these timestamps" : "");
+        }
+    }
+
+    /** A token leaving one place for another (sendAt by the sender's clock) or arriving at a place (by the receiver's clock). */
+    public static final class Hop {
+        public final int token; public final String from, to; public final long at;
+        public Hop(int token, String from, String to, long at) { this.token = token; this.from = from; this.to = to; this.at = at; }
+    }
+
+    /**
+     * Offset bounds between the hosts of each pair of places a token travelled between. Each send is paired with the
+     * same token's arrival at the destination nearest to it in time (the visit it started); arrivals carry from = null.
+     */
+    public static Map<String, ClockOffsetBound> clockOffsetBounds(List<Hop> sends, List<Hop> arrivals) {
+        Map<String, List<Long>> arrivalsAt = new HashMap<>();
+        for (Hop a : arrivals) arrivalsAt.computeIfAbsent(a.token + "|" + a.to, k -> new ArrayList<>()).add(a.at);
+        Map<String, ClockOffsetBound> bounds = new TreeMap<>();
+        for (Hop s : sends) {
+            if (s.from == null || s.to == null || s.from.equals(s.to)) continue;
+            List<Long> candidates = arrivalsAt.get(s.token + "|" + s.to);
+            if (candidates == null || candidates.isEmpty()) continue;
+            long nearest = candidates.get(0);
+            for (long candidate : candidates) if (Math.abs(candidate - s.at) < Math.abs(nearest - s.at)) nearest = candidate;
+            long delta = nearest - s.at;
+            boolean forward = s.from.compareTo(s.to) < 0;
+            String a = forward ? s.from : s.to, b = forward ? s.to : s.from;
+            ClockOffsetBound bound = bounds.computeIfAbsent(a + " / " + b, k -> new ClockOffsetBound());
+            bound.placeA = a; bound.placeB = b;
+            if (forward) { bound.upper = bound.upper == null ? delta : Math.min(bound.upper, delta); bound.hopsAtoB++; }
+            else { bound.lower = bound.lower == null ? -delta : Math.max(bound.lower, -delta); bound.hopsBtoA++; }
+        }
+        return bounds;
+    }
+
+    /** Sends are EXIT records toward another place; arrivals are BUFFERED records and recorded service arrival times. */
+    private Map<String, ClockOffsetBound> clockOffsetBounds(Connection conn, int workflowBase,
+                                                          List<ServiceContribution> contributions) throws SQLException {
+        List<Hop> sends = new ArrayList<>(), arrivals = new ArrayList<>();
+        String sql = "SELECT tokenId, timestamp, placeName, toPlace, eventType FROM CONSOLIDATED_TRANSITION_FIRINGS " +
+                     "WHERE workflowBase = ? AND eventType IN ('EXIT', 'BUFFERED')";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, workflowBase);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                String to = rs.getString("toPlace");
+                if (to == null || !to.endsWith("_Place")) continue;
+                int token = rs.getInt("tokenId");
+                long at = rs.getLong("timestamp");
+                if ("EXIT".equals(rs.getString("eventType"))) sends.add(new Hop(token, rs.getString("placeName"), to, at));
+                else arrivals.add(new Hop(token, null, to, at));
+            }
+        }
+        for (ServiceContribution sc : contributions)
+            if (sc.placeName != null && sc.arrivalTime > 0) arrivals.add(new Hop(sc.sequenceId, null, sc.placeName, sc.arrivalTime));
+        return clockOffsetBounds(sends, arrivals);
     }
 
     private static class JoinTemporalAccumulator {
