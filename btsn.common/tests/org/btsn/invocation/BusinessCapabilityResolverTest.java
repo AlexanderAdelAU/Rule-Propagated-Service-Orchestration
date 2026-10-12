@@ -127,7 +127,8 @@ public final class BusinessCapabilityResolverTest {
         capabilities.remove(capabilities.size() - 1);
         capabilities.remove(0);
         write(fixture.resolve(PLACEMENT), infrastructure);
-        rejects(() -> new BusinessCapabilityResolver(fixture), "not deployed");
+        // The catalogue is a menu: a deployment that places only some of its services is valid.
+        new BusinessCapabilityResolver(fixture);
         Path conflict = fixture();
         JSONObject catalog = read(conflict.resolve(CATALOG));
         JSONObject validation = (JSONObject) ((JSONArray) catalog.get("services")).get(0);

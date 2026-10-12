@@ -1,6 +1,6 @@
 {
   "domain": "PetriNetModels",
-  "purpose": "Reusable stochastic Boolean operation; process topology and instance token contracts are defined separately.",
+  "purpose": "Reusable Boolean operations, random and deterministic; process topology and instance token contracts are defined separately.",
   "services": [
     {
       "service": "StochasticService",
@@ -8,6 +8,19 @@
       "operation": "processToken",
       "description": "Decides at random: returns true or false with equal chance. Use it to model a step that sometimes has to be repeated, such as a check that can fail.",
       "returns": "true or false. Route on it from the T_out with guards true and false.",
+      "inputs": [
+        "data"
+      ],
+      "returnAttribute": "decision",
+      "resultType": "boolean",
+      "status": "active"
+    },
+    {
+      "service": "AlwaysTrueService",
+      "implementationClass": "org.btsn.services.AlwaysTrueService",
+      "operation": "processToken",
+      "description": "Always returns true, so the place always takes its true route. Use it when runs must repeat exactly, for example to compare timings without random routing.",
+      "returns": "true. Route on it from the T_out with the guard true.",
       "inputs": [
         "data"
       ],

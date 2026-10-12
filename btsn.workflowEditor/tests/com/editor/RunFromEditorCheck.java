@@ -51,7 +51,25 @@ public final class RunFromEditorCheck {
         check(RunWindow.describeMachines("TwoHost", ServiceRegistry.infrastructureNodes(processes, "TwoHost"))
             .equals("TwoHost: P1, P3, P5 on 192.168.1.82; P2, P4, P6 on 192.168.1.152"), "Machines description");
         LauncherRun plain = new LauncherRun(p2Launcher, repository, new File(repository, "unused.txt"), false, "", null);
-        check(plain.infrastructureArgs().isEmpty() && plain.infrastructure("TwoHost").infrastructureArgs().equals(List.of("-Dinfrastructure=TwoHost")), "Ant option for the machines");
+        check(plain.infrastructureArgs().equals(List.of("-Dinfrastructure=SingleHost")) && plain.infrastructure("TwoHost").infrastructureArgs().equals(List.of("-Dinfrastructure=TwoHost")), "Ant option for the machines");
+        // Opening or saving a definition in InfrastructureDefinitionFolder makes it the editor's machines; elsewhere it does not.
+        int[] told = {0};
+        Runnable listener = () -> told[0]++;
+        ServiceRegistry.addInfrastructureListener(listener);
+        String before = System.clearProperty("rpso.infrastructure");
+        String savedChoice = java.util.prefs.Preferences.userNodeForPackage(ServiceRegistry.class).get("infrastructure", null);
+        try {
+            ServiceRegistry.selectInfrastructure("SingleHost");
+            check("TwoHost".equals(ServiceRegistry.useInfrastructureFile(new File(repository, "btsn.common/InfrastructureDefinitionFolder/TwoHost.json")))
+                && ServiceRegistry.selectedInfrastructure().equals("TwoHost") && told[0] >= 1, "Opening TwoHost.json did not choose it");
+            File elsewhere = Files.createTempFile("Elsewhere", ".json").toFile(); elsewhere.deleteOnExit();
+            check(ServiceRegistry.useInfrastructureFile(elsewhere) == null && ServiceRegistry.selectedInfrastructure().equals("TwoHost"), "A definition outside the folder was chosen");
+        } finally {
+            if (savedChoice == null) java.util.prefs.Preferences.userNodeForPackage(ServiceRegistry.class).remove("infrastructure");
+            else java.util.prefs.Preferences.userNodeForPackage(ServiceRegistry.class).put("infrastructure", savedChoice);
+            if (before != null) System.setProperty("rpso.infrastructure", before);
+            ServiceRegistry.removeInfrastructureListener(listener);
+        }
         Path logDir = Files.createTempDirectory("run-hosts-");
         Path fakeLauncher = logDir.resolve("X_BuildAndRun.xml");
         Files.write(fakeLauncher, "<property name=\"run.p2\" value=\"true\"/>".getBytes(StandardCharsets.UTF_8));

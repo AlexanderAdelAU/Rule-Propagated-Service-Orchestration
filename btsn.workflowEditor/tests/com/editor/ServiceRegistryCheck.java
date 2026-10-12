@@ -34,7 +34,7 @@ public final class ServiceRegistryCheck {
         check(registry.describe("TriageService", "processTriageAssessment").contains("\nReturns: "), "Operation description lacks its result");
         check(ServiceRegistry.tooltip("a < b\nc").equals("<html><div style='width:300px'>a &lt; b<br>c</div></html>"), "Tooltip not escaped and wrapped");
         registry.loadDeployment(new File(common, "ServiceDeploymentFolder/petrinet/TrafficLightModels.json"));
-        check(registry.services().equals(Arrays.asList("StochasticService")), "Petri-net dropdown contains another service");
+        check(new java.util.TreeSet<>(registry.services()).equals(new java.util.TreeSet<>(Arrays.asList("StochasticService", "AlwaysTrueService"))), "Petri-net dropdown should offer the random and the always-true service: " + registry.services());
         check(registry.instances("StochasticService", "processToken").size() == 6, "Repeated instances missing");
         check(!registry.validateEndpoint("TypoService", "processToken", "token", Arrays.asList("token"), "boolean-token").isEmpty(), "Unknown service accepted");
         check(!registry.validateEndpoint("StochasticService", "typo", "token", Arrays.asList("token"), "boolean-token").isEmpty(), "Unknown operation accepted");

@@ -312,9 +312,30 @@ public final class ServiceRegistry {
         if (forced != null && !forced.trim().isEmpty()) return forced.trim();
         return java.util.prefs.Preferences.userNodeForPackage(ServiceRegistry.class).get(INFRASTRUCTURE_PREF, DEFAULT_INFRASTRUCTURE);
     }
+    private static final List<Runnable> INFRASTRUCTURE_LISTENERS = new java.util.concurrent.CopyOnWriteArrayList<>();
+    /** Told when the chosen machines change, wherever they were chosen (toolbar, Open or Save of a definition). */
+    public static void addInfrastructureListener(Runnable listener) { INFRASTRUCTURE_LISTENERS.add(listener); }
+    public static void removeInfrastructureListener(Runnable listener) { INFRASTRUCTURE_LISTENERS.remove(listener); }
     public static void selectInfrastructure(String name) {
-        java.util.prefs.Preferences.userNodeForPackage(ServiceRegistry.class).put(INFRASTRUCTURE_PREF,
-            name == null || name.trim().isEmpty() ? DEFAULT_INFRASTRUCTURE : name.trim());
+        String chosen = name == null || name.trim().isEmpty() ? DEFAULT_INFRASTRUCTURE : name.trim();
+        boolean changed = !chosen.equals(selectedInfrastructure());
+        java.util.prefs.Preferences.userNodeForPackage(ServiceRegistry.class).put(INFRASTRUCTURE_PREF, chosen);
+        if (changed) for (Runnable listener : INFRASTRUCTURE_LISTENERS) listener.run();
+    }
+    /**
+     * Use this infrastructure definition for the editor's machines when it lives in its repository's
+     * InfrastructureDefinitionFolder (where runs look for it). Returns its name, or null when it lives elsewhere.
+     */
+    public static String useInfrastructureFile(File file) {
+        if (file == null) return null;
+        File common = findCommon(file.getAbsoluteFile().getParentFile());
+        if (common == null || !file.getName().endsWith(".json")) return null;
+        try {
+            if (!file.getCanonicalFile().getParentFile().equals(new File(common, "InfrastructureDefinitionFolder").getCanonicalFile())) return null;
+        } catch (IOException ex) { return null; }
+        String name = file.getName().substring(0, file.getName().length() - 5);
+        selectInfrastructure(name);
+        return name;
     }
     /** The infrastructure definitions available (their names, SingleHost first), from InfrastructureDefinitionFolder. */
     public static List<String> infrastructures(File anchor) {

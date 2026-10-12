@@ -1,10 +1,21 @@
 {
   "domain": "PetriNetModels",
-  "purpose": "Reusable stochastic Boolean service, independent of process topology.",
+  "purpose": "Reusable Boolean services (random and deterministic), independent of process topology.",
   "services": [
     {
       "service": "StochasticService",
       "implementationClass": "org.btsn.services.StochasticService",
+      "operation": "processToken",
+      "inputs": [
+        "data"
+      ],
+      "returnAttribute": "decision",
+      "resultType": "boolean",
+      "status": "preserved-unbound"
+    },
+    {
+      "service": "AlwaysTrueService",
+      "implementationClass": "org.btsn.services.AlwaysTrueService",
       "operation": "processToken",
       "inputs": [
         "data"

@@ -119,10 +119,7 @@ public final class BusinessCapabilityResolver {
             require(runtimeBindings.put(runtimeKey, capability) == null,
                     "Multiple capabilities assigned to runtime operation: " + runtimeKey);
         }
-        for (Map.Entry<String, Capability> entry : logicalBindings.entrySet()) {
-            require(!entry.getValue().active || deployed.contains(entry.getKey()),
-                    "Active catalogue capability is not deployed: " + entry.getKey());
-        }
+        // A catalogue lists the services a process may choose from; a deployment places only those it uses.
         // Explicitly registered infrastructure operations keep their current invocation.
         // An unresolved business operation never falls through to a physical adapter.
         for (Object file : array(config, "directServiceRules")) {
