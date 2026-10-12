@@ -63,6 +63,23 @@ public final class RunFromEditorCheck {
             } catch (Exception ex) { throw new RuntimeException(ex); }
         });
         check(BuildAndRunGenerator.packagedHosts(inventoryPlan[0]).isEmpty(), "SingleHost needs no host packages");
+        // The fork/join evaluation: two generators (v001, v002) into P1; rebuilding keeps its 100 tokens and 30 s wait.
+        File forkJoin = new File(repository, "btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_P2_P3_P4_Fork_Join_Workflow.json");
+        BuildAndRunGenerator.Plan[] forkPlan = new BuildAndRunGenerator.Plan[1];
+        javax.swing.SwingUtilities.invokeAndWait(() -> {
+            try {
+                Canvas canvas = new Canvas(); canvas.setDefinitionLocation(forkJoin);
+                canvas.loadFromJSON(new String(Files.readAllBytes(forkJoin.toPath()), StandardCharsets.UTF_8));
+                forkPlan[0] = BuildAndRunGenerator.plan(canvas, forkJoin);
+            } catch (Exception ex) { throw new RuntimeException(ex); }
+        });
+        BuildAndRunGenerator.Options fork = forkPlan[0].defaults;
+        check(forkPlan[0].problems.isEmpty() && fork.tokens == 100 && fork.completionSeconds == 30, "Kept run length: " + fork.tokens + "/" + fork.completionSeconds + forkPlan[0].problems);
+        check(fork.runs.size() == 2 && "v001".equals(fork.runs.get(0).version) && "v002".equals(fork.runs.get(1).version)
+            && "P1_Place".equals(forkPlan[0].targets.get("EVENT_GENERATOR_V002")), "Generators: " + forkPlan[0].versions + forkPlan[0].targets);
+        check(BuildAndRunGenerator.problems(forkPlan[0], fork).isEmpty(), "100 tokens per generator must be allowed");
+        fork.tokens = 101;
+        check(BuildAndRunGenerator.problems(forkPlan[0], fork).stream().anyMatch(p -> p.startsWith("At most 100 tokens")), "101 tokens would reach the next version's numbers");
         System.setProperty("rpso.infrastructure", "TwoHost");
         try {
             check(BuildAndRunGenerator.packagedHosts(inventoryPlan[0]).equals(List.of("P2 for 192.168.1.152")),

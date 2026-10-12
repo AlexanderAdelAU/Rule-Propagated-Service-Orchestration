@@ -114,6 +114,10 @@ public class Common_Collector_EventGenerator {
             String[] versions = queryVersion.split(",");
             System.out.println("=== Collecting Multiple Versions: " + Arrays.toString(versions) + " ===");
             
+            // Each request carries its own sequence ID (this collector's base + the version's index). The replies reach
+            // MonitorService under these IDs; replies sharing one (every host's v001 reply under 1000000) were taken as
+            // duplicates when a large reply was still being stored, and that host's records for the version were lost.
+            int versionIndex = 0;
             for (String version : versions) {
                 String versionTrimmed = version.trim();
                 System.out.println("\nCollecting ALL data for version: " + versionTrimmed);
@@ -132,7 +136,7 @@ public class Common_Collector_EventGenerator {
                     resolvedServiceChannel, resolvedServicePort, collectorToken);
                 
                 fireEvent(xmlPayload, resolvedServiceChannel, resolvedServicePort, 
-                    versionBase, timeToExpire);
+                    sequenceID + versionIndex++, timeToExpire);
                 
                 if (!version.equals(versions[versions.length - 1])) {
                     Thread.sleep(500); // Small delay between versions, except after last one
@@ -155,7 +159,7 @@ public class Common_Collector_EventGenerator {
                 resolvedServiceChannel, resolvedServicePort, collectorToken);
             
             fireEvent(xmlPayload, resolvedServiceChannel, resolvedServicePort, 
-                versionBase, timeToExpire);
+                sequenceID, timeToExpire);
         }
         
         long eventTime = System.currentTimeMillis() - startTime - timeToCommit;
@@ -544,4 +548,4 @@ public class Common_Collector_EventGenerator {
             }
         }
     }
-}
+}

@@ -377,7 +377,7 @@ d.text(560,448,'Circle: place · Bar: transition · Dot: illustrative token · D
 d.save('p1-tutorial.svg')
 
 nodes,arcs=load_model('P1_P2_P3_P4_Fork_Join_Workflow.json')
-d=Diagram(1120,700,'Four-place Boolean-function model with fork and input join','Each of P1 through P4 is a circular place whose bound function independently produces true or false. T_out_P1 forks true into P2 and P3 or terminates false. P2 and P3 publish either result to the input join before P4. The join synchronizes arrivals, not Boolean truth; P4 produces its own Boolean and either outcome reaches final termination. All fifteen model nodes and arcs are represented. Monitor observes outside the token path.')
+d=Diagram(1120,700,'Four-place Boolean-function model with fork and input join','Each of P1 through P4 is a circular place whose bound function independently produces true or false. Two event generators, one per rule version (v001 and v002), fire together into P1, so every place serves both versions. T_out_P1 forks true into P2 and P3 or terminates false. P2 and P3 publish either result to the input join before P4. The join synchronizes arrivals, not Boolean truth; P4 produces its own Boolean and either outcome reaches final termination. All sixteen model nodes and arcs are represented. Monitor observes outside the token path.')
 draw,drawn=arc_drawer(d,arcs)
 d.group(20,20,1080,520,'Petri-net execution · Boolean functionality at every place')
 positions={'P1':(160,260),'P2':(500,145),'P3':(500,390),'P4':(850,260)}
@@ -391,13 +391,15 @@ for place,(x,y) in positions.items():
     d.transition(x+80,y,tout)
     draw(tin,place,f'M {x-(66 if join else 72)} {y} L {x-27} {y}')
     draw(place,tout,f'M {x+27} {y} L {x+72} {y}')
-d.box(35,90,235,70,'Generator',['Workflow tokens'],'endpoint',identity='EVENT_GENERATOR')
+d.box(20,90,125,70,'Generator',['v001 tokens'],'endpoint',identity='EVENT_GENERATOR')
+d.box(155,90,125,70,'Generator',['v002 tokens'],'endpoint',identity='EVENT_GENERATOR_V002')
 d.transition(160,445,'T_in_Terminate',terminal=True)
 d.text(160,518,'P1 false: terminate',15,True)
 d.transition(1030,410,'T_in_Model_Terminate',terminal=True)
 d.text(1030,483,'Terminate',15,True)
 publications={
-    ('EVENT_GENERATOR','T_in_P1'):'M 160 160 L 40 185 L 40 260 L 72 260',
+    ('EVENT_GENERATOR','T_in_P1'):'M 82 160 L 82 178 L 40 178 L 40 262 L 72 262',
+    ('EVENT_GENERATOR_V002','T_in_P1'):'M 217 160 L 217 192 L 54 192 L 54 248 L 72 248',
     ('T_out_P1','T_in_P2'):'M 248 260 L 315 260 L 315 145 L 412 145',
     ('T_out_P1','T_in_P3'):'M 248 260 L 315 260 L 315 390 L 412 390',
     ('T_out_P1','T_in_Terminate'):'M 240 284 L 240 365 L 160 365 L 160 421',
@@ -410,7 +412,7 @@ assert drawn==set(arcs)
 assert nodes['T_in_P4']['node_type']=='JoinNode'
 assert all(arcs['T_out_P1',target]['decision_value']=='true' for target in ['T_in_P2','T_in_P3'])
 assert arcs['T_out_P1','T_in_Terminate']['decision_value']=='false'
-assert all(not arcs[source,target].get('decision_value') for source,target in publications if source not in ['EVENT_GENERATOR','T_out_P1'])
+assert all(not arcs[source,target].get('decision_value') for source,target in publications if source not in ['EVENT_GENERATOR','EVENT_GENERATOR_V002','T_out_P1'])
 d.text(322,249,'true: fork',14,anchor='start')
 d.text(253,349,'false',14,anchor='start')
 d.text(647,124,'either result',14)
