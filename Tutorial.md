@@ -589,6 +589,38 @@ The join measures (time from first arrival to ENTER, and the skew between branch
 - **Network.** Use a local network or a VPN. Tokens and rules travel as plain UDP, without authentication or encryption.
 - **Firewalls.** Each package's README lists the ports its host listens on. The `ip0` machine must accept UDP from the others for Monitor and for rule commitments (ports 35000 and up). If ping between the machines fails, allow ICMP echo in the firewall to check the path.
 
+## 8. Change a running process
+
+A process changes by publishing a new rule version to the running hosts. No host is restarted and no code changes. Tokens already in flight finish under the version they started with.
+
+The example has two versions of one four-place process; every place runs `AlwaysTrueService`, so only the rules decide the route:
+
+| Version | Process | P1 sends its result to |
+|---|---|---|
+| `v001` | [`P1_P2_P3_P4_Rebalance_Workflow.json`](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_P2_P3_P4_Rebalance_Workflow.json) | P2 |
+| `v002` | [`P1_P2_P3_P4_Rebalance_ToP3_Workflow.json`](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_P2_P3_P4_Rebalance_ToP3_Workflow.json) | P3 |
+
+P4 merges: it takes a token from either P2 or P3. On `ThreeHost`, P2 and P3 are different machines, so publishing `v002` moves the work from one machine to the other.
+
+The launcher, `P1_P2_P3_P4_Rebalance_BuildAndRun.xml`, runs it in one go:
+1. `v001` fires 30 tokens, one a second.
+2. At 15 s, `v002` is published to the running hosts. The `[LIVE]` lines give the time it started and the time every host had committed it.
+3. 10 s after that, `v002` fires its 30 tokens.
+
+```sh
+cd btsn.petrinet.ProjectLoader
+ant -f P1_P2_P3_P4_Rebalance_BuildAndRun.xml -Dhost.address=127.0.0.1        # one machine
+ant -f P1_P2_P3_P4_Rebalance_BuildAndRun.xml host-packages -Dinfrastructure=ThreeHost
+ant -f P1_P2_P3_P4_Rebalance_BuildAndRun.xml -Dinfrastructure=ThreeHost      # three machines, hosts started first
+```
+
+**What to look for:**
+- **Routes.** Under `LOGICAL PLACE EXECUTIONS`, `v001` runs P1, P2, P4 and `v002` runs P1, P3, P4, with no P3 in `v001` and no P2 in `v002`.
+- **Nothing lost.** Generated and completed are equal for each version.
+- **The delta.** Each host keeps the rules it committed in `RuleFolder.v001` and `RuleFolder.v002`. Comparing them shows that only P1's routing facts differ: P2 `true` becomes `false`, and P3 `false` becomes `true`.
+
+**What travels by message.** A version's routing rules reach the hosts as rule messages. Its service contracts (the canonical bindings) are read from each host's `btsn.common`. The two versions here share their contracts, so `v002` needs nothing new on the hosts. A version that changes a contract needs its host packages rebuilt.
+
 ## Repository artefacts
 
 The supplied P2 tutorial, built with exactly these steps:

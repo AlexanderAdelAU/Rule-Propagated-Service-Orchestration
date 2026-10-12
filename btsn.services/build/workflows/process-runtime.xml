@@ -75,6 +75,15 @@
     <condition property="eg2.trigger.set"><and><isset property="eg2.trigger.file"/><not><equals arg1="${eg2.trigger.file}" arg2=""/></not></and></condition>
     <condition property="eg3.trigger.set"><and><isset property="eg3.trigger.file"/><not><equals arg1="${eg3.trigger.file}" arg2=""/></not></and></condition>
     <property name="${first.node}.first" value="true"/>
+    <!-- Optional per generator: its own process definition (versions may differ by a rule delta), its own
+         token count, and egN.publish.at.seconds to publish that version live, while the other generators run
+         (egN.fire.after.seconds then waits between its commitment and its first token). -->
+    <property name="eg1.process" value="${workflow.process.name}"/>
+    <property name="eg2.process" value="${workflow.process.name}"/>
+    <property name="eg3.process" value="${workflow.process.name}"/>
+    <property name="eg1.tokens" value="${token.count}"/>
+    <property name="eg2.tokens" value="${token.count}"/>
+    <property name="eg3.tokens" value="${token.count}"/>
 
     <!-- A host process for one node, started only when the deployment uses it and it runs here. -->
     <macrodef name="start-host">
@@ -157,7 +166,7 @@
         <sequential>
             <java classname="org.btsn.rulecontroller.TopologyBindingGenerator" classpathref="generator.classpath"
                   dir="${common.project.dir}" fork="true" failonerror="true" if:set="@{slot}.id">
-                <arg value="${workflow.process.name}"/><arg value="${@{slot}.version}"/>
+                <arg value="${@{slot}.process}"/><arg value="${@{slot}.version}"/>
             </java>
             <java classname="org.btsn.utils.BuildMasterServiceRuleBase" classpathref="generator.classpath"
                   dir="${common.project.dir}" fork="true" failonerror="true" if:set="@{slot}.id">
@@ -170,11 +179,11 @@
     <macrodef name="deploy-generator">
         <attribute name="slot"/>
         <sequential>
-            <echo message="Deploying ${workflow.process.name} (${@{slot}.version}) for ${@{slot}.id}..." if:set="@{slot}.id"/>
+            <echo message="Deploying ${@{slot}.process} (${@{slot}.version}) for ${@{slot}.id}..." if:set="@{slot}.id"/>
             <java classname="${token.generator.class}" fork="true" dir="${generator.project.dir}" failonerror="true" if:set="@{slot}.id">
                 <classpath refid="generator.classpath"/>
                 <arg value="-version"/><arg value="${@{slot}.version}"/>
-                <arg value="-process"/><arg value="${workflow.process.name}"/>
+                <arg value="-process"/><arg value="${@{slot}.process}"/>
                 <arg value="-infrastructure"/><arg value="${infrastructure.definition.name}"/>
                 <arg value="-place"/><arg value="${@{slot}.place}"/>
                 <arg value="-operation"/><arg value="${@{slot}.operation}"/>
@@ -189,15 +198,15 @@
     <macrodef name="fire-generator">
         <attribute name="slot"/>
         <sequential>
-            <echo message="Firing ${token.count} tokens from ${@{slot}.id} (${@{slot}.version}) to ${@{slot}.place}.${@{slot}.operation}..." if:set="@{slot}.id"/>
+            <echo message="Firing ${@{slot}.tokens} tokens from ${@{slot}.id} (${@{slot}.version}) to ${@{slot}.place}.${@{slot}.operation}..." if:set="@{slot}.id"/>
             <java classname="${token.generator.class}" fork="true" dir="${generator.project.dir}" failonerror="true" if:set="@{slot}.id">
                 <classpath refid="generator.classpath"/>
                 <arg value="-version"/><arg value="${@{slot}.version}"/>
-                <arg value="-process"/><arg value="${workflow.process.name}"/>
+                <arg value="-process"/><arg value="${@{slot}.process}"/>
                 <arg value="-infrastructure"/><arg value="${infrastructure.definition.name}"/>
                 <arg value="-place"/><arg value="${@{slot}.place}"/>
                 <arg value="-operation"/><arg value="${@{slot}.operation}"/>
-                <arg value="-tokens"/><arg value="${token.count}"/>
+                <arg value="-tokens"/><arg value="${@{slot}.tokens}"/>
                 <arg value="-expire"/><arg value="${token.expire}"/>
                 <arg value="-generator"/><arg value="${@{slot}.id}"/>
                 <arg value="-triggerfile" if:set="@{slot}.trigger.set"/><arg value="${@{slot}.trigger.file}" if:set="@{slot}.trigger.set"/>
@@ -212,14 +221,35 @@
 
     <target name="rebuild-service-ruleml" depends="prepare-runtime,generate-workflow-bindings" description="Rebuild the master Service.ruleml (done per version above)"/>
 
+    <!-- Versions published live are deployed later, by run-generator. -->
     <target name="deploy-workflow">
-        <deploy-generator slot="eg1"/><deploy-generator slot="eg2"/><deploy-generator slot="eg3"/>
+        <deploy-generator slot="eg1" unless:set="eg1.publish.at.seconds"/>
+        <deploy-generator slot="eg2" unless:set="eg2.publish.at.seconds"/>
+        <deploy-generator slot="eg3" unless:set="eg3.publish.at.seconds"/>
     </target>
 
-    <!-- All generators fire together, so their workflows run concurrently. -->
+    <!-- One generator's part of the run: a live version is published (and committed by every host) at its
+         publish time, while the other generators keep firing; then its tokens fire. The [LIVE] lines time it. -->
+    <macrodef name="run-generator">
+        <attribute name="slot"/>
+        <sequential>
+            <sequential if:set="@{slot}.publish.at.seconds">
+                <sleep seconds="${@{slot}.publish.at.seconds}"/>
+                <tstamp><format property="@{slot}.publish.time" pattern="yyyy-MM-dd HH:mm:ss.SSS"/></tstamp>
+                <echo message="[LIVE] ${@{slot}.version} publish started at ${@{slot}.publish.time} (${@{slot}.process})"/>
+                <deploy-generator slot="@{slot}"/>
+                <tstamp><format property="@{slot}.commit.time" pattern="yyyy-MM-dd HH:mm:ss.SSS"/></tstamp>
+                <echo message="[LIVE] ${@{slot}.version} committed by every host at ${@{slot}.commit.time}"/>
+                <sleep seconds="${@{slot}.fire.after.seconds}" if:set="@{slot}.fire.after.seconds"/>
+            </sequential>
+            <fire-generator slot="@{slot}"/>
+        </sequential>
+    </macrodef>
+
+    <!-- All generators run together, so their workflows run concurrently. -->
     <target name="fire-tokens">
         <parallel>
-            <fire-generator slot="eg1"/><fire-generator slot="eg2"/><fire-generator slot="eg3"/>
+            <run-generator slot="eg1"/><run-generator slot="eg2"/><run-generator slot="eg3"/>
         </parallel>
     </target>
 
