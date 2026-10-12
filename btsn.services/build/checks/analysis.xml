@@ -41,7 +41,7 @@
             <arg file="../btsn.common.Monitor"/>
         </java>
     </target>
-    <target name="check-clock-offsets" depends="jar" description="Check clock-offset bounds between hosts from tokens sent between them">
+    <target name="check-clock-offsets" depends="jar" description="Check clock-offset bounds between hosts and aligning their timestamps to the ip0 clock">
         <delete dir="target/clock-offset-check"/>
         <mkdir dir="target/clock-offset-check/classes"/>
         <path id="clock.offset.check.classpath">
@@ -50,10 +50,13 @@
             <pathelement location="target/clock-offset-check/classes"/>
         </path>
         <javac srcdir="../btsn.common.Monitor/tests" destdir="target/clock-offset-check/classes"
-               includes="ClockOffsetBoundsCheck.java" release="${java.release}" includeantruntime="false" encoding="UTF-8">
+               includes="ClockOffsetBoundsCheck.java,ClockAlignmentCheck.java" release="${java.release}" includeantruntime="false" encoding="UTF-8">
             <classpath refid="clock.offset.check.classpath"/>
         </javac>
         <java classname="ClockOffsetBoundsCheck" fork="true" failonerror="true">
+            <classpath refid="clock.offset.check.classpath"/>
+        </java>
+        <java classname="ClockAlignmentCheck" fork="true" failonerror="true">
             <classpath refid="clock.offset.check.classpath"/>
         </java>
     </target>

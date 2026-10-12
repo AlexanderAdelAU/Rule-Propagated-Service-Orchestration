@@ -320,6 +320,11 @@ public class WorkflowSpatialView extends JPanel {
             placeLanes.clear();
             tokenPathsById.clear();
             presentServiceVersions.clear();
+
+            // Times recorded on other machines are shown on the ip0 clock (see ClockAlignment).
+            ClockAlignment alignment = ClockAlignment.fromDatabase(conn, null, ClockAlignment.placeChannels());
+            if (alignment.problem() != null) System.out.println("Clock alignment: not aligned: " + alignment.problem());
+            for (ClockAlignment.Channel c : alignment.channels()) System.out.println("Clock alignment: " + c.describe());
             
             // Load token paths from CONSOLIDATED_TOKEN_PATHS
             String pathQuery = 
@@ -335,12 +340,14 @@ public class WorkflowSpatialView extends JPanel {
             Set<Long> workflows = new HashSet<>();
             
             while (rs.next()) {
+                String placeName = rs.getString("placeName");
+                long shift = alignment.correction(placeName);
                 TokenPath path = new TokenPath(
                     rs.getInt("tokenId"),
                     rs.getLong("workflowBase"),
-                    rs.getString("placeName"),
-                    rs.getLong("entryTime"),
-                    rs.getLong("exitTime"),
+                    placeName,
+                    rs.getLong("entryTime") + shift,
+                    rs.getLong("exitTime") + shift,
                     rs.getLong("residenceTime")
                 );
                 path.entryBufferSize = rs.getInt("entryBufferSize");
@@ -397,11 +404,14 @@ public class WorkflowSpatialView extends JPanel {
             rs = stmt.executeQuery(genealogyQuery);
             
             while (rs.next()) {
+                String forkTransition = rs.getString("forkTransitionId");
+                // T_out_P1 is fired, and its fork stamped, by P1_Place.
+                String forkPlace = forkTransition != null && forkTransition.matches("T_out_P\\d+") ? forkTransition.substring(6) + "_Place" : null;
                 TokenGenealogy gen = new TokenGenealogy(
                     rs.getInt("parentTokenId"),
                     rs.getInt("childTokenId"),
-                    rs.getString("forkTransitionId"),
-                    rs.getLong("forkTimestamp"),
+                    forkTransition,
+                    rs.getLong("forkTimestamp") + alignment.correction(forkPlace),
                     rs.getLong("workflowBase")
                 );
                 genealogy.add(gen);
