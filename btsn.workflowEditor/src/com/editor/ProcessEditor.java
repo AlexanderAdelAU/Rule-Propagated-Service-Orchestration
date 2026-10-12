@@ -542,7 +542,7 @@ public class ProcessEditor extends JFrame {
 
         toolbar.add(Box.createHorizontalStrut(5));
 
-        JButton buildRunBtn = new JButton("Build and Run");
+        JButton buildRunBtn = new JButton("Build");
         buildRunBtn.setToolTipText("Create an Ant launcher that initialises, runs and collects this deployed process");
         buildRunBtn.setFocusPainted(false);
         buildRunBtn.addActionListener(e -> createBuildAndRun());
