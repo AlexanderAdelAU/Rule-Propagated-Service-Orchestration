@@ -92,6 +92,10 @@ of services and their operations that the hosts can run.
    supplies the arguments; you do not type them.
 5. **Runs on**: the box reads **Not deployed yet**. Where P2 runs is decided in [step 2](#2-deploy-the-process).
 
+The Petri-net catalogue also offers `AlwaysTrueService`, which always returns
+`true`. Use it in place of `StochasticService` when every run must take the same
+route, for example to compare timings on different machines.
+
 Choosing a service does not create one. `StochasticService` is already packaged
 ([source](btsn.common/src/org/btsn/services/StochasticService.java)) and runs
 inside the generic host on whichever node you deploy P2 to.
@@ -547,7 +551,7 @@ Rebuild the packages whenever the process, its deployment or the infrastructure 
 
 - **Network.** Use a local network or a VPN. Tokens and rules travel as plain UDP, without authentication or encryption.
 - **Firewalls.** Each package's README lists the ports its host listens on. The `ip0` machine must accept UDP from the others for Monitor and for rule commitments (ports 35000 and up).
-- **From the editor.** Choose the infrastructure under **Machines** on the toolbar (for example `TwoHost`). **Runs on** then shows each place's machine. In **Run on hosts**, **Build host packages** builds the packages; start them on their machines, then click **Run**, which passes `-Dinfrastructure` for you.
+- **From the editor.** Choose the infrastructure under **Machines** on the toolbar (for example `TwoHost`); opening or saving an infrastructure definition in `InfrastructureDefinitionFolder` chooses it too. **Runs on** and **Deploy to** then show each node's machine, and **Build and Run** records the machines in the launcher. In **Run on hosts**, **Build host packages** builds the packages; start them on their machines, then click **Run**, which passes `-Dinfrastructure` for you.
 
 ## Repository artefacts
 

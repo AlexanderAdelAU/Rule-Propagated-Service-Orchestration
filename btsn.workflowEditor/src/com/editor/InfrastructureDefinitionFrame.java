@@ -420,7 +420,9 @@ public class InfrastructureDefinitionFrame extends JFrame {
             loadPhysicalNodes(new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8));
             rememberDirectory(PREF_DEFINITION_DIR, file.getParentFile());
             nodeNetworkModel.fireTableDataChanged();
-            setStatus("Infrastructure preview: " + file.getAbsolutePath(), "Network settings belong to this physical definition.");
+            String machines = ServiceRegistry.useInfrastructureFile(file);
+            setStatus(machines != null ? "Machines: " + machines + " - Runs on, Deploy to and Run on hosts now use it" : "Infrastructure preview: " + file.getAbsolutePath(),
+                machines != null ? file.getAbsolutePath() : "Save it in InfrastructureDefinitionFolder for runs to use it.");
         } catch (Exception ex) { showError("Could not load infrastructure", ex); }
     }
 
@@ -468,6 +470,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
             markSaved();
             rememberDirectory(preferenceKey(), file.getParentFile());
             setStatus("Definition saved: " + file.getAbsolutePath(), file.getAbsolutePath());
+            if (!deploymentEditor) useForEditor(file, "saved");
             if (processCanvas != null) linkProcess(file);
             return true;
         } catch (Exception ex) {
@@ -710,12 +713,22 @@ public class InfrastructureDefinitionFrame extends JFrame {
             rememberDirectory(preferenceKey(), file.getParentFile());
             if (!deploymentEditor || serviceRegistry.problem() == null)
                 setStatus("Definition opened: " + file.getAbsolutePath(), file.getAbsolutePath());
+            if (!deploymentEditor) useForEditor(file, "opened");
             return true;
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(dialogParent, "Could not open definition:\n" + ex.getMessage(),
                 "Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
+    }
+
+    /** An infrastructure definition opened or saved here becomes the editor's machines (when runs can find it). */
+    private void useForEditor(File file, String how) {
+        String machines = ServiceRegistry.useInfrastructureFile(file);
+        if (machines != null) setStatus("Definition " + how + "; the editor now uses " + machines + " (Machines)",
+            "Runs on, Deploy to and Run on hosts use " + file.getAbsolutePath());
+        else setStatus("Definition " + how + ": " + file.getAbsolutePath(),
+            "Runs look for infrastructure in InfrastructureDefinitionFolder; save it there to use it.");
     }
 
     private static javax.swing.filechooser.FileNameExtensionFilter createJsonFilter() {
@@ -958,6 +971,8 @@ public class InfrastructureDefinitionFrame extends JFrame {
             if (blank(n.node)) errors.add(identity + ": Node is required.");
             else if (!nodeNames.add(n.node)) errors.add(identity + ": Node is duplicated.");
             if (blank(n.channel)) errors.add(identity + ": Channel is required.");
+            else if (!deploymentEditor && !n.channel.matches("ip\\d+"))
+                errors.add(identity + ": Channel must be ip0, ip1, ... (one per machine; the number shifts the ports).");
             if (blank(n.address)) errors.add(identity + ": Address is required.");
             if (n.basePorts.isEmpty()) errors.add(identity + ": At least one fixed base port is required.");
             for (int port : n.basePorts) {
@@ -971,6 +986,8 @@ public class InfrastructureDefinitionFrame extends JFrame {
             }
         }
 
+        if (!deploymentEditor && !nodes.isEmpty() && !channelAddresses.containsKey("ip0"))
+            errors.add("Channel ip0 is required: it is the machine that runs the launcher and Monitor.");
         Set<String> physicalSockets = new HashSet<>();
         for (NodeNetwork n : nodes) for (int port : n.basePorts) {
             if (!physicalSockets.add(n.address + ":" + n.channel + ":" + port))

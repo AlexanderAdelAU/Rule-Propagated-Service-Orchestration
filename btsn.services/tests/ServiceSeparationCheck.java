@@ -25,14 +25,14 @@ public final class ServiceSeparationCheck {
     public static void main(String[] args) throws Exception {
         Logger.getRootLogger().setLevel(Level.OFF);
         Path root = Path.of(args[0]).toAbsolutePath(), common = root.resolve("btsn.common");
-        // Every active Petri-net profile must use the one reusable type, including older model profiles.
+        // Every active Petri-net profile must use the reusable Boolean types (random or always true), including older model profiles.
         int petriProfiles = 0;
         try (java.util.stream.Stream<Path> profiles = Files.list(common.resolve("ServiceDeploymentFolder/petrinet"))) {
             for (Path path : (Iterable<Path>)profiles.filter(p -> p.toString().endsWith(".json"))::iterator) {
                 JSONObject deployment = DeploymentConfiguration.read(path);
                 for (Object item : (JSONArray)deployment.get("capabilities")) {
                     JSONObject capability = (JSONObject)item;
-                    check("StochasticService".equals(capability.get("service")), "Old service type in " + path);
+                    check("StochasticService".equals(capability.get("service")) || "AlwaysTrueService".equals(capability.get("service")), "Old service type in " + path);
                     check(capability.get("instance") != null, "Missing instance in " + path);
                     check("boolean-token".equals(capability.get("invocationAdapter")), "Missing adapter in " + path);
                 }

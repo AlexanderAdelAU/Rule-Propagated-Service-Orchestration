@@ -51,7 +51,7 @@ public final class LauncherRun {
         this.allHostsHere = allHostsHere; this.antCommand = antCommand; this.listener = listener;
     }
 
-    /** Run on these machines: passes -Dinfrastructure=name unless it is SingleHost. */
+    /** Run on these machines (InfrastructureDefinitionFolder/name.json). */
     public LauncherRun infrastructure(String name) {
         this.infrastructure = name == null || name.trim().isEmpty() ? ServiceRegistry.DEFAULT_INFRASTRUCTURE : name.trim();
         return this;
@@ -60,9 +60,9 @@ public final class LauncherRun {
     /** Only build the packages for hosts on other machines (the launcher's host-packages target). */
     public LauncherRun packagesOnly() { this.packagesOnly = true; return this; }
 
-    /** -Dinfrastructure=name, or nothing for the default single machine. */
+    /** -Dinfrastructure=name, always: the editor's choice outranks the machines a launcher recorded when it was built. */
     List<String> infrastructureArgs() {
-        return ServiceRegistry.DEFAULT_INFRASTRUCTURE.equals(infrastructure) ? new ArrayList<>() : new ArrayList<>(List.of("-Dinfrastructure=" + infrastructure));
+        return new ArrayList<>(List.of("-Dinfrastructure=" + infrastructure));
     }
 
     public boolean isRunning() { return worker != null && worker.isAlive(); }

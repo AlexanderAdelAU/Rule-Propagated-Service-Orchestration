@@ -581,11 +581,16 @@ public class ProcessEditor extends JFrame {
             String name = (String)machinesCombo.getSelectedItem();
             if (name.equals(ServiceRegistry.selectedInfrastructure())) return;
             ServiceRegistry.selectInfrastructure(name);
+        });
+        toolbar.add(machinesCombo);
+        // However the machines are chosen (here, or by opening or saving an infrastructure definition), show them.
+        ServiceRegistry.addInfrastructureListener(() -> SwingUtilities.invokeLater(() -> {
+            String name = ServiceRegistry.selectedInfrastructure();
+            fillMachines();
             attributesFrame.refreshSelection();
             canvas.repaint();
             statusLabel.setText(" Machines: " + name + " - places run on " + describeMachines(name));
-        });
-        toolbar.add(machinesCombo);
+        }));
         
         toolbar.addSeparator(new Dimension(20, 32));
         
