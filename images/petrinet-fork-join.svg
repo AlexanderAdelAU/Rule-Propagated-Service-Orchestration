@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1120" height="700" viewBox="0 0 1120 700" role="img" aria-labelledby="title desc">
-<title id="title">Four-place Boolean-function model with fork and input join</title><desc id="desc">Each of P1 through P4 is a circular place whose bound function independently produces true or false. Two event generators, one per rule version (v001 and v002), fire together into P1, so every place serves both versions. T_out_P1 forks true into P2 and P3 or terminates false. P2 and P3 publish either result to the input join before P4. The join synchronizes arrivals, not Boolean truth; P4 produces its own Boolean and either outcome reaches final termination. All sixteen model nodes and arcs are represented. Monitor observes outside the token path.</desc>
+<title id="title">Four-place Boolean-function model with fork and input join</title><desc id="desc">Each of P1 through P4 is a circular place whose bound function independently produces true or false. T_out_P1 forks true into P2 and P3 or terminates false. P2 and P3 publish either result to the input join before P4. The join synchronizes arrivals, not Boolean truth; P4 produces its own Boolean and either outcome reaches final termination. All fifteen model nodes and arcs are represented. Monitor observes outside the token path.</desc>
 <defs>
 <marker id="flow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#24598e"/></marker>
 <marker id="rule" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7350a2"/></marker>
@@ -50,20 +50,16 @@
 <text x="930" y="308" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#1b2b40">T_out_P4</text>
 <path d="M 784 260 L 823 260" fill="none" stroke="#24598e" stroke-width="2" data-source="T_in_P4" data-target="P4" marker-end="url(#flow)"/>
 <path d="M 877 260 L 922 260" fill="none" stroke="#24598e" stroke-width="2" data-source="P4" data-target="T_out_P4" marker-end="url(#flow)"/>
-<rect id="EVENT_GENERATOR" x="20" y="90" width="125" height="70" rx="8" fill="#f5f6f8" stroke="#60738a" stroke-width="1.5"/>
-<text x="82.5" y="119" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Generator</text>
-<text x="82.5" y="145" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">v001 tokens</text>
-<rect id="EVENT_GENERATOR_V002" x="155" y="90" width="125" height="70" rx="8" fill="#f5f6f8" stroke="#60738a" stroke-width="1.5"/>
-<text x="217.5" y="119" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Generator</text>
-<text x="217.5" y="145" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">v002 tokens</text>
+<rect id="EVENT_GENERATOR" x="35" y="90" width="235" height="70" rx="8" fill="#f5f6f8" stroke="#60738a" stroke-width="1.5"/>
+<text x="152.5" y="119" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#1b2b40">Generator</text>
+<text x="152.5" y="145" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#1b2b40">Workflow tokens</text>
 <rect id="T_in_Terminate" x="152" y="421" width="16" height="48" fill="#1b2b40"/>
 <text x="160" y="493" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#1b2b40">T_in_Terminate</text>
 <text x="160" y="518" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#1b2b40">P1 false: terminate</text>
 <rect id="T_in_Model_Terminate" x="1022" y="386" width="16" height="48" fill="#1b2b40"/>
 <text x="1030" y="458" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#1b2b40">T_in_Model_Terminate</text>
 <text x="1030" y="483" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#1b2b40">Terminate</text>
-<path d="M 82 160 L 82 178 L 40 178 L 40 262 L 72 262" fill="none" stroke="#24598e" stroke-width="2" stroke-dasharray="6 4" data-source="EVENT_GENERATOR" data-target="T_in_P1" marker-end="url(#flow)"/>
-<path d="M 217 160 L 217 192 L 54 192 L 54 248 L 72 248" fill="none" stroke="#24598e" stroke-width="2" stroke-dasharray="6 4" data-source="EVENT_GENERATOR_V002" data-target="T_in_P1" marker-end="url(#flow)"/>
+<path d="M 160 160 L 40 185 L 40 260 L 72 260" fill="none" stroke="#24598e" stroke-width="2" stroke-dasharray="6 4" data-source="EVENT_GENERATOR" data-target="T_in_P1" marker-end="url(#flow)"/>
 <path d="M 248 260 L 315 260 L 315 145 L 412 145" fill="none" stroke="#24598e" stroke-width="2" stroke-dasharray="6 4" data-source="T_out_P1" data-target="T_in_P2" marker-end="url(#flow)"/>
 <path d="M 248 260 L 315 260 L 315 390 L 412 390" fill="none" stroke="#24598e" stroke-width="2" stroke-dasharray="6 4" data-source="T_out_P1" data-target="T_in_P3" marker-end="url(#flow)"/>
 <path d="M 240 284 L 240 365 L 160 365 L 160 421" fill="none" stroke="#24598e" stroke-width="2" stroke-dasharray="6 4" data-source="T_out_P1" data-target="T_in_Terminate" marker-end="url(#flow)"/>

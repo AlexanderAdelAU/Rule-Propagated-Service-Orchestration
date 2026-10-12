@@ -13,7 +13,7 @@ public final class BuildAndRunDialog extends JDialog {
     /** One row per event generator; each runs under its own rule version. */
     final List<BuildAndRunGenerator.Run> runs = new ArrayList<>();
     final GeneratorModel generators = new GeneratorModel();
-    final JSpinner tokens = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));
+    final JSpinner tokens = new JSpinner(new SpinnerNumberModel(10, 1, 100000, 1));
     final JSpinner completion = new JSpinner(new SpinnerNumberModel(10, 1, 3600, 1));
     final JTextField name = new JTextField(28);
     final JComboBox<File> folder;

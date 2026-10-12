@@ -10,7 +10,7 @@
     <property name="init.process.name" value="common/Initializers/P1_P2_P3_P4_Initialization"/>
     <property name="collector.process.name" value="common/Collectors/P1_P2_P3_P4_Collector"/>
     <property name="rule.version" value="v001"/>
-    <property name="query.version" value="v001,v002"/>
+    <property name="query.version" value="v001"/>
 
     <!-- Tokens: one block per event generator, each with its own rule version, target place and schedule.
          The generators fire together. -->
@@ -18,14 +18,9 @@
     <property name="eg1.version" value="v001"/>
     <property name="eg1.place" value="P1_Place"/>
     <property name="eg1.operation" value="processToken"/>
-    <property name="eg1.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun_EVENT_GENERATOR.csv"/>
-    <property name="eg2.id" value="EVENT_GENERATOR_V002"/>
-    <property name="eg2.version" value="v002"/>
-    <property name="eg2.place" value="P1_Place"/>
-    <property name="eg2.operation" value="processToken"/>
-    <property name="eg2.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun_EVENT_GENERATOR_V002.csv"/>
-    <property name="token.count" value="100"/>
-    <property name="workflow.completion.seconds" value="30"/>
+    <property name="eg1.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.csv"/>
+    <property name="token.count" value="10"/>
+    <property name="workflow.completion.seconds" value="10"/>
 
     <!-- Hosts used by the service deployment -->
     <property name="run.p1" value="true"/>
