@@ -52,6 +52,28 @@ public final class RunFromEditorCheck {
             .equals("TwoHost: P1, P3, P5 on 192.168.1.82; P2, P4, P6 on 192.168.1.152"), "Machines description");
         LauncherRun plain = new LauncherRun(p2Launcher, repository, new File(repository, "unused.txt"), false, "", null);
         check(plain.infrastructureArgs().equals(List.of("-Dinfrastructure=SingleHost")) && plain.infrastructure("TwoHost").infrastructureArgs().equals(List.of("-Dinfrastructure=TwoHost")), "Ant option for the machines");
+        // Build packages the hosts on other machines: for the inventory example on TwoHost, P2 for 192.168.1.152.
+        File inventory = new File(repository, "btsn.common/ProcessDefinitionFolder/inventory/Workflow/Inventory_Workflow.json");
+        BuildAndRunGenerator.Plan[] inventoryPlan = new BuildAndRunGenerator.Plan[1];
+        javax.swing.SwingUtilities.invokeAndWait(() -> {
+            try {
+                Canvas canvas = new Canvas(); canvas.setDefinitionLocation(inventory);
+                canvas.loadFromJSON(new String(Files.readAllBytes(inventory.toPath()), StandardCharsets.UTF_8));
+                inventoryPlan[0] = BuildAndRunGenerator.plan(canvas, inventory);
+            } catch (Exception ex) { throw new RuntimeException(ex); }
+        });
+        check(BuildAndRunGenerator.packagedHosts(inventoryPlan[0]).isEmpty(), "SingleHost needs no host packages");
+        System.setProperty("rpso.infrastructure", "TwoHost");
+        try {
+            check(BuildAndRunGenerator.packagedHosts(inventoryPlan[0]).equals(List.of("P2 for 192.168.1.152")),
+                "TwoHost packages: " + BuildAndRunGenerator.packagedHosts(inventoryPlan[0]));
+            check(BuildAndRunGenerator.summary(inventoryPlan[0], inventoryPlan[0].defaults).stream().anyMatch(l -> l.startsWith("Package  P2 for 192.168.1.152")),
+                "Build's summary does not list the host package");
+        } finally {
+            System.setProperty("rpso.infrastructure", "SingleHost");
+        }
+        check(LauncherRun.hostPackagesFolder(repository, new File("Inventory_Workflow_BuildAndRun.xml")).getPath()
+            .replace('\\', '/').endsWith("btsn.services/target/host-packages/Inventory_Workflow_BuildAndRun"), "Host package folder");
         // Opening or saving a definition in InfrastructureDefinitionFolder makes it the editor's machines; elsewhere it does not.
         int[] told = {0};
         Runnable listener = () -> told[0]++;

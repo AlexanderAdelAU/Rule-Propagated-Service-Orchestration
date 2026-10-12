@@ -19,6 +19,8 @@ public final class BuildAndRunDialog extends JDialog {
     final JComboBox<File> folder;
     final JTextArea summary = new JTextArea(11, 92);
     private final JButton create = new JButton("Create");
+    /** Writes the launcher, then packages the hosts that run on other machines (enabled only when there are some). */
+    private final JButton packages = new JButton("Build host packages");
     File created;
 
     public BuildAndRunDialog(Window owner, BuildAndRunGenerator.Plan plan) {
@@ -56,6 +58,8 @@ public final class BuildAndRunDialog extends JDialog {
         row(form, c, 2, "Wait after last token (s):", completion);
         row(form, c, 3, "Launcher name:", name);
         row(form, c, 4, "Folder:", folder);
+        java.util.List<ServiceRegistry.Node> nodes = ServiceRegistry.infrastructureNodes(plan.profile);
+        row(form, c, 5, "Machines:", new JLabel(RunWindow.describeMachines(ServiceRegistry.selectedInfrastructure(), nodes)));
 
         summary.setEditable(false);
         summary.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
@@ -63,10 +67,12 @@ public final class BuildAndRunDialog extends JDialog {
         summaryPane.setBorder(BorderFactory.createTitledBorder("Files and run"));
 
         JButton cancel = new JButton("Cancel");
-        create.addActionListener(e -> create());
+        create.addActionListener(e -> create(false));
+        packages.addActionListener(e -> create(true));
+        packages.setToolTipText("Write the launcher, then build a self-contained package for each host on another machine: unzip it there and run launch.bat");
         cancel.addActionListener(e -> dispose());
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        buttons.add(create); buttons.add(cancel);
+        buttons.add(packages); buttons.add(create); buttons.add(cancel);
 
         JPanel top = new JPanel(new BorderLayout(6, 6));
         top.add(form, BorderLayout.NORTH);
@@ -136,8 +142,9 @@ public final class BuildAndRunDialog extends JDialog {
 
     private void refresh() {
         BuildAndRunGenerator.Options o = options();
-        if (o.launcherName.isEmpty() || o.folder == null) { summary.setText("Enter a launcher name."); create.setEnabled(false); return; }
+        if (o.launcherName.isEmpty() || o.folder == null) { summary.setText("Enter a launcher name."); create.setEnabled(false); packages.setEnabled(false); return; }
         create.setEnabled(BuildAndRunGenerator.problems(plan, o).isEmpty());
+        packages.setEnabled(create.isEnabled() && !BuildAndRunGenerator.packagedHosts(plan).isEmpty());
         summary.setText(String.join("\n", BuildAndRunGenerator.summary(plan, o)));
         summary.setCaretPosition(0);
     }
@@ -150,7 +157,40 @@ public final class BuildAndRunDialog extends JDialog {
         return created;
     }
 
-    private void create() {
+    /** After the launcher: the packages for the hosts on other machines, so Run on hosts finds everything ready. */
+    private void buildPackages(File launcher, List<String> files) {
+        create.setEnabled(false); packages.setEnabled(false);
+        summary.setText("Built " + launcher.getName() + ". Building the host packages for "
+            + String.join(", ", BuildAndRunGenerator.packagedHosts(plan)) + "...\n");
+        String machines = ServiceRegistry.selectedInfrastructure();
+        LauncherRun run = new LauncherRun(launcher, plan.root, LauncherRun.analysisFileFor(plan.root, plan.processName), false, RunWindow.antCommand(),
+            new LauncherRun.Listener() {
+                public void line(String text) { SwingUtilities.invokeLater(() -> { summary.append(text + "\n"); summary.setCaretPosition(summary.getDocument().getLength()); }); }
+                public void phase(LauncherRun.Phase phase, String detail) { }
+                public void finished(LauncherRun.Phase outcome, File analysis, String message) { SwingUtilities.invokeLater(() -> {
+                    if (outcome != LauncherRun.Phase.DONE) {
+                        create.setEnabled(true); packages.setEnabled(true);
+                        JOptionPane.showMessageDialog(BuildAndRunDialog.this, "The launcher was built, but not the host packages:\n" + message,
+                            "Host packages", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    File folder = LauncherRun.hostPackagesFolder(plan.root, launcher);
+                    JOptionPane.showMessageDialog(BuildAndRunDialog.this,
+                        "Built " + launcher.getName() + " and its host packages for " + machines + ".\n\n"
+                        + message.replace("; ", "\n") + "\n\n"
+                        + "Copy each ZIP to its machine, unzip it and run launch.bat.\n"
+                        + "Then click Run on hosts.\n\n" + String.join("\n", files),
+                        "Launcher and host packages built", JOptionPane.INFORMATION_MESSAGE);
+                    if (folder.isDirectory() && Desktop.isDesktopSupported()) {
+                        try { Desktop.getDesktop().open(folder); } catch (Exception ignored) { }
+                    }
+                    dispose();
+                }); }
+            }).infrastructure(machines).packagesOnly();
+        run.start();
+    }
+
+    private void create(boolean withPackages) {
         BuildAndRunGenerator.Options o = options();
         File launcher = plan.launcher(o);
         if (launcher.exists() && JOptionPane.showConfirmDialog(this, launcher.getName() + " already exists. Replace it?",
@@ -158,6 +198,7 @@ public final class BuildAndRunDialog extends JDialog {
         try {
             createFiles();
             List<String> lines = BuildAndRunGenerator.summary(plan, o);
+            if (withPackages) { buildPackages(launcher, lines); return; }
             JOptionPane.showMessageDialog(this,
                 "Created " + launcher.getName() + " in " + o.folder.getName() + ".\n\n"
                 + "Run it from Eclipse (right-click > Run As > Ant Build) or with:\n"
