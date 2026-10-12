@@ -211,10 +211,8 @@ and are not supported here yet.
 
 | Choice | Default | Meaning |
 |---|---|---|
-| **Tokens per generator** | `10` | Root workflows each generator starts, at most 100 (each version numbers 100 workflows) |
+| **Tokens per generator** | `10` | Root workflows each generator starts |
 | **Wait after last token (s)** | `10` | Time for the last workflows to finish before collection |
-
-Replacing a launcher keeps its token count and wait, so an evaluation-sized launcher stays that size.
 | **Launcher name** | `<process>_BuildAndRun.xml` | File name of the launcher |
 | **Folder** | `btsn.<domain>.ProjectLoader` | Where the launcher is written |
 
@@ -508,8 +506,6 @@ Hosts talk to each other only by UDP messages, so the same process runs unchange
 
 The worked example spreads the four-place fork/join over three machines. P1 forks to P2 and P3, which run on two other machines, and their results join at P4, back on the first machine. Each branch reaches the join over its own network path.
 
-The example is sized as an evaluation run. Two event generators, one for rule version `v001` and one for `v002`, each fire 100 tokens, one every 2 s. They fire together, so P1 receives a pair of tokens every 2 s and every place serves both versions at once. A run takes about five minutes. For a quick try, add `-Dtoken.count=10` to the Ant command.
-
 ### Choose the machines
 
 An infrastructure definition gives each node its machine. Three are supplied:
@@ -577,7 +573,6 @@ ant -f P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.xml host-packages -Dinfrastruc
 **What to look for in the analysis.** The structural results are the same as on one machine:
 - **Forks and joins:** `Fork families` equals `Observed join sites`, and `Orphan fork children` is 0.
 - **Branch executions:** P2 and P3 each execute once per fork.
-- **Both versions:** the report has one section per workflow base (`1000000` for `v001`, `2000000` for `v002`). The shared-service analysis at the end shows every place serving both versions, with any contention between them.
 
 The join measures (time from first arrival to ENTER, and the skew between branch arrivals) now include each branch's network path.
 
