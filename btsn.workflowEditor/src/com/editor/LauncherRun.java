@@ -138,6 +138,11 @@ public final class LauncherRun {
         return completed && !stopRequested;
     }
 
+    /** Where the launcher's host-packages target writes its ZIPs. */
+    public static File hostPackagesFolder(File root, File launcher) {
+        return new File(root, "btsn.services/target/host-packages/" + launcher.getName().replaceFirst("\\.xml$", ""));
+    }
+
     /** The host-packages target: one ZIP for each host whose address is another machine. */
     private void runPackages() {
         Phase outcome = Phase.FAILED; String message = "Packaging failed; see the output above.";

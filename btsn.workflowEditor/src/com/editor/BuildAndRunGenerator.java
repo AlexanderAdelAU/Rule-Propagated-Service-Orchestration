@@ -159,12 +159,29 @@ public final class BuildAndRunGenerator {
         lines.add((plan.initializerExists ? "Reuse    " : "Write    ") + relative(plan.root, plan.initializer));
         lines.add((plan.collectorExists ? "Reuse    " : "Write    ") + relative(plan.root, plan.collector));
         lines.add("Hosts    " + String.join(", ", plan.nodes) + " and Monitor");
+        for (String packaged : packagedHosts(plan)) lines.add("Package  " + packaged + " (Build host packages; start it on its machine)");
         for (Run run : o.enabled())
             lines.add("Tokens   " + o.tokens + " from " + run.generatorId + " to " + plan.targets.get(run.generatorId) + "." + plan.operations.get(run.generatorId)
                 + ", one every " + run.intervalMs + " ms, version " + run.version);
         if (o.enabled().size() > 1) lines.add("         The generators fire together; the analysis reports each version separately.");
         for (String problem : problems(plan, o)) lines.add("Problem  " + problem);
         return lines;
+    }
+
+    /**
+     * The hosts on another machine than the launcher's (ip0) under the editor's Machines, as "P2 for 192.168.1.152".
+     * Build host packages (in the Build dialog) packages these after writing the launcher.
+     */
+    public static List<String> packagedHosts(Plan plan) {
+        List<ServiceRegistry.Node> nodes = ServiceRegistry.infrastructureNodes(plan.profile);
+        String launcherMachine = null;
+        for (ServiceRegistry.Node node : nodes) if ("ip0".equals(node.channel)) launcherMachine = node.address;
+        List<String> packaged = new ArrayList<>();
+        if (launcherMachine == null || !ServiceRegistry.severalMachines(nodes)) return packaged;
+        for (String used : plan.nodes)
+            for (ServiceRegistry.Node node : nodes)
+                if (node.node.equals(used) && !node.address.equals(launcherMachine)) packaged.add(used + " for " + node.address);
+        return packaged;
     }
 
     /** Writes the launcher and any missing supporting files; returns the launcher. */

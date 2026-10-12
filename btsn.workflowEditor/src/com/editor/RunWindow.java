@@ -36,7 +36,6 @@ public final class RunWindow extends JFrame {
     /** The machines chosen in the editor (Machines on the toolbar), and whether they are more than one. */
     final String machines;
     final boolean severalMachines;
-    final JButton packages = new JButton("Build host packages");
     final JTextField ant = new JTextField(28);
     final JTextArea console = new JTextArea(24, 110);
     final JButton start = new JButton("Run"), stop = new JButton("Stop"), close = new JButton("Close");
@@ -80,13 +79,7 @@ public final class RunWindow extends JFrame {
         c.gridy = 0; c.gridx = 0; form.add(new JLabel("Launcher:"), c); c.gridx = 1; c.weightx = 1; c.gridwidth = 2; form.add(launcher, c);
         c.gridy = 1; c.gridx = 0; c.weightx = 0; c.gridwidth = 1; form.add(new JLabel("Hosts:"), c); c.gridx = 1; c.gridwidth = 2; form.add(allHostsHere, c);
         c.gridy = 2; c.gridx = 0; c.gridwidth = 1; c.weightx = 0; form.add(new JLabel("Machines:"), c);
-        c.gridx = 1; c.weightx = 1; form.add(new JLabel(describeMachines(machines, nodes)), c);
-        c.gridx = 2; c.weightx = 0; form.add(packages, c);
-        packages.setEnabled(severalMachines);
-        packages.setToolTipText(severalMachines
-            ? "Build a self-contained package for each host on another machine; unzip it there and run launch.bat before Run"
-            : "Every host runs on this computer; choose other Machines on the editor toolbar to run on several");
-        packages.addActionListener(e -> buildPackages());
+        c.gridx = 1; c.weightx = 1; c.gridwidth = 2; form.add(new JLabel(describeMachines(machines, nodes)), c); c.gridwidth = 1;
         c.gridy = 3; c.gridx = 0; c.gridwidth = 1; form.add(new JLabel("Ant folder:"), c); c.gridx = 1; c.weightx = 1; form.add(ant, c); c.gridx = 2; c.weightx = 0; form.add(chooseAnt, c);
         c.gridy = 4; c.gridx = 0; form.add(new JLabel("Analysis:"), c);
         c.gridx = 1; c.gridwidth = 2;
@@ -158,10 +151,19 @@ public final class RunWindow extends JFrame {
         pack();
         setLocationRelativeTo(owner);
         status.setText("Runs the launcher, stops its hosts when collection is done, analyses the run and loads it into the replay.");
-        if (severalMachines) status.setText("Runs on " + machines + ". First build the host packages and start each one on its machine (launch.bat), then Run.");
+        if (severalMachines) status.setText(packagesReady()
+            ? "Runs on " + machines + ". Start each host package on its machine with launch.bat, then Run."
+            : "Runs on " + machines + ", but this launcher has no host packages yet: use Build > Build host packages first.");
     }
 
     public boolean isRunning() { return run != null && run.isRunning(); }
+
+    /** Build made the packages for the hosts on other machines (any ZIP in the launcher's package folder). */
+    private boolean packagesReady() {
+        File selected = (File)launcher.getSelectedItem();
+        File[] zips = selected == null ? null : LauncherRun.hostPackagesFolder(root, selected).listFiles((d, n) -> n.endsWith(".zip"));
+        return zips != null && zips.length > 0;
+    }
 
     /** "TwoHost: P1, P3, P5 on 192.168.1.82; P2, P4, P6 on 192.168.1.152". */
     static String describeMachines(String name, java.util.List<ServiceRegistry.Node> nodes) {
@@ -172,30 +174,9 @@ public final class RunWindow extends JFrame {
         return name + (parts.isEmpty() ? "" : ": " + String.join("; ", parts));
     }
 
-    /** The launcher's host-packages target, for the machines chosen. */
-    void buildPackages() {
-        File selected = (File)launcher.getSelectedItem();
-        if (selected == null) return;
-        try { LauncherRun.antHome(ant.getText()); }
-        catch (java.io.IOException ex) { status.setText(ex.getMessage()); JOptionPane.showMessageDialog(this, ex.getMessage(), "Ant", JOptionPane.WARNING_MESSAGE); return; }
-        prefs.put(ANT_PREF, ant.getText().trim());
-        console.setText("");
-        resetSteps();
-        start.setEnabled(false); packages.setEnabled(false); stop.setEnabled(true); launcher.setEnabled(false);
-        status.setText("Building host packages for " + machines + "...");
-        run = new LauncherRun(selected, root, LauncherRun.analysisFileFor(root, processName), false, ant.getText(), new LauncherRun.Listener() {
-            public void line(String text) { SwingUtilities.invokeLater(() -> append(text)); }
-            public void phase(LauncherRun.Phase phase, String detail) { }
-            public void finished(LauncherRun.Phase outcome, File analysis, String message) { SwingUtilities.invokeLater(() -> {
-                start.setEnabled(true); packages.setEnabled(severalMachines); stop.setEnabled(false); launcher.setEnabled(true);
-                status.setText(message);
-                File folder = new File(root, "btsn.services/target/host-packages/" + selected.getName().replaceFirst("\\.xml$", ""));
-                if (outcome == LauncherRun.Phase.DONE && folder.isDirectory() && java.awt.Desktop.isDesktopSupported()) {
-                    try { java.awt.Desktop.getDesktop().open(folder); } catch (Exception ignored) { }
-                }
-            }); }
-        }).infrastructure(machines).packagesOnly();
-        run.start();
+    /** The Ant folder chosen in this window (empty: ANT_HOME, the PATH or Eclipse's Ant); Build uses it too. */
+    static String antCommand() {
+        return Preferences.userNodeForPackage(RunWindow.class).get(ANT_PREF, "");
     }
 
     void startRun() {
@@ -211,7 +192,7 @@ public final class RunWindow extends JFrame {
         runStartedAt = System.currentTimeMillis();
         hosts.started(runStartedAt);
         hostTimer.start();
-        start.setEnabled(false); stop.setEnabled(true); launcher.setEnabled(false); allHostsHere.setEnabled(false); packages.setEnabled(false);
+        start.setEnabled(false); stop.setEnabled(true); launcher.setEnabled(false); allHostsHere.setEnabled(false);
         status.setText("Running " + selected.getName() + (severalMachines ? " on " + machines : "") + "...");
         run = new LauncherRun(selected, root, LauncherRun.analysisFileFor(root, processName), allHostsHere.isSelected(), ant.getText(), new LauncherRun.Listener() {
             public void line(String text) { SwingUtilities.invokeLater(() -> { append(text); hostLine(text); }); }
@@ -245,7 +226,7 @@ public final class RunWindow extends JFrame {
     }
 
     private void done(LauncherRun.Phase outcome, File analysis, String message) {
-        start.setEnabled(true); stop.setEnabled(false); launcher.setEnabled(true); allHostsHere.setEnabled(!severalMachines); packages.setEnabled(severalMachines);
+        start.setEnabled(true); stop.setEnabled(false); launcher.setEnabled(true); allHostsHere.setEnabled(!severalMachines);
         hostTimer.stop();
         hosts.refresh(); hosts.stopped(); hostModel.fireTableDataChanged();
         java.text.SimpleDateFormat clock = new java.text.SimpleDateFormat("HH:mm:ss");
