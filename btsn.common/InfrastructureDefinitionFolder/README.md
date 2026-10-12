@@ -52,6 +52,9 @@ machine. See the [tutorial](../../Tutorial.md#7-run-on-several-machines).
 [TwoHost.json](TwoHost.json) is the two-machine test arrangement: P1, P3 and P5 on
 `ip0` (192.168.1.82, the launcher's machine) and P2, P4 and P6 on `ip1`
 (192.168.1.152).
+[ThreeHost.json](ThreeHost.json) adds a third machine for the four-place fork/join:
+P1 and P4 on `ip0` (192.168.1.82), P2 and P5 on `ip1` (192.168.1.152), and P3 and
+P6 on `ip2` (192.168.1.90), so the two branches join across machines.
 
 ## Follow the configuration
 
