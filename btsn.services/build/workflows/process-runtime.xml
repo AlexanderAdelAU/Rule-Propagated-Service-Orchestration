@@ -367,42 +367,38 @@
         </parallel>
     </target>
 
-    <!-- One self-contained package per host that runs on another machine. -->
+    <!-- One self-contained package per machine for the hosts that run on other machines: <launcher>_<nodes>, for example
+         ForkRebalance_ThreeHost_P3P6 for P3 and P6 on 192.168.1.90. -->
     <property name="host.packages" value="remote"/>
     <property name="host.packages.dir" location="${services.project.dir}/target/host-packages/${ant.project.name}"/>
-    <macrodef name="package-host">
+    <macrodef name="choose-package-node">
         <attribute name="node"/><attribute name="label"/>
         <sequential>
             <condition property="@{node}.package"><and>
                 <isset property="run.@{node}"/>
                 <or><not><isset property="@{node}.is.local"/></not><equals arg1="${host.packages}" arg2="all"/></or>
             </and></condition>
-            <java classname="org.btsn.deployment.HostPackage" fork="true" failonerror="true" classpathref="generator.classpath" if:set="@{node}.package">
-                <arg value="node=@{label}"/><arg value="version=${rule.version}"/><arg value="launcher=${ant.project.name}"/>
-                <arg value="runtime=${launcher.runtime.dir}"/><arg value="source=${source.root}"/><arg value="bundle=${service.bundle.dir}"/>
-                <arg value="infrastructureJar=${infrastructure.jar}"/><arg value="libs=${lib.dir}"/>
-                <arg value="libExcludes=${services.project.dir}/target/runtime-library-excludes.txt"/><arg value="out=${host.packages.dir}"/>
-            </java>
-            <delete file="${host.packages.dir}/${ant.project.name}-@{label}.zip" if:set="@{node}.package"/>
-            <zip destfile="${host.packages.dir}/${ant.project.name}-@{label}.zip" if:set="@{node}.package">
-                <zipfileset dir="${host.packages.dir}/${ant.project.name}-@{label}" prefix="${ant.project.name}-@{label}" excludes="launch.sh"/>
-                <zipfileset dir="${host.packages.dir}/${ant.project.name}-@{label}" prefix="${ant.project.name}-@{label}" includes="launch.sh" filemode="755"/>
-            </zip>
-            <echo message="  @{label}: ${host.packages.dir}/${ant.project.name}-@{label}.zip  (copy to ${@{node}.address} and run launch.bat or launch.sh)" if:set="@{node}.package"/>
+            <condition property="@{node}.package.label" value="@{label}," else=""><isset property="@{node}.package"/></condition>
         </sequential>
     </macrodef>
 
     <target name="host-packages" depends="prepare-runtime,resolve-deployment-modes,generate-workflow-bindings"
-            description="Package each host that runs on another machine (-Dhost.packages=all packages every host)">
+            description="Package the hosts that run on other machines, one package per machine (-Dhost.packages=all packages every host)">
         <echo message="Packaging hosts for ${process.title} on ${infrastructure.definition.name}, rules ${rule.version}..."/>
-        <package-host node="p1" label="P1"/><package-host node="p2" label="P2"/><package-host node="p3" label="P3"/>
-        <package-host node="p4" label="P4"/><package-host node="p5" label="P5"/><package-host node="p6" label="P6"/>
+        <choose-package-node node="p1" label="P1"/><choose-package-node node="p2" label="P2"/><choose-package-node node="p3" label="P3"/>
+        <choose-package-node node="p4" label="P4"/><choose-package-node node="p5" label="P5"/><choose-package-node node="p6" label="P6"/>
+        <java classname="org.btsn.deployment.HostPackage" fork="true" failonerror="true" classpathref="generator.classpath">
+            <arg value="nodes=${p1.package.label}${p2.package.label}${p3.package.label}${p4.package.label}${p5.package.label}${p6.package.label}"/>
+            <arg value="version=${rule.version}"/><arg value="launcher=${ant.project.name}"/>
+            <arg value="runtime=${launcher.runtime.dir}"/><arg value="source=${source.root}"/><arg value="bundle=${service.bundle.dir}"/>
+            <arg value="infrastructureJar=${infrastructure.jar}"/><arg value="libs=${lib.dir}"/>
+            <arg value="libExcludes=${services.project.dir}/target/runtime-library-excludes.txt"/><arg value="out=${host.packages.dir}"/>
+        </java>
         <condition property="host.packages.none"><not><or>
             <isset property="p1.package"/><isset property="p2.package"/><isset property="p3.package"/>
             <isset property="p4.package"/><isset property="p5.package"/><isset property="p6.package"/>
         </or></not></condition>
-        <echo message="Every host this deployment uses runs on this machine; nothing to package (-Dhost.packages=all packages them anyway)." if:set="host.packages.none"/>
-        <echo message="Start each packaged host on its machine, then run this launcher here (the ip0 machine, ${ip0.address}) with the same settings." unless:set="host.packages.none"/>
+        <echo message="Start each machine's package (launch.bat starts all its hosts), then run this launcher here (the ip0 machine, ${ip0.address}) with the same settings." unless:set="host.packages.none"/>
     </target>
 
     <target name="help" description="Usage">
@@ -412,6 +408,6 @@
         <echo message="-Dhost.address=127.0.0.1 run every host on this machine"/>
         <echo message="-Dp1.mode=local|remote   start or skip a host (default auto)"/>
         <echo message="-Dinfrastructure=MultiHost  use InfrastructureDefinitionFolder/MultiHost.json"/>
-        <echo message="ant host-packages        package each host that runs on another machine"/>
+        <echo message="ant host-packages        package the hosts on other machines, one package per machine"/>
     </target>
 </project>

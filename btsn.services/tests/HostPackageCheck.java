@@ -16,10 +16,10 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 /**
- * A host on another machine reaches the deployment only by UDP. Checks that its package carries the
- * launcher's own master ruleset and only its node's services, that it starts from an empty folder
- * outside the repository, and that a distributed infrastructure moves each host's administrative
- * services onto that host's channel.
+ * A host on another machine reaches the deployment only by UDP. Checks that a machine's package carries the
+ * launcher's own master ruleset and only its nodes' services, that one launch starts all its hosts from an
+ * empty folder outside the repository, and that a distributed infrastructure moves each host's administrative
+ * services onto that host's channel. The inventory example on one address packages P1 and P2 as one machine.
  *
  * Arguments: repository-root packages-folder launcher-runtime-folder
  */
@@ -32,12 +32,14 @@ public final class HostPackageCheck {
         String digest = HostPackage.rulesetDigest(runtime.resolve("btsn.common"), new StringBuilder());
         Path scratch = Files.createTempDirectory("host package check ");
         try {
-            Path p1 = unpack(packages.resolve("Inventory_Workflow_BuildAndRun-P1.zip"), scratch);
-            Path p2 = unpack(packages.resolve("Inventory_Workflow_BuildAndRun-P2.zip"), scratch);
-            contents(p1, "P1", digest, runtime, "inventory/InventoryService.jar");
-            contents(p2, "P2", digest, runtime, "inventory/SupplierService.jar");
-            if (System.getProperty("os.name").toLowerCase().contains("win")) System.out.println("SKIP: starting a package uses sh launch.sh");
-            else starts(p2, "btsn.rpso.places.p2", 3);
+            try (Stream<Path> zips = Files.list(packages)) {
+                List<String> names = zips.map(z -> z.getFileName().toString()).filter(n -> n.endsWith(".zip")).sorted().collect(java.util.stream.Collectors.toList());
+                check(names.equals(List.of("Inventory_Workflow_BuildAndRun_P1P2.zip")), "One package per machine, named after its hosts: " + names);
+            }
+            Path machine = unpack(packages.resolve("Inventory_Workflow_BuildAndRun_P1P2.zip"), scratch);
+            contents(machine, List.of("P1", "P2"), digest, runtime, List.of("inventory/InventoryService.jar", "inventory/SupplierService.jar"));
+            if (System.getProperty("os.name").toLowerCase().contains("win")) System.out.println("SKIP: starting a package uses sh launch-to-file.sh");
+            else starts(machine, 3, "P1", "P2");
         } finally {
             delete(scratch);
         }
@@ -90,54 +92,63 @@ public final class HostPackageCheck {
         }
     }
 
-    /** The package carries the launcher's master ruleset, only its node's services and a host JAR without business classes. */
-    static void contents(Path pkg, String node, String digest, Path runtime, String service) throws Exception {
+    /** The package carries the launcher's master ruleset, only its nodes' services, host JARs without business classes, and the launches. */
+    static void contents(Path pkg, List<String> nodes, String digest, Path runtime, List<String> expectedServices) throws Exception {
         String readme = Files.readString(pkg.resolve("README.txt"));
-        check(readme.contains("master ruleset " + digest), node + ": README must carry the launcher's master ruleset digest");
-        check(Files.readString(pkg.resolve("MASTER-RULESET.sha256")).startsWith("# master ruleset " + digest), node + ": digest file differs");
-        check(HostPackage.rulesetDigest(pkg.resolve("btsn.common"), new StringBuilder()).equals(digest), node + ": packaged rules differ from the launcher's");
+        check(readme.contains("master ruleset " + digest), "README must carry the launcher's master ruleset digest");
+        check(Files.readString(pkg.resolve("MASTER-RULESET.sha256")).startsWith("# master ruleset " + digest), "digest file differs");
+        check(HostPackage.rulesetDigest(pkg.resolve("btsn.common"), new StringBuilder()).equals(digest), "packaged rules differ from the launcher's");
         String generated = "RuleBase/Generated/InfrastructureDeployment.ruleml.xml";
         check(Files.readString(pkg.resolve("btsn.common").resolve(generated)).equals(Files.readString(runtime.resolve("btsn.common").resolve(generated))),
-            node + ": generated deployment rules differ");
+            "generated deployment rules differ");
         List<String> services = new ArrayList<>();
         try (Stream<Path> files = Files.walk(pkg.resolve("jars/services"))) {
             files.filter(Files::isRegularFile).forEach(f -> services.add(pkg.resolve("jars/services").relativize(f).toString().replace('\\', '/')));
         }
-        check(services.equals(List.of(service)), node + ": expected only " + service + ", found " + services);
-        String hostJar = "jars/host/btsn.rpso.places." + node.toLowerCase() + ".jar";
-        try (ZipFile jar = new ZipFile(pkg.resolve(hostJar).toFile())) {
-            for (ZipEntry entry : java.util.Collections.list(jar.entries()))
-                check(!entry.getName().startsWith("org/btsn/business/") && !entry.getName().startsWith("org/btsn/services/"),
-                    node + ": host JAR contains business class " + entry.getName());
+        java.util.Collections.sort(services);
+        check(services.equals(expectedServices), "expected only " + expectedServices + ", found " + services);
+        for (String node : nodes) {
+            String hostJar = "jars/host/btsn.rpso.places." + node.toLowerCase() + ".jar";
+            try (ZipFile jar = new ZipFile(pkg.resolve(hostJar).toFile())) {
+                for (ZipEntry entry : java.util.Collections.list(jar.entries()))
+                    check(!entry.getName().startsWith("org/btsn/business/") && !entry.getName().startsWith("org/btsn/services/"),
+                        node + ": host JAR contains business class " + entry.getName());
+            }
+            check(Files.isDirectory(pkg.resolve("btsn.rpso.places." + node.toLowerCase() + "/ServiceLoaderQueries")), node + ": no working folder");
+            check(Files.readString(pkg.resolve("launch-" + node + ".bat")).contains("\r\n"), node + ": launch-" + node + ".bat needs Windows line endings");
+            check(Files.readString(pkg.resolve("launch-" + node + ".sh")).contains("org.btsn.handlers.ServiceLoader . -version v001"), node + ": launch-" + node + ".sh must start the ServiceLoader");
+            String toFile = Files.readString(pkg.resolve("launch-to-file-" + node + ".bat"));
+            check(toFile.contains("\r\n") && toFile.contains("call \"%~dp0launch-" + node + ".bat\" %* > \"%~dp0" + node + "_Place.out.txt\" 2>&1"),
+                node + ": launch-to-file-" + node + ".bat must run launch-" + node + ".bat into " + node + "_Place.out.txt");
+            // The machine's launches start every node: one window each on Windows.
+            check(Files.readString(pkg.resolve("launch.bat")).contains("call \"%~dp0launch-" + node + ".bat\""), "launch.bat must start " + node);
+            check(Files.readString(pkg.resolve("launch-to-file.bat")).contains("call \"%~dp0launch-to-file-" + node + ".bat\""), "launch-to-file.bat must start " + node);
+            check(Files.readString(pkg.resolve("launch-to-file.sh")).contains("launch-to-file-" + node + ".sh"), "launch-to-file.sh must start " + node);
+            check(readme.contains(node + " "), "README must list " + node);
         }
-        check(Files.readString(pkg.resolve("launch.bat")).contains("\r\n"), node + ": launch.bat needs Windows line endings");
-        check(Files.readString(pkg.resolve("launch.sh")).contains("org.btsn.handlers.ServiceLoader . -version v001"), node + ": launch.sh must start the ServiceLoader");
-        String toFile = Files.readString(pkg.resolve("launch-to-file.bat"));
-        check(toFile.contains("\r\n") && toFile.contains("call \"%~dp0launch.bat\" %* > \"%~dp0" + node + "_Place.out.txt\" 2>&1"),
-            node + ": launch-to-file.bat must run launch.bat into " + node + "_Place.out.txt");
-        check(Files.readString(pkg.resolve("launch-to-file.sh")).contains(node + "_Place.out.txt"), node + ": launch-to-file.sh must write " + node + "_Place.out.txt");
-        check(Files.readString(pkg.resolve("README.txt")).contains("launch-to-file.bat"), node + ": README must explain both launches");
+        check(Files.readString(pkg.resolve("launch.bat")).contains("\r\n") && Files.readString(pkg.resolve("launch-to-file.bat")).contains("\r\n"), "machine launches need Windows line endings");
+        check(readme.contains("launch-to-file.bat") && (nodes.size() == 1 || readme.contains("launch-Pn.bat")), "README must explain the launches");
     }
 
-    /** Starts the host with launch-to-file.sh (which runs launch.sh) from its unpacked folder and waits for its service handlers in its output file; it must build its rules from the package. */
-    static void starts(Path pkg, String hostProject, int handlers) throws Exception {
-        String node = hostProject.substring(hostProject.lastIndexOf('.') + 1).toUpperCase();
-        Path output = pkg.resolve(node + "_Place.out.txt");
+    /** One launch-to-file.sh starts every host of the machine; each must reach its service handlers in its own output file and build its rules in its own folder. */
+    static void starts(Path pkg, int handlers, String... nodes) throws Exception {
         Process host = new ProcessBuilder("sh", "launch-to-file.sh").directory(pkg.toFile()).redirectErrorStream(true)
             .redirectOutput(ProcessBuilder.Redirect.DISCARD).start();
         try {
-            long deadline = System.currentTimeMillis() + 90_000;
-            int listening = 0;
-            while (System.currentTimeMillis() < deadline && host.isAlive()) {
-                if (Files.isRegularFile(output)) listening = count(Files.readString(output, StandardCharsets.ISO_8859_1), "Service Handler is listening");
-                if (listening >= handlers) break;
-                Thread.sleep(500);
+            long deadline = System.currentTimeMillis() + 120_000;
+            for (String node : nodes) {
+                Path output = pkg.resolve(node + "_Place.out.txt");
+                int listening = 0;
+                while (System.currentTimeMillis() < deadline && host.isAlive()) {
+                    if (Files.isRegularFile(output)) listening = count(Files.readString(output, StandardCharsets.ISO_8859_1), "Service Handler is listening");
+                    if (listening >= handlers) break;
+                    Thread.sleep(500);
+                }
+                check(listening >= handlers, node + " started " + listening + " of " + handlers + " service handlers:\n" + tail(output));
+                Path rules = pkg.resolve("btsn.rpso.places." + node.toLowerCase()).resolve("RuleFolder.v001/Service.ruleml");
+                check(Files.isRegularFile(rules), node + " built no rules in its own folder");
+                check(Files.readString(rules, StandardCharsets.ISO_8859_1).contains(node + "_Place"), node + "'s rules lack its own place");
             }
-            check(listening >= handlers, "Packaged host started " + listening + " of " + handlers + " service handlers:\n" + tail(output));
-            Path rules = pkg.resolve(hostProject).resolve("RuleFolder.v001/Service.ruleml");
-            check(Files.isRegularFile(rules), "Packaged host built no rules in its own folder");
-            String text = Files.readString(rules, StandardCharsets.ISO_8859_1);
-            check(text.contains("P2_Place") && text.contains("restock"), "Packaged host's rules lack its own operation");
         } finally {
             host.descendants().forEach(ProcessHandle::destroy);
             host.destroy();
