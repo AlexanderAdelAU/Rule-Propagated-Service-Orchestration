@@ -26,7 +26,7 @@ import org.json.simple.JSONObject;
  * same files the local hosts read), each host's own configuration, and launch scripts.
  *
  * One package per machine: the nodes being packaged are grouped by address, and each group becomes
- * {@code <launcher>_<nodes>} (for example {@code P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange_P3P6}), as a folder and a ZIP.
+ * {@code <launcher>_<nodes>} (for example {@code P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange_P3P6}), as a ZIP; the working folder is removed.
  * {@code launch} starts every node in it; {@code launch-Pn} starts one, for a node that joins later.
  *
  * Arguments (name=value): nodes (P2,P3,P6), version, launcher, runtime (the launcher's runtime folder),
@@ -59,7 +59,7 @@ public final class HostPackage {
         if (packages.isEmpty()) System.out.println("Every host this deployment uses runs on this machine; nothing to package (-Dhost.packages=all packages them anyway).");
     }
 
-    /** One package per machine for the given nodes; a fresh output folder, so no package from an earlier layout is left. */
+    /** One package ZIP per machine for the given nodes; the output folder holds only these ZIPs, so no package from an earlier layout is left. */
     public static List<Path> buildMachines(List<String> nodeNames, String version, String launcher, Path runtime, Path source, Path bundle,
                                           Path infrastructureJar, Path libs, Path libExcludes, Path out) throws Exception {
         DeploymentConfiguration config = new DeploymentConfiguration(runtime.resolve("btsn.common"));
@@ -69,15 +69,17 @@ public final class HostPackage {
             require(node.matches("P\\d+"), "Host node is P1 ... P6: " + name);
             byAddress.computeIfAbsent(DeploymentConfiguration.text(config.node(node), "address"), k -> new ArrayList<>()).add(node);
         }
-        deleteTree(out);
+        // Keep the folder and replace what is in it, so an Explorer window open on it shows the new packages.
         Files.createDirectories(out);
+        try (Stream<Path> old = Files.list(out)) { for (Path p : (Iterable<Path>)old::iterator) deleteTree(p); }
         List<Path> packages = new ArrayList<>();
         for (Map.Entry<String, List<String>> machine : byAddress.entrySet()) {
             Path pkg = build(machine.getValue(), version, launcher, runtime, source, bundle, infrastructureJar, libs, libExcludes, out);
             Path zip = out.resolve(pkg.getFileName() + ".zip");
             zip(pkg, zip);
+            deleteTree(pkg); // only the ZIP is left: one file per machine
             System.out.println("  " + String.join("", machine.getValue()) + ": " + zip + "  (copy to " + machine.getKey() + " and run launch.bat or launch.sh)");
-            packages.add(pkg);
+            packages.add(zip);
         }
         return packages;
     }
