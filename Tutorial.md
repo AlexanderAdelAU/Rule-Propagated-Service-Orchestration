@@ -619,8 +619,6 @@ ant -f P1_P2_P3_P4_Rebalance_BuildAndRun.xml -Dinfrastructure=ThreeHost      # t
 - **Nothing lost.** Generated and completed are equal for each version.
 - **The delta.** Each host keeps the rules it committed in `RuleFolder.v001` and `RuleFolder.v002`. Comparing them shows that only P1's routing facts differ: P2 `true` becomes `false`, and P3 `false` becomes `true`.
 
-**With forks and joins.** `P1_P2_P3_P4_P6_ForkRebalance_BuildAndRun.xml` does the same to a forking process. In `v001`, P1 forks to P2 and P3, which join at P4. In `v002`, the second branch runs on P6 instead of P2; on `ThreeHost` that moves it from 192.168.1.152 to 192.168.1.90. P6 has P2's contract and gets its rules only when `v002` is published. Here `v002` is published at 10 s and fires as soon as it is committed, so for about 15 s both versions fork and join on the same hosts. Check that each version reports 30 forks and 30 joins, `Join-family violations: 0`, no P6 in `v001` and no P2 in `v002`.
-
 **What travels by message.** A version's routing rules reach the hosts as rule messages. Its service contracts (the canonical bindings) are read from each host's `btsn.common`. The two versions here share their contracts, so `v002` needs nothing new on the hosts. A version that changes a contract needs its host packages rebuilt.
 
 ## Repository artefacts
