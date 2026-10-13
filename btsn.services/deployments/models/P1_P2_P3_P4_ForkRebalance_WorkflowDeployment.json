@@ -6,5 +6,5 @@
     "RuleBase/PetriNet/ListofPetriNetInitializationServices.ruleml.xml",
     "RuleBase/PetriNet/ListofPetrinetCollectorServices.ruleml.xml"
   ],
-  "serviceDeployment": "ServiceDeploymentFolder/petrinet/RebalanceModels.json"
+  "serviceDeployment": "ServiceDeploymentFolder/petrinet/P1_P2_P3_P4_ForkRebalance.json"
 }

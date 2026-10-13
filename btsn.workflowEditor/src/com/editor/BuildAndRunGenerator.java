@@ -129,11 +129,9 @@ public final class BuildAndRunGenerator {
         File models = new File(plan.root, "btsn.petrinet.ProjectLoader");
         Options o = plan.defaults;
         o.folder = preferred.isDirectory() ? preferred : models.isDirectory() ? models : plan.folders.isEmpty() ? plan.root : plan.folders.get(0);
-        // One host: the deployment is named after its process. Several machines: <name>_<infrastructure>, so a deployment's
-        // name says where it runs (P1_P2_P3_P4_Fork_Join_ThreeHost.xml); its packages add the hosts they start.
-        String machines = ServiceRegistry.selectedInfrastructure();
-        o.launcherName = ServiceRegistry.DEFAULT_INFRASTRUCTURE.equals(machines) ? base + "_BuildAndRun.xml"
-            : base.replaceFirst("_Workflow$", "") + "_" + machines + ".xml";
+        // Named after its process, so every file of a run starts with the process name; packages for other
+        // machines add the hosts they start (P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun_P2.zip).
+        o.launcherName = base + "_BuildAndRun.xml";
         for (String id : plan.targets.keySet()) {
             Run run = new Run(); run.generatorId = id; run.intervalMs = plan.rates.get(id); run.version = plan.versions.get(id);
             o.runs.add(run);
