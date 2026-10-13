@@ -65,6 +65,40 @@ public final class BuildAndRunGenerator {
         public String baseName(Options o) { return launcher(o).getName().replaceFirst("\\.xml$", ""); }
     }
 
+    /**
+     * A combined process: a drawing named after its launcher (&lt;name&gt;_LiveChange.json and &lt;name&gt;_LiveChange.xml), an amalgam
+     * of independent processes that the launcher deploys and runs, each under its own version. Null for an ordinary process.
+     */
+    public static File combinedLauncher(File processFile) {
+        if (processFile == null) return null;
+        String base = processFile.getName().replaceFirst("\\.json$", "");
+        if (!base.endsWith("_LiveChange")) return null;
+        File common = ServiceRegistry.findCommon(processFile);
+        File[] loaders = common == null ? null : common.getParentFile().listFiles(f -> f.isDirectory() && f.getName().matches("btsn\\..+\\.ProjectLoader"));
+        if (loaders != null) for (File loader : loaders) { File xml = new File(loader, base + ".xml"); if (xml.isFile()) return xml; }
+        return null;
+    }
+
+    /** What a combined launcher runs, one line per event generator: "EG2: v002, P1_P3_P4_P6_..._Workflow, 30 tokens, deployed at 45 s". */
+    public static List<String> combinedSummary(File launcher) {
+        List<String> lines = new ArrayList<>();
+        Map<String, String> p = new LinkedHashMap<>();
+        try {
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("<property name=\"([^\"]+)\" (?:value|location)=\"([^\"]*)\"")
+                .matcher(new String(java.nio.file.Files.readAllBytes(launcher.toPath()), java.nio.charset.StandardCharsets.UTF_8));
+            while (m.find()) p.putIfAbsent(m.group(1), m.group(2));
+        } catch (java.io.IOException ex) { lines.add("Cannot read " + launcher.getName() + ": " + ex.getMessage()); return lines; }
+        for (int i = 1; i <= 3; i++) {
+            String slot = "eg" + i;
+            if (!p.containsKey(slot + ".id")) continue;
+            String process = p.getOrDefault(slot + ".process", p.getOrDefault("workflow.process.name", ""));
+            String when = p.containsKey(slot + ".publish.at.seconds") ? "deployed to the running hosts at " + p.get(slot + ".publish.at.seconds") + " s" : "from the start";
+            lines.add("EG" + i + ": " + p.getOrDefault(slot + ".version", "") + ", " + process.substring(process.lastIndexOf('/') + 1)
+                + ", " + p.getOrDefault(slot + ".tokens", p.getOrDefault("token.count", "?")) + " tokens, " + when);
+        }
+        return lines;
+    }
+
     public static Plan plan(Canvas canvas, File processFile) {
         Plan plan = new Plan();
         plan.processFile = processFile;
@@ -78,13 +112,6 @@ public final class BuildAndRunGenerator {
         plan.processName = folder.relativize(location).toString().replace(File.separatorChar, '/').replaceFirst("\\.json$", "");
         plan.domain = plan.processName.contains("/") ? plan.processName.substring(0, plan.processName.indexOf('/')) : "";
         if ("healthcare".equals(plan.domain)) plan.problems.add("Healthcare processes use their own token generator; generating their launchers is not supported yet.");
-        // A combined process (<name>_LiveChange.json) is a drawing of independently run processes; its launcher of the same name runs them.
-        String combined = processFile.getName().replaceFirst("\\.json$", "");
-        if (combined.endsWith("_LiveChange")) {
-            plan.problems.add("This is a combined process: a drawing of independent processes, each deployed and run under its own version. "
-                + "It is not built here; run it with btsn.petrinet.ProjectLoader/" + combined + ".xml.");
-            return plan;
-        }
 
         ServiceRegistry registry = canvas.getServiceRegistry();
         if (!registry.hasDeployment()) { plan.problems.add("Deploy the process first: no service deployment is linked."); return plan; }

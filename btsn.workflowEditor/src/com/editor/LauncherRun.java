@@ -403,6 +403,9 @@ public final class LauncherRun {
                 catch (IOException ignored) { }
             }
         }
+        // A combined process is run by the launcher of the same name.
+        String own = processName.substring(processName.lastIndexOf('/') + 1) + ".xml";
+        for (File loader : loaders) { File xml = new File(loader, own); if (xml.isFile() && !found.contains(xml)) found.add(xml); }
         String base = processName.substring(processName.lastIndexOf('/') + 1) + "_BuildAndRun.xml";
         found.sort(Comparator.comparing((File f) -> !f.getName().equals(base)).thenComparing(File::getName));
         return found;
