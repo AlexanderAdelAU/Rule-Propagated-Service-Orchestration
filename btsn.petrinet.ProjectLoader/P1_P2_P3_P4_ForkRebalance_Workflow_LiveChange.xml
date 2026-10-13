@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Live change: one launch, two event generators, P6 on standby.
-     Overview:  petrinet/LiveChange/ForkRebalance_LiveChange_Overview (P6 drawn as a standby service)
+     Combined process: petrinet/LiveChange/P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange, the drawing of this launch:
+     an amalgam of the two independent processes below, with P6 drawn as a standby service.
      v001 (petrinet/LiveChange/P1_P2_P3_P4_ForkRebalance_Workflow): P1 forks to P2 and P3, which join at P4.
      v002 (petrinet/LiveChange/P1_P3_P4_P6_ForkRebalance_Workflow): the same, but the second branch runs on P6 instead of P2.
      Every host, P6 included, is started and initialised at the start. P6 has P2's contract and does nothing under v001.

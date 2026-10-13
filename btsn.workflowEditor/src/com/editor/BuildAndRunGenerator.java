@@ -78,6 +78,13 @@ public final class BuildAndRunGenerator {
         plan.processName = folder.relativize(location).toString().replace(File.separatorChar, '/').replaceFirst("\\.json$", "");
         plan.domain = plan.processName.contains("/") ? plan.processName.substring(0, plan.processName.indexOf('/')) : "";
         if ("healthcare".equals(plan.domain)) plan.problems.add("Healthcare processes use their own token generator; generating their launchers is not supported yet.");
+        // A combined process (<name>_LiveChange.json) is a drawing of independently run processes; its launcher of the same name runs them.
+        String combined = processFile.getName().replaceFirst("\\.json$", "");
+        if (combined.endsWith("_LiveChange")) {
+            plan.problems.add("This is a combined process: a drawing of independent processes, each deployed and run under its own version. "
+                + "It is not built here; run it with btsn.petrinet.ProjectLoader/" + combined + ".xml.");
+            return plan;
+        }
 
         ServiceRegistry registry = canvas.getServiceRegistry();
         if (!registry.hasDeployment()) { plan.problems.add("Deploy the process first: no service deployment is linked."); return plan; }

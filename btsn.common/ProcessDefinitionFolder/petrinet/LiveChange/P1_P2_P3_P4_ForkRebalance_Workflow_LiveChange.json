@@ -517,25 +517,41 @@
   ],
   "textElements": [
     {
-      "x": 250,
-      "y": 92,
-      "text": "ForkRebalance live change: overview (a picture; the runnable processes are v001 and v002)",
+      "x": 150,
+      "y": 62,
+      "text": "P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange: a combined process",
       "fontSize": 14,
       "fontStyle": 1,
       "color": -16777216
     },
     {
-      "x": 250,
-      "y": 119,
-      "text": "EG1 fires v001 from the start: P1 forks to P2 and P3, which join at P4.",
+      "x": 150,
+      "y": 86,
+      "text": "An amalgam of two independent processes, each deployed and run under its own version:",
       "fontSize": 12,
       "fontStyle": 0,
       "color": -16777216
     },
     {
-      "x": 250,
-      "y": 139,
-      "text": "Halfway through, EG2 publishes v002: the second branch moves to P6, the standby service. Nothing restarts.",
+      "x": 150,
+      "y": 104,
+      "text": "  P1_P2_P3_P4_ForkRebalance_Workflow (v001)  and  P1_P3_P4_P6_ForkRebalance_Workflow (v002).",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 150,
+      "y": 122,
+      "text": "EG1 fires v001 from the start; halfway through, EG2 deploys v002 and P6, the standby, takes the second branch.",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 150,
+      "y": 140,
+      "text": "Not built or run from here: run P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml.",
       "fontSize": 12,
       "fontStyle": 0,
       "color": -16777216
