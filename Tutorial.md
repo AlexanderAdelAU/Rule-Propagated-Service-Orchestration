@@ -600,39 +600,43 @@ The join measures (time from first arrival to ENTER, and the skew between branch
 
 A process changes by publishing a new rule version to the running hosts. No host is restarted and no code changes. Tokens already in flight finish under the version they started with.
 
-The example has two versions of one four-place process; every place runs `AlwaysTrueService`, so only the rules decide the route:
+The example has two versions of a forking process, in their own folder, [`ProcessDefinitionFolder/petrinet/LiveChange`](btsn.common/ProcessDefinitionFolder/petrinet/LiveChange). Every place runs `AlwaysTrueService`, so only the rules decide the route:
 
-| Version | Process | P1 sends its result to |
-|---|---|---|
-| `v001` | [`P1_P2_P3_P4_Rebalance_Workflow.json`](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_P2_P3_P4_Rebalance_Workflow.json) | P2 |
-| `v002` | [`P1_P2_P3_P4_Rebalance_ToP3_Workflow.json`](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_P2_P3_P4_Rebalance_ToP3_Workflow.json) | P3 |
+| Version | Process | P1 forks to | On `ThreeHost` |
+|---|---|---|---|
+| `v001` | [`P1_P2_P3_P4_ForkRebalance_Workflow.json`](btsn.common/ProcessDefinitionFolder/petrinet/LiveChange/P1_P2_P3_P4_ForkRebalance_Workflow.json) | P2 and P3, joined at P4 | second branch on 192.168.1.152 |
+| `v002` | [`P1_P3_P4_P6_ForkRebalance_Workflow.json`](btsn.common/ProcessDefinitionFolder/petrinet/LiveChange/P1_P3_P4_P6_ForkRebalance_Workflow.json) | P6 and P3, joined at P4 | second branch on 192.168.1.90 |
 
-P4 merges: it takes a token from either P2 or P3. On `ThreeHost`, P2 and P3 are different machines, so publishing `v002` moves the work from one machine to the other.
+P6 is a node that joins a running system: it is in the master ruleset from the first build (its address, service and contract), but it is not started with the others.
 
-The launcher, `P1_P2_P3_P4_Rebalance_Workflow_LiveChange.xml`, runs it in one go:
-1. `v001` fires 30 tokens, one a second.
-2. At 15 s, `v002` is published to the running hosts. The `[LIVE]` lines give the time it started and the time every host had committed it.
-3. 10 s after that, `v002` fires its 30 tokens.
+The launcher, `P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml`, runs it in one go:
+1. `v001` fires 90 tokens, one a second.
+2. At 20 s, `v002` is published to the running hosts. The publish is retried until P6 answers, and P6's records are cleared. The `[LIVE]` lines give the time it started and the time every host had committed it.
+3. `v002` fires 30 tokens while `v001` is still firing.
 
 ```sh
 cd btsn.petrinet.ProjectLoader
-ant -f P1_P2_P3_P4_Rebalance_Workflow_LiveChange.xml -Dinfrastructure=SingleHost -Dhost.address=127.0.0.1   # one machine
-ant -f P1_P2_P3_P4_Rebalance_Workflow_LiveChange.xml host-packages     # P1_P2_P3_P4_Rebalance_Workflow_LiveChange_P2.zip, P1_P2_P3_P4_Rebalance_Workflow_LiveChange_P3.zip
-ant -f P1_P2_P3_P4_Rebalance_Workflow_LiveChange.xml                   # three machines, hosts started first
+ant -f P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml host-packages     # the packages for .152 and .90
+ant -f P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml                   # on 192.168.1.82, after P2 and P3 are started
+ant -f P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml -Dinfrastructure=SingleHost -Dhost.address=127.0.0.1   # everything on one machine
 ```
 
-**What to look for:**
-- **Routes.** Under `LOGICAL PLACE EXECUTIONS`, `v001` runs P1, P2, P4 and `v002` runs P1, P3, P4, with no P3 in `v001` and no P2 in `v002`.
-- **Nothing lost.** Generated and completed are equal for each version.
-- **The delta.** Each host keeps the rules it committed in `RuleFolder.v001` and `RuleFolder.v002`. Comparing them shows that only P1's routing facts differ: P2 `true` becomes `false`, and P3 `false` becomes `true`.
+On three machines:
+- **192.168.1.152**: unzip `…_LiveChange_P2.zip` and run `launch-to-file.bat` (P2).
+- **192.168.1.90**: unzip `…_LiveChange_P3P6.zip` and run `launch-to-file-P3.bat`. Run `launch-to-file-P6.bat` when the launcher prints `[LIVE] v002 brings P6 into use`.
+- **192.168.1.82**: run the launcher.
 
-**With forks and joins.** `P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml` does the same to a forking process. In `v001`, P1 forks to P2 and P3, which join at P4. In `v002`, the second branch runs on P6 instead of P2; on `ThreeHost` that moves it from 192.168.1.152 to 192.168.1.90. P6 is a node that joins a running system: it is in the master ruleset from the first build (its address, service and contract), but it is not started with the others. Its packages are `P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange_P2.zip` for 192.168.1.152 and `P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange_P3P6.zip` for 192.168.1.90. Start P2 (`launch-to-file.bat`) and P3 (`launch-to-file-P3.bat`) before the run, and start P6 (`launch-to-file-P6.bat`) when the launcher prints `[LIVE] v002 brings P6 into use`. The publish of `v002` is retried until P6 answers, P6's records are cleared, and `v002` fires 30 tokens while `v001` is still firing its 90. Check that each version reports as many forks and joins as workflows, `Join-family violations: 0`, no P6 in `v001` and no P2 in `v002`.
+**What to look for:**
+- **Routes.** Under `LOGICAL PLACE EXECUTIONS`, no P6 in `v001` and no P2 in `v002`.
+- **Nothing lost.** Generated and completed are equal for each version.
+- **Forks and joins.** Each version reports as many forks and joins as workflows, and `Join-family violations: 0`.
+- **The delta.** Each host keeps the rules it committed in `RuleFolder.v001` and `RuleFolder.v002`. Comparing them shows that only one of P1's routing facts differs: P2_Place becomes P6_Place.
 
 Its files all start with the name of the `v001` process:
 
 | File | Folder | What it is |
 |---|---|---|
-| `P1_P2_P3_P4_ForkRebalance_Workflow.json` | `btsn.common/ProcessDefinitionFolder/petrinet/Workflow` | Process, `v001` |
+| `P1_P2_P3_P4_ForkRebalance_Workflow.json` | `btsn.common/ProcessDefinitionFolder/petrinet/LiveChange` | Process, `v001` |
 | `P1_P3_P4_P6_ForkRebalance_Workflow.json` | same | Process, `v002` |
 | `P1_P2_P3_P4_ForkRebalance.json` | `btsn.common/ServiceDeploymentFolder/petrinet` | Which service runs on each node, for both versions |
 | `P1_P2_P3_P4_ForkRebalance_WorkflowDeployment.json` | `btsn.services/deployments/models` | Launcher profile |
