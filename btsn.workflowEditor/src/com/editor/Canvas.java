@@ -1716,7 +1716,7 @@ public class Canvas extends JPanel {
                 continue;
             }
             
-            Color color = tokenColors.getOrDefault(state.tokenId, Color.BLUE);
+            Color color = tokenColors.getOrDefault(state.tokenId, getVersionColor(state.version));
             Point pos = calculateTokenPosition(state);
             
             if (pos != null) {
@@ -1882,19 +1882,9 @@ public class Canvas extends JPanel {
     /**
      * Get color for a version string
      */
+    /** The replay's version colours, the same as its legend (v001 red, v002 blue, ...). */
     private Color getVersionColor(String version) {
-        if (version == null) return Color.GRAY;
-        switch (version) {
-            case "v001": return new Color(0, 100, 200);     // Blue
-            case "v002": return new Color(200, 50, 50);      // Red
-            case "v003": return new Color(50, 150, 50);      // Green
-            case "v004": return new Color(150, 100, 200);    // Purple
-            case "v005": return new Color(200, 150, 50);     // Orange
-            case "v006": return new Color(50, 150, 150);     // Teal
-            case "v007": return new Color(150, 50, 150);     // Magenta
-            case "v008": return new Color(100, 100, 100);    // Gray
-            default: return Color.GRAY;
-        }
+        return TokenAnimator.versionColor(version);
     }
 
     /**
