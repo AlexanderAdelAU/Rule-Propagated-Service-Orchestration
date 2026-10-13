@@ -535,12 +535,11 @@ Package  P3 for 192.168.1.90 (Build host packages; start it on its machine)
 ```
 
 **Names.**
-Every file of a run starts with the name of its process, so related files sort together in every folder:
-- **Process**: `P1_P2_P3_P4_Fork_Join_Workflow.json`.
-- **Launcher**: `P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.xml`, with its event file `…_BuildAndRun.csv`. It runs on the `ip0` machine, which gets no package.
-- **Packages**: the launcher's name plus the hosts the package starts, one per other machine: `P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun_P2.zip` for 192.168.1.152 and `…_BuildAndRun_P3.zip` for 192.168.1.90. A machine with two hosts gets one package, such as `…_P3P6.zip`.
+- **Process**: `<places>_<Name>_Workflow.json`, as before.
+- **Deployment (launcher)**: on one machine, `<process>_BuildAndRun.xml`. On several, `<Name>_<machines>.xml`, for example `P1_P2_P3_P4_Fork_Join_ThreeHost.xml`. It runs on the `ip0` machine, which gets no package.
+- **Package**: `<deployment>_<hosts>.zip`, one per other machine, for example `P1_P2_P3_P4_Fork_Join_ThreeHost_P2.zip`. A machine with two hosts gets one package, such as `…_P3P6.zip`.
 
-Click **Build host packages**. It writes the launcher, builds the ZIPs in `btsn.services/target/host-packages/P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun/`, and opens that folder. Each package holds:
+Click **Build host packages**. It writes the launcher, builds the ZIPs in `btsn.services/target/host-packages/P1_P2_P3_P4_Fork_Join_ThreeHost/`, and opens that folder. Each package holds:
 
 - **Its hosts**: each host's JAR and the shared infrastructure JAR, with no business classes inside.
 - **Their services**: only the business service JARs the deployment places on those hosts, kept as separate JARs.
@@ -549,11 +548,11 @@ Click **Build host packages**. It writes the launcher, builds the ZIPs in `btsn.
 
 Build the packages again whenever the process, its deployment or the machines change.
 
-From the command line, on the `ip0` machine:
+From the command line, on the `ip0` machine, once **Build** has written the launcher:
 
 ```sh
 cd btsn.petrinet.ProjectLoader
-ant -f P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.xml host-packages -Dinfrastructure=ThreeHost
+ant -f P1_P2_P3_P4_Fork_Join_ThreeHost.xml host-packages
 ```
 
 ### Start the hosts, then run
@@ -568,7 +567,7 @@ ant -f P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.xml host-packages -Dinfrastruc
 3. On the `ip0` machine, click **Run on hosts**, then **Run**. From the command line:
 
    ```sh
-   ant -f P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.xml -Dinfrastructure=ThreeHost
+   ant -f P1_P2_P3_P4_Fork_Join_ThreeHost.xml
    ```
 
    The launcher starts P1, P4 and Monitor, and skips P2 and P3 (`[p2] Skipping - running on remote host`). It prints `Master ruleset …`, which must match each package's README. It then:
@@ -609,16 +608,16 @@ The example has two versions of one four-place process; every place runs `Always
 
 P4 merges: it takes a token from either P2 or P3. On `ThreeHost`, P2 and P3 are different machines, so publishing `v002` moves the work from one machine to the other.
 
-The launcher, `P1_P2_P3_P4_Rebalance_Workflow_LiveChange.xml`, runs it in one go:
+The launcher, `Rebalance_ThreeHost.xml`, runs it in one go:
 1. `v001` fires 30 tokens, one a second.
 2. At 15 s, `v002` is published to the running hosts. The `[LIVE]` lines give the time it started and the time every host had committed it.
 3. 10 s after that, `v002` fires its 30 tokens.
 
 ```sh
 cd btsn.petrinet.ProjectLoader
-ant -f P1_P2_P3_P4_Rebalance_Workflow_LiveChange.xml -Dinfrastructure=SingleHost -Dhost.address=127.0.0.1   # one machine
-ant -f P1_P2_P3_P4_Rebalance_Workflow_LiveChange.xml host-packages     # P1_P2_P3_P4_Rebalance_Workflow_LiveChange_P2.zip, P1_P2_P3_P4_Rebalance_Workflow_LiveChange_P3.zip
-ant -f P1_P2_P3_P4_Rebalance_Workflow_LiveChange.xml                   # three machines, hosts started first
+ant -f Rebalance_ThreeHost.xml -Dinfrastructure=SingleHost -Dhost.address=127.0.0.1   # one machine
+ant -f Rebalance_ThreeHost.xml host-packages     # Rebalance_ThreeHost_P2.zip, Rebalance_ThreeHost_P3.zip
+ant -f Rebalance_ThreeHost.xml                   # three machines, hosts started first
 ```
 
 **What to look for:**
@@ -626,20 +625,7 @@ ant -f P1_P2_P3_P4_Rebalance_Workflow_LiveChange.xml                   # three m
 - **Nothing lost.** Generated and completed are equal for each version.
 - **The delta.** Each host keeps the rules it committed in `RuleFolder.v001` and `RuleFolder.v002`. Comparing them shows that only P1's routing facts differ: P2 `true` becomes `false`, and P3 `false` becomes `true`.
 
-**With forks and joins.** `P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml` does the same to a forking process. In `v001`, P1 forks to P2 and P3, which join at P4. In `v002`, the second branch runs on P6 instead of P2; on `ThreeHost` that moves it from 192.168.1.152 to 192.168.1.90. P6 is a node that joins a running system: it is in the master ruleset from the first build (its address, service and contract), but it is not started with the others. Its packages are `P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange_P2.zip` for 192.168.1.152 and `P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange_P3P6.zip` for 192.168.1.90. Start P2 (`launch-to-file.bat`) and P3 (`launch-to-file-P3.bat`) before the run, and start P6 (`launch-to-file-P6.bat`) when the launcher prints `[LIVE] v002 brings P6 into use`. The publish of `v002` is retried until P6 answers, P6's records are cleared, and `v002` fires 30 tokens while `v001` is still firing its 90. Check that each version reports as many forks and joins as workflows, `Join-family violations: 0`, no P6 in `v001` and no P2 in `v002`.
-
-Its files all start with the name of the `v001` process:
-
-| File | Folder | What it is |
-|---|---|---|
-| `P1_P2_P3_P4_ForkRebalance_Workflow.json` | `btsn.common/ProcessDefinitionFolder/petrinet/Workflow` | Process, `v001` |
-| `P1_P3_P4_P6_ForkRebalance_Workflow.json` | same | Process, `v002` |
-| `P1_P2_P3_P4_ForkRebalance.json` | `btsn.common/ServiceDeploymentFolder/petrinet` | Which service runs on each node, for both versions |
-| `P1_P2_P3_P4_ForkRebalance_WorkflowDeployment.json` | `btsn.services/deployments/models` | Launcher profile |
-| `P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml` | `btsn.petrinet.ProjectLoader` | Launcher: runs `v001`, publishes `v002` while it runs. Run on 192.168.1.82 (P1, P4) |
-| `P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange_V001.csv`, `_V002.csv` | `btsn.common.eventgenerators/EventTriggeringFile` | Tokens each version fires |
-| `P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange_P2.zip` | `btsn.services/target/host-packages/P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange` | Package for 192.168.1.152 (P2) |
-| `P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange_P3P6.zip` | same | Package for 192.168.1.90 (P3, P6) |
+**With forks and joins.** `ForkRebalance_ThreeHost.xml` does the same to a forking process. In `v001`, P1 forks to P2 and P3, which join at P4. In `v002`, the second branch runs on P6 instead of P2; on `ThreeHost` that moves it from 192.168.1.152 to 192.168.1.90. P6 is a node that joins a running system: it is in the master ruleset from the first build (its address, service and contract), but it is not started with the others. Its packages are `ForkRebalance_ThreeHost_P2.zip` for 192.168.1.152 and `ForkRebalance_ThreeHost_P3P6.zip` for 192.168.1.90. Start P2 (`launch-to-file.bat`) and P3 (`launch-to-file-P3.bat`) before the run, and start P6 (`launch-to-file-P6.bat`) when the launcher prints `[LIVE] v002 brings P6 into use`. The publish of `v002` is retried until P6 answers, P6's records are cleared, and `v002` fires 30 tokens while `v001` is still firing its 90. Check that each version reports as many forks and joins as workflows, `Join-family violations: 0`, no P6 in `v001` and no P2 in `v002`.
 
 **What travels by message.** A version's routing rules reach the hosts as rule messages. Its service contracts (the canonical bindings) are read from each host's `btsn.common`. The two versions here share their contracts, so `v002` needs nothing new on the hosts. A version that changes a contract needs its host packages rebuilt.
 

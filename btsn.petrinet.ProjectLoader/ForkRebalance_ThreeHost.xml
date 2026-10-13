@@ -10,12 +10,12 @@
      records are cleared, and v002 fires its 30 tokens while v001 is still firing, so both versions fork and join on
      P1, P3 and P4 together. Every workflow forks, and joins, under its own version.
      Hand-written: the editor's Build writes one process per launcher, and this launcher needs one per version.
-     Run:     ant -f P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml        (on ThreeHost; -Dinfrastructure=SingleHost -Dhost.address=127.0.0.1 runs every host on this machine)
-     Hosts:   ant -f P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml host-packages   (one package per other machine: P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange_P2, P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange_P3P6)
-     Analyse: ant -f P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml analyse -->
-<project name="P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange" default="run-complete-workflow" basedir=".">
+     Run:     ant -f ForkRebalance_ThreeHost.xml        (on ThreeHost; -Dinfrastructure=SingleHost -Dhost.address=127.0.0.1 runs every host on this machine)
+     Hosts:   ant -f ForkRebalance_ThreeHost.xml host-packages   (one package per other machine: ForkRebalance_ThreeHost_P2, ForkRebalance_ThreeHost_P3P6)
+     Analyse: ant -f ForkRebalance_ThreeHost.xml analyse -->
+<project name="ForkRebalance_ThreeHost" default="run-complete-workflow" basedir=".">
     <property name="process.title" value="petrinet/Workflow/P1_P2_P3_P4_ForkRebalance_Workflow (v001, then v002 published live)"/>
-    <property name="launcher.profile.file" location="../btsn.services/deployments/models/P1_P2_P3_P4_ForkRebalance_WorkflowDeployment.json"/>
+    <property name="launcher.profile.file" location="../btsn.services/deployments/models/ForkRebalanceDeployment.json"/>
     <property name="workflow.process.name" value="petrinet/Workflow/P1_P2_P3_P4_ForkRebalance_Workflow"/>
     <!-- First phase: the nodes v001 uses. P6 joins with v002 and is initialised then. -->
     <property name="init.process.name" value="common/Initializers/P1_P2_P3_P4_Initialization"/>
@@ -29,7 +29,7 @@
     <property name="eg1.version" value="v001"/>
     <property name="eg1.place" value="P1_Place"/>
     <property name="eg1.operation" value="processToken"/>
-    <property name="eg1.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange_V001.csv"/>
+    <property name="eg1.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/ForkRebalance_ThreeHost_V001.csv"/>
     <property name="eg1.tokens" value="90"/>
 
     <!-- v002: published to the running hosts at 20 s, bringing P6 into use; fires as soon as every host has committed it. -->
@@ -38,7 +38,7 @@
     <property name="eg2.process" value="petrinet/Workflow/P1_P3_P4_P6_ForkRebalance_Workflow"/>
     <property name="eg2.place" value="P1_Place"/>
     <property name="eg2.operation" value="processToken"/>
-    <property name="eg2.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange_V002.csv"/>
+    <property name="eg2.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/ForkRebalance_ThreeHost_V002.csv"/>
     <property name="eg2.publish.at.seconds" value="20"/>
     <property name="eg2.joins.p6" value="true"/>
 

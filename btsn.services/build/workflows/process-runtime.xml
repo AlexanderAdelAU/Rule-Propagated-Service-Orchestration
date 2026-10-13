@@ -368,7 +368,7 @@
     </target>
 
     <!-- One self-contained package per machine for the hosts that run on other machines: <launcher>_<nodes>, for example
-         P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange_P3P6 for P3 and P6 on 192.168.1.90. -->
+         ForkRebalance_ThreeHost_P3P6 for P3 and P6 on 192.168.1.90. -->
     <property name="host.packages" value="remote"/>
     <property name="host.packages.dir" location="${services.project.dir}/target/host-packages/${ant.project.name}"/>
     <macrodef name="choose-package-node">

@@ -5,12 +5,12 @@
      v001 fires 30 tokens, one a second. At 15 s v002 is published to the running hosts and committed by every one
      of them; 10 s later v002 starts firing its 30 tokens. v001 tokens still in flight finish through P2 under v001.
      Hand-written: the editor's Build writes one process per launcher, and this launcher needs one per version.
-     Run:     ant -f P1_P2_P3_P4_Rebalance_Workflow_LiveChange.xml        (on ThreeHost; -Dinfrastructure=SingleHost -Dhost.address=127.0.0.1 runs every host on this machine)
-     Hosts:   ant -f P1_P2_P3_P4_Rebalance_Workflow_LiveChange.xml host-packages   (one package per other machine: P1_P2_P3_P4_Rebalance_Workflow_LiveChange_P2, P1_P2_P3_P4_Rebalance_Workflow_LiveChange_P3)
-     Analyse: ant -f P1_P2_P3_P4_Rebalance_Workflow_LiveChange.xml analyse -->
-<project name="P1_P2_P3_P4_Rebalance_Workflow_LiveChange" default="run-complete-workflow" basedir=".">
+     Run:     ant -f Rebalance_ThreeHost.xml        (on ThreeHost; -Dinfrastructure=SingleHost -Dhost.address=127.0.0.1 runs every host on this machine)
+     Hosts:   ant -f Rebalance_ThreeHost.xml host-packages   (one package per other machine: Rebalance_ThreeHost_P2, Rebalance_ThreeHost_P3)
+     Analyse: ant -f Rebalance_ThreeHost.xml analyse -->
+<project name="Rebalance_ThreeHost" default="run-complete-workflow" basedir=".">
     <property name="process.title" value="petrinet/Workflow/P1_P2_P3_P4_Rebalance_Workflow (v001, then v002 published live)"/>
-    <property name="launcher.profile.file" location="../btsn.services/deployments/models/P1_P2_P3_P4_Rebalance_WorkflowDeployment.json"/>
+    <property name="launcher.profile.file" location="../btsn.services/deployments/models/RebalanceDeployment.json"/>
     <property name="workflow.process.name" value="petrinet/Workflow/P1_P2_P3_P4_Rebalance_Workflow"/>
     <property name="init.process.name" value="common/Initializers/P1_P2_P3_P4_Initialization"/>
     <property name="collector.process.name" value="common/Collectors/P1_P2_P3_P4_Collector"/>
@@ -22,7 +22,7 @@
     <property name="eg1.version" value="v001"/>
     <property name="eg1.place" value="P1_Place"/>
     <property name="eg1.operation" value="processToken"/>
-    <property name="eg1.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/P1_P2_P3_P4_Rebalance_Workflow_LiveChange_V001.csv"/>
+    <property name="eg1.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/Rebalance_ThreeHost_V001.csv"/>
 
     <!-- v002: the rule delta, published to the running hosts at 15 s, firing 10 s after every host has committed it. -->
     <property name="eg2.id" value="EVENT_GENERATOR_V002"/>
@@ -30,7 +30,7 @@
     <property name="eg2.process" value="petrinet/Workflow/P1_P2_P3_P4_Rebalance_ToP3_Workflow"/>
     <property name="eg2.place" value="P1_Place"/>
     <property name="eg2.operation" value="processToken"/>
-    <property name="eg2.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/P1_P2_P3_P4_Rebalance_Workflow_LiveChange_V002.csv"/>
+    <property name="eg2.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/Rebalance_ThreeHost_V002.csv"/>
     <property name="eg2.publish.at.seconds" value="15"/>
     <property name="eg2.fire.after.seconds" value="10"/>
 
