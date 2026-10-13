@@ -129,7 +129,11 @@ public final class BuildAndRunGenerator {
         File models = new File(plan.root, "btsn.petrinet.ProjectLoader");
         Options o = plan.defaults;
         o.folder = preferred.isDirectory() ? preferred : models.isDirectory() ? models : plan.folders.isEmpty() ? plan.root : plan.folders.get(0);
-        o.launcherName = base + "_BuildAndRun.xml";
+        // One host: the deployment is named after its process. Several machines: <name>_<infrastructure>, so a deployment's
+        // name says where it runs (P1_P2_P3_P4_Fork_Join_ThreeHost.xml); its packages add the hosts they start.
+        String machines = ServiceRegistry.selectedInfrastructure();
+        o.launcherName = ServiceRegistry.DEFAULT_INFRASTRUCTURE.equals(machines) ? base + "_BuildAndRun.xml"
+            : base.replaceFirst("_Workflow$", "") + "_" + machines + ".xml";
         for (String id : plan.targets.keySet()) {
             Run run = new Run(); run.generatorId = id; run.intervalMs = plan.rates.get(id); run.version = plan.versions.get(id);
             o.runs.add(run);
@@ -169,7 +173,8 @@ public final class BuildAndRunGenerator {
     }
 
     /**
-     * The hosts on another machine than the launcher's (ip0) under the editor's Machines, as "P2 for 192.168.1.152".
+     * The packages for machines other than the launcher's (ip0) under the editor's Machines, one per machine,
+     * named after the hosts it starts: "P2 for 192.168.1.152", "P3P6 for 192.168.1.90".
      * Build host packages (in the Build dialog) packages these after writing the launcher.
      */
     public static List<String> packagedHosts(Plan plan) {
@@ -178,9 +183,13 @@ public final class BuildAndRunGenerator {
         for (ServiceRegistry.Node node : nodes) if ("ip0".equals(node.channel)) launcherMachine = node.address;
         List<String> packaged = new ArrayList<>();
         if (launcherMachine == null || !ServiceRegistry.severalMachines(nodes)) return packaged;
+        // One package per machine, named after the hosts it starts: "P3P6 for 192.168.1.90".
+        Map<String, StringBuilder> byMachine = new LinkedHashMap<>();
         for (String used : plan.nodes)
             for (ServiceRegistry.Node node : nodes)
-                if (node.node.equals(used) && !node.address.equals(launcherMachine)) packaged.add(used + " for " + node.address);
+                if (node.node.equals(used) && !node.address.equals(launcherMachine))
+                    byMachine.computeIfAbsent(node.address, a -> new StringBuilder()).append(used);
+        for (Map.Entry<String, StringBuilder> m : byMachine.entrySet()) packaged.add(m.getValue() + " for " + m.getKey());
         return packaged;
     }
 

@@ -143,7 +143,7 @@ public final class LauncherRun {
         return new File(root, "btsn.services/target/host-packages/" + launcher.getName().replaceFirst("\\.xml$", ""));
     }
 
-    /** The host-packages target: one ZIP for each host whose address is another machine. */
+    /** The host-packages target: one ZIP for each other machine, named after the hosts it starts. */
     private void runPackages() {
         Phase outcome = Phase.FAILED; String message = "Packaging failed; see the output above.";
         try {
@@ -156,7 +156,7 @@ public final class LauncherRun {
             try (BufferedReader out = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
                 for (String line; (line = out.readLine()) != null; ) {
                     listener.line(line);
-                    java.util.regex.Matcher zip = java.util.regex.Pattern.compile("(P\\d): (.+\\.zip)\\s+\\(copy to (\\S+)").matcher(line);
+                    java.util.regex.Matcher zip = java.util.regex.Pattern.compile("((?:P\\d)+): (.+\\.zip)\\s+\\(copy to (\\S+)").matcher(line);
                     if (zip.find()) zips.add(zip.group(1) + " for " + zip.group(3) + ": " + zip.group(2));
                     if (line.contains("nothing to package")) none = true;
                 }
@@ -166,7 +166,7 @@ public final class LauncherRun {
             else if (exit == 0) {
                 outcome = Phase.DONE;
                 message = none ? "Every host runs on this machine; nothing to package."
-                    : "Packages: " + String.join("; ", zips) + ". Unzip each on its machine and run launch.bat, then Run.";
+                    : "Packages: " + String.join("; ", zips) + ". Unzip each on its machine and run launch.bat (it starts every host in it), then Run.";
             }
         } catch (IOException ex) {
             message = ex.getMessage();
