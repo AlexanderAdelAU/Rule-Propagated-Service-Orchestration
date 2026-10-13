@@ -431,5 +431,5 @@
       "color": -16777216
     }
   ],
-  "serviceDeployment": "ServiceDeploymentFolder/petrinet/ForkRebalanceModels.json"
+  "serviceDeployment": "ServiceDeploymentFolder/petrinet/P1_P2_P3_P4_ForkRebalance.json"
 }

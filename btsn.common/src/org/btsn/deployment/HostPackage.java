@@ -26,7 +26,7 @@ import org.json.simple.JSONObject;
  * same files the local hosts read), each host's own configuration, and launch scripts.
  *
  * One package per machine: the nodes being packaged are grouped by address, and each group becomes
- * {@code <launcher>_<nodes>} (for example {@code ForkRebalance_ThreeHost_P3P6}), as a folder and a ZIP.
+ * {@code <launcher>_<nodes>} (for example {@code P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange_P3P6}), as a folder and a ZIP.
  * {@code launch} starts every node in it; {@code launch-Pn} starts one, for a node that joins later.
  *
  * Arguments (name=value): nodes (P2,P3,P6), version, launcher, runtime (the launcher's runtime folder),
