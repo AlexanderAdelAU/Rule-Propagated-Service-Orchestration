@@ -527,19 +527,19 @@ Keep [`SingleHost.json`](btsn.common/InfrastructureDefinitionFolder/SingleHost.j
 
 ### Build the host packages
 
-Click **Build**. The dialog shows the machines, and its summary lists one package for each host on another machine:
+Click **Build**. The dialog shows the machines, and its summary lists one package for each other machine, named after the hosts it starts:
 
 ```
 Package  P2 for 192.168.1.152 (Build host packages; start it on its machine)
 Package  P3 for 192.168.1.90 (Build host packages; start it on its machine)
 ```
 
-Click **Build host packages**. It writes the launcher, builds one ZIP per listed host in `btsn.services/target/host-packages/P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun/`, and opens that folder. Each package holds:
+Click **Build host packages**. It writes the launcher, builds one ZIP per listed machine in `btsn.services/target/host-packages/P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun/`, and opens that folder. Each package holds:
 
-- **The host**: its JAR and the shared infrastructure JAR, with no business classes inside.
-- **Its services**: only the business service JARs the deployment places on that host, kept as separate JARs.
+- **Its hosts**: each host's JAR and the shared infrastructure JAR, with no business classes inside.
+- **Their services**: only the business service JARs the deployment places on those hosts, kept as separate JARs.
 - **The master ruleset**: the rules and bindings the launcher generated, the same files the hosts on the `ip0` machine read. `README.txt` gives its digest.
-- **Launch scripts and a README**: the host's address, its ports and how to start it.
+- **Launch scripts and a README**: the machine's address, its hosts, their ports and how to start them. A machine with two hosts gets one package, for example `…_P3P6.zip`.
 
 Build the packages again whenever the process, its deployment or the machines change.
 
@@ -553,9 +553,10 @@ ant -f P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.xml host-packages -Dinfrastruc
 ### Start the hosts, then run
 
 1. Copy each ZIP to its machine and extract it. Those machines need Java 15 or later; they do not need Ant or this repository.
-2. Start the host in one of two ways. When Windows asks, let Java use private networks. Wait for `Service Handler is listening`.
-   - `launch.bat` (or `sh launch.sh`) shows the output in the window.
-   - `launch-to-file.bat` (or `sh launch-to-file.sh`) writes it to `Pn_Place.out.txt` in the package folder, the same file a local host writes. Open it in Notepad to follow the run.
+2. Start the package's hosts in one of two ways. When Windows asks, let Java use private networks. Wait for `Service Handler is listening` from each host.
+   - `launch.bat` (or `sh launch.sh`) starts every host in the package, each in its own window.
+   - `launch-to-file.bat` (or `sh launch-to-file.sh`) starts them too, but each writes its output to `Pn_Place.out.txt` in the package folder, the same file a local host writes. Open it in Notepad to follow the run.
+   - `launch-Pn.bat` and `launch-to-file-Pn.bat` start a single host.
 
    Nothing stops a remote host on a timer: it runs until you press Ctrl+C. Keep the machine from sleeping.
 3. On the `ip0` machine, click **Run on hosts**, then **Run**. From the command line:
@@ -588,6 +589,47 @@ The join measures (time from first arrival to ENTER, and the skew between branch
 
 - **Network.** Use a local network or a VPN. Tokens and rules travel as plain UDP, without authentication or encryption.
 - **Firewalls.** Each package's README lists the ports its host listens on. The `ip0` machine must accept UDP from the others for Monitor and for rule commitments (ports 35000 and up). If ping between the machines fails, allow ICMP echo in the firewall to check the path.
+
+## 8. Change a running process
+
+A running process changes when a new rule version is published to its hosts. No host is restarted and no code changes. Tokens already in flight finish under the version they started with.
+
+The example is in [`ProcessDefinitionFolder/petrinet/LiveChange`](btsn.common/ProcessDefinitionFolder/petrinet/LiveChange). Every place runs `AlwaysTrueService`, so only the rules decide the route:
+
+| File | What it is |
+|---|---|
+| `ForkRebalance_LiveChange_Overview.json` | A picture of both versions: EG1 and EG2, and P6 drawn as a standby service. It is not run. |
+| `P1_P2_P3_P4_ForkRebalance_Workflow.json` | `v001`: P1 forks to P2 and P3, which join at P4 |
+| `P1_P3_P4_P6_ForkRebalance_Workflow.json` | `v002`: the same, but the second branch runs on P6 |
+
+One launch runs both, [`P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml`](btsn.petrinet.ProjectLoader/P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml), like the healthcare launchers that run several workflows together:
+1. Every host is started and initialised, P6 included. P6 gets no `v001` rules, so it does nothing.
+2. EG1 fires 90 `v001` tokens, one a second.
+3. Halfway through, at 45 s, the need for P6 is assumed. `v002` is deployed to the running hosts. The `[LIVE]` lines give the time its publish started and the time every host had committed it.
+4. EG2 fires 30 `v002` tokens while `v001` is still firing.
+
+On `ThreeHost`:
+- **192.168.1.152**: unzip `…_LiveChange_P2.zip` and run `launch-to-file.bat` (P2).
+- **192.168.1.90**: unzip `…_LiveChange_P3P6.zip` and run `launch-to-file.bat` (P3 and P6).
+- **192.168.1.82**: run the launcher, and nothing else on this machine at the same time; then run its `analyse` target.
+
+```sh
+cd btsn.petrinet.ProjectLoader
+ant -f P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml host-packages     # the packages for .152 and .90
+ant -f P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml                   # the run, on 192.168.1.82
+ant -f P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml analyse
+```
+
+To run everything on one machine, add `-Dinfrastructure=SingleHost -Dhost.address=127.0.0.1` to the run.
+
+**What to look for:**
+- **Both versions:** the analysis has a section for `v001` (workflow base 1000000) and one for `v002` (2000000).
+- **Routes:** under `LOGICAL PLACE EXECUTIONS`, there is no P6 in `v001` and no P2 in `v002`.
+- **Nothing lost:** generated and completed workflows are equal for each version.
+- **Forks and joins:** each version has as many forks and joins as workflows, and `Join-family violations: 0`.
+- **Overlap:** both versions run on P1, P3 and P4 at the same time (`CROSS-VERSION PRIORITY ANALYSIS` lists them as shared services).
+
+**What travels by message.** A version's routing rules reach the hosts as rule messages. Its service contracts are read from each host's `btsn.common`. The two versions share their contracts (P6 has P2's), so `v002` needs nothing new on the hosts.
 
 ## Repository artefacts
 
