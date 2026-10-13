@@ -84,6 +84,17 @@
     <property name="eg1.tokens" value="${token.count}"/>
     <property name="eg2.tokens" value="${token.count}"/>
     <property name="eg3.tokens" value="${token.count}"/>
+    <!-- A node that joins mid-run: egN.joins.pN marks a node first used by live version egN. It is left out of the
+         first phase; when egN is published the launcher asks for it to be started, keeps trying the publish until it
+         answers (join.attempts tries, 5 s apart), then initialises it with join.init.process.name. -->
+    <property name="join.init.process.name" value="${init.process.name}"/>
+    <property name="join.attempts" value="12"/>
+    <condition property="p1.joins"><or><isset property="eg1.joins.p1"/><isset property="eg2.joins.p1"/><isset property="eg3.joins.p1"/></or></condition>
+    <condition property="p2.joins"><or><isset property="eg1.joins.p2"/><isset property="eg2.joins.p2"/><isset property="eg3.joins.p2"/></or></condition>
+    <condition property="p3.joins"><or><isset property="eg1.joins.p3"/><isset property="eg2.joins.p3"/><isset property="eg3.joins.p3"/></or></condition>
+    <condition property="p4.joins"><or><isset property="eg1.joins.p4"/><isset property="eg2.joins.p4"/><isset property="eg3.joins.p4"/></or></condition>
+    <condition property="p5.joins"><or><isset property="eg1.joins.p5"/><isset property="eg2.joins.p5"/><isset property="eg3.joins.p5"/></or></condition>
+    <condition property="p6.joins"><or><isset property="eg1.joins.p6"/><isset property="eg2.joins.p6"/><isset property="eg3.joins.p6"/></or></condition>
 
     <!-- A host process for one node, started only when the deployment uses it and it runs here. -->
     <macrodef name="start-host">
@@ -102,7 +113,7 @@
     <macrodef name="initialise-host">
         <attribute name="node"/><attribute name="service"/><attribute name="sequence"/>
         <sequential>
-            <java classname="${init.event.generator.class}" fork="true" dir="${generator.project.dir}" failonerror="true" if:set="run.@{node}">
+            <java classname="${init.event.generator.class}" fork="true" dir="${generator.project.dir}" failonerror="true" if:set="run.@{node}" unless:set="@{node}.joins">
                 <classpath refid="generator.classpath"/>
                 <arg value="-service"/><arg value="@{service}"/>
                 <arg value="-operation"/><arg value="${db.init.operation}"/>
@@ -112,6 +123,30 @@
                 <arg value="-tokens"/><arg value="1"/>
                 <arg value="-skipDeploy" unless:set="@{node}.first"/>
             </java>
+        </sequential>
+    </macrodef>
+
+    <!-- A node joining with live version @{slot}: once that version is committed (so the node is up), clear its records. -->
+    <macrodef name="join-node">
+        <attribute name="slot"/><attribute name="node"/><attribute name="service"/><attribute name="sequence"/>
+        <sequential>
+            <echo message="[LIVE] @{node} has joined; clearing its records" if:set="@{slot}.joins.@{node}"/>
+            <java classname="${init.event.generator.class}" fork="true" dir="${generator.project.dir}" failonerror="true" if:set="@{slot}.joins.@{node}">
+                <classpath refid="generator.classpath"/>
+                <arg value="-service"/><arg value="@{service}"/>
+                <arg value="-operation"/><arg value="${db.init.operation}"/>
+                <arg value="-version"/><arg value="${init.version}"/>
+                <arg value="-process"/><arg value="${join.init.process.name}"/>
+                <arg value="-sequenceId"/><arg value="@{sequence}"/>
+                <arg value="-tokens"/><arg value="1"/>
+            </java>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="ask-for-node">
+        <attribute name="slot"/><attribute name="node"/><attribute name="label"/>
+        <sequential>
+            <echo message="[LIVE] ${@{slot}.version} brings @{label} into use at ${@{slot}.publish.at.seconds} s: start @{label} on ${@{node}.address} by then" if:set="@{slot}.joins.@{node}"/>
         </sequential>
     </macrodef>
 
@@ -234,12 +269,22 @@
         <attribute name="slot"/>
         <sequential>
             <sequential if:set="@{slot}.publish.at.seconds">
+                <ask-for-node slot="@{slot}" node="p1" label="P1"/><ask-for-node slot="@{slot}" node="p2" label="P2"/>
+                <ask-for-node slot="@{slot}" node="p3" label="P3"/><ask-for-node slot="@{slot}" node="p4" label="P4"/>
+                <ask-for-node slot="@{slot}" node="p5" label="P5"/><ask-for-node slot="@{slot}" node="p6" label="P6"/>
                 <sleep seconds="${@{slot}.publish.at.seconds}"/>
                 <tstamp><format property="@{slot}.publish.time" pattern="yyyy-MM-dd HH:mm:ss.SSS"/></tstamp>
                 <echo message="[LIVE] ${@{slot}.version} publish started at ${@{slot}.publish.time} (${@{slot}.process})"/>
-                <deploy-generator slot="@{slot}"/>
+                <!-- A joining node may not be up yet: an unanswered commitment fails the publish, which is tried again. -->
+                <retry retrycount="${join.attempts}" retrydelay="5000"><deploy-generator slot="@{slot}"/></retry>
                 <tstamp><format property="@{slot}.commit.time" pattern="yyyy-MM-dd HH:mm:ss.SSS"/></tstamp>
                 <echo message="[LIVE] ${@{slot}.version} committed by every host at ${@{slot}.commit.time}"/>
+                <join-node slot="@{slot}" node="p1" service="P1_InitializationService" sequence="999000000"/>
+                <join-node slot="@{slot}" node="p2" service="P2_InitializationService" sequence="999100000"/>
+                <join-node slot="@{slot}" node="p3" service="P3_InitializationService" sequence="999200000"/>
+                <join-node slot="@{slot}" node="p4" service="P4_InitializationService" sequence="999300000"/>
+                <join-node slot="@{slot}" node="p5" service="P5_InitializationService" sequence="999400000"/>
+                <join-node slot="@{slot}" node="p6" service="P6_InitializationService" sequence="999500000"/>
                 <sleep seconds="${@{slot}.fire.after.seconds}" if:set="@{slot}.fire.after.seconds"/>
             </sequential>
             <fire-generator slot="@{slot}"/>
