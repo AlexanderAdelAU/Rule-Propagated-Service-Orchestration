@@ -527,25 +527,19 @@ Keep [`SingleHost.json`](btsn.common/InfrastructureDefinitionFolder/SingleHost.j
 
 ### Build the host packages
 
-Click **Build**. The dialog shows the machines, and its summary lists one package for each other machine, named after the hosts it starts:
+Click **Build**. The dialog shows the machines, and its summary lists one package for each host on another machine:
 
 ```
 Package  P2 for 192.168.1.152 (Build host packages; start it on its machine)
 Package  P3 for 192.168.1.90 (Build host packages; start it on its machine)
 ```
 
-**Names.**
-Every file of a run starts with the name of its process, so related files sort together in every folder:
-- **Process**: `P1_P2_P3_P4_Fork_Join_Workflow.json`.
-- **Launcher**: `P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.xml`, with its event file `…_BuildAndRun.csv`. It runs on the `ip0` machine, which gets no package.
-- **Packages**: the launcher's name plus the hosts the package starts, one per other machine: `P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun_P2.zip` for 192.168.1.152 and `…_BuildAndRun_P3.zip` for 192.168.1.90. A machine with two hosts gets one package, such as `…_P3P6.zip`.
+Click **Build host packages**. It writes the launcher, builds one ZIP per listed host in `btsn.services/target/host-packages/P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun/`, and opens that folder. Each package holds:
 
-Click **Build host packages**. It writes the launcher, builds the ZIPs in `btsn.services/target/host-packages/P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun/`, and opens that folder. Each package holds:
-
-- **Its hosts**: each host's JAR and the shared infrastructure JAR, with no business classes inside.
-- **Their services**: only the business service JARs the deployment places on those hosts, kept as separate JARs.
+- **The host**: its JAR and the shared infrastructure JAR, with no business classes inside.
+- **Its services**: only the business service JARs the deployment places on that host, kept as separate JARs.
 - **The master ruleset**: the rules and bindings the launcher generated, the same files the hosts on the `ip0` machine read. `README.txt` gives its digest.
-- **Launch scripts and a README**: the machine's address, its hosts, their ports and how to start them.
+- **Launch scripts and a README**: the host's address, its ports and how to start it.
 
 Build the packages again whenever the process, its deployment or the machines change.
 
@@ -559,10 +553,9 @@ ant -f P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.xml host-packages -Dinfrastruc
 ### Start the hosts, then run
 
 1. Copy each ZIP to its machine and extract it. Those machines need Java 15 or later; they do not need Ant or this repository.
-2. Start the package's hosts in one of two ways. When Windows asks, let Java use private networks. Wait for `Service Handler is listening` from each host.
-   - `launch.bat` (or `sh launch.sh`) starts every host in the package, each in its own window.
-   - `launch-to-file.bat` (or `sh launch-to-file.sh`) starts them too, but each writes its output to `Pn_Place.out.txt` in the package folder, the same file a local host writes. Open it in Notepad to follow the run.
-   - `launch-Pn.bat` and `launch-to-file-Pn.bat` start one host, for a host that joins later (section 8).
+2. Start the host in one of two ways. When Windows asks, let Java use private networks. Wait for `Service Handler is listening`.
+   - `launch.bat` (or `sh launch.sh`) shows the output in the window.
+   - `launch-to-file.bat` (or `sh launch-to-file.sh`) writes it to `Pn_Place.out.txt` in the package folder, the same file a local host writes. Open it in Notepad to follow the run.
 
    Nothing stops a remote host on a timer: it runs until you press Ctrl+C. Keep the machine from sleeping.
 3. On the `ip0` machine, click **Run on hosts**, then **Run**. From the command line:
@@ -595,57 +588,6 @@ The join measures (time from first arrival to ENTER, and the skew between branch
 
 - **Network.** Use a local network or a VPN. Tokens and rules travel as plain UDP, without authentication or encryption.
 - **Firewalls.** Each package's README lists the ports its host listens on. The `ip0` machine must accept UDP from the others for Monitor and for rule commitments (ports 35000 and up). If ping between the machines fails, allow ICMP echo in the firewall to check the path.
-
-## 8. Change a running process
-
-A process changes by publishing a new rule version to the running hosts. No host is restarted and no code changes. Tokens already in flight finish under the version they started with.
-
-The example has two versions of a forking process, in their own folder, [`ProcessDefinitionFolder/petrinet/LiveChange`](btsn.common/ProcessDefinitionFolder/petrinet/LiveChange). Every place runs `AlwaysTrueService`, so only the rules decide the route:
-
-| Version | Process | P1 forks to | On `ThreeHost` |
-|---|---|---|---|
-| `v001` | [`P1_P2_P3_P4_ForkRebalance_Workflow.json`](btsn.common/ProcessDefinitionFolder/petrinet/LiveChange/P1_P2_P3_P4_ForkRebalance_Workflow.json) | P2 and P3, joined at P4 | second branch on 192.168.1.152 |
-| `v002` | [`P1_P3_P4_P6_ForkRebalance_Workflow.json`](btsn.common/ProcessDefinitionFolder/petrinet/LiveChange/P1_P3_P4_P6_ForkRebalance_Workflow.json) | P6 and P3, joined at P4 | second branch on 192.168.1.90 |
-
-P6 is a node that joins a running system: it is in the master ruleset from the first build (its address, service and contract), but it is not started with the others.
-
-The launcher, `P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml`, runs it in one go:
-1. `v001` fires 90 tokens, one a second.
-2. At 20 s, `v002` is published to the running hosts. The publish is retried until P6 answers, and P6's records are cleared. The `[LIVE]` lines give the time it started and the time every host had committed it.
-3. `v002` fires 30 tokens while `v001` is still firing.
-
-```sh
-cd btsn.petrinet.ProjectLoader
-ant -f P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml host-packages     # the packages for .152 and .90
-ant -f P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml                   # on 192.168.1.82, after P2 and P3 are started
-ant -f P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml -Dinfrastructure=SingleHost -Dhost.address=127.0.0.1   # everything on one machine
-```
-
-On three machines:
-- **192.168.1.152**: unzip `…_LiveChange_P2.zip` and run `launch-to-file.bat` (P2).
-- **192.168.1.90**: unzip `…_LiveChange_P3P6.zip` and run `launch-to-file-P3.bat`. Run `launch-to-file-P6.bat` when the launcher prints `[LIVE] v002 brings P6 into use`.
-- **192.168.1.82**: run the launcher.
-
-**What to look for:**
-- **Routes.** Under `LOGICAL PLACE EXECUTIONS`, no P6 in `v001` and no P2 in `v002`.
-- **Nothing lost.** Generated and completed are equal for each version.
-- **Forks and joins.** Each version reports as many forks and joins as workflows, and `Join-family violations: 0`.
-- **The delta.** Each host keeps the rules it committed in `RuleFolder.v001` and `RuleFolder.v002`. Comparing them shows that only one of P1's routing facts differs: P2_Place becomes P6_Place.
-
-Its files all start with the name of the `v001` process:
-
-| File | Folder | What it is |
-|---|---|---|
-| `P1_P2_P3_P4_ForkRebalance_Workflow.json` | `btsn.common/ProcessDefinitionFolder/petrinet/LiveChange` | Process, `v001` |
-| `P1_P3_P4_P6_ForkRebalance_Workflow.json` | same | Process, `v002` |
-| `P1_P2_P3_P4_ForkRebalance.json` | `btsn.common/ServiceDeploymentFolder/petrinet` | Which service runs on each node, for both versions |
-| `P1_P2_P3_P4_ForkRebalance_WorkflowDeployment.json` | `btsn.services/deployments/models` | Launcher profile |
-| `P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml` | `btsn.petrinet.ProjectLoader` | Launcher: runs `v001`, publishes `v002` while it runs. Run on 192.168.1.82 (P1, P4) |
-| `P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange_V001.csv`, `_V002.csv` | `btsn.common.eventgenerators/EventTriggeringFile` | Tokens each version fires |
-| `P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange_P2.zip` | `btsn.services/target/host-packages/P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange` | Package for 192.168.1.152 (P2) |
-| `P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange_P3P6.zip` | same | Package for 192.168.1.90 (P3, P6) |
-
-**What travels by message.** A version's routing rules reach the hosts as rule messages. Its service contracts (the canonical bindings) are read from each host's `btsn.common`. The two versions here share their contracts, so `v002` needs nothing new on the hosts. A version that changes a contract needs its host packages rebuilt.
 
 ## Repository artefacts
 

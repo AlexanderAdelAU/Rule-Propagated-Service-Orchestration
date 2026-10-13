@@ -1,12 +1,12 @@
 {
-  "processType": "PetriNet",
+   "processType":"PetriNet",
   "elements": [
     {
       "id": "T_in_P1",
       "type": "TRANSITION",
-      "x": 110,
-      "y": 250,
-      "width": 24,
+      "x": 170,
+      "y": 270,
+      "width": 20,
       "height": 60,
       "label": "T_in_P1",
       "rotation": 0.0,
@@ -18,34 +18,24 @@
     {
       "id": "P1",
       "type": "PLACE",
-      "x": 175,
-      "y": 255,
+      "x": 255,
+      "y": 275,
       "width": 50,
       "height": 50,
       "label": "P1",
-      "service": "AlwaysTrueService",
+      "service": "P1_Place",
       "operations": [
         {
-          "name": "processToken",
-          "returnAttribute": "token",
-          "arguments": [
-            {
-              "name": "token",
-              "type": "String",
-              "value": "String",
-              "required": false
-            }
-          ]
+          "name": "processToken"
         }
-      ],
-      "serviceInstance": "AlwaysTrueInstance1"
+      ]
     },
     {
       "id": "T_out_P1",
       "type": "TRANSITION",
-      "x": 248,
-      "y": 250,
-      "width": 24,
+      "x": 370,
+      "y": 270,
+      "width": 20,
       "height": 60,
       "label": "T_out_P1",
       "rotation": 0.0,
@@ -54,63 +44,11 @@
       "transition_type": "T_out"
     },
     {
-      "id": "T_in_P2",
-      "type": "TRANSITION",
-      "x": 350,
-      "y": 190,
-      "width": 24,
-      "height": 60,
-      "label": "T_in_P2",
-      "rotation": 0.0,
-      "node_type": "EdgeNode",
-      "node_value": "EDGE_NODE",
-      "transition_type": "T_in",
-      "buffer": "10"
-    },
-    {
-      "id": "P2",
-      "type": "PLACE",
-      "x": 415,
-      "y": 195,
-      "width": 50,
-      "height": 50,
-      "label": "P2",
-      "service": "AlwaysTrueService",
-      "operations": [
-        {
-          "name": "processToken",
-          "returnAttribute": "token_branch2",
-          "arguments": [
-            {
-              "name": "token",
-              "type": "String",
-              "value": "String",
-              "required": false
-            }
-          ]
-        }
-      ],
-      "serviceInstance": "AlwaysTrueInstance2"
-    },
-    {
-      "id": "T_out_P2",
-      "type": "TRANSITION",
-      "x": 510,
-      "y": 190,
-      "width": 24,
-      "height": 60,
-      "label": "T_out_P2",
-      "rotation": 0.0,
-      "node_type": "EdgeNode",
-      "node_value": "EDGE_NODE",
-      "transition_type": "T_out"
-    },
-    {
       "id": "T_in_P3",
       "type": "TRANSITION",
-      "x": 350,
-      "y": 290,
-      "width": 24,
+      "x": 470,
+      "y": 210,
+      "width": 20,
       "height": 60,
       "label": "T_in_P3",
       "rotation": 0.0,
@@ -122,34 +60,24 @@
     {
       "id": "P3",
       "type": "PLACE",
-      "x": 415,
-      "y": 295,
+      "x": 535,
+      "y": 215,
       "width": 50,
       "height": 50,
       "label": "P3",
-      "service": "AlwaysTrueService",
+      "service": "P3_Place",
       "operations": [
         {
-          "name": "processToken",
-          "returnAttribute": "token_branch1",
-          "arguments": [
-            {
-              "name": "token",
-              "type": "String",
-              "value": "String",
-              "required": false
-            }
-          ]
+          "name": "processToken"
         }
-      ],
-      "serviceInstance": "AlwaysTrueInstance3"
+      ]
     },
     {
       "id": "T_out_P3",
       "type": "TRANSITION",
-      "x": 510,
-      "y": 290,
-      "width": 24,
+      "x": 630,
+      "y": 210,
+      "width": 20,
       "height": 60,
       "label": "T_out_P3",
       "rotation": 0.0,
@@ -158,11 +86,53 @@
       "transition_type": "T_out"
     },
     {
+      "id": "T_in_P2",
+      "type": "TRANSITION",
+      "x": 470,
+      "y": 310,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_P2",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "P2",
+      "type": "PLACE",
+      "x": 535,
+      "y": 315,
+      "width": 50,
+      "height": 50,
+      "label": "P2",
+      "service": "P2_Place",
+      "operations": [
+        {
+          "name": "processToken"
+        }
+      ]
+    },
+    {
+      "id": "T_out_P2",
+      "type": "TRANSITION",
+      "x": 630,
+      "y": 310,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_P2",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
       "id": "T_in_P4",
       "type": "TRANSITION",
-      "x": 610,
-      "y": 250,
-      "width": 24,
+      "x": 730,
+      "y": 270,
+      "width": 20,
       "height": 60,
       "label": "T_in_P4",
       "rotation": 0.0,
@@ -174,40 +144,24 @@
     {
       "id": "P4",
       "type": "PLACE",
-      "x": 675,
-      "y": 255,
+      "x": 795,
+      "y": 275,
       "width": 50,
       "height": 50,
       "label": "P4",
-      "service": "AlwaysTrueService",
+      "service": "P4_Place",
       "operations": [
         {
-          "name": "processToken",
-          "returnAttribute": "token",
-          "arguments": [
-            {
-              "name": "token_branch1",
-              "type": "String",
-              "value": "String",
-              "required": false
-            },
-            {
-              "name": "token_branch2",
-              "type": "String",
-              "value": "String",
-              "required": false
-            }
-          ]
+          "name": "processToken"
         }
-      ],
-      "serviceInstance": "AlwaysTrueInstance4"
+      ]
     },
     {
       "id": "T_out_P4",
       "type": "TRANSITION",
-      "x": 768,
-      "y": 250,
-      "width": 24,
+      "x": 910,
+      "y": 270,
+      "width": 20,
       "height": 60,
       "label": "T_out_P4",
       "rotation": 0.0,
@@ -216,14 +170,56 @@
       "transition_type": "T_out"
     },
     {
-      "id": "T_in_Terminate",
+      "id": "T_in_Monitor",
       "type": "TRANSITION",
-      "x": 248,
+      "x": 910,
       "y": 370,
-      "width": 24,
+      "width": 20,
       "height": 60,
-      "label": "T_in_Terminate",
+      "label": "T_in_Monitor",
       "rotation": 90.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "Monitor",
+      "type": "PLACE",
+      "x": 895,
+      "y": 455,
+      "width": 50,
+      "height": 50,
+      "label": "Monitor",
+      "service": "MonitorService",
+      "operations": [
+        {
+          "name": "acknowledgeTokenArrival"
+        }
+      ]
+    },
+    {
+      "id": "T_out_Monitor",
+      "type": "TRANSITION",
+      "x": 910,
+      "y": 530,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Monitor",
+      "rotation": 90.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "Terminate",
+      "type": "TRANSITION",
+      "x": 370,
+      "y": 392,
+      "width": 20,
+      "height": 56,
+      "label": "Terminate",
+      "rotation": 180.0,
       "node_type": "TerminateNode",
       "node_value": "TERMINATE_NODE",
       "transition_type": "Other"
@@ -231,8 +227,8 @@
     {
       "id": "EVENT_GENERATOR",
       "type": "EVENT_GENERATOR",
-      "x": 28,
-      "y": 250,
+      "x": 68,
+      "y": 270,
       "width": 24,
       "height": 60,
       "label": "EVENT_GENERATOR",
@@ -241,35 +237,19 @@
       "token_version": "v001"
     },
     {
-      "id": "T_in_Model_Terminate",
-      "type": "TRANSITION",
-      "x": 860,
-      "y": 250,
-      "width": 20,
+      "id": "P1_EVENTGENERATOR",
+      "type": "EVENT_GENERATOR",
+      "x": 68,
+      "y": 350,
+      "width": 24,
       "height": 60,
-      "label": "Terminate",
-      "node_type": "TerminateNode",
-      "node_value": "TERMINATE_NODE",
-      "transition_type": "Other"
+      "label": "P1_EVENTGENERATOR",
+      "rotation": 0.0,
+      "generator_rate": "1000",
+      "token_version": "v001"
     }
   ],
   "arrows": [
-    {
-      "source": "T_out_P1",
-      "target": "T_in_P2",
-      "label": "true",
-      "guardCondition": "DECISION_EQUAL_TO",
-      "decision_value": "true",
-      "endpoint": "processToken",
-      "waypoints": [
-        {
-          "x": 320,
-          "y": 220
-        }
-      ],
-      "labelOffsetX": -14,
-      "labelOffsetY": -18
-    },
     {
       "source": "T_out_P1",
       "target": "T_in_P3",
@@ -278,13 +258,35 @@
       "decision_value": "true",
       "endpoint": "processToken",
       "waypoints": [
-        {
-          "x": 320,
-          "y": 320
-        }
-      ],
-      "labelOffsetX": -15,
-      "labelOffsetY": 31
+        {"x": 440, "y": 240}
+      ]
+    },
+    {
+      "source": "T_out_P1",
+      "target": "T_in_P2",
+      "label": "true",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "true",
+      "endpoint": "processToken",
+      "waypoints": [
+        {"x": 440, "y": 340}
+      ]
+    },
+    {
+      "source": "T_in_P3",
+      "target": "P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P3",
+      "target": "T_out_P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
     },
     {
       "source": "T_in_P2",
@@ -303,29 +305,7 @@
       "endpoint": ""
     },
     {
-      "source": "T_in_P3",
-      "target": "P3",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
-    },
-    {
-      "source": "P3",
-      "target": "T_out_P3",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": "",
-      "waypoints": [
-        {
-          "x": 480,
-          "y": 320
-        }
-      ]
-    },
-    {
-      "source": "T_out_P3",
+      "source": "T_out_P2",
       "target": "T_in_P4",
       "label": "",
       "guardCondition": "",
@@ -343,30 +323,42 @@
     {
       "source": "P4",
       "target": "T_out_P4",
-      "label": "",
+      "label": "v001",
       "guardCondition": "",
       "decision_value": "",
-      "endpoint": ""
-    },
-    {
-      "source": "T_out_P2",
-      "target": "T_in_P4",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
-    },
-    {
-      "source": "P1",
-      "target": "T_out_P1",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
+      "endpoint": "",
+      "waypoints": [
+        {"x": 860, "y": 300},
+        {"x": 880, "y": 300}
+      ]
     },
     {
       "source": "T_out_P4",
-      "target": "T_in_Model_Terminate",
+      "target": "T_in_Monitor",
+      "label": "v001",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Monitor",
+      "target": "Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Monitor",
+      "target": "T_out_Monitor",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P3",
+      "target": "T_in_P4",
       "label": "",
       "guardCondition": "",
       "decision_value": "",
@@ -381,55 +373,94 @@
       "endpoint": ""
     },
     {
+      "source": "P1",
+      "target": "T_out_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
       "source": "T_out_P1",
-      "target": "T_in_Terminate",
+      "target": "Terminate",
       "label": "false",
       "guardCondition": "DECISION_EQUAL_TO",
       "decision_value": "false",
       "endpoint": ""
     },
     {
+      "source": "P1_EVENTGENERATOR",
+      "target": "T_in_P1",
+      "label": "v002",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "waypoints": [
+        {"x": 180, "y": 380}
+      ]
+    },
+    {
       "source": "EVENT_GENERATOR",
       "target": "T_in_P1",
-      "label": "",
+      "label": "v001",
       "guardCondition": "",
       "decision_value": "",
       "endpoint": ""
+    },
+    {
+      "source": "T_out_P2",
+      "target": "T_in_Monitor",
+      "label": "v002",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "waypoints": [
+        {"x": 760, "y": 400}
+      ],
+      "labelOffsetX": -17,
+      "labelOffsetY": 15
     }
   ],
   "textElements": [
     {
-      "x": 326,
-      "y": 92,
-      "text": "P1_P2_P3_P4_ForkRebalance_Workflow (v001)",
+      "x": 281,
+      "y": 77,
+      "text": "P1_P2_P3_P4_Fork_Concurrent_Workflow",
       "fontSize": 14,
       "fontStyle": 1,
       "color": -16777216
     },
     {
-      "x": 219,
-      "y": 237,
+      "x": 328,
+      "y": 253,
       "text": "GATEWAY NODE",
       "fontSize": 10,
       "fontStyle": 0,
       "color": -16777216
     },
     {
-      "x": 615,
-      "y": 235,
+      "x": 608,
+      "y": 236,
       "text": "JOIN",
       "fontSize": 10,
       "fontStyle": 0,
       "color": -16777216
     },
     {
-      "x": 250,
-      "y": 119,
-      "text": "Every place returns true: P1 forks to P2 and P3, which join at P4.",
+      "x": 276,
+      "y": 98,
+      "text": "(P1 to P4 Return True of False from SPN implementation",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 702,
+      "y": 544,
+      "text": "Terminate",
       "fontSize": 12,
       "fontStyle": 0,
       "color": -16777216
     }
-  ],
-  "serviceDeployment": "ServiceDeploymentFolder/petrinet/P1_P2_P3_P4_ForkRebalance.json"
+  ]
 }
