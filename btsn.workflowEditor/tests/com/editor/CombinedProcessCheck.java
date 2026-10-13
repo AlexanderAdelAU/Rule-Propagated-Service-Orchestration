@@ -19,6 +19,18 @@ public final class CombinedProcessCheck {
             "Run on hosts does not find the combined launcher");
         check(BuildAndRunGenerator.combinedLauncher(new File(root, "btsn.common/ProcessDefinitionFolder/petrinet/LiveChange/P1_P2_P3_P4_ForkRebalance_Workflow.json")) == null,
             "An ordinary process was taken for a combined one");
+        if (args.length > 1 && !java.awt.GraphicsEnvironment.isHeadless()) {
+            File picture = new File(args[1], "combined-build.png");
+            javax.swing.SwingUtilities.invokeAndWait(() -> {
+                CombinedBuildDialog dialog = new CombinedBuildDialog(null, root, "petrinet/LiveChange/" + name, launcher);
+                check(dialog.getTitle().equals("Build"), "Dialog title: " + dialog.getTitle());
+                java.awt.Container content = dialog.getContentPane();
+                java.awt.image.BufferedImage image = new java.awt.image.BufferedImage(content.getWidth(), content.getHeight(), java.awt.image.BufferedImage.TYPE_INT_RGB);
+                content.paint(image.getGraphics());
+                try { javax.imageio.ImageIO.write(image, "png", picture); } catch (java.io.IOException ex) { throw new RuntimeException(ex); }
+                dialog.dispose();
+            });
+        }
         System.out.println("PASS: combined process finds its launcher, summarises both versions, and Run on hosts finds it");
     }
     private static void check(boolean condition, String message) { if (!condition) throw new AssertionError(message); }

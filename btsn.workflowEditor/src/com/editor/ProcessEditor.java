@@ -1298,39 +1298,13 @@ public class ProcessEditor extends JFrame {
         new BuildAndRunDialog(this, plan).setVisible(true);
     }
 
-    /** Build on a combined process: nothing to write; its launcher runs the separate processes. Offer its packages and Run. */
+    /** Build on a combined process: its launcher already exists, so Build only makes the host packages. */
     private void buildCombined(java.io.File launcher) {
-        String message = "Combined process: an amalgam of independent processes, each deployed and run under its own version.\n"
-            + "Its launcher, " + launcher.getName() + ", runs them in one launch:\n\n  "
-            + String.join("\n  ", BuildAndRunGenerator.combinedSummary(launcher)) + "\n\n"
-            + "Nothing is written. Build host packages makes the packages for the other machines under "
-            + ServiceRegistry.selectedInfrastructure() + "; Run on hosts runs it.";
-        Object[] choices = { "Build host packages", "Run on hosts", "Close" };
-        int choice = JOptionPane.showOptionDialog(this, message, "Build and Run", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, choices, choices[1]);
-        if (choice == 1) { openRunWindow(); return; }
-        if (choice != 0) return;
-        java.io.File root = ServiceRegistry.findCommon(currentFile).getParentFile();
-        String machines = ServiceRegistry.selectedInfrastructure();
-        statusLabel.setText(" Building the host packages for " + launcher.getName() + " on " + machines + "...");
-        new LauncherRun(launcher, root, LauncherRun.analysisFileFor(root, launcher.getName().replaceFirst("\\.xml$", "")), false, RunWindow.antCommand(),
-            new LauncherRun.Listener() {
-                public void line(String text) { }
-                public void phase(LauncherRun.Phase phase, String detail) { }
-                public void finished(LauncherRun.Phase outcome, java.io.File analysis, String result) { javax.swing.SwingUtilities.invokeLater(() -> {
-                    statusLabel.setText(" " + result);
-                    if (outcome != LauncherRun.Phase.DONE) {
-                        JOptionPane.showMessageDialog(ProcessEditor.this, "The host packages were not built:\n" + result, "Host packages", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-                    JOptionPane.showMessageDialog(ProcessEditor.this, "Host packages for " + launcher.getName() + " on " + machines + ".\n\n"
-                        + result.replace("; ", "\n") + "\n\nCopy each ZIP to its machine, unzip it and run launch.bat.\nThen click Run on hosts.",
-                        "Host packages built", JOptionPane.INFORMATION_MESSAGE);
-                    java.io.File folder = LauncherRun.hostPackagesFolder(root, launcher);
-                    if (folder.isDirectory() && java.awt.Desktop.isDesktopSupported()) {
-                        try { java.awt.Desktop.getDesktop().open(folder); } catch (Exception ignored) { }
-                    }
-                }); }
-            }).infrastructure(machines).packagesOnly().start();
+        java.io.File processPath = LauncherRun.real(currentFile);
+        java.io.File common = ServiceRegistry.findCommon(processPath);
+        String processName = new java.io.File(common, "ProcessDefinitionFolder").toPath().relativize(processPath.toPath())
+            .toString().replace(java.io.File.separatorChar, '/').replaceFirst("\\.json$", "");
+        new CombinedBuildDialog(this, common.getParentFile(), processName, launcher).setVisible(true);
     }
 
     private RunWindow runWindow;

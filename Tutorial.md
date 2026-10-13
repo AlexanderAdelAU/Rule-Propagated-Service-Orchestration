@@ -598,7 +598,7 @@ The example is in [`ProcessDefinitionFolder/petrinet/LiveChange`](btsn.common/Pr
 
 | File | What it is |
 |---|---|
-| `P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.json` | The combined process, named after its launcher: an amalgam of the two processes below, with EG1, EG2 and P6 drawn as a standby service. Open it in the editor: **Build** shows what its launcher runs and offers **Build host packages**; **Run on hosts** runs the launcher of the same name. |
+| `P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.json` | The combined process, named after its launcher: an amalgam of the two processes below, with EG1, EG2 and P6 drawn as a standby service. Open it in the editor. **Build** says it is a combined process, shows what its launcher runs, and builds the host packages; you copy them to their machines and start them; then **Run on hosts** runs the launcher of the same name. |
 | `P1_P2_P3_P4_ForkRebalance_Workflow.json` | `v001`: P1 forks to P2 and P3, which join at P4 |
 | `P1_P3_P4_P6_ForkRebalance_Workflow.json` | `v002`: the same, but the second branch runs on P6 |
 
