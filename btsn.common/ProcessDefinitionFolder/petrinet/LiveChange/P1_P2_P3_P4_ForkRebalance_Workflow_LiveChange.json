@@ -580,5 +580,6 @@
       "fontStyle": 1,
       "color": -16777216
     }
-  ]
+  ],
+  "serviceDeployment": "ServiceDeploymentFolder/petrinet/P1_P2_P3_P4_ForkRebalance.json"
 }
