@@ -3,11 +3,12 @@
      v001 (P1_P2_P3_P4_ForkRebalance_Workflow): P1 forks to P2 and P3, which join at P4.
      v002 (P1_P3_P4_P6_ForkRebalance_Workflow): the same, but the second branch runs on P6 instead of P2.
      On ThreeHost, P2 is on 192.168.1.152 and P6 on 192.168.1.90, so v002 moves that branch to the other machine.
-     P6 has the same contract as P2 and receives rules only when v002 is published.
+     P6 is a node that joins mid-run: it is in the master ruleset from the start (address, service, contract) but is
+     not started or initialised with the others. Start it when the launcher asks ("[LIVE] v002 brings P6 into use").
      Every place runs AlwaysTrueService, so every token forks and routes depend only on rules.
-     v001 fires 30 tokens, one a second. At 10 s v002 is published to the running hosts and, once every host has
-     committed it, fires its 30 tokens while v001 is still firing: for about 15 s both versions run on P1, P3 and P4
-     together. Every workflow forks, and joins, under its own version.
+     v001 fires 90 tokens, one a second. At 20 s v002 is published; the publish is retried until P6 answers, P6's
+     records are cleared, and v002 fires its 30 tokens while v001 is still firing, so both versions fork and join on
+     P1, P3 and P4 together. Every workflow forks, and joins, under its own version.
      Hand-written: the editor's Build writes one process per launcher, and this launcher needs one per version.
      Run:     ant -f P1_P2_P3_P4_P6_ForkRebalance_BuildAndRun.xml        (add -Dhost.address=127.0.0.1 to run every host on this machine)
      Hosts:   ant -f P1_P2_P3_P4_P6_ForkRebalance_BuildAndRun.xml host-packages -Dinfrastructure=ThreeHost
@@ -16,7 +17,9 @@
     <property name="process.title" value="petrinet/Workflow/P1_P2_P3_P4_ForkRebalance_Workflow (v001, then v002 published live)"/>
     <property name="launcher.profile.file" location="../btsn.services/deployments/models/ForkRebalanceDeployment.json"/>
     <property name="workflow.process.name" value="petrinet/Workflow/P1_P2_P3_P4_ForkRebalance_Workflow"/>
-    <property name="init.process.name" value="common/Initializers/P1_P2_P3_P4_P6_Initialization"/>
+    <!-- First phase: the nodes v001 uses. P6 joins with v002 and is initialised then. -->
+    <property name="init.process.name" value="common/Initializers/P1_P2_P3_P4_Initialization"/>
+    <property name="join.init.process.name" value="common/Initializers/P1_P2_P3_P4_P6_Initialization"/>
     <property name="collector.process.name" value="common/Collectors/P1_P2_P3_P4_P6_Collector"/>
     <property name="rule.version" value="v001"/>
     <property name="query.version" value="v001,v002"/>
@@ -27,15 +30,17 @@
     <property name="eg1.place" value="P1_Place"/>
     <property name="eg1.operation" value="processToken"/>
     <property name="eg1.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/P1_P2_P3_P4_P6_ForkRebalance_BuildAndRun_V001.csv"/>
+    <property name="eg1.tokens" value="90"/>
 
-    <!-- v002: published to the running hosts at 10 s, firing as soon as every host has committed it. -->
+    <!-- v002: published to the running hosts at 20 s, bringing P6 into use; fires as soon as every host has committed it. -->
     <property name="eg2.id" value="EVENT_GENERATOR_V002"/>
     <property name="eg2.version" value="v002"/>
     <property name="eg2.process" value="petrinet/Workflow/P1_P3_P4_P6_ForkRebalance_Workflow"/>
     <property name="eg2.place" value="P1_Place"/>
     <property name="eg2.operation" value="processToken"/>
     <property name="eg2.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/P1_P2_P3_P4_P6_ForkRebalance_BuildAndRun_V002.csv"/>
-    <property name="eg2.publish.at.seconds" value="10"/>
+    <property name="eg2.publish.at.seconds" value="20"/>
+    <property name="eg2.joins.p6" value="true"/>
 
     <property name="token.count" value="30"/>
     <property name="workflow.completion.seconds" value="20"/>
