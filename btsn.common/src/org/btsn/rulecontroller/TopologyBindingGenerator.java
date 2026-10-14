@@ -183,6 +183,7 @@ public class TopologyBindingGenerator {
                 String jsonContent = StringFileIO.readFileAsString(jsonFileName);
                 logger.info("Successfully loaded JSON workflow: " + jsonContent.length() + " characters");
                 parseJsonWorkflow(jsonContent);
+                this.serviceDeploymentReference = extractJsonValue(jsonContent, "serviceDeployment");
             } else {
                 throw new TopologyBindingException("Workflow file not found: " + jsonFileName);
             }
@@ -772,6 +773,54 @@ public class TopologyBindingGenerator {
     // PETRINET BINDING GENERATION
     // ========================================================================
 
+    /** The process's service deployment (ServiceDeploymentFolder/...json), or null when the process names none. */
+    private String serviceDeploymentReference;
+
+    /**
+     * Standby nodes: a capability in the process's service deployment that this process does not place (a node a later
+     * version will bring into use) gets its canonical binding from the deployment, so a host package built now carries
+     * its contract. The later version's own compilation, at its publication, writes the same binding.
+     */
+    private void generateStandbyBindings(String bindingsBasePath, Collection<ServiceNode> placed,
+            List<String> generatedBindingFiles) throws IOException {
+        if (serviceDeploymentReference == null || serviceDeploymentReference.isEmpty()) return;
+        File deployment = new File(new File(new File("../").getCanonicalFile(), Config.COMMON_FOLDER), serviceDeploymentReference);
+        if (!deployment.isFile()) {
+            logger.warn("Service deployment not found for standby bindings: " + deployment);
+            return;
+        }
+        Set<String> placedInstances = new HashSet<>();
+        for (ServiceNode node : placed) placedInstances.add(node.service);
+        org.json.simple.JSONObject root;
+        try (FileReader reader = new FileReader(deployment)) {
+            root = (org.json.simple.JSONObject) new org.json.simple.parser.JSONParser().parse(reader);
+        } catch (org.json.simple.parser.ParseException e) {
+            throw new IOException("Cannot read service deployment " + deployment + ": " + e.getMessage(), e);
+        }
+        Object capabilities = root.get("capabilities");
+        if (!(capabilities instanceof org.json.simple.JSONArray)) return;
+        for (Object item : (org.json.simple.JSONArray) capabilities) {
+            org.json.simple.JSONObject capability = (org.json.simple.JSONObject) item;
+            String instance = (String) capability.get("instance");
+            String operation = (String) capability.get("operation");
+            if (instance == null || operation == null || placedInstances.contains(instance)) continue;
+            List<String> argumentNames = new ArrayList<>();
+            Object arguments = capability.get("arguments");
+            if (arguments instanceof org.json.simple.JSONArray)
+                for (Object argument : (org.json.simple.JSONArray) arguments) {
+                    Object name = ((org.json.simple.JSONObject) argument).get("name");
+                    if (name != null) argumentNames.add(name.toString());
+                }
+            String returnAttribute = (String) capability.get("returnAttribute");
+            generateCanonicalBindingFile(bindingsBasePath, instance, operation, Math.max(1, argumentNames.size()),
+                argumentNames.isEmpty() ? null : argumentNames, returnAttribute);
+            String folderName = instance.contains("_") ? instance.substring(0, instance.indexOf("_")) : instance;
+            generatedBindingFiles.add(bindingsBasePath + "/" + folderName + "/" + instance + "-CanonicalBindings.ruleml.xml");
+            placedInstances.add(instance);
+            logger.info("Generated canonical binding for standby " + instance + " from the service deployment");
+        }
+    }
+
     private void generatePetriNetCanonicalBindings() throws TopologyBindingException {
         logger.info("=== GENERATING PETRINET CANONICAL BINDINGS ===");
         
@@ -864,6 +913,12 @@ public class TopologyBindingGenerator {
             }
         }
         
+        try {
+            generateStandbyBindings(bindingsBasePath, services.values(), generatedBindingFiles);
+        } catch (IOException e) {
+            throw new TopologyBindingException("Failed to generate standby bindings", e);
+        }
+
         try {
             appendBindingsToServiceRuleml(generatedBindingFiles);
         } catch (IOException e) {

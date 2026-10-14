@@ -605,8 +605,12 @@ The example is in [`ProcessDefinitionFolder/petrinet/LiveChange`](btsn.common/Pr
 One launch runs both, [`P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml`](btsn.petrinet.ProjectLoader/P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml), like the healthcare launchers that run several workflows together:
 1. Every host is started and initialised, P6 included. P6 gets no `v001` rules, so it does nothing.
 2. EG1 fires 90 `v001` tokens, one a second.
-3. Halfway through, at 45 s, the need for P6 is assumed. `v002` is deployed to the running hosts. The `[LIVE]` lines give the time its publish started and the time every host had committed it.
-4. EG2 fires 30 `v002` tokens while `v001` is still firing.
+3. At 10 s, `v002` is compiled and published to the running hosts, which commit it while `v001` tokens are in flight. P6 is now prepared: it holds rules nothing uses yet. Nothing about `v002` exists before this: it is compiled here, not at the start.
+4. 30 s after every host has committed, about halfway through `v001`, the need for P6 is assumed and EG2 fires 30 `v002` tokens while `v001` is still firing.
+
+The `[LIVE]` lines give the times the publish started, every host had committed, and the first `v002` token was fired.
+
+A standby node's contract comes from the service deployment: the first build writes a canonical binding for every node the deployment lists, so P6's package carries its contract before `v002` exists.
 
 On `ThreeHost`:
 - **192.168.1.152**: unzip `…_LiveChange_P2.zip` and run `launch-to-file.bat` (P2).
