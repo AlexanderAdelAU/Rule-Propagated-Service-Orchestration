@@ -42,6 +42,11 @@ public final class RunWindow extends JFrame {
     private final JLabel[] steps;
     private final JLabel status = new JLabel(" ");
     private LauncherRun run;
+    /** Everything the run printed, uncapped, saved beside the analysis when the run ends. */
+    private final StringBuilder runLog = new StringBuilder();
+    /** The launcher's [LIVE] timing lines, repeated in the summary so the console cap cannot lose them. */
+    private final java.util.List<String> liveLines = new java.util.ArrayList<>();
+    private File selectedLauncher;
 
     private static final String[] STEP_NAMES = {"Build and start hosts", "Initialise", "Deploy rules", "Commitments received", "Fire tokens", "Collect", "Settle", "Analyse", "Replay"};
 
@@ -186,6 +191,7 @@ public final class RunWindow extends JFrame {
         catch (java.io.IOException ex) { status.setText(ex.getMessage()); JOptionPane.showMessageDialog(this, ex.getMessage(), "Ant", JOptionPane.WARNING_MESSAGE); return; }
         prefs.put(ANT_PREF, ant.getText().trim());
         console.setText("");
+        runLog.setLength(0); liveLines.clear(); selectedLauncher = selected;
         resetSteps();
         nextSteps.setVisible(false);
         planHosts();
@@ -203,6 +209,9 @@ public final class RunWindow extends JFrame {
     }
 
     private void append(String text) {
+        runLog.append(text).append('\n');
+        int live = text.indexOf("[LIVE]");
+        if (live >= 0) liveLines.add(text.substring(live));
         console.append(text + "\n");
         if (console.getDocument().getLength() > MAX_CONSOLE_CHARS) console.replaceRange("", 0, console.getDocument().getLength() - MAX_CONSOLE_CHARS / 2);
         console.setCaretPosition(console.getDocument().getLength());
@@ -231,8 +240,10 @@ public final class RunWindow extends JFrame {
         hosts.refresh(); hosts.stopped(); hostModel.fireTableDataChanged();
         java.text.SimpleDateFormat clock = new java.text.SimpleDateFormat("HH:mm:ss");
         long end = System.currentTimeMillis();
+        for (String live : new java.util.ArrayList<>(liveLines)) append(live);
         if (outcome == LauncherRun.Phase.DONE)
             append("Ran " + clock.format(new Date(runStartedAt)) + " to " + clock.format(new Date(end)) + " (" + (end - runStartedAt) / 1000 + " s) on " + hosts.describe());
+        saveRunLog();
         if (outcome == LauncherRun.Phase.DONE && analysis != null) {
             onAnalysis.accept(analysis);
             lastAnalysis = analysis;
@@ -244,6 +255,24 @@ public final class RunWindow extends JFrame {
         } else {
             for (JLabel step : steps) if (step.getBackground().equals(new Color(0xFFF1C2))) step.setBackground(new Color(0xF6D0D0));
             status.setText(message);
+        }
+    }
+
+    /** Run_<launcher>.txt beside the analysis: the whole console, which the window itself trims. */
+    static File runLogFile(File root, String processName, File launcher) {
+        String name = launcher.getName().replaceFirst("\\.xml$", "");
+        return new File(LauncherRun.analysisFileFor(root, processName).getParentFile(), "Run_" + name + ".txt");
+    }
+
+    private void saveRunLog() {
+        if (selectedLauncher == null) return;
+        File file = runLogFile(root, processName, selectedLauncher);
+        try {
+            file.getParentFile().mkdirs();
+            java.nio.file.Files.write(file.toPath(), runLog.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            append("Run log saved to " + file.getAbsolutePath());
+        } catch (java.io.IOException ex) {
+            append("Run log not saved (" + file.getAbsolutePath() + "): " + ex.getMessage());
         }
     }
 

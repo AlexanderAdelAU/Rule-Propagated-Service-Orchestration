@@ -500,7 +500,7 @@
     {
       "x": 150,
       "y": 122,
-      "text": "EG1 fires v001 from the start; halfway through, EG2 deploys v002 and P6, the standby, takes the second branch.",
+      "text": "EG1 fires v001 from the start; at 10 s v002 is published and P6, the standby, is prepared; halfway through, EG2 fires v002.",
       "fontSize": 12,
       "fontStyle": 0,
       "color": -16777216
