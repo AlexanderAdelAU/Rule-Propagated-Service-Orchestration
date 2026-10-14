@@ -221,11 +221,22 @@ public class RuleHandler {
     /**
      * Send commitment back to the originating machine
      * Always uses version-based port (35000 + version number)
+     *
+     * Sent through the rule handler's own socket, like the acknowledgement. A new socket per
+     * commitment needs a fresh ephemeral port, and on Windows that bind can fail with
+     * "Address already in use" after many short-lived sockets; an idle host then hits the
+     * same clash on every retry and the commitment barrier never completes.
      */
     private void sendCommitment(String commitmentMessage) {
         DatagramSocket ms = null;
+        boolean ownSocket = false;
         try {
-            ms = new DatagramSocket();
+            if (udpSocket != null && !udpSocket.isClosed()) {
+                ms = udpSocket;
+            } else {
+                ms = new DatagramSocket();
+                ownSocket = true;
+            }
             
             InetAddress targetAddress;
             int targetPort;
@@ -281,7 +292,7 @@ public class RuleHandler {
         } catch (IOException ie) {
             System.err.println("IO error in sendCommitment: " + ie.getMessage());
         } finally {
-            if (ms != null) {
+            if (ownSocket && ms != null) {
                 ms.close();
             }
         }
