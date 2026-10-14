@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Live change: one launch, two event generators, P6 on standby.
+     Combined process: petrinet/LiveChange/P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange, the drawing of this launch:
+     an amalgam of the two independent processes below, with P6 drawn as a standby service.
+     v001 (petrinet/LiveChange/P1_P2_P3_P4_ForkRebalance_Workflow): P1 forks to P2 and P3, which join at P4.
+     v002 (petrinet/LiveChange/P1_P3_P4_P6_ForkRebalance_Workflow): the same, but the second branch runs on P6 instead of P2.
+     Every host, P6 included, is started and initialised at the start. P6 has P2's contract and does nothing under v001.
+     EG1 fires 90 v001 tokens, one a second. Halfway through (45 s) the need for P6 is assumed: v002 is deployed to the
+     running hosts and, once every host has committed it, EG2 fires 30 v002 tokens while v001 is still firing.
+     The [LIVE] lines give the time v002's publish started and the time every host had committed it.
+     On ThreeHost: P1, P4 on 192.168.1.82 (this launcher); P2 on 192.168.1.152; P3, P6 on 192.168.1.90.
+     Run:      ant -f P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml
+     Packages: ant -f P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml host-packages   (…_P2.zip for .152, …_P3P6.zip for .90)
+     Analyse:  ant -f P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml analyse
+     One machine: add -Dinfrastructure=SingleHost -Dhost.address=127.0.0.1 -->
+<project name="P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange" default="run-complete-workflow" basedir=".">
+    <property name="process.title" value="petrinet/LiveChange/P1_P2_P3_P4_ForkRebalance_Workflow (v001, then v002 published live)"/>
+    <property name="launcher.profile.file" location="../btsn.services/deployments/models/P1_P2_P3_P4_ForkRebalance_WorkflowDeployment.json"/>
+    <property name="workflow.process.name" value="petrinet/LiveChange/P1_P2_P3_P4_ForkRebalance_Workflow"/>
+    <property name="init.process.name" value="common/Initializers/P1_P2_P3_P4_P6_Initialization"/>
+    <property name="collector.process.name" value="common/Collectors/P1_P2_P3_P4_P6_Collector"/>
+    <property name="rule.version" value="v001"/>
+    <property name="query.version" value="v001,v002"/>
+
+    <!-- EG1, v001: deployed before the run, fires from the start. -->
+    <property name="eg1.id" value="EVENT_GENERATOR"/>
+    <property name="eg1.version" value="v001"/>
+    <property name="eg1.place" value="P1_Place"/>
+    <property name="eg1.operation" value="processToken"/>
+    <property name="eg1.tokens" value="90"/>
+    <property name="eg1.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange_V001.csv"/>
+
+    <!-- EG2, v002: deployed to the running hosts halfway through v001, then fires. -->
+    <property name="eg2.id" value="EVENT_GENERATOR_V002"/>
+    <property name="eg2.version" value="v002"/>
+    <property name="eg2.process" value="petrinet/LiveChange/P1_P3_P4_P6_ForkRebalance_Workflow"/>
+    <property name="eg2.place" value="P1_Place"/>
+    <property name="eg2.operation" value="processToken"/>
+    <property name="eg2.tokens" value="30"/>
+    <property name="eg2.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange_V002.csv"/>
+    <property name="eg2.publish.at.seconds" value="45"/>
+
+    <property name="token.count" value="90"/>
+    <property name="workflow.completion.seconds" value="30"/>
+
+    <!-- The machines: InfrastructureDefinitionFolder/ThreeHost.json -->
+    <property name="infrastructure" value="ThreeHost"/>
+
+    <!-- Hosts used by either version; P6 is the standby -->
+    <property name="run.p1" value="true"/>
+    <property name="run.p2" value="true"/>
+    <property name="run.p3" value="true"/>
+    <property name="run.p4" value="true"/>
+    <property name="run.p6" value="true"/>
+    <property name="first.node" value="p1"/>
+
+    <import file="../btsn.services/process-runtime.xml"/>
+</project>

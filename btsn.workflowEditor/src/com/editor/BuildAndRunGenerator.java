@@ -65,6 +65,40 @@ public final class BuildAndRunGenerator {
         public String baseName(Options o) { return launcher(o).getName().replaceFirst("\\.xml$", ""); }
     }
 
+    /**
+     * A combined process: a drawing named after its launcher (&lt;name&gt;_LiveChange.json and &lt;name&gt;_LiveChange.xml), an amalgam
+     * of independent processes that the launcher deploys and runs, each under its own version. Null for an ordinary process.
+     */
+    public static File combinedLauncher(File processFile) {
+        if (processFile == null) return null;
+        String base = processFile.getName().replaceFirst("\\.json$", "");
+        if (!base.endsWith("_LiveChange")) return null;
+        File common = ServiceRegistry.findCommon(processFile);
+        File[] loaders = common == null ? null : common.getParentFile().listFiles(f -> f.isDirectory() && f.getName().matches("btsn\\..+\\.ProjectLoader"));
+        if (loaders != null) for (File loader : loaders) { File xml = new File(loader, base + ".xml"); if (xml.isFile()) return xml; }
+        return null;
+    }
+
+    /** What a combined launcher runs, one line per event generator: "EG2: v002, P1_P3_P4_P6_..._Workflow, 30 tokens, deployed at 45 s". */
+    public static List<String> combinedSummary(File launcher) {
+        List<String> lines = new ArrayList<>();
+        Map<String, String> p = new LinkedHashMap<>();
+        try {
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("<property name=\"([^\"]+)\" (?:value|location)=\"([^\"]*)\"")
+                .matcher(new String(java.nio.file.Files.readAllBytes(launcher.toPath()), java.nio.charset.StandardCharsets.UTF_8));
+            while (m.find()) p.putIfAbsent(m.group(1), m.group(2));
+        } catch (java.io.IOException ex) { lines.add("Cannot read " + launcher.getName() + ": " + ex.getMessage()); return lines; }
+        for (int i = 1; i <= 3; i++) {
+            String slot = "eg" + i;
+            if (!p.containsKey(slot + ".id")) continue;
+            String process = p.getOrDefault(slot + ".process", p.getOrDefault("workflow.process.name", ""));
+            String when = p.containsKey(slot + ".publish.at.seconds") ? "deployed to the running hosts at " + p.get(slot + ".publish.at.seconds") + " s" : "from the start";
+            lines.add("EG" + i + ": " + p.getOrDefault(slot + ".version", "") + ", " + process.substring(process.lastIndexOf('/') + 1)
+                + ", " + p.getOrDefault(slot + ".tokens", p.getOrDefault("token.count", "?")) + " tokens, " + when);
+        }
+        return lines;
+    }
+
     public static Plan plan(Canvas canvas, File processFile) {
         Plan plan = new Plan();
         plan.processFile = processFile;
@@ -169,7 +203,8 @@ public final class BuildAndRunGenerator {
     }
 
     /**
-     * The hosts on another machine than the launcher's (ip0) under the editor's Machines, as "P2 for 192.168.1.152".
+     * The packages for machines other than the launcher's (ip0) under the editor's Machines, one per machine,
+     * named after the hosts it starts: "P2 for 192.168.1.152", "P3P6 for 192.168.1.90".
      * Build host packages (in the Build dialog) packages these after writing the launcher.
      */
     public static List<String> packagedHosts(Plan plan) {
@@ -178,9 +213,13 @@ public final class BuildAndRunGenerator {
         for (ServiceRegistry.Node node : nodes) if ("ip0".equals(node.channel)) launcherMachine = node.address;
         List<String> packaged = new ArrayList<>();
         if (launcherMachine == null || !ServiceRegistry.severalMachines(nodes)) return packaged;
+        // One package per machine, named after the hosts it starts: "P3P6 for 192.168.1.90".
+        Map<String, StringBuilder> byMachine = new LinkedHashMap<>();
         for (String used : plan.nodes)
             for (ServiceRegistry.Node node : nodes)
-                if (node.node.equals(used) && !node.address.equals(launcherMachine)) packaged.add(used + " for " + node.address);
+                if (node.node.equals(used) && !node.address.equals(launcherMachine))
+                    byMachine.computeIfAbsent(node.address, a -> new StringBuilder()).append(used);
+        for (Map.Entry<String, StringBuilder> m : byMachine.entrySet()) packaged.add(m.getValue() + " for " + m.getKey());
         return packaged;
     }
 

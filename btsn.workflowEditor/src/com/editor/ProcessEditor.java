@@ -1286,6 +1286,8 @@ public class ProcessEditor extends JFrame {
         java.util.List<String> problems = new ArrayList<>();
         if (currentFile == null || isDirty) problems.add("Save the process first.");
         if (deployFrame != null && deployFrame.isDisplayable() && deployFrame.getTitle().endsWith("*")) problems.add("Save the deployment in the Deploy panel first.");
+        java.io.File combined = problems.isEmpty() ? BuildAndRunGenerator.combinedLauncher(currentFile) : null;
+        if (combined != null) { buildCombined(combined); return; }
         problems.addAll(canvas.validateServiceContracts());
         BuildAndRunGenerator.Plan plan = BuildAndRunGenerator.plan(canvas, currentFile);
         for (String problem : plan.problems) if (!problems.contains(problem)) problems.add(problem);
@@ -1294,6 +1296,15 @@ public class ProcessEditor extends JFrame {
             return;
         }
         new BuildAndRunDialog(this, plan).setVisible(true);
+    }
+
+    /** Build on a combined process: its launcher already exists, so Build only makes the host packages. */
+    private void buildCombined(java.io.File launcher) {
+        java.io.File processPath = LauncherRun.real(currentFile);
+        java.io.File common = ServiceRegistry.findCommon(processPath);
+        String processName = new java.io.File(common, "ProcessDefinitionFolder").toPath().relativize(processPath.toPath())
+            .toString().replace(java.io.File.separatorChar, '/').replaceFirst("\\.json$", "");
+        new CombinedBuildDialog(this, common.getParentFile(), processName, launcher).setVisible(true);
     }
 
     private RunWindow runWindow;

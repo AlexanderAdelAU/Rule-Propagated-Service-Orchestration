@@ -95,14 +95,7 @@ public class TokenAnimator {
     
     private void initializeColors() {
         // The same colours as Monitor's charts (WorkflowSpatialView, SwingGanttChart_WithLatency).
-        versionColors.put("v001", new Color(231, 76, 60));    // red
-        versionColors.put("v002", new Color(52, 152, 219));   // blue
-        versionColors.put("v003", new Color(46, 204, 113));   // green
-        versionColors.put("v004", new Color(155, 89, 182));   // purple
-        versionColors.put("v005", new Color(243, 156, 18));   // orange
-        versionColors.put("v006", new Color(26, 188, 156));   // teal
-        versionColors.put("v007", new Color(241, 196, 15));   // yellow
-        versionColors.put("v008", new Color(52, 73, 94));     // dark grey
+        for (int v = 1; v <= 8; v++) { String version = String.format("v%03d", v); versionColors.put(version, versionColor(version)); }
     }
     
     public void setCanvas(Canvas canvas) {
@@ -3058,6 +3051,22 @@ public class TokenAnimator {
     public Set<String> getPlaceIds() { return new HashSet<>(placeIds); }
     public Set<String> getTInIds() { return new HashSet<>(tInIds); }
     public Color getVersionColor(String version) { return versionColors.getOrDefault(version, Color.GRAY); }
+
+    /** One palette for the replay: moving tokens, tokens waiting at a T_in, and the legend all use it. */
+    public static Color versionColor(String version) {
+        if (version == null) return Color.GRAY;
+        switch (version) {
+            case "v001": return new Color(231, 76, 60);    // red
+            case "v002": return new Color(52, 152, 219);   // blue
+            case "v003": return new Color(46, 204, 113);   // green
+            case "v004": return new Color(155, 89, 182);   // purple
+            case "v005": return new Color(243, 156, 18);   // orange
+            case "v006": return new Color(26, 188, 156);   // teal
+            case "v007": return new Color(241, 196, 15);   // yellow
+            case "v008": return new Color(52, 73, 94);     // dark grey
+            default: return Color.GRAY;
+        }
+    }
     public boolean hasData() { return !segments.isEmpty(); }
     public boolean hasTopology() { return !placeToTIn.isEmpty(); }
     
@@ -3159,4 +3168,4 @@ public class TokenAnimator {
         logger.info("Implicit join T_ins: " + implicitJoinTIns);
         logger.info("Explicit join T_ins (JoinNode): " + explicitJoinTIns);
     }
-}
+}
