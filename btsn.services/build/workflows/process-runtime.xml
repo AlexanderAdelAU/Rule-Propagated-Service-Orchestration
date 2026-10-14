@@ -215,8 +215,12 @@
         </sequential>
     </macrodef>
 
-    <target name="generate-workflow-bindings" depends="prepare-runtime" description="Generate canonical bindings and master rules for each generator's version">
-        <prepare-version slot="eg1"/><prepare-version slot="eg2"/><prepare-version slot="eg3"/>
+    <!-- Versions published live (egN.publish.at.seconds) are compiled when they are published, not here:
+         nothing about such a version exists before its publication. -->
+    <target name="generate-workflow-bindings" depends="prepare-runtime" description="Generate canonical bindings and master rules for each version deployed at the start">
+        <prepare-version slot="eg1" unless:set="eg1.publish.at.seconds"/>
+        <prepare-version slot="eg2" unless:set="eg2.publish.at.seconds"/>
+        <prepare-version slot="eg3" unless:set="eg3.publish.at.seconds"/>
     </target>
 
     <target name="rebuild-service-ruleml" depends="prepare-runtime,generate-workflow-bindings" description="Rebuild the master Service.ruleml (done per version above)"/>
@@ -237,10 +241,13 @@
                 <sleep seconds="${@{slot}.publish.at.seconds}"/>
                 <tstamp><format property="@{slot}.publish.time" pattern="yyyy-MM-dd HH:mm:ss.SSS"/></tstamp>
                 <echo message="[LIVE] ${@{slot}.version} publish started at ${@{slot}.publish.time} (${@{slot}.process})"/>
+                <prepare-version slot="@{slot}"/>
                 <deploy-generator slot="@{slot}"/>
                 <tstamp><format property="@{slot}.commit.time" pattern="yyyy-MM-dd HH:mm:ss.SSS"/></tstamp>
                 <echo message="[LIVE] ${@{slot}.version} committed by every host at ${@{slot}.commit.time}"/>
                 <sleep seconds="${@{slot}.fire.after.seconds}" if:set="@{slot}.fire.after.seconds"/>
+                <tstamp><format property="@{slot}.fire.time" pattern="yyyy-MM-dd HH:mm:ss.SSS"/></tstamp>
+                <echo message="[LIVE] ${@{slot}.version} first token at ${@{slot}.fire.time}"/>
             </sequential>
             <fire-generator slot="@{slot}"/>
         </sequential>

@@ -14,7 +14,7 @@ public final class CombinedProcessCheck {
         List<String> lines = BuildAndRunGenerator.combinedSummary(launcher);
         check(lines.size() == 2, "Expected two event generators: " + lines);
         check(lines.get(0).startsWith("EG1: v001, P1_P2_P3_P4_ForkRebalance_Workflow, 90 tokens, from the start"), "EG1: " + lines.get(0));
-        check(lines.get(1).startsWith("EG2: v002, P1_P3_P4_P6_ForkRebalance_Workflow, 30 tokens, deployed to the running hosts at 45 s"), "EG2: " + lines.get(1));
+        check(lines.get(1).startsWith("EG2: v002, P1_P3_P4_P6_ForkRebalance_Workflow, 30 tokens, published to the running hosts at 10 s, tokens 30 s after every host commits"), "EG2: " + lines.get(1));
         check(LauncherRun.launchersFor(root, "petrinet/LiveChange/" + name).stream().anyMatch(f -> f.getName().equals(name + ".xml")),
             "Run on hosts does not find the combined launcher");
         check(BuildAndRunGenerator.combinedLauncher(new File(root, "btsn.common/ProcessDefinitionFolder/petrinet/LiveChange/P1_P2_P3_P4_ForkRebalance_Workflow.json")) == null,

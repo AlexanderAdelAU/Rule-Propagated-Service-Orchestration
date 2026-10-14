@@ -92,7 +92,9 @@ public final class BuildAndRunGenerator {
             String slot = "eg" + i;
             if (!p.containsKey(slot + ".id")) continue;
             String process = p.getOrDefault(slot + ".process", p.getOrDefault("workflow.process.name", ""));
-            String when = p.containsKey(slot + ".publish.at.seconds") ? "deployed to the running hosts at " + p.get(slot + ".publish.at.seconds") + " s" : "from the start";
+            String when = !p.containsKey(slot + ".publish.at.seconds") ? "from the start"
+                : "published to the running hosts at " + p.get(slot + ".publish.at.seconds") + " s"
+                  + (p.containsKey(slot + ".fire.after.seconds") ? ", tokens " + p.get(slot + ".fire.after.seconds") + " s after every host commits" : "");
             lines.add("EG" + i + ": " + p.getOrDefault(slot + ".version", "") + ", " + process.substring(process.lastIndexOf('/') + 1)
                 + ", " + p.getOrDefault(slot + ".tokens", p.getOrDefault("token.count", "?")) + " tokens, " + when);
         }

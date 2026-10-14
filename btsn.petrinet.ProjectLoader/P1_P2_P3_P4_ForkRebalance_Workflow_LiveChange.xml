@@ -5,9 +5,11 @@
      v001 (petrinet/LiveChange/P1_P2_P3_P4_ForkRebalance_Workflow): P1 forks to P2 and P3, which join at P4.
      v002 (petrinet/LiveChange/P1_P3_P4_P6_ForkRebalance_Workflow): the same, but the second branch runs on P6 instead of P2.
      Every host, P6 included, is started and initialised at the start. P6 has P2's contract and does nothing under v001.
-     EG1 fires 90 v001 tokens, one a second. Halfway through (45 s) the need for P6 is assumed: v002 is deployed to the
-     running hosts and, once every host has committed it, EG2 fires 30 v002 tokens while v001 is still firing.
-     The [LIVE] lines give the time v002's publish started and the time every host had committed it.
+     EG1 fires 90 v001 tokens, one a second. At 10 s v002 is compiled and published to the running hosts, which commit
+     it while v001 tokens are in flight: P6 is prepared, holding rules nothing uses yet. 30 s after every host has
+     committed (about halfway through v001) the need for P6 is assumed and EG2 fires 30 v002 tokens while v001 is
+     still firing. Nothing about v002 exists before its publication: it is compiled then, not at the start.
+     The [LIVE] lines give the times v002's publish started, every host had committed it, and its first token.
      On ThreeHost: P1, P4 on 192.168.1.82 (this launcher); P2 on 192.168.1.152; P3, P6 on 192.168.1.90.
      Run:      ant -f P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml
      Packages: ant -f P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml host-packages   (…_P2.zip for .152, …_P3P6.zip for .90)
@@ -30,7 +32,7 @@
     <property name="eg1.tokens" value="90"/>
     <property name="eg1.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange_V001.csv"/>
 
-    <!-- EG2, v002: deployed to the running hosts halfway through v001, then fires. -->
+    <!-- EG2, v002: compiled and published to the running hosts at 10 s (prepare), fires 30 s after commitment (use). -->
     <property name="eg2.id" value="EVENT_GENERATOR_V002"/>
     <property name="eg2.version" value="v002"/>
     <property name="eg2.process" value="petrinet/LiveChange/P1_P3_P4_P6_ForkRebalance_Workflow"/>
@@ -38,7 +40,8 @@
     <property name="eg2.operation" value="processToken"/>
     <property name="eg2.tokens" value="30"/>
     <property name="eg2.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange_V002.csv"/>
-    <property name="eg2.publish.at.seconds" value="45"/>
+    <property name="eg2.publish.at.seconds" value="10"/>
+    <property name="eg2.fire.after.seconds" value="30"/>
 
     <property name="token.count" value="90"/>
     <property name="workflow.completion.seconds" value="30"/>
