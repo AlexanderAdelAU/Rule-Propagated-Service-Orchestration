@@ -33,7 +33,24 @@ import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
  * Recorded service invocation timings, with an optional workflow elapsed view.
  * Local host measurements work without process completion or a running Monitor.
  */
-public class SwingGanttChart_WithLatency extends JPanel {
+public class SwingGanttChart_WithLatency extends JPanel implements Scrollable {
+    /** Fit the chart to the window (the default), like the spatial view; off, it keeps its natural width and scrolls. */
+    private boolean fitToWindow = true;
+    public void setFitToWindow(boolean fit) { fitToWindow = fit; revalidate(); repaint(); }
+    @Override public Dimension getPreferredScrollableViewportSize() { return getPreferredSize(); }
+    @Override public int getScrollableUnitIncrement(Rectangle visible, int orientation, int direction) { return 16; }
+    @Override public int getScrollableBlockIncrement(Rectangle visible, int orientation, int direction) {
+        return orientation == SwingConstants.HORIZONTAL ? visible.width : visible.height;
+    }
+    @Override public boolean getScrollableTracksViewportWidth() { return fitToWindow; }
+    /** Fit the height too unless the window is too short for the lanes to stay readable. */
+    @Override public boolean getScrollableTracksViewportHeight() {
+        if (!fitToWindow || !(getParent() instanceof JViewport)) return false;
+        int lanes = Math.max(1, (displayByVersion ? uniqueVersions : uniqueServices).size());
+        int width = getParent().getWidth();
+        int minimum = plotTop(width) + Math.round((105 + lanes * 70) * fontScaleFactor);
+        return getParent().getHeight() >= minimum;
+    }
     private static final double BAR_SLOT_CENTER = 0.345;
     private static final double BAR_SLOT_WIDTH = 0.225;
     private boolean wideBars = true;
@@ -1158,6 +1175,10 @@ public class SwingGanttChart_WithLatency extends JPanel {
         narrowItem.addActionListener(e -> chart.setWideBars(false));
         barWidthGroup.add(narrowItem); barWidthMenu.add(narrowItem);
         viewMenu.add(barWidthMenu);
+        JCheckBoxMenuItem fitItem = new JCheckBoxMenuItem("Fit to Window", true);
+        fitItem.setToolTipText("Fit every workflow into the window; untick to keep the natural width and scroll");
+        fitItem.addActionListener(e -> chart.setFitToWindow(fitItem.isSelected()));
+        viewMenu.add(fitItem);
         viewMenu.addSeparator();
 
         JMenu yScaleMenu = new JMenu("Y-Axis Scale");
