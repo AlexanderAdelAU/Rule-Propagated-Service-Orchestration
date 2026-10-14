@@ -50,6 +50,11 @@ public final class RunFromEditorCheck {
         check(RunHosts.forLauncher(p2Launcher, repository, false, "TwoHost").hosts.get(0).endpoint.equals("192.168.1.152:4002"), "P2 not on the TwoHost address");
         check(RunWindow.describeMachines("TwoHost", ServiceRegistry.infrastructureNodes(processes, "TwoHost"))
             .equals("TwoHost: P1, P3, P5 on 192.168.1.82; P2, P4, P6 on 192.168.1.152"), "Machines description");
+        // The whole console is saved beside the analysis, named after the launcher that ran.
+        File runLog = RunWindow.runLogFile(repository, "petrinet/LiveChange/P1_P2_P3_P4_ForkRebalance_Workflow",
+            new File(repository, "btsn.petrinet.ProjectLoader/P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml"));
+        check(runLog.equals(new File(LauncherRun.analysisFileFor(repository, "petrinet/LiveChange/P1_P2_P3_P4_ForkRebalance_Workflow").getParentFile(),
+            "Run_P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.txt")), "Run log location: " + runLog);
         LauncherRun plain = new LauncherRun(p2Launcher, repository, new File(repository, "unused.txt"), false, "", null);
         check(plain.infrastructureArgs().equals(List.of("-Dinfrastructure=SingleHost")) && plain.infrastructure("TwoHost").infrastructureArgs().equals(List.of("-Dinfrastructure=TwoHost")), "Ant option for the machines");
         // Build packages the hosts on other machines: for the inventory example on TwoHost, P2 for 192.168.1.152.
