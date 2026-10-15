@@ -471,6 +471,8 @@ public class RuleDeployer {
 	        // Parse elements section
 	        String elementsSection = extractJsonSection(jsonContent, "\"elements\"");
 	        String[] elementBlocks = splitJsonObjects(elementsSection);
+	        // Places that name no service operation: allowed only off the token path (e.g. a label).
+	        java.util.Set<String> placesWithoutService = new java.util.LinkedHashSet<>();
 	        
 	        for (String block : elementBlocks) {
 	            if (block.trim().isEmpty()) continue;
@@ -575,6 +577,8 @@ public class RuleDeployer {
 	                        "[" + String.join(", ", operationsList) + "]" : primaryOperation;
 	                    String argsDisplay = operationArguments.isEmpty() ? "" : " args=" + operationArguments;
 	                    logger.debug("Parsed JSON Place: " + id + " -> " + service + ":" + opsDisplay + argsDisplay);
+	                } else {
+	                    placesWithoutService.add(id);
 	                }
 	            }
 	            else if ("TRANSITION".equals(type)) {
@@ -676,6 +680,7 @@ public class RuleDeployer {
 	            }
 	        }
 	        
+	        requireServiceOnTokenPath(placesWithoutService, workflowModel.getWorkflowEdges());
 	        logger.info("JSON parsing complete - " + workflowModel.getServiceNodes().size() + " services, " +
 	            workflowModel.getTransitionNodes().size() + " transitions, " + 
 	            workflowModel.getWorkflowEdges().size() + " edges");
@@ -684,6 +689,24 @@ public class RuleDeployer {
 	        logger.error("Error parsing JSON workflow", e);
 	        throw new RuleDeployerException("Failed to parse JSON workflow: " + e.getMessage(), e);
 	    }
+	}
+
+	/**
+	 * A place on the token path must be bound to a service operation; a place with no service is
+	 * rejected rather than silently left out of the model, which would break every route through it.
+	 * An unconnected place (a label on the drawing) is ignored. A routing-only place is bound to
+	 * AlwaysTrueService, which carries the token's data through unchanged.
+	 */
+	static void requireServiceOnTokenPath(java.util.Set<String> placesWithoutService,
+			java.util.Collection<WorkflowEdge> edges) throws RuleDeployerException {
+		for (WorkflowEdge edge : edges) {
+			for (String node : new String[] { edge.fromNode, edge.toNode }) {
+				if (placesWithoutService.contains(node)) {
+					throw new RuleDeployerException("Place '" + node + "' is connected but names no service operation. "
+						+ "Bind it to a service; for a place that only routes, use AlwaysTrueService.processToken.");
+				}
+			}
+		}
 	}
 
 	/**
