@@ -60,8 +60,23 @@ public class OOjdrewConcurrencyTest {
 
         require(parses.get() >= 10, "parser thread did not run concurrently (" + parses.get() + " parses)");
         require(wrong == 0, wrong + " of " + ROUNDS + " concurrent queries were wrong; solution counts " + counts);
+        // Re-parsing must not accumulate clauses: jDREW indexes every loaded clause in oids,
+        // which clearClauses() does not empty, so a host re-parsing per token grew slower.
+        OOjdrewAPI reused = new OOjdrewAPI();
+        reused.parseKnowledgeBase(queried, false);
+        int indexedOnce = indexedClauses(reused);
+        for (int i = 0; i < 50; i++) reused.parseKnowledgeBase(queried, false);
+        require(indexedOnce > 0 && indexedClauses(reused) == indexedOnce,
+            "re-parsing grew the clause index from " + indexedOnce + " to " + indexedClauses(reused));
+
         System.out.println("OOjDREW concurrency check passed: " + ROUNDS + " queries, " + parses.get()
             + " concurrent parses, every query returned " + FACTS + " solutions");
+    }
+
+    private static int indexedClauses(OOjdrewAPI api) {
+        int n = 0;
+        for (Object entries : api.backwardReasoner.oids.values()) n += ((java.util.Collection<?>) entries).size();
+        return n;
     }
 
     private static int countSolutions(OOjdrewAPI api) {
