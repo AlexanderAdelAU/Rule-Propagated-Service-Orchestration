@@ -192,8 +192,12 @@ public class TopologyBindingGenerator {
         }
     }
 
+    /** Places that name no service operation; allowed only off the token path (e.g. a label). */
+    private final java.util.Set<String> placesWithoutService = new java.util.LinkedHashSet<>();
+
     private void parseJsonWorkflow(String jsonContent) throws TopologyBindingException {
         logger.info("=== PARSING JSON WORKFLOW ===");
+        placesWithoutService.clear();
         
         try {
             // Extract processType - REQUIRED
@@ -238,6 +242,17 @@ public class TopologyBindingGenerator {
             for (String block : arrowBlocks) {
                 if (block.trim().isEmpty()) continue;
                 parseArrow(block);
+            }
+            
+            // A place on the token path must be bound to a service operation (a routing-only place
+            // uses AlwaysTrueService); a place with no service would silently break every route through it.
+            for (WorkflowEdge edge : workflowModel.getWorkflowEdges()) {
+                for (String node : new String[] { edge.fromNode, edge.toNode }) {
+                    if (placesWithoutService.contains(node)) {
+                        throw new TopologyBindingException("Place '" + node + "' is connected but names no service operation. "
+                            + "Bind it to a service; for a place that only routes, use AlwaysTrueService.processToken.");
+                    }
+                }
             }
             
             logger.info("JSON parsing complete - " + workflowModel.getServiceNodes().size() + " services, " +
@@ -301,6 +316,8 @@ public class TopologyBindingGenerator {
             ServiceNode serviceNode = new ServiceNode(id, service, primaryOperation, attributes);
             workflowModel.addServiceNode(serviceNode);
             logger.debug("Parsed Place: " + id + " -> " + service + ":" + primaryOperation);
+        } else {
+            placesWithoutService.add(id);
         }
     }
 
