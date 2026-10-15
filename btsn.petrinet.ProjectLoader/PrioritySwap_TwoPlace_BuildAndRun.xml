@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Research control: both workflow versions execute EXACTLY the same P1 -> P2 net.
+  B = 80 tokens, every 350 ms. A = 20-token burst, at t=10 s.
+  Normal: A=v001 (preferred), B=v002. Swapped: A=v002, B=v001.
+  Both versions are compiled/published before either generator fires.
+  Uses two of the existing ThreeHost nodes: P1=ip0 (192.168.1.82), P2=ip1 (192.168.1.152).
+  NO business services, orchestration handlers, queue code or Monitor tables modified.
+-->
+<project name="PrioritySwap_TwoPlace_BuildAndRun" default="run-complete-workflow" basedir=".">
+    <property name="priority.condition" value="normal"/>
+    <condition property="priority.normal"><equals arg1="${priority.condition}" arg2="normal"/></condition>
+    <condition property="priority.swapped"><equals arg1="${priority.condition}" arg2="swapped"/></condition>
+
+    <!-- eg1 = B continuous, eg2 = A burst. Only the version ranges swap. -->
+    <condition property="eg1.version" value="v002" else="v001"><isset property="priority.normal"/></condition>
+    <condition property="eg2.version" value="v001" else="v002"><isset property="priority.normal"/></condition>
+
+    <property name="process.title" value="Priority-swap control: ${priority.condition} (B=${eg1.version}, A=${eg2.version})"/>
+    <property name="launcher.profile.file" location="../btsn.services/deployments/models/PrioritySwap_TwoPlaceDeployment.json"/>
+    <property name="workflow.process.name" value="petrinet/Research/PrioritySwap_TwoPlace_Workflow"/>
+    <property name="init.process.name" value="common/Initializers/P1_P2_Initialization"/>
+    <property name="collector.process.name" value="common/Collectors/P1_P2_Collector"/>
+
+    <property name="rule.version" value="v001"/>
+    <property name="query.version" value="v001,v002"/>
+    <property name="infrastructure" value="ThreeHost"/>
+
+    <property name="eg1.id" value="EG_BACKGROUND"/>
+    <property name="eg1.place" value="P1_Place"/>
+    <property name="eg1.operation" value="processToken"/>
+    <property name="eg1.tokens" value="80"/>
+    <property name="eg1.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/PrioritySwap_Background.csv"/>
+
+    <property name="eg2.id" value="EG_BURST"/>
+    <property name="eg2.place" value="P1_Place"/>
+    <property name="eg2.operation" value="processToken"/>
+    <property name="eg2.tokens" value="20"/>
+    <property name="eg2.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/PrioritySwap_Burst.csv"/>
+
+    <property name="token.count" value="80"/>
+    <property name="token.expire" value="120000"/>
+    <property name="workflow.completion.seconds" value="45"/>
+    <property name="collector.delay.seconds" value="3"/>
+
+    <property name="run.p1" value="true"/>
+    <property name="run.p2" value="true"/>
+    <property name="first.node" value="p1"/>
+
+    <import file="../btsn.services/process-runtime.xml"/>
+
+    <target name="validate-experiment" description="Fail fast on a wrong research condition or missing inputs">
+        <fail message="Use -Dpriority.condition=normal or -Dpriority.condition=swapped">
+            <condition><not><or><isset property="priority.normal"/><isset property="priority.swapped"/></or></not></condition>
+        </fail>
+        <available file="${launcher.profile.file}" property="priority.profile.exists"/>
+        <available file="${eg1.trigger.file}" property="priority.background.exists"/>
+        <available file="${eg2.trigger.file}" property="priority.burst.exists"/>
+        <fail unless="priority.profile.exists" message="Missing experiment deployment profile"/>
+        <fail unless="priority.background.exists" message="Missing background schedule"/>
+        <fail unless="priority.burst.exists" message="Missing burst schedule"/>
+        <echo message="Condition: ${priority.condition}. B/background: ${eg1.version}, 80 at 350 ms; A/burst: ${eg2.version}, 20 at t=10 s"/>
+        <echo message="Topology: both versions use ${workflow.process.name}; P1 on ip0, P2 on ip1"/>
+    </target>
+
+    <!-- The imported process-runtime target does all deployment, running and collection. -->
+    <target name="run-complete-workflow" depends="validate-experiment,process-runtime.run-complete-workflow"/>
+
+    <!-- Run AFTER the Ant launcher has been stopped, and before the next condition purges Monitor.
+         Archive each run once under a distinct experiment.id; never overwrite earlier results. -->
+    <target name="capture-run" depends="validate-experiment" description="Analyse and preserve DB, logs, schedules and configs under a unique experiment.id">
+        <fail unless="experiment.id" message="Specify a new -Dexperiment.id=normal-01 or swapped-01"/>
+        <property name="priority.archive.root" location="../btsn.services/target/research/priority-swap"/>
+        <property name="priority.archive.dir" location="${priority.archive.root}/${experiment.id}"/>
+        <available file="${priority.archive.dir}" type="dir" property="priority.archive.exists"/>
+        <fail if="priority.archive.exists" message="Experiment id already exists: archives must not be overwritten"/>
+        <mkdir dir="${priority.archive.dir}"/>
+        <echo message="Running PetriNetAnalyzer for ${experiment.id} (${priority.condition})..."/>
+        <java classname="org.btsn.derby.Analysis.PetriNetAnalyzer" fork="true" failonerror="true"
+              maxmemory="128m" dir="${monitor.project.dir}"
+              output="${priority.archive.dir}/analysis.txt" logError="true">
+            <classpath refid="monitor.classpath"/>
+            <arg value="--all"/>
+            <jvmarg value="-Dbtsn.common.dir=${common.project.dir}"/>
+        </java>
+        <copy todir="${priority.archive.dir}/monitor-database" failonerror="false">
+            <fileset dir="${monitor.project.dir}/ServiceAnalysisDataBase" includes="**/*" erroronmissingdir="false"/>
+        </copy>
+        <copy todir="${priority.archive.dir}/local-host-logs" failonerror="false">
+            <fileset dir="${basedir}" includes="P?_Place.out.txt,MonitorService.out.txt" erroronmissingdir="false"/>
+        </copy>
+        <copy todir="${priority.archive.dir}/inputs">
+            <fileset dir=".." includes="
+                btsn.petrinet.ProjectLoader/PrioritySwap_TwoPlace_BuildAndRun.xml,
+                btsn.common/ProcessDefinitionFolder/petrinet/Research/PrioritySwap_TwoPlace_Workflow.json,
+                btsn.common/ServiceDeploymentFolder/petrinet/PrioritySwap_TwoPlace.json,
+                btsn.services/deployments/models/PrioritySwap_TwoPlaceDeployment.json,
+                btsn.common.eventgenerators/EventTriggeringFile/PrioritySwap_Background.csv,
+                btsn.common.eventgenerators/EventTriggeringFile/PrioritySwap_Burst.csv"/>
+        </copy>
+        <tstamp><format property="priority.capture.timestamp" pattern="yyyy-MM-dd'T'HH:mm:ss.SSSZ"/></tstamp>
+        <echo file="${priority.archive.dir}/manifest.txt">Experiment ID: ${experiment.id}
+Captured: ${priority.capture.timestamp}
+Condition: ${priority.condition}
+Background B: ${eg1.version}, 80 tokens, 350-ms spacing
+Burst A: ${eg2.version}, 20 tokens, at 10000 ms
+Workflow: ${workflow.process.name}
+Infrastructure: ${infrastructure.definition.name}
+Java: ${java.version}
+Run must be started from the same source revision on both hosts.
+Note: remote P2 host logs and Eclipse launcher console must be saved separately.
+</echo>
+        <zip destfile="${priority.archive.root}/${experiment.id}.zip" basedir="${priority.archive.dir}"/>
+        <echo message="ARCHIVED: ${priority.archive.root}/${experiment.id}.zip"/>
+    </target>
+</project>

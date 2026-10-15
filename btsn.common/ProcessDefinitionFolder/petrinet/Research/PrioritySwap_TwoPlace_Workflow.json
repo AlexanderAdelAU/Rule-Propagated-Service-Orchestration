@@ -1,0 +1,207 @@
+{
+  "processType": "PetriNet",
+  "elements": [
+    {
+      "id": "T_in_P1",
+      "type": "TRANSITION",
+      "x": 210,
+      "y": 110,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_P1",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "50",
+      "fill_color": "#CCCCCC"
+    },
+    {
+      "id": "P1",
+      "type": "PLACE",
+      "x": 275,
+      "y": 115,
+      "width": 50,
+      "height": 50,
+      "label": "P1",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ],
+          "returnAttribute": "token"
+        }
+      ],
+      "fill_color": "#33FF33",
+      "returnAttribute": "token",
+      "serviceInstance": "AlwaysTrueInstance1"
+    },
+    {
+      "id": "T_in_P2",
+      "type": "TRANSITION",
+      "x": 450,
+      "y": 110,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_P2",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "50",
+      "fill_color": "#CCCCCC"
+    },
+    {
+      "id": "P2",
+      "type": "PLACE",
+      "x": 515,
+      "y": 115,
+      "width": 50,
+      "height": 50,
+      "label": "P2",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ],
+          "returnAttribute": "token"
+        }
+      ],
+      "returnAttribute": "token",
+      "serviceInstance": "AlwaysTrueInstance2"
+    },
+    {
+      "id": "T_out_P2",
+      "type": "TRANSITION",
+      "x": 610,
+      "y": 110,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_P2",
+      "rotation": 0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_out",
+      "fill_color": "#FF9933"
+    },
+    {
+      "id": "T_out_P1",
+      "type": "TRANSITION",
+      "x": 370,
+      "y": 110,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_P1",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out",
+      "fill_color": "#FF9933"
+    },
+    {
+      "id": "EG_BACKGROUND",
+      "type": "EVENT_GENERATOR",
+      "x": 88,
+      "y": 110,
+      "width": 24,
+      "height": 60,
+      "label": "EG_BACKGROUND",
+      "rotation": 0,
+      "generator_rate": "1000"
+    },
+    {
+      "id": "EG_BURST",
+      "type": "EVENT_GENERATOR",
+      "x": 88,
+      "y": 220,
+      "width": 24,
+      "height": 60,
+      "label": "EG_BURST",
+      "rotation": 0,
+      "generator_rate": "1000"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "T_in_P1",
+      "target": "P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P2",
+      "target": "P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P2",
+      "target": "T_out_P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P1",
+      "target": "T_out_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "EG_BACKGROUND",
+      "target": "T_in_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P1",
+      "target": "T_in_P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "EG_BURST",
+      "target": "T_in_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    }
+  ],
+  "textElements": [
+    {
+      "x": 180,
+      "y": 40,
+      "text": "Priority-swap control: identical P1 to P2 routing, two independently scheduled generators",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    }
+  ],
+  "serviceDeployment": "ServiceDeploymentFolder/petrinet/PrioritySwap_TwoPlace.json"
+}
