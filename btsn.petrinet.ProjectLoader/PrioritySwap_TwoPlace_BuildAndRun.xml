@@ -4,7 +4,7 @@
   B = 80 tokens, every 350 ms. A = 20-token burst, at t=10 s.
   Normal: A=v001 (preferred), B=v002. Swapped: A=v002, B=v001.
   Both versions are compiled/published before either generator fires.
-  Uses two of the existing ThreeHost nodes: P1=ip0 (192.168.1.82), P2=ip1 (192.168.1.152).
+  SingleHost on 192.168.1.82: P1 and P2 are separate local host processes.
   NO business services, orchestration handlers, queue code or Monitor tables modified.
 -->
 <project name="PrioritySwap_TwoPlace_BuildAndRun" default="run-complete-workflow" basedir=".">
@@ -23,7 +23,7 @@
 
     <property name="rule.version" value="v001"/>
     <property name="query.version" value="v001,v002"/>
-    <property name="infrastructure" value="ThreeHost"/>
+    <property name="infrastructure" value="SingleHost"/>
 
     <property name="eg1.id" value="EG_BACKGROUND"/>
     <property name="eg1.place" value="P1_Place"/>
