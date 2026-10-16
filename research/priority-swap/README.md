@@ -4,7 +4,7 @@ This is a **new controlled comparison**, not a reconstruction of the historical 
 
 ## Experiment design
 
-Both workflows use the **same** `P1_Place → P2_Place → termination` process, with `AlwaysTrueService.processToken` at both nodes. P1 is on ip0 (`192.168.1.82`) and P2 is on ip1 (`192.168.1.152`) using the existing `ThreeHost` infrastructure. The third host is not needed. The priority mechanism is **non-preemptive**: it selects among queued tokens and does not interrupt an already running service.
+Both workflows use the **same** `P1_Place → P2_Place → termination` process, with `AlwaysTrueService.processToken` at both nodes. P1 and P2 are separate infrastructure host processes on the same machine (`192.168.1.82`), using the existing `SingleHost` definition. No remote host packages or remote deployment are needed. The priority mechanism is **non-preemptive**: it selects among queued tokens and does not interrupt an already running service.
 
 - **B (background):** 80 tokens, one every 350 ms, from 0 to 27.65 s (`EG_BACKGROUND`).
 - **A (burst):** 20 tokens at 10 s (`EG_BURST`).
@@ -15,7 +15,7 @@ The topology, host allocation, business services, arrival schedules, expiration 
 
 ## Run in Eclipse
 
-1. Fetch and check out `experiment/figure11-priority-rerun`. Keep the same compatible infrastructure and business-service runtime on both machines. Start the remote P2 host (`192.168.1.152`) in the established way; do not start a duplicate P2 process on that port.
+1. Fetch and check out `experiment/figure11-priority-rerun` on the `.82` machine. Confirm no other local P1/P2 processes are already bound to their configured ports. The ordinary launcher starts both locally; no P2 deployment ZIP is needed.
 2. In `btsn.petrinet.ProjectLoader`, select `PrioritySwap_TwoPlace_BuildAndRun.xml` → **Ant Build**. The default target, `run-complete-workflow`, performs the ordinary initialization, rule deployment, token generation and collection.
 3. **Normal run:** use no additional Ant arguments. The default `priority.condition` is `normal`.
 4. Wait for **Phase 3 Complete**, stop the local launcher as usual, and run your existing PetriNetAnalyzer and Gantt-chart tools. Save the analysis output and chart(s) **before the next run**; initializing the next run may overwrite Monitor data.
@@ -27,7 +27,7 @@ The topology, host allocation, business services, arrival schedules, expiration 
 
 6. After Phase 3, collect and save the swapped-run analysis and charts in the same way.
 
-There is no `capture-run`, `experiment.id`, special ZIP output, or additional tool to execute. The `Run_*.txt` file from your normal Eclipse workflow is not required; if a run fails, the console and remote-host logs may be useful for diagnosis.
+There is no `capture-run`, `experiment.id`, special ZIP output, or additional tool to execute. The `Run_*.txt` file from your normal Eclipse workflow is not required; if a run fails, the Eclipse console and local host logs may be useful for diagnosis.
 
 ## What to send for analysis
 
