@@ -197,7 +197,7 @@
     {
       "x": 180,
       "y": 40,
-      "text": "Priority swap: same P1 to P2 routing; randomized interleaved A and B arrivals",
+      "text": "Priority swap: B establishes P1 backlog; randomized A and B then overlap",
       "fontSize": 12,
       "fontStyle": 0,
       "color": -16777216
