@@ -18,7 +18,7 @@ Both versions compile the **same** two-place process, `P1_Place → P2_Place →
 
 ## Preflight (on the launcher machine, from Eclipse Ant)
 
-After pulling `research/tosem-validation-v59`, use the Ant Build dialog on:
+After fetching and checking out `experiment/figure11-priority-rerun` in Eclipse, use the Ant Build dialog on:
 `btsn.petrinet.ProjectLoader/PrioritySwap_TwoPlace_BuildAndRun.xml`.
 
 1. Ensure your remote P2 (.152) host is running the matching current `main` infrastructure/service packages with the normal ThreeHost ports. Do not launch a second P2 process on the same port. P1 (.82) and Monitor are started by the launcher in its default configuration; as with the existing three-host workflow, check for port conflicts.
