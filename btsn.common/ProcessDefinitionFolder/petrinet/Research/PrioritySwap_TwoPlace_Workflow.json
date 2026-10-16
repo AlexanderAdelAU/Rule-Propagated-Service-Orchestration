@@ -113,24 +113,24 @@
       "fill_color": "#FF9933"
     },
     {
-      "id": "EG_BACKGROUND",
+      "id": "EG_B",
       "type": "EVENT_GENERATOR",
       "x": 88,
       "y": 110,
       "width": 24,
       "height": 60,
-      "label": "EG_BACKGROUND",
+      "label": "EG_B",
       "rotation": 0,
       "generator_rate": "1000"
     },
     {
-      "id": "EG_BURST",
+      "id": "EG_A",
       "type": "EVENT_GENERATOR",
       "x": 88,
       "y": 220,
       "width": 24,
       "height": 60,
-      "label": "EG_BURST",
+      "label": "EG_A",
       "rotation": 0,
       "generator_rate": "1000"
     }
@@ -169,7 +169,7 @@
       "endpoint": ""
     },
     {
-      "source": "EG_BACKGROUND",
+      "source": "EG_B",
       "target": "T_in_P1",
       "label": "",
       "guardCondition": "",
@@ -185,7 +185,7 @@
       "endpoint": ""
     },
     {
-      "source": "EG_BURST",
+      "source": "EG_A",
       "target": "T_in_P1",
       "label": "",
       "guardCondition": "",
@@ -197,7 +197,7 @@
     {
       "x": 180,
       "y": 40,
-      "text": "Priority-swap control: identical P1 to P2 routing, two independently scheduled generators",
+      "text": "Priority swap: same P1 to P2 routing; randomized interleaved A and B arrivals",
       "fontSize": 12,
       "fontStyle": 0,
       "color": -16777216
