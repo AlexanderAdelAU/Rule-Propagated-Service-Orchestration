@@ -1,34 +1,43 @@
-# Figure 11 — randomized priority-swap control
+# Figure 11 — controlled priority-queue contention
 
-The ordinary Eclipse Ant launcher runs two independent, interleaved event-generator streams through the **same** `P1_Place → P2_Place → termination` process. Both places invoke `AlwaysTrueService.processToken`. P1 and P2 are separate local host processes on `192.168.1.82` under the existing `SingleHost` deployment. No remote deployment or separate result-archiving target is required.
+The **ordinary Eclipse Ant Build** runs two versions of the identical `P1_Place → P2_Place → termination` process, using `AlwaysTrueService.processToken` at both places. P1 and P2 run separately on the existing `SingleHost` infrastructure at `192.168.1.82`. No remote ZIP or capture target is required.
 
-## Randomized arrivals
+## Why this schedule creates contention
 
-The old artificial experiment generated 80 regularly spaced B tokens and then injected all 20 A tokens as one burst after 10 seconds. **That is no longer the schedule.**
+The experiment is specifically designed to test **priority overtaking**, not merely two randomly interleaved token streams.
 
-Both A and B now issue individual tokens at randomized, interleaved times throughout the run:
+1. **Build a low-priority backlog:** Generator B produces 30 individual randomized arrivals between **72 and 894 ms**. Under the previously observed approximately 300–350 ms P1 service-dispatch cadence, these arrivals accumulate at P1. They are *not* generated as one indivisible 30-token batch.
+2. **Introduce the competing stream:** Generator A's first randomized arrival is scheduled at **2577 ms**, after B has had time to queue. Then the remaining 19 A and 50 B tokens arrive at randomized interleaved times until **31187 ms**. Both streams continue during contention.
+3. **Reverse priorities without changing inputs:** The exact same committed CSV schedules are used in both conditions.
 
-- Workload **A**: 20 independently scheduled arrivals (generator `EG_A`, `PrioritySwap_Random_A.csv`)
-- Workload **B**: 80 independently scheduled arrivals (generator `EG_B`, `PrioritySwap_Random_B.csv`)
-- The 100 event times were produced with pseudorandom, shifted-exponential inter-arrival intervals: `20 + round(-220 × ln(1-U))` milliseconds, with `U` uniform on `[0,1)`. The 20 A positions were chosen by a pseudorandom shuffle of the 100 arrival positions; the remaining 80 are B. The initial xorshift32 state was `0xB16B00B5`.
-- These CSV schedules were generated once and committed to GitHub. They are **randomized schedules, not new random draws on each execution**. That matters for a controlled comparison: normal and swapped priority runs receive **the same exact arrival schedules**. No Java generator or service code was altered.
-- Final scheduled event: `26701 ms`. Both workloads occur in the beginning, middle, and final parts of the schedule. No 10-second mass burst.
-
-| Condition | A (20 arrivals) | B (80 arrivals) |
+| Condition | A (20 tokens) | B (80 tokens) |
 |---|---|---|
-| Normal (default) | v001 — higher priority | v002 — lower priority |
-| Swapped | v002 — lower priority | v001 — higher priority |
+| **Normal (default)** | v001, higher priority | v002, lower priority |
+| **Swapped** | v002, lower priority | v001, higher priority |
 
-Only the versions assigned to A and B change between conditions; their actual event schedules, counts, P1/P2 routes, host assignment, business operations and expiry (120 s) remain unchanged. Priority selection is non-preemptive; existing running service executions are not interrupted.
+This means normal prioritizes A over already-waiting B, while swapped prioritizes B over subsequently arriving A. The first part of the experiment is deliberately asymmetric to create a backlog; **the process, token counts, schedules, service implementation and host allocation do not change between conditions**.
 
-## Normal Eclipse workflow
+## Schedule reproducibility
 
-1. Fetch/refresh the `experiment/figure11-priority-rerun` branch, and make sure no other local P1/P2 processes occupy ports 4001 and 4002.
-2. Open `btsn.petrinet.ProjectLoader/PrioritySwap_TwoPlace_BuildAndRun.xml` in Eclipse and select **Ant Build**. Its default target `run-complete-workflow` does initialization, both-version rule commitment, concurrent token generation and collection, and starts P1/P2 locally.
-3. For the normal condition, **no Ant arguments** are needed.
-4. Once Phase 3 finishes, stop the launched processes and save the usual PetriNetAnalyzer output and timing chart **before another run**, since initialization can replace Monitor data.
-5. For the swapped condition, run the **same** buildfile with `-Dpriority.condition=swapped`. Collect the same analysis and charts. There is no separate capture, ZIP, special launcher or console-log requirement.
+`PrioritySwap_Random_A.csv` and `PrioritySwap_Random_B.csv` are fixed, reproducible input files, not fresh random draws on every run. The recorded pseudorandom seed is **`0xC07E2026`** (xorshift32). The first 30 B timestamps were sampled from 50–899 ms, then sorted and made unique. A's first timestamp was sampled from 2250–2599 ms. The later shared timeline was generated using random increments `40 + round(-285 ln(1-U))` milliseconds, with uniform `U` in `[0,1)`. Nineteen later A slots were randomly selected, one per successive stratum of the 69 remaining event positions, to avoid all A arrivals clustering into one block. Every CSV row is `timestamp_ms,0,1` (one token per event).
 
-## Analysis criteria
+The first 30 B arrivals are intended to overload P1 without reaching its configured 50-token input buffer. Approximate queue calculations based on earlier measured service cadence are **design estimates**, not assertions about execution. Verify actual queue occupancy and timing in the analysis.
 
-Check 20/20 A and 80/80 B completions, actual interleaved `GENERATED` timestamps, queue wait at P1 and P2, and end-to-end workflow durations. Compare by A/B workload identity, not version label alone because version priorities are swapped between conditions. Observe queue contention; do not infer it solely from a chart. For publication, a priority effect should be assessed with repeated runs, the fixed input schedules and recorded limitations. The Monitor's available timing records are not direct measurements of every internal enqueue/dequeue decision. No result is pre-claimed.
+## Eclipse execution
+
+1. Fetch and check out the latest `experiment/figure11-priority-rerun` branch on `.82`; ensure no stale P1/P2 processes are using their assigned local ports.
+2. Open `btsn.petrinet.ProjectLoader/PrioritySwap_TwoPlace_BuildAndRun.xml` and use **Ant Build** with the default `run-complete-workflow` target. **No extra arguments** for normal.
+3. Let initialization, token generation and data collection finish. Save the regular PetriNetAnalyzer output and timing chart **before the next run**, because Monitor data can be replaced by initialization.
+4. Repeat the identical buildfile with `-Dpriority.condition=swapped`. Preserve its analyzer output and chart as well.
+
+Do not deploy new Java code or change service handlers, queueing logic, the Analyzer or Monitor to conduct this test.
+
+## Acceptance criteria
+
+- **Validity:** 20 A and 80 B workflows generated/completed; no orphaned or missing visits, and no overflow/dropped-token errors.
+- **Arrival overlap:** Actual `GENERATED` timestamps match the intended lead-in and overlapping streams, allowing for launcher startup jitter.
+- **Contention:** Prior to an A arrival, older B tokens are still outstanding at P1. The recorded events and observed queue waits must support this, rather than assuming contention because of the CSV.
+- **Priority evidence:** For the normal condition, test whether A tokens that arrived later than waiting B tokens begin P1 service sooner. In the swapped condition, compare the corresponding scheduling order and queue latencies by **A/B workload identity** rather than merely by v001/v002 version label.
+- **Caveat:** `GENERATED` and `ENTER` events are not necessarily direct queue enqueue/dequeue records. Treat observed overtaking as evidence consistent with priority scheduling, not proof of exact internal dequeue decisions without queue instrumentation.
+
+This is a deliberately overloaded, randomized and reproducible **control**. Whether it demonstrates inversion is determined by the actual runtime records, not by the schedule design alone.
