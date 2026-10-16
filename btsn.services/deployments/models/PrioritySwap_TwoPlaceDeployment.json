@@ -1,6 +1,6 @@
 {
   "catalog": "BusinessServiceDefinitions/petrinet/PetriNetModels.json",
-  "infrastructure": "InfrastructureDefinitionFolder/ThreeHost.json",
+  "infrastructure": "InfrastructureDefinitionFolder/SingleHost.json",
   "deploymentRules": "RuleBase/Generated/InfrastructureDeployment.ruleml.xml",
   "directServiceRules": [
     "RuleBase/PetriNet/ListofPetriNetInitializationServices.ruleml.xml",
