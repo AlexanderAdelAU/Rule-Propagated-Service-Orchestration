@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   Research control: both workflow versions execute EXACTLY the same P1 -> P2 net.
-  B = 80 tokens, every 350 ms. A = 20-token burst, at t=10 s.
+  Randomized, interleaved arrivals: B=80 tokens, A=20 tokens; fixed seed 0xB16B00B5.
   Normal: A=v001 (preferred), B=v002. Swapped: A=v002, B=v001.
   Both versions are compiled/published before either generator fires.
   SingleHost on 192.168.1.82: P1 and P2 are separate local host processes.
@@ -11,7 +11,7 @@
     <property name="priority.condition" value="normal"/>
     <condition property="priority.normal"><equals arg1="${priority.condition}" arg2="normal"/></condition>
 
-    <!-- eg1 = B continuous, eg2 = A burst. Only the version ranges swap. -->
+    <!-- Both generators have interleaved pseudorandom schedules; only the version ranges swap. -->
     <condition property="eg1.version" value="v002" else="v001"><isset property="priority.normal"/></condition>
     <condition property="eg2.version" value="v001" else="v002"><isset property="priority.normal"/></condition>
 
@@ -25,17 +25,17 @@
     <property name="query.version" value="v001,v002"/>
     <property name="infrastructure" value="SingleHost"/>
 
-    <property name="eg1.id" value="EG_BACKGROUND"/>
+    <property name="eg1.id" value="EG_B"/>
     <property name="eg1.place" value="P1_Place"/>
     <property name="eg1.operation" value="processToken"/>
     <property name="eg1.tokens" value="80"/>
-    <property name="eg1.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/PrioritySwap_Background.csv"/>
+    <property name="eg1.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/PrioritySwap_Random_B.csv"/>
 
-    <property name="eg2.id" value="EG_BURST"/>
+    <property name="eg2.id" value="EG_A"/>
     <property name="eg2.place" value="P1_Place"/>
     <property name="eg2.operation" value="processToken"/>
     <property name="eg2.tokens" value="20"/>
-    <property name="eg2.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/PrioritySwap_Burst.csv"/>
+    <property name="eg2.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/PrioritySwap_Random_A.csv"/>
 
     <property name="token.count" value="80"/>
     <property name="token.expire" value="120000"/>
