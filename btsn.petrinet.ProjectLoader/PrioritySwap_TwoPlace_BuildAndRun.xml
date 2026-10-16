@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   Research control: both workflow versions execute EXACTLY the same P1 -> P2 net.
-  Randomized, interleaved arrivals: B=80 tokens, A=20 tokens; fixed seed 0xB16B00B5.
+  Controlled queue contention: B=30 random early arrivals to create P1 backlog,
+  then 20 A + 50 B randomized and overlapping arrivals; fixed seed 0xC07E2026.
   Normal: A=v001 (preferred), B=v002. Swapped: A=v002, B=v001.
   Both versions are compiled/published before either generator fires.
   SingleHost on 192.168.1.82: P1 and P2 are separate local host processes.
@@ -11,7 +12,7 @@
     <property name="priority.condition" value="normal"/>
     <condition property="priority.normal"><equals arg1="${priority.condition}" arg2="normal"/></condition>
 
-    <!-- Both generators have interleaved pseudorandom schedules; only the version ranges swap. -->
+    <!-- Two seeded randomized streams; B builds a backlog before A and B overlap. Only versions swap. -->
     <condition property="eg1.version" value="v002" else="v001"><isset property="priority.normal"/></condition>
     <condition property="eg2.version" value="v001" else="v002"><isset property="priority.normal"/></condition>
 
