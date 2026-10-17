@@ -140,6 +140,8 @@ public final class BuildAndRunGenerator {
             plan.versions.put(element.getId(), VERSIONS.contains(element.getTokenVersion()) ? element.getTokenVersion() : "v001");
             int inputs = joinInputs(canvas, element, place);
             if (inputs > 1) plan.joins.put(element.getId(), inputs);
+            else if (inputs >= 0) plan.problems.add(element.getId() + " feeds the join before " + place.getLabel()
+                + ", but " + place.getLabel() + "'s operation names " + inputs + " input(s); a join needs one argument for each input.");
         }
         if (plan.targets.isEmpty()) plan.problems.add("Add an event generator connected through a T_in transition to a deployed place.");
         if (!plan.problems.isEmpty()) return plan;
@@ -201,7 +203,7 @@ public final class BuildAndRunGenerator {
         for (String packaged : packagedHosts(plan)) lines.add("Package  " + packaged + " (Build host packages; start it on its machine)");
         for (Run run : o.enabled())
             if (plan.joins.containsKey(run.generatorId))
-                lines.add("Tokens   one set of join tokens " + joinTokens(run.version, plan.joins.get(run.generatorId)) + " from " + run.generatorId + " to "
+                lines.add("Tokens   one set of " + plan.joins.get(run.generatorId) + " join tokens from " + run.generatorId + " to "
                     + plan.targets.get(run.generatorId) + "." + plan.operations.get(run.generatorId) + ", version " + run.version
                     + " (the generator feeds a join, which needs all its inputs to start)");
             else lines.add("Tokens   " + o.tokens + " from " + run.generatorId + " to " + plan.targets.get(run.generatorId) + "." + plan.operations.get(run.generatorId)
@@ -288,7 +290,7 @@ public final class BuildAndRunGenerator {
             if (join != null) {
                 x.append("    <!-- ").append(xml(run.generatorId)).append(" feeds a join: it fires one token for each of the join's inputs. -->\n");
                 x.append("    <property name=\"").append(slot).append(".tokens\" value=\"").append(join).append("\"/>\n");
-                x.append("    <property name=\"").append(slot).append(".join.tokens\" value=\"").append(joinTokens(run.version, join)).append("\"/>\n");
+                x.append("    <property name=\"").append(slot).append(".join.inputs\" value=\"").append(join).append("\"/>\n");
             }
         }
         x.append("    <property name=\"token.count\" value=\"").append(o.tokens).append("\"/>\n");
@@ -361,24 +363,16 @@ public final class BuildAndRunGenerator {
     }
 
     /** The place reached from an event generator through its transition (generator -> T_in -> place). */
-    /** The number of inputs of the join a generator feeds through its T_in (its place's arguments), or 0 when that T_in is not a join. */
+    /** The number of inputs of the join a generator feeds through its T_in (its place's arguments), or -1 when that T_in is not a join. */
     static int joinInputs(Canvas canvas, ProcessElement generator, ProcessElement place) {
         for (Arrow out : canvas.getArrows()) {
             ProcessElement next = out.getTarget();
             if (out.getSource() != generator || next == null || !"JoinNode".equals(next.getNodeType())) continue;
             boolean feedsPlace = false;
             for (Arrow onward : canvas.getArrows()) if (onward.getSource() == next && onward.getTarget() == place) feedsPlace = true;
-            if (feedsPlace) return Math.max(2, place.getServiceOperations().get(0).getArguments().size());
+            if (feedsPlace) return place.getServiceOperations().get(0).getArguments().size();
         }
-        return 0;
-    }
-
-    /** One workflow's join tokens under a version: v001 with two inputs is 1000001,1000002. */
-    static String joinTokens(String version, int inputs) {
-        int base = Integer.parseInt(version.substring(1)) * 1000000;
-        StringBuilder ids = new StringBuilder();
-        for (int i = 1; i <= inputs; i++) ids.append(i > 1 ? "," : "").append(base + i);
-        return ids.toString();
+        return -1;
     }
 
     static ProcessElement firstPlaceAfter(Canvas canvas, ProcessElement generator) {

@@ -21,7 +21,8 @@
                                event.generator.id, target.place, target.operation, rule.version, trigger.file
     eg1.data                   optional: name=value pairs carried by every token of that generator,
                                e.g. outcome=true
-    eg1.join.tokens            optional: fire these token IDs (e.g. 1000001,1000002) instead of a count
+    eg1.join.inputs            optional: the generator feeds a join with this many inputs; it fires one
+                               workflow's join tokens, numbered from that version's base
     run.p1 ... run.p6          set for each host the deployment uses
     first.node                 first host in use (p1 ... p6); its calls deploy the admin rules
 -->
@@ -215,7 +216,7 @@
                 <arg value="-generator"/><arg value="${@{slot}.id}"/>
                 <arg value="-triggerfile" if:set="@{slot}.trigger.set"/><arg value="${@{slot}.trigger.file}" if:set="@{slot}.trigger.set"/>
                 <arg value="-data" if:set="@{slot}.data"/><arg value="${@{slot}.data}" if:set="@{slot}.data"/>
-                <arg value="-joinargs" if:set="@{slot}.join.tokens"/><arg value="${@{slot}.join.tokens}" if:set="@{slot}.join.tokens"/>
+                <arg value="-joininputs" if:set="@{slot}.join.inputs"/><arg value="${@{slot}.join.inputs}" if:set="@{slot}.join.inputs"/>
                 <arg value="-skipdeploy"/>
             </java>
         </sequential>

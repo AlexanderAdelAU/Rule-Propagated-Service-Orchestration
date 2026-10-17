@@ -133,7 +133,7 @@ public final class DeployFlowCheck {
                 check(launcher.equals(scratch.resolve("btsn.petrinet.ProjectLoader/TrafficLight_Design_BuildAndRun.xml").toFile()), "Launcher location: " + launcher);
                 String xml = read(launcher.toPath());
                 for (String expected : new String[] {"value=\"petrinet/Workflow/TrafficLight_Design\"", "value=\"common/Initializers/P1_to_P6_Initialization\"",
-                        "name=\"eg1.place\" value=\"" + target + "\"", "name=\"eg1.tokens\" value=\"2\"", "name=\"eg1.join.tokens\" value=\"1000001,1000002\"", "name=\"eg1.id\" value=\"TRAFFICLIGHT_EVENTGENERATOR\"", "name=\"query.version\" value=\"v001\"", "name=\"token.count\" value=\"4\"", "name=\"run.p6\" value=\"true\"",
+                        "name=\"eg1.place\" value=\"" + target + "\"", "name=\"eg1.tokens\" value=\"2\"", "name=\"eg1.join.inputs\" value=\"2\"", "name=\"eg1.id\" value=\"TRAFFICLIGHT_EVENTGENERATOR\"", "name=\"query.version\" value=\"v001\"", "name=\"token.count\" value=\"4\"", "name=\"run.p6\" value=\"true\"",
                         "location=\"../btsn.services/deployments/models/TrafficLight_DesignDeployment.json\"", "<import file=\"../btsn.services/process-runtime.xml\"/>"})
                     check(xml.contains(expected), "Launcher lacks " + expected + "\n" + xml);
                 javax.xml.parsers.DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(launcher);
@@ -146,6 +146,12 @@ public final class DeployFlowCheck {
                 JSONObject initializer = (JSONObject)new JSONParser().parse(BuildAndRunGenerator.adminProcess(Arrays.asList("P3", "P5"), true, "P3_P5"));
                 check(collector.toJSONString().contains("P5_CollectorService") && collector.toJSONString().contains("writeCollectorData")
                     && initializer.toJSONString().contains("P3_InitializationService") && initializer.toJSONString().contains("Monitor_InitializationService"), "Generated admin processes");
+                // A join whose operation names fewer than two inputs is reported, not guessed.
+                Canvas oneInput = new Canvas(); oneInput.setDefinitionLocation(processFile.toFile()); oneInput.loadFromJSON(linked);
+                for (ProcessElement place : oneInput.getPlaces())
+                    if ("NS_Green".equals(place.getLabel())) { ServiceOperation op = place.getServiceOperations().get(0); op.setArguments(op.getArguments().subList(0, 1)); }
+                check(BuildAndRunGenerator.plan(oneInput, processFile.toFile()).problems.stream().anyMatch(p -> p.contains("a join needs one argument for each input")),
+                    "A join with one named input was accepted for Build and Run");
                 Canvas undeployed = new Canvas(); undeployed.setDefinitionLocation(processFile.toFile()); undeployed.loadFromJSON(design);
                 check(BuildAndRunGenerator.plan(undeployed, processFile.toFile()).problems.stream().anyMatch(p -> p.startsWith("Deploy the process first")), "Undeployed process accepted for Build and Run");
 
