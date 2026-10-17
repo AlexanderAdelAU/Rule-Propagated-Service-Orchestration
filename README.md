@@ -200,7 +200,7 @@ carries the incoming data and exposes that result to the process guards; it
 never chooses a destination. The transitions receive inputs and route the
 result according to the model.
 
-Run [P1_P2_P3_P4_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_P3_P4_BuildAndRun.xml)
+Run [P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.xml)
 to execute this model. Its captured results appear under
 [Petri-net fork/join execution](#petri-net-forkjoin-execution) below.
 
@@ -292,7 +292,7 @@ Run
 [P1_to_P6_Double_Join_Workflow.xml](btsn.petrinet.ProjectLoader/P1_to_P6_Double_Join_Workflow.xml)
 as an Ant Build with its default target. It builds the JARs, prepares the selected
 deployment, initializes, deploys, sends ten tokens and collects observations.
-The launcher's `token.outcome` property is input data only; it does not force
+The launcher's `eg1.data` value (`outcome=true`) is input data only; it does not force
 P1's result. A smaller two-place example is
 [P1_P2_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_BuildAndRun.xml).
 See [the model guide](btsn.services/docs/PETRINET_MODELS.md) for profiles and contracts.
@@ -424,7 +424,7 @@ queue wait.
 
 ![Captured P1–P4 fork/join run: ten root workflows with elapsed-time bars and independent queue-wait diamonds.](images/execution/petrinet-p1-p4-run.png)
 
-*A run of [P1_P2_P3_P4_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_P3_P4_BuildAndRun.xml).
+*A run of the earlier [P1_P2_P3_P4_BuildAndRun.xml](btsn.petrinet.ProjectLoader/deprecated/P1_P2_P3_P4_BuildAndRun.xml) launcher.
 Ten root workflows are shown in arrival order. Bars measure elapsed time from
 generation to business completion; diamonds show the maximum observed
 service-visit queue wait across each root's family, including fork children.

@@ -674,7 +674,7 @@ Every launcher runs the same way:
 | Single place (this tutorial) | [P2_Tutorial_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P2_Tutorial_Workflow_BuildAndRun.xml) |
 | Single place, P1 reference | [P1_Tutorial_Local_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_Tutorial_Local_BuildAndRun.xml) |
 | Your own service: inventory and supplier | [Inventory_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/Inventory_Workflow_BuildAndRun.xml) |
-| P1–P4 fork/join model | [P1_P2_P3_P4_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_P3_P4_BuildAndRun.xml) |
+| P1–P4 fork/join model | [P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.xml) |
 | Six-place double-join model | [P1_to_P6_Double_Join_Workflow.xml](btsn.petrinet.ProjectLoader/P1_to_P6_Double_Join_Workflow.xml) |
 | Emergency department | [Emergency_Department_BuildAndRun.xml](btsn.healthcare.ProjectLoader/Emergency_Department_BuildAndRun.xml) |
 | Full Financial application | [FinancialSystem_P1_P5_BuildAndRun.xml](btsn.financial.ProjectLoader/FinancialSystem_P1_P5_BuildAndRun.xml) |

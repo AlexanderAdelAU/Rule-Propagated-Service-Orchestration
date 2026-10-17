@@ -80,7 +80,8 @@
     <property name="${first.node}.first" value="true"/>
     <!-- Optional per generator: its own process definition (versions may differ by a rule delta), its own
          token count, and egN.publish.at.seconds to publish that version live, while the other generators run
-         (egN.fire.after.seconds then waits between its commitment and its first token). -->
+         (egN.fire.after.seconds then waits between its commitment and its first token; for a version deployed
+         at the start it delays that generator's first token). -->
     <property name="eg1.process" value="${workflow.process.name}"/>
     <property name="eg2.process" value="${workflow.process.name}"/>
     <property name="eg3.process" value="${workflow.process.name}"/>
@@ -254,6 +255,7 @@
                 <tstamp><format property="@{slot}.fire.time" pattern="yyyy-MM-dd HH:mm:ss.SSS"/></tstamp>
                 <echo message="[LIVE] ${@{slot}.version} first token at ${@{slot}.fire.time}"/>
             </sequential>
+            <sleep seconds="${@{slot}.fire.after.seconds}" if:set="@{slot}.fire.after.seconds" unless:set="@{slot}.publish.at.seconds"/>
             <fire-generator slot="@{slot}"/>
         </sequential>
     </macrodef>
