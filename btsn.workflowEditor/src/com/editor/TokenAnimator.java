@@ -85,6 +85,7 @@ public class TokenAnimator {
     private List<AnimationSegment> segments = new ArrayList<>();
     private long startTime = Long.MAX_VALUE;
     private long endTime = Long.MIN_VALUE;
+    private long recordingCutoff = 0;  // when not 0: the replay ends here, because a host stopped recording
     
     private Map<String, Color> versionColors = new HashMap<>();
     private Canvas canvas;
@@ -655,7 +656,41 @@ public class TokenAnimator {
         }
         
         logger.info("Parsed " + events.size() + " unique events (filtered " + (seenEvents.size() - events.size()) + " duplicates)");
+
+        // A process that never terminates (a loop such as the traffic light) is still running while its hosts
+        // are collected one after another, so each host's records stop at a different time. Past the first
+        // host that went silent while tokens were still sent to it, the records are incomplete: replay up to there.
+        recordingCutoff = 0;
+        long horizon = recordingHorizon(events);
+        if (horizon != Long.MAX_VALUE && horizon < endTime) {
+            int before = events.size();
+            events.removeIf(e -> e.timestamp > horizon);
+            endTime = horizon;
+            recordingCutoff = horizon;
+            logger.info("Replay ends at " + horizon + ": a host stopped recording while tokens were still sent to it ("
+                + (before - events.size()) + " later events not replayed)");
+        }
     }
+
+    /**
+     * The last moment every host was still recording, or Long.MAX_VALUE when no host went silent early: the
+     * earliest last record of a place to which a token was sent after that record.
+     */
+    static long recordingHorizon(List<MarkingEvent> events) {
+        Map<String, Long> lastRecord = new HashMap<>();
+        for (MarkingEvent e : events)
+            if (e.placeId != null && !e.placeId.isEmpty()) lastRecord.merge(e.placeId, e.timestamp, Math::max);
+        long horizon = Long.MAX_VALUE;
+        for (MarkingEvent e : events) {
+            if (!"EXIT".equals(e.eventType) || e.toPlace == null) continue;
+            Long silentFrom = lastRecord.get(e.toPlace);
+            if (silentFrom != null && e.timestamp > silentFrom) horizon = Math.min(horizon, silentFrom);
+        }
+        return horizon;
+    }
+
+    /** When not 0, the replay was cut here because a host stopped recording (see recordingHorizon). */
+    public long getRecordingCutoff() { return recordingCutoff; }
     
     /**
      * Generate animation segments from parsed events.
@@ -761,6 +796,8 @@ public class TokenAnimator {
             long postWindow = TRAVEL_DURATION_TO_TOUT + TRAVEL_DURATION_TO_NEXT + 500;
             startTime = Math.min(startTime, segments.get(0).startTime) - preWindow;
             endTime = Math.max(endTime, segments.get(segments.size() - 1).endTime) + postWindow;
+            // Cut short (see recordingHorizon): stop where the records stop, not after tokens left resting at places.
+            if (recordingCutoff != 0) endTime = Math.min(endTime, recordingCutoff + 500);
         }
         
         logger.info("=== Segment generation complete ===");
@@ -3083,6 +3120,7 @@ public class TokenAnimator {
         segments.clear();
         startTime = Long.MAX_VALUE;
         endTime = Long.MIN_VALUE;
+        recordingCutoff = 0;
     }
     
     /**
