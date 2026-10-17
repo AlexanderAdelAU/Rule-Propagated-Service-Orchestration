@@ -258,15 +258,15 @@ public final class RunWindow extends JFrame {
         }
     }
 
-    /** Run_<launcher>.txt beside the analysis: the whole console, which the window itself trims. */
-    static File runLogFile(File root, String processName, File launcher) {
+    /** Run_<launcher>.txt in btsn.services/target/run-logs (a build output, not tracked): the whole console, which the window itself trims. */
+    static File runLogFile(File root, File launcher) {
         String name = launcher.getName().replaceFirst("\\.xml$", "");
-        return new File(LauncherRun.analysisFileFor(root, processName).getParentFile(), "Run_" + name + ".txt");
+        return new File(root, "btsn.services/target/run-logs/Run_" + name + ".txt");
     }
 
     private void saveRunLog() {
         if (selectedLauncher == null) return;
-        File file = runLogFile(root, processName, selectedLauncher);
+        File file = runLogFile(root, selectedLauncher);
         try {
             file.getParentFile().mkdirs();
             java.nio.file.Files.write(file.toPath(), runLog.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
