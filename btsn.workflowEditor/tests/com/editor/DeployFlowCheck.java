@@ -133,11 +133,11 @@ public final class DeployFlowCheck {
                 check(launcher.equals(scratch.resolve("btsn.petrinet.ProjectLoader/TrafficLight_Design_BuildAndRun.xml").toFile()), "Launcher location: " + launcher);
                 String xml = read(launcher.toPath());
                 for (String expected : new String[] {"value=\"petrinet/Workflow/TrafficLight_Design\"", "value=\"common/Initializers/P1_to_P6_Initialization\"",
-                        "name=\"eg1.place\" value=\"" + target + "\"", "name=\"eg1.id\" value=\"TRAFFICLIGHT_EVENTGENERATOR\"", "name=\"query.version\" value=\"v001\"", "name=\"token.count\" value=\"4\"", "name=\"run.p6\" value=\"true\"",
+                        "name=\"eg1.place\" value=\"" + target + "\"", "name=\"eg1.tokens\" value=\"2\"", "name=\"eg1.join.tokens\" value=\"1000001,1000002\"", "name=\"eg1.id\" value=\"TRAFFICLIGHT_EVENTGENERATOR\"", "name=\"query.version\" value=\"v001\"", "name=\"token.count\" value=\"4\"", "name=\"run.p6\" value=\"true\"",
                         "location=\"../btsn.services/deployments/models/TrafficLight_DesignDeployment.json\"", "<import file=\"../btsn.services/process-runtime.xml\"/>"})
                     check(xml.contains(expected), "Launcher lacks " + expected + "\n" + xml);
                 javax.xml.parsers.DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(launcher);
-                check(read(scratch.resolve("btsn.common.eventgenerators/EventTriggeringFile/TrafficLight_Design_BuildAndRun.csv")).equals("0,0,1\n250,0,1\n500,0,1\n750,0,1\n"), "Token schedule");
+                check(read(scratch.resolve("btsn.common.eventgenerators/EventTriggeringFile/TrafficLight_Design_BuildAndRun.csv")).equals("0,0,2\n"), "Join token schedule: the traffic light starts at a join, so both inputs fire together");
                 JSONObject profile = (JSONObject)new JSONParser().parse(read(scratch.resolve("btsn.services/deployments/models/TrafficLight_DesignDeployment.json")));
                 check("ServiceDeploymentFolder/petrinet/TrafficLight_Design.json".equals(profile.get("serviceDeployment"))
                     && "BusinessServiceDefinitions/petrinet/PetriNetModels.json".equals(profile.get("catalog")), "Profile: " + profile);
