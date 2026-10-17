@@ -1,5 +1,6 @@
 {
-  "processType": "PetriNet",
+  "serviceDeployment": "ServiceDeploymentFolder/petrinet/P1_P2_P3_P4_ForkRebalance.json",
+   "processType":"PetriNet",
   "elements": [
     {
       "id": "T_in_P1",
@@ -24,21 +25,16 @@
       "height": 50,
       "label": "P1",
       "service": "AlwaysTrueService",
+      "serviceInstance": "AlwaysTrueInstance1",
       "operations": [
         {
           "name": "processToken",
           "returnAttribute": "token",
           "arguments": [
-            {
-              "name": "token",
-              "type": "String",
-              "value": "String",
-              "required": false
-            }
+            {"name": "token", "type": "String", "value": "String", "required": false}
           ]
         }
-      ],
-      "serviceInstance": "AlwaysTrueInstance1"
+      ]
     },
     {
       "id": "T_out_P1",
@@ -76,21 +72,16 @@
       "height": 50,
       "label": "P2",
       "service": "AlwaysTrueService",
+      "serviceInstance": "AlwaysTrueInstance2",
       "operations": [
         {
           "name": "processToken",
           "returnAttribute": "token_branch2",
           "arguments": [
-            {
-              "name": "token",
-              "type": "String",
-              "value": "String",
-              "required": false
-            }
+            {"name": "token", "type": "String", "value": "String", "required": false}
           ]
         }
-      ],
-      "serviceInstance": "AlwaysTrueInstance2"
+      ]
     },
     {
       "id": "T_out_P2",
@@ -128,21 +119,16 @@
       "height": 50,
       "label": "P3",
       "service": "AlwaysTrueService",
+      "serviceInstance": "AlwaysTrueInstance3",
       "operations": [
         {
           "name": "processToken",
           "returnAttribute": "token_branch1",
           "arguments": [
-            {
-              "name": "token",
-              "type": "String",
-              "value": "String",
-              "required": false
-            }
+            {"name": "token", "type": "String", "value": "String", "required": false}
           ]
         }
-      ],
-      "serviceInstance": "AlwaysTrueInstance3"
+      ]
     },
     {
       "id": "T_out_P3",
@@ -180,27 +166,17 @@
       "height": 50,
       "label": "P4",
       "service": "AlwaysTrueService",
+      "serviceInstance": "AlwaysTrueInstance4",
       "operations": [
         {
           "name": "processToken",
           "returnAttribute": "token",
           "arguments": [
-            {
-              "name": "token_branch1",
-              "type": "String",
-              "value": "String",
-              "required": false
-            },
-            {
-              "name": "token_branch2",
-              "type": "String",
-              "value": "String",
-              "required": false
-            }
+            {"name": "token_branch1", "type": "String", "value": "String", "required": false},
+            {"name": "token_branch2", "type": "String", "value": "String", "required": false}
           ]
         }
-      ],
-      "serviceInstance": "AlwaysTrueInstance4"
+      ]
     },
     {
       "id": "T_out_P4",
@@ -241,13 +217,14 @@
       "token_version": "v001"
     },
     {
-      "id": "T_in_Model_Terminate",
+      "id": "Terminate",
       "type": "TRANSITION",
       "x": 860,
       "y": 250,
       "width": 20,
       "height": 60,
       "label": "Terminate",
+      "rotation": 0.0,
       "node_type": "TerminateNode",
       "node_value": "TERMINATE_NODE",
       "transition_type": "Other"
@@ -275,21 +252,16 @@
       "height": 50,
       "label": "P6",
       "service": "AlwaysTrueService",
+      "serviceInstance": "AlwaysTrueInstance6",
       "operations": [
         {
           "name": "processToken",
           "returnAttribute": "token_branch2",
           "arguments": [
-            {
-              "name": "token",
-              "type": "String",
-              "value": "String",
-              "required": false
-            }
+            {"name": "token", "type": "String", "value": "String", "required": false}
           ]
         }
-      ],
-      "serviceInstance": "AlwaysTrueInstance6"
+      ]
     },
     {
       "id": "T_out_P6",
@@ -326,10 +298,7 @@
       "decision_value": "true",
       "endpoint": "processToken",
       "waypoints": [
-        {
-          "x": 320,
-          "y": 220
-        }
+        {"x": 320, "y": 220}
       ],
       "labelOffsetX": -14,
       "labelOffsetY": -18
@@ -342,10 +311,7 @@
       "decision_value": "true",
       "endpoint": "processToken",
       "waypoints": [
-        {
-          "x": 320,
-          "y": 320
-        }
+        {"x": 320, "y": 320}
       ],
       "labelOffsetX": -15,
       "labelOffsetY": 31
@@ -382,10 +348,7 @@
       "decision_value": "",
       "endpoint": "",
       "waypoints": [
-        {
-          "x": 480,
-          "y": 320
-        }
+        {"x": 480, "y": 320}
       ]
     },
     {
@@ -430,7 +393,7 @@
     },
     {
       "source": "T_out_P4",
-      "target": "T_in_Model_Terminate",
+      "target": "Terminate",
       "label": "",
       "guardCondition": "",
       "decision_value": "",
@@ -468,10 +431,7 @@
       "decision_value": "true",
       "endpoint": "processToken",
       "waypoints": [
-        {
-          "x": 320,
-          "y": 420
-        }
+        {"x": 320, "y": 420}
       ],
       "labelOffsetX": -15,
       "labelOffsetY": 31
@@ -495,16 +455,13 @@
     {
       "source": "T_out_P6",
       "target": "T_in_P4",
-      "waypoints": [
-        {
-          "x": 580,
-          "y": 420
-        }
-      ],
       "label": "",
       "guardCondition": "",
       "decision_value": "",
-      "endpoint": ""
+      "endpoint": "",
+      "waypoints": [
+        {"x": 580, "y": 420}
+      ]
     },
     {
       "source": "EVENT_GENERATOR_V002",
@@ -580,6 +537,5 @@
       "fontStyle": 1,
       "color": -16777216
     }
-  ],
-  "serviceDeployment": "ServiceDeploymentFolder/petrinet/P1_P2_P3_P4_ForkRebalance.json"
+  ]
 }
