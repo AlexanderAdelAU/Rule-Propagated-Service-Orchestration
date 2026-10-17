@@ -143,6 +143,10 @@ public class OOjdrewAPI {
 				symbolEpoch++;
 			}
 			backwardReasoner.clearClauses();
+			// clearClauses() empties only the clause table; jDREW also indexes every loaded clause
+			// in oids and never clears it, so without this each parse kept a copy of the rule base
+			// and a long-running host got slower with every token it served.
+			backwardReasoner.oids.clear();
 			parsedKnowledgeBase = knowledgeBase;
 			parsedEpoch = symbolEpoch;
 			if (knowledgeBase == null || knowledgeBase.isEmpty()) {
@@ -189,6 +193,10 @@ public class OOjdrewAPI {
 			// The shared symbol table was reset after this rule base was parsed; its
 			// clauses refer to symbols that no longer exist, so intern them again first.
 			backwardReasoner.clearClauses();
+			// clearClauses() empties only the clause table; jDREW also indexes every loaded clause
+			// in oids and never clears it, so without this each parse kept a copy of the rule base
+			// and a long-running host got slower with every token it served.
+			backwardReasoner.oids.clear();
 			parsedEpoch = symbolEpoch;
 			if (!parsedKnowledgeBase.isEmpty()) {
 				parseRuleMLKnowledeBase(parsedKnowledgeBase);

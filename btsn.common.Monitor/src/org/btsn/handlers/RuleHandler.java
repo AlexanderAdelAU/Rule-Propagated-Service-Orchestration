@@ -221,11 +221,25 @@ public class RuleHandler {
     /**
      * Send commitment back to the originating machine
      * Always uses version-based port (35000 + version number)
+     *
+     * Sent from a new socket, as before. On Windows that bind can fail with "Address already
+     * in use"; an idle host then hits the same clash on every retry and the commitment barrier
+     * never completes, so only then is the rule handler's own socket used instead. Using that
+     * socket for every commitment made the first reply from a service go missing each run.
      */
     private void sendCommitment(String commitmentMessage) {
         DatagramSocket ms = null;
+        boolean ownSocket = false;
         try {
-            ms = new DatagramSocket();
+            try {
+                ms = new DatagramSocket();
+                ownSocket = true;
+            } catch (SocketException bindFailed) {
+                if (udpSocket == null || udpSocket.isClosed()) throw bindFailed;
+                System.err.println("sendCommitment: new socket failed (" + bindFailed.getMessage()
+                    + "); sending through the rule handler's socket");
+                ms = udpSocket;
+            }
             
             InetAddress targetAddress;
             int targetPort;
@@ -281,7 +295,7 @@ public class RuleHandler {
         } catch (IOException ie) {
             System.err.println("IO error in sendCommitment: " + ie.getMessage());
         } finally {
-            if (ms != null) {
+            if (ownSocket && ms != null) {
                 ms.close();
             }
         }
