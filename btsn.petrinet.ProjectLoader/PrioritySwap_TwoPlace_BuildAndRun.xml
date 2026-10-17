@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Research control: both workflow versions execute EXACTLY the same P1 -> P2 net.
+  Controlled queue contention: B=30 random early arrivals to create P1 backlog,
+  then 20 A + 50 B randomized and overlapping arrivals; fixed seed 0xC07E2026.
+  Normal: A=v001 (preferred), B=v002. Swapped: A=v002, B=v001.
+  Both versions are compiled/published before either generator fires.
+  SingleHost on 192.168.1.82: P1 and P2 are separate local host processes.
+  NO business services, orchestration handlers, queue code or Monitor tables modified.
+-->
+<project name="PrioritySwap_TwoPlace_BuildAndRun" default="run-complete-workflow" basedir=".">
+    <property name="priority.condition" value="normal"/>
+    <condition property="priority.normal"><equals arg1="${priority.condition}" arg2="normal"/></condition>
+
+    <!-- Two seeded randomized streams; B builds a backlog before A and B overlap. Only versions swap. -->
+    <condition property="eg1.version" value="v002" else="v001"><isset property="priority.normal"/></condition>
+    <condition property="eg2.version" value="v001" else="v002"><isset property="priority.normal"/></condition>
+
+    <property name="process.title" value="Priority-swap control: ${priority.condition} (B=${eg1.version}, A=${eg2.version})"/>
+    <property name="launcher.profile.file" location="../btsn.services/deployments/models/PrioritySwap_TwoPlaceDeployment.json"/>
+    <property name="workflow.process.name" value="petrinet/Research/PrioritySwap_TwoPlace_Workflow"/>
+    <property name="init.process.name" value="common/Initializers/P1_P2_Initialization"/>
+    <property name="collector.process.name" value="common/Collectors/P1_P2_Collector"/>
+
+    <property name="rule.version" value="v001"/>
+    <property name="query.version" value="v001,v002"/>
+    <property name="infrastructure" value="SingleHost"/>
+
+    <property name="eg1.id" value="EG_B"/>
+    <property name="eg1.place" value="P1_Place"/>
+    <property name="eg1.operation" value="processToken"/>
+    <property name="eg1.tokens" value="80"/>
+    <property name="eg1.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/PrioritySwap_Random_B.csv"/>
+
+    <property name="eg2.id" value="EG_A"/>
+    <property name="eg2.place" value="P1_Place"/>
+    <property name="eg2.operation" value="processToken"/>
+    <property name="eg2.tokens" value="20"/>
+    <property name="eg2.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/PrioritySwap_Random_A.csv"/>
+
+    <property name="token.count" value="80"/>
+    <property name="token.expire" value="120000"/>
+    <property name="workflow.completion.seconds" value="45"/>
+    <property name="collector.delay.seconds" value="3"/>
+
+    <property name="run.p1" value="true"/>
+    <property name="run.p2" value="true"/>
+    <property name="first.node" value="p1"/>
+
+    <import file="../btsn.services/process-runtime.xml"/>
+</project>
