@@ -93,6 +93,8 @@ import org.json.simple.JSONObject;
  * JOIN MODE ARGUMENTS (for injecting specific token IDs):
  *   -joinargs <ids>      Comma-separated list of token IDs to inject
  *                        (e.g., "1000201,1000202")
+ *   -joininputs <n>      The target is a join with n inputs: inject one workflow's n join
+ *                        tokens, numbered from this version's base (v001 with 2: 1000001,1000002)
  * 
  * ================================================================================
  * USAGE EXAMPLES
@@ -184,6 +186,8 @@ public class GenericPetriNetTokenGenerator {
 	
 	// Join args - explicit token IDs (e.g., -joinargs 1000201,1000202)
 	private static List<Integer> joinArgs = new ArrayList<>();
+	// Join inputs - the target join's input count; the token IDs follow from the version (-joininputs 2)
+	private static int joinInputs = 0;
 	
 	// Control settings
 	private static boolean exitOnCompletion = true;
@@ -210,6 +214,12 @@ public class GenericPetriNetTokenGenerator {
 		
 		// Set sequenceID based on version
 		setSequenceIDBasedOnVersion();
+
+		// A join target: one workflow's join tokens, numbered from the version's base
+		if (joinInputs > 0 && joinArgs.isEmpty()) {
+			for (int input = 1; input <= joinInputs; input++) joinArgs.add(sequenceID + input);
+			numberOfTokens = joinArgs.size();
+		}
 		
 		long startTime = System.currentTimeMillis();
 
@@ -469,6 +479,14 @@ public class GenericPetriNetTokenGenerator {
 					}
 					break;
 				
+				case "-joininputs":
+				case "--joininputs":
+					if (i + 1 < args.length) {
+						joinInputs = Integer.parseInt(args[++i]);
+						System.out.println("  Parsed -joininputs: " + joinInputs);
+					}
+					break;
+
 				case "-generator":
 				case "--generator":
 				case "-eventgenerator":

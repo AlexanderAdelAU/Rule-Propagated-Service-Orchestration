@@ -17,8 +17,8 @@
     <property name="eg1.version" value="v001"/>
     <property name="eg1.place" value="P1_Place"/>
     <property name="eg1.operation" value="processToken"/>
-    <!-- The two lights start as join tokens with these IDs. -->
-    <property name="eg1.join.tokens" value="1000001,1000002"/>
+    <!-- NS_Green's T_in is a join with two inputs: the generator fires one workflow's two join tokens. -->
+    <property name="eg1.join.inputs" value="2"/>
     <property name="token.count" value="2"/>
     <property name="workflow.completion.seconds" value="5"/>
 
