@@ -23,6 +23,10 @@
                                e.g. outcome=true
     eg1.join.inputs            optional: the generator feeds a join with this many inputs; it fires one
                                workflow's join tokens, numbered from that version's base
+    eg1.format.service         optional: the token format (TokenFormats) the generator fills its tokens from,
+                               for a token generator that has formats (e.g. TriageService)
+    token.generator.class      optional: the token generator; default GenericPetriNetTokenGenerator
+                               (healthcare launchers use GenericHealthcareTokenGenerator)
     run.p1 ... run.p6          set for each host the deployment uses
     first.node                 first host in use (p1 ... p6); its calls deploy the admin rules
 -->
@@ -195,6 +199,7 @@
                 <arg value="-tokens"/><arg value="0"/>
                 <arg value="-expire"/><arg value="${token.expire}"/>
                 <arg value="-generator"/><arg value="${@{slot}.id}"/>
+                <arg value="-format-service" if:set="@{slot}.format.service"/><arg value="${@{slot}.format.service}" if:set="@{slot}.format.service"/>
             </java>
         </sequential>
     </macrodef>
@@ -217,6 +222,7 @@
                 <arg value="-triggerfile" if:set="@{slot}.trigger.set"/><arg value="${@{slot}.trigger.file}" if:set="@{slot}.trigger.set"/>
                 <arg value="-data" if:set="@{slot}.data"/><arg value="${@{slot}.data}" if:set="@{slot}.data"/>
                 <arg value="-joininputs" if:set="@{slot}.join.inputs"/><arg value="${@{slot}.join.inputs}" if:set="@{slot}.join.inputs"/>
+                <arg value="-format-service" if:set="@{slot}.format.service"/><arg value="${@{slot}.format.service}" if:set="@{slot}.format.service"/>
                 <arg value="-skipdeploy"/>
             </java>
         </sequential>

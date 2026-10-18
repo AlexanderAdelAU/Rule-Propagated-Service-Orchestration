@@ -83,6 +83,9 @@ import org.json.simple.parser.JSONParser;
  *   -data <pairs>        Custom token data as key=value,key=value
  *                        Example: patientId=P123,providerId=RN001
  *   -sequenceid <id>     Override starting sequence ID (normally auto-calculated)
+ *   -triggerfile <csv>   Token schedule (time_ms,0,count rows); default: <VERSION>_EventTriggeringFile.csv
+ *   -joininputs <n>      The target is a join with n inputs: send one workflow's n join tokens
+ *   -format-service <s>  Token format to use (TokenFormats); default: the target place's
  *   -skipdeploy          Skip rule deployment (use if rules already deployed)
  *   -noexit              Don't exit after completion (for embedded use)
  *   -generator <id>      Event generator identity for instrumentation tracking
@@ -157,6 +160,10 @@ public class GenericHealthcareTokenGenerator {
 	private static long timeToExpire = 120000;  // Token validity window in ms (default: 120000, override with -expire)
 	private static String tokenData = "";  // Optional custom data (use -data)
 	private static String processName = null;  // REQUIRED: Workflow name (REQUIRED: -process)
+	private static String triggerFileOverride = null;  // Optional schedule (-triggerfile), as in the Petri-net generator
+	// Join inputs - the target join's input count; the token IDs follow from the version (-joininputs 2)
+	private static int joinInputs = 0;
+	private static java.util.List<Integer> joinArgs = new java.util.ArrayList<>();
 	
 	// Control settings
 	private static boolean exitOnCompletion = true;
@@ -189,6 +196,12 @@ public class GenericHealthcareTokenGenerator {
 		
 		// Set sequenceID based on version
 		setSequenceIDBasedOnVersion();
+
+		// A join target: one workflow's join tokens, numbered from the version's base
+		if (joinInputs > 0) {
+			for (int input = 1; input <= joinInputs; input++) joinArgs.add(sequenceID + input);
+			numberOfTokens = joinArgs.size();
+		}
 		
 		long startTime = System.currentTimeMillis();
 
@@ -203,6 +216,8 @@ public class GenericHealthcareTokenGenerator {
 		System.out.println("Token Expiry: " + timeToExpire + "ms");
 		System.out.println("Token Data: " + (tokenData.isEmpty() ? "(from format file)" : tokenData));
 		System.out.println("Data Variant: " + (dataVariant != null ? dataVariant : "(default)"));
+		System.out.println("Trigger File: " + (triggerFileOverride == null ? "(version default)" : triggerFileOverride));
+		if (!joinArgs.isEmpty()) System.out.println("Join Token IDs: " + joinArgs);
 		System.out.println("Skip Deploy: " + skipDeploy);
 		System.out.println("=====================================\n");
 
@@ -404,6 +419,20 @@ public class GenericHealthcareTokenGenerator {
 				case "-infrastructure":
 				case "--infrastructure":
 					if (i + 1 < args.length) infrastructureDefinitionName = args[++i];
+					break;
+				case "-triggerfile":
+				case "--triggerfile":
+					if (i + 1 < args.length) {
+						triggerFileOverride = args[++i];
+						System.out.println("  Parsed -triggerfile: " + triggerFileOverride);
+					}
+					break;
+				case "-joininputs":
+				case "--joininputs":
+					if (i + 1 < args.length) {
+						joinInputs = Integer.parseInt(args[++i]);
+						System.out.println("  Parsed -joininputs: " + joinInputs);
+					}
 					break;
 				case "-format-service":
 					if (i + 1 < args.length) tokenFormatService = args[++i];
@@ -616,8 +645,13 @@ public class GenericHealthcareTokenGenerator {
 	private static void generateTokens() throws Exception {
 		String triggeringPath = new File("").getAbsolutePath() + "/EventTriggeringFile";
 		ParseCSV pcsv = new ParseCSV();
-		// Build CSV filename using the version parameter (e.g., v001 -> V001_EventTriggeringFile.csv)
+		// An explicit schedule when supplied; otherwise the version's (e.g., v001 -> V001_EventTriggeringFile.csv)
 		String csvFilename = triggeringPath + "/" + ruleBaseVersion.toUpperCase() + "_EventTriggeringFile.csv";
+		if (triggerFileOverride != null && !triggerFileOverride.isEmpty()) {
+			File triggerFile = new File(triggerFileOverride);
+			if (!triggerFile.isAbsolute()) triggerFile = new File(triggeringPath, triggerFileOverride);
+			csvFilename = triggerFile.getAbsolutePath();
+		}
 		System.out.println("Loading trigger file: " + csvFilename);
 		
 		TreeMap<Integer, Integer> tokenSequence = pcsv.parseCSV(csvFilename);
@@ -639,10 +673,8 @@ public class GenericHealthcareTokenGenerator {
 	private static void generateTokensImmediate() throws Exception {
 		int sidInc = VersionConstants.TOKEN_INCREMENT;
 		for (int i = 0; i < numberOfTokens; i++) {
-			String jsonToken = createHealthcareToken(sequenceID);
-			System.out.println("Sending token " + (i + 1) + "/" + numberOfTokens + " (seqID=" + sequenceID + ")");
-			sendToken(jsonToken, sequenceID);
-			sequenceID += sidInc;
+			System.out.println("Sending token " + (i + 1) + "/" + numberOfTokens);
+			sendNextToken(i, sidInc);
 		}
 	}
 
@@ -690,12 +722,8 @@ public class GenericHealthcareTokenGenerator {
 				
 				// FIRE ALL TOKENS IMMEDIATELY - NO DELAYS!
 				for (int j = 0; j < tokensToFire; j++) {
-					String jsonToken = createHealthcareToken(sequenceID);
-					
 					// FIRE IMMEDIATELY - as fast as possible
-					sendToken(jsonToken, sequenceID);
-					
-					sequenceID += sidInc;
+					sendNextToken(totalTokensProcessed, sidInc);
 					totalTokensProcessed++;
 				}
 				
@@ -924,11 +952,25 @@ public class GenericHealthcareTokenGenerator {
 	}
 
 	/**
-	 * Send token to target service
+	 * Send the n-th token: one of a join set (token_branchN, sharing the workflow's ID as joinID) when the
+	 * target is a join, otherwise the next workflow's token.
 	 */
-	private static void sendToken(String jsonToken, int seqID) throws IOException {
+	private static void sendNextToken(int n, int sidInc) throws IOException {
+		if (n < joinArgs.size()) {
+			int tokenId = joinArgs.get(n);
+			sendToken(createHealthcareToken(tokenId), tokenId, "token_branch" + (n + 1), sequenceID);
+		} else {
+			sendToken(createHealthcareToken(sequenceID), sequenceID, attributeName, -1);
+			sequenceID += sidInc;
+		}
+	}
+
+	/**
+	 * Send token to target service (attribute "token", or token_branchN with the join's ID for a join)
+	 */
+	private static void sendToken(String jsonToken, int seqID, String attrName, int joinID) throws IOException {
 		// Build XML payload wrapper (ServiceThread expects XML wrapper around token)
-		String xmlPayload = buildXMLPayload(jsonToken, seqID);
+		String xmlPayload = buildXMLPayload(jsonToken, seqID, attrName, joinID);
 		
 		// Send via UDP
 		sendUDPEvent(xmlPayload, resolvedServiceChannel, resolvedServicePort);
@@ -938,6 +980,10 @@ public class GenericHealthcareTokenGenerator {
 	 * Build XML payload wrapper for ServiceThread
 	 */
 	private static String buildXMLPayload(String tokenValue, int seqID) {
+		return buildXMLPayload(tokenValue, seqID, attributeName, -1);
+	}
+
+	private static String buildXMLPayload(String tokenValue, int seqID, String attrName, int joinID) {
 		long currentTime = System.currentTimeMillis();
 		String notAfter = Long.toString(currentTime + timeToExpire);
 		
@@ -951,13 +997,14 @@ public class GenericHealthcareTokenGenerator {
 		xml.append("    <ruleBaseVersion>").append(ruleBaseVersion).append("</ruleBaseVersion>\n");
 		xml.append("    <priortiseSID>true</priortiseSID>\n");
 		xml.append("    <monitorIncomingEvents>true</monitorIncomingEvents>\n");
+		if (joinID > 0) xml.append("    <joinID>").append(joinID).append("</joinID>\n");
 		xml.append("  </header>\n");
 		xml.append("  <service>\n");
 		xml.append("    <serviceName>").append(targetPlaceName).append("</serviceName>\n");
 		xml.append("    <operation>").append(serviceOperation).append("</operation>\n");
 		xml.append("  </service>\n");
 		xml.append("  <joinAttribute>\n");
-		xml.append("    <attributeName>").append(attributeName).append("</attributeName>\n");
+		xml.append("    <attributeName>").append(attrName).append("</attributeName>\n");
 		xml.append("    <attributeValue>").append(escapeXml(tokenValue)).append("</attributeValue>\n");
 		xml.append("    <notAfter>").append(notAfter).append("</notAfter>\n");
 		xml.append("    <status>active</status>\n");
