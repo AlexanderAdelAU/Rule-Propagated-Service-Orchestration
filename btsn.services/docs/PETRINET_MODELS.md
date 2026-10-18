@@ -17,7 +17,7 @@ invocation returns a random Boolean; the explicit `boolean-token` adapter
 carries data and exposes the result to process guards. Both outcomes use the
 same unguarded connection in this two-place model.
 
-`token.count` defaults to ten. The older `token.outcome` launcher property is
+`token.count` defaults to ten. The launcher's `eg1.data` value (`outcome=true`) is
 input data only; it does not force the service result. Node and gateway types,
 joins and routing are configured by the process independently of the service.
 Stop the previous local Ant run before starting another. Local hosts remain

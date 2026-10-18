@@ -18,9 +18,10 @@ target remains `run-complete-workflow`.
 | `FinancialSystem_Stage4_LiveDeployment_BuildAndRun.xml` | Live-deployment workflow example |
 | `FinancialSystem_Stage5_PriorityPreemption_BuildAndRun.xml` | Foreground/background priority workflow example |
 
-These five files were moved unchanged from `btsn.petrinet.ProjectLoader`.
-Existing Eclipse Ant launch configurations referencing their former paths must
-select the XML in this project or be recreated by running the moved file.
+All five run on the shared process runtime (`btsn.services/process-runtime.xml`),
+so each also works from the Process Editor's Deploy, Build and Run on hosts, and
+`host-packages` builds a package for each other machine. Their processes, versions,
+token counts, token data, schedules and delays are those of the earlier launchers.
 Petri-net model launchers remain in [their own project](../btsn.petrinet.ProjectLoader/README.md).
 
 The Financial deployment profile remains under
@@ -32,8 +33,7 @@ launcher project does not rename those process identifiers.
 Each launcher keeps its isolated host configuration and databases under
 `btsn.services/target/launchers/<Ant-project-name>`, so existing prepared host
 state uses the same location. Monitor retains its usual working directory and
-results. Service output files now appear beside the launch XML in this project;
-their filenames, token counts, versions, delays and phase order are unchanged.
+results. Service output files appear beside the launch XML in this project.
 Local/remote startup selection and overrides remain available. Remote hosts must
 already be running with matching prepared configuration and deployed JARs.
 
