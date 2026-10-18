@@ -32,6 +32,21 @@ public class ProcessEditor extends JFrame {
     
     // Process type selector
     private JComboBox<String> processTypeCombo;
+    static final String DEFAULT_PROCESS_TYPE = "PetriNet";
+    static final String PROCESS_TYPE_TIP = "<html><b>Process type</b>: how the deployed rules bind joins and service results.<br><br>"
+        + "<b>PetriNet</b> (default): token flow. A join fires when the expected number of tokens has arrived,<br>"
+        + "and a service with no declared result passes the token on. Use it for models and most processes.<br><br>"
+        + "<b>SOA</b>: service contracts. A join waits for named inputs (Diagnosis waits for the radiology,<br>"
+        + "laboratory and cardiology results), and every service must declare its arguments and result;<br>"
+        + "deployment stops if one is missing. Use it when places exchange named business data,<br>"
+        + "as in the healthcare processes.</html>";
+
+    /** Shows the process's type, or the default for a process that names none (and records it, so Save writes it). */
+    private void selectProcessType(String type) {
+        String chosen = type == null || type.trim().isEmpty() ? DEFAULT_PROCESS_TYPE : type;
+        processTypeCombo.setSelectedItem(chosen);
+        canvas.setProcessType(chosen);
+    }
     /** The machines (infrastructure definition) places are shown and run on. */
     private final JComboBox<String> machinesCombo = new JComboBox<>();
     private boolean fillingMachines;
@@ -412,8 +427,8 @@ public class ProcessEditor extends JFrame {
             e -> clearCanvas());
         
         // Process type dropdown
-        processTypeCombo = new JComboBox<>(new String[]{"", "PetriNet", "SOA"});
-        processTypeCombo.setToolTipText("Process Type (PetriNet or SOA)");
+        processTypeCombo = new JComboBox<>(new String[]{"PetriNet", "SOA"});
+        processTypeCombo.setToolTipText(PROCESS_TYPE_TIP);
         processTypeCombo.setPreferredSize(new Dimension(100, 28));
         processTypeCombo.setMinimumSize(new Dimension(100, 28));
         processTypeCombo.setMaximumSize(new Dimension(100, 28));
@@ -421,6 +436,7 @@ public class ProcessEditor extends JFrame {
             String selectedType = (String) processTypeCombo.getSelectedItem();
             canvas.setProcessType(selectedType != null && !selectedType.isEmpty() ? selectedType : null);
         });
+        canvas.setProcessType(DEFAULT_PROCESS_TYPE);  // a new process is a Petri net until you choose otherwise
         
         // Zoom change listener to update zoom label
         canvas.setZoomChangeListener(() -> updateZoomLabel());
@@ -1435,11 +1451,7 @@ public class ProcessEditor extends JFrame {
                 
                 // Update process type dropdown to match loaded file
                 String loadedProcessType = canvas.getProcessType();
-                if (loadedProcessType != null) {
-                    processTypeCombo.setSelectedItem(loadedProcessType);
-                } else {
-                    processTypeCombo.setSelectedIndex(0);  // Empty/blank
-                }
+                selectProcessType(loadedProcessType);
                 
                 // Extract unique colors from loaded elements into the palette
                 populateColorsFromCanvas();
@@ -1504,7 +1516,7 @@ public class ProcessEditor extends JFrame {
             canvas.setDefinitionLocation(null);
             documentationPanel.clear();  // Clear documentation
             resetButtonColors();
-            processTypeCombo.setSelectedIndex(0);  // Reset process type dropdown
+            selectProcessType(null);  // a new process starts as a Petri net
             currentFile = null; // Forget current file (starting fresh)
             updateStatusBar(); // Update status bar to show no file
             setDirty(false); // Clear dirty flag after clearing canvas
