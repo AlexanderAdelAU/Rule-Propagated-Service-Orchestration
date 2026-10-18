@@ -280,6 +280,16 @@ public final class DeployFlowCheck {
                         "name=\"eg1.id\" value=\"PATIENT_ARRIVAL\"", "name=\"eg1.place\" value=\"P1_Place\"", "name=\"eg1.operation\" value=\"processTriageAssessment\"",
                         "name=\"eg1.format.service\" value=\"TriageService\"", "location=\"../btsn.services/deployments/healthcare/Deployment.json\"", "name=\"run.p6\" value=\"true\""})
                     check(edXml.contains(expected), "Healthcare launcher lacks " + expected + "\n" + edXml);
+                // A join names one input for each arc arriving at it; the supplied joins do, and a missing one is reported on Validate and Save.
+                check(ed.validateServiceContracts().isEmpty(), "Emergency Department joins reported: " + ed.validateServiceContracts());
+                for (ProcessElement place : ed.getPlaces())
+                    if ("Diagnosis".equals(place.getLabel())) { ServiceOperation op = place.getServiceOperations().get(0); op.setArguments(new ArrayList<>(op.getArguments().subList(0, 2))); }
+                check(ed.joinInputMismatches().equals(Arrays.asList("Diagnosis is a join with 3 incoming arcs but its operation names 2 inputs; name one input for each arc.")),
+                    "Join with a missing input: " + ed.joinInputMismatches());
+                Path combined = workflows.resolve("petrinet/LiveChange/P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.json");
+                Canvas both2 = new Canvas(); both2.setDefinitionLocation(combined.toFile()); both2.loadFromJSON(read(combined));
+                check(!both2.joinInputMismatches().isEmpty() && both2.validateServiceContracts().stream().noneMatch(e -> e.contains("incoming arcs")),
+                    "A combined process's overlaid join arcs should not be reported");
                 bothOptions.runs.get(1).version = "v001";
                 check(BuildAndRunGenerator.problems(bothPlan, bothOptions).stream().anyMatch(e -> e.contains("both use v001")), "Shared version accepted");
                 bothOptions.runs.get(1).version = "v002"; bothOptions.runs.get(1).enabled = false;
@@ -322,7 +332,7 @@ public final class DeployFlowCheck {
             } catch (Throwable ex) { replay[0] = ex; }
         });
         if (replay[0] != null) throw new AssertionError("Inventory replay", replay[0]);
-        System.out.println("PASS: catalogue-only design, right-click Deploy to, filled Deploy panel with Place column, two-way node edits, save links process and instances, reopen, existing deployment unchanged, Create Build and Run files, Ant-prefixed analysis replay, What it does, transition names by label or node, one place per node, several event generators, healthcare launchers with their token generator, inventory replay mapped by service");
+        System.out.println("PASS: catalogue-only design, right-click Deploy to, filled Deploy panel with Place column, two-way node edits, save links process and instances, reopen, existing deployment unchanged, Create Build and Run files, Ant-prefixed analysis replay, What it does, transition names by label or node, one place per node, several event generators, healthcare launchers with their token generator, one input per join arc, inventory replay mapped by service");
     }
 
     private static int rowOf(JTable table, String place) {
