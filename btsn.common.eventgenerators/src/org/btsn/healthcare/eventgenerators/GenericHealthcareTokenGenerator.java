@@ -979,6 +979,10 @@ public class GenericHealthcareTokenGenerator {
 	/**
 	 * Build XML payload wrapper for ServiceThread
 	 */
+	private static String buildXMLPayload(String tokenValue, int seqID) {
+		return buildXMLPayload(tokenValue, seqID, attributeName, -1);
+	}
+
 	private static String buildXMLPayload(String tokenValue, int seqID, String attrName, int joinID) {
 		long currentTime = System.currentTimeMillis();
 		String notAfter = Long.toString(currentTime + timeToExpire);
