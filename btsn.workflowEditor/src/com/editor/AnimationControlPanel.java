@@ -278,7 +278,8 @@ public class AnimationControlPanel extends JPanel {
             }
             
             loadAnalysisText(content.toString());
-            statusLabel.setText("Recorded run: " + file.getName() + ", saved " + new java.text.SimpleDateFormat("d MMM HH:mm").format(new java.util.Date(file.lastModified())) + " (events measured at the hosts)");
+            statusLabel.setText("Recorded run: " + file.getName() + ", saved " + new java.text.SimpleDateFormat("d MMM HH:mm").format(new java.util.Date(file.lastModified())) + " (events measured at the hosts)"
+                + cutoffNote());
             
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
@@ -288,6 +289,13 @@ public class AnimationControlPanel extends JPanel {
         }
     }
     
+    /** "; replay ends at 14.7 s: ..." when a host stopped recording before the others. */
+    private String cutoffNote() {
+        long cutoff = animator.getRecordingCutoff();
+        if (cutoff == 0) return "";
+        return String.format("; replay ends at %.1f s, after which not every host was recording", (cutoff - animator.getStartTime()) / 1000.0);
+    }
+
     /**
      * Load analysis data from text
      */
