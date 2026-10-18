@@ -48,8 +48,9 @@ Finished copies of every file are included as `P2_Tutorial_*` ([list](#repositor
 
 ## 1. Design the process
 
-Choose **File → New → Process Definition** and set the toolbar's **Type** to
-**PetriNet**.
+Choose **File → New → Process Definition**. The toolbar's **Type** starts at
+**PetriNet**, which is what this tutorial uses; hover over it to see when to choose
+**SOA** instead.
 
 ### Place the elements
 

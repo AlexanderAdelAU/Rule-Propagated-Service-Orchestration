@@ -2770,6 +2770,35 @@ public class Canvas extends JPanel {
         List<String> errors = new ArrayList<>();
         for (ProcessElement element : elements) if (element.getType() == ProcessElement.Type.PLACE)
             for (String error : serviceRegistry.validatePlace(element)) errors.add(element.getLabel() + ": " + error);
+        // A combined process overlays several versions, so a join may draw every version's arcs.
+        if (BuildAndRunGenerator.combinedLauncher(definitionLocation) == null) errors.addAll(joinInputMismatches());
+        return errors;
+    }
+
+    /**
+     * A join place names one input for each arc arriving at its join T_in (from T_outs; an event generator's
+     * arc brings a join set and is checked by Build and Run). A place with several operations needs one that fits.
+     */
+    public List<String> joinInputMismatches() {
+        List<String> errors = new ArrayList<>();
+        for (ProcessElement join : elements) {
+            if (join.getType() != ProcessElement.Type.TRANSITION || !"JoinNode".equals(join.getNodeType())) continue;
+            int arcs = 0;
+            for (Arrow in : arrows)
+                if (in.getTarget() == join && in.getSource() != null && in.getSource().getType() != ProcessElement.Type.EVENT_GENERATOR) arcs++;
+            if (arcs == 0) continue;
+            for (Arrow out : arrows) {
+                ProcessElement place = out.getSource() == join ? out.getTarget() : null;
+                if (place == null || place.getType() != ProcessElement.Type.PLACE || place.getServiceOperations().isEmpty()) continue;
+                boolean fits = false; int named = -1;
+                for (ServiceOperation operation : place.getServiceOperations()) {
+                    named = operation.getArguments().size();
+                    if (named == arcs) fits = true;
+                }
+                if (!fits) errors.add(place.getLabel() + " is a join with " + arcs + " incoming arcs but its operation names " + named
+                    + (named == 1 ? " input" : " inputs") + "; name one input for each arc.");
+            }
+        }
         return errors;
     }
     public String saveToJSON() {
