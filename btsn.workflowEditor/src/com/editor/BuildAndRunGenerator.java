@@ -49,6 +49,7 @@ public final class BuildAndRunGenerator {
         public final Map<String, String> operations = new LinkedHashMap<>(); // generator id -> operation
         public final Map<String, Integer> rates = new LinkedHashMap<>();
         public final Map<String, String> versions = new LinkedHashMap<>();
+        public final Map<String, Integer> joins = new LinkedHashMap<>();     // generator id -> inputs of the join it feeds
         public File profile; public boolean profileExists;
         public String serviceDeployment = "", catalogue = "";
         public String nodeSetName = "";
@@ -137,6 +138,10 @@ public final class BuildAndRunGenerator {
             plan.operations.put(element.getId(), place.getServiceOperations().get(0).getName());
             plan.rates.put(element.getId(), parse(element.getGeneratorRate(), 1000));
             plan.versions.put(element.getId(), VERSIONS.contains(element.getTokenVersion()) ? element.getTokenVersion() : "v001");
+            int inputs = joinInputs(canvas, element, place);
+            if (inputs > 1) plan.joins.put(element.getId(), inputs);
+            else if (inputs >= 0) plan.problems.add(element.getId() + " feeds the join before " + place.getLabel()
+                + ", but " + place.getLabel() + "'s operation names " + inputs + " input(s); a join needs one argument for each input.");
         }
         if (plan.targets.isEmpty()) plan.problems.add("Add an event generator connected through a T_in transition to a deployed place.");
         if (!plan.problems.isEmpty()) return plan;
@@ -197,7 +202,11 @@ public final class BuildAndRunGenerator {
         lines.add("Hosts    " + String.join(", ", plan.nodes) + " and Monitor");
         for (String packaged : packagedHosts(plan)) lines.add("Package  " + packaged + " (Build host packages; start it on its machine)");
         for (Run run : o.enabled())
-            lines.add("Tokens   " + o.tokens + " from " + run.generatorId + " to " + plan.targets.get(run.generatorId) + "." + plan.operations.get(run.generatorId)
+            if (plan.joins.containsKey(run.generatorId))
+                lines.add("Tokens   one set of " + plan.joins.get(run.generatorId) + " join tokens from " + run.generatorId + " to "
+                    + plan.targets.get(run.generatorId) + "." + plan.operations.get(run.generatorId) + ", version " + run.version
+                    + " (the generator feeds a join, which needs all its inputs to start)");
+            else lines.add("Tokens   " + o.tokens + " from " + run.generatorId + " to " + plan.targets.get(run.generatorId) + "." + plan.operations.get(run.generatorId)
                 + ", one every " + run.intervalMs + " ms, version " + run.version);
         if (o.enabled().size() > 1) lines.add("         The generators fire together; the analysis reports each version separately.");
         for (String problem : problems(plan, o)) lines.add("Problem  " + problem);
@@ -233,7 +242,9 @@ public final class BuildAndRunGenerator {
         if (!plan.profileExists) writeText(plan.profile, profileJson(plan));
         for (Run run : o.enabled()) {
             StringBuilder csv = new StringBuilder();
-            for (int i = 0; i < o.tokens; i++) csv.append((long)i * run.intervalMs).append(",0,1\n");
+            Integer join = plan.joins.get(run.generatorId);
+            if (join != null) csv.append("0,0,").append(join).append("\n"); // the join's inputs arrive together
+            else for (int i = 0; i < o.tokens; i++) csv.append((long)i * run.intervalMs).append(",0,1\n");
             writeText(plan.schedule(o, run), csv.toString());
         }
         if (!plan.initializerExists) writeText(plan.initializer, adminProcess(plan.nodes, true, plan.nodeSetName));
@@ -275,6 +286,12 @@ public final class BuildAndRunGenerator {
             x.append("    <property name=\"").append(slot).append(".place\" value=\"").append(plan.targets.get(run.generatorId)).append("\"/>\n");
             x.append("    <property name=\"").append(slot).append(".operation\" value=\"").append(xml(plan.operations.get(run.generatorId))).append("\"/>\n");
             x.append("    <property name=\"").append(slot).append(".trigger.file\" location=\"").append(xml(relative(dir, plan.schedule(o, run)))).append("\"/>\n");
+            Integer join = plan.joins.get(run.generatorId);
+            if (join != null) {
+                x.append("    <!-- ").append(xml(run.generatorId)).append(" feeds a join: it fires one token for each of the join's inputs. -->\n");
+                x.append("    <property name=\"").append(slot).append(".tokens\" value=\"").append(join).append("\"/>\n");
+                x.append("    <property name=\"").append(slot).append(".join.inputs\" value=\"").append(join).append("\"/>\n");
+            }
         }
         x.append("    <property name=\"token.count\" value=\"").append(o.tokens).append("\"/>\n");
         x.append("    <property name=\"workflow.completion.seconds\" value=\"").append(o.completionSeconds).append("\"/>\n\n");
@@ -346,6 +363,18 @@ public final class BuildAndRunGenerator {
     }
 
     /** The place reached from an event generator through its transition (generator -> T_in -> place). */
+    /** The number of inputs of the join a generator feeds through its T_in (its place's arguments), or -1 when that T_in is not a join. */
+    static int joinInputs(Canvas canvas, ProcessElement generator, ProcessElement place) {
+        for (Arrow out : canvas.getArrows()) {
+            ProcessElement next = out.getTarget();
+            if (out.getSource() != generator || next == null || !"JoinNode".equals(next.getNodeType())) continue;
+            boolean feedsPlace = false;
+            for (Arrow onward : canvas.getArrows()) if (onward.getSource() == next && onward.getTarget() == place) feedsPlace = true;
+            if (feedsPlace) return place.getServiceOperations().get(0).getArguments().size();
+        }
+        return -1;
+    }
+
     static ProcessElement firstPlaceAfter(Canvas canvas, ProcessElement generator) {
         for (Arrow out : canvas.getArrows()) {
             if (out.getSource() != generator) continue;
