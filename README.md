@@ -525,7 +525,11 @@ open the matching workflow JSON, click **Load Analysis...** and choose the
 analyzer output: the files under `btsn.common/AnalysisFolder`, or one saved with
 `ant -emacs … analyse > analysis.txt`. Replaying shows recorded observations; it
 does not run the workflow again. Every launcher also opens the two charts with
-its `chart-timing` and `chart-spatial` targets.
+its `chart-timing` and `chart-spatial` targets. The editor saves each run's whole
+console to `btsn.services/target/run-logs/Run_<launcher>.txt`.
+A process that never terminates (the traffic light's loop) is still running while
+its hosts are collected one after another, so their records end at different times;
+the replay stops where the first host stopped recording and says so.
 Open the workflow from its place under `btsn.common/ProcessDefinitionFolder` so
 that its service deployment loads. The analyzer names places and transitions
 after their hosting node (`P1_Place`, `T_in_P1`), and the deployment maps those
@@ -550,6 +554,16 @@ provide entry points for preparing the packaged runtime.
 | `btsn.financial.ProjectLoader` | Financial launchers |
 | `btsn.petrinet.ProjectLoader` | Petri-net model launchers and utility phases; launchers that Build and Run writes for domains without their own loader (such as the inventory example) |
 | `btsn.workflowEditor` | ProcessEditor: design, deploy, Build and Run, Run on hosts, and replay of recorded runs |
+
+Every process launcher, in all three loader folders, runs on the shared process runtime
+([`btsn.services/process-runtime.xml`](btsn.services/build/workflows/process-runtime.xml)).
+A launcher only sets its process, its event generators (`eg1`–`eg3`, each with its own
+version, target place and schedule) and the hosts it uses; the runtime supplies the
+three phases. A deployment profile may name the token generator its services expect:
+the healthcare profile names the one that fills tokens from each service's token format.
+Build and Run writes launchers of the same form. The exceptions are the controlled
+queue experiment (`Queue_Priority_BuildAndRun.xml`) and the triage process tests,
+which run single phases.
 
 Each domain describes its services in a catalogue under
 [`BusinessServiceDefinitions`](btsn.common/BusinessServiceDefinitions).
