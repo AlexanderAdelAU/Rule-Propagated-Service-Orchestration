@@ -202,8 +202,9 @@ Click **Build and Run** in the toolbar. The editor first checks that:
 - every place is deployed on one of P1–P6;
 - an event generator feeds a deployed place through a `T_in` transition.
 
-It lists anything missing. Healthcare processes use their own token generator
-and are not supported here yet.
+It lists anything missing. When the deployment profile names a token generator
+(the healthcare profile names `GenericHealthcareTokenGenerator`), the launcher uses it,
+and each generator's tokens are filled from the token format of the service at its target place.
 
 ![The Create Build and Run dialog for the P2 tutorial with a second event generator: 10 tokens per generator, 10 s wait, launcher name P2_Tutorial_Workflow_BuildAndRun.xml in btsn.petrinet.ProjectLoader; an Event generators table with EG11 at v001 and EG6 at v002, both feeding P2_Place.processToken every 1000 ms; and a summary of the files it will write or reuse.](images/p2-tutorial-build-and-run.png)
 

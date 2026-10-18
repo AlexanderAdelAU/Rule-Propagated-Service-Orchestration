@@ -269,6 +269,17 @@ public final class DeployFlowCheck {
                 for (String expected : new String[] {"name=\"eg1.id\" value=\"EG11\"", "name=\"eg1.version\" value=\"v001\"", "name=\"eg2.id\" value=\"EG6\"",
                         "name=\"eg2.version\" value=\"v002\"", "name=\"query.version\" value=\"v001,v002\"", "P2_Tutorial_Workflow_BuildAndRun_EG6.csv"})
                     check(bothXml.contains(expected), "Two-generator launcher lacks " + expected + "\n" + bothXml);
+                check(!bothXml.contains("token.generator.class") && !bothXml.contains("format.service"), "Petri-net launcher names a token generator\n" + bothXml);
+                // Healthcare: its deployment profile names the token generator, which fills each token from its target service's format.
+                Path emergency = workflows.resolve("healthcare/Workflow/Emergency_Department_Patient_Workflow.json");
+                Canvas ed = new Canvas(); ed.setDefinitionLocation(emergency.toFile()); ed.loadFromJSON(read(emergency));
+                BuildAndRunGenerator.Plan edPlan = BuildAndRunGenerator.plan(ed, emergency.toFile());
+                check(edPlan.problems.isEmpty(), "Healthcare process not ready for Build: " + edPlan.problems);
+                String edXml = BuildAndRunGenerator.launcherXml(edPlan, edPlan.defaults);
+                for (String expected : new String[] {"name=\"token.generator.class\" value=\"org.btsn.healthcare.eventgenerators.GenericHealthcareTokenGenerator\"",
+                        "name=\"eg1.id\" value=\"PATIENT_ARRIVAL\"", "name=\"eg1.place\" value=\"P1_Place\"", "name=\"eg1.operation\" value=\"processTriageAssessment\"",
+                        "name=\"eg1.format.service\" value=\"TriageService\"", "location=\"../btsn.services/deployments/healthcare/Deployment.json\"", "name=\"run.p6\" value=\"true\""})
+                    check(edXml.contains(expected), "Healthcare launcher lacks " + expected + "\n" + edXml);
                 bothOptions.runs.get(1).version = "v001";
                 check(BuildAndRunGenerator.problems(bothPlan, bothOptions).stream().anyMatch(e -> e.contains("both use v001")), "Shared version accepted");
                 bothOptions.runs.get(1).version = "v002"; bothOptions.runs.get(1).enabled = false;
@@ -311,7 +322,7 @@ public final class DeployFlowCheck {
             } catch (Throwable ex) { replay[0] = ex; }
         });
         if (replay[0] != null) throw new AssertionError("Inventory replay", replay[0]);
-        System.out.println("PASS: catalogue-only design, right-click Deploy to, filled Deploy panel with Place column, two-way node edits, save links process and instances, reopen, existing deployment unchanged, Create Build and Run files, Ant-prefixed analysis replay, What it does, transition names by label or node, one place per node, several event generators, inventory replay mapped by service");
+        System.out.println("PASS: catalogue-only design, right-click Deploy to, filled Deploy panel with Place column, two-way node edits, save links process and instances, reopen, existing deployment unchanged, Create Build and Run files, Ant-prefixed analysis replay, What it does, transition names by label or node, one place per node, several event generators, healthcare launchers with their token generator, inventory replay mapped by service");
     }
 
     private static int rowOf(JTable table, String place) {

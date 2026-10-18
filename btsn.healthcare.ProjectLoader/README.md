@@ -8,6 +8,15 @@ healthcare place project or Eclipse `bin` output is on their classpaths.
 Run the selected XML file as an **Ant Build** in Eclipse with Ant 1.10.2+ and a
 JDK 15+. Paths resolve from the build file's directory, including `ProcessTests`.
 
+The three process launchers run on the shared process runtime
+(`btsn.services/process-runtime.xml`), like the Petri-net launchers: they set the process,
+event generators and hosts, and name the healthcare token generator
+(`token.generator.class`), which fills each token from the target service's token format
+(`egN.format.service`). Add `-Dhost.address=127.0.0.1` to run every host on one machine;
+`ant -f <launcher> analyse` analyses the run. The editor's Build writes launchers of the same
+form for healthcare processes, taking the token generator from
+`btsn.services/deployments/healthcare/Deployment.json`.
+
 | Build file | Default behaviour |
 |---|---|
 | `Emergency_Department_BuildAndRun.xml` | Initialize P1–P6 and Monitor, run ten patients, collect observations |

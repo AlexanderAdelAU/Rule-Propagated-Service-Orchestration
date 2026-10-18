@@ -50,6 +50,8 @@ public final class BuildAndRunGenerator {
         public final Map<String, Integer> rates = new LinkedHashMap<>();
         public final Map<String, String> versions = new LinkedHashMap<>();
         public final Map<String, Integer> joins = new LinkedHashMap<>();     // generator id -> inputs of the join it feeds
+        public final Map<String, String> services = new LinkedHashMap<>();  // generator id -> service at its target place
+        public String tokenGenerator = "";  // the profile's "tokenGenerator", when it names one (else the runtime's default)
         public File profile; public boolean profileExists;
         public String serviceDeployment = "", catalogue = "";
         public String nodeSetName = "";
@@ -114,7 +116,6 @@ public final class BuildAndRunGenerator {
         if (!location.startsWith(folder)) { plan.problems.add("Save the process under btsn.common/ProcessDefinitionFolder."); return plan; }
         plan.processName = folder.relativize(location).toString().replace(File.separatorChar, '/').replaceFirst("\\.json$", "");
         plan.domain = plan.processName.contains("/") ? plan.processName.substring(0, plan.processName.indexOf('/')) : "";
-        if ("healthcare".equals(plan.domain)) plan.problems.add("Healthcare processes use their own token generator; generating their launchers is not supported yet.");
 
         ServiceRegistry registry = canvas.getServiceRegistry();
         if (!registry.hasDeployment()) { plan.problems.add("Deploy the process first: no service deployment is linked."); return plan; }
@@ -136,6 +137,7 @@ public final class BuildAndRunGenerator {
             if (place == null || place.getServiceOperations().isEmpty() || registry.nodeFor(place).isEmpty()) continue;
             plan.targets.put(element.getId(), registry.nodeFor(place) + "_Place");
             plan.operations.put(element.getId(), place.getServiceOperations().get(0).getName());
+            if (place.getService() != null && !place.getService().isEmpty()) plan.services.put(element.getId(), place.getService());
             plan.rates.put(element.getId(), parse(element.getGeneratorRate(), 1000));
             plan.versions.put(element.getId(), VERSIONS.contains(element.getTokenVersion()) ? element.getTokenVersion() : "v001");
             int inputs = joinInputs(canvas, element, place);
@@ -151,7 +153,12 @@ public final class BuildAndRunGenerator {
         for (File candidate : jsonFiles(deployments)) {
             try {
                 JSONObject profile = (JSONObject)new JSONParser().parse(read(candidate));
-                if (plan.serviceDeployment.equals(profile.get("serviceDeployment"))) { plan.profile = candidate; plan.profileExists = true; break; }
+                if (plan.serviceDeployment.equals(profile.get("serviceDeployment"))) {
+                    plan.profile = candidate; plan.profileExists = true;
+                    // A profile may name the token generator its services expect (e.g. one that fills tokens from formats).
+                    if (profile.get("tokenGenerator") instanceof String) plan.tokenGenerator = (String)profile.get("tokenGenerator");
+                    break;
+                }
             } catch (Exception ignored) { }
         }
         String base = processFile.getName().replaceFirst("(?i)\\.json$", "");
@@ -200,6 +207,7 @@ public final class BuildAndRunGenerator {
         lines.add((plan.initializerExists ? "Reuse    " : "Write    ") + relative(plan.root, plan.initializer));
         lines.add((plan.collectorExists ? "Reuse    " : "Write    ") + relative(plan.root, plan.collector));
         lines.add("Hosts    " + String.join(", ", plan.nodes) + " and Monitor");
+        if (!plan.tokenGenerator.isEmpty()) lines.add("Tokens   made by " + plan.tokenGenerator + " (named by the deployment profile), each from its target service's token format");
         for (String packaged : packagedHosts(plan)) lines.add("Package  " + packaged + " (Build host packages; start it on its machine)");
         for (Run run : o.enabled())
             if (plan.joins.containsKey(run.generatorId))
@@ -270,6 +278,8 @@ public final class BuildAndRunGenerator {
         x.append("<project name=\"").append(xml(name)).append("\" default=\"run-complete-workflow\" basedir=\".\">\n");
         x.append("    <property name=\"process.title\" value=\"").append(xml(plan.processName)).append("\"/>\n");
         x.append("    <property name=\"launcher.profile.file\" location=\"").append(xml(relative(dir, plan.profile))).append("\"/>\n");
+        if (!plan.tokenGenerator.isEmpty())
+            x.append("    <property name=\"token.generator.class\" value=\"").append(xml(plan.tokenGenerator)).append("\"/>\n");
         x.append("    <property name=\"workflow.process.name\" value=\"").append(xml(plan.processName)).append("\"/>\n");
         x.append("    <property name=\"init.process.name\" value=\"common/Initializers/").append(plan.nodeSetName).append("_Initialization\"/>\n");
         x.append("    <property name=\"collector.process.name\" value=\"common/Collectors/").append(plan.nodeSetName).append("_Collector\"/>\n");
@@ -286,6 +296,8 @@ public final class BuildAndRunGenerator {
             x.append("    <property name=\"").append(slot).append(".place\" value=\"").append(plan.targets.get(run.generatorId)).append("\"/>\n");
             x.append("    <property name=\"").append(slot).append(".operation\" value=\"").append(xml(plan.operations.get(run.generatorId))).append("\"/>\n");
             x.append("    <property name=\"").append(slot).append(".trigger.file\" location=\"").append(xml(relative(dir, plan.schedule(o, run)))).append("\"/>\n");
+            if (!plan.tokenGenerator.isEmpty() && plan.services.containsKey(run.generatorId))
+                x.append("    <property name=\"").append(slot).append(".format.service\" value=\"").append(xml(plan.services.get(run.generatorId))).append("\"/>\n");
             Integer join = plan.joins.get(run.generatorId);
             if (join != null) {
                 x.append("    <!-- ").append(xml(run.generatorId)).append(" feeds a join: it fires one token for each of the join's inputs. -->\n");
