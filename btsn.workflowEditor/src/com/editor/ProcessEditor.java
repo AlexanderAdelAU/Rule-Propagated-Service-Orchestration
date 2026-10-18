@@ -41,11 +41,23 @@ public class ProcessEditor extends JFrame {
         + "deployment stops if one is missing. Use it when places exchange named business data,<br>"
         + "as in the healthcare processes.</html>";
 
-    /** Shows the process's type, or the default for a process that names none (and records it, so Save writes it). */
+    /**
+     * Shows the process's type, or the default for a process that names none (and records it, so Save writes it).
+     * Showing a type is not an edit, so it leaves the unsaved-changes state as it was.
+     */
     private void selectProcessType(String type) {
+        boolean wasDirty = isDirty;
         String chosen = type == null || type.trim().isEmpty() ? DEFAULT_PROCESS_TYPE : type;
         processTypeCombo.setSelectedItem(chosen);
         canvas.setProcessType(chosen);
+        setDirty(wasDirty);
+    }
+
+    /** Open starts at ProcessDefinitionFolder, so every application grouping (common, financial, healthcare...) is in view. */
+    static File processDefinitionRoot(File anchor) {
+        File common = ServiceRegistry.findCommon(anchor);
+        File root = common == null ? null : new File(common, "ProcessDefinitionFolder");
+        return root != null && root.isDirectory() ? root : null;
     }
     /** The machines (infrastructure definition) places are shown and run on. */
     private final JComboBox<String> machinesCombo = new JComboBox<>();
@@ -437,6 +449,7 @@ public class ProcessEditor extends JFrame {
             canvas.setProcessType(selectedType != null && !selectedType.isEmpty() ? selectedType : null);
         });
         canvas.setProcessType(DEFAULT_PROCESS_TYPE);  // a new process is a Petri net until you choose otherwise
+        setDirty(false);                               // ... which is not an unsaved change
         
         // Zoom change listener to update zoom label
         canvas.setZoomChangeListener(() -> updateZoomLabel());
@@ -1407,7 +1420,10 @@ public class ProcessEditor extends JFrame {
         }
         
         JFileChooser fileChooser = new JFileChooser();
-        if (lastDirectory != null) {
+        File root = processDefinitionRoot(currentFile);
+        if (root != null) {
+            fileChooser.setCurrentDirectory(root);
+        } else if (lastDirectory != null) {
             fileChooser.setCurrentDirectory(lastDirectory);
         }
         fileChooser.setDialogTitle("Open Process Definition");
