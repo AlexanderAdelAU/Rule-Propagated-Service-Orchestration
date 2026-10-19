@@ -164,6 +164,7 @@ Use either route:
 | **Port Slot** | `0`, the node's first fixed port | A node has a second port (P4, P6) and you need it |
 | **Instance** | The place label (`P2`) | You want another name. The supplied file uses `StochasticInstance1`. |
 | **Invocation Adapter** | `boolean-token` for a Boolean service | Never for this tutorial |
+| **Endpoint** | Blank | You set the adapter to `rest`, so the host calls the service over HTTP ([Call it over REST](ServiceTutorial.md#8-call-it-over-rest)) |
 
 The **Physical node network** table at the top is read-only. It comes from
 [`SingleHost.json`](btsn.common/InfrastructureDefinitionFolder/SingleHost.json):

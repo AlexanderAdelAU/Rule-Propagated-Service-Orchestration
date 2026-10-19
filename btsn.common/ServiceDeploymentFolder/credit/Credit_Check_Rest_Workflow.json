@@ -1,0 +1,19 @@
+{
+  "definitionType": "ServiceDeployment",
+  "catalog": "BusinessServiceDefinitions/credit/Credit.json",
+  "capabilities": [
+    {
+      "node": "P1",
+      "service": "CreditLimitService",
+      "instance": "Credit",
+      "invocationAdapter": "rest",
+      "endpoint": "http://127.0.0.1:8080/credit/assess",
+      "operation": "assess",
+      "returnAttribute": "creditDecision",
+      "portSlot": 0,
+      "arguments": [
+        {"name": "token", "type": "String", "value": "String", "required": false}
+      ]
+    }
+  ]
+}

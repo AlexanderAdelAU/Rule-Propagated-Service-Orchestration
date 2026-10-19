@@ -519,7 +519,7 @@ public class ServiceHelper {
 		String implementationClass = capabilityResolver.resolve(service, operation, buildVersion,
 		        cleanedArguments.size(), ruleBaseVersion);
 		logger.info("CAPABILITY RESOLVED: " + service + "." + operation + " -> " + implementationClass);
-		String adapted = capabilityResolver.adaptedResult(service, operation, cleanedArguments, buildVersion, ruleBaseVersion);
+		String adapted = capabilityResolver.adaptedResult(sequenceID, service, operation, cleanedArguments, buildVersion, ruleBaseVersion);
         if (adapted != null) return adapted;
         Class<?> serviceClass = Class.forName(implementationClass);
 		

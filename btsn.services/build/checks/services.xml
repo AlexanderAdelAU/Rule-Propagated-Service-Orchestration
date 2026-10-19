@@ -165,6 +165,7 @@
             <src path="../btsn.rpso.places.p1/src"/>
             <include name="org/btsn/invocation/BusinessCapabilityResolver.java"/>
             <include name="org/btsn/invocation/BooleanTokenAdapter.java"/>
+            <include name="org/btsn/invocation/RestAdapter.java"/>
             <include name="org/btsn/deployment/DeploymentConfiguration.java"/>
             <include name="org/btsn/invocation/BusinessCapabilityResolverTest.java"/>
             <include name="org/btsn/json/jsonLibrary.java"/>

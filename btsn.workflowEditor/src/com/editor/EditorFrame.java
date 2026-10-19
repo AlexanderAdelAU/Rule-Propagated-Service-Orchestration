@@ -779,6 +779,8 @@ public class EditorFrame extends JPanel {
             String machines = ServiceRegistry.selectedInfrastructure();
             if (!ServiceRegistry.DEFAULT_INFRASTRUCTURE.equals(machines)) where += " (" + machines + ")";
             if (canvas.hasPendingNode(element)) where += " (not saved; use Deploy)";
+            String rest = registry.restEndpointFor(element);
+            if (!rest.isEmpty()) where += "\ncalling " + rest + " (REST)";
         }
         JTextArea runsOn = new JTextArea(where); runsOn.setEditable(false); runsOn.setLineWrap(true); runsOn.setWrapStyleWord(true); runsOn.setFont(fieldFont());
         runsOn.setBorder(BorderFactory.createTitledBorder("Runs on"));

@@ -94,6 +94,7 @@ public final class BusinessCapabilityResolverTest {
         verifyMetadataFailures();
         verifyConfiguredImplementation();
         verifyGenericHosts();
+        verifyRestHosts();
         System.out.println("PASS: " + checks + " capability/invocation checks");
     }
 
@@ -209,6 +210,70 @@ public final class BusinessCapabilityResolverTest {
         }
     }
 
+    /**
+     * A service reached over REST: every host calls the placement's endpoint with the token's sequence id and named
+     * inputs, and publishes the endpoint's answer. Its catalogue entry has no Java class.
+     */
+    @SuppressWarnings("unchecked")
+    private static void verifyRestHosts() throws Exception {
+        String originalCommon = System.getProperty("btsn.common.dir");
+        com.sun.net.httpserver.HttpServer server = com.sun.net.httpserver.HttpServer.create(new java.net.InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/echo", exchange -> {
+            try {
+                JSONObject request = parse(new String(exchange.getRequestBody().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8));
+                JSONObject body = new JSONObject();
+                body.put("payload", ((JSONObject) request.get("inputs")).get("payload"));
+                body.put("sequenceId", request.get("sequenceId"));
+                body.put("operation", request.get("operation"));
+                body.put("implementation", "rest");
+                JSONObject routing = new JSONObject(); routing.put("routing_path", "via-rest");
+                body.put("routing_decision", routing);
+                JSONObject response = new JSONObject(); response.put("result", body);
+                byte[] bytes = response.toJSONString().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                exchange.getResponseHeaders().add("Content-Type", "application/json");
+                exchange.sendResponseHeaders(200, bytes.length);
+                exchange.getResponseBody().write(bytes);
+            } catch (Exception e) {
+                exchange.sendResponseHeaders(500, -1);
+            } finally {
+                exchange.close();
+            }
+        });
+        server.start();
+        String endpoint = "http://127.0.0.1:" + server.getAddress().getPort() + "/echo";
+        try {
+            for (int i = 1; i <= 6; i++) {
+                String runtime = "P" + i + "_Place";
+                Path metadata = hostFixture(runtime, "echo", "result", "payload", null,
+                        "\"invocationAdapter\":\"rest\",\"endpoint\":\"" + endpoint + "\",");
+                System.setProperty("btsn.common.dir", metadata.toString());
+                String response = new ServiceHelper().process("1030000", "org.btsn.places." + runtime, "echo",
+                        new ArrayList<String>(Arrays.asList("{\"value\":\"over-rest\"}")), "result", "v001").getResult();
+                JSONObject body = (JSONObject) parse(response).get("result");
+                equal("over-rest", ((JSONObject) body.get("payload")).get("value"));
+                equal("1030000", body.get("sequenceId"));
+                equal("echo", body.get("operation"));
+                equal("rest", body.get("implementation"));
+                equal("via-rest", ((JSONObject) body.get("routing_decision")).get("routing_path"));
+            }
+            // A service with no Java class must be deployed with the rest adapter, and a rest placement needs an endpoint.
+            Path noClass = hostFixture("P1_Place", "echo", "result", "payload", null);
+            rejects(() -> new BusinessCapabilityResolver(noClass), "No implementation class");
+            Path noEndpoint = hostFixture("P1_Place", "echo", "result", "payload", null, "\"invocationAdapter\":\"rest\",\"endpoint\":\"not-a-url\",");
+            rejects(() -> new BusinessCapabilityResolver(noEndpoint), "endpoint");
+            // An endpoint that cannot be reached fails the invocation with its address.
+            server.stop(0);
+            Path down = hostFixture("P1_Place", "echo", "result", "payload", null,
+                    "\"invocationAdapter\":\"rest\",\"endpoint\":\"" + endpoint + "\",\"timeoutMs\":2000,");
+            BusinessCapabilityResolver resolver = new BusinessCapabilityResolver(down, Paths.get("").toAbsolutePath());
+            rejects(() -> resolver.adaptedResult("1000000", "org.btsn.places.P1_Place", "echo",
+                    Arrays.asList("{}"), "result", "v001"), "could not be reached");
+        } finally {
+            server.stop(0);
+            System.setProperty("btsn.common.dir", originalCommon);
+        }
+    }
+
     public static final class EchoService {
         @SuppressWarnings("unchecked")
         public String echo(String payload) throws Exception {
@@ -223,19 +288,26 @@ public final class BusinessCapabilityResolverTest {
 
     private static Path hostFixture(String runtime, String operation, String output, String input, String implementation)
             throws Exception {
+        return hostFixture(runtime, operation, output, input, implementation, "");
+    }
+
+    /** As above; placementExtra adds placement fields (e.g. the rest adapter), and a null implementation omits the class. */
+    private static Path hostFixture(String runtime, String operation, String output, String input, String implementation,
+                                    String placementExtra) throws Exception {
         Path metadata = Files.createTempDirectory(Paths.get("").toAbsolutePath(), "host-metadata-");
         Files.createDirectories(metadata.resolve("BusinessServiceDefinitions"));
         Files.writeString(metadata.resolve("BusinessServiceDefinitions/Deployment.json"),
                 "{\"catalog\":\"catalog.json\",\"infrastructure\":\"infrastructure.json\",\"serviceDeployment\":\"deployment.json\","
                 + "\"deploymentRules\":\"facts.xml\",\"directServiceRules\":[]}");
         Files.writeString(metadata.resolve("catalog.json"), "{\"services\":[{\"service\":\"ConfiguredCapability\","
-                + "\"operation\":\"" + operation + "\",\"implementationClass\":\"" + implementation + "\","
+                + "\"operation\":\"" + operation + "\","
+                + (implementation == null ? "" : "\"implementationClass\":\"" + implementation + "\",")
                 + "\"returnAttribute\":\"" + output + "\",\"inputs\":[\"" + input + "\"],\"status\":\"active\"}]}");
         Files.writeString(metadata.resolve("infrastructure.json"), "{\"definitionType\":\"Infrastructure\","
                 + "\"nodes\":[{\"node\":\"configured-node\",\"channel\":\"fixture\",\"address\":\"127.0.0.1\",\"basePorts\":[7000]}]}");
         Files.writeString(metadata.resolve("deployment.json"), "{\"definitionType\":\"ServiceDeployment\","
                 + "\"capabilities\":[{\"node\":\"configured-node\",\"service\":\"ConfiguredCapability\","
-                + "\"operation\":\"" + operation + "\",\"portSlot\":0,\"returnAttribute\":\"" + output + "\","
+                + "\"operation\":\"" + operation + "\",\"portSlot\":0,\"returnAttribute\":\"" + output + "\"," + placementExtra
                 + "\"arguments\":[{\"name\":\"" + input + "\",\"type\":\"String\"}]}]}");
         Files.writeString(metadata.resolve("facts.xml"), "<Atom><Rel>boundChannel</Rel><Ind>fixture</Ind><Ind>127.0.0.1</Ind></Atom>"
                 + "<Atom><Rel>activeService</Rel><Ind>" + runtime + "</Ind><Ind>" + operation
