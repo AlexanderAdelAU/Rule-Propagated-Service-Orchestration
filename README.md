@@ -9,7 +9,9 @@ Because the places are generic, the same orchestration runs any process you can
 express as places, transitions, forks and joins: a Boolean Petri-net model, a
 loan application or an emergency-department workflow. Bind different services to
 the places and the process does different work. Change the deployment and the
-same process runs across different machines. No central engine routes the
+same process runs across different machines. A service can run inside its host
+(a Java class) or anywhere it can be reached over REST, written in any language and
+hosted locally or on the internet. No central engine routes the
 tokens; each host follows its own installed rules.
 
 Every run is measured as it happens (queue waits, service times, join waits and
@@ -19,8 +21,8 @@ measurements, not guarantees of meeting hard real-time deadlines.
 The workflow editor takes a process from design to a measured run: draw it,
 deploy its places to hosts, create its launcher, run it on the hosts and replay
 the recorded run. Start with a Boolean-returning Petri-net example.
-[ServiceTutorial.md](ServiceTutorial.md) then shows how to write your own service,
-the inventory example adds state and several hosts, and the financial and healthcare
+[ServiceTutorial.md](ServiceTutorial.md) then shows how to write your own service
+and call it over REST from Node.js, the inventory example adds state and several hosts, and the financial and healthcare
 workflows show larger processes.
 
 ![The Petri net you draw is the system that runs: a four-place model on the left, where P1 forks to P2 and P3 and they join before P4, is deployed as local rules to four separate hosts on the right. Each host runs its own T_in, place function and T_out; tokens travel between hosts as messages with no central engine, and Monitor observes every host for complete Petri-net analysis.](images/rpso-overview.svg)
@@ -228,6 +230,7 @@ the same **T_in → P → T_out** unit.
 | Financial application | Validate, check credit/fraud, underwrite and decide | Fork checks, synchronize their results and route declared outcomes |
 | Emergency department | Triage, perform diagnostic operations, diagnose and treat | Select direct/diagnostic paths, fork diagnostics and synchronize results |
 | Inventory example | Reserve stock (stateful), restock with a lead time | Route on string results, loop between two hosts, carry state changes as messages |
+| Credit check | Approve or refer an application, in Java or as a Node.js service over REST | Route one decision to one of two terminate nodes; the same process whether the service is in-process, local or on the internet |
 
 To write your own service, start with [ServiceTutorial.md](ServiceTutorial.md), then see the inventory example in [Tutorial.md](Tutorial.md#6-add-your-own-service).
 
@@ -336,13 +339,14 @@ with `rest`, the host POSTs each call to the placement's endpoint, so the servic
 be written in any language and run anywhere it can be reached over HTTP. It returns
 the same result a Java service would, and the transitions, rules and tokens do not
 change. [ServiceTutorial.md](ServiceTutorial.md#8-call-it-over-rest) serves the credit
-check from Node.js this way.
+check from Node.js this way, on the same machine or [hosted on the internet](ServiceTutorial.md#host-it-on-the-internet)
+(the code is in [`examples/rest`](examples/rest)).
 
 | Layer | Responsibility | Repository artefacts |
 |---|---|---|
 | Process model | Places, transitions, fork/join structure, guards and termination | `btsn.common/ProcessDefinitionFolder` |
 | Service contract | Logical service identity, operations, named inputs and returned attribute | `BusinessServiceDefinitions`, `ServiceAttributeBindings` in `btsn.common` |
-| Deployment | Map capabilities to implementation classes, hosts and channels | [Physical infrastructure](btsn.common/InfrastructureDefinitionFolder/README.md), [service deployments](btsn.common/ServiceDeploymentFolder/README.md) and `btsn.services/deployments/{healthcare,financial,models}` |
+| Deployment | Map capabilities to implementation classes or REST endpoints, hosts and channels | [Physical infrastructure](btsn.common/InfrastructureDefinitionFolder/README.md), [service deployments](btsn.common/ServiceDeploymentFolder/README.md) and `btsn.services/deployments/{healthcare,financial,models}` |
 | Generic execution fabric | Transport, buffering, synchronization, version selection, invocation and publication | `btsn.rpso.places.p1`–`p6`, shared infrastructure |
 | Business computation | Domain objects, calculations and routing values | Here `btsn.common/src/org/btsn/business`, packaged as independent service JARs and called by reflection; any implementation that honours the binding would do |
 | Observation | Collect records, reconstruct workflow families and display measurements | `btsn.common.Monitor` |
@@ -570,6 +574,7 @@ provide entry points for preparing the packaged runtime.
 | `btsn.financial.ProjectLoader` | Financial launchers |
 | `btsn.petrinet.ProjectLoader` | Petri-net model launchers and utility phases; launchers that Build and Run writes for domains without their own loader (such as the inventory example) |
 | `btsn.workflowEditor` | ProcessEditor: design, deploy, Build and Run, Run on hosts, and replay of recorded runs |
+| `examples/rest` | The credit-check service in Node.js, called over REST: a local server and the same function for Vercel |
 
 Every process launcher, in all three loader folders, runs on the shared process runtime
 ([`btsn.services/build/workflows/process-runtime.xml`](btsn.services/build/workflows/process-runtime.xml),
