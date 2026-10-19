@@ -34,7 +34,8 @@ outputs stay under the existing `target` directories.
 
 ## Build and check
 
-From the repository root, with Ant 1.10.2+ running on a JDK 15+:
+From the repository root, with Ant 1.10.2+ running on a JDK 15+ (Eclipse includes Ant;
+from a command line, install it separately):
 
 ```sh
 ant -f btsn.services/build.xml clean check

@@ -5,8 +5,8 @@ business-service JARs, the shared infrastructure JAR, Monitor and common event
 generators. They build through the existing `btsn.services` tooling. No legacy
 healthcare place project or Eclipse `bin` output is on their classpaths.
 
-Run the selected XML file as an **Ant Build** in Eclipse with Ant 1.10.2+ and a
-JDK 15+. Paths resolve from the build file's directory, including `ProcessTests`.
+Run the selected XML file as an **Ant Build** in Eclipse, which includes Ant 1.10.x,
+on a JDK 15+. Paths resolve from the build file's directory, including `ProcessTests`.
 
 The three process launchers run on the shared process runtime
 (`btsn.services/process-runtime.xml`), like the Petri-net launchers: they set the process,
