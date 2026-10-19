@@ -62,6 +62,9 @@ public final class MeasuredWorkflowTimeline extends JPanel {
     public static List<Interval> loadFromDatabase() throws Exception {
         Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
         List<Interval> intervals = new ArrayList<>();
+        try { return loadIntervals(intervals); } finally { MonitorDatabase.release("jdbc:derby:ServiceAnalysisDataBase"); }
+    }
+    private static List<Interval> loadIntervals(List<Interval> intervals) throws Exception {
         try (Connection c = DriverManager.getConnection("jdbc:derby:ServiceAnalysisDataBase");
              Statement s = c.createStatement();
              ResultSet rs = s.executeQuery("SELECT DISTINCT workflowBase FROM CONSOLIDATED_TRANSITION_FIRINGS WHERE eventType='GENERATED' ORDER BY workflowBase")) {

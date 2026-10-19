@@ -1,5 +1,6 @@
 package org.btsn.derby.Analysis;
 
+import org.btsn.derby.Analysis.helper.MonitorDatabase;
 import org.btsn.derby.Analysis.helper.CombinedWorkflowMetrics;
 import org.btsn.derby.Analysis.helper.MeasuredWorkflowTimeline;
 import org.btsn.derby.Analysis.helper.RecordedServiceTimings;
@@ -679,7 +680,11 @@ public class SwingGanttChart_WithLatency extends JPanel implements Scrollable {
             setPreferredSize(new Dimension(width,plotTop(width)+Math.round((105+Math.max(1,uniqueServices.size())*110)*fontScaleFactor)));
             System.out.println("Loaded " + tasks.size() + (serviceVisitMode ? " recorded service visits" : " root workflows for elapsed / queue view"));
         } catch(Exception e) {
-            throw new IllegalStateException("Unable to load measured workflow metrics",e);
+            String locked = MonitorDatabase.lockedMessage(e);
+            throw new IllegalStateException(locked != null ? locked : "Unable to load measured workflow metrics",e);
+        } finally {
+            // the window stays open; let the other viewers and the analyser in
+            for (String databasePath : databasePaths) MonitorDatabase.release("jdbc:derby:" + databasePath);
         }
     }
     public void setServiceVisitMode(boolean serviceVisits) {
@@ -1270,6 +1275,7 @@ public class SwingGanttChart_WithLatency extends JPanel implements Scrollable {
         frame.setVisible(true);
     }
     public static void main(String[] args) {
+        MonitorDatabase.releaseAfterReading = true;  // a viewer window must not hold the database open
         if (args.length != 0) {
             List<String> paths = new ArrayList<>();
             for (int i=0; i<args.length; i+=2) {
