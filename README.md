@@ -147,7 +147,8 @@ receipt, function invocation and output routing visible in one small model.
 
 ![A circular P1 place between input and output transition bars. Its function returns true or false; the output transition terminates on true and loops on false.](images/p1-tutorial.svg)
 
-In the [single-place tutorial](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json),
+In the [single-place tutorial](Tutorial.md)
+([process definition](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json)),
 **P1 performs a function whose result is `true` or `false`**. The function produces
 its own result; it does not simply copy the arriving token's logical state.
 The transitions supply the execution behavior around that function:
@@ -519,7 +520,7 @@ Keep this metadata with `ServiceAnalysisDataBase` when archiving results. Older
 runs without matching metadata show `Process not captured`.
 
 After **Run on hosts**, the editor
-([ProcessEditor](btsn.workflowEditor/src/com/editor/ProcessEditor.java)) loads
+([ProcessEditor source](btsn.workflowEditor/src/com/editor/ProcessEditor.java)) loads
 the run's analysis itself and highlights **Play**. To replay an earlier run,
 open the matching workflow JSON, click **Load Analysis...** and choose the
 analyzer output: the files under `btsn.common/AnalysisFolder`, or one saved with
@@ -556,7 +557,8 @@ provide entry points for preparing the packaged runtime.
 | `btsn.workflowEditor` | ProcessEditor: design, deploy, Build and Run, Run on hosts, and replay of recorded runs |
 
 Every process launcher, in all three loader folders, runs on the shared process runtime
-([`btsn.services/process-runtime.xml`](btsn.services/build/workflows/process-runtime.xml)).
+([`btsn.services/build/workflows/process-runtime.xml`](btsn.services/build/workflows/process-runtime.xml),
+imported through `btsn.services/process-runtime.xml`).
 A launcher only sets its process, its event generators (`eg1`–`eg3`, each with its own
 version, target place and schedule) and the hosts it uses; the runtime supplies the
 three phases. A deployment profile may name the token generator its services expect:
