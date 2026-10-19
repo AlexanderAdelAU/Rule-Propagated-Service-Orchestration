@@ -174,7 +174,7 @@ function can run.
 
 ![P1–P4 shown as circular places between input and output transition bars. P1 true forks to P2 and P3, their arrivals join before P4, and each place produces its own Boolean result.](images/petrinet-fork-join.svg)
 
-The [P1–P4 model](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_P2_P3_P4_Fork_Join_Workflow.json)
+The P1–P4 model ([process definition](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_P2_P3_P4_Fork_Join_Workflow.json))
 uses the same simple Boolean-returning functionality at **all four places**.
 Each completed invocation produces its own `true` or `false` result, irrespective
 of the arriving Boolean value. The model's routing rules determine whether that
@@ -268,8 +268,8 @@ result of one synchronized activity becomes an input to another.
 
 ![Six explicit transition–place–transition units. P1 forks to P2, P3 and P5; P4 joins P2/P3, P6 joins P4/P5 and terminates.](images/petrinet-double-join.svg)
 
-The
-[six-place double-join definition](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_to_P6_Double_Join_Workflow.json)
+The six-place double-join model
+([process definition](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_to_P6_Double_Join_Workflow.json))
 binds every place to its own deployment instance of the same Boolean function,
 `StochasticService.processToken`. The adapter carries the incoming data, so the
 branch data is preserved through both joins:
