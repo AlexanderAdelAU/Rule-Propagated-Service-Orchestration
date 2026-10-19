@@ -5,7 +5,7 @@ General → Existing Projects into Workspace**. Select the repository root and
 leave **Copy projects into workspace** unchecked. This project contains Ant
 entry points; it does not need a Java source folder or duplicate runtime libraries.
 
-Run the required XML directly as an **Ant Build**, with Ant 1.10.2+ and a JDK 15+.
+Run the required XML directly as an **Ant Build** in Eclipse, which includes Ant 1.10.x, on a JDK 15+.
 Each launcher automatically builds the packaged business services, shared
 infrastructure, generic numbered hosts, Monitor and event generators. Its default
 target remains `run-complete-workflow`.

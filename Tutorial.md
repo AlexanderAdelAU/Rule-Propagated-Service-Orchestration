@@ -33,7 +33,10 @@ Finished copies of every file are included as `P2_Tutorial_*` ([list](#repositor
 ## Before you start
 
 - **Tools**:
-  - **JDK 15 or later** and **Apache Ant 1.10.2 or later**. Run Ant with a JDK so its compiler is available.
+  - **JDK 15 or later.**
+  - **Apache Ant 1.10.2 or later**: it comes with Eclipse, which runs every launcher as an **Ant Build**,
+    and the editor finds it there by itself. Install Ant separately only to run launchers from a command
+    line. Run Ant with a JDK so its compiler is available.
   - In Eclipse, import the projects with **File → Import → General → Existing
     Projects into Workspace**, leaving **Copy projects into workspace** unchecked.
   - You need `btsn.common`, `btsn.services`, `btsn.common.eventgenerators`,

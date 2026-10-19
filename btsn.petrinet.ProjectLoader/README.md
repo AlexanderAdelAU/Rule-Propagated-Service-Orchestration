@@ -1,7 +1,7 @@
 # Petri-net model launchers
 
-Run your usual `XXX_BuildAndRun.xml` as an Ant Build in Eclipse with Ant 1.10.2+
-and a JDK 15+. Each retained launcher builds the packaged business services,
+Run your usual `XXX_BuildAndRun.xml` as an Ant Build in Eclipse, which includes
+Ant 1.10.x, on a JDK 15+. Each retained launcher builds the packaged business services,
 shared infrastructure, numbered hosts, Monitor and event generators automatically.
 No separate `clean`/`package` step or Eclipse `bin` compilation is required.
 

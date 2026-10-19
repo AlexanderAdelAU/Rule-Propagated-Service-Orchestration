@@ -50,9 +50,10 @@ To give places your own services, follow the inventory example in [Add your own 
 
 ## Quick start: run, observe and replay
 
-You need a JDK (15 or later; tested with 21) and Apache Ant 1.10. Eclipse is
-optional: every launcher is an Ant build file that you can also run as an
-**Ant Build** from Eclipse. The repository supplies the runtime libraries,
+You need a JDK (15 or later; tested with 21) and Apache Ant 1.10.2 or later.
+Ant comes with Eclipse, which runs every launcher as an **Ant Build**, and the editor
+finds it there by itself; install Ant separately only to run launchers from a command
+line. Eclipse itself is optional: every launcher is an ordinary Ant build file. The repository supplies the runtime libraries,
 including OOjDREW and embedded Derby, so no Maven or Python is needed.
 
 ### From the editor
