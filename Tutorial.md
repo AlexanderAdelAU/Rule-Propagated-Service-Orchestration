@@ -446,6 +446,8 @@ ant -f btsn.petrinet.ProjectLoader/P1_Tutorial_Local_BuildAndRun.xml export-tuto
 
 ## 6. Add your own service
 
+New to writing services? [ServiceTutorial.md](ServiceTutorial.md) builds one from scratch, step by step: a credit check that routes to `approve` or `refer`. The inventory example below goes further.
+
 StochasticService only tosses a coin. Any Java class can be a place's service, and the rest of the flow (design, Deploy, Build and Run, Run on hosts, replay) stays the same. The supplied **inventory example** shows how, in a deliberately small process: it is an example of extending RPSO, not a full business process.
 
 ![The inventory example in the editor: ORDERS feeds the Inventory place on P1; T_out_Inventory routes reserved to Shipped and out_of_stock to the Supplier place on P2, whose T_out routes restocked back to Inventory and unavailable to Cancelled. The Attributes panel shows InventoryService.reserve and what it does.](images/inventory-design.png)
@@ -678,6 +680,7 @@ Every launcher runs the same way:
 |---|---|
 | Single place (this tutorial) | [P2_Tutorial_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P2_Tutorial_Workflow_BuildAndRun.xml) |
 | Single place, P1 reference | [P1_Tutorial_Local_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_Tutorial_Local_BuildAndRun.xml) |
+| Your first service: credit check ([ServiceTutorial.md](ServiceTutorial.md)) | [Credit_Check_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/Credit_Check_Workflow_BuildAndRun.xml) |
 | Your own service: inventory and supplier | [Inventory_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/Inventory_Workflow_BuildAndRun.xml) |
 | P1–P4 fork/join model | [P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.xml) |
 | Six-place double-join model | [P1_to_P6_Double_Join_Workflow.xml](btsn.petrinet.ProjectLoader/P1_to_P6_Double_Join_Workflow.xml) |

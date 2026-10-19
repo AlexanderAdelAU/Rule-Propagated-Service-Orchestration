@@ -1,0 +1,16 @@
+{
+  "domain": "Credit",
+  "purpose": "The service written in ServiceTutorial.md: one stateless check, routed on a string result. Physical placement is defined separately by the service deployment.",
+  "services": [
+    {
+      "service": "CreditLimitService",
+      "implementationClass": "org.btsn.business.credit.CreditLimitService",
+      "operation": "assess",
+      "description": "Approves a credit application up to a limit of 5,000 and refers the rest. Application n asks for n x 1,000 unless the token carries an amount.",
+      "returns": "A credit decision with the application, amount and limit. Routes on \"approve\" (within the limit) or \"refer\" (over it).",
+      "inputs": ["token"],
+      "returnAttribute": "creditDecision",
+      "status": "active"
+    }
+  ]
+}

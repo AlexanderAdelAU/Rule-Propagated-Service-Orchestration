@@ -18,9 +18,10 @@ measurements, not guarantees of meeting hard real-time deadlines.
 
 The workflow editor takes a process from design to a measured run: draw it,
 deploy its places to hosts, create its launcher, run it on the hosts and replay
-the recorded run. Start with a Boolean-returning Petri-net example. The
-inventory example then shows how to add your own services, and the financial
-and healthcare workflows show larger processes.
+the recorded run. Start with a Boolean-returning Petri-net example.
+[ServiceTutorial.md](ServiceTutorial.md) then shows how to write your own service,
+the inventory example adds state and several hosts, and the financial and healthcare
+workflows show larger processes.
 
 ![The Petri net you draw is the system that runs: a four-place model on the left, where P1 forks to P2 and P3 and they join before P4, is deployed as local rules to four separate hosts on the right. Each host runs its own T_in, place function and T_out; tokens travel between hosts as messages with no central engine, and Monitor observes every host for complete Petri-net analysis.](images/rpso-overview.svg)
 
@@ -46,7 +47,7 @@ How each step is done in the editor (ProcessEditor, `btsn.workflowEditor`), work
 | **4 · Run on hosts** | The launcher starts each place as its own host process, plus Monitor. It installs each host's rules and waits for every host to commit to them, then fires the tokens and collects the observations | [Run it](Tutorial.md#4-run-it), [Rule deployment](#rule-deployment-and-token-execution) |
 | **5 · Results** | The editor analyses the run and replays the recorded tokens on the design; Monitor's charts show timing and activity | [Show the results](Tutorial.md#5-show-the-results), [Observe a run](#observe-and-interpret-a-run) |
 
-To give places your own services, follow the inventory example in [Add your own service](Tutorial.md#6-add-your-own-service).
+To write your own service, follow [ServiceTutorial.md](ServiceTutorial.md): one complete service, from the Java class to a run. The inventory example in [Add your own service](Tutorial.md#6-add-your-own-service) then adds state and several hosts.
 
 ## Quick start: run, observe and replay
 
@@ -228,7 +229,7 @@ the same **T_in → P → T_out** unit.
 | Emergency department | Triage, perform diagnostic operations, diagnose and treat | Select direct/diagnostic paths, fork diagnostics and synchronize results |
 | Inventory example | Reserve stock (stateful), restock with a lead time | Route on string results, loop between two hosts, carry state changes as messages |
 
-To add your own service, follow the inventory example in [Tutorial.md](Tutorial.md#6-add-your-own-service).
+To write your own service, start with [ServiceTutorial.md](ServiceTutorial.md), then see the inventory example in [Tutorial.md](Tutorial.md#6-add-your-own-service).
 
 P1–Pn denotes the general model positions. This repository currently packages
 six numbered host projects; deployment determines which functions they run.
