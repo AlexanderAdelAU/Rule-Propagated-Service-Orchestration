@@ -594,7 +594,7 @@ class NodeTypeProcessorHelper {
         if ("TERMINATE".equals(nextService) && "TERMINATE".equals(nextOp)) {
             logger.info("GATEWAY-TERMINATE: Token " + serviceThread.getSequenceID() + " terminated via GatewayNode decision [arc=" + arcValue + "]");
 
-            serviceThread.instrumentTokenTerminate(serviceThread.getSequenceID(), serviceThread.getServiceName(), "GatewayNode");
+            serviceThread.instrumentTokenTerminate(serviceThread.getSequenceID(), serviceThread.getServiceName(), "GatewayNode", arcValue);
             return;
         }
 

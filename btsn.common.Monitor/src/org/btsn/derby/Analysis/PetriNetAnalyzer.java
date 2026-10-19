@@ -993,7 +993,7 @@ public class PetriNetAnalyzer {
         ArrayList<MarkingSnapshot> snapshots = new ArrayList<>();
         
         String sql = 
-            "SELECT tokenId, timestamp, marking, bufferSize, toPlace, transitionId, eventType " +
+            "SELECT * " +   // arcValue is absent from databases written before it was recorded
             "FROM CONSOLIDATED_MARKING_EVOLUTION " +
             "WHERE placeName = ? " +
             "  AND workflowBase = ? " +
@@ -1005,6 +1005,10 @@ public class PetriNetAnalyzer {
             pstmt.setString(1, placeName);
             pstmt.setInt(2, workflowBase);
             ResultSet rs = pstmt.executeQuery();
+            boolean hasArc = false;
+            java.sql.ResultSetMetaData meta = rs.getMetaData();
+            for (int c = 1; c <= meta.getColumnCount(); c++)
+                if ("ARCVALUE".equalsIgnoreCase(meta.getColumnName(c))) hasArc = true;
             
             while (rs.next()) {
                 MarkingSnapshot snapshot = new MarkingSnapshot();
@@ -1015,6 +1019,7 @@ public class PetriNetAnalyzer {
                 snapshot.toPlace = rs.getString("toPlace");
                 snapshot.transitionId = rs.getString("transitionId");
                 snapshot.eventType = rs.getString("eventType");
+                snapshot.arcValue = hasArc ? rs.getString("arcValue") : null;
                 snapshots.add(snapshot);
             }
             
@@ -3037,6 +3042,7 @@ public class PetriNetAnalyzer {
         public String toPlace;       // Destination place (for exits)
         public String transitionId;  // T_in_X or T_out_X
         public String eventType;     // ENTER, EXIT, FORK_CONSUMED, TERMINATE
+        public String arcValue;      // guard value taken (tells which terminate node a token reached)
     }
     
     public static class InterArrival {
@@ -3212,7 +3218,9 @@ public class PetriNetAnalyzer {
                                      " Buffer=" + snap.bufferSize +
                                      " ToPlace=" + (snap.toPlace != null ? snap.toPlace : "") +
                                      " TransitionId=" + (snap.transitionId != null ? snap.transitionId : "") +
-                                     " EventType=" + (snap.eventType != null ? snap.eventType : ""));
+                                     " EventType=" + (snap.eventType != null ? snap.eventType : "") +
+                                     (snap.arcValue != null && !snap.arcValue.isEmpty()
+                                         ? " Arc=" + snap.arcValue : ""));
                 }
             }
         }

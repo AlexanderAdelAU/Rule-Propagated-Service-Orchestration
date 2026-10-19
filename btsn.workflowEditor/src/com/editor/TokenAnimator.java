@@ -62,6 +62,8 @@ public class TokenAnimator {
     private Set<String> eventGeneratorIds = new HashSet<>();
     private Map<String, String> eventGenToTIn = new HashMap<>();
     private Map<String, String> tOutToTerminate = new HashMap<>();
+    /** T_out + decision value -> terminate node, for a T_out whose guards lead to more than one terminate node. */
+    private Map<String, String> tOutArcToTerminate = new HashMap<>();
     private Set<String> terminateIds = new HashSet<>();
     private Map<String, Point> terminatePositions = new HashMap<>();
     private Map<String, String> labelToService = new HashMap<>();  // Maps place label -> place key
@@ -254,6 +256,7 @@ public class TokenAnimator {
         eventGeneratorIds.clear();
         eventGenToTIn.clear();
         tOutToTerminate.clear();
+        tOutArcToTerminate.clear();
         terminateIds.clear();
         terminatePositions.clear();
         labelToService.clear();
@@ -442,6 +445,9 @@ public class TokenAnimator {
                 sourceLabel != null && sourceLabel.startsWith("T_out_") &&
                 targetLabel != null && terminateIds.contains(targetLabel)) {
                 tOutToTerminate.put(sourceLabel, targetLabel);
+                String decision = arrow.getDecisionValue();
+                if (decision != null && !decision.trim().isEmpty())
+                    tOutArcToTerminate.put(sourceLabel + "#" + decision.trim(), targetLabel);
             }
             
             // Store waypoints for all arrows (used for path distance calculation)
@@ -599,6 +605,14 @@ public class TokenAnimator {
                     String toPlace = null;
                     String eventType = null;
                     String transitionId = null;
+                    String arcValue = null;
+                    
+                    // Arc= comes last and is the guard value as written, which may contain spaces
+                    int arcAt = line.indexOf(" Arc=");
+                    if (arcAt >= 0) {
+                        arcValue = line.substring(arcAt + 5).trim();
+                        line = line.substring(0, arcAt);
+                    }
                     
                     String[] parts = line.split(" ");
                     for (String part : parts) {
@@ -643,8 +657,10 @@ public class TokenAnimator {
                         eventType = entering ? "ENTER" : "EXIT";
                     }
                     
-                    events.add(new MarkingEvent(timestamp, tokenId, version,
-                        placeId, entering, buffer, toPlace, eventType, transitionId));
+                    MarkingEvent parsed = new MarkingEvent(timestamp, tokenId, version,
+                        placeId, entering, buffer, toPlace, eventType, transitionId);
+                    parsed.arcValue = (arcValue == null || arcValue.isEmpty()) ? null : arcValue;
+                    events.add(parsed);
                     
                     if (timestamp < startTime) startTime = timestamp;
                     if (timestamp > endTime) endTime = timestamp;
@@ -2027,7 +2043,7 @@ public class TokenAnimator {
             } else if (current.isTerminate()) {
                 // Token terminated
                 String tOut = placeToTOut.get(current.placeId);
-                String terminateNode = tOutToTerminate.get(tOut);
+                String terminateNode = terminateFor(tOut, current.arcValue);
                 
                 segments.add(new AnimationSegment(
                     tokenId, version, Phase.CONSUMED,
@@ -2515,7 +2531,7 @@ public class TokenAnimator {
                 ));
                 
                 // Check if this place directly routes to terminate
-                String terminateNode = tOutToTerminate.get(tOutId);
+                String terminateNode = terminateFor(tOutId, terminateEvent != null ? terminateEvent.arcValue : null);
                 
                 if (terminateNode != null) {
                     // This place routes directly to terminate
@@ -2739,7 +2755,9 @@ public class TokenAnimator {
         }
         
         if (isTerminating) {
-            String terminateNode = tOutToTerminate.get(tOut);
+            String arc = exitEvent.arcValue;
+            if (arc == null && nextEvent != null && nextEvent.isTerminate()) arc = nextEvent.arcValue;
+            String terminateNode = terminateFor(tOut, arc);
             if (terminateNode == null) {
                 // Try to find any terminate node
                 terminateNode = terminateIds.isEmpty() ? "TERMINATE" : terminateIds.iterator().next();
@@ -3056,6 +3074,18 @@ public class TokenAnimator {
     }
     public boolean leadsToTerminate(String tOutId) { return tOutToTerminate.containsKey(tOutId); }
     public String getTerminateForTOut(String tOutId) { return tOutToTerminate.get(tOutId); }
+
+    /**
+     * The terminate node a token reached from this T_out: the one whose arc carries the guard value
+     * the host recorded, or the T_out's terminate node when the analysis has no value (older runs).
+     */
+    String terminateFor(String tOut, String arcValue) {
+        if (tOut != null && arcValue != null) {
+            String byArc = tOutArcToTerminate.get(tOut + "#" + arcValue.trim());
+            if (byArc != null) return byArc;
+        }
+        return tOutToTerminate.get(tOut);
+    }
     public boolean isTerminateNode(String nodeId) { return terminateIds.contains(nodeId); }
     public Point getTerminatePosition(String terminateNodeId) { return terminatePositions.get(terminateNodeId); }
     public Set<String> getTerminateNodeIds() { return new HashSet<>(terminateIds); }

@@ -14,6 +14,8 @@ public class MarkingEvent implements Comparable<MarkingEvent> {
     public final String toPlace;
     public final String eventType;
     public final String transitionId;
+    /** For a TERMINATE: the guard value taken, which picks the terminate node when a T_out has several (null in older analyses). */
+    public String arcValue;
     
     public MarkingEvent(long timestamp, String tokenId, String version,
                        String placeId, boolean entering, int buffer,
