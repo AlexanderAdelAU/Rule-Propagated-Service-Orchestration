@@ -1,0 +1,17 @@
+{
+  "definitionType": "ServiceDeployment",
+  "catalog": "BusinessServiceDefinitions/credit/Credit.json",
+  "capabilities": [
+    {
+      "node": "P1",
+      "service": "CreditLimitService",
+      "instance": "Credit",
+      "operation": "assess",
+      "returnAttribute": "creditDecision",
+      "portSlot": 0,
+      "arguments": [
+        {"name": "token", "type": "String", "value": "String", "required": false}
+      ]
+    }
+  ]
+}
