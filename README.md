@@ -317,12 +317,24 @@ platform assembles them. The diagram and table below locate the process
 definition, service contract, deployment, execution machinery and observation
 tools, and explain how their responsibilities fit together.
 
-![Process definitions install local rules in generic hosts, which invoke separate business JARs and supply observations to Monitor.](images/rpso-architecture.svg)
+![Process definitions install local rules in generic hosts, which call each bound service through its canonical binding and supply observations to Monitor.](images/rpso-architecture.svg)
 
-*Responsibility boundaries in the current Java implementation. Bound service
-JARs are invoked in-process inside a numbered host. The dashed path configures
-local rules; the dotted path carries collected observations outside the business
-workflow.*
+*Responsibility boundaries. The host calls a bound service through its canonical
+binding; in this Java implementation the service is a class invoked in-process.
+The dashed path configures local rules; the dotted path carries collected
+observations outside the business workflow.*
+
+**What binds a service is its contract, not its code.** The fabric knows a service
+only through its canonical binding (the operation's name, its named inputs and the
+attribute it returns) and through the routing value in that result, which the guards
+test. Nothing in the
+coordination layer depends on how the operation is implemented or reached. This
+implementation happens to look up the class named in the catalogue and call it by
+Java reflection, inside the host. A placement can already name an invocation
+adapter instead (the `boolean-token` adapter is one), and an adapter is where
+another means of invocation belongs: a REST call to a remote endpoint, or a service
+written in another language, would satisfy the same binding without any change to
+the transitions, the rules or the tokens.
 
 | Layer | Responsibility | Repository artefacts |
 |---|---|---|
@@ -330,7 +342,7 @@ workflow.*
 | Service contract | Logical service identity, operations, named inputs and returned attribute | `BusinessServiceDefinitions`, `ServiceAttributeBindings` in `btsn.common` |
 | Deployment | Map capabilities to implementation classes, hosts and channels | [Physical infrastructure](btsn.common/InfrastructureDefinitionFolder/README.md), [service deployments](btsn.common/ServiceDeploymentFolder/README.md) and `btsn.services/deployments/{healthcare,financial,models}` |
 | Generic execution fabric | Transport, buffering, synchronization, version selection, invocation and publication | `btsn.rpso.places.p1`–`p6`, shared infrastructure |
-| Business computation | Domain objects, calculations and decision symbols | `btsn.common/src/org/btsn/business`, packaged as independent service JARs |
+| Business computation | Domain objects, calculations and routing values | Here `btsn.common/src/org/btsn/business`, packaged as independent service JARs and called by reflection; any implementation that honours the binding would do |
 | Observation | Collect records, reconstruct workflow families and display measurements | `btsn.common.Monitor` |
 
 **Synchronize required inputs** means waiting for any remaining inputs after
@@ -342,8 +354,8 @@ and publication, or after termination has been recorded. These are logical roles
 within the host, which remains available for subsequent tokens.
 
 A business service consumes its named inputs and returns a result. Where routing
-is conditional, the result includes a symbol such as `approved` or `declined`.
-The service interprets business meaning; the fabric matches the symbol against
+is conditional, the result includes a routing value such as `approved` or `declined`.
+The service interprets business meaning; the fabric matches the value against
 declared routes and resolves the destination. Logical service identity is
 separate from physical placement: P1 can host a clinical, financial or model
 capability according to the selected deployment.
