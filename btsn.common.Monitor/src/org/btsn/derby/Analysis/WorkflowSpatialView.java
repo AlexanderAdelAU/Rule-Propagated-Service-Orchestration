@@ -1,5 +1,6 @@
 package org.btsn.derby.Analysis;
 
+import org.btsn.derby.Analysis.helper.MonitorDatabase;
 import org.btsn.derby.Analysis.helper.ServiceDisplayNames;
 import org.btsn.derby.Analysis.helper.WorkflowProcessNames;
 
@@ -41,6 +42,8 @@ public class WorkflowSpatialView extends JPanel {
     private static final String PROTOCOL = "jdbc:derby:";
     private static final String DB_NAME = "ServiceAnalysisDataBase";
     private static final String DB_URL = PROTOCOL + DB_NAME;
+    /** Why the last load found nothing, when it could not read the database (shown instead of the empty-run hint). */
+    private String loadProblem;
 
     // Data structures
     private List<TokenPath> tokenPaths = new ArrayList<>();
@@ -306,6 +309,7 @@ public class WorkflowSpatialView extends JPanel {
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
+        loadProblem = null;
         
         try {
             DriverManager.registerDriver(new EmbeddedDriver());
@@ -445,8 +449,9 @@ public class WorkflowSpatialView extends JPanel {
             }
             
         } catch (SQLException e) {
-            System.err.println("Error loading data: " + e.getMessage());
-            e.printStackTrace();
+            loadProblem = MonitorDatabase.lockedMessage(e);
+            System.err.println("Error loading data: " + (loadProblem != null ? loadProblem : e.getMessage()));
+            if (loadProblem == null) e.printStackTrace();
         } finally {
             try {
                 if (rs != null) rs.close();
@@ -455,6 +460,7 @@ public class WorkflowSpatialView extends JPanel {
             } catch (SQLException e) {
                 // Ignore
             }
+            MonitorDatabase.release(DB_URL);  // the window stays open; let the other viewers and the analyser in
         }
     }
     
@@ -618,7 +624,7 @@ public class WorkflowSpatialView extends JPanel {
         g2.drawString(msg, (getWidth() - fm.stringWidth(msg)) / 2, getHeight() / 2);
         
         g2.setFont(labelFont);
-        String hint = "Run a workflow and ensure collectors execute successfully";
+        String hint = loadProblem != null ? loadProblem : "Run a workflow and ensure collectors execute successfully";
         fm = g2.getFontMetrics();
         g2.drawString(hint, (getWidth() - fm.stringWidth(hint)) / 2, getHeight() / 2 + 25);
     }
@@ -1647,6 +1653,7 @@ public class WorkflowSpatialView extends JPanel {
     }
     
     public static void main(String[] args) {
+        MonitorDatabase.releaseAfterReading = true;  // a viewer window must not hold the database open
         SwingUtilities.invokeLater(() -> {
             WorkflowSpatialView chart = new WorkflowSpatialView();
             createAndShowGUI(chart);

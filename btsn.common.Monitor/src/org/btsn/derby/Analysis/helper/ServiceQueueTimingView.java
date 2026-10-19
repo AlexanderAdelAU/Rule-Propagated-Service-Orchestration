@@ -210,6 +210,7 @@ public final class ServiceQueueTimingView extends JPanel {
         try {
             Data data;
             try(Connection c=DriverManager.getConnection("jdbc:derby:ServiceAnalysisDataBase")) { data=load(c); }
+            finally { MonitorDatabase.release("jdbc:derby:ServiceAnalysisDataBase"); }
             JFrame frame=new JFrame("Service Queue Timings"); frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             JTabbedPane tabs=new JTabbedPane();
             tabs.addTab("Queue comparison",new JScrollPane(new ServiceQueueTimingView(data)));
