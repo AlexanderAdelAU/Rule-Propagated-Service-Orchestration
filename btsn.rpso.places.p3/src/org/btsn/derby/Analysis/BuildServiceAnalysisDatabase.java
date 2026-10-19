@@ -611,9 +611,11 @@ public class BuildServiceAnalysisDatabase {
 				+ "joinState VARCHAR(50), "
 				+ "bufferSize INT, "
 				+ "ruleVersion VARCHAR(20), "
-				+ "eventType VARCHAR(20)"  // ENTER, EXIT, FORK_CONSUMED, TERMINATE
+				+ "eventType VARCHAR(20), "  // ENTER, EXIT, FORK_CONSUMED, TERMINATE
+				+ "arcValue VARCHAR(100)"  // guard value taken (e.g. which terminate node a token reached)
 				+ ")";
 		manageTable(statement, TRANSITION_FIRINGS_TABLE, createTransitionFiringsSQL);
+		addColumnIfMissing(statement, TRANSITION_FIRINGS_TABLE, "arcValue", "VARCHAR(100)");
 		
 		// 10. TOKEN_GENEALOGY table
 		// NOTE: Composite primary key (parentTokenId, childTokenId, forkTimestamp) allows
@@ -759,8 +761,8 @@ public class BuildServiceAnalysisDatabase {
 	public void writeTransitionFiring(TreeMap<String, String> record) {
 		String sql = "INSERT INTO " + TRANSITION_FIRINGS_TABLE + 
 				" (timestamp, transitionId, transitionType, tokenId, workflowBase, " +
-				"fromPlace, toPlace, forkDecision, joinState, bufferSize, ruleVersion, eventType) " +
-				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				"fromPlace, toPlace, forkDecision, joinState, bufferSize, ruleVersion, eventType, arcValue) " +
+				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		
 		Connection conn = null;
 		PreparedStatement pstmt = null;
@@ -800,6 +802,13 @@ public class BuildServiceAnalysisDatabase {
 				pstmt.setString(12, eventTypeStr);
 			} else {
 				pstmt.setNull(12, java.sql.Types.VARCHAR);
+			}
+			
+			String arcValueStr = record.get("arcValue");
+			if (arcValueStr != null && !arcValueStr.isEmpty()) {
+				pstmt.setString(13, arcValueStr);
+			} else {
+				pstmt.setNull(13, java.sql.Types.VARCHAR);
 			}
 			
 			pstmt.executeUpdate();
@@ -1585,6 +1594,16 @@ public class BuildServiceAnalysisDatabase {
 	/**
 	 * Manage table - create or verify existence
 	 */
+	/** Adds a column to a table made by an earlier version; a column that already exists is left alone. */
+	private void addColumnIfMissing(Statement statement, String tableName, String column, String type) {
+		try {
+			statement.execute("ALTER TABLE " + tableName + " ADD COLUMN " + column + " " + type);
+			logger.info("Added column " + column + " to " + tableName);
+		} catch (SQLException alreadyThere) {
+			// the column exists
+		}
+	}
+
 	private void manageTable(Statement statement, String tableName, String createSQL) throws SQLException {
 		if (tableExists(statement, tableName)) {
 			logger.info("Table " + tableName + " already exists");

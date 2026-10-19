@@ -755,7 +755,7 @@ private String extractServiceContextFromToken(String token) {
         // This gives per-token entry/exit events that the animator can use
         // ADDED: toPlace for routing info at forks, eventType for lifecycle events
         String sql = 
-            "SELECT tokenId, timestamp, transitionId, workflowBase, bufferSize, toPlace, eventType, " +
+            "SELECT tokenId, timestamp, transitionId, workflowBase, bufferSize, toPlace, eventType, arcValue, " +
             "       CASE WHEN transitionId = ? THEN 1 ELSE 0 END as marking " +
             "FROM " + TRANSITION_FIRINGS_TABLE + " " +
             "WHERE (transitionId = ? OR transitionId = ?) " +
@@ -786,6 +786,7 @@ private String extractServiceContextFromToken(String token) {
                 snapshot.transitionId = rs.getString("transitionId");  // T_in_X or T_out_X
                 snapshot.toPlace = rs.getString("toPlace");            // Destination (for exits)
                 snapshot.eventType = rs.getString("eventType");        // ENTER, EXIT, FORK_CONSUMED, TERMINATE
+                snapshot.arcValue = rs.getString("arcValue");          // guard value taken (which terminate node)
                 snapshots.add(snapshot);
             }
             
@@ -1057,6 +1058,8 @@ private String extractServiceContextFromToken(String token) {
                     snapshotObj.put("transitionId", snapshot.transitionId);  // Which transition fired
                     snapshotObj.put("toPlace", snapshot.toPlace);            // Destination (for routing)
                     snapshotObj.put("eventType", snapshot.eventType);        // ENTER, EXIT, FORK_CONSUMED, TERMINATE
+                    if (snapshot.arcValue != null && !snapshot.arcValue.isEmpty())
+                        snapshotObj.put("arcValue", snapshot.arcValue);      // guard value taken
                     markingsArray.add(snapshotObj);
                 }
             }
@@ -1402,6 +1405,7 @@ private String extractServiceContextFromToken(String token) {
         String transitionId;  // T_in_X or T_out_X - identifies which transition fired
         String toPlace;       // Destination place (for T_out events) - critical for fork routing
         String eventType;     // ENTER, EXIT, FORK_CONSUMED, TERMINATE
+        String arcValue;      // guard value taken - tells a replay which terminate node a token reached
     }
 
     protected static class PlaceStatistics {

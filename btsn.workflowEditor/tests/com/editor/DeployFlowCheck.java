@@ -343,7 +343,37 @@ public final class DeployFlowCheck {
             } catch (Throwable ex) { replay[0] = ex; }
         });
         if (replay[0] != null) throw new AssertionError("Inventory replay", replay[0]);
-        System.out.println("PASS: catalogue-only design, right-click Deploy to, filled Deploy panel with Place column, two-way node edits, save links process and instances, reopen, existing deployment unchanged, Create Build and Run files, Ant-prefixed analysis replay, What it does, transition names by label or node, one place per node, several event generators, healthcare launchers with their token generator, one input per join arc, rest placements, inventory replay mapped by service");
+        // A gateway with two terminate nodes: each token is drawn to the node whose arc carries the value the host took.
+        SwingUtilities.invokeAndWait(() -> {
+            try {
+                Path creditProcess = common.toPath().resolve("ProcessDefinitionFolder/credit/Workflow/Credit_Check_Workflow.json");
+                String creditRun = read(repository.toPath().resolve("btsn.workflowEditor/tests/fixtures/Analysis_Credit_Check.txt"));
+                Map<String, String> byArc = terminations(creditProcess, creditRun);
+                check(byArc.size() == 10, "Credit replay terminations: " + byArc);
+                for (int n = 0; n < 10; n++)
+                    check((n < 5 ? "Approved" : "Referred").equals(byArc.get(Integer.toString(1000000 + n * 10000))),
+                          "Credit replay token " + (1000000 + n * 10000) + " ends at " + byArc.get(Integer.toString(1000000 + n * 10000)));
+                // An analysis without Arc= (written before it was recorded) still replays, to the T_out's terminate node.
+                Map<String, String> unrecorded = terminations(creditProcess, creditRun.replaceAll(" Arc=\\S+", ""));
+                check(unrecorded.size() == 10 && new HashSet<>(unrecorded.values()).size() == 1, "Credit replay without Arc: " + unrecorded);
+            } catch (Throwable ex) { replay[0] = ex; }
+        });
+        if (replay[0] != null) throw new AssertionError("Credit replay", replay[0]);
+        System.out.println("PASS: catalogue-only design, right-click Deploy to, filled Deploy panel with Place column, two-way node edits, save links process and instances, reopen, existing deployment unchanged, Create Build and Run files, Ant-prefixed analysis replay, What it does, transition names by label or node, one place per node, several event generators, healthcare launchers with their token generator, one input per join arc, rest placements, inventory replay mapped by service, terminations replayed to the node of the arc taken");
+    }
+
+    /** Token -> the terminate node its replay ends at. */
+    private static Map<String, String> terminations(Path process, String analysis) throws Exception {
+        Canvas canvas = new Canvas(); canvas.setDefinitionLocation(process.toFile()); canvas.loadFromJSON(read(process));
+        TokenAnimator animator = new TokenAnimator(); animator.setCanvas(canvas);
+        animator.parseOutput(analysis);
+        Field f = TokenAnimator.class.getDeclaredField("segments"); f.setAccessible(true);
+        Map<String, String> ends = new TreeMap<>();
+        for (Object o : (List<?>) f.get(animator)) {
+            com.editor.animator.AnimationSegment segment = (com.editor.animator.AnimationSegment) o;
+            if (segment.terminateId != null) ends.put(segment.tokenId, segment.terminateId);
+        }
+        return ends;
     }
 
     private static int rowOf(JTable table, String place) {

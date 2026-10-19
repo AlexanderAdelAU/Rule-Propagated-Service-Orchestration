@@ -474,9 +474,9 @@ public class MonitorService extends BaseStochasticPetriNetPlace {
 	    
 	    String sql = "INSERT INTO " + CONSOLIDATED_MARKING_EVOLUTION_TABLE + 
 	                 " (workflowBase, tokenId, timestamp, marking, bufferSize, placeName, " +
-	                 "transitionId, toPlace, eventType, " +
+	                 "transitionId, toPlace, eventType, arcValue, " +
 	                 "reportingService, reportingChannel, analysisTime) " +
-	                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	    
 	    try (Connection conn = getConnection();
 	         PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -492,9 +492,10 @@ public class MonitorService extends BaseStochasticPetriNetPlace {
 	            pstmt.setString(7, getStringValue(marking, "transitionId", ""));
 	            pstmt.setString(8, getStringValue(marking, "toPlace", ""));
 	            pstmt.setString(9, getStringValue(marking, "eventType", ""));
-	            pstmt.setString(10, reportingService);
-	            pstmt.setString(11, reportingChannel);
-	            pstmt.setLong(12, analysisTime);
+	            pstmt.setString(10, getStringValue(marking, "arcValue", ""));
+	            pstmt.setString(11, reportingService);
+	            pstmt.setString(12, reportingChannel);
+	            pstmt.setLong(13, analysisTime);
 	            pstmt.executeUpdate();
 	            count++;
 	        }
@@ -539,6 +540,15 @@ public class MonitorService extends BaseStochasticPetriNetPlace {
 	            stmt.execute("ALTER TABLE " + CONSOLIDATED_MARKING_EVOLUTION_TABLE + 
 	                       " ADD COLUMN eventType VARCHAR(20)");
 	            System.out.println("Added eventType column to " + CONSOLIDATED_MARKING_EVOLUTION_TABLE);
+	        } catch (SQLException e) {
+	            // Column probably already exists - that's fine
+	        }
+
+	        // arcValue: the guard value a terminating token took, so a replay can tell its terminate node
+	        try (java.sql.Statement stmt = conn.createStatement()) {
+	            stmt.execute("ALTER TABLE " + CONSOLIDATED_MARKING_EVOLUTION_TABLE + 
+	                       " ADD COLUMN arcValue VARCHAR(100)");
+	            System.out.println("Added arcValue column to " + CONSOLIDATED_MARKING_EVOLUTION_TABLE);
 	        } catch (SQLException e) {
 	            // Column probably already exists - that's fine
 	        }

@@ -3223,10 +3223,18 @@ class ServiceThread implements Runnable {
 	 * Record token termination (workflow end).
 	 */
 	void instrumentTokenTerminate(int tokenId, String fromPlace, String nodeType) {
+		instrumentTokenTerminate(tokenId, fromPlace, nodeType, null);
+	}
+
+	/**
+	 * Record token termination with the guard value that chose it, so a replay can tell
+	 * which terminate node the token reached when a T_out has more than one.
+	 */
+	void instrumentTokenTerminate(int tokenId, String fromPlace, String nodeType, String arcValue) {
 		if (petriNetHelper == null) return;
 		
-		petriNetHelper.recordTokenExiting(tokenId, fromPlace, "TERMINATE", "TERMINATE",
-		                                  nodeType, decisionValueCollection);
+		petriNetHelper.recordTokenExitingWithArc(tokenId, fromPlace, "TERMINATE", "TERMINATE",
+		                                         nodeType, decisionValueCollection, arcValue);
 		logger.debug("PETRI-NET: Token " + tokenId + " TERMINATED at " + fromPlace);
 	}
 }

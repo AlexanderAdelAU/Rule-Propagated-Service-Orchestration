@@ -1,0 +1,263 @@
+Buildfile: /home/claude/rule-propagated-service-orchestration/btsn.petrinet.ProjectLoader/Credit_Check_Workflow_BuildAndRun.xml
+
+analyse:
+     [java]  INFO [main] (?:?) - Derby Embedded Driver registered successfully.
+     [java]  INFO [main] (?:?) - Found 1 distinct workflowBases: [1000000]
+     [java] Analyzing ALL 1 workflow bases: [1000000]
+     [java] 
+     [java] ================================================================================
+     [java] WORKFLOW BASE: 1000000 (v001)
+     [java] ================================================================================
+     [java]  INFO [main] (?:?) - Canonical reconstruction: generated=10, completed=10, monitorAck=0, forks=0, joins=0, orphanChildren=0
+     [java]  INFO [main] (?:?) - Fork/Join analysis: 0 forks, 0 joined fork families
+     [java]  INFO [main] (?:?) - Place ENTER/EXIT pairing check: all ENTER events paired
+     [java]  INFO [main] (?:?) - Place P1_Place statistics: 10 paired logical visits, avg=119.0ms
+     [java]  INFO [main] (?:?) - Capacity verification for P1_Place: max marking=1, capacity=50 - PASS
+     [java]  INFO [main] (?:?) - Retrieved 10 logical place paths for workflowBase=1000000
+     [java] === PETRI NET ANALYSIS REPORT ===
+     [java] Workflow Base: 1000000
+     [java] 
+     [java] 1. CANONICAL WORKFLOW RECONSTRUCTION
+     [java]    Generated workflows:       10
+     [java]    Completed workflows:       10
+     [java]    Monitor handoffs:          0
+     [java]    Monitor acknowledgements:  0
+     [java]    Business terminations:     10
+     [java]    Fork families:             0
+     [java]    Fork children:             0
+     [java]    Observed join sites:        0
+     [java]    Orphan fork children:      0
+     [java]    Unassigned place visits:   0
+     [java]    Join-family violations:    0
+     [java]    Roots without business termination: 0
+     [java]    Structural result:         [OK]
+     [java] 
+     [java] 2. LOGICAL PLACE EXECUTIONS
+     [java]    CreditLimitService (P1_Place): 10 executions
+     [java] 
+     [java] 3. FORK/JOIN DETAIL
+     [java]    Forks detected (legacy cross-check): 0
+     [java]    Joined fork families (legacy cross-check): 0
+     [java] 
+     [java] 4. INSTRUMENTATION CONSISTENCY
+     [java]    Unpaired place ENTER events: 0
+     [java] 
+     [java] 5. PLACE RESIDENCE SAMPLES
+     [java]    Service/place: CreditLimitService (P1_Place)
+     [java]      Logical executions: 10
+     [java]      Paired timing samples: 10
+     [java]      Avg residence: 119.0ms
+     [java]      Min/Max: 100/181ms
+     [java] 
+     [java] 6. CAPACITY VERIFICATION
+     [java]    CreditLimitService (P1_Place): [OK] BOUNDED
+     [java] 
+     [java] 7. DATA QUALITY
+     [java]    Reconstructed place paths: 10
+     [java]    [OK] All paired residence times are non-negative
+     [java]    NOTE: temporal distributions and canonical throughput are reported in Stage 2.
+     [java] 
+     [java] === END REPORT ===
+     [java] 
+     [java]  INFO [main] (?:?) - Generated workflow report for workflowBase=1000000
+     [java]  INFO [main] (?:?) - GENEALOGY: Found 10 tokens for workflow 1000000
+     [java]  INFO [main] (?:?) - GENEALOGY: 10 root tokens, 0 forked tokens, 0 max generation depth
+     [java] 
+     [java] === TOKEN GENEALOGY REPORT ===
+     [java] Workflow Base: 1000000
+     [java] Total Tokens: 10
+     [java] Root Tokens: 10
+     [java] Forked Tokens: 0
+     [java] Max Generation Depth: 0
+     [java] Total Families: 10
+     [java] 
+     [java] --- Generation Distribution ---
+     [java] Generation 0: 10 tokens
+     [java] 
+     [java] --- Family Trees ---
+     [java] 
+     [java] Family rooted at 1050000:
+     [java]   Total members: 1
+     [java]   Direct descendants: 0
+     [java] 
+     [java] Family rooted at 1060000:
+     [java]   Total members: 1
+     [java]   Direct descendants: 0
+     [java] 
+     [java] Family rooted at 1070000:
+     [java]   Total members: 1
+     [java]   Direct descendants: 0
+     [java] 
+     [java] Family rooted at 1080000:
+     [java]   Total members: 1
+     [java]   Direct descendants: 0
+     [java] 
+     [java] Family rooted at 1090000:
+     [java]   Total members: 1
+     [java]   Direct descendants: 0
+     [java] 
+     [java] Family rooted at 1000000:
+     [java]   Total members: 1
+     [java]   Direct descendants: 0
+     [java] 
+     [java] Family rooted at 1010000:
+     [java]   Total members: 1
+     [java]   Direct descendants: 0
+     [java] 
+     [java] Family rooted at 1020000:
+     [java]   Total members: 1
+     [java]   Direct descendants: 0
+     [java] 
+     [java] Family rooted at 1030000:
+     [java]   Total members: 1
+     [java]   Direct descendants: 0
+     [java] 
+     [java] Family rooted at 1040000:
+     [java]   Total members: 1
+     [java]   Direct descendants: 0
+     [java]  INFO [main] (?:?) - Canonical reconstruction: generated=10, completed=10, monitorAck=0, forks=0, joins=0, orphanChildren=0
+     [java]  INFO [main] (?:?) - Retrieved 10 logical place paths for workflowBase=1000000
+     [java]  INFO [main] (?:?) - Place correlation: 10 matched, 0 unmatched out of 10
+     [java] 
+     [java] === STAGE 2 TEMPORAL ANALYSIS ===
+     [java] Workflow Base: 1000000
+     [java] 
+     [java] 1. END-TO-END WORKFLOW LATENCY
+     [java]    Canonical completed workflows: 10
+     [java]    Timed completion samples:      10
+     [java]    Latency: n=10, avg=403.5ms, p50=369ms, p95=632ms, min/max=352/632ms
+     [java]    Observation window: 9349ms
+     [java]    Completion throughput: 1.070 workflows/sec
+     [java] 
+     [java] 2. WORKLOAD GENERATION
+     [java]    Root inter-arrival: n=9, avg=998.6ms, p50=1000ms, p95=1001ms, min/max=987/1001ms
+     [java] 
+     [java] 3. PLACE RESIDENCE DISTRIBUTIONS
+     [java]    CreditLimitService (P1_Place): n=10, avg=119.5ms, p50=108ms, p95=181ms, min/max=100/181ms
+     [java] 
+     [java] 4. SERVICE EXECUTION TIMING
+     [java]    Service: CreditLimitService
+     [java]      Orchestration place: P1_Place
+     [java]      Queue: n=10, avg=274.3ms, p50=248ms, p95=414ms, min/max=241/414ms
+     [java]      Service: n=10, avg=125.3ms, p50=118ms, p95=182ms, min/max=106/182ms
+     [java]      Total: n=10, avg=399.6ms, p50=371ms, p95=596ms, min/max=354/596ms
+     [java]    Unmatched service timing samples: 0
+     [java]    Service timing/place-count mismatches: 0
+     [java] 
+     [java] 5. JOIN SYNCHRONIZATION
+     [java]    No completed joins observed
+     [java] 
+     [java] 6. TEMPORAL DATA QUALITY
+     [java]    Negative/invalid timing samples: 0
+     [java]    Temporal result: [OK]
+     [java] 
+     [java] === END STAGE 2 REPORT ===
+     [java] 
+     [java] 
+     [java] === TOKEN PATHS ===
+     [java]  INFO [main] (?:?) - Retrieved 10 logical place paths for workflowBase=1000000
+     [java] Token 1000000 at CreditLimitService (P1_Place): residence=181ms
+     [java] Token 1010000 at CreditLimitService (P1_Place): residence=129ms
+     [java] Token 1020000 at CreditLimitService (P1_Place): residence=119ms
+     [java] Token 1030000 at CreditLimitService (P1_Place): residence=119ms
+     [java] Token 1040000 at CreditLimitService (P1_Place): residence=108ms
+     [java] Token 1050000 at CreditLimitService (P1_Place): residence=128ms
+     [java] Token 1060000 at CreditLimitService (P1_Place): residence=100ms
+     [java] Token 1070000 at CreditLimitService (P1_Place): residence=103ms
+     [java] Token 1080000 at CreditLimitService (P1_Place): residence=100ms
+     [java] Token 1090000 at CreditLimitService (P1_Place): residence=108ms
+     [java] 
+     [java] === MARKING EVOLUTION ===
+     [java]  INFO [main] (?:?) - Retrieved 10 GENERATED events for workflowBase 1000000
+     [java] Time=1792400311130 Token=1000000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=APPLICATIONS EventType=GENERATED
+     [java] Time=1792400312117 Token=1010000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=APPLICATIONS EventType=GENERATED
+     [java] Time=1792400313118 Token=1020000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=APPLICATIONS EventType=GENERATED
+     [java] Time=1792400314118 Token=1030000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=APPLICATIONS EventType=GENERATED
+     [java] Time=1792400315118 Token=1040000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=APPLICATIONS EventType=GENERATED
+     [java] Time=1792400316117 Token=1050000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=APPLICATIONS EventType=GENERATED
+     [java] Time=1792400317117 Token=1060000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=APPLICATIONS EventType=GENERATED
+     [java] Time=1792400318118 Token=1070000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=APPLICATIONS EventType=GENERATED
+     [java] Time=1792400319118 Token=1080000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=APPLICATIONS EventType=GENERATED
+     [java] Time=1792400320117 Token=1090000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=APPLICATIONS EventType=GENERATED
+     [java]  INFO [main] (?:?) - Retrieved 30 marking snapshots for P1_Place
+     [java] Time=1792400311558 Token=1000000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+     [java] Time=1792400311581 Token=1000000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+     [java] Time=1792400311762 Token=1000000 Place=P1_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P1 EventType=TERMINATE Arc=approve
+     [java] Time=1792400312362 Token=1010000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+     [java] Time=1792400312368 Token=1010000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+     [java] Time=1792400312497 Token=1010000 Place=P1_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P1 EventType=TERMINATE Arc=approve
+     [java] Time=1792400313365 Token=1020000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+     [java] Time=1792400313370 Token=1020000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+     [java] Time=1792400313489 Token=1020000 Place=P1_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P1 EventType=TERMINATE Arc=approve
+     [java] Time=1792400314354 Token=1030000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+     [java] Time=1792400314363 Token=1030000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+     [java] Time=1792400314482 Token=1030000 Place=P1_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P1 EventType=TERMINATE Arc=approve
+     [java] Time=1792400315374 Token=1040000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+     [java] Time=1792400315379 Token=1040000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+     [java] Time=1792400315487 Token=1040000 Place=P1_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P1 EventType=TERMINATE Arc=approve
+     [java] Time=1792400316445 Token=1050000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+     [java] Time=1792400316452 Token=1050000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+     [java] Time=1792400316580 Token=1050000 Place=P1_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P1 EventType=TERMINATE Arc=refer
+     [java] Time=1792400317368 Token=1060000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+     [java] Time=1792400317373 Token=1060000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+     [java] Time=1792400317473 Token=1060000 Place=P1_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P1 EventType=TERMINATE Arc=refer
+     [java] Time=1792400318397 Token=1070000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+     [java] Time=1792400318401 Token=1070000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+     [java] Time=1792400318504 Token=1070000 Place=P1_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P1 EventType=TERMINATE Arc=refer
+     [java] Time=1792400319366 Token=1080000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+     [java] Time=1792400319370 Token=1080000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+     [java] Time=1792400319470 Token=1080000 Place=P1_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P1 EventType=TERMINATE Arc=refer
+     [java] Time=1792400320367 Token=1090000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+     [java] Time=1792400320371 Token=1090000 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+     [java] Time=1792400320479 Token=1090000 Place=P1_Place Marking=0 Buffer=0 ToPlace=TERMINATE TransitionId=T_out_P1 EventType=TERMINATE Arc=refer
+     [java] 
+     [java] ================================================================================
+     [java] CROSS-VERSION PRIORITY ANALYSIS
+     [java] ================================================================================
+     [java]  INFO [main] (?:?) - Place correlation: 10 matched, 0 unmatched out of 10
+     [java]  INFO [main] (?:?) - Shared services (cross-version): []
+     [java]  INFO [main] (?:?) - Priority analysis complete: 10 samples (10 root, 0 forked), 0 shared services, 0 shared-service contention points, 0 shared-service inversions
+     [java] 
+     [java] === STAGE 3 SHARED-SERVICE CONCURRENCY ANALYSIS ===
+     [java] 
+     [java] 1. SERVICE EXECUTION SAMPLE BREAKDOWN
+     [java]    Total logical service executions: 10
+     [java]    Root-token executions:            10
+     [java]    Fork-derived executions:          0
+     [java]    Shared-service executions:        0
+     [java]    NOTE: fork-derived executions are included when they consume a shared service.
+     [java] 
+     [java] 2. SHARED SERVICES (Cross-Version Traffic)
+     [java]    [INFO] No shared services detected - each version uses exclusive services
+     [java]    Priority contention cannot be measured without shared services
+     [java] 
+     [java] 3. VERSION STATISTICS (All Logical Service Executions)
+     [java]    Version  Tokens     Avg Queue    Min Queue    Max Queue    Avg Service 
+     [java]    ----------------------------------------------------------------------
+     [java]    v001     10         274.3        241          414          125.3       
+     [java] 
+     [java] 4. SHARED SERVICE CONTENTION CANDIDATES (Both Arrived Before Invocation)
+     [java]    Total candidate comparisons: 0
+     [java] 
+     [java] 5. SHARED SERVICE PRIORITY INVERSION CANDIDATES
+     [java]    [NOTE] Arrival is recorded before queue insertion; invocation is recorded after dequeue and rule processing.
+     [java]    A lower-priority token can be dequeued before the higher-priority token enters the queue, yet be invoked after its arrival.
+     [java]    Queue insertion/dequeue timestamps are not recorded here; these candidates do not prove a scheduling violation.
+     [java]    [OK] No invocation-order inversion candidates at shared services
+     [java] 
+     [java] 6. LEGACY ROOT TOKEN ANALYSIS (Global - Includes Cross-Service Comparisons)
+     [java]    Contention points: 0
+     [java]    Inversions: 0
+     [java] 
+     [java] 7. FORK-DERIVED SERVICE EXECUTIONS
+     [java]    Fork-derived execution samples: 0
+     [java] 
+     [java] 8. STAGE 3 EVIDENCE SUMMARY
+     [java]    Shared-service concurrency: [NOT OBSERVED] no physical service saw multiple versions
+     [java] 
+     [java] === END STAGE 3 REPORT ===
+     [java] 
+     [java]  INFO [main] (?:?) - Generated priority analysis report
+
+BUILD SUCCESSFUL
+Total time: 2 seconds
