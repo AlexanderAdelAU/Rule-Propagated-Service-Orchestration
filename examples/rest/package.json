@@ -1,0 +1,13 @@
+{
+  "name": "rpso-credit-service",
+  "version": "1.0.0",
+  "description": "The credit check from ServiceTutorial.md as a REST service: a plain Node server (Render) and a Vercel function.",
+  "private": true,
+  "main": "credit-service.js",
+  "scripts": {
+    "start": "node credit-service.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

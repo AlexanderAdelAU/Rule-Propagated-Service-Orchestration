@@ -210,19 +210,21 @@ The host can call a service over HTTP instead of in-process. The service can the
 be written in any language and run anywhere the host can reach. The catalogue
 contract stays the same: only the placement changes, in the Deploy panel.
 
-The same credit check, in Node.js, is supplied as
-[`examples/rest/credit-service.js`](examples/rest/credit-service.js). It needs no
-packages:
+The same credit check, in Node.js, is supplied in [`examples/rest`](examples/rest). It
+needs no packages. [`credit.js`](examples/rest/credit.js) holds the logic,
+[`credit-service.js`](examples/rest/credit-service.js) serves it, and
+[`api/credit/assess.js`](examples/rest/api/credit/assess.js) is the same service as a
+Vercel function:
 
 ```js
-function assess(call) {
+function assess(call, servedBy) {
   const application = applicationNumber(call.sequenceId);
   const given = Number(find(call.inputs.token, 'amount'));
   const amount = Number.isFinite(given) ? given : application * 1000;
   const decision = amount <= LIMIT ? 'approve' : 'refer';
   return {
     creditDecision: {
-      application: 'APP-' + application, amount: amount, limit: LIMIT, served_by: 'node',
+      application: 'APP-' + application, amount: amount, limit: LIMIT, served_by: servedBy,
       routing_decision: { routing_path: decision }
     }
   };
@@ -275,6 +277,30 @@ same result as before: ten workflows completed, five approved and five referred.
   `rest` adapter, and its catalogue left out of `packaging.json`, since there is nothing
   to package.
 - **Boolean services** keep the `boolean-token` adapter.
+
+### Host it on the internet
+
+To call the service across a real network, host it on a public platform and use its
+`https://` address as the Endpoint. You need your own account; the hosts need outbound
+internet access. Both of these have free plans:
+
+| | Render (a Node server) | Vercel (a function) |
+|---|---|---|
+| **Create** | New **Web Service** from your GitHub repository | New **Project** from your GitHub repository |
+| **Root directory** | `examples/rest` | `examples/rest` |
+| **Start** | Build command: `npm install`; start command: `npm start` | Nothing to set; Vercel finds `api/` |
+| **Endpoint** | `https://<your-service>.onrender.com/credit/assess` | `https://<your-project>.vercel.app/api/credit/assess` |
+| **Check it** | Open the address without `/credit/assess`: it answers *Credit service* | Open the endpoint in a browser: it answers *POST a call to this address* |
+
+Then set the placement's **Endpoint** to that address in the Deploy panel, save,
+**Build** and **Run on hosts**. The result shows which platform answered: `served_by`
+is `node` or `vercel` in each credit decision.
+
+- **Cold starts.** A free Render service sleeps after 15 minutes without calls, and
+  its first call can take longer than the 10-second timeout. Open the check address
+  just before a run, or add `"timeoutMs": 60000` to the placement.
+- **Network time counts.** Monitor measures the call from the host, so service times
+  now include the round trip to the platform.
 
 ## Going further
 
