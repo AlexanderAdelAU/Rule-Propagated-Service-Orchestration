@@ -22,10 +22,10 @@ hosts) and does not repeat them in detail.
 The fabric knows a service only through its **canonical binding**: the operation's
 name, its named inputs and the attribute it returns. The **routing value** in that
 result is what the transition guards test. Nothing else about the service matters
-to the transitions, the rules or the tokens. In this implementation a service is a
-Java class, which the host finds through the catalogue and calls by reflection.
-See [Architecture](README.md#architecture-coordination-and-business-meaning) for
-where other means of invocation, such as REST, would fit.
+to the transitions, the rules or the tokens. By default a service is a Java class,
+which the host finds through the catalogue and calls by reflection; steps 1 to 7
+write one. [Step 8](#8-call-it-over-rest) serves the same service from Node.js over
+REST instead.
 
 | File | Step |
 |---|---|
@@ -203,6 +203,78 @@ ant -f btsn.petrinet.ProjectLoader/Credit_Check_Workflow_BuildAndRun.xml -Dhost.
 Every application now asks for 4,500, so all ten are approved. `eg1.data` takes
 `name=value` pairs separated by commas; the service reads them with `numberValue`
 or `textValue`.
+
+## 8. Call it over REST
+
+The host can call a service over HTTP instead of in-process. The service can then
+be written in any language and run anywhere the host can reach. The catalogue
+contract stays the same: only the placement changes, in the Deploy panel.
+
+The same credit check, in Node.js, is supplied as
+[`examples/rest/credit-service.js`](examples/rest/credit-service.js). It needs no
+packages:
+
+```js
+function assess(call) {
+  const application = applicationNumber(call.sequenceId);
+  const given = Number(find(call.inputs.token, 'amount'));
+  const amount = Number.isFinite(given) ? given : application * 1000;
+  const decision = amount <= LIMIT ? 'approve' : 'refer';
+  return {
+    creditDecision: {
+      application: 'APP-' + application, amount: amount, limit: LIMIT, served_by: 'node',
+      routing_decision: { routing_path: decision }
+    }
+  };
+}
+```
+
+**What the host sends and expects.** For each call the host POSTs a JSON body to the endpoint:
+
+```json
+{"service": "CreditLimitService", "operation": "assess", "sequenceId": "1060000", "version": "v001",
+ "inputs": {"token": {"tokenId": "1060000", "data": {}}}}
+```
+
+and expects, with HTTP 200, the body a Java service would return: the result under
+the catalogue's `returnAttribute`, with its `routing_decision.routing_path`:
+
+```json
+{"creditDecision": {"application": "APP-7", "amount": 7000, "limit": 5000, "routing_decision": {"routing_path": "refer"}}}
+```
+
+`inputs` holds one entry per catalogue input, by name. `sequenceId` is what a Java
+service receives in its constructor.
+
+**Try it.** The supplied
+[`Credit_Check_Rest_Workflow.json`](btsn.common/ProcessDefinitionFolder/credit/Workflow/Credit_Check_Rest_Workflow.json)
+is the same process, deployed this way.
+
+1. Start the service: `node examples/rest/credit-service.js`. It listens on `http://127.0.0.1:8080/credit/assess`.
+2. Open `credit/Workflow/Credit_Check_Rest_Workflow.json` and click **Deploy**. In `Credit`'s row:
+   - **Invocation Adapter**: `rest`;
+   - **Endpoint**: `http://127.0.0.1:8080/credit/assess`.
+
+   Save the deployment (the editor suggests `ServiceDeploymentFolder/credit/Credit_Check_Rest_Workflow.json`), then the process. Selecting the place now shows **Runs on** `P1 — ...`, calling the endpoint (REST).
+3. Click **Build**, then **Run on hosts**.
+
+The Node console prints each application and its decision, and the run gives the
+same result as before: ten workflows completed, five approved and five referred.
+
+- **Where the endpoint is called from.** The host (P1 here) makes the call, so the
+  address must be reachable from P1's machine. `127.0.0.1` works when the service runs
+  on that machine.
+- **When it fails.** If the endpoint cannot be reached, answers an error, or returns a
+  body without the return attribute, the call fails as a Java service that throws
+  would. The host's log names the endpoint; with the service stopped, a run reports ten
+  workflows generated and none completed.
+- **Timeout.** A call waits up to 10 seconds. To change it, add `"timeoutMs": 5000` to
+  the placement in the service deployment file.
+- **No Java class at all.** A service that only exists behind an endpoint can leave
+  `implementationClass` out of its catalogue entry. It must then be deployed with the
+  `rest` adapter, and its catalogue left out of `packaging.json`, since there is nothing
+  to package.
+- **Boolean services** keep the `boolean-token` adapter.
 
 ## Going further
 

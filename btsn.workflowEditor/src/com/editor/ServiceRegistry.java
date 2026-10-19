@@ -18,7 +18,7 @@ public final class ServiceRegistry {
         public final List<String> inputs = new ArrayList<>();
     }
     public static final class Endpoint {
-        public String service, operation, instance, output, adapter, node;
+        public String service, operation, instance, output, adapter, node, endpoint = "";
         public final List<String> inputs = new ArrayList<>();
         public final List<ServiceArgument> arguments = new ArrayList<>();
     }
@@ -120,7 +120,7 @@ public final class ServiceRegistry {
             JSONObject placement = (JSONObject)item;
             Endpoint e = new Endpoint(); e.service = text(placement, "service"); e.operation = text(placement, "operation"); e.instance = text(placement, "instance");
             if (e.instance.isEmpty()) e.instance = e.service;
-            e.output = text(placement, "returnAttribute"); e.adapter = text(placement, "invocationAdapter");
+            e.output = text(placement, "returnAttribute"); e.adapter = text(placement, "invocationAdapter"); e.endpoint = text(placement, "endpoint");
             e.node = text(placement, "node");
             for (Object input : array(placement, "arguments")) {
                 JSONObject parameter = (JSONObject)input;
@@ -215,12 +215,25 @@ public final class ServiceRegistry {
         return null;
     }
 
+    /** Invocation adapters: boolean-token (a Boolean service as a token) and rest (the service is called over HTTP). */
+    public static final String REST = "rest", BOOLEAN_TOKEN = "boolean-token";
+    /** True for an http or https URL with a host, as a rest placement's endpoint must be. */
+    public static boolean validRestEndpoint(String endpoint) {
+        try { java.net.URI uri = new java.net.URI(endpoint); return ("http".equals(uri.getScheme()) || "https".equals(uri.getScheme())) && uri.getHost() != null; }
+        catch (Exception e) { return false; }
+    }
     public List<String> validateEndpoint(String service, String op, String output, List<String> inputs, String adapter) {
+        return validateEndpoint(service, op, output, inputs, adapter, null);
+    }
+    /** As above; a rest placement also needs an http(s) endpoint (not checked when endpoint is null). */
+    public List<String> validateEndpoint(String service, String op, String output, List<String> inputs, String adapter, String endpoint) {
         List<String> errors = new ArrayList<>();
         if (problem != null) { errors.add(problem); return errors; }
         Contract c = contract(service, op);
         if (c == null) { errors.add("Undefined catalogue operation: " + service + "." + op); return errors; }
-        if (adapter.isEmpty()) {
+        if (REST.equals(adapter) && endpoint != null && !validRestEndpoint(endpoint))
+            errors.add("The rest adapter needs an Endpoint: an http:// or https:// address.");
+        if (adapter.isEmpty() || REST.equals(adapter)) {
             if ("boolean".equals(c.resultType)) errors.add("Choose boolean-token explicitly for this Boolean service.");
             if (!c.inputs.equals(inputs)) errors.add("Inputs must match catalogue: " + c.inputs);
             if (!c.output.equals(output)) errors.add("Result must match catalogue: " + c.output);
@@ -241,7 +254,7 @@ public final class ServiceRegistry {
             List<String> names = new ArrayList<>(); for (ServiceArgument input : operation.getArguments()) names.add(input.getName());
             Endpoint e = endpoint(place.getService(), operation.getName(), identity(place));
             if (e != null) {
-                errors.addAll(validateEndpoint(e.service, e.operation, e.output, e.inputs, e.adapter));
+                errors.addAll(validateEndpoint(e.service, e.operation, e.output, e.inputs, e.adapter, e.endpoint));
                 if (!e.inputs.equals(names)) errors.add("Process inputs differ from deployment " + e.instance + ": expected " + e.inputs);
                 if (!e.output.equals(operation.getReturnAttribute())) errors.add("Process result differs from deployment " + e.instance + ": expected " + e.output);
                 continue;
@@ -265,6 +278,12 @@ public final class ServiceRegistry {
         for (ServiceOperation operation : place.getServiceOperations())
             if (endpoint(place.getService(), operation.getName(), identity(place)) == null) return false;
         return true;
+    }
+    /** The REST endpoint the deployment calls for this place, or "" when the host calls it in-process. */
+    public String restEndpointFor(ProcessElement place) {
+        if (!isDeployed(place)) return "";
+        Endpoint e = endpoint(place.getService(), place.getServiceOperations().get(0).getName(), identity(place));
+        return REST.equals(e.adapter) ? e.endpoint : "";
     }
     /** Node of the linked deployment that runs this place, or "" when it is not deployed. */
     public String nodeFor(ProcessElement place) {

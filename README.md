@@ -329,13 +329,14 @@ observations outside the business workflow.*
 only through its canonical binding (the operation's name, its named inputs and the
 attribute it returns) and through the routing value in that result, which the guards
 test. Nothing in the
-coordination layer depends on how the operation is implemented or reached. This
-implementation happens to look up the class named in the catalogue and call it by
-Java reflection, inside the host. A placement can already name an invocation
-adapter instead (the `boolean-token` adapter is one), and an adapter is where
-another means of invocation belongs: a REST call to a remote endpoint, or a service
-written in another language, would satisfy the same binding without any change to
-the transitions, the rules or the tokens.
+coordination layer depends on how the operation is implemented or reached. By
+default the host looks up the class named in the catalogue and calls it by Java
+reflection, inside the host. A placement can name an **invocation adapter** instead:
+with `rest`, the host POSTs each call to the placement's endpoint, so the service can
+be written in any language and run anywhere it can be reached over HTTP. It returns
+the same result a Java service would, and the transitions, rules and tokens do not
+change. [ServiceTutorial.md](ServiceTutorial.md#8-call-it-over-rest) serves the credit
+check from Node.js this way.
 
 | Layer | Responsibility | Repository artefacts |
 |---|---|---|

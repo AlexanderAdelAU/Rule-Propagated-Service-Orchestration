@@ -290,6 +290,17 @@ public final class DeployFlowCheck {
                 Canvas both2 = new Canvas(); both2.setDefinitionLocation(combined.toFile()); both2.loadFromJSON(read(combined));
                 check(!both2.joinInputMismatches().isEmpty() && both2.validateServiceContracts().stream().noneMatch(e -> e.contains("incoming arcs")),
                     "A combined process's overlaid join arcs should not be reported");
+                // A rest placement: the place shows its endpoint, and the rest adapter needs an http(s) endpoint.
+                Path restProcess = workflows.resolve("credit/Workflow/Credit_Check_Rest_Workflow.json");
+                Canvas rest = new Canvas(); rest.setDefinitionLocation(restProcess.toFile()); rest.loadFromJSON(read(restProcess));
+                ProcessElement credit = rest.getPlaces().get(0);
+                check(rest.validateServiceContracts().isEmpty(), "REST credit check reported: " + rest.validateServiceContracts());
+                check("http://127.0.0.1:8080/credit/assess".equals(rest.getServiceRegistry().restEndpointFor(credit)), "REST endpoint not shown for the place");
+                java.util.List<String> token = Arrays.asList("token");
+                check(rest.getServiceRegistry().validateEndpoint("CreditLimitService", "assess", "creditDecision", token, "rest", "not-a-url")
+                    .stream().anyMatch(e -> e.contains("needs an Endpoint")), "A rest placement without an http(s) endpoint was accepted");
+                check(rest.getServiceRegistry().validateEndpoint("CreditLimitService", "assess", "creditDecision", token, "rest", "https://example.org/assess").isEmpty(),
+                    "A valid rest placement was rejected");
                 bothOptions.runs.get(1).version = "v001";
                 check(BuildAndRunGenerator.problems(bothPlan, bothOptions).stream().anyMatch(e -> e.contains("both use v001")), "Shared version accepted");
                 bothOptions.runs.get(1).version = "v002"; bothOptions.runs.get(1).enabled = false;
@@ -332,7 +343,7 @@ public final class DeployFlowCheck {
             } catch (Throwable ex) { replay[0] = ex; }
         });
         if (replay[0] != null) throw new AssertionError("Inventory replay", replay[0]);
-        System.out.println("PASS: catalogue-only design, right-click Deploy to, filled Deploy panel with Place column, two-way node edits, save links process and instances, reopen, existing deployment unchanged, Create Build and Run files, Ant-prefixed analysis replay, What it does, transition names by label or node, one place per node, several event generators, healthcare launchers with their token generator, one input per join arc, inventory replay mapped by service");
+        System.out.println("PASS: catalogue-only design, right-click Deploy to, filled Deploy panel with Place column, two-way node edits, save links process and instances, reopen, existing deployment unchanged, Create Build and Run files, Ant-prefixed analysis replay, What it does, transition names by label or node, one place per node, several event generators, healthcare launchers with their token generator, one input per join arc, rest placements, inventory replay mapped by service");
     }
 
     private static int rowOf(JTable table, String place) {

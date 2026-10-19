@@ -187,11 +187,20 @@ public final class BusinessCapabilityResolver {
     /** Only explicitly adapted placements enter this path; all other invocation remains unchanged. */
     public String adaptedResult(String service, String operation, List<String> inputs,
                                 String outputAttribute, String version) throws Exception {
+        return adaptedResult(null, service, operation, inputs, outputAttribute, version);
+    }
+
+    /** As above; a REST placement also passes the token's sequence id to its endpoint. */
+    public String adaptedResult(String sequenceId, String service, String operation, List<String> inputs,
+                                String outputAttribute, String version) throws Exception {
         String identity = service.substring(service.lastIndexOf('.') + 1);
         Capability capability = runtimeBindings.get(key(identity, operation));
         if (capability == null) capability = instanceBindings.get(key(identity, operation));
         if (capability == null || capability.adapter == null) return null;
         String implementation = resolve(service, operation, outputAttribute, inputs.size(), version);
+        if (RestAdapter.NAME.equals(capability.adapter))
+            return RestAdapter.invoke(capability.endpoint, capability.timeoutMs, capability.logicalService, operation,
+                    sequenceId, version, capability.inputs, inputs, outputAttribute);
 
         return BooleanTokenAdapter.invoke(implementation, operation, inputs, outputAttribute);
     }
@@ -205,13 +214,27 @@ public final class BusinessCapabilityResolver {
         final boolean active;
         final String bindingIdentity;
         final String adapter;
+        final String endpoint;   // REST placements only
+        final int timeoutMs;
 
         Capability placement(JSONObject placement, String instance) {
             if (!placement.containsKey("invocationAdapter")) {
+                require(implementationClass != null, "No implementation class for " + logicalService
+                        + "; deploy it with the rest adapter and an endpoint");
                 require(returnAttribute.equals(text(placement, "returnAttribute")), "Conflicting return attribute: " + logicalService);
                 return new Capability(this, instance, null, inputs, returnAttribute);
             }
             String adapter = text(placement, "invocationAdapter");
+            if (RestAdapter.NAME.equals(adapter)) {
+                // The contract is the catalogue's; only the means of invocation changes.
+                String endpoint = text(placement, "endpoint");
+                require(RestAdapter.validEndpoint(endpoint), "Invalid REST endpoint for " + logicalService + ": " + endpoint);
+                require(returnAttribute.equals(text(placement, "returnAttribute")), "Conflicting return attribute: " + logicalService);
+                Object timeout = placement.get("timeoutMs");
+                int ms = timeout == null ? RestAdapter.DEFAULT_TIMEOUT_MS : Integer.parseInt(timeout.toString().trim());
+                require(ms > 0, "Invalid REST timeout for " + logicalService + ": " + ms);
+                return new Capability(this, instance, adapter, inputs, returnAttribute, endpoint, ms);
+            }
             require("boolean-token".equals(adapter), "Unknown invocation adapter: " + adapter);
             require(inputs.equals(java.util.Collections.singletonList("data")) && "decision".equals(returnAttribute),
                     "Boolean adapter requires the data -> decision service contract");
@@ -221,6 +244,12 @@ public final class BusinessCapabilityResolver {
             return new Capability(this, instance, adapter, names, text(placement, "returnAttribute"));
         }
         Capability(Capability source, String instance, String adapter, List<String> inputs, String output) {
+            this(source, instance, adapter, inputs, output, null, 0);
+        }
+        Capability(Capability source, String instance, String adapter, List<String> inputs, String output,
+                   String endpoint, int timeoutMs) {
+            this.endpoint = endpoint;
+            this.timeoutMs = timeoutMs;
             logicalService = source.logicalService;
             operation = source.operation;
             implementationClass = source.implementationClass;
@@ -235,8 +264,11 @@ public final class BusinessCapabilityResolver {
             logicalService = text(definition, "service");
             bindingIdentity = logicalService;
             adapter = null;
+            endpoint = null;
+            timeoutMs = 0;
             operation = text(definition, "operation");
-            implementationClass = text(definition, "implementationClass");
+            // A service reached only over REST may have no Java class; its placement must then use the rest adapter.
+            implementationClass = definition.get("implementationClass") == null ? null : text(definition, "implementationClass");
             returnAttribute = text(definition, "returnAttribute");
             active = "active".equals(text(definition, "status"));
             for (Object input : array(definition, "inputs")) {

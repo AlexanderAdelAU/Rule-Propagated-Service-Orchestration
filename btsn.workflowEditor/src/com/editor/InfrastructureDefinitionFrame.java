@@ -32,7 +32,8 @@ public class InfrastructureDefinitionFrame extends JFrame {
             if (column == 0) { for (NodeNetwork node : nodes) values.add(node.node); }
             else if (column == 1) values.addAll(serviceRegistry.services());
             else if (column == 2) values.addAll(serviceRegistry.operations(cap.service));
-            else if (column == 6) { ServiceRegistry.Contract contract = serviceRegistry.contract(cap.service, cap.operation); if (contract != null && "boolean".equals(contract.resultType)) values.add("boolean-token"); }
+            else if (column == 6) { ServiceRegistry.Contract contract = serviceRegistry.contract(cap.service, cap.operation);
+                if (contract != null && "boolean".equals(contract.resultType)) values.add(ServiceRegistry.BOOLEAN_TOKEN); else values.add(ServiceRegistry.REST); }
             else return super.getCellEditor(row, column);
             java.util.function.Function<String, String> describe = column == 1 ? serviceRegistry::describe
                 : column == 2 ? (op -> serviceRegistry.describe(cap.service, op)) : null;
@@ -173,8 +174,10 @@ public class InfrastructureDefinitionFrame extends JFrame {
                 column = table.convertColumnIndexToModel(column);
                 Capability cap = capabilities.get(row);
                 List<String> names = new ArrayList<>(); for (Argument argument : cap.arguments) names.add(argument.name);
-                List<String> errors = serviceRegistry.validateEndpoint(cap.service, cap.operation, cap.returnAttribute, names, cap.adapter);
-                String described = column == 1 ? serviceRegistry.describe(cap.service) : column == 2 ? serviceRegistry.describe(cap.service, cap.operation) : "";
+                List<String> errors = serviceRegistry.validateEndpoint(cap.service, cap.operation, cap.returnAttribute, names, cap.adapter, cap.endpoint);
+                String described = column == 1 ? serviceRegistry.describe(cap.service) : column == 2 ? serviceRegistry.describe(cap.service, cap.operation)
+                    : column == 6 ? "Blank: the host calls the service's Java class. rest: the host calls the Endpoint over HTTP instead. boolean-token: a Boolean service as a token."
+                    : column == 7 ? "For the rest adapter: the http(s) address the host POSTs each call to, e.g. http://127.0.0.1:8080/credit/assess" : "";
                 setToolTipText(!errors.isEmpty() ? String.join("; ", errors) : ServiceRegistry.tooltip(described));
                 if (!selected) setForeground(errors.isEmpty() ? table.getForeground() : Color.RED);
                 if ((column == 1 && !serviceRegistry.services().contains(cap.service)) || (column == 2 && !serviceRegistry.operations(cap.service).contains(cap.operation))) setText("Unresolved: " + value);
@@ -251,7 +254,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
                 JOptionPane.showMessageDialog(this, "Select a capability first.");
                 return;
             }
-            if (c.adapter.isEmpty()) { JOptionPane.showMessageDialog(this, "Catalogue inputs are fixed. Select an explicit adapter to define transport aliases."); return; }
+            if (!aliasing(c)) { JOptionPane.showMessageDialog(this, "Catalogue inputs are fixed. Select the boolean-token adapter to define transport aliases."); return; }
             c.arguments.add(new Argument());
             argumentModel.fireTableDataChanged();
         });
@@ -259,7 +262,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
         removeArgument.addActionListener(e -> {
             Capability c = argumentModel.capability;
             int row = argumentTable.getSelectedRow();
-            if (c != null && row >= 0 && !c.adapter.isEmpty()) {
+            if (c != null && row >= 0 && aliasing(c)) {
                 c.arguments.remove(row);
                 argumentModel.fireTableDataChanged();
             }
@@ -761,6 +764,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
             field(b, "service", c.service, true);
             if (!blank(c.instance)) field(b, "instance", c.instance, true);
             if (!blank(c.adapter)) field(b, "invocationAdapter", c.adapter, true);
+            if (ServiceRegistry.REST.equals(c.adapter)) field(b, "endpoint", c.endpoint, true);
             field(b, "operation", c.operation, true);
             field(b, "returnAttribute", c.returnAttribute, true);
             b.append("      \"portSlot\": ").append(c.portSlot).append(",\n");
@@ -812,6 +816,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
             c.service = stringValue(block, "service");
             c.instance = stringValue(block, "instance");
             c.adapter = stringValue(block, "invocationAdapter");
+            c.endpoint = stringValue(block, "endpoint");
             c.operation = stringValue(block, "operation");
             c.returnAttribute = stringValue(block, "returnAttribute");
             c.portSlot = intValue(block, "portSlot");
@@ -940,7 +945,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
 
     private void useCatalogueContract(Capability cap) {
         ServiceRegistry.Contract contract = serviceRegistry.contract(cap.service, cap.operation);
-        if (contract == null || !cap.adapter.isEmpty()) return;
+        if (contract == null || aliasing(cap)) return;
         cap.returnAttribute = contract.output;
         cap.arguments.clear();
         for (String input : contract.inputs) { Argument argument = new Argument(); argument.name = input; argument.type = "String"; cap.arguments.add(argument); }
@@ -960,7 +965,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
             if (serviceRegistry.problem() != null) errors.add(serviceRegistry.problem());
             else for (Capability cap : capabilities) {
                 List<String> names = new ArrayList<>(); for (Argument input : cap.arguments) names.add(input.name);
-                for (String error : serviceRegistry.validateEndpoint(cap.service, cap.operation, cap.returnAttribute, names, cap.adapter))
+                for (String error : serviceRegistry.validateEndpoint(cap.service, cap.operation, cap.returnAttribute, names, cap.adapter, cap.endpoint))
                     errors.add(cap.node + " / " + cap.service + "." + cap.operation + ": " + error);
             }
         }
@@ -1007,7 +1012,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
             String instance = blank(cap.instance) ? cap.service : cap.instance;
             if (!instance.matches("[A-Za-z][A-Za-z0-9]*")) errors.add(identity + "Instance must be an alphanumeric identifier starting with a letter.");
             if (!instances.add(instance + "\u0000" + cap.operation)) errors.add(identity + "Instance operation is duplicated.");
-            if (!blank(cap.adapter) && !"boolean-token".equals(cap.adapter)) errors.add(identity + "Unknown invocation adapter.");
+            if (!blank(cap.adapter) && !ServiceRegistry.BOOLEAN_TOKEN.equals(cap.adapter) && !ServiceRegistry.REST.equals(cap.adapter)) errors.add(identity + "Unknown invocation adapter.");
             if (blank(cap.returnAttribute)) errors.add(identity + "Return Attribute is required.");
 
             NodeNetwork node = findNode(cap.node);
@@ -1170,16 +1175,20 @@ public class InfrastructureDefinitionFrame extends JFrame {
     }
 
     private final class CapabilityModel extends AbstractTableModel {
-        private final String[] columns = {"Node", "Service", "Operation", "Return Attribute", "Port Slot", "Instance", "Invocation Adapter", "Place"};
+        private final String[] columns = {"Node", "Service", "Operation", "Return Attribute", "Port Slot", "Instance", "Invocation Adapter", "Endpoint", "Place"};
         public int getRowCount() { return capabilities.size(); }
         public int getColumnCount() { return processCanvas == null ? columns.length - 1 : columns.length; }
         public String getColumnName(int c) { return columns[c]; }
         public Class<?> getColumnClass(int c) { return c == 4 ? Integer.class : String.class; }
-        public boolean isCellEditable(int r, int c) { return c != 7 && (c != 3 || !capabilities.get(r).adapter.isEmpty()); }
+        public boolean isCellEditable(int r, int c) {
+            Capability x = capabilities.get(r);
+            return c != 8 && (c != 3 || aliasing(x)) && (c != 7 || ServiceRegistry.REST.equals(x.adapter));
+        }
         public Object getValueAt(int r, int c) {
             Capability x = capabilities.get(r);
             switch (c) {
-                case 7: return placeLabel(x);
+                case 8: return placeLabel(x);
+                case 7: return x.endpoint;
                 case 0: return x.node;
                 case 1: return x.service;
                 case 2: return x.operation;
@@ -1216,7 +1225,13 @@ public class InfrastructureDefinitionFrame extends JFrame {
             else if (c == 3) x.returnAttribute = s;
             else if (c == 4) x.portSlot = parseTableInt(v);
             else if (c == 5) x.instance = s;
-            else if (c == 6) x.adapter = s;
+            else if (c == 6) {
+                if (s.equals(x.adapter)) return;
+                x.adapter = s;
+                if (!ServiceRegistry.REST.equals(s)) x.endpoint = "";
+                useCatalogueContract(x); fireTableRowsUpdated(r, r); return;
+            }
+            else if (c == 7) x.endpoint = s;
             fireTableCellUpdated(r, c);
         }
     }
@@ -1238,7 +1253,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
         public int getColumnCount() { return columns.length; }
         public String getColumnName(int c) { return columns[c]; }
         public Class<?> getColumnClass(int c) { return c == 3 ? Boolean.class : String.class; }
-        public boolean isCellEditable(int r, int c) { return c == 2 || capability != null && !capability.adapter.isEmpty(); }
+        public boolean isCellEditable(int r, int c) { return c == 2 || capability != null && aliasing(capability); }
         public Object getValueAt(int r, int c) {
             Argument a = capability.arguments.get(r);
             switch (c) {
@@ -1271,11 +1286,15 @@ public class InfrastructureDefinitionFrame extends JFrame {
         String service = "";
         String instance = "";
         String adapter = "";
+        String endpoint = "";
         String operation = "";
         String returnAttribute = "";
         int portSlot;
         final List<Argument> arguments = new ArrayList<>();
     }
+
+    /** Only the boolean-token adapter renames inputs; a rest placement keeps the catalogue's contract. */
+    private static boolean aliasing(Capability c) { return ServiceRegistry.BOOLEAN_TOKEN.equals(c.adapter); }
 
     private static final class Argument {
         String name = "";
