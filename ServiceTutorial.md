@@ -296,6 +296,8 @@ Then set the placement's **Endpoint** to that address in the Deploy panel, save,
 **Build** and **Run on hosts**. The result shows which platform answered: `served_by`
 is `node` or `vercel` in each credit decision.
 
+- **Accounts.** Render asks for a credit card when you create a service, even on the free
+  plan. Vercel's free Hobby plan does not.
 - **Cold starts.** A free Render service sleeps after 15 minutes without calls, and
   its first call can take longer than the 10-second timeout. Open the check address
   just before a run, or add `"timeoutMs": 60000` to the placement.
