@@ -741,7 +741,8 @@ public class EditorFrame extends JPanel {
         source.setEditable(false); source.setOpaque(false); source.setLineWrap(true); source.setWrapStyleWord(true);
         source.setPreferredSize(new Dimension(220, 40)); source.setMinimumSize(new Dimension(0, 40)); source.setMaximumSize(new Dimension(Integer.MAX_VALUE, 55));
         source.setToolTipText(registry.description()); attributesPanel.add(source);
-        JComboBox<String> services = ServiceRegistry.choices(registry.services(), element.getService(), registry::describe);
+        JComboBox<String> services = ServiceRegistry.choices(registry.services(), element.getService(), registry::describe,
+            name -> registry.isStandard(name) ? name + "   (standard)" : name);
         addComboField("Service:", services, element.getService());
         services.addActionListener(e -> {
             String value = (String)services.getSelectedItem();

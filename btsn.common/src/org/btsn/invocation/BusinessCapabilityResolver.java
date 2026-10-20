@@ -50,7 +50,6 @@ public final class BusinessCapabilityResolver {
         this.runtimeDirectory = runtimeDirectory;
         org.btsn.deployment.DeploymentConfiguration deployment = new org.btsn.deployment.DeploymentConfiguration(common);
         JSONObject config = deployment.profile;
-        JSONObject catalog = json(common.resolve(text(config, "catalog")));
         JSONObject infrastructure = deployment.infrastructure;
         require("Infrastructure".equals(text(infrastructure, "definitionType")),
                 "Selected definition is not Infrastructure");
@@ -62,8 +61,7 @@ public final class BusinessCapabilityResolver {
             String name = text(node, "node");
             require(nodes.put(name, node) == null, "Duplicate infrastructure node: " + name);
         }
-        for (Object item : array(catalog, "services")) {
-            JSONObject definition = object(item);
+        for (JSONObject definition : org.btsn.deployment.DeploymentConfiguration.catalogueServices(common, text(config, "catalog"))) {
             Capability capability = new Capability(definition);
             String key = key(capability.logicalService, capability.operation);
             require(logicalBindings.put(key, capability) == null, "Duplicate catalogue capability: " + key);

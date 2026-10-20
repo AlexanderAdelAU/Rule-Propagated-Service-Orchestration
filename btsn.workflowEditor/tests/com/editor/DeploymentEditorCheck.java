@@ -31,7 +31,8 @@ public final class DeploymentEditorCheck {
                 Method validate = InfrastructureDefinitionFrame.class.getDeclaredMethod("validateDefinition"); validate.setAccessible(true);
                 check(((List<?>)validate.invoke(frame)).isEmpty(), "Opened deployment remains invalid: " + validate.invoke(frame));
                 check(Boolean.TRUE.equals(open.invoke(frame,frame,new File(common,"ServiceDeploymentFolder/financial/FinancialSystem.json"))), "Could not open ordinary deployment");
-                check(registry.services().contains("ValidationService") && !registry.services().contains("StochasticService"), "Stale catalogue survived another Open");
+                // StochasticService is still offered, but now as a standard service beside the financial catalogue, not as the Petri-net catalogue's own.
+                check(registry.services().contains("ValidationService") && registry.isStandard("StochasticService"), "Stale catalogue survived another Open");
                 selectCurrent(table,0,1,"ValidationService"); selectCurrent(table,0,2,"processToken");
                 check(((List<?>)validate.invoke(frame)).isEmpty(), "Ordinary contract changed after selection");
             } catch (Throwable ex) { failure[0] = ex; }

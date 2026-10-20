@@ -64,6 +64,29 @@ public final class SharedInfrastructureCheck {
             rejects(() -> new DeploymentConfiguration(fixture), "not network settings");
             System.out.println("PASS: shared physical infrastructure / " + root.relativize(profile));
         }
+        // A domain process may place a standard service (the routing-only AlwaysTrueService) without copying it into
+        // its own catalogue; a domain catalogue may not redefine a standard service's name.
+        Path credit = fixture(common, root.resolve("btsn.services/deployments/credit/Credit_Check_WorkflowDeployment.json"));
+        Path standard = credit.resolve(DeploymentConfiguration.STANDARD_CATALOGUE);
+        Files.createDirectories(standard.getParent()); Files.copy(common.resolve(DeploymentConfiguration.STANDARD_CATALOGUE), standard);
+        DeploymentConfiguration creditConfig = new DeploymentConfiguration(credit);
+        JSONObject relay = (JSONObject)new org.json.simple.parser.JSONParser().parse("{\"node\":\"P2\",\"service\":\"AlwaysTrueService\",\"operation\":\"processToken\","
+            + "\"returnAttribute\":\"token\",\"portSlot\":0,\"instance\":\"Relay\",\"invocationAdapter\":\"boolean-token\","
+            + "\"arguments\":[{\"name\":\"token\",\"type\":\"String\",\"value\":\"String\",\"required\":false}]}");
+        JSONObject creditDeployment = creditConfig.serviceDeployment;
+        ((JSONArray)creditDeployment.get("capabilities")).add(relay);
+        Files.writeString(credit.resolve((String)creditConfig.profile.get("serviceDeployment")), creditDeployment.toJSONString());
+        GenerateDeploymentRules.main(new String[]{credit.toString()});
+        check("org.btsn.services.AlwaysTrueService".equals(new BusinessCapabilityResolver(credit).resolve("AlwaysTrueService", "processToken", "decision", 1, null)),
+            "Standard service not resolved in a domain process");
+        JSONObject creditCatalog = DeploymentConfiguration.read(credit.resolve((String)creditConfig.profile.get("catalog")));
+        JSONObject clash = new JSONObject((JSONObject)((JSONArray)creditCatalog.get("services")).get(0));
+        clash.put("service", "AlwaysTrueService");
+        ((JSONArray)creditCatalog.get("services")).add(clash);
+        Files.writeString(credit.resolve((String)creditConfig.profile.get("catalog")), creditCatalog.toJSONString());
+        rejects(() -> new DeploymentConfiguration(credit), "redefines the standard service AlwaysTrueService");
+        System.out.println("PASS: a domain process places a standard service; a domain catalogue cannot redefine one");
+
         Path override = fixture(common, common.resolve("BusinessServiceDefinitions/Deployment.json"));
         GenerateDeploymentRules.main(new String[]{override.toString(), "127.0.0.1"});
         DeploymentConfiguration config = new DeploymentConfiguration(override);
