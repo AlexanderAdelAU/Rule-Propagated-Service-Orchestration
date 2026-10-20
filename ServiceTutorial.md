@@ -255,7 +255,9 @@ is the same process, deployed this way.
 1. Start the service: `node examples/rest/credit-service.js`. It listens on `http://127.0.0.1:8080/credit/assess`.
 2. Open `credit/Workflow/Credit_Check_Rest_Workflow.json` and click **Deploy**. In `Credit`'s row:
    - **Invocation Adapter**: `rest`;
-   - **Endpoint**: `http://127.0.0.1:8080/credit/assess`.
+   - **Service endpoint**: `http://127.0.0.1:8080/credit/assess`.
+
+   The place's host still runs on its **Host node** (P1); only the service runs at the endpoint.
 
    Save the deployment (the editor suggests `ServiceDeploymentFolder/credit/Credit_Check_Rest_Workflow.json`), then the process. Selecting the place now shows **Runs on** `P1 — ...`, calling the endpoint (REST).
 3. Click **Build**, then **Run on hosts**.
@@ -281,7 +283,7 @@ same result as before: ten workflows completed, five approved and five referred.
 ### Host it on the internet
 
 To call the service across a real network, host it on a public platform and use its
-`https://` address as the Endpoint. You need your own account; the hosts need outbound
+`https://` address as the Service endpoint. You need your own account; the hosts need outbound
 internet access. Both of these have free plans:
 
 | | Render (a Node server) | Vercel (a function) |
@@ -292,7 +294,7 @@ internet access. Both of these have free plans:
 | **Endpoint** | `https://<your-service>.onrender.com/credit/assess` | `https://<your-project>.vercel.app/api/credit/assess` |
 | **Check it** | Open the address without `/credit/assess`: it answers *Credit service* | Open the endpoint in a browser: it answers *POST a call to this address* |
 
-Then set the placement's **Endpoint** to that address in the Deploy panel, save,
+Then set the place's **Service endpoint** to that address in the Deploy panel, save,
 **Build** and **Run on hosts**. The result shows which platform answered: `served_by`
 is `node` or `vercel` in each credit decision.
 

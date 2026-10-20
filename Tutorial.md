@@ -152,22 +152,24 @@ Use either route:
   - Use **Deploy panel...** on the same menu to open the panel described next.
 - **Click Deploy** in the toolbar: opens the Deploy panel beside the editor, already filled from the process.
 
-![The Deploy panel for the P2 tutorial: the read-only physical node network P1–P6 from SingleHost.json, and one node capability row with Place P2, Node P2, Service StochasticService, Operation processToken, Return Attribute token, Port Slot 0, Instance StochasticInstance1 and Invocation Adapter boolean-token.](images/p2-tutorial-deploy.png)
+![The Deploy panel for the P2 tutorial, titled Places in P2_Tutorial_Workflow: one row with Place P2, Host node P2, Address 192.168.1.82:4002, Service StochasticService, Operation processToken, Return Attribute token, Port Slot 0, Instance StochasticInstance1 and Invocation Adapter boolean-token, and below it the row's argument token.](images/p2-tutorial-deploy.png)
 
-*The Deploy panel. There is one row per place, and you choose the Node. The other columns are filled for you.*
+*The Deploy panel. It lists the places of your process, one row each, and you choose each place's Host node. The other columns are filled for you.*
 
 | Column | Filled with | You change it when |
 |---|---|---|
-| **Place** | The place label on the canvas | Never; it ties the row to the canvas |
-| **Node** | Your right-click choice, or the first free node | You want the place on another host. Edit the cell; the canvas badge follows. |
+| **Place** | The place label on the canvas | Never; it ties the row to the canvas. Add or remove places in the diagram, not here. |
+| **Host node** | Your right-click choice, or the first free node | You want the place on another host. Pick from the list, which gives each node's address and ports and marks nodes other places use; the canvas badge follows. |
+| **Address** | The host node's address and the port of the row's slot | Never; it follows the Host node |
 | **Service / Operation / Return Attribute** | The place's contract from the catalogue | Never; change the design instead |
 | **Port Slot** | `0`, the node's first fixed port | A node has a second port (P4, P6) and you need it |
 | **Instance** | The place label (`P2`) | You want another name. The supplied file uses `StochasticInstance1`. |
 | **Invocation Adapter** | `boolean-token` for a Boolean service | Never for this tutorial |
-| **Endpoint** | Blank | You set the adapter to `rest`, so the host calls the service over HTTP ([Call it over REST](ServiceTutorial.md#8-call-it-over-rest)) |
+| **Service endpoint** | Blank | You set the adapter to `rest`, so the host calls the service over HTTP ([Call it over REST](ServiceTutorial.md#8-call-it-over-rest)). The place's host still runs on its Host node; only the service runs at the endpoint. |
 
-The **Physical node network** table at the top is read-only. It comes from
-[`SingleHost.json`](btsn.common/InfrastructureDefinitionFolder/SingleHost.json):
+The nodes you can choose come from
+[`SingleHost.json`](btsn.common/InfrastructureDefinitionFolder/SingleHost.json)
+(**Choose infrastructure...** picks another):
 
 | Node | Channel | Address | Fixed Base Ports |
 |---|---|---|---|
