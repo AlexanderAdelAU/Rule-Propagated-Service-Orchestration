@@ -19,12 +19,19 @@
             <pathelement location="${ant.home}/lib/ant.jar"/>
             <pathelement location="${ant.home}/lib/ant-launcher.jar"/>
         </path>
-        <javac srcdir="tests" destdir="${target.dir}/launcher-check/classes" includes="LauncherRuntimeCheck.java,SharedInfrastructureCheck.java,ServiceSeparationCheck.java,AdminWorkflowCheck.java"
+        <javac srcdir="tests" destdir="${target.dir}/launcher-check/classes" includes="LauncherRuntimeCheck.java,SharedInfrastructureCheck.java,ServiceSeparationCheck.java,AdminWorkflowCheck.java,PlaceContractCheck.java"
                release="${java.release}" includeantruntime="false" encoding="UTF-8">
             <classpath refid="launcher.check.classpath"/>
         </javac>
         <java classname="ServiceSeparationCheck" fork="true" failonerror="true">
             <classpath refid="launcher.check.classpath"/><arg file=".."/>
+        </java>
+        <!-- A connected place needs a service; several operations per place survive binding generation;
+             routing-only places pass data through. The generator writes bindings beside its working directory. -->
+        <delete dir="${target.dir}/place-contract" quiet="true"/>
+        <mkdir dir="${target.dir}/place-contract/work"/>
+        <java classname="PlaceContractCheck" fork="true" failonerror="true" dir="${target.dir}/place-contract/work">
+            <classpath refid="launcher.check.classpath"/>
         </java>
         <java classname="SharedInfrastructureCheck" fork="true" failonerror="true">
             <classpath refid="launcher.check.classpath"/><arg file=".."/>
