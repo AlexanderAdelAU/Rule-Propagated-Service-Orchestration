@@ -3,8 +3,7 @@ name: Shared infrastructure regression checks
 on:
   push:
     branches:
-      - organize-infrastructure-definitions
-      - separate-service-and-gateway
+      - main
   pull_request:
   workflow_dispatch:
 
