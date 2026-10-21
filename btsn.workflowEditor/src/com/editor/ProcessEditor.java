@@ -1408,6 +1408,21 @@ public class ProcessEditor extends JFrame {
             JOptionPane.showMessageDialog(this, "No launcher runs " + processName + " yet. Use Build and Run to create one first.", "Run", JOptionPane.WARNING_MESSAGE);
             return;
         }
+        // A REST service that does not answer would stop every token that reaches it: say so before the run, not in its analysis.
+        setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.WAIT_CURSOR));
+        java.util.List<String> silent;
+        try {
+            silent = EndpointCheck.notAnswering(canvas, ServiceRegistry.DEFAULT_INFRASTRUCTURE.equals(ServiceRegistry.selectedInfrastructure()), EndpointCheck.TIMEOUT_MS);
+        } finally {
+            setCursor(java.awt.Cursor.getDefaultCursor());
+        }
+        if (!silent.isEmpty()) {
+            StringBuilder html = new StringBuilder("<html><div style='width:520px'>These services are not answering from this computer, so tokens would stop at their places:<font color='#C00000'><ul>");
+            for (String problem : silent) html.append("<li>").append(htmlText(problem)).append("</li>");
+            html.append("</ul></font>Run anyway only if the hosts reach them by another route.</div></html>");
+            Object[] choices = {"Cancel", "Run anyway"};
+            if (JOptionPane.showOptionDialog(this, html.toString(), "Run", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, choices, choices[0]) != 1) return;
+        }
         final java.io.File processFile = currentFile;
         runWindow = new RunWindow(this, root, processName, launchers, analysis -> {
             if (processFile.equals(currentFile)) {
