@@ -393,7 +393,8 @@ public class AnimationControlPanel extends JPanel {
      * Start playback
      */
     public void startPlayback() {
-        if (!animator.hasData()) return;
+        // Never play what the controls cannot pause or reset (e.g. a run that could not be mapped onto the design).
+        if (!animator.hasData() || !playPauseButton.isEnabled()) return;
         highlightPlay(false);
         
         playing = true;

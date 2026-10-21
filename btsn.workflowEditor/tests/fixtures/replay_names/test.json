@@ -1,0 +1,114 @@
+{
+  "serviceDeployment": "ServiceDeploymentFolder/test/test.json",
+   "processType":"PetriNet",
+  "elements": [
+    {
+      "id": "T1",
+      "type": "TRANSITION",
+      "x": 188,
+      "y": 110,
+      "width": 24,
+      "height": 60,
+      "label": "T1",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "EG2",
+      "type": "EVENT_GENERATOR",
+      "x": 88,
+      "y": 110,
+      "width": 24,
+      "height": 60,
+      "label": "EG2",
+      "rotation": 0.0,
+      "generator_rate": "1000",
+      "token_version": "v001"
+    },
+    {
+      "id": "P3",
+      "type": "PLACE",
+      "x": 275,
+      "y": 115,
+      "width": 50,
+      "height": 50,
+      "label": "P3",
+      "service": "P3Service",
+      "serviceInstance": "P32",
+      "operations": [
+        {
+          "name": "screen",
+          "returnAttribute": "token",
+          "arguments": [
+            {"name": "token", "type": "String", "value": "String", "required": false}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T4",
+      "type": "TRANSITION",
+      "x": 388,
+      "y": 110,
+      "width": 24,
+      "height": 60,
+      "label": "T4",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "Terminate",
+      "type": "TRANSITION",
+      "x": 508,
+      "y": 110,
+      "width": 24,
+      "height": 60,
+      "label": "Terminate",
+      "rotation": 0.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "EG2",
+      "target": "T1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T1",
+      "target": "P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P3",
+      "target": "T4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T4",
+      "target": "Terminate",
+      "label": "Terminate",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    }
+  ],
+  "textElements": [
+  ]
+}

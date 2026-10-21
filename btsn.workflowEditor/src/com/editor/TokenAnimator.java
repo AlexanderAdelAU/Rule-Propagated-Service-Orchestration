@@ -221,6 +221,24 @@ public class TokenAnimator {
     }
 
     /** Deployment node (e.g. "P1") hosting this place's service instance, or "" when not deployed. */
+    /** Canvas place -> the node it is deployed to, for mapping the instrumented transition names. */
+    private final Map<String, String> placeNodes = new HashMap<>();
+
+    /** A T_in: typed T_in, named T_in_..., or a transition with an arc into a place. */
+    private boolean isTIn(ProcessElement e) {
+        if (e == null || e.getType() != ProcessElement.Type.TRANSITION) return false;
+        if ("T_in".equals(e.getTransitionType()) || (e.getLabel() != null && e.getLabel().startsWith("T_in_"))) return true;
+        for (Arrow a : canvas.getArrows()) if (a.getSource() == e && a.getTarget() != null && a.getTarget().getType() == ProcessElement.Type.PLACE) return true;
+        return false;
+    }
+    /** A T_out: typed T_out, named T_out_..., or a transition a place's arc leads into. */
+    private boolean isTOut(ProcessElement e) {
+        if (e == null || e.getType() != ProcessElement.Type.TRANSITION) return false;
+        if ("T_out".equals(e.getTransitionType()) || (e.getLabel() != null && e.getLabel().startsWith("T_out_"))) return true;
+        for (Arrow a : canvas.getArrows()) if (a.getTarget() == e && a.getSource() != null && a.getSource().getType() == ProcessElement.Type.PLACE) return true;
+        return false;
+    }
+
     private String deploymentNode(ProcessElement place) {
         if (canvas == null || canvas.getServiceRegistry() == null) return "";
         // The node the canvas shows for the place (its badge): by deployment instance, or by service
@@ -261,6 +279,7 @@ public class TokenAnimator {
         terminatePositions.clear();
         labelToService.clear();
         runtimeAliases.clear();
+        placeNodes.clear();
         elementPositions.clear();
         arrowWaypoints.clear();
         eventGenImplicitForkToJoin.clear();
@@ -313,6 +332,7 @@ public class TokenAnimator {
                 if (!node.isEmpty()) {
                     if (!(node + "_Place").equals(placeKey)) runtimeAliases.put(node + "_Place", placeKey);
                     if (!node.equals(placeKey)) runtimeAliases.put(node, placeKey);
+                    placeNodes.put(placeKey, node);
                 }
 
             } else if (elem.getType() == ProcessElement.Type.EVENT_GENERATOR) {
@@ -338,7 +358,7 @@ public class TokenAnimator {
                 String label = elem.getLabel();
                 elementPositions.put(label, center);
                 
-                if (label != null && label.startsWith("T_in_")) {
+                if (isTIn(elem)) {
                     tInIds.add(label);
                     
                     // Check if this T_in is explicitly marked as a JoinNode
@@ -350,7 +370,7 @@ public class TokenAnimator {
                     }
                 }
                 String nodeValue = elem.getNodeValue();
-                if ("TERMINATE_NODE".equals(nodeValue) ||
+                if ("TERMINATE_NODE".equals(nodeValue) || "TerminateNode".equals(elem.getNodeType()) ||
                     (label != null && label.toLowerCase().contains("terminate"))) {
                     terminateIds.add(label);
                     terminatePositions.put(label, new Point(elem.getX(), elem.getY()));
@@ -369,24 +389,19 @@ public class TokenAnimator {
             
             // Event Generator -> T_in
             if (source.getType() == ProcessElement.Type.EVENT_GENERATOR &&
-                target.getType() == ProcessElement.Type.TRANSITION &&
-                targetLabel != null && targetLabel.startsWith("T_in_")) {
+                isTIn(target)) {
                 eventGenToTIn.put(sourceLabel, targetLabel);
             }
             
             // T_in -> Place
-            if (source.getType() == ProcessElement.Type.TRANSITION &&
-                target.getType() == ProcessElement.Type.PLACE &&
-                sourceLabel != null && sourceLabel.startsWith("T_in_")) {
+            if (isTIn(source) && target.getType() == ProcessElement.Type.PLACE) {
                 String placeService = placeKey(target);
                 placeToTIn.put(placeService, sourceLabel);
                 tInToPlace.put(sourceLabel, placeService);
             }
             
             // Place -> T_out
-            if (source.getType() == ProcessElement.Type.PLACE &&
-                target.getType() == ProcessElement.Type.TRANSITION &&
-                targetLabel != null && targetLabel.startsWith("T_out_")) {
+            if (source.getType() == ProcessElement.Type.PLACE && isTOut(target)) {
                 String placeService = placeKey(source);
                 placeToTOut.put(placeService, targetLabel);
             }
@@ -406,10 +421,7 @@ public class TokenAnimator {
             // ============================================================
             
             // T_out -> T_in
-            if (source.getType() == ProcessElement.Type.TRANSITION &&
-                target.getType() == ProcessElement.Type.TRANSITION &&
-                sourceLabel != null && sourceLabel.startsWith("T_out_") &&
-                targetLabel != null && targetLabel.startsWith("T_in_")) {
+            if (isTOut(source) && isTIn(target)) {
                 
                 // Check if source is a true fork (parallel split) vs exclusive choice (XOR)
                 String sourceNodeType = source.getNodeType();
@@ -440,9 +452,7 @@ public class TokenAnimator {
             }
             
             // T_out -> Terminate
-            if (source.getType() == ProcessElement.Type.TRANSITION &&
-                target.getType() == ProcessElement.Type.TRANSITION &&
-                sourceLabel != null && sourceLabel.startsWith("T_out_") &&
+            if (isTOut(source) && target.getType() == ProcessElement.Type.TRANSITION &&
                 targetLabel != null && terminateIds.contains(targetLabel)) {
                 tOutToTerminate.put(sourceLabel, targetLabel);
                 String decision = arrow.getDecisionValue();
@@ -458,11 +468,11 @@ public class TokenAnimator {
             }
         }
         
-        // Transitions are instrumented as T_in_<node>/T_out_<node>; map them to the canvas transitions.
-        for (Map.Entry<String, String> alias : new ArrayList<>(runtimeAliases.entrySet())) {
-            String node = alias.getKey();
-            if (node.endsWith("_Place")) continue;
-            String place = alias.getValue();
+        // Transitions are instrumented as T_in_<node>/T_out_<node>; map them to the canvas transitions,
+        // whatever the canvas calls them (T1, T4, ...), also for a place labelled after its own node.
+        for (Map.Entry<String, String> placeNode : placeNodes.entrySet()) {
+            String node = placeNode.getValue();
+            String place = placeNode.getKey();
             String tIn = placeToTIn.get(place), tOut = placeToTOut.get(place);
             if (tIn != null && !tIn.equals("T_in_" + node)) runtimeAliases.put("T_in_" + node, tIn);
             if (tOut != null && !tOut.equals("T_out_" + node)) runtimeAliases.put("T_out_" + node, tOut);
