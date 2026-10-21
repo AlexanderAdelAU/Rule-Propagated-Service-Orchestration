@@ -2695,7 +2695,7 @@ public class Canvas extends JPanel {
      * guards that test values a service does not route on, and services still running the editor's starting code.
      */
     public List<String> serviceNotes() { return serviceNotes(true); }
-    /** As serviceNotes, without the starting-code reminders: what stops Deploy and Build and Run. */
+    /** As serviceNotes, without the reminders (starting code, untested guards): what stops Deploy, Build and Run. */
     public List<String> serviceBlockers() { return serviceNotes(false); }
     private List<String> serviceNotes(boolean reminders) {
         List<String> notes = new ArrayList<>();
@@ -2739,7 +2739,31 @@ public class Canvas extends JPanel {
             }
         }
         notes.addAll(chainMismatches());
+        notes.addAll(routingGaps(reminders));
         return notes;
+    }
+    /**
+     * Arcs that lead nowhere: a connected transition with nothing after it that is not a Terminate node (tokens
+     * reaching it stop with no end recorded, and a gateway arc to it is left out of the rules). With reminders,
+     * guards on arcs into a transition, which are never tested.
+     */
+    public List<String> routingGaps(boolean reminders) {
+        List<String> gaps = new ArrayList<>();
+        for (ProcessElement element : elements) {
+            if (element.getType() != ProcessElement.Type.TRANSITION) continue;
+            String kind = (element.getNodeType() + " " + element.getNodeValue()).toUpperCase();
+            boolean in = false, out = false;
+            for (Arrow a : arrows) { in |= a.getTarget() == element; out |= a.getSource() == element; }
+            if (in && !out && !kind.contains("TERMINATE"))
+                gaps.add("Transition '" + element.getLabel() + "' leads nowhere: tokens reaching it stop there. Make it a Terminate node if the process ends there, or connect it to the next place.");
+        }
+        if (reminders) for (Arrow a : arrows) {
+            String value = a.getDecisionValue();
+            if (a.getSource() != null && a.getSource().getType() == ProcessElement.Type.PLACE && a.getTarget() != null && value != null && !value.trim().isEmpty())
+                gaps.add("The arc from " + a.getSource().getLabel() + " to " + a.getTarget().getLabel() + " has the guard \"" + value.trim()
+                    + "\", which is never tested: guards belong on the arcs leaving " + a.getTarget().getLabel() + ". Clear it.");
+        }
+        return gaps;
     }
     /** What the places after this one (one arc away) take as their input, and what the places before it publish. */
     public Set<String> neighbourNames(ProcessElement place, boolean downstream) {

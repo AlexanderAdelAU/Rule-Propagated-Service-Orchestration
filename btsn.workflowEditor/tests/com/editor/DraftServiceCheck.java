@@ -101,6 +101,20 @@ public final class DraftServiceCheck {
             && n.contains("so those tokens would be dropped")), "A route value with no arc is not reported: " + canvas.serviceBlockers());
         arcs.addAll(reviewArcs);
         check(canvas.serviceBlockers().isEmpty(), "Restoring the review arc did not clear the report: " + canvas.serviceBlockers());
+        // The review arc drawn to an input transition instead of a Terminate node leads nowhere: it stops Deploy and Run.
+        ProcessElement review = null;
+        for (ProcessElement e : canvas.getElements()) if ("Review".equals(e.getLabel())) review = e;
+        review.setNodeType("EdgeNode"); review.setNodeValue("EDGE_NODE");
+        check(canvas.serviceBlockers().equals(Arrays.asList("Transition 'Review' leads nowhere: tokens reaching it stop there. Make it a Terminate node if the process ends there, or connect it to the next place.")),
+            "A dead end is not reported: " + canvas.serviceBlockers());
+        review.setNodeType("TerminateNode"); review.setNodeValue("TERMINATE_NODE");
+        // A guard on the arc into a T_out is never tested: a reminder at Validate, not a reason to stop.
+        Arrow into = null;
+        for (Arrow a : arcs) if (a.getSource() == fraud) into = a;
+        into.setDecisionValue("true");
+        check(canvas.serviceBlockers().isEmpty() && canvas.serviceNotes().stream().anyMatch(n -> n.startsWith("The arc from Fraud to T_out_Fraud has the guard \"true\", which is never tested")),
+            "An untested guard is not noted: " + canvas.serviceNotes());
+        into.setDecisionValue("");
         String ownCode = Files.readString(source).replace(ServiceStub.MARKER, "real logic");
         Files.writeString(source, ownCode);
         ServiceDefinitionDialog.write(credit.toFile(), common.toFile(), canvas.getServiceRegistry().domainContract(fraud), noRoutes, true);
