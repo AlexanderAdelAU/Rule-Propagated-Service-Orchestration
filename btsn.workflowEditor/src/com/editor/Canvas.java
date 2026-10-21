@@ -1197,11 +1197,15 @@ public class Canvas extends JPanel {
             ProcessElement place = selectedElements.iterator().next();
             addDeployMenu(menu, place);
             menu.addSeparator();
-            // A service the design needs but the catalogue lacks is described here, from the place that needs it.
-            boolean draft = serviceRegistry.isDraft(place.getService());
-            JMenuItem define = new JMenuItem(draft ? "Edit Service in Catalogue..." : "Add Service to Catalogue...");
-            define.addActionListener(ev -> ServiceDefinitionDialog.open(this, this, place));
-            menu.add(define);
+            // The place's own service is seen and finished from here; a service the catalogue lacks is added from here too.
+            if (serviceRegistry.domainContract(place) != null) {
+                JMenuItem editService = new JMenuItem("Edit Service in Catalogue...");
+                editService.addActionListener(ev -> ServiceDefinitionDialog.open(this, this, place, true));
+                menu.add(editService);
+            }
+            JMenuItem addService = new JMenuItem("Add Service to Catalogue...");
+            addService.addActionListener(ev -> ServiceDefinitionDialog.open(this, this, place, false));
+            menu.add(addService);
             menu.addSeparator();
         }
         
@@ -2703,14 +2707,18 @@ public class Canvas extends JPanel {
                 else if (reminders && ServiceStub.isStartingCode(serviceRegistry.common(), c.implementationClass))
                     notes.add("Place '" + place.getLabel() + "': " + c.service + " still runs the starting code the editor wrote; remember to write the real logic in "
                         + c.implementationClass.substring(c.implementationClass.lastIndexOf('.') + 1) + ".java.");
-                if (c.routes.isEmpty()) continue;
+                // Starting code that declares no routes returns true, so that is what its guards must test.
+                List<String> routesOn = !c.routes.isEmpty() ? c.routes
+                    : ServiceStub.isStartingCode(serviceRegistry.common(), c.implementationClass) ? java.util.Collections.singletonList("true") : c.routes;
+                if (routesOn.isEmpty()) continue;
                 for (Arrow out : arrows) {
                     if (out.getSource() != place || out.getTarget() == null || out.getTarget().getType() != ProcessElement.Type.TRANSITION) continue;
                     for (Arrow route : arrows) {
                         String value = route.getDecisionValue();
-                        if (route.getSource() == out.getTarget() && value != null && !value.trim().isEmpty() && !c.routes.contains(value.trim()))
+                        if (route.getSource() == out.getTarget() && value != null && !value.trim().isEmpty() && !routesOn.contains(value.trim()))
                             notes.add("Place '" + place.getLabel() + "': the arc from " + out.getTarget().getLabel() + " to " + (route.getTarget() == null ? "?" : route.getTarget().getLabel())
-                                + " tests \"" + value.trim() + "\", but " + c.service + " routes on " + String.join(", ", c.routes) + ".");
+                                + " tests \"" + value.trim() + "\", but " + c.service + (c.routes.isEmpty() ? " (starting code)" : "") + " routes on " + String.join(", ", routesOn)
+                                + (c.routes.isEmpty() ? ". Add the values it routes on with Edit Service in Catalogue..." : ".") );
                     }
                 }
             }

@@ -201,6 +201,27 @@ public final class ServiceRegistry {
         return service + "." + op + " is a draft in " + (catalogue == null ? "the catalogue" : catalogue.getName())
             + ". It still needs " + String.join(", ", stillNeeded(c)) + ". Right-click the place and choose Edit Service in Catalogue... to finish it.";
     }
+    /** The place's service as an entry of the process's own catalogue (draft or finished), or null (none, or standard). */
+    public Contract domainContract(ProcessElement place) {
+        if (place.getOperations().isEmpty()) return null;
+        Contract c = contract(place.getService(), place.getOperations().get(0));
+        return c == null || c.standard ? null : c;
+    }
+    /** Other process definitions (not this one) whose places use the service: its contract is then not changed from a design. */
+    public List<String> usedElsewhere(String service, File thisProcess) {
+        List<String> users = new ArrayList<>();
+        if (common == null || service == null || service.isEmpty()) return users;
+        List<File> files = new ArrayList<>();
+        collect(new File(common, "ProcessDefinitionFolder"), files);
+        java.util.regex.Pattern uses = java.util.regex.Pattern.compile("\"service\"\\s*:\\s*\"" + java.util.regex.Pattern.quote(service) + "\"");
+        for (File file : files) {
+            try {
+                if (thisProcess != null && file.getCanonicalFile().equals(thisProcess.getCanonicalFile())) continue;
+                if (uses.matcher(new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8)).find()) users.add(file.getName());
+            } catch (IOException ignored) { }
+        }
+        return users;
+    }
     /** Reload the catalogue (and deployment, if linked) from disk, e.g. after the editor wrote a catalogue entry. */
     public void reload() throws Exception {
         if (deployment != null) loadDeployment(deployment);

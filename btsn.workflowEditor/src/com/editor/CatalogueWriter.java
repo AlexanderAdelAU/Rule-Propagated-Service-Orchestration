@@ -69,6 +69,14 @@ public final class CatalogueWriter {
 
     /** Rewrites the draft entry service.operation as entry, which may also rename it or make it active. */
     public static void updateDraft(File catalogue, String service, String operation, Entry entry) throws Exception {
+        update(catalogue, service, operation, entry, false);
+    }
+
+    /**
+     * Rewrites the entry service.operation as entry. A finished (active) entry is rewritten only when allowActive:
+     * the editor allows it when no other process uses the service, and otherwise keeps its contract fixed.
+     */
+    public static void update(File catalogue, String service, String operation, Entry entry, boolean allowActive) throws Exception {
         String text = read(catalogue);
         Services services = services(text);
         Span target = null;
@@ -78,7 +86,7 @@ public final class CatalogueWriter {
             else if (entry.service.equals(span.service) && entry.operation.equals(span.operation)) clash = true;
         }
         if (target == null) throw new IOException(service + "." + operation + " is not in " + catalogue.getName() + ".");
-        if (!ServiceRegistry.DRAFT.equals(target.status))
+        if (!allowActive && !ServiceRegistry.DRAFT.equals(target.status))
             throw new IOException(service + " is finished (active), and other processes may use it; change it in " + catalogue.getName() + " itself.");
         if (clash) throw new IOException(entry.service + "." + entry.operation + " is already in " + catalogue.getName() + ".");
         // The file already has the indent before the entry's opening brace.

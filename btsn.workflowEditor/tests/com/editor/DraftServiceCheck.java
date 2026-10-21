@@ -74,6 +74,33 @@ public final class DraftServiceCheck {
         try { CatalogueWriter.updateDraft(credit.toFile(), "CreditLimitService", "assess", done); throw new AssertionError("A finished service was rewritten from a design"); }
         catch (java.io.IOException expected) { check(expected.getMessage().contains("finished (active)"), expected.getMessage()); }
 
+        // 2b. The place's own finished service opens filled in for editing. Starting code declaring no routes returns true,
+        // so a guard testing clear is reported; adding the routes in the form rewrites the starting code to return them.
+        ProcessElement fraud = null;
+        for (ProcessElement place : canvas.getPlaces()) if ("Fraud".equals(place.getLabel())) fraud = place;
+        fraud.getServiceOperations().get(0).setReturnAttribute("token");
+        ServiceRegistry.Contract own = canvas.getServiceRegistry().domainContract(fraud);
+        check(own != null && "FraudScreenService".equals(own.service) && !own.draft, "Finished service not offered for editing: " + own);
+        check(canvas.getServiceRegistry().usedElsewhere("FraudScreenService", process.toFile()).isEmpty()
+            && canvas.getServiceRegistry().usedElsewhere("FraudScreenService", null).equals(Arrays.asList("Credit_Fraud_Workflow.json")), "Other users of the service not found");
+        CatalogueWriter.Entry noRoutes = CatalogueWriter.from(own); noRoutes.routes.clear();
+        ServiceDefinitionDialog.write(credit.toFile(), common.toFile(), own, noRoutes, true);
+        canvas.getServiceRegistry().reload();
+        check(Files.readString(source).contains("String[] routes = {\"true\"};"), "Starting code not rewritten when its routes were removed");
+        check(canvas.serviceBlockers().stream().anyMatch(n -> n.contains("tests \"clear\", but FraudScreenService (starting code) routes on true")),
+            "A guard the starting code never matches is not reported: " + canvas.serviceBlockers());
+        ServiceDefinitionDialog.write(credit.toFile(), common.toFile(), canvas.getServiceRegistry().domainContract(fraud), done, true);
+        canvas.getServiceRegistry().reload();
+        check(Files.readString(source).contains("String[] routes = {\"clear\", \"review\"};") && canvas.serviceBlockers().isEmpty(),
+            "Adding the routes did not fix the starting code: " + canvas.serviceBlockers());
+        String ownCode = Files.readString(source).replace(ServiceStub.MARKER, "real logic");
+        Files.writeString(source, ownCode);
+        ServiceDefinitionDialog.write(credit.toFile(), common.toFile(), canvas.getServiceRegistry().domainContract(fraud), noRoutes, true);
+        check(Files.readString(source).equals(ownCode), "The designer's own code was overwritten");
+        Files.writeString(source, ServiceStub.source(done.implementationClass, done));
+        ServiceDefinitionDialog.write(credit.toFile(), common.toFile(), canvas.getServiceRegistry().domainContract(fraud), done, true);
+        canvas.getServiceRegistry().reload();
+
         // 3. The starting code compiles against the service base class and routes each value in turn.
         Path classes = Files.createTempDirectory("draft-classes-");
         String classpath = new File(realCommon, "lib/json-simple-1.1.1.jar").getPath();
@@ -95,7 +122,7 @@ public final class DraftServiceCheck {
         plain.service = "NoteService"; plain.operation = "note"; plain.inputs.add("token"); plain.returnAttribute = "noted";
         check(ServiceStub.source(ServiceStub.className("credit", "NoteService"), plain).contains("String[] routes = {\"true\"};"), "Starting code without routes should return true");
         check(DraftServiceCheck.class.getClassLoader() != null && ServiceDefinitionDialog.refusal(registryFor(standard.toFile())) != null, "A service could be added to the standard catalogue");
-        System.out.println("PASS: draft service added without disturbing the catalogue, offered, saved with the process but refused for deployment with its reason; finished with starting code that compiles, keeps the contract, routes in turn (or true) and is flagged until replaced; mismatched names between places reported; finished entries not rewritten; standard catalogue protected");
+        System.out.println("PASS: draft service added without disturbing the catalogue, offered, saved with the process but refused for deployment with its reason; finished with starting code that compiles, keeps the contract, routes in turn (or true) and is flagged until replaced; mismatched names between places reported; the place own service edited, its starting code kept in step with its routes and code the designer wrote left alone; finished entries not rewritten; standard catalogue protected");
     }
 
     private static ServiceRegistry registryFor(File catalogue) throws Exception {

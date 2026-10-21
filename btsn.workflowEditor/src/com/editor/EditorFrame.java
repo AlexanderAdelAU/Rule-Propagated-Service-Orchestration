@@ -757,9 +757,10 @@ public class EditorFrame extends JPanel {
         addComboField("Operation:", operations, op);
         addWhatItDoes(registry, element.getService(), op);
         // A service the catalogue lacks is described from here (or the place's right-click menu); a draft is finished the same way.
-        JButton defineService = new JButton(registry.isDraft(element.getService()) ? "Edit service in catalogue..." : "Add service to catalogue...");
+        boolean ownService = registry.domainContract(element) != null;
+        JButton defineService = new JButton(ownService ? "Edit service in catalogue..." : "Add service to catalogue...");
         defineService.setToolTipText("Describe a service this place needs that is not in the catalogue yet; you can keep designing while it is a draft.");
-        defineService.addActionListener(e -> { if (ServiceDefinitionDialog.open(this, canvas, element)) updateSelection(element); });
+        defineService.addActionListener(e -> { if (ServiceDefinitionDialog.open(this, canvas, element, ownService)) updateSelection(element); });
         attributesPanel.add(defineService);
         operations.addActionListener(e -> {
             String value = (String)operations.getSelectedItem();
