@@ -23,6 +23,7 @@ public final class ServiceRegistryCheck {
             catalogued++;
             for (Object item : (JSONArray)data.get("services")) {
                 JSONObject service = (JSONObject)item;
+                if ("draft".equals(service.get("status"))) continue;   // a draft is still being described in the editor
                 String name = service.get("service") + "." + service.get("operation");
                 for (String field : new String[] {"description", "returns"})
                     check(service.get(field) instanceof String && !((String)service.get(field)).trim().isEmpty(), catalogue.getFileName() + ": " + name + " has no " + field);

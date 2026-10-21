@@ -1194,7 +1194,14 @@ public class Canvas extends JPanel {
         JPopupMenu menu = new JPopupMenu();
         lastContextMenu = menu;
         if (selectedElements.size() == 1 && selectedElements.iterator().next().getType() == ProcessElement.Type.PLACE) {
-            addDeployMenu(menu, selectedElements.iterator().next());
+            ProcessElement place = selectedElements.iterator().next();
+            addDeployMenu(menu, place);
+            menu.addSeparator();
+            // A service the design needs but the catalogue lacks is described here, from the place that needs it.
+            boolean draft = serviceRegistry.isDraft(place.getService());
+            JMenuItem define = new JMenuItem(draft ? "Edit Service in Catalogue..." : "Add Service to Catalogue...");
+            define.addActionListener(ev -> ServiceDefinitionDialog.open(this, this, place));
+            menu.add(define);
             menu.addSeparator();
         }
         
@@ -2671,6 +2678,67 @@ public class Canvas extends JPanel {
     private Runnable deployAction;
     private final List<Runnable> deploymentListeners = new ArrayList<>();
     public void serviceContractChanged() { notifyChange(); repaint(); }
+    /** The place now uses service.operation from the (reloaded) catalogue: contract applied, panels and Deploy refreshed. */
+    public void useService(ProcessElement place, String service, String operation) {
+        saveUndoState();
+        place.setService(service); place.setServiceInstance(""); place.setServiceOperations(new ArrayList<>());
+        serviceRegistry.applyCatalogue(place, operation);
+        notifyChange(); notifySelectionChanged(place); repaint();
+        for (Runnable listener : deploymentListeners) listener.run();
+    }
+    /**
+     * Things to finish before the process can be deployed, which do not stop it being saved: draft services,
+     * guards that test values a service does not route on, and services still running the editor's starting code.
+     */
+    public List<String> serviceNotes() { return serviceNotes(true); }
+    /** As serviceNotes, without the starting-code reminders: what stops Deploy and Build and Run. */
+    public List<String> serviceBlockers() { return serviceNotes(false); }
+    private List<String> serviceNotes(boolean reminders) {
+        List<String> notes = new ArrayList<>();
+        for (ProcessElement place : getPlaces()) {
+            for (String op : place.getOperations()) {
+                ServiceRegistry.Contract c = serviceRegistry.contract(place.getService(), op);
+                if (c == null) continue;
+                if (c.draft) notes.add("Place '" + place.getLabel() + "': " + serviceRegistry.draftReason(place.getService(), op));
+                else if (reminders && ServiceStub.isStartingCode(serviceRegistry.common(), c.implementationClass))
+                    notes.add("Place '" + place.getLabel() + "': " + c.service + " still runs the starting code the editor wrote; remember to write the real logic in "
+                        + c.implementationClass.substring(c.implementationClass.lastIndexOf('.') + 1) + ".java.");
+                if (c.routes.isEmpty()) continue;
+                for (Arrow out : arrows) {
+                    if (out.getSource() != place || out.getTarget() == null || out.getTarget().getType() != ProcessElement.Type.TRANSITION) continue;
+                    for (Arrow route : arrows) {
+                        String value = route.getDecisionValue();
+                        if (route.getSource() == out.getTarget() && value != null && !value.trim().isEmpty() && !c.routes.contains(value.trim()))
+                            notes.add("Place '" + place.getLabel() + "': the arc from " + out.getTarget().getLabel() + " to " + (route.getTarget() == null ? "?" : route.getTarget().getLabel())
+                                + " tests \"" + value.trim() + "\", but " + c.service + " routes on " + String.join(", ", c.routes) + ".");
+                    }
+                }
+            }
+        }
+        notes.addAll(chainMismatches());
+        return notes;
+    }
+    /** What the places after this one (one arc away) take as their input, and what the places before it publish. */
+    public Set<String> neighbourNames(ProcessElement place, boolean downstream) {
+        Set<String> names = new java.util.LinkedHashSet<>();
+        for (Arrow a : arrows) {
+            ProcessElement transition = downstream ? (a.getSource() == place ? a.getTarget() : null) : (a.getTarget() == place ? a.getSource() : null);
+            if (transition == null || transition.getType() != ProcessElement.Type.TRANSITION) continue;
+            for (Arrow b : arrows) {
+                ProcessElement next = downstream ? (b.getSource() == transition ? b.getTarget() : null) : (b.getTarget() == transition ? b.getSource() : null);
+                if (next == null || next.getType() != ProcessElement.Type.TRANSITION) continue;
+                for (Arrow c : arrows) {
+                    ProcessElement other = downstream ? (c.getSource() == next ? c.getTarget() : null) : (c.getTarget() == next ? c.getSource() : null);
+                    if (other == null || other.getType() != ProcessElement.Type.PLACE) continue;
+                    for (ServiceOperation operation : other.getServiceOperations()) {
+                        if (downstream && operation.getArguments().size() == 1) names.add(operation.getArguments().get(0).getName());
+                        if (!downstream && !operation.getReturnAttribute().isEmpty()) names.add(operation.getReturnAttribute());
+                    }
+                }
+            }
+        }
+        return names;
+    }
     public ServiceRegistry getServiceRegistry() { return serviceRegistry; }
     public void setDefinitionLocation(java.io.File file) { definitionLocation = file; }
     public java.io.File getDefinitionLocation() { return definitionLocation; }
@@ -2779,6 +2847,50 @@ public class Canvas extends JPanel {
      * A join place names one input for each arc arriving at its join T_in (from T_outs; an event generator's
      * arc brings a join set and is checked by Build and Run). A place with several operations needs one that fits.
      */
+    /**
+     * A place reached along one arc takes, as its input, what the place before it publishes. When the names differ
+     * the host drops the token at run time ("expects attribute ... but received ..."), so it is reported while designing.
+     * Joins (several inputs) are checked by joinInputMismatches.
+     */
+    public List<String> chainMismatches() {
+        List<String> problems = new ArrayList<>();
+        for (ProcessElement place : getPlaces()) {
+            if (place.getServiceOperations().isEmpty()) continue;
+            Set<String> takes = new HashSet<>();
+            for (ServiceOperation operation : place.getServiceOperations())
+                if (operation.getArguments().size() == 1) takes.add(operation.getArguments().get(0).getName());
+            if (takes.isEmpty()) continue;
+            for (Arrow toPlace : arrows) {
+                ProcessElement tIn = toPlace.getTarget() == place ? toPlace.getSource() : null;
+                if (tIn == null || tIn.getType() != ProcessElement.Type.TRANSITION || "JoinNode".equals(tIn.getNodeType())) continue;
+                for (Arrow toTIn : arrows) {
+                    ProcessElement tOut = toTIn.getTarget() == tIn ? toTIn.getSource() : null;
+                    if (tOut == null || tOut.getType() != ProcessElement.Type.TRANSITION) continue;
+                    for (Arrow fromUpstream : arrows) {
+                        ProcessElement upstream = fromUpstream.getTarget() == tOut ? fromUpstream.getSource() : null;
+                        if (upstream == null || upstream.getType() != ProcessElement.Type.PLACE || upstream.getServiceOperations().isEmpty()) continue;
+                        // Boolean services travel as tokens under the deployment's aliases, which the boolean-token adapter matches up.
+                        if (isBooleanService(place) || isBooleanService(upstream)) continue;
+                        Set<String> publishes = new java.util.LinkedHashSet<>();
+                        for (ServiceOperation operation : upstream.getServiceOperations()) publishes.add(operation.getReturnAttribute());
+                        if (java.util.Collections.disjoint(takes, publishes))
+                            problems.add("Place '" + place.getLabel() + "' takes " + String.join(" or ", takes) + ", but '" + upstream.getLabel() + "' publishes "
+                                + String.join(" or ", publishes) + "; the names must match, or the token stops at '" + place.getLabel() + "'.");
+                    }
+                }
+            }
+        }
+        return problems;
+    }
+
+    private boolean isBooleanService(ProcessElement place) {
+        for (String op : place.getOperations()) {
+            ServiceRegistry.Contract c = serviceRegistry.contract(place.getService(), op);
+            if (c != null && "boolean".equals(c.resultType)) return true;
+        }
+        return false;
+    }
+
     public List<String> joinInputMismatches() {
         List<String> errors = new ArrayList<>();
         for (ProcessElement join : elements) {

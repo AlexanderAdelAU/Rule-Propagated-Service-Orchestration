@@ -979,17 +979,19 @@ public class ProcessEditor extends JFrame {
             errors.add(0, "Process Type must be specified (PetriNet or SOA)");
         }
         
+        java.util.List<String> notes = canvas.serviceNotes();
+        String toFinish = notes.isEmpty() ? "" : "\n\nStill to do (these do not stop you saving):\n- " + String.join("\n- ", notes);
         if (errors.isEmpty()) {
             JOptionPane.showMessageDialog(this,
-                "Validation passed!\n\nNo duplicate labels or other issues found.",
+                "Validation passed!\n\nNo duplicate labels or other issues found." + toFinish,
                 "Validation Successful",
-                JOptionPane.INFORMATION_MESSAGE);
+                notes.isEmpty() ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.WARNING_MESSAGE);
         } else {
             StringBuilder message = new StringBuilder("Validation found the following issues:\n\n");
             for (String error : errors) {
                 message.append("- ").append(error).append("\n");
             }
-            message.append("\nPlease fix these issues before saving.");
+            message.append("\nPlease fix these issues before saving.").append(toFinish);
             JOptionPane.showMessageDialog(this,
                 message.toString(),
                 "Validation Errors",
@@ -1297,7 +1299,7 @@ public class ProcessEditor extends JFrame {
         ServiceRegistry registry = canvas.getServiceRegistry();
         if (registry.problem() != null) problems.add(registry.problem());
         else if (canvas.getPlaces().isEmpty()) problems.add("Add at least one place before deploying.");
-        else problems.addAll(canvas.validateServiceContracts());
+        else { problems.addAll(canvas.validateServiceContracts()); problems.addAll(canvas.serviceBlockers()); }
         if (!problems.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Before deploying:\n" + String.join("\n", problems), "Deploy", JOptionPane.WARNING_MESSAGE);
             return;
@@ -1318,6 +1320,7 @@ public class ProcessEditor extends JFrame {
         java.io.File combined = problems.isEmpty() ? BuildAndRunGenerator.combinedLauncher(currentFile) : null;
         if (combined != null) { buildCombined(combined); return; }
         problems.addAll(canvas.validateServiceContracts());
+        problems.addAll(canvas.serviceBlockers());
         BuildAndRunGenerator.Plan plan = BuildAndRunGenerator.plan(canvas, currentFile);
         for (String problem : plan.problems) if (!problems.contains(problem)) problems.add(problem);
         if (!problems.isEmpty()) {
