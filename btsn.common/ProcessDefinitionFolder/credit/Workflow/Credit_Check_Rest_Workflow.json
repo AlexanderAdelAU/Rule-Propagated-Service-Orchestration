@@ -5,8 +5,8 @@
     {
       "id": "APPLICATIONS",
       "type": "EVENT_GENERATOR",
-      "x": 48,
-      "y": 170,
+      "x": 60,
+      "y": 160,
       "width": 24,
       "height": 60,
       "label": "APPLICATIONS",
@@ -17,8 +17,8 @@
     {
       "id": "T_in_Credit",
       "type": "TRANSITION",
-      "x": 368,
-      "y": 170,
+      "x": 150,
+      "y": 160,
       "width": 24,
       "height": 60,
       "label": "T_in_Credit",
@@ -31,8 +31,8 @@
     {
       "id": "Credit",
       "type": "PLACE",
-      "x": 435,
-      "y": 175,
+      "x": 235,
+      "y": 165,
       "width": 50,
       "height": 50,
       "label": "Credit",
@@ -51,8 +51,8 @@
     {
       "id": "T_out_Credit",
       "type": "TRANSITION",
-      "x": 548,
-      "y": 170,
+      "x": 340,
+      "y": 160,
       "width": 24,
       "height": 60,
       "label": "T_out_Credit",
@@ -64,8 +64,8 @@
     {
       "id": "Approved",
       "type": "TRANSITION",
-      "x": 678,
-      "y": 110,
+      "x": 470,
+      "y": 100,
       "width": 24,
       "height": 60,
       "label": "Approved",
@@ -77,8 +77,8 @@
     {
       "id": "Referred",
       "type": "TRANSITION",
-      "x": 678,
-      "y": 230,
+      "x": 470,
+      "y": 220,
       "width": 24,
       "height": 60,
       "label": "Referred",
@@ -86,70 +86,17 @@
       "node_type": "TerminateNode",
       "node_value": "TERMINATE_NODE",
       "transition_type": "Other"
-    },
-    {
-      "id": "T_in_Fraud",
-      "type": "TRANSITION",
-      "x": 128,
-      "y": 170,
-      "width": 24,
-      "height": 60,
-      "label": "T_in_Fraud",
-      "rotation": 0.0,
-      "node_type": "EdgeNode",
-      "node_value": "EDGE_NODE",
-      "transition_type": "T_in",
-      "buffer": "10"
-    },
-    {
-      "id": "Fraud",
-      "type": "PLACE",
-      "x": 195,
-      "y": 175,
-      "width": 50,
-      "height": 50,
-      "label": "Fraud",
-      "service": "FraudService",
-      "serviceInstance": "Fraud",
-      "operations": [
-        {
-          "name": "FraudeAssessment",
-          "returnAttribute": "token",
-          "arguments": [
-            {"name": "token", "type": "String", "value": "String", "required": false}
-          ]
-        }
-      ]
-    },
-    {
-      "id": "T_out_Fraud",
-      "type": "TRANSITION",
-      "x": 288,
-      "y": 170,
-      "width": 24,
-      "height": 60,
-      "label": "T_out_Fraud",
-      "rotation": 0.0,
-      "node_type": "GatewayNode",
-      "node_value": "GATEWAY_NODE",
-      "transition_type": "T_out"
-    },
-    {
-      "id": "Review",
-      "type": "TRANSITION",
-      "x": 288,
-      "y": 290,
-      "width": 24,
-      "height": 60,
-      "label": "Review",
-      "rotation": 0.0,
-      "node_type": "TerminateNode",
-      "node_value": "TERMINATE_NODE",
-      "transition_type": "T_in",
-      "buffer": "10"
     }
   ],
   "arrows": [
+    {
+      "source": "APPLICATIONS",
+      "target": "T_in_Credit",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
     {
       "source": "T_in_Credit",
       "target": "Credit",
@@ -181,49 +128,6 @@
       "guardCondition": "DECISION_EQUAL_TO",
       "decision_value": "refer",
       "endpoint": ""
-    },
-    {
-      "source": "T_out_Fraud",
-      "target": "T_in_Credit",
-      "label": "clear",
-      "guardCondition": "DECISION_EQUAL_TO",
-      "decision_value": "clear",
-      "endpoint": ""
-    },
-    {
-      "source": "APPLICATIONS",
-      "target": "T_in_Fraud",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
-    },
-    {
-      "source": "T_in_Fraud",
-      "target": "Fraud",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
-    },
-    {
-      "source": "Fraud",
-      "target": "T_out_Fraud",
-      "label": "",
-      "guardCondition": "DECISION_EQUAL_TO",
-      "decision_value": "true",
-      "endpoint": ""
-    },
-    {
-      "source": "T_out_Fraud",
-      "target": "Review",
-      "label": "review",
-      "guardCondition": "DECISION_EQUAL_TO",
-      "decision_value": "review",
-      "endpoint": "",
-      "waypoints": [
-        {"x": 300, "y": 260}
-      ]
     }
   ],
   "textElements": [

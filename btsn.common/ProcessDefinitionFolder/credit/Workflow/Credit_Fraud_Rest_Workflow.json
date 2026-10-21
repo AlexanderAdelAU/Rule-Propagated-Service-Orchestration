@@ -1,0 +1,239 @@
+{
+  "serviceDeployment": "ServiceDeploymentFolder/credit/Credit_Fraud_Rest_Workflow.json",
+   "processType":"PetriNet",
+  "elements": [
+    {
+      "id": "APPLICATIONS",
+      "type": "EVENT_GENERATOR",
+      "x": 48,
+      "y": 170,
+      "width": 24,
+      "height": 60,
+      "label": "APPLICATIONS",
+      "rotation": 0.0,
+      "generator_rate": "1000",
+      "token_version": "v001"
+    },
+    {
+      "id": "T_in_Credit",
+      "type": "TRANSITION",
+      "x": 368,
+      "y": 170,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_Credit",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "Credit",
+      "type": "PLACE",
+      "x": 435,
+      "y": 175,
+      "width": 50,
+      "height": 50,
+      "label": "Credit",
+      "service": "CreditLimitService",
+      "serviceInstance": "Credit",
+      "operations": [
+        {
+          "name": "assess",
+          "returnAttribute": "creditDecision",
+          "arguments": [
+            {"name": "token", "type": "String", "value": "String", "required": false}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_Credit",
+      "type": "TRANSITION",
+      "x": 548,
+      "y": 170,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_Credit",
+      "rotation": 0.0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "Approved",
+      "type": "TRANSITION",
+      "x": 678,
+      "y": 110,
+      "width": 24,
+      "height": 60,
+      "label": "Approved",
+      "rotation": 0.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    },
+    {
+      "id": "Referred",
+      "type": "TRANSITION",
+      "x": 678,
+      "y": 230,
+      "width": 24,
+      "height": 60,
+      "label": "Referred",
+      "rotation": 0.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    },
+    {
+      "id": "T_in_Fraud",
+      "type": "TRANSITION",
+      "x": 128,
+      "y": 170,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_Fraud",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "Fraud",
+      "type": "PLACE",
+      "x": 195,
+      "y": 175,
+      "width": 50,
+      "height": 50,
+      "label": "Fraud",
+      "service": "FraudService",
+      "serviceInstance": "Fraud",
+      "operations": [
+        {
+          "name": "FraudeAssessment",
+          "returnAttribute": "token",
+          "arguments": [
+            {"name": "token", "type": "String", "value": "String", "required": false}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_Fraud",
+      "type": "TRANSITION",
+      "x": 288,
+      "y": 170,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_Fraud",
+      "rotation": 0.0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "Review",
+      "type": "TRANSITION",
+      "x": 288,
+      "y": 290,
+      "width": 24,
+      "height": 60,
+      "label": "Review",
+      "rotation": 0.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "T_in_Credit",
+      "target": "Credit",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Credit",
+      "target": "T_out_Credit",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_Credit",
+      "target": "Approved",
+      "label": "approve",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "approve",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_Credit",
+      "target": "Referred",
+      "label": "refer",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "refer",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_Fraud",
+      "target": "T_in_Credit",
+      "label": "clear",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "clear",
+      "endpoint": ""
+    },
+    {
+      "source": "APPLICATIONS",
+      "target": "T_in_Fraud",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Fraud",
+      "target": "Fraud",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Fraud",
+      "target": "T_out_Fraud",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_Fraud",
+      "target": "Review",
+      "label": "review",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "review",
+      "endpoint": "",
+      "waypoints": [
+        {"x": 300, "y": 260}
+      ]
+    }
+  ],
+  "textElements": [
+    {
+      "x": 60,
+      "y": 60,
+      "text": "Fraud screen, then credit check: Fraud (FraudService, the editor's starting code) routes clear to Credit (called over REST) and review to Review (see ServiceTutorial.md)",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    }
+  ]
+}

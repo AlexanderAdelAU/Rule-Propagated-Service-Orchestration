@@ -160,7 +160,15 @@ If other processes use the service, its name, operation, inputs, return attribut
 in the form, and only its description and routes can change.
 
 Validate also checks that each place takes, as its input, the name the place before it publishes.
-If the names differ, the token would stop at that place when the process runs.
+If the names differ, the token would stop at that place when the process runs. It checks the routes too:
+a guard testing a value the service never returns, a value the service returns that no arc tests, and a
+transition that leads nowhere because it is not a Terminate node. Each of these stops Deploy, Build and Run on hosts.
+
+**An example.** [`Credit_Fraud_Rest_Workflow.json`](btsn.common/ProcessDefinitionFolder/credit/Workflow/Credit_Fraud_Rest_Workflow.json)
+puts a fraud screen in front of the credit check. `FraudService` was added this way and still runs its
+starting code, which routes `clear` and `review` in turn: `clear` goes on to Credit, called over REST
+([Call it over REST](#8-call-it-over-rest)), and `review` ends at Review. Its launcher is
+`Credit_Fraud_Rest_Workflow_BuildAndRun.xml`; a run completes all ten workflows, five ending at Review.
 
 ## 3. Package it
 
