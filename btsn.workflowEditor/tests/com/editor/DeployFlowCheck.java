@@ -394,6 +394,21 @@ public final class DeployFlowCheck {
             } catch (Throwable ex) { replay[0] = ex; }
         });
         if (replay[0] != null) throw new AssertionError("Credit replay", replay[0]);
+        // The claims process of Tutorial.md Part 1: its supplied run replays to the terminate nodes the tutorial gives.
+        SwingUtilities.invokeAndWait(() -> {
+            try {
+                Path claims = common.toPath().resolve("ProcessDefinitionFolder/claims/Workflow/Claims_Workflow.json");
+                Map<String, String> ends = terminations(claims, read(common.toPath().resolve("AnalysisFolder/Claims/Analysis_Claims_Workflow.txt")));
+                Map<String, Integer> counts = new TreeMap<>();
+                for (String end : ends.values()) counts.merge(end, 1, Integer::sum);
+                check(counts.equals(Map.of("Paid", 5, "Accepted", 3, "Rejected", 2)), "Claims replay: " + counts);
+                for (int n = 0; n < 5; n++) check("Paid".equals(ends.get(Integer.toString(1000000 + n * 10000))), "Claim " + (n + 1) + " not paid: " + ends);
+                Canvas claimsDesign = new Canvas(); claimsDesign.setDefinitionLocation(claims.toFile()); claimsDesign.loadFromJSON(read(claims));
+                check(claimsDesign.serviceBlockers().isEmpty() && claimsDesign.serviceNotes().size() == 1 && claimsDesign.serviceNotes().get(0).startsWith("Place 'Assess': AssessService still runs the starting code"),
+                    "Claims design not as Tutorial Part 1 leaves it: " + claimsDesign.serviceNotes());
+            } catch (Throwable ex) { replay[0] = ex; }
+        });
+        if (replay[0] != null) throw new AssertionError("Claims replay", replay[0]);
         // A run whose Credit service could not be reached: the analysis says so, and the replay removes each failed token at its place.
         SwingUtilities.invokeAndWait(() -> {
             try {
@@ -419,7 +434,7 @@ public final class DeployFlowCheck {
             } catch (Throwable ex) { replay[0] = ex; }
         });
         if (replay[0] != null) throw new AssertionError("Failed-call replay", replay[0]);
-        System.out.println("PASS: catalogue-only design, right-click Deploy to, filled Deploy panel with Place column, two-way node edits, save links process and instances, reopen, existing deployment unchanged, Create Build and Run files, Ant-prefixed analysis replay, What it does, transition names by label or node, one place per node, several event generators, healthcare launchers with their token generator, one input per join arc, rest placements, inventory replay mapped by service, terminations replayed to the node of the arc taken, failed service calls reported and replayed, Deploy lists only the process places with their host addresses");
+        System.out.println("PASS: catalogue-only design, right-click Deploy to, filled Deploy panel with Place column, two-way node edits, save links process and instances, reopen, existing deployment unchanged, Create Build and Run files, Ant-prefixed analysis replay, What it does, transition names by label or node, one place per node, several event generators, healthcare launchers with their token generator, one input per join arc, rest placements, inventory replay mapped by service, terminations replayed to the node of the arc taken, the tutorial claims run replayed as documented, failed service calls reported and replayed, Deploy lists only the process places with their host addresses");
     }
 
     /** Token -> the terminate node its replay ends at. */

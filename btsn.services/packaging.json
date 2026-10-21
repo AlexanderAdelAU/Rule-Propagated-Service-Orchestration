@@ -6,7 +6,8 @@
     "catalogues/LegacyPetriNetServices.json",
     "../btsn.common/BusinessServiceDefinitions/healthcare/Healthcare.json",
     "../btsn.common/BusinessServiceDefinitions/inventory/Inventory.json",
-    "../btsn.common/BusinessServiceDefinitions/credit/Credit.json"
+    "../btsn.common/BusinessServiceDefinitions/credit/Credit.json",
+    "../btsn.common/BusinessServiceDefinitions/claims/Claims.json"
   ],
   "runtimeLibraries": [
     "../btsn.common/lib/json-simple-1.1.1.jar",
@@ -20,6 +21,7 @@
     "Healthcare.json": "healthcare",
     "LegacyPetriNetServices.json": "models",
     "Inventory.json": "inventory",
-    "Credit.json": "credit"
+    "Credit.json": "credit",
+    "Claims.json": "claims"
   }
 }

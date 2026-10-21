@@ -13,9 +13,14 @@ The finished files are supplied, so you can compare yours with them. To build
 your own alongside them, use another name throughout, for example `loan`
 instead of `credit`.
 
-**Before you start:** work through [Tutorial.md](Tutorial.md) sections 1 to 4
-once. This tutorial uses the same editor steps (design, Deploy, Build, Run on
+**Before you start:** work through [Tutorial.md](Tutorial.md) once (Part 1, or Part 2
+sections 1 to 4). This tutorial uses the same editor steps (design, Deploy, Build, Run on
 hosts) and does not repeat them in detail.
+
+Here you write the service first, catalogue entry and all, then draw the process. To start
+from the process instead, and let the editor write the catalogue entry and starting code as
+you go, follow [Tutorial.md, Part 1](Tutorial.md#part-1-from-an-idea-to-a-running-process);
+step 7 there replaces the starting code with real logic the way section 1 here writes it.
 
 ## What RPSO needs from a service
 
@@ -135,7 +140,8 @@ may not reuse a standard service's name.
 ### Add a service while designing
 
 Designing the catalogue first is best, but a design often shows that a service is missing.
-You do not need to leave the editor:
+You do not need to leave the editor ([Tutorial.md, Part 1](Tutorial.md#part-1-from-an-idea-to-a-running-process)
+works through it for a whole process):
 
 1. Draw the place, then right-click it and choose **Add Service to Catalogue...** (or use
    **Add service to catalogue...** under the place's Service).

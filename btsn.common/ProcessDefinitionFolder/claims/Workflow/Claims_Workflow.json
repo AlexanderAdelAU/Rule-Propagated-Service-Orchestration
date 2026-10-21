@@ -1,0 +1,235 @@
+{
+  "serviceDeployment": "ServiceDeploymentFolder/claims/Claims_Workflow.json",
+   "processType":"PetriNet",
+  "elements": [
+    {
+      "id": "CLAIMS",
+      "type": "EVENT_GENERATOR",
+      "x": 60,
+      "y": 170,
+      "width": 24,
+      "height": 60,
+      "label": "CLAIMS",
+      "rotation": 0.0,
+      "generator_rate": "1000",
+      "token_version": "v001"
+    },
+    {
+      "id": "T_in_Triage",
+      "type": "TRANSITION",
+      "x": 150,
+      "y": 170,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_Triage",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "Triage",
+      "type": "PLACE",
+      "x": 235,
+      "y": 175,
+      "width": 50,
+      "height": 50,
+      "label": "Triage",
+      "service": "ClaimsTriageService",
+      "serviceInstance": "Triage",
+      "operations": [
+        {
+          "name": "triage",
+          "returnAttribute": "token",
+          "arguments": [
+            {"name": "token", "type": "String", "value": "String", "required": false}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_Triage",
+      "type": "TRANSITION",
+      "x": 340,
+      "y": 170,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_Triage",
+      "rotation": 0.0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "Paid",
+      "type": "TRANSITION",
+      "x": 340,
+      "y": 310,
+      "width": 24,
+      "height": 60,
+      "label": "Paid",
+      "rotation": 0.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    },
+    {
+      "id": "T_in_Assess",
+      "type": "TRANSITION",
+      "x": 450,
+      "y": 170,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_Assess",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "Assess",
+      "type": "PLACE",
+      "x": 535,
+      "y": 175,
+      "width": 50,
+      "height": 50,
+      "label": "Assess",
+      "service": "AssessService",
+      "serviceInstance": "Assess",
+      "operations": [
+        {
+          "name": "assess",
+          "returnAttribute": "token",
+          "arguments": [
+            {"name": "token", "type": "String", "value": "String", "required": false}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_Assess",
+      "type": "TRANSITION",
+      "x": 640,
+      "y": 170,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_Assess",
+      "rotation": 0.0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "Accepted",
+      "type": "TRANSITION",
+      "x": 770,
+      "y": 100,
+      "width": 24,
+      "height": 60,
+      "label": "Accepted",
+      "rotation": 0.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    },
+    {
+      "id": "Rejected",
+      "type": "TRANSITION",
+      "x": 770,
+      "y": 240,
+      "width": 24,
+      "height": 60,
+      "label": "Rejected",
+      "rotation": 0.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "CLAIMS",
+      "target": "T_in_Triage",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Triage",
+      "target": "Triage",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Triage",
+      "target": "T_out_Triage",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_Triage",
+      "target": "Paid",
+      "label": "simple",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "simple",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_Triage",
+      "target": "T_in_Assess",
+      "label": "complex",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "complex",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Assess",
+      "target": "Assess",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Assess",
+      "target": "T_out_Assess",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_Assess",
+      "target": "Accepted",
+      "label": "accept",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "accept",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_Assess",
+      "target": "Rejected",
+      "label": "reject",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "reject",
+      "endpoint": ""
+    }
+  ],
+  "textElements": [
+    {
+      "x": 60,
+      "y": 60,
+      "text": "Insurance claims: Triage pays a small claim at once and sends a larger one to Assess (see Tutorial.md, Part 1)",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    }
+  ]
+}

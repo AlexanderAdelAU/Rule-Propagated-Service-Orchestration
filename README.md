@@ -18,12 +18,13 @@ Every run is measured as it happens (queue waits, service times, join waits and
 end-to-end workflow time) and can be replayed on the model. These are
 measurements, not guarantees of meeting hard real-time deadlines.
 
-The workflow editor takes a process from design to a measured run: draw it,
-deploy its places to hosts, create its launcher, run it on the hosts and replay
-the recorded run. Start with a Boolean-returning Petri-net example.
-[ServiceTutorial.md](ServiceTutorial.md) then shows how to write your own service
-and call it over REST from Node.js, the inventory example adds state and several hosts, and the financial and healthcare
-workflows show larger processes.
+The workflow editor takes a process from an idea to a measured run. Sketch the
+process, name the services it needs as you go, and run it at once on starting code
+the editor writes; then replace one service at a time with the real logic, in Java or
+behind a REST endpoint in any language. [Tutorial.md](Tutorial.md) starts from an empty
+canvas with an insurance-claims process. [ServiceTutorial.md](ServiceTutorial.md) writes a
+service from the start and calls it over REST from Node.js, the inventory example adds state
+and several hosts, and the financial and healthcare workflows show larger processes.
 
 ![The Petri net you draw is the system that runs: a four-place model on the left, where P1 forks to P2 and P3 and they join before P4, is deployed as local rules to four separate hosts on the right. Each host runs its own T_in, place function and T_out; tokens travel between hosts as messages with no central engine, and Monitor observes every host for complete Petri-net analysis.](images/rpso-overview.svg)
 
@@ -37,19 +38,24 @@ Every host runs the same pattern, whatever service its place is bound to: **T_in
 
 *The execution pattern within a generic host. Shaded activation bars show responsibility for one invocation; their lengths do not represent measured time. More under [Architecture](#architecture-coordination-and-business-meaning).*
 
-### From design to a measured run
+### From an idea to a measured run
 
-How each step is done in the editor (ProcessEditor, `btsn.workflowEditor`), worked through for a single place in [Tutorial.md](Tutorial.md):
+How each step is done in the editor (ProcessEditor, `btsn.workflowEditor`). Part 1 of
+[Tutorial.md](Tutorial.md) works through it for an insurance-claims process that starts with no
+services at all; Part 2 explains each step on a single place.
 
 | Step | How | Walkthrough |
 |---|---|---|
-| **1 · Design** | Draw the net and choose each place's service from a catalogue; the editor says what each service does | [Design the process](Tutorial.md#1-design-the-process) |
-| **2 · Deploy** | Choose the node (host) each place runs on and save the service deployment | [Deploy the process](Tutorial.md#2-deploy-the-process) |
-| **3 · Build and Run** | The editor writes an Ant launcher: the hosts, the event generators with their versions, and the token schedule | [Create Build and Run](Tutorial.md#3-create-build-and-run) |
-| **4 · Run on hosts** | The launcher starts each place as its own host process, plus Monitor. It installs each host's rules and waits for every host to commit to them, then fires the tokens and collects the observations | [Run it](Tutorial.md#4-run-it), [Rule deployment](#rule-deployment-and-token-execution) |
-| **5 · Results** | The editor analyses the run and replays the recorded tokens on the design; Monitor's charts show timing and activity | [Show the results](Tutorial.md#5-show-the-results), [Observe a run](#observe-and-interpret-a-run) |
+| **1 · Sketch** | Draw the places, transitions and arcs. Transitions become T_in or T_out from their arcs; labels are free | [Sketch the process](Tutorial.md#step-1-sketch-the-process) |
+| **2 · Add services as you go** | Right-click a place and add its service to the catalogue of the process's domain (the editor creates the catalogue the first time). Give a name, an operation and the values it routes on; the editor writes starting code that keeps the contract and returns those values in turn, or leaves a draft to finish later. A finished service is chosen from the catalogue instead | [Add the first service](Tutorial.md#step-2-add-the-first-service), [Choose the service](Tutorial.md#choose-the-service-and-operation) |
+| **3 · Validate** | Before anything runs, Validate checks the guards against the values each service returns, the names passed from place to place, drafts, and transitions that lead nowhere | [Validate and save](Tutorial.md#step-5-validate-and-save) |
+| **4 · Deploy** | Choose the node (host) each place runs on and save the service deployment | [Deploy the process](Tutorial.md#2-deploy-the-process) |
+| **5 · Build and Run** | The editor writes an Ant launcher: the hosts, the event generators with their versions, and the token schedule | [Create Build and Run](Tutorial.md#3-create-build-and-run) |
+| **6 · Run on hosts** | The editor first checks that every REST service it calls answers. The launcher starts each place as its own host process, plus Monitor. It installs each host's rules and waits for every host to commit to them, then fires the tokens and collects the observations | [Run it](Tutorial.md#4-run-it), [Rule deployment](#rule-deployment-and-token-execution) |
+| **7 · Results** | The editor analyses the run and replays the recorded tokens on the design; Monitor's charts show timing and activity. A token that fails at a place is reported with the reason | [Show the results](Tutorial.md#5-show-the-results), [Observe a run](#observe-and-interpret-a-run) |
+| **8 · Replace the starting code** | Write each service's real logic, in its Java class or as a REST service in any language, and run again; Validate lists the services still on starting code | [Write the real logic](Tutorial.md#step-7-write-the-real-triage-logic), [ServiceTutorial.md](ServiceTutorial.md) |
 
-To write your own service, follow [ServiceTutorial.md](ServiceTutorial.md): one complete service, from the Java class to a run. The inventory example in [Add your own service](Tutorial.md#6-add-your-own-service) then adds state and several hosts.
+[ServiceTutorial.md](ServiceTutorial.md) writes one complete service from the start, from the Java class to a run, and calls it over REST. The inventory example in [Add your own service](Tutorial.md#6-add-your-own-service) then adds state and several hosts.
 
 ## Quick start: run, observe and replay
 
@@ -64,6 +70,7 @@ including OOjDREW and embedded Derby, so no Maven or Python is needed.
 1. **Start the editor.** In Eclipse, run `com.editor.ProcessEditor` (`btsn.workflowEditor`) as a Java application, or run
    `ant -f btsn.workflowEditor/build.xml clean jar run`.
 2. **Open a process** that has a launcher, for example:
+   - `btsn.common/ProcessDefinitionFolder/claims/Workflow/Claims_Workflow.json`, the insurance-claims process of [Tutorial.md, Part 1](Tutorial.md#part-1-from-an-idea-to-a-running-process), on two hosts;
    - `btsn.common/ProcessDefinitionFolder/inventory/Workflow/Inventory_Workflow.json`, an inventory and a supplier on two hosts;
    - `btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P2_Tutorial_Workflow.json`, the tutorial's single place.
 

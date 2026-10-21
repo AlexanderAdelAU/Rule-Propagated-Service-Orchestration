@@ -1,0 +1,38 @@
+{
+  "definitionType": "ServiceDeployment",
+  "catalog": "BusinessServiceDefinitions/claims/Claims.json",
+  "capabilities": [
+    {
+      "node": "P1",
+      "service": "ClaimsTriageService",
+      "instance": "Triage",
+      "operation": "triage",
+      "returnAttribute": "token",
+      "portSlot": 0,
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ]
+    },
+    {
+      "node": "P2",
+      "service": "AssessService",
+      "instance": "Assess",
+      "operation": "assess",
+      "returnAttribute": "token",
+      "portSlot": 0,
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ]
+    }
+  ]
+}

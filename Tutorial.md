@@ -1,7 +1,278 @@
-# Tutorial: design, deploy, build and run a process
+# Tutorial: from an idea to a measured run
 
-This tutorial takes one process from an empty canvas to a replayed run, all
-from ProcessEditor:
+You do not need the services before you design a process. Sketch the process,
+name the services it needs as you go, and run it straight away on starting code
+the editor writes. Then replace one service at a time with the real logic.
+
+| Part | You start with | You learn |
+|---|---|---|
+| **[Part 1: From an idea to a running process](#part-1-from-an-idea-to-a-running-process)** | A sketch of an insurance-claims process, and no services | Adding services while designing, running on starting code, what Validate checks, replacing starting code with real logic |
+| **[Part 2: Each step in detail](#part-2-each-step-in-detail)** | A single place and a ready-made service | Deploy, Build and Run, the results, your own service, several machines, changing a running process |
+
+Part 1 is the quickest way to see the whole path; Part 2 explains each step on the
+smallest possible process. Finished copies of both are in the repository
+([list](#repository-artefacts)).
+
+## Before you start
+
+- **Tools**:
+  - **JDK 15 or later.**
+  - **Apache Ant 1.10.2 or later**: it comes with Eclipse, which runs every launcher as an **Ant Build**,
+    and the editor finds it there by itself. Install Ant separately only to run launchers from a command
+    line. Run Ant with a JDK so its compiler is available.
+  - In Eclipse, import the projects with **File → Import → General → Existing
+    Projects into Workspace**, leaving **Copy projects into workspace** unchecked.
+  - You need `btsn.common`, `btsn.services`, `btsn.common.eventgenerators`,
+    `btsn.common.Monitor`, `btsn.petrinet.ProjectLoader`, `btsn.workflowEditor`
+    and `btsn.rpso.places.p1`–`p6`.
+- **Start the editor**:
+  - Run [`com.editor.ProcessEditor`](btsn.workflowEditor/src/com/editor/ProcessEditor.java)
+    as a Java application with **btsn.workflowEditor** as its working directory (Eclipse's default).
+  - The Deploy panel finds the shared infrastructure from there.
+- **Know what a run resets**: every run reinitialises the databases of the hosts it uses
+  and of Monitor. Save any results you want to keep before running again.
+
+## Part 1: From an idea to a running process
+
+An insurer wants to pay small claims at once and assess the larger ones. That is
+all you need to know to start:
+
+- **Triage** decides whether a claim is simple or complex;
+- a **simple** claim is paid;
+- a **complex** claim goes to **Assess**, which accepts or rejects it.
+
+Neither service exists yet. You will draw the process, add the two services to a
+new **claims** catalogue as you go, run it on starting code, then write the real
+triage logic.
+
+The supplied copy is
+[`Claims_Workflow.json`](btsn.common/ProcessDefinitionFolder/claims/Workflow/Claims_Workflow.json)
+([all its files](#repository-artefacts)). To follow along beside it, use the domain `myclaims`
+wherever this part says `claims`. Service names are shared by every domain, so the editor then
+suggests `MyclaimsTriageService` and `MyclaimsAssessService`; accept them.
+
+### Step 1: Sketch the process
+
+Choose **File → New → Process Definition**. A new process starts with only the
+standard services that every process shares (`AlwaysTrueService`,
+`StochasticService`), not the catalogue of the process you had open.
+
+Draw the elements with the palette and connect them with **Arrow (drag)**, then set their
+attributes (the Node Types a transition offers depend on the Transition Type its arcs give it):
+
+| Palette tool | Label | Attributes |
+|---|---|---|
+| Event Generator | `CLAIMS` | Rate (ms): `1000`; Version: `v001` |
+| Transition | `T_in_Triage` | Node Type: `EdgeNode`; Buffer: `10` |
+| Place | `Triage` | none yet |
+| Transition | `T_out_Triage` | Node Type: `GatewayNode` |
+| Transition | `Paid` | Transition Type: `Other`; Node Type: `TerminateNode` |
+| Transition | `T_in_Assess` | Node Type: `EdgeNode`; Buffer: `10` |
+| Place | `Assess` | none yet |
+| Transition | `T_out_Assess` | Node Type: `GatewayNode` |
+| Transition | `Accepted`, `Rejected` | Transition Type: `Other`; Node Type: `TerminateNode` |
+
+Arcs: `CLAIMS → T_in_Triage → Triage → T_out_Triage`, then `T_out_Triage → Paid`
+and `T_out_Triage → T_in_Assess → Assess → T_out_Assess`, then `T_out_Assess → Accepted`
+and `T_out_Assess → Rejected`.
+
+- **Transition types follow the arcs.** An arc from a transition into a place makes it a
+  **T_in**; an arc from a place into a transition makes it a **T_out**. The **Transition Type**
+  of such a transition is set for you and locked.
+- **Labels are names.** `T1`, `T4` or `Screen` work as well as `T_in_Triage`; this tutorial
+  uses the longer names because they read well.
+- **Gateways route.** A T_out with `GatewayNode` sends each token along the arc whose guard
+  matches what the place's service returned. You set the guards in [step 4](#step-4-set-the-guards).
+
+![The claims sketch in ProcessEditor: CLAIMS feeds T_in, place Triage, T_out, which leads to Paid and to T_in, place Assess and T_out, which leads to Accepted and Rejected. Triage is selected; its Attributes panel shows the standard catalogue PetriNetModels.json, no service chosen, the button Add service to catalogue, and the unresolved contract in red.](images/claims-sketch.png)
+
+*The sketch. The red dot on a place means it has no service yet.*
+
+### Step 2: Add the first service
+
+Right-click **Triage** and choose **Add Service to Catalogue...** (or click
+**Add service to catalogue...** in its Attributes panel).
+
+**Choose the catalogue.** The first service of a process needs a catalogue to hold it.
+A catalogue belongs to a **domain**: every process of the domain shares it, so a service
+is written once and used by each of them.
+
+![The catalogue prompt: Before we begin, we need a catalogue to hold the services you will be creating or importing. The second choice, Create a catalogue for a new domain, is selected, with claims typed; below it, Creates BusinessServiceDefinitions/claims/Claims.json and lists it for packaging.](images/claims-catalogue.png)
+
+Choose **Create a catalogue for a new domain**, type `claims` and click **OK**. The editor:
+
+- creates the empty catalogue `btsn.common/BusinessServiceDefinitions/claims/Claims.json`;
+- lists it in [`btsn.services/packaging.json`](btsn.services/packaging.json), so the build
+  packages the Java services you add to it.
+
+A process of an existing domain (credit, healthcare, ...) chooses that domain's catalogue instead.
+
+**Describe the service.** The form opens with what it can suggest:
+
+![The Add Service to Catalogue form: Service ClaimsTriageService, Operation triage, What it does, What it returns, Inputs token, Return attribute token, Routes on simple, complex; How it runs: A Java class org.btsn.business.claims.ClaimsTriageService, with Write starting code checked; button Add to Claims.json.](images/claims-add-service.png)
+
+| Field | Enter | Why |
+|---|---|---|
+| **Service** | `ClaimsTriageService` (suggested) | From the place's label. `TriageService` is already a service in the healthcare catalogue, and every domain's services are packaged together, so the editor prefixes the domain. |
+| **Operation** | `triage` | The method the host calls |
+| **What it does** / **What it returns** | In words | Shown wherever the service is chosen. Leave them for later if you like. |
+| **Inputs** / **Return attribute** | `token` / `token` (suggested) | What the place takes and publishes, matched to the places around it |
+| **Routes on** | `simple, complex` | The values the service returns for the T_out's guards |
+| **How it runs** | **A Java class**, with **Write starting code** checked | |
+
+Click **Add to Claims.json**. The service is in the catalogue, the place uses it, and the
+editor has written
+[`ClaimsTriageService.java`](btsn.common/src/org/btsn/business/claims/ClaimsTriageService.java)
+as **starting code**:
+
+```java
+public String triage(String token) {
+    // RPSO-STARTING-CODE: delete this line when the real logic replaces the starting code below.
+    // TODO: the real logic. ...
+    // Until then it returns the routes in turn, one per call, so every arc leaving the place is tried.
+    String[] routes = {"simple", "complex"};
+    String route = routes[(CALLS.incrementAndGet() - 1) % routes.length];
+
+    JSONObject result = new JSONObject();
+    result.put("routing_decision", routingDecision(route));
+    return businessResult("token", result);
+}
+```
+
+It compiles and keeps the contract, so the process can run now.
+
+The other two ways a service can run:
+
+- **Not decided yet**: the entry is a **draft**. You can keep designing and save the
+  process; Validate, Deploy and Build say exactly what it still needs.
+  **Edit Service in Catalogue...** on the place finishes it later.
+- **A service called over REST**, in any language; its endpoint is set in Deploy
+  ([Call it over REST](ServiceTutorial.md#8-call-it-over-rest)).
+
+### Step 3: Add the second service
+
+Do the same for **Assess**: the editor uses the claims catalogue now, so it does not ask again.
+
+| Field | Enter |
+|---|---|
+| **Service** | `AssessService` (suggested) |
+| **Operation** | `assess` |
+| **Routes on** | `accept, reject` |
+| **How it runs** | A Java class, with starting code |
+
+### Step 4: Set the guards
+
+Select each arc leaving a T_out, set **Guard Condition** to `DECISION_EQUAL_TO` and type its
+**Decision Value**. Copy the value into **Label** to show it on the canvas.
+
+| Arc | Decision Value |
+|---|---|
+| `T_out_Triage → Paid` | `simple` |
+| `T_out_Triage → T_in_Assess` | `complex` |
+| `T_out_Assess → Accepted` | `accept` |
+| `T_out_Assess → Rejected` | `reject` |
+
+Only arcs leaving a T_out take a guard; on any other arc the guard fields are greyed out.
+To remove a guard, choose **(none)**.
+
+### Step 5: Validate and save
+
+Click **Validate**. The design is complete; what is left is listed in red under **Still to do**:
+
+![Validation passed, with Still to do: Place Triage: ClaimsTriageService still runs the starting code the editor wrote; remember to write the real logic in ClaimsTriageService.java. The same for Place Assess and AssessService.java.](images/claims-validate.png)
+
+The starting-code reminders do not stop you running. Validate also checks the routes and names
+before anything runs, and these do stop Deploy, Build and **Run on hosts**:
+
+| Validate reports | Because at run time |
+|---|---|
+| A guard tests a value the service never returns (e.g. `false` when it returns `true`) | No token would take that arc |
+| The service returns a value no arc from its T_out tests | Those tokens would be dropped |
+| A transition leads nowhere and is not a Terminate node | Tokens reaching it would stop there |
+| A place takes an input the place before it does not publish | The token would stop at that place |
+| A service is still a draft | It has no code to run |
+| A transition both feeds a place and is fed by one | It cannot be both a T_in and a T_out |
+
+Save with **File → Save Process Definition As...**. The editor offers
+`ProcessDefinitionFolder/claims/Workflow`, beside the domain's catalogue; save as
+`Claims_Workflow.json`.
+
+### Step 6: Deploy, build and run
+
+These are the same steps as for any process; [Part 2](#2-deploy-the-process) explains each one.
+
+1. **Deploy**: click **Deploy** and choose a Host node for each place: **Triage** on `P1`,
+   **Assess** on `P2`. Click **Save deployment...** (it suggests
+   `ServiceDeploymentFolder/claims/Claims_Workflow.json`), then save the process.
+2. **Build**: keep the defaults (ten tokens from `CLAIMS`, one a second) and click
+   **Create**. The editor writes `Claims_Workflow_BuildAndRun.xml`.
+3. **Run on hosts**: the editor packages the two services, starts P1, P2 and Monitor, runs the
+   ten claims, then analyses the run.
+
+On starting code each place takes its routes in turn:
+
+| Claims | Triage returns | Then |
+|---|---|---|
+| 1, 3, 5, 7, 9 | `simple` | **Paid** |
+| 2, 4, 6, 8, 10 | `complex` | Assess returns `accept`, `reject`, `accept`, ...: 3 **Accepted**, 2 **Rejected** |
+
+The run summary begins `v001: 10 generated, 10 completed`. Press **Replay the recorded run**
+to watch the claims move through the design.
+
+### Step 7: Write the real triage logic
+
+Open `ClaimsTriageService.java` and replace the body of `triage`: a claim of up to 2,500 is
+simple. The claim's amount comes from the token when it carries one; otherwise claim *n* is
+for *n* × 500, so the ten claims of a run divide evenly.
+
+```java
+public String triage(String token) {
+    int claim = claimNumber(sequenceId);
+    double amount = numberValue(token, "amount", claim * 500.0);
+
+    JSONObject result = new JSONObject();
+    result.put("claim", "CLM-" + claim);
+    result.put("amount", amount);
+    result.put("threshold", THRESHOLD);
+    result.put("routing_decision", routingDecision(amount <= THRESHOLD ? "simple" : "complex"));
+    return businessResult("token", result);
+}
+```
+
+`THRESHOLD` (2,500) and `claimNumber` are in the
+[finished class](btsn.common/src/org/btsn/business/claims/ClaimsTriageService.java);
+`numberValue`, `routingDecision` and `businessResult` come from `BaseBusinessService`.
+Delete the `RPSO-STARTING-CODE` line with the rest of the starting code: that line is how the
+editor knows the class is still starting code, and once it is gone the editor never rewrites
+the class.
+
+Click **Validate**: only Assess is still to do. Click **Run on hosts** again; the run
+packages the new class.
+
+| Claims | Amount | Triage returns | Then |
+|---|---|---|---|
+| 1–5 | 500–2,500 | `simple` | **Paid** |
+| 6–10 | 3,000–5,000 | `complex` | Assess (still starting code): 3 **Accepted**, 2 **Rejected** |
+
+![The finished claims design during the replay of its recorded run: Triage is selected and runs ClaimsTriageService.triage on node P1 (badge P1), Assess on P2; tokens are at the CLAIMS generator, at Assess, and five have ended at Paid.](images/claims-design.png)
+
+*The replay of the recorded run: claims 1–5 have been paid and claim 7 is at Assess.*
+
+### Where next
+
+- **Assess** still runs its starting code. Write it the same way, or let a service written in
+  any language answer it over REST ([Call it over REST](ServiceTutorial.md#8-call-it-over-rest)).
+- **If a service fails** at run time, the analysis says why, for example
+  `5 failed at P1_Place: REST service ... could not be reached`, and the replay removes each
+  failed token at its place. **Run on hosts** checks that every REST service answers before it starts.
+- **Run on several machines**: [Part 2, step 7](#7-run-on-several-machines).
+- **Change the process while it runs**: [Part 2, step 8](#8-change-a-running-process).
+- **Write a service from the start**, with its catalogue entry by hand: [ServiceTutorial.md](ServiceTutorial.md).
+
+## Part 2: Each step in detail
+
+This part takes one process from an empty canvas to a replayed run, all
+from ProcessEditor, explaining each step:
 
 - **Design**: a single place P2 calls `StochasticService.processToken`, which
   returns `true` or `false` at random.
@@ -30,25 +301,6 @@ Finished copies of every file are included as `P2_Tutorial_*` ([list](#repositor
   supplied files for comparison.
 - Every path below starts at the repository root.
 
-## Before you start
-
-- **Tools**:
-  - **JDK 15 or later.**
-  - **Apache Ant 1.10.2 or later**: it comes with Eclipse, which runs every launcher as an **Ant Build**,
-    and the editor finds it there by itself. Install Ant separately only to run launchers from a command
-    line. Run Ant with a JDK so its compiler is available.
-  - In Eclipse, import the projects with **File → Import → General → Existing
-    Projects into Workspace**, leaving **Copy projects into workspace** unchecked.
-  - You need `btsn.common`, `btsn.services`, `btsn.common.eventgenerators`,
-    `btsn.common.Monitor`, `btsn.petrinet.ProjectLoader`, `btsn.workflowEditor`
-    and `btsn.rpso.places.p1`–`p6`.
-- **Start the editor**:
-  - Run [`com.editor.ProcessEditor`](btsn.workflowEditor/src/com/editor/ProcessEditor.java)
-    as a Java application with **btsn.workflowEditor** as its working directory (Eclipse's default).
-  - The Deploy panel finds the shared infrastructure from there.
-- **Know what a run resets**: every run reinitialises the P2 and Monitor
-  databases. Save any results you want to keep before running again.
-
 ## 1. Design the process
 
 Choose **File → New → Process Definition**. The toolbar's **Type** starts at
@@ -58,7 +310,9 @@ Choose **File → New → Process Definition**. The toolbar's **Type** starts at
 ### Place the elements
 
 Select a palette tool, click the canvas, then fill in the **Attributes** panel.
-Set **Transition Type** before **Node Type**; **Node Value** follows automatically.
+**Node Value** follows the **Node Type** automatically. The **Transition Type** of a transition
+attached to a place follows its arcs: `T_in` once it has an arc into the place, `T_out` once the
+place has an arc into it.
 
 | Palette tool | Label | Attributes |
 |---|---|---|
@@ -68,11 +322,10 @@ Set **Transition Type** before **Node Type**; **Node Value** follows automatical
 | Transition | `T_out_P2` | Transition Type: `T_out`; Node Type: `GatewayNode` |
 | Transition | `Terminate` | Transition Type: `Other`; Node Type: `TerminateNode` |
 
-- Labels must be unique.
-- Name each place's transitions after that place: either its label or the node it is deployed to.
-  - Use the same name on the T_in and the T_out.
-  - Here both are `P2`, so `T_in_P2` and `T_out_P2`. If you relabel the place `TRUEORFALSE` and deploy it to P2, then `T_in_P2` or `T_in_TRUEORFALSE` both pass.
-  - Business models use the label, for example `T_in_Validation`.
+- Labels must be unique. Otherwise a label is just a name: `T1` works as well as `T_in_P2`.
+- If you do name a transition `T_in_<name>` or `T_out_<name>`, Validate checks that `<name>` is
+  its place's label or the node the place is deployed to, the same on the T_in and the T_out.
+  Here both are `P2`; business models use the label, for example `T_in_Validation`.
 - The generator's **Rate** and **Version** become the defaults in
   [Build and Run](#3-create-build-and-run).
 - The supplied `P2_Tutorial_Workflow.json` stores `T_out_P2` as a `DecisionNode`. The runtime accepts it too, and both route on the guards below.
@@ -82,9 +335,11 @@ Set **Transition Type** before **Node Type**; **Node Value** follows automatical
 Select P2. Its Attributes panel works from the **service catalogue**: the list
 of services and their operations that the hosts can run.
 
-1. **Catalogue**: the panel names the catalogue in use. If the **Service** list is empty, click **Choose catalogue...** and open
-   [`BusinessServiceDefinitions/petrinet/PetriNetModels.json`](btsn.common/BusinessServiceDefinitions/petrinet/PetriNetModels.json).
-   Once the process is saved under `ProcessDefinitionFolder/petrinet`, the editor selects this catalogue itself.
+1. **Catalogue**: the panel names the catalogue in use. A new process starts with the standard
+   services every process shares,
+   [`BusinessServiceDefinitions/petrinet/PetriNetModels.json`](btsn.common/BusinessServiceDefinitions/petrinet/PetriNetModels.json),
+   which is all this model needs. A process that needs services of its own uses its domain's
+   catalogue instead ([Part 1, step 2](#step-2-add-the-first-service)).
 2. **Service**: hover over each entry in the list to see what it does. Choose `StochasticService`. Its only operation, `processToken`, is
    selected for you.
 3. **What it does**: the box under the Operation says what the service does and what it returns, so you know how to route its result:
@@ -130,6 +385,8 @@ Use **Arrow (drag)**, or **Arrow (click waypoints)** to bend the return route.
 ### Validate and save
 
 1. Click **Validate**. Fix any missing labels, incomplete operations or invalid connections.
+   Validate also checks the guards against the values each service returns
+   ([what it checks](#step-5-validate-and-save)).
 2. Choose **File → Save Process Definition As...** and save to
    `btsn.common/ProcessDefinitionFolder/petrinet/Workflow/My_P2_Workflow.json`.
 
@@ -647,7 +904,21 @@ To run everything on one machine, add `-Dinfrastructure=SingleHost -Dhost.addres
 
 ## Repository artefacts
 
-The supplied P2 tutorial, built with exactly these steps:
+The supplied claims process of Part 1, made with its steps:
+
+| Artefact | Role |
+|---|---|
+| [Claims_Workflow.json](btsn.common/ProcessDefinitionFolder/claims/Workflow/Claims_Workflow.json) | Process design, linked to its deployment |
+| [Claims.json](btsn.common/BusinessServiceDefinitions/claims/Claims.json) | The claims catalogue the editor created, with `ClaimsTriageService` and `AssessService` |
+| [ClaimsTriageService.java](btsn.common/src/org/btsn/business/claims/ClaimsTriageService.java) | Triage, with the real logic of step 7 |
+| [AssessService.java](btsn.common/src/org/btsn/business/claims/AssessService.java) | Assess, still the editor's starting code |
+| [Claims_Workflow.json](btsn.common/ServiceDeploymentFolder/claims/Claims_Workflow.json) (deployment) | Triage on node P1, Assess on P2 |
+| [Claims_WorkflowDeployment.json](btsn.services/deployments/claims/Claims_WorkflowDeployment.json) | Deployment profile written by Build and Run |
+| [Claims_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/Claims_Workflow_BuildAndRun.xml) | Launcher written by Build and Run |
+| [Analysis_Claims_Workflow.txt](btsn.common/AnalysisFolder/Claims/Analysis_Claims_Workflow.txt) | Analysis of the run in step 7, ready to replay |
+| [packaging.json](btsn.services/packaging.json) | Lists `Claims.json`, as the editor did when it created the catalogue |
+
+The supplied P2 tutorial of Part 2, built with exactly these steps:
 
 | Artefact | Role |
 |---|---|
@@ -681,7 +952,8 @@ Every launcher runs the same way:
 
 | Example | Ant entry point |
 |---|---|
-| Single place (this tutorial) | [P2_Tutorial_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P2_Tutorial_Workflow_BuildAndRun.xml) |
+| From an idea: insurance claims (Part 1) | [Claims_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/Claims_Workflow_BuildAndRun.xml) |
+| Single place (Part 2) | [P2_Tutorial_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P2_Tutorial_Workflow_BuildAndRun.xml) |
 | Single place, P1 reference | [P1_Tutorial_Local_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_Tutorial_Local_BuildAndRun.xml) |
 | Your first service: credit check ([ServiceTutorial.md](ServiceTutorial.md)) | [Credit_Check_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/Credit_Check_Workflow_BuildAndRun.xml) |
 | Your own service: inventory and supplier | [Inventory_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/Inventory_Workflow_BuildAndRun.xml) |

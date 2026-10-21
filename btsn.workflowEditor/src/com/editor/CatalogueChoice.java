@@ -88,7 +88,8 @@ public final class CatalogueChoice {
         c.gridx = 1; c.fill = GridBagConstraints.HORIZONTAL; panel.add(existing, c);
         c.gridx = 0; c.gridy++; c.fill = GridBagConstraints.NONE; c.insets = new Insets(4, 2, 2, 6); panel.add(createNew, c);
         c.gridx = 1; c.fill = GridBagConstraints.HORIZONTAL; panel.add(newDomain, c);
-        c.gridy++; c.insets = new Insets(0, 2, 2, 2); panel.add(creates, c);
+        // Below both columns, so a long domain name does not squeeze the choices as it is typed.
+        c.gridx = 0; c.gridy++; c.gridwidth = 2; c.insets = new Insets(0, 2, 2, 2); panel.add(creates, c);
         while (true) {
             int answer = JOptionPane.showConfirmDialog(parent, panel, "Catalogue for this process's services", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (answer != JOptionPane.OK_OPTION) return null;
@@ -101,6 +102,6 @@ public final class CatalogueChoice {
     }
 
     private static JLabel text(String html) {
-        return new JLabel("<html><div style='width:440px'>" + html + "</div></html>");
+        return new JLabel("<html><div style='width:540px'>" + html + "</div></html>");
     }
 }
