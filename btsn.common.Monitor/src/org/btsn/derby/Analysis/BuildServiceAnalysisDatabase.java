@@ -523,9 +523,11 @@ public class BuildServiceAnalysisDatabase {
 			+ "reportingService VARCHAR(100), "
 			+ "reportingChannel VARCHAR(50), "
 			+ "analysisTime BIGINT, "
-			+ "eventType VARCHAR(20)"  // ENTER, EXIT, FORK_CONSUMED, TERMINATE
+			+ "eventType VARCHAR(20), "  // ENTER, EXIT, FORK_CONSUMED, TERMINATE, FAILED
+			+ "detail VARCHAR(500)"  // FAILED: why the token stopped at the place
 			+ ")";
 		manageTable(statement, CONSOLIDATED_TRANSITION_FIRINGS_TABLE, createConsolidatedTransitionFiringsSQL);
+		addColumnIfMissing(statement, CONSOLIDATED_TRANSITION_FIRINGS_TABLE, "detail", "VARCHAR(500)");
 
 		// 6. CONSOLIDATED_TOKEN_PATHS - Aggregated token path data from all services
 		String createConsolidatedTokenPathsSQL = "CREATE TABLE " + CONSOLIDATED_TOKEN_PATHS_TABLE + " ("
@@ -616,10 +618,12 @@ public class BuildServiceAnalysisDatabase {
 				+ "bufferSize INT, "
 				+ "ruleVersion VARCHAR(20), "
 				+ "eventType VARCHAR(20), "  // ENTER, EXIT, FORK_CONSUMED, TERMINATE
-				+ "arcValue VARCHAR(100)"  // guard value taken (e.g. which terminate node a token reached)
+				+ "arcValue VARCHAR(100), "  // guard value taken (e.g. which terminate node a token reached)
+				+ "detail VARCHAR(500)"  // why a token failed at its place (FAILED events)
 				+ ")";
 		manageTable(statement, TRANSITION_FIRINGS_TABLE, createTransitionFiringsSQL);
 		addColumnIfMissing(statement, TRANSITION_FIRINGS_TABLE, "arcValue", "VARCHAR(100)");
+		addColumnIfMissing(statement, TRANSITION_FIRINGS_TABLE, "detail", "VARCHAR(500)");
 		
 		// 10. TOKEN_GENEALOGY table
 		// NOTE: Composite primary key (parentTokenId, childTokenId, forkTimestamp) allows
@@ -765,8 +769,8 @@ public class BuildServiceAnalysisDatabase {
 	public void writeTransitionFiring(TreeMap<String, String> record) {
 		String sql = "INSERT INTO " + TRANSITION_FIRINGS_TABLE + 
 				" (timestamp, transitionId, transitionType, tokenId, workflowBase, " +
-				"fromPlace, toPlace, forkDecision, joinState, bufferSize, ruleVersion, eventType, arcValue) " +
-				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				"fromPlace, toPlace, forkDecision, joinState, bufferSize, ruleVersion, eventType, arcValue, detail) " +
+				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		
 		Connection conn = null;
 		PreparedStatement pstmt = null;
@@ -813,6 +817,13 @@ public class BuildServiceAnalysisDatabase {
 				pstmt.setString(13, arcValueStr);
 			} else {
 				pstmt.setNull(13, java.sql.Types.VARCHAR);
+			}
+
+			String detailStr = record.get("detail");
+			if (detailStr != null && !detailStr.isEmpty()) {
+				pstmt.setString(14, detailStr.length() > 500 ? detailStr.substring(0, 500) : detailStr);
+			} else {
+				pstmt.setNull(14, java.sql.Types.VARCHAR);
 			}
 			
 			pstmt.executeUpdate();

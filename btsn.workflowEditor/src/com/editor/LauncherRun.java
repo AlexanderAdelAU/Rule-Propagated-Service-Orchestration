@@ -221,6 +221,9 @@ public final class LauncherRun {
             if (low != null && high != null) line += ", latency " + low + " to " + high + " ms" + (median == null ? "" : " (median " + median + " ms)");
             if (generated != null && completed != null && !generated.equals(completed)) line += "  <-- " + (Integer.parseInt(generated) - Integer.parseInt(completed)) + " did not complete";
             lines.add(line);
+            // Why: tokens that failed at a place, as the analyzer lists them ("5 failed at CreditLimitService (P1_Place): ...").
+            java.util.regex.Matcher failed = java.util.regex.Pattern.compile("(?m)^\\s+(\\d+ failed at .+)$").matcher(part);
+            while (failed.find()) lines.add("    " + failed.group(1).trim());
         }
         if (lines.size() == 1) lines.add("No workflows found in the analysis; see the report above.");
         return lines;

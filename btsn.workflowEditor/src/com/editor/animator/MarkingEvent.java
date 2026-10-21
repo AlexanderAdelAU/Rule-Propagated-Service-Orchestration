@@ -45,6 +45,8 @@ public class MarkingEvent implements Comparable<MarkingEvent> {
     public boolean isJoinConsumed() { return "JOIN_CONSUMED".equals(eventType); }
     public boolean isJoinSurvivor() { return "JOIN_SURVIVOR".equals(eventType); }
     public boolean isTerminate() { return "TERMINATE".equals(eventType); }
+    /** The token stopped at its place: its service call failed, or no arc took the value it returned. */
+    public boolean isFailed() { return "FAILED".equals(eventType); }
     public boolean isForkConsumed() { return "FORK_CONSUMED".equals(eventType); }
     public boolean isGenerated() { return "GENERATED".equals(eventType); }
     

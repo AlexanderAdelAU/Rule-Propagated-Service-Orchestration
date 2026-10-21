@@ -1889,10 +1889,14 @@ public class TokenAnimator {
                         processedIndices.add(exitIndex);
                     }
                 } else {
-                    // No exit found - token stays at place
+                    // No exit found - token stays at place, until it failed there (then it is gone)
+                    MarkingEvent failed = null;
+                    for (int k = i + 1; k < tokenEvents.size() && failed == null; k++)
+                        if (tokenEvents.get(k).isFailed() && tokenEvents.get(k).placeId.equals(current.placeId)) failed = tokenEvents.get(k);
+                    if (failed != null) processedIndices.add(tokenEvents.indexOf(failed));
                     segments.add(new AnimationSegment(
                         tokenId, version, Phase.AT_PLACE,
-                        current.timestamp, endTime + 10000,
+                        current.timestamp, failed != null ? Math.max(failed.timestamp, current.timestamp + 1) : endTime + 10000,
                         current.placeId,
                         placeToTIn.get(current.placeId),
                         placeToTOut.get(current.placeId),

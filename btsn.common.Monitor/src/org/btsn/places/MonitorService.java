@@ -401,8 +401,8 @@ public class MonitorService extends BaseStochasticPetriNetPlace {
 	    int count = 0;
 	    String sql = "INSERT INTO " + CONSOLIDATED_TRANSITION_FIRINGS_TABLE + 
 	                 " (workflowBase, tokenId, transitionId, timestamp, toPlace, fromPlace, bufferSize, " +
-	                 "placeName, reportingService, reportingChannel, analysisTime, eventType) " +
-	                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	                 "placeName, reportingService, reportingChannel, analysisTime, eventType, detail) " +
+	                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	    
 	    try (Connection conn = getConnection();
 	         PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -421,6 +421,8 @@ public class MonitorService extends BaseStochasticPetriNetPlace {
 	            pstmt.setString(10, reportingChannel);
 	            pstmt.setLong(11, analysisTime);
 	            pstmt.setString(12, getStringValue(firing, "eventType", ""));
+	            String detail = getStringValue(firing, "detail", "");   // FAILED: why the token stopped
+	            pstmt.setString(13, detail.length() > 500 ? detail.substring(0, 500) : detail);
 	            pstmt.executeUpdate();
 	            count++;
 	        }

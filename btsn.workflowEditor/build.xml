@@ -139,6 +139,12 @@
             <classpath><pathelement location="${build.dir}/contract-tests"/><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
             <arg file=".."/>
         </java>
+        <java classname="com.editor.EndpointCheckTest" fork="true" failonerror="true">
+            <sysproperty key="rpso.infrastructure" value="SingleHost"/>
+            <jvmarg value="-Djava.awt.headless=true"/>
+            <classpath><pathelement location="${build.dir}/contract-tests"/><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
+            <arg file=".."/>
+        </java>
     </target>
 
     <target name="check-deployment-editor" depends="check-contracts" description="Test real deployment table editors (requires a display or xvfb-run)">
