@@ -11,6 +11,17 @@
       "inputs": ["token"],
       "returnAttribute": "creditDecision",
       "status": "active"
+    },
+    {
+      "service": "FraudService",
+      "implementationClass": "org.btsn.business.credit.FraudService",
+      "operation": "FraudeAssessment",
+      "description": "It validates the attributes and details of the application",
+      "returns": "Assessement",
+      "inputs": ["token"],
+      "returnAttribute": "token",
+      "routes": ["clear", "review"],
+      "status": "active"
     }
   ]
 }

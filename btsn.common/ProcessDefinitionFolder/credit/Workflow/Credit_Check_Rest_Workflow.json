@@ -5,8 +5,8 @@
     {
       "id": "APPLICATIONS",
       "type": "EVENT_GENERATOR",
-      "x": 60,
-      "y": 160,
+      "x": 48,
+      "y": 170,
       "width": 24,
       "height": 60,
       "label": "APPLICATIONS",
@@ -17,8 +17,8 @@
     {
       "id": "T_in_Credit",
       "type": "TRANSITION",
-      "x": 150,
-      "y": 160,
+      "x": 358,
+      "y": 170,
       "width": 24,
       "height": 60,
       "label": "T_in_Credit",
@@ -31,8 +31,8 @@
     {
       "id": "Credit",
       "type": "PLACE",
-      "x": 235,
-      "y": 165,
+      "x": 443,
+      "y": 175,
       "width": 50,
       "height": 50,
       "label": "Credit",
@@ -51,8 +51,8 @@
     {
       "id": "T_out_Credit",
       "type": "TRANSITION",
-      "x": 340,
-      "y": 160,
+      "x": 548,
+      "y": 170,
       "width": 24,
       "height": 60,
       "label": "T_out_Credit",
@@ -64,8 +64,8 @@
     {
       "id": "Approved",
       "type": "TRANSITION",
-      "x": 470,
-      "y": 100,
+      "x": 678,
+      "y": 110,
       "width": 24,
       "height": 60,
       "label": "Approved",
@@ -77,8 +77,8 @@
     {
       "id": "Referred",
       "type": "TRANSITION",
-      "x": 470,
-      "y": 220,
+      "x": 678,
+      "y": 230,
       "width": 24,
       "height": 60,
       "label": "Referred",
@@ -86,17 +86,56 @@
       "node_type": "TerminateNode",
       "node_value": "TERMINATE_NODE",
       "transition_type": "Other"
+    },
+    {
+      "id": "T_in_Fraud",
+      "type": "TRANSITION",
+      "x": 128,
+      "y": 170,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_Fraud",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "Fraud",
+      "type": "PLACE",
+      "x": 195,
+      "y": 175,
+      "width": 50,
+      "height": 50,
+      "label": "Fraud",
+      "service": "FraudService",
+      "serviceInstance": "Fraud",
+      "operations": [
+        {
+          "name": "FraudeAssessment",
+          "returnAttribute": "token",
+          "arguments": [
+            {"name": "token", "type": "String", "value": "String", "required": false}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_Fraud",
+      "type": "TRANSITION",
+      "x": 288,
+      "y": 170,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_Fraud",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
     }
   ],
   "arrows": [
-    {
-      "source": "APPLICATIONS",
-      "target": "T_in_Credit",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
-    },
     {
       "source": "T_in_Credit",
       "target": "Credit",
@@ -127,6 +166,38 @@
       "label": "refer",
       "guardCondition": "DECISION_EQUAL_TO",
       "decision_value": "refer",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_Fraud",
+      "target": "T_in_Credit",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "APPLICATIONS",
+      "target": "T_in_Fraud",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_Fraud",
+      "target": "Fraud",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Fraud",
+      "target": "T_out_Fraud",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
       "endpoint": ""
     }
   ],

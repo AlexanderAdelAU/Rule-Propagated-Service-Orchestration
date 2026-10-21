@@ -14,6 +14,17 @@
       "arguments": [
         {"name": "token", "type": "String", "value": "String", "required": false}
       ]
+    },
+    {
+      "node": "P2",
+      "service": "FraudService",
+      "instance": "Fraud",
+      "operation": "FraudeAssessment",
+      "returnAttribute": "token",
+      "portSlot": 0,
+      "arguments": [
+        {"name": "token", "type": "String", "value": "String", "required": false}
+      ]
     }
   ]
 }
