@@ -317,10 +317,22 @@ run gives the same result as before: ten workflows completed, five approved and 
 - **Where the endpoint is called from.** The host (P1 here) makes the call, so the
   address must be reachable from P1's machine. `127.0.0.1` works when the service runs
   on that machine.
+- **Before a run.** **Run on hosts** first asks each REST endpoint for an answer. If one
+  does not answer, it names the service and the reason (for example *connection refused*)
+  and lets you cancel. An address on `127.0.0.1` is checked only when the hosts run on this
+  computer, since from another machine it would name that machine.
 - **When it fails.** If the endpoint cannot be reached, answers an error, or returns a
   body without the return attribute, the call fails as a Java service that throws
-  would. The host's log names the endpoint; with the service stopped, a run reports ten
-  workflows generated and none completed.
+  would. The token stops at that place, and the analysis says why:
+
+  ```
+  Failed workflows:          10
+    10 failed at P1_Place: REST service CreditLimitService.assess at http://127.0.0.1:8080/credit/assess could not be reached: java.net.ConnectException
+  ```
+
+  The same report lists a token whose service returned a value that no arc from its
+  T_out tests ("no arc from its T_out tests 'review'"). The run summary in the editor
+  repeats these lines, and the replay removes each failed token at its place.
 - **Timeout.** A call waits up to 10 seconds. To change it, add `"timeoutMs": 5000` to
   the placement in the service deployment file.
 - **No Java class at all.** A service that only exists behind an endpoint can leave

@@ -35,6 +35,18 @@ import org.json.simple.JSONObject;
  */
 public class ServiceHelper {
 	private static final Logger logger = Logger.getLogger(ServiceHelper.class);
+
+	/** A place's service could not be called or threw: the token stops at the place. */
+	public static class ServiceInvocationException extends RuntimeException {
+		public ServiceInvocationException(String message, Throwable cause) { super(message, cause); }
+
+		/** The underlying reason, in the service's or adapter's own words. */
+		public String reason() {
+			for (Throwable t = getCause(); t != null; t = t.getCause())
+				if (t.getMessage() != null && !t.getMessage().isEmpty()) return t.getMessage();
+			return getCause() != null ? getCause().getClass().getSimpleName() : getMessage();
+		}
+	}
 	private BusinessCapabilityResolver capabilityResolver;
 	
 	private static final ThreadLocal<String> returnType = new ThreadLocal<>();
@@ -209,7 +221,7 @@ public class ServiceHelper {
 
 		} catch (Exception e) {
 			logger.error("SERVICE ERROR: Failed to invoke " + service + "." + operation, e);
-			throw new RuntimeException("Service invocation failed", e);
+			throw new ServiceInvocationException("Service invocation failed", e);
 		} finally {
 			returnType.remove();
 		}

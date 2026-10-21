@@ -585,7 +585,7 @@ private String extractServiceContextFromToken(String token) {
         // Include EVENT_GENERATOR events for the first place in the workflow
         // GENERATED events have eventType = 'GENERATED' and toPlace = this place
         String sql = 
-            "SELECT tokenId, transitionId, timestamp, toPlace, fromPlace, workflowBase, bufferSize, eventType " +
+            "SELECT tokenId, transitionId, timestamp, toPlace, fromPlace, workflowBase, bufferSize, eventType, detail " +
             "FROM " + TRANSITION_FIRINGS_TABLE + " " +
             "WHERE ((transitionId = ? OR transitionId = ?) " +
             "       OR (eventType = 'GENERATED' AND toPlace = ?)) " +
@@ -615,6 +615,7 @@ private String extractServiceContextFromToken(String token) {
                 firing.workflowBase = rs.getInt("workflowBase");
                 firing.bufferSize = rs.getInt("bufferSize");
                 firing.eventType = rs.getString("eventType");
+                firing.detail = rs.getString("detail");             // why a FAILED token stopped here
                 firing.placeName = placeName;
                 firings.add(firing);
             }
@@ -1018,7 +1019,8 @@ private String extractServiceContextFromToken(String token) {
                     firingObj.put("fromPlace", firing.fromPlace);
                     firingObj.put("placeName", firing.placeName);
                     firingObj.put("bufferSize", firing.bufferSize);
-                    firingObj.put("eventType", firing.eventType);  // ENTER, EXIT, FORK_CONSUMED, TERMINATE
+                    firingObj.put("eventType", firing.eventType);  // ENTER, EXIT, FORK_CONSUMED, TERMINATE, FAILED
+                    if (firing.detail != null && !firing.detail.isEmpty()) firingObj.put("detail", firing.detail);
                     firingsArray.add(firingObj);
                 }
             }
@@ -1381,7 +1383,8 @@ private String extractServiceContextFromToken(String token) {
         int workflowBase;
         int bufferSize;
         String placeName;
-        String eventType;  // ENTER, EXIT, FORK_CONSUMED, TERMINATE
+        String eventType;  // ENTER, EXIT, FORK_CONSUMED, TERMINATE, FAILED
+        String detail;     // FAILED: why the token stopped at the place
     }
 
     protected static class TokenPath {

@@ -636,6 +636,17 @@ public class PetriNetInstrumentationHelper {
     }
     
     /**
+     * Record a token that failed at a place: its service call failed, or no arc from the place's T_out tests the
+     * value it returned. The token goes no further; the analysis reports it with the reason instead of leaving it open.
+     */
+    public void recordTokenFailed(int tokenId, String placeName, String reason) {
+        if (shouldSkipInstrumentation(tokenId) || !recordTransitions) return;
+        recordTransitionFiring(buildTOutTransitionId(placeName), "Failure", tokenId, placeName, "FAILED", null, null,
+                               0, -1, VersionConstants.getVersionFromSequenceId(tokenId), "FAILED", null, reason);
+        logger.warn("Token " + tokenId + " FAILED at " + placeName + ": " + reason);
+    }
+
+    /**
      * Record fork genealogy - parent to child relationship
      * 
      * Called from ServiceThread when a fork creates child tokens.
@@ -888,6 +899,16 @@ public class PetriNetInstrumentationHelper {
                                        String forkDecision, String joinState,
                                        long workflowStartTime, int bufferSize, String ruleVersion,
                                        String eventType, String arcValue) {
+        recordTransitionFiring(transitionId, transitionType, tokenId, fromPlace, toPlace, forkDecision, joinState,
+                               workflowStartTime, bufferSize, ruleVersion, eventType, arcValue, null);
+    }
+
+    /** As above, with why a token failed at its place (FAILED events only). */
+    private void recordTransitionFiring(String transitionId, String transitionType,
+                                       int tokenId, String fromPlace, String toPlace,
+                                       String forkDecision, String joinState,
+                                       long workflowStartTime, int bufferSize, String ruleVersion,
+                                       String eventType, String arcValue, String detail) {
         try {
             TreeMap<String, String> record = new TreeMap<>();
             record.put("timestamp", Long.toString(System.currentTimeMillis()));
@@ -904,6 +925,7 @@ public class PetriNetInstrumentationHelper {
             record.put("eventType", eventType != null ? eventType : "");
             // An unguarded arc matches through a rule variable ($ANON...); only a real guard value is a route.
             record.put("arcValue", arcValue != null && !arcValue.startsWith("$") ? arcValue : "");
+            record.put("detail", detail != null ? detail : "");
             
             dbWriter.writeTransitionFiring(record);
             

@@ -35,6 +35,13 @@ public final class RunFromEditorCheck {
             + "WORKFLOW BASE: 2000000 (v002)\n   Generated workflows:       10\n   Completed workflows:       8\n";
         List<String> partial = LauncherRun.summarise(twoVersions);
         check(partial.contains("v001: 10 generated, 10 completed, structure OK") && partial.contains("v002: 10 generated, 8 completed  <-- 2 did not complete"), "Partial summary: " + partial);
+        // Tokens that failed at a place are listed under their version, with the reason.
+        String failing = "WORKFLOW BASE: 1000000 (v001)\n   Generated workflows:       10\n   Completed workflows:       5\n   Failed workflows:          5\n"
+            + "     5 failed at CreditLimitService (P1_Place): REST service CreditLimitService.assess at http://127.0.0.1:8080/credit/assess could not be reached: java.net.ConnectException\n";
+        List<String> failedSummary = LauncherRun.summarise(failing);
+        check(failedSummary.equals(Arrays.asList("=== RUN COMPLETE ===", "v001: 10 generated, 5 completed  <-- 5 did not complete",
+            "    5 failed at CreditLimitService (P1_Place): REST service CreditLimitService.assess at http://127.0.0.1:8080/credit/assess could not be reached: java.net.ConnectException")),
+            "Failures not summarised: " + failedSummary);
         // Hosts: the launcher's hosts and endpoints, then live state from each host's own log.
         File p2Launcher = launchers.get(0);
         RunHosts here = RunHosts.forLauncher(p2Launcher, repository, true);
