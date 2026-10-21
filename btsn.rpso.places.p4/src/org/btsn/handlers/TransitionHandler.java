@@ -377,6 +377,8 @@ class TransitionHandler {
 
         if (matchingBranchIndices.isEmpty()) {
             logger.warn("XOR: No branches matched routing decision '" + cleanRoutingPath + "' - event dropped");
+            serviceThread.instrumentTokenFailed(serviceThread.getPhaseSequenceID(), serviceThread.getServiceName(),
+                "no arc from its T_out tests '" + cleanRoutingPath + "'");
             logger.info("XOR-DIAG: === END XOR ROUTING (NO MATCH) ===");
             return;
         }
@@ -508,6 +510,8 @@ class TransitionHandler {
 
         if (matchingIndices.isEmpty()) {
             logger.error("GATEWAY: No destinations match routing_path '" + cleanRoutingPath + "' - token dropped");
+            serviceThread.instrumentTokenFailed(serviceThread.getPhaseSequenceID(), serviceThread.getServiceName(),
+                "no arc from its T_out tests '" + cleanRoutingPath + "'");
             logger.info("GATEWAY-DIAG: === END GATEWAY ROUTING (NO MATCH) ===");
             return;
         }

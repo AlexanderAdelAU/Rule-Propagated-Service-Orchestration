@@ -1310,6 +1310,9 @@ class ServiceThread implements Runnable {
 					putServicePerformanceData(sequenceID);
 				}
 
+			} catch (ServiceHelper.ServiceInvocationException e) {
+				logger.error("Error processing control node of type: " + nodeType, e);
+				instrumentTokenFailed(phaseSequenceID, serviceName, e.reason());
 			} catch (Exception e) {
 				logger.error("Error processing control node of type: " + nodeType, e);
 			}
@@ -3230,6 +3233,12 @@ class ServiceThread implements Runnable {
 	 * Record token termination with the guard value that chose it, so a replay can tell
 	 * which terminate node the token reached when a T_out has more than one.
 	 */
+	/** Record that the token stopped at this place, and why, so the analysis can report it. */
+	void instrumentTokenFailed(Integer tokenId, String place, String reason) {
+		if (petriNetHelper == null || tokenId == null) return;
+		petriNetHelper.recordTokenFailed(tokenId, place, reason);
+	}
+
 	void instrumentTokenTerminate(int tokenId, String fromPlace, String nodeType, String arcValue) {
 		if (petriNetHelper == null) return;
 		

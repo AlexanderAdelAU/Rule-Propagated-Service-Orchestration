@@ -97,7 +97,7 @@ public class PetriNetAnalyzer {
             "      WHERE t_out.tokenId = t_in.tokenId " +
             "        AND t_out.workflowBase = t_in.workflowBase " +
             "        AND t_out.fromPlace = t_in.toPlace " +
-            "        AND t_out.eventType IN ('EXIT', 'TERMINATE') " +
+            "        AND t_out.eventType IN ('EXIT', 'TERMINATE', 'FAILED') " +
             "        AND t_out.timestamp >= t_in.timestamp " +
             "  ) " +
             "ORDER BY t_in.tokenId, t_in.timestamp";
@@ -2280,6 +2280,32 @@ public class PetriNetAnalyzer {
                 }
             }
             
+            // A token that failed at a place (FAILED) ends its workflow there, with the reason the host recorded.
+            String failedSql =
+                "SELECT * FROM CONSOLIDATED_TRANSITION_FIRINGS " +   // detail is absent from databases written before it was recorded
+                "WHERE workflowBase = ? AND eventType = 'FAILED' ORDER BY timestamp";
+            try (PreparedStatement pstmt = conn.prepareStatement(failedSql)) {
+                pstmt.setInt(1, workflowBase);
+                ResultSet rs = pstmt.executeQuery();
+                boolean hasDetail = false;
+                java.sql.ResultSetMetaData meta = rs.getMetaData();
+                for (int c = 1; c <= meta.getColumnCount(); c++)
+                    if ("DETAIL".equalsIgnoreCase(meta.getColumnName(c))) hasDetail = true;
+                Set<Integer> counted = new HashSet<>();
+                while (rs.next()) {
+                    int tokenId = rs.getInt("tokenId");
+                    if (!counted.add(tokenId)) continue;   // the same failure reported by more than one collector
+                    int root = resolveRootToken(tokenId, parentByChild);
+                    String place = rs.getString("fromPlace");
+                    String reason = hasDetail ? rs.getString("detail") : null;
+                    if (reason == null || reason.isEmpty()) reason = "see the host's log";
+                    analysis.failures.computeIfAbsent(place == null ? "?" : place, k -> new TreeMap<>()).merge(reason, 1, Integer::sum);
+                    if (analysis.instances.containsKey(root)) analysis.failedRoots.add(root);
+                }
+            } catch (SQLException e) {
+                logger.warn("Canonical reconstruction: failed tokens unavailable: " + e.getMessage());
+            }
+            
         } catch (SQLException e) {
             logger.error("Error reconstructing canonical workflows for workflowBase=" + workflowBase, e);
         }
@@ -2292,8 +2318,11 @@ public class PetriNetAnalyzer {
         analysis.completedRoots.addAll(analysis.businessTerminatedRoots);
         analysis.completedWorkflows = analysis.completedRoots.size();
         
+        analysis.failedRoots.removeAll(analysis.completedRoots);
+        analysis.failedWorkflows = analysis.failedRoots.size();
         analysis.incompleteRoots.addAll(analysis.generatedRoots);
         analysis.incompleteRoots.removeAll(analysis.completedRoots);
+        analysis.incompleteRoots.removeAll(analysis.failedRoots);
         analysis.incompleteWorkflows = analysis.incompleteRoots.size();
         
         logger.info("Canonical reconstruction: generated=" + analysis.generatedWorkflows +
@@ -2333,6 +2362,13 @@ public class PetriNetAnalyzer {
         report.append("1. CANONICAL WORKFLOW RECONSTRUCTION\n");
         report.append("   Generated workflows:       ").append(canonical.generatedWorkflows).append("\n");
         report.append("   Completed workflows:       ").append(canonical.completedWorkflows).append("\n");
+        if (canonical.failedWorkflows > 0 || !canonical.failures.isEmpty()) {
+            report.append("   Failed workflows:          ").append(canonical.failedWorkflows).append("\n");
+            for (Map.Entry<String, Map<String, Integer>> place : canonical.failures.entrySet())
+                for (Map.Entry<String, Integer> reason : place.getValue().entrySet())
+                    report.append("     ").append(reason.getValue()).append(" failed at ")
+                          .append(names.describe(workflowBase, place.getKey())).append(": ").append(reason.getKey()).append("\n");
+        }
         report.append("   Monitor handoffs:          ").append(canonical.monitorHandoffs).append("\n");
         report.append("   Monitor acknowledgements:  ").append(canonical.monitorAcknowledgements).append("\n");
         report.append("   Business terminations:     ").append(canonical.businessTerminations).append("\n");
@@ -2858,6 +2894,11 @@ public class PetriNetAnalyzer {
         public Set<Integer> businessTerminatedRoots = new HashSet<>();
         public Set<Integer> completedRoots = new HashSet<>();
         public Set<Integer> incompleteRoots = new HashSet<>();
+        /** Roots whose token stopped at a place (FAILED): service call failed, or no arc for its routing value. */
+        public Set<Integer> failedRoots = new HashSet<>();
+        public int failedWorkflows;
+        /** place -> reason -> tokens that failed there for that reason */
+        public Map<String, Map<String, Integer>> failures = new TreeMap<>();
     }
     
     public static class WorkflowInstanceSummary {

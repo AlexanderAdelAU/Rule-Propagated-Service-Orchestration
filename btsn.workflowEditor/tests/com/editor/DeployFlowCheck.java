@@ -394,7 +394,32 @@ public final class DeployFlowCheck {
             } catch (Throwable ex) { replay[0] = ex; }
         });
         if (replay[0] != null) throw new AssertionError("Credit replay", replay[0]);
-        System.out.println("PASS: catalogue-only design, right-click Deploy to, filled Deploy panel with Place column, two-way node edits, save links process and instances, reopen, existing deployment unchanged, Create Build and Run files, Ant-prefixed analysis replay, What it does, transition names by label or node, one place per node, several event generators, healthcare launchers with their token generator, one input per join arc, rest placements, inventory replay mapped by service, terminations replayed to the node of the arc taken, Deploy lists only the process places with their host addresses");
+        // A run whose Credit service could not be reached: the analysis says so, and the replay removes each failed token at its place.
+        SwingUtilities.invokeAndWait(() -> {
+            try {
+                Path fraudProcess = common.toPath().resolve("ProcessDefinitionFolder/credit/Workflow/Credit_Fraud_Rest_Workflow.json");
+                String failedRun = read(repository.toPath().resolve("btsn.workflowEditor/tests/fixtures/Analysis_Credit_Fraud_Failed.txt"));
+                check(failedRun.contains("Failed workflows:          5") && failedRun.contains("5 failed at P1_Place: REST service CreditLimitService.assess at http://127.0.0.1:8099/credit/assess could not be reached"),
+                    "Failed calls not reported in the analysis");
+                Canvas canvas = new Canvas(); canvas.setDefinitionLocation(fraudProcess.toFile()); canvas.loadFromJSON(read(fraudProcess));
+                TokenAnimator animator = new TokenAnimator(); animator.setCanvas(canvas);
+                animator.parseOutput(failedRun);
+                Field f = TokenAnimator.class.getDeclaredField("segments"); f.setAccessible(true);
+                Map<String, Long> failedAt = new TreeMap<>();
+                for (String line : failedRun.split("\n")) {
+                    java.util.regex.Matcher m = java.util.regex.Pattern.compile("Time=(\\d+) Token=(\\d+) .*EventType=FAILED").matcher(line);
+                    if (m.find()) failedAt.put(m.group(2), Long.parseLong(m.group(1)));
+                }
+                Map<String, Long> lastAtCredit = new TreeMap<>();
+                for (Object o : (List<?>) f.get(animator)) {
+                    com.editor.animator.AnimationSegment segment = (com.editor.animator.AnimationSegment) o;
+                    if ("Credit".equals(segment.placeId) && segment.phase == com.editor.animator.Phase.AT_PLACE) lastAtCredit.put(segment.tokenId, segment.endTime);
+                }
+                check(failedAt.size() == 5 && lastAtCredit.equals(failedAt), "Failed tokens not removed at their failure: " + lastAtCredit + " vs " + failedAt);
+            } catch (Throwable ex) { replay[0] = ex; }
+        });
+        if (replay[0] != null) throw new AssertionError("Failed-call replay", replay[0]);
+        System.out.println("PASS: catalogue-only design, right-click Deploy to, filled Deploy panel with Place column, two-way node edits, save links process and instances, reopen, existing deployment unchanged, Create Build and Run files, Ant-prefixed analysis replay, What it does, transition names by label or node, one place per node, several event generators, healthcare launchers with their token generator, one input per join arc, rest placements, inventory replay mapped by service, terminations replayed to the node of the arc taken, failed service calls reported and replayed, Deploy lists only the process places with their host addresses");
     }
 
     /** Token -> the terminate node its replay ends at. */
