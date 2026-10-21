@@ -25,9 +25,12 @@ public final class ServiceDefinitionDialog extends JDialog {
     private final File catalogue, common;
     private final String domain;
 
-    private final JTextField service = new JTextField(24), operation = new JTextField(24), returns = new JTextField(24),
-        inputs = new JTextField(24), returnAttribute = new JTextField(24), routes = new JTextField(24), javaClass = new JTextField(24);
-    private final JTextArea description = new JTextArea(3, 24);
+    // Each empty field shows, greyed, an example of what goes in it and in what form.
+    private final JTextField service = hinted("e.g. FraudScreenService"), operation = hinted("e.g. screen"),
+        returns = hinted("In words, e.g. a screening result for the application"),
+        inputs = hinted("Names, separated by commas, e.g. token"), returnAttribute = hinted("A name, e.g. token"),
+        routes = hinted("Values, separated by commas, e.g. clear, review"), javaClass = new JTextField(24);
+    private final JTextArea description = new HintTextArea("In words, e.g. Screens an application for signs of fraud.");
     private final JRadioButton undecided = new JRadioButton("Not decided yet: it stays a draft"),
         java = new JRadioButton("A Java class:"), rest = new JRadioButton("A service called over REST, in any language (endpoint set in Deploy)");
     private final JCheckBox startingCode = new JCheckBox("Write starting code for the class if it does not exist", true);
@@ -72,10 +75,10 @@ public final class ServiceDefinitionDialog extends JDialog {
         row(form, c, 2, "Operation:", operation, "What the place asks the service to do, e.g. screen.");
         description.setLineWrap(true); description.setWrapStyleWord(true);
         row(form, c, 3, "What it does:", new JScrollPane(description), "Shown in the editor's What it does box.");
-        row(form, c, 4, "What it returns:", returns, "In words, e.g. clear when the payment looks normal, review otherwise.");
+        row(form, c, 4, "What it returns:", returns, "What the result is, in words. The values it routes on go in Routes on, not here.");
         row(form, c, 5, "Inputs:", inputs, "Names separated by commas, in the order of the method's parameters.");
         row(form, c, 6, "Return attribute:", returnAttribute, "The name the result is published under. The next place takes it as input, so it must be the name that place's input has.");
-        row(form, c, 7, "Routes on:", routes, "The values its result routes on, e.g. clear, review. Leave blank if the place has one way out.");
+        row(form, c, 7, "Routes on:", routes, "The values its result routes on, separated by commas; the guards leaving the place test these. Leave blank if the place has one way out.");
         JPanel howPanel = new JPanel(new GridBagLayout());
         howPanel.setBorder(BorderFactory.createTitledBorder("How it runs"));
         GridBagConstraints h = new GridBagConstraints(); h.anchor = GridBagConstraints.WEST; h.fill = GridBagConstraints.HORIZONTAL; h.gridx = 0; h.gridwidth = 2;
@@ -195,6 +198,12 @@ public final class ServiceDefinitionDialog extends JDialog {
         startingCode.setEnabled(java.isSelected()); javaClass.setEnabled(java.isSelected());
         CatalogueWriter.Entry e = entry();
         List<String> errors = errors(e), needed = stillNeeded(e);
+        // Values typed into What it returns instead of Routes on would leave the starting code and guard checks without them.
+        if (e.routes.isEmpty() && e.returns.matches("[A-Za-z0-9_]+(\\s*,\\s*[A-Za-z0-9_]+)+")) {
+            outcome.setText("<html><div style='width:430px'><font color='#B00020'>What it returns looks like routing values. Put them in "
+                + "<b>Routes on</b>, which the guards and the starting code use, and describe the result in words here.</font></div></html>");
+            return;
+        }
         String text = e.service.isEmpty() || e.operation.isEmpty() ? "Name the service and its operation; everything else can follow later."
             : !errors.isEmpty() ? "<font color='#B00020'>" + escape(errors.get(0)) + "</font>"
             : needed.isEmpty() ? "<b>Ready:</b> it will be an active service that can be deployed."
@@ -272,6 +281,28 @@ public final class ServiceDefinitionDialog extends JDialog {
     }
 
     // ------------------------------------------------------------------ small helpers
+
+    private static JTextField hinted(String hint) {
+        return new JTextField(24) {
+            @Override protected void paintComponent(Graphics g) { super.paintComponent(g); paintHint(this, g, hint); }
+        };
+    }
+    private static final class HintTextArea extends JTextArea {
+        private final String hint;
+        HintTextArea(String hint) { super(3, 24); this.hint = hint; }
+        @Override protected void paintComponent(Graphics g) { super.paintComponent(g); paintHint(this, g, hint); }
+    }
+    /** The greyed example, shown while the field is empty. */
+    private static void paintHint(javax.swing.text.JTextComponent field, Graphics g, String hint) {
+        if (!field.getText().isEmpty() || !field.isEnabled()) return;
+        Graphics2D g2 = (Graphics2D)g.create();
+        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g2.setColor(Color.GRAY);
+        g2.setFont(field.getFont().deriveFont(Font.ITALIC));
+        Insets in = field.getInsets();
+        g2.drawString(hint, in.left + 2, in.top + g2.getFontMetrics().getAscent());
+        g2.dispose();
+    }
 
     private static void row(JPanel form, GridBagConstraints c, int y, String label, JComponent field, String tip) {
         c.gridy = y; c.gridx = 0; c.weightx = 0; form.add(new JLabel(label), c);
