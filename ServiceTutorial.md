@@ -124,6 +124,14 @@ Create `btsn.common/BusinessServiceDefinitions/credit/Credit.json`:
 The folder name (`credit`) is the domain. Saving the process under
 `ProcessDefinitionFolder/credit` in step 4 makes the editor select this catalogue.
 
+Design the catalogue before the process: it is the list of contracts the process is
+drawn from. Every process can also use the **standard services** in
+[`petrinet/PetriNetModels.json`](btsn.common/BusinessServiceDefinitions/petrinet/PetriNetModels.json)
+without copying them into its own catalogue. They are `AlwaysTrueService`, a routing-only place
+that passes the token on unchanged, and `StochasticService`, a random `true`/`false`. The
+editor lists them after the domain's own services, marked *(standard)*. A domain catalogue
+may not reuse a standard service's name.
+
 ## 3. Package it
 
 Add the catalogue to [`btsn.services/packaging.json`](btsn.services/packaging.json),

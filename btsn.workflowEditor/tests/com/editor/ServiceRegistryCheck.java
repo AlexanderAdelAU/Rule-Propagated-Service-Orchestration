@@ -32,6 +32,20 @@ public final class ServiceRegistryCheck {
         registry.loadCatalogue(common.toPath().resolve("BusinessServiceDefinitions/healthcare/Healthcare.json").toFile());
         check(registry.describe("RadiologyService").split("\n").length == 2, "A service with two operations should describe both");
         check(registry.describe("TriageService", "processTriageAssessment").contains("\nReturns: "), "Operation description lacks its result");
+        // The standard services follow the domain's own in every process, marked as standard; a domain may not redefine one.
+        List<String> healthcare = registry.services();
+        check(healthcare.indexOf("AlwaysTrueService") > healthcare.indexOf("TriageService") && registry.isStandard("AlwaysTrueService") && !registry.isStandard("TriageService"),
+            "Standard services not offered after the domain's: " + healthcare);
+        check(registry.describe("AlwaysTrueService", "processToken").endsWith("Standard service, available to every process."), "Standard service not described as such");
+        Path clash = Files.createTempDirectory("standard-clash-").resolve("btsn.common");
+        Path standardCopy = clash.resolve(ServiceRegistry.STANDARD_CATALOGUE);
+        Files.createDirectories(standardCopy.getParent()); Files.copy(common.toPath().resolve(ServiceRegistry.STANDARD_CATALOGUE), standardCopy);
+        Path domain = clash.resolve("BusinessServiceDefinitions/clash/Clash.json");
+        Files.createDirectories(domain.getParent());
+        Files.write(domain, ("{\"services\":[{\"service\":\"AlwaysTrueService\",\"operation\":\"other\",\"inputs\":[\"x\"],\"returnAttribute\":\"y\","
+            + "\"description\":\"d\",\"returns\":\"r\",\"status\":\"active\"}]}").getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        try { new ServiceRegistry().loadCatalogue(domain.toFile()); throw new AssertionError("A domain catalogue redefined a standard service"); }
+        catch (java.io.IOException expected) { check(expected.getMessage().contains("redefines the standard service AlwaysTrueService"), expected.getMessage()); }
         check(ServiceRegistry.tooltip("a < b\nc").equals("<html><div style='width:300px'>a &lt; b<br>c</div></html>"), "Tooltip not escaped and wrapped");
         registry.loadDeployment(new File(common, "ServiceDeploymentFolder/petrinet/TrafficLightModels.json"));
         check(new java.util.TreeSet<>(registry.services()).equals(new java.util.TreeSet<>(Arrays.asList("StochasticService", "AlwaysTrueService"))), "Petri-net dropdown should offer the random and the always-true service: " + registry.services());
@@ -102,7 +116,7 @@ public final class ServiceRegistryCheck {
                 javax.imageio.ImageIO.write(image, "png", new File(args[1]));
             } catch (Exception ex) { throw new RuntimeException(ex); }
         });
-        System.out.println("PASS: every catalogue operation described, seven workflow contract round trips, real dropdown repair, legacy/unknown references, JSON/Boolean adapter isolation, argument/result rejection and routing preservation");
+        System.out.println("PASS: every catalogue operation described, seven workflow contract round trips, real dropdown repair, legacy/unknown references, JSON/Boolean adapter isolation, argument/result rejection and routing preservation, standard services beside each domain's");
     }
     private static boolean contains(JComboBox<?> combo, String value) { for (int i=0;i<combo.getItemCount();i++) if(value.equals(combo.getItemAt(i))) return true; return false; }
     private static List<JComboBox<?>> combos(Container parent) { List<JComboBox<?>> result = new ArrayList<>(); for(Component c:parent.getComponents()) { if(c instanceof JComboBox) result.add((JComboBox<?>)c); else if(c instanceof Container) result.addAll(combos((Container)c)); } return result; }

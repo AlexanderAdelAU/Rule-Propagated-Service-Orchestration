@@ -345,7 +345,7 @@ check from Node.js this way, on the same machine or [hosted on the internet](Ser
 | Layer | Responsibility | Repository artefacts |
 |---|---|---|
 | Process model | Places, transitions, fork/join structure, guards and termination | `btsn.common/ProcessDefinitionFolder` |
-| Service contract | Logical service identity, operations, named inputs and returned attribute | `BusinessServiceDefinitions`, `ServiceAttributeBindings` in `btsn.common` |
+| Service contract | Logical service identity, operations, named inputs and returned attribute; each domain's catalogue plus the standard services every process may use | `BusinessServiceDefinitions`, `ServiceAttributeBindings` in `btsn.common` |
 | Deployment | Map capabilities to implementation classes or REST endpoints, hosts and channels | [Physical infrastructure](btsn.common/InfrastructureDefinitionFolder/README.md), [service deployments](btsn.common/ServiceDeploymentFolder/README.md) and `btsn.services/deployments/{healthcare,financial,models}` |
 | Generic execution fabric | Transport, buffering, synchronization, version selection, invocation and publication | `btsn.rpso.places.p1`–`p6`, shared infrastructure |
 | Business computation | Domain objects, calculations and routing values | Here `btsn.common/src/org/btsn/business`, packaged as independent service JARs and called by reflection; any implementation that honours the binding would do |

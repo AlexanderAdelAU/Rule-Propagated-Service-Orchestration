@@ -15,8 +15,12 @@ public final class ServiceRegistry {
         public String service, operation, output, resultType;
         /** What the operation does and what it returns, in the catalogue's words (blank when not described). */
         public String description = "", returns = "";
+        /** True for a service of the standard catalogue, which every process may use. */
+        public boolean standard;
         public final List<String> inputs = new ArrayList<>();
     }
+    /** Services every process may use, read beside its own catalogue (as DeploymentConfiguration.STANDARD_CATALOGUE). */
+    public static final String STANDARD_CATALOGUE = "BusinessServiceDefinitions/petrinet/PetriNetModels.json";
     public static final class Endpoint {
         public String service, operation, instance, output, adapter, node, endpoint = "";
         public final List<String> inputs = new ArrayList<>();
@@ -137,16 +141,37 @@ public final class ServiceRegistry {
         File root = findCommon(source.getAbsoluteFile().getParentFile());
         if (root == null) throw new IOException("Select a catalogue in btsn.common/BusinessServiceDefinitions.");
         Map<String, Contract> loaded = new LinkedHashMap<>();
+        readContracts(source, false, loaded);
+        if (loaded.isEmpty()) throw new IOException("Catalogue has no active service operations.");
+        // The standard services follow the domain's own; a domain may not reuse a standard service's name.
+        File standard = new File(root, STANDARD_CATALOGUE);
+        if (standard.isFile() && !standard.getCanonicalFile().equals(source.getCanonicalFile())) {
+            Set<String> domainServices = new HashSet<>();
+            for (Contract c : loaded.values()) domainServices.add(c.service);
+            Map<String, Contract> standardContracts = new LinkedHashMap<>();
+            readContracts(standard, true, standardContracts);
+            for (Contract c : standardContracts.values()) {
+                if (domainServices.contains(c.service))
+                    throw new IOException(source.getName() + " redefines the standard service " + c.service + "; choose another name.");
+                loaded.put(key(c.service, c.operation), c);
+            }
+        }
+        contracts.putAll(loaded); common = root.getCanonicalFile(); catalogue = source.getCanonicalFile(); problem = null;
+    }
+    private static void readContracts(File source, boolean standard, Map<String, Contract> loaded) throws Exception {
         for (Object item : array(read(source), "services")) {
             JSONObject definition = (JSONObject)item;
             if (!"active".equals(text(definition, "status"))) continue;
             Contract c = new Contract(); c.service = text(definition, "service"); c.operation = text(definition, "operation"); c.output = text(definition, "returnAttribute"); c.resultType = text(definition, "resultType");
-            c.description = text(definition, "description"); c.returns = text(definition, "returns");
+            c.description = text(definition, "description"); c.returns = text(definition, "returns"); c.standard = standard;
             for (Object input : array(definition, "inputs")) c.inputs.add(input.toString());
             if (loaded.put(key(c.service, c.operation), c) != null) throw new IOException("Duplicate catalogue operation: " + c.service + "." + c.operation);
         }
-        if (loaded.isEmpty()) throw new IOException("Catalogue has no active service operations.");
-        contracts.putAll(loaded); common = root.getCanonicalFile(); catalogue = source.getCanonicalFile(); problem = null;
+    }
+    /** True for a service from the standard catalogue rather than the process's own. */
+    public boolean isStandard(String service) {
+        for (Contract c : contracts.values()) if (c.service.equals(service)) return c.standard;
+        return false;
     }
     private static void collect(File dir, List<File> files) {
         File[] children = dir.listFiles(); if (children == null) return;
@@ -173,8 +198,9 @@ public final class ServiceRegistry {
     public String describe(String service, String op) {
         Contract c = contract(service, op);
         if (c == null) return service == null || service.isEmpty() ? "" : describe(service);
-        if (c.description.isEmpty()) return "";
-        return c.description + (c.returns.isEmpty() ? "" : "\nReturns: " + c.returns);
+        if (c.description.isEmpty()) return c.standard ? "Standard service, available to every process." : "";
+        return c.description + (c.returns.isEmpty() ? "" : "\nReturns: " + c.returns)
+            + (c.standard ? "\nStandard service, available to every process." : "");
     }
     /** Tooltip text that wraps instead of running off the screen. */
     public static String tooltip(String text) {
@@ -421,6 +447,11 @@ public final class ServiceRegistry {
     public static JComboBox<String> choices(List<String> valid, String current) { return choices(valid, current, null); }
     /** As above; each choice also shows a description when hovered in the open list. */
     public static JComboBox<String> choices(List<String> valid, String current, java.util.function.Function<String, String> describe) {
+        return choices(valid, current, describe, null);
+    }
+    /** As above; label, when given, is the text shown for each valid choice (the value itself is unchanged). */
+    public static JComboBox<String> choices(List<String> valid, String current, java.util.function.Function<String, String> describe,
+                                            java.util.function.Function<String, String> label) {
         JComboBox<String> combo = new JComboBox<>(); combo.addItem("");
         for (String value : valid) combo.addItem(value);
         if (current != null && !current.isEmpty() && !valid.contains(current)) combo.addItem(current);
@@ -431,6 +462,7 @@ public final class ServiceRegistry {
                 super.getListCellRendererComponent(list, value, index, selected, focus);
                 String name = value == null ? "" : value.toString();
                 if (!name.isEmpty() && !valid.contains(name)) { setText("Unresolved: " + name); if (!selected) setForeground(java.awt.Color.RED); }
+                else if (label != null && !name.isEmpty()) setText(label.apply(name));
                 setToolTipText(describe == null || name.isEmpty() || !valid.contains(name) ? null : tooltip(describe.apply(name)));
                 return this;
             }

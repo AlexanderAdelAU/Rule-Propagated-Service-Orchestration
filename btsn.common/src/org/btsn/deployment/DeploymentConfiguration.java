@@ -3,7 +3,9 @@ package org.btsn.deployment;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.json.simple.JSONArray;
@@ -12,6 +14,12 @@ import org.json.simple.parser.JSONParser;
 
 /** Combines reusable network resources with a separately selected service placement. */
 public final class DeploymentConfiguration {
+    /**
+     * Services every process may use, whatever its domain: the reusable Boolean services, including the
+     * routing-only one. It is read beside a process's own catalogue, never copied into it.
+     */
+    public static final String STANDARD_CATALOGUE = "BusinessServiceDefinitions/petrinet/PetriNetModels.json";
+
     public final JSONObject profile;
     public final JSONObject infrastructure;
     public final JSONObject serviceDeployment;
@@ -31,8 +39,7 @@ public final class DeploymentConfiguration {
         require(!serviceDeployment.containsKey("nodes"), "Service deployment must not contain physical nodes");
         if (serviceDeployment.containsKey("catalog"))
             require(text(profile, "catalog").equals(text(serviceDeployment, "catalog")), "Deployment catalogue conflicts with Deployment.json");
-        for (Object item : array(read(common.resolve(text(profile, "catalog"))), "services")) {
-            JSONObject service = (JSONObject)item;
+        for (JSONObject service : catalogueServices(common, text(profile, "catalog"))) {
             if (!"active".equals(service.get("status"))) continue;
             String key = text(service, "service") + "\u0000" + text(service, "operation");
             require(operations.put(key, service) == null, "Duplicate catalogue capability: " + key.replace('\u0000', '.'));
@@ -177,6 +184,28 @@ public final class DeploymentConfiguration {
         int slot = integer(placement.get("portSlot"), "port slot");
         require(slot >= 0 && slot < ports.size(), "Undefined port slot for node: " + text(placement, "node"));
         return integer(ports.get(slot), "base port");
+    }
+
+    /**
+     * The services of a domain catalogue followed by the standard ones. A domain catalogue may not define
+     * a service under a standard service's name, so a name always means one contract.
+     */
+    public static List<JSONObject> catalogueServices(Path common, String domainCatalogue) throws Exception {
+        List<JSONObject> services = new ArrayList<>();
+        Set<String> domainNames = new HashSet<>();
+        for (Object item : array(read(common.resolve(domainCatalogue)), "services")) {
+            services.add((JSONObject)item);
+            domainNames.add(text((JSONObject)item, "service"));
+        }
+        Path standard = common.resolve(STANDARD_CATALOGUE);
+        if (!Files.isRegularFile(standard) || Files.isSameFile(standard, common.resolve(domainCatalogue))) return services;
+        for (Object item : array(read(standard), "services")) {
+            JSONObject service = (JSONObject)item;
+            require(!domainNames.contains(text(service, "service")),
+                    "Catalogue " + domainCatalogue + " redefines the standard service " + text(service, "service") + "; choose another name");
+            services.add(service);
+        }
+        return services;
     }
 
     public static JSONObject read(Path file) throws Exception {
