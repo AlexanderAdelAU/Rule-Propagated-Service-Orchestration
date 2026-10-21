@@ -965,6 +965,7 @@ public class Canvas extends JPanel {
                     saveUndoState();  // Save before adding arrow
                     Arrow newArrow = new Arrow(connectionSource, element);
                     arrows.add(newArrow);
+                    fixTransitionType(connectionSource); fixTransitionType(element);   // an arc to or from a place sets T_in / T_out
                     
                     // Select the newly created arrow so it's visible (red highlight)
                     selectedArrow = newArrow;
@@ -2308,6 +2309,7 @@ public class Canvas extends JPanel {
         }
         
         arrows.add(newArrow);
+        fixTransitionType(connectionSource); fixTransitionType(target);   // an arc to or from a place sets T_in / T_out
         
         // Select the newly created arrow
         selectedArrow = newArrow;
@@ -2765,8 +2767,55 @@ public class Canvas extends JPanel {
         }
         notes.addAll(chainMismatches());
         notes.addAll(routingGaps(reminders));
+        notes.addAll(transitionTypeConflicts());
+        if (reminders && !typesCorrectedOnLoad.isEmpty())
+            notes.add("Transition types corrected from their arcs (" + String.join("; ", typesCorrectedOnLoad) + "). Save to keep the correction.");
+        String mismatch = reminders ? domainMismatch() : null;
+        if (mismatch != null) notes.add(mismatch);
         return notes;
     }
+    /**
+     * The type a transition's arcs give it: T_in when it has an arc into a place, T_out when a place's arc leads into
+     * it, "both" when it has both (a contradiction), null when it touches no place (its type is then free).
+     */
+    public String requiredTransitionType(ProcessElement t) {
+        if (t == null || t.getType() != ProcessElement.Type.TRANSITION) return null;
+        boolean feedsPlace = false, fedByPlace = false;
+        for (Arrow a : arrows) {
+            if (a.getSource() == t && a.getTarget() != null && a.getTarget().getType() == ProcessElement.Type.PLACE) feedsPlace = true;
+            if (a.getTarget() == t && a.getSource() != null && a.getSource().getType() == ProcessElement.Type.PLACE) fedByPlace = true;
+        }
+        return feedsPlace && fedByPlace ? "both" : feedsPlace ? "T_in" : fedByPlace ? "T_out" : null;
+    }
+    /** Gives the transition the type its arcs require; true when it changed. */
+    boolean fixTransitionType(ProcessElement t) {
+        String required = requiredTransitionType(t);
+        if (required == null || "both".equals(required) || required.equals(t.getTransitionType())) return false;
+        t.setTransitionType(required);
+        return true;
+    }
+    /** Fixes every transition attached to a place; returns "T2: Other -> T_in" for each one corrected. */
+    public List<String> fixTransitionTypes() {
+        List<String> corrected = new ArrayList<>();
+        for (ProcessElement e : elements) {
+            String before = e.getTransitionType();
+            if (fixTransitionType(e)) corrected.add(e.getLabel() + ": " + (before == null || before.isEmpty() ? "no type" : before) + " -> " + e.getTransitionType());
+        }
+        return corrected;
+    }
+    private List<String> typesCorrectedOnLoad = new ArrayList<>();
+    /** Once saved, the corrections are in the file. */
+    public void markSaved() { typesCorrectedOnLoad = new ArrayList<>(); }
+    /** Transitions that both feed a place and are fed by one: a transition is one place's T_in or another's T_out. */
+    public List<String> transitionTypeConflicts() {
+        List<String> conflicts = new ArrayList<>();
+        for (ProcessElement e : elements)
+            if ("both".equals(requiredTransitionType(e)))
+                conflicts.add("Transition '" + e.getLabel() + "' both feeds a place and is fed by one. A transition is a place's T_in or its T_out: "
+                    + "put a T_out after the first place and a T_in before the next, joined by an arc.");
+        return conflicts;
+    }
+
     /**
      * Arcs that lead nowhere: a connected transition with nothing after it that is not a Terminate node (tokens
      * reaching it stop with no end recorded, and a gateway arc to it is left out of the rules). With reminders,
@@ -2838,19 +2887,36 @@ public class Canvas extends JPanel {
         else pendingNodes.put(place.getId(), node);
         deploymentChanged();
     }
-    /** Choose the service catalogue whose services the places of this process may use. */
-    public void chooseCatalogue(java.awt.Component parent) {
-        JFileChooser chooser = new JFileChooser();
+    /** Choose (or create) the catalogue of this process's domain, whose services its places may use. */
+    public boolean chooseCatalogue(java.awt.Component parent) {
+        return chooseCatalogue(parent, serviceRegistry.hasDomainCatalogue() ? "Choose the catalogue for this process's services." : CatalogueChoice.BEFORE_WE_BEGIN);
+    }
+    public boolean chooseCatalogue(java.awt.Component parent, String why) {
         java.io.File common = ServiceRegistry.findCommon(definitionLocation);
-        if (common != null) chooser.setCurrentDirectory(new java.io.File(common, "BusinessServiceDefinitions"));
-        chooser.setDialogTitle("Choose the service catalogue for this process");
-        if (chooser.showOpenDialog(parent) != JFileChooser.APPROVE_OPTION) return;
-        try {
-            serviceRegistry.loadCatalogue(chooser.getSelectedFile());
-            serviceDeploymentReference = "";
-            pendingNodes.clear();
-            notifyChange(); notifySelectionChanged(selectedElements.size() == 1 ? selectedElements.iterator().next() : null); deploymentChanged();
-        } catch (Exception ex) { JOptionPane.showMessageDialog(parent, ex.getMessage(), "Invalid catalogue", JOptionPane.ERROR_MESSAGE); }
+        java.io.File chosen = CatalogueChoice.ask(parent, common, definitionLocation, why, serviceRegistry.hasDeployment());
+        if (chosen == null) return false;
+        try { useCatalogue(chosen); return true; }
+        catch (Exception ex) { JOptionPane.showMessageDialog(parent, ex.getMessage(), "Invalid catalogue", JOptionPane.ERROR_MESSAGE); return false; }
+    }
+    /** The process's services come from this catalogue (with the standard ones); its deployment is set aside. */
+    public void useCatalogue(java.io.File catalogue) throws Exception {
+        serviceRegistry.loadCatalogue(catalogue);
+        serviceDeploymentReference = "";
+        pendingNodes.clear();
+        notifyChange(); notifySelectionChanged(selectedElements.size() == 1 ? selectedElements.iterator().next() : null); deploymentChanged();
+    }
+    /**
+     * A process and its catalogue belong to one domain: saved under ProcessDefinitionFolder/<domain>, using
+     * BusinessServiceDefinitions/<domain>. Null when they agree, the process is unsaved, or it uses only standard services.
+     */
+    public String domainMismatch() {
+        if (!serviceRegistry.hasDomainCatalogue() || definitionLocation == null) return null;
+        String processDomain = CatalogueChoice.processDomain(serviceRegistry.common(), definitionLocation);
+        String catalogueDomain = serviceRegistry.catalogueDomain();
+        if (processDomain.isEmpty() || processDomain.equals(catalogueDomain)) return null;
+        return "This process is saved under ProcessDefinitionFolder/" + processDomain + " but uses the " + catalogueDomain + " catalogue ("
+            + serviceRegistry.catalogueFile().getName() + "). Save it under ProcessDefinitionFolder/" + catalogueDomain
+            + ", so the processes of a domain stay beside the catalogue they share.";
     }
     /**
      * Record a saved service deployment: the process links to it and each place uses its instance.
@@ -3483,6 +3549,9 @@ public class Canvas extends JPanel {
             return false;
         });
         
+        // A transition attached to a place is that place's T_in or T_out, whatever the file says.
+        typesCorrectedOnLoad = fixTransitionTypes();
+
         // Parse text elements if present
         try {
             String textSection = extractSection(json, "\"textElements\"");
@@ -3785,7 +3854,7 @@ public class Canvas extends JPanel {
         processType = null;
         serviceDeploymentReference = "";
         pendingNodes.clear();
-        serviceRegistry.dropDeployment();
+        serviceRegistry.useStandardCatalogue(definitionLocation);   // a new process does not inherit the last one's catalogue
         notifySelectionChanged(null);  // Clear attributes panel
         deploymentChanged();
     }
@@ -4247,6 +4316,7 @@ public class Canvas extends JPanel {
                 arrows.add(newArrow);
             }
         }
+        fixTransitionTypes();
         
         // Paste text elements with offset
         for (TextElement clipText : clipboardTextElements) {

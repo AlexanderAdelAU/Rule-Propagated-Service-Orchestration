@@ -119,6 +119,8 @@ public final class ServiceDefinitionDialog extends JDialog {
      */
     public static boolean open(Component parent, Canvas canvas, ProcessElement place, boolean edit) {
         ServiceRegistry registry = canvas.getServiceRegistry();
+        // The first service of a process needs its domain's catalogue: choose one, or create it for a new domain.
+        if (registry.problem() == null && !registry.hasDomainCatalogue() && !canvas.chooseCatalogue(parent, CatalogueChoice.BEFORE_WE_BEGIN)) return false;
         String refusal = refusal(registry);
         if (refusal != null) { JOptionPane.showMessageDialog(parent, refusal, "Add Service to Catalogue", JOptionPane.WARNING_MESSAGE); return false; }
         ServiceRegistry.Contract own = edit ? registry.domainContract(place) : null;
@@ -131,8 +133,7 @@ public final class ServiceDefinitionDialog extends JDialog {
     static String refusal(ServiceRegistry registry) {
         if (registry.problem() != null || registry.catalogueFile() == null) return "Choose this process's catalogue first: " + registry.problem();
         if (registry.catalogueFile().getPath().replace(File.separatorChar, '/').endsWith(ServiceRegistry.STANDARD_CATALOGUE))
-            return "This process uses the standard catalogue, which every process shares, so its services are not added from a design. "
-                + "Save the process under ProcessDefinitionFolder/<your domain>, with a catalogue in BusinessServiceDefinitions/<your domain>, and add the service there.";
+            return "The standard catalogue is shared by every process, so services are not added to it. Choose or create your domain's catalogue first.";
         return null;
     }
 
@@ -146,11 +147,20 @@ public final class ServiceDefinitionDialog extends JDialog {
         if (!label.isEmpty() && Character.isLetter(label.charAt(0))) {
             String base = Character.toUpperCase(label.charAt(0)) + label.substring(1);
             e.service = base.endsWith("Service") ? base : base + "Service";
+            // A name another domain already uses is taken: prefix this domain's (Triage -> ClaimsTriageService).
+            ServiceRegistry registry = canvas.getServiceRegistry();
+            if (registry.catalogueFile() != null && ServiceRegistry.definedElsewhere(registry.common(), e.service, registry.catalogueFile()) != null)
+                e.service = domainName(registry.catalogueDomain()) + e.service;
         }
         java.util.Set<String> before = canvas.neighbourNames(place, false), after = canvas.neighbourNames(place, true);
         e.inputs.add(before.size() == 1 ? before.iterator().next() : "token");
         e.returnAttribute = after.size() == 1 ? after.iterator().next() : "token";
         return e;
+    }
+
+    /** claims -> Claims, home_loans -> HomeLoans */
+    static String domainName(String domain) {
+        return CatalogueWriter.catalogueName(domain == null || domain.isEmpty() ? "x" : domain).replaceFirst("\\.json$", "");
     }
 
     // ------------------------------------------------------------------ what OK will do
@@ -178,6 +188,11 @@ public final class ServiceDefinitionDialog extends JDialog {
         if (renamed && registry.contract(e.service, e.operation) != null)
             errors.add(e.service + "." + e.operation + " is already in the catalogue" + (registry.isStandard(e.service) ? " as a standard service" : "") + ".");
         else if (registry.isStandard(e.service)) errors.add(e.service + " is a standard service; choose another name.");
+        else if (existing == null || !existing.service.equals(e.service)) {
+            File other = ServiceRegistry.definedElsewhere(common, e.service, catalogue);
+            if (other != null) errors.add(e.service + " is already a service in " + other.getName() + " (" + other.getParentFile().getName()
+                + "); every domain's services are packaged together, so choose another name, e.g. " + domainName(domain) + e.service + ".");
+        }
         return errors;
     }
 

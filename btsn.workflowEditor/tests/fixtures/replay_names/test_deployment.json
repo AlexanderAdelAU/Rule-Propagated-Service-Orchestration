@@ -1,0 +1,1 @@
+{"definitionType": "ServiceDeployment", "catalog": "BusinessServiceDefinitions/test/Test.json", "capabilities": [{"node": "P3", "service": "P3Service", "instance": "P32", "operation": "screen", "returnAttribute": "token", "portSlot": 0, "arguments": [{"name": "token", "type": "String", "value": "String", "required": false}]}]}

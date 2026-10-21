@@ -1,0 +1,1 @@
+{"domain": "Test", "services": [{"service": "P3Service", "implementationClass": "org.btsn.business.test.P3Service", "operation": "screen", "inputs": ["token"], "returnAttribute": "token", "status": "active"}]}

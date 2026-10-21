@@ -55,6 +55,8 @@ public final class ServiceStub {
             + (entry.returns.isEmpty() ? "" : " *" + n + " * Returns: " + entry.returns.replace("*/", "* /") + n)
             + " */" + n
             + "public class " + name + " extends BaseBusinessService {" + n + n
+            + "    /** Calls so far on this host: the starting code takes the routes in turn, one per call. */" + n
+            + "    private static final java.util.concurrent.atomic.AtomicInteger CALLS = new java.util.concurrent.atomic.AtomicInteger();" + n + n
             + "    private final String sequenceId;" + n + n
             + "    public " + name + "() { this(\"\"); }" + n + n
             + "    /** The host passes the token's sequence id. */" + n
@@ -65,20 +67,12 @@ public final class ServiceStub {
             + "        // " + MARKER + ": delete this line when the real logic replaces the starting code below." + n
             + "        // TODO: the real logic. Read the inputs (each is the text the previous place published, often JSON;" + n
             + "        // BaseBusinessService's textValue and numberValue read fields from it), decide, and fill the result." + n
-            + "        // Until then it returns " + (entry.routes.isEmpty() ? "true" : "the routes in turn, so every arc leaving the place is tried") + "." + n
+            + "        // Until then it returns " + (entry.routes.isEmpty() ? "true" : "the routes in turn, one per call, so every arc leaving the place is tried") + "." + n
             + "        String[] routes = {" + String.join(", ", quoted) + "};" + n
-            + "        String route = routes[(tokenNumber(sequenceId) - 1) % routes.length];" + n + n
+            + "        String route = routes[(CALLS.incrementAndGet() - 1) % routes.length];" + n + n
             + "        JSONObject result = new JSONObject();" + n
             + "        result.put(\"routing_decision\", routingDecision(route));" + n
             + "        return businessResult(\"" + entry.returnAttribute + "\", result);" + n
-            + "    }" + n + n
-            + "    /** 1 for the first token of a version, 2 for the second, ... (token ids are base + n x 10000). */" + n
-            + "    static int tokenNumber(String sequenceId) {" + n
-            + "        try {" + n
-            + "            return (int)((Long.parseLong(sequenceId.trim()) % 1_000_000L) / 10_000L) + 1;" + n
-            + "        } catch (NumberFormatException e) {" + n
-            + "            return 1;" + n
-            + "        }" + n
             + "    }" + n
             + "}" + n;
     }
