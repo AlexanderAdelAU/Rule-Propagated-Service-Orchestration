@@ -153,7 +153,7 @@ public class Canvas extends JPanel {
         notifyChange();
     }
     
-    private void saveUndoState() {
+    void saveUndoState() {
         if (undoRedoManager != null) {
             undoRedoManager.saveState();
         }
@@ -1359,23 +1359,44 @@ public class Canvas extends JPanel {
          JTextField labelField = new JTextField(arrow.getLabel());
          panel.add(labelField);
          
-         // Guard Condition - DROPDOWN instead of text field
+         // Guard: only arcs leaving a T_out are tested; elsewhere a guard can only be cleared.
+         boolean guardApplies = GuardEditing.applies(this, arrow);
          panel.add(new JLabel("Guard Condition:"));
-         String[] guardOptions = {
-             "",
-             "DECISION_EQUAL_TO",
-             "DECISION_NOT_EQUAL",
-             "DECISION_GREATER_THAN",
-             "DECISION_LESS_THAN"
-         };
-         JComboBox<String> conditionCombo = new JComboBox<>(guardOptions);
-         conditionCombo.setSelectedItem(arrow.getGuardCondition());
+         JComboBox<String> conditionCombo = new JComboBox<>(GuardEditing.CONDITIONS);
+         conditionCombo.setSelectedItem(GuardEditing.shown(arrow));
          panel.add(conditionCombo);
          
          // Decision Value
          panel.add(new JLabel("Decision Value:"));
          JTextField decisionValueField = new JTextField(arrow.getDecisionValue());
          panel.add(decisionValueField);
+         conditionCombo.addActionListener(e -> {
+             boolean none = GuardEditing.NONE.equals(conditionCombo.getSelectedItem());
+             if (none) decisionValueField.setText("");
+             decisionValueField.setEnabled(guardApplies && !none);
+         });
+         decisionValueField.setEnabled(guardApplies && !GuardEditing.NONE.equals(conditionCombo.getSelectedItem()));
+         JButton clearGuardButton = new JButton("Clear guard");
+         if (!guardApplies) {
+             conditionCombo.setEnabled(false);
+             decisionValueField.setEnabled(false);
+             conditionCombo.setToolTipText(GuardEditing.NOT_HERE);
+             decisionValueField.setToolTipText(GuardEditing.NOT_HERE);
+             JLabel note = new JLabel(GuardEditing.NOT_HERE + (GuardEditing.guarded(arrow) ? ": this arc's guard is never tested." : "."));
+             note.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
+             dialog.add(note, BorderLayout.NORTH);
+             clearGuardButton.setEnabled(GuardEditing.guarded(arrow));
+             clearGuardButton.addActionListener(e -> {
+                 saveUndoState();
+                 GuardEditing.clear(arrow);
+                 labelField.setText(arrow.getLabel());
+                 conditionCombo.setSelectedItem(GuardEditing.NONE);
+                 decisionValueField.setText("");
+                 clearGuardButton.setEnabled(false);
+                 notifySelectionChanged(arrow);
+                 repaint();
+             });
+         }
          
          // Endpoint
          panel.add(new JLabel("Endpoint:"));
@@ -1389,14 +1410,18 @@ public class Canvas extends JPanel {
          okButton.addActionListener(e -> {
              saveUndoState();
              arrow.setLabel(labelField.getText());
-             arrow.setGuardCondition((String) conditionCombo.getSelectedItem());
-             arrow.setDecisionValue(decisionValueField.getText());
+             if (guardApplies) {
+                 String condition = (String) conditionCombo.getSelectedItem();
+                 if (GuardEditing.NONE.equals(condition)) GuardEditing.clear(arrow);
+                 else { arrow.setGuardCondition(condition); arrow.setDecisionValue(decisionValueField.getText()); }
+             }
              arrow.setEndpoint(endpointField.getText());
              notifySelectionChanged(arrow);
              repaint();
              dialog.dispose();
          });
          buttonPanel.add(okButton);
+         if (!guardApplies) buttonPanel.add(clearGuardButton);
          
          JButton cancelButton = new JButton("Cancel");
          cancelButton.addActionListener(e -> dialog.dispose());
@@ -2762,7 +2787,7 @@ public class Canvas extends JPanel {
             if (a.getSource() != null && a.getSource().getType() == ProcessElement.Type.PLACE && a.getTarget() != null && value != null && !value.trim().isEmpty())
                 gaps.add("The arc from place " + a.getSource().getLabel() + " into " + a.getTarget().getLabel() + " carries the guard \"" + value.trim()
                     + "\". It does nothing: only the arcs leaving " + a.getTarget().getLabel() + " are tested against what " + a.getSource().getLabel()
-                    + " returns. Select that arc and clear its guard.");
+                    + " returns. Select that arc and click Clear guard.");
         }
         return gaps;
     }

@@ -509,26 +509,50 @@ public class EditorFrame extends JPanel {
             attributesPanel.add(availPanel);
         }
         
-        // Guard Condition - DROPDOWN instead of text field
-        String[] guardOptions = {
-            "",
-            "DECISION_EQUAL_TO",
-            "DECISION_NOT_EQUAL",
-            "DECISION_GREATER_THAN",
-            "DECISION_LESS_THAN"
-        };
-        JComboBox<String> guardConditionCombo = new JComboBox<>(guardOptions);
-        guardConditionCombo.setSelectedItem(arrow.getGuardCondition());
+        // Guard: only arcs leaving a T_out are tested. Elsewhere the fields are greyed out and a guard can only be cleared;
+        // on a T_out arc, (none) removes the guard (condition and decision value).
+        boolean guardApplies = GuardEditing.applies(canvas, arrow);
+        JComboBox<String> guardConditionCombo = new JComboBox<>(GuardEditing.CONDITIONS);
+        addComboField("Guard Condition:", guardConditionCombo, GuardEditing.shown(arrow));
         guardConditionCombo.addActionListener(e -> {
-            arrow.setGuardCondition((String) guardConditionCombo.getSelectedItem());
+            String choice = (String) guardConditionCombo.getSelectedItem();
+            if (GuardEditing.NONE.equals(choice) && GuardEditing.guarded(arrow)) {
+                canvas.saveUndoState();
+                GuardEditing.clear(arrow);
+                canvas.repaint();
+                SwingUtilities.invokeLater(() -> showArrowAttributes(arrow));
+            } else if (!GuardEditing.NONE.equals(choice)) {
+                arrow.setGuardCondition(choice);
+                freshDecisionField.setEnabled(true);
+            }
         });
-        addComboField("Guard Condition:", guardConditionCombo, arrow.getGuardCondition());
         
         // Decision Value
         addField("Decision Value:", freshDecisionField, arrow.getDecisionValue());
         freshDecisionField.getDocument().addDocumentListener(new SimpleDocumentListener(() -> {
             arrow.setDecisionValue(freshDecisionField.getText());
         }));
+        freshDecisionField.setEnabled(guardApplies && !GuardEditing.NONE.equals(guardConditionCombo.getSelectedItem()));
+        if (!guardApplies) {
+            guardConditionCombo.setEnabled(false);
+            guardConditionCombo.setToolTipText(GuardEditing.NOT_HERE);
+            freshDecisionField.setToolTipText(GuardEditing.NOT_HERE);
+            addLabel("Guard:", GuardEditing.NOT_HERE);
+            if (GuardEditing.guarded(arrow)) {
+                JButton clearGuard = new JButton("Clear guard");
+                clearGuard.setToolTipText("This arc's guard is never tested: remove it");
+                clearGuard.addActionListener(e -> {
+                    canvas.saveUndoState();
+                    GuardEditing.clear(arrow);
+                    canvas.repaint();
+                    showArrowAttributes(arrow);
+                });
+                JPanel clearPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                clearPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+                clearPanel.add(clearGuard);
+                attributesPanel.add(clearPanel);
+            }
+        }
         
         // Endpoint - which operation to invoke for multi-operation services
         addField("Endpoint:", freshEndpointField, arrow.getEndpoint());
