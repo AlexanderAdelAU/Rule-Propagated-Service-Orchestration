@@ -1384,6 +1384,14 @@ public class ProcessEditor extends JFrame {
             JOptionPane.showMessageDialog(this, "Save the process first; the launcher runs the saved file.", "Run", JOptionPane.WARNING_MESSAGE);
             return;
         }
+        // The hosts route exactly as drawn, so what Validate lists as still to do is fixed before a run, not found in its analysis.
+        java.util.List<String> blockers = canvas.serviceBlockers();
+        if (!blockers.isEmpty()) {
+            StringBuilder html = new StringBuilder("<html><div style='width:520px'>Fix these before running:<font color='#C00000'><ul>");
+            for (String blocker : blockers) html.append("<li>").append(htmlText(blocker)).append("</li>");
+            JOptionPane.showMessageDialog(this, html.append("</ul></font></div></html>").toString(), "Run", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
         // Real, absolute paths only: a process opened through "..\\" must not carry ".." into the launcher's paths.
         java.io.File processPath = LauncherRun.real(currentFile);
         java.io.File common = ServiceRegistry.findCommon(processPath);

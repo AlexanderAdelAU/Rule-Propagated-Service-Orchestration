@@ -93,6 +93,14 @@ public final class DraftServiceCheck {
         canvas.getServiceRegistry().reload();
         check(Files.readString(source).contains("String[] routes = {\"clear\", \"review\"};") && canvas.serviceBlockers().isEmpty(),
             "Adding the routes did not fix the starting code: " + canvas.serviceBlockers());
+        // Without the review arc, review tokens would be dropped at Fraud: reported before Deploy and Run.
+        List<Arrow> arcs = canvas.getArrows(), reviewArcs = new ArrayList<>();
+        for (Arrow a : arcs) if ("review".equals(a.getDecisionValue())) reviewArcs.add(a);
+        arcs.removeAll(reviewArcs);
+        check(canvas.serviceBlockers().stream().anyMatch(n -> n.startsWith("Place 'Fraud': FraudScreenService routes on review, but no arc from T_out_Fraud tests it")
+            && n.contains("so those tokens would be dropped")), "A route value with no arc is not reported: " + canvas.serviceBlockers());
+        arcs.addAll(reviewArcs);
+        check(canvas.serviceBlockers().isEmpty(), "Restoring the review arc did not clear the report: " + canvas.serviceBlockers());
         String ownCode = Files.readString(source).replace(ServiceStub.MARKER, "real logic");
         Files.writeString(source, ownCode);
         ServiceDefinitionDialog.write(credit.toFile(), common.toFile(), canvas.getServiceRegistry().domainContract(fraud), noRoutes, true);
