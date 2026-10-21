@@ -330,7 +330,7 @@ public final class DeployFlowCheck {
                 Canvas rest = new Canvas(); rest.setDefinitionLocation(restProcess.toFile()); rest.loadFromJSON(read(restProcess));
                 ProcessElement credit = rest.getPlaces().get(0);
                 check(rest.validateServiceContracts().isEmpty(), "REST credit check reported: " + rest.validateServiceContracts());
-                check("http://127.0.0.1:8080/credit/assess".equals(rest.getServiceRegistry().restEndpointFor(credit)), "REST endpoint not shown for the place");
+                check("https://rule-propagated-service-orchestrati.vercel.app/api/credit/assess".equals(rest.getServiceRegistry().restEndpointFor(credit)), "REST endpoint not shown for the place");
                 java.util.List<String> token = Arrays.asList("token");
                 check(rest.getServiceRegistry().validateEndpoint("CreditLimitService", "assess", "creditDecision", token, "rest", "not-a-url")
                     .stream().anyMatch(e -> e.contains("needs an Endpoint")), "A rest placement without an http(s) endpoint was accepted");
