@@ -143,8 +143,8 @@
       "height": 60,
       "label": "Review",
       "rotation": 0.0,
-      "node_type": "EdgeNode",
-      "node_value": "EDGE_NODE",
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
       "transition_type": "T_in",
       "buffer": "10"
     }

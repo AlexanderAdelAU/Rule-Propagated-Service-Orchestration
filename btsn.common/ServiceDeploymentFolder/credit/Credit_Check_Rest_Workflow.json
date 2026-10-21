@@ -7,7 +7,7 @@
       "service": "CreditLimitService",
       "instance": "Credit",
       "invocationAdapter": "rest",
-      "endpoint": "http://127.0.0.1:8080/credit/assess",
+      "endpoint": "https://rule-propagated-service-orchestrati.vercel.app/api/credit/assess",
       "operation": "assess",
       "returnAttribute": "creditDecision",
       "portSlot": 0,
