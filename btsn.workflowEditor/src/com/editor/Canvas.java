@@ -2721,22 +2721,20 @@ public class Canvas extends JPanel {
                                 + (c.routes.isEmpty() ? ". Add the values it routes on with Edit Service in Catalogue..." : ".") );
                     }
                     // The other way round: a value the service routes on that no arc tests, with no unguarded arc to take it.
-                    // At run time such a token goes to the only arc anyway, whatever its guard, or is dropped when there are several.
-                    List<String> tested = new ArrayList<>(), targets = new ArrayList<>();
+                    // The host drops such a token, so the design is fixed before it runs.
+                    List<String> tested = new ArrayList<>();
                     boolean unguarded = false;
                     for (Arrow route : arrows) {
                         if (route.getSource() != out.getTarget() || route.getTarget() == null) continue;
                         String value = route.getDecisionValue();
                         if (value == null || value.trim().isEmpty()) unguarded = true; else tested.add(value.trim());
-                        targets.add(route.getTarget().getLabel());
                     }
                     if (unguarded || tested.isEmpty() || c.routes.isEmpty()) continue;
                     List<String> missing = new ArrayList<>();
                     for (String r : c.routes) if (!tested.contains(r)) missing.add(r);
                     if (!missing.isEmpty())
                         notes.add("Place '" + place.getLabel() + "': " + c.service + " routes on " + String.join(", ", missing) + ", but no arc from " + out.getTarget().getLabel()
-                            + " tests " + (missing.size() == 1 ? "it" : "them") + "; " + (targets.size() == 1 ? "those tokens would go to " + targets.get(0) + " regardless of its guard"
-                            : "those tokens would be dropped") + ". Draw an arc for " + String.join(", ", missing) + " (to a terminate node if the process ends there).");
+                            + " tests " + (missing.size() == 1 ? "it" : "them") + ", so those tokens would be dropped. Draw an arc for " + String.join(", ", missing) + " (to a terminate node if the process ends there).");
                 }
             }
         }
