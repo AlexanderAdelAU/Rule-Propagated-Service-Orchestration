@@ -17,7 +17,7 @@
     {
       "id": "T_in_Credit",
       "type": "TRANSITION",
-      "x": 358,
+      "x": 368,
       "y": 170,
       "width": 24,
       "height": 60,
@@ -31,7 +31,7 @@
     {
       "id": "Credit",
       "type": "PLACE",
-      "x": 443,
+      "x": 435,
       "y": 175,
       "width": 50,
       "height": 50,
@@ -130,9 +130,23 @@
       "height": 60,
       "label": "T_out_Fraud",
       "rotation": 0.0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "Review",
+      "type": "TRANSITION",
+      "x": 288,
+      "y": 290,
+      "width": 24,
+      "height": 60,
+      "label": "Review",
+      "rotation": 0.0,
       "node_type": "EdgeNode",
       "node_value": "EDGE_NODE",
-      "transition_type": "T_out"
+      "transition_type": "T_in",
+      "buffer": "10"
     }
   ],
   "arrows": [
@@ -171,9 +185,9 @@
     {
       "source": "T_out_Fraud",
       "target": "T_in_Credit",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
+      "label": "clear",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "clear",
       "endpoint": ""
     },
     {
@@ -196,9 +210,20 @@
       "source": "Fraud",
       "target": "T_out_Fraud",
       "label": "",
-      "guardCondition": "",
-      "decision_value": "",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "true",
       "endpoint": ""
+    },
+    {
+      "source": "T_out_Fraud",
+      "target": "Review",
+      "label": "review",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "review",
+      "endpoint": "",
+      "waypoints": [
+        {"x": 300, "y": 260}
+      ]
     }
   ],
   "textElements": [
