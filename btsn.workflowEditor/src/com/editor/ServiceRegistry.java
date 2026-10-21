@@ -17,6 +17,12 @@ public final class ServiceRegistry {
         public String description = "", returns = "";
         /** True for a service of the standard catalogue, which every process may use. */
         public boolean standard;
+        /** True for an entry still being written ("status": "draft"): designable, never deployable. */
+        public boolean draft;
+        /** The Java class the host calls; blank for a service reached only over REST, or a draft. */
+        public String implementationClass = "";
+        /** The values the service routes on (optional "routes"); guards leaving its place should test these. */
+        public final List<String> routes = new ArrayList<>();
         public final List<String> inputs = new ArrayList<>();
     }
     /** Services every process may use, read beside its own catalogue (as DeploymentConfiguration.STANDARD_CATALOGUE). */
@@ -142,7 +148,7 @@ public final class ServiceRegistry {
         if (root == null) throw new IOException("Select a catalogue in btsn.common/BusinessServiceDefinitions.");
         Map<String, Contract> loaded = new LinkedHashMap<>();
         readContracts(source, false, loaded);
-        if (loaded.isEmpty()) throw new IOException("Catalogue has no active service operations.");
+        if (loaded.isEmpty()) throw new IOException("Catalogue has no active or draft service operations.");
         // The standard services follow the domain's own; a domain may not reuse a standard service's name.
         File standard = new File(root, STANDARD_CATALOGUE);
         if (standard.isFile() && !standard.getCanonicalFile().equals(source.getCanonicalFile())) {
@@ -161,12 +167,65 @@ public final class ServiceRegistry {
     private static void readContracts(File source, boolean standard, Map<String, Contract> loaded) throws Exception {
         for (Object item : array(read(source), "services")) {
             JSONObject definition = (JSONObject)item;
-            if (!"active".equals(text(definition, "status"))) continue;
+            String status = text(definition, "status");
+            // Drafts of a domain's own catalogue can be designed with; the standard catalogue offers finished services only.
+            if (!"active".equals(status) && !(DRAFT.equals(status) && !standard)) continue;
             Contract c = new Contract(); c.service = text(definition, "service"); c.operation = text(definition, "operation"); c.output = text(definition, "returnAttribute"); c.resultType = text(definition, "resultType");
             c.description = text(definition, "description"); c.returns = text(definition, "returns"); c.standard = standard;
+            c.draft = DRAFT.equals(status); c.implementationClass = text(definition, "implementationClass");
+            for (Object route : array(definition, "routes")) c.routes.add(route.toString());
             for (Object input : array(definition, "inputs")) c.inputs.add(input.toString());
             if (loaded.put(key(c.service, c.operation), c) != null) throw new IOException("Duplicate catalogue operation: " + c.service + "." + c.operation);
         }
+    }
+    public static final String DRAFT = "draft";
+    /** True when the service is a draft entry of the process's catalogue. */
+    public boolean isDraft(String service) {
+        for (Contract c : contracts.values()) if (c.service.equals(service)) return c.draft;
+        return false;
+    }
+    /** What a draft still needs before it can become an active, deployable service. */
+    public static List<String> stillNeeded(Contract c) {
+        List<String> needed = new ArrayList<>();
+        if (c.description.isEmpty()) needed.add("a description");
+        if (c.returns.isEmpty()) needed.add("what it returns");
+        if (c.inputs.isEmpty()) needed.add("its inputs");
+        if (c.output.isEmpty()) needed.add("a return attribute");
+        if (c.draft) needed.add("its code: a Java class, or a service called over REST");
+        return needed;
+    }
+    /** The reason a draft service cannot be deployed yet, naming what it still needs and how to finish it. */
+    public String draftReason(String service, String op) {
+        Contract c = contract(service, op);
+        if (c == null || !c.draft) return null;
+        return service + "." + op + " is a draft in " + (catalogue == null ? "the catalogue" : catalogue.getName())
+            + ". It still needs " + String.join(", ", stillNeeded(c)) + ". Right-click the place and choose Edit Service in Catalogue... to finish it.";
+    }
+    /** The place's service as an entry of the process's own catalogue (draft or finished), or null (none, or standard). */
+    public Contract domainContract(ProcessElement place) {
+        if (place.getOperations().isEmpty()) return null;
+        Contract c = contract(place.getService(), place.getOperations().get(0));
+        return c == null || c.standard ? null : c;
+    }
+    /** Other process definitions (not this one) whose places use the service: its contract is then not changed from a design. */
+    public List<String> usedElsewhere(String service, File thisProcess) {
+        List<String> users = new ArrayList<>();
+        if (common == null || service == null || service.isEmpty()) return users;
+        List<File> files = new ArrayList<>();
+        collect(new File(common, "ProcessDefinitionFolder"), files);
+        java.util.regex.Pattern uses = java.util.regex.Pattern.compile("\"service\"\\s*:\\s*\"" + java.util.regex.Pattern.quote(service) + "\"");
+        for (File file : files) {
+            try {
+                if (thisProcess != null && file.getCanonicalFile().equals(thisProcess.getCanonicalFile())) continue;
+                if (uses.matcher(new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8)).find()) users.add(file.getName());
+            } catch (IOException ignored) { }
+        }
+        return users;
+    }
+    /** Reload the catalogue (and deployment, if linked) from disk, e.g. after the editor wrote a catalogue entry. */
+    public void reload() throws Exception {
+        if (deployment != null) loadDeployment(deployment);
+        else if (catalogue != null) loadCatalogue(catalogue);
     }
     /** True for a service from the standard catalogue rather than the process's own. */
     public boolean isStandard(String service) {
@@ -198,9 +257,11 @@ public final class ServiceRegistry {
     public String describe(String service, String op) {
         Contract c = contract(service, op);
         if (c == null) return service == null || service.isEmpty() ? "" : describe(service);
-        if (c.description.isEmpty()) return c.standard ? "Standard service, available to every process." : "";
-        return c.description + (c.returns.isEmpty() ? "" : "\nReturns: " + c.returns)
-            + (c.standard ? "\nStandard service, available to every process." : "");
+        String note = c.standard ? "Standard service, available to every process."
+            : c.draft ? "Draft: still needs " + String.join(", ", stillNeeded(c)) + "."
+            : ServiceStub.isStartingCode(common, c.implementationClass) ? "Still runs the starting code the editor wrote; replace it with the real logic." : "";
+        if (c.description.isEmpty()) return note;
+        return c.description + (c.returns.isEmpty() ? "" : "\nReturns: " + c.returns) + (note.isEmpty() ? "" : "\n" + note);
     }
     /** Tooltip text that wraps instead of running off the screen. */
     public static String tooltip(String text) {
@@ -257,6 +318,10 @@ public final class ServiceRegistry {
         if (problem != null) { errors.add(problem); return errors; }
         Contract c = contract(service, op);
         if (c == null) { errors.add("Undefined catalogue operation: " + service + "." + op); return errors; }
+        if (c.draft) { errors.add(draftReason(service, op)); return errors; }
+        if (c.implementationClass.isEmpty() && !REST.equals(adapter) && !"boolean".equals(c.resultType))
+            errors.add(service + " has no Java class in the catalogue, so it runs only over REST: set the adapter to rest and give its endpoint, "
+                + "or write its Java class and name it as the catalogue's implementationClass (Edit Service in Catalogue... can create a starting class).");
         if (REST.equals(adapter) && endpoint != null && !validRestEndpoint(endpoint))
             errors.add("The rest adapter needs an Endpoint: an http:// or https:// address.");
         if (adapter.isEmpty() || REST.equals(adapter)) {
@@ -288,6 +353,7 @@ public final class ServiceRegistry {
             // Not deployed yet: the catalogue fixes the contract. Deployment is a later, separate step.
             Contract c = contract(place.getService(), operation.getName());
             if (c == null) { errors.add("Undefined catalogue operation: " + place.getService() + "." + operation.getName()); continue; }
+            if (c.draft && (c.inputs.isEmpty() || c.output.isEmpty())) continue;   // a draft is checked once it declares its contract
             if ("boolean".equals(c.resultType)) {
                 if (names.isEmpty() || names.contains("") || new HashSet<>(names).size() != names.size() || operation.getReturnAttribute().isEmpty())
                     errors.add("A Boolean service needs unique, nonempty token input and result names.");

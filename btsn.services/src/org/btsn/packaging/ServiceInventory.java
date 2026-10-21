@@ -65,6 +65,8 @@ public final class ServiceInventory {
             String domain = ((String) selectedDomain).toLowerCase(Locale.ROOT);
             if (!domain.matches("[a-z][a-z0-9_-]*")) throw new IllegalArgumentException("Invalid packaging domain: " + selectedDomain);
             for (Object entry : (JSONArray) catalogueData.get("services")) {
+                // Nothing to package for a draft (still being written in the editor) or a service reached only over REST.
+                if ("draft".equals(((JSONObject) entry).get("status")) || ((JSONObject) entry).get("implementationClass") == null) continue;
                 JSONObject service = new JSONObject(new LinkedHashMap<>((JSONObject) entry));
                 service.put("domain", domain);
                 services.add(service);

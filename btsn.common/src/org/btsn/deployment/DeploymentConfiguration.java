@@ -194,8 +194,9 @@ public final class DeploymentConfiguration {
         List<JSONObject> services = new ArrayList<>();
         Set<String> domainNames = new HashSet<>();
         for (Object item : array(read(common.resolve(domainCatalogue)), "services")) {
-            services.add((JSONObject)item);
             domainNames.add(text((JSONObject)item, "service"));
+            // A draft is still being written in the editor: it is designed with, never deployed or resolved.
+            if (!"draft".equals(((JSONObject)item).get("status"))) services.add((JSONObject)item);
         }
         Path standard = common.resolve(STANDARD_CATALOGUE);
         if (!Files.isRegularFile(standard) || Files.isSameFile(standard, common.resolve(domainCatalogue))) return services;

@@ -1194,7 +1194,18 @@ public class Canvas extends JPanel {
         JPopupMenu menu = new JPopupMenu();
         lastContextMenu = menu;
         if (selectedElements.size() == 1 && selectedElements.iterator().next().getType() == ProcessElement.Type.PLACE) {
-            addDeployMenu(menu, selectedElements.iterator().next());
+            ProcessElement place = selectedElements.iterator().next();
+            addDeployMenu(menu, place);
+            menu.addSeparator();
+            // The place's own service is seen and finished from here; a service the catalogue lacks is added from here too.
+            if (serviceRegistry.domainContract(place) != null) {
+                JMenuItem editService = new JMenuItem("Edit Service in Catalogue...");
+                editService.addActionListener(ev -> ServiceDefinitionDialog.open(this, this, place, true));
+                menu.add(editService);
+            }
+            JMenuItem addService = new JMenuItem("Add Service to Catalogue...");
+            addService.addActionListener(ev -> ServiceDefinitionDialog.open(this, this, place, false));
+            menu.add(addService);
             menu.addSeparator();
         }
         
@@ -2671,6 +2682,111 @@ public class Canvas extends JPanel {
     private Runnable deployAction;
     private final List<Runnable> deploymentListeners = new ArrayList<>();
     public void serviceContractChanged() { notifyChange(); repaint(); }
+    /** The place now uses service.operation from the (reloaded) catalogue: contract applied, panels and Deploy refreshed. */
+    public void useService(ProcessElement place, String service, String operation) {
+        saveUndoState();
+        place.setService(service); place.setServiceInstance(""); place.setServiceOperations(new ArrayList<>());
+        serviceRegistry.applyCatalogue(place, operation);
+        notifyChange(); notifySelectionChanged(place); repaint();
+        for (Runnable listener : deploymentListeners) listener.run();
+    }
+    /**
+     * Things to finish before the process can be deployed, which do not stop it being saved: draft services,
+     * guards that test values a service does not route on, and services still running the editor's starting code.
+     */
+    public List<String> serviceNotes() { return serviceNotes(true); }
+    /** As serviceNotes, without the reminders (starting code, untested guards): what stops Deploy, Build and Run. */
+    public List<String> serviceBlockers() { return serviceNotes(false); }
+    private List<String> serviceNotes(boolean reminders) {
+        List<String> notes = new ArrayList<>();
+        for (ProcessElement place : getPlaces()) {
+            for (String op : place.getOperations()) {
+                ServiceRegistry.Contract c = serviceRegistry.contract(place.getService(), op);
+                if (c == null) continue;
+                if (c.draft) notes.add("Place '" + place.getLabel() + "': " + serviceRegistry.draftReason(place.getService(), op));
+                else if (reminders && ServiceStub.isStartingCode(serviceRegistry.common(), c.implementationClass))
+                    notes.add("Place '" + place.getLabel() + "': " + c.service + " still runs the starting code the editor wrote; remember to write the real logic in "
+                        + c.implementationClass.substring(c.implementationClass.lastIndexOf('.') + 1) + ".java.");
+                // Starting code that declares no routes returns true, so that is what its guards must test.
+                List<String> routesOn = !c.routes.isEmpty() ? c.routes
+                    : ServiceStub.isStartingCode(serviceRegistry.common(), c.implementationClass) ? java.util.Collections.singletonList("true") : c.routes;
+                if (routesOn.isEmpty()) continue;
+                for (Arrow out : arrows) {
+                    if (out.getSource() != place || out.getTarget() == null || out.getTarget().getType() != ProcessElement.Type.TRANSITION) continue;
+                    for (Arrow route : arrows) {
+                        String value = route.getDecisionValue();
+                        if (route.getSource() == out.getTarget() && value != null && !value.trim().isEmpty() && !routesOn.contains(value.trim()))
+                            notes.add("Place '" + place.getLabel() + "': the arc from " + out.getTarget().getLabel() + " to " + (route.getTarget() == null ? "?" : route.getTarget().getLabel())
+                                + " tests \"" + value.trim() + "\", but " + c.service + (c.routes.isEmpty() ? " (starting code)" : "") + " routes on " + String.join(", ", routesOn)
+                                + (c.routes.isEmpty() ? ". Add the values it routes on with Edit Service in Catalogue..." : ".") );
+                    }
+                    // The other way round: a value the service routes on that no arc tests, with no unguarded arc to take it.
+                    // The host drops such a token, so the design is fixed before it runs.
+                    List<String> tested = new ArrayList<>();
+                    boolean unguarded = false;
+                    for (Arrow route : arrows) {
+                        if (route.getSource() != out.getTarget() || route.getTarget() == null) continue;
+                        String value = route.getDecisionValue();
+                        if (value == null || value.trim().isEmpty()) unguarded = true; else tested.add(value.trim());
+                    }
+                    if (unguarded || tested.isEmpty() || c.routes.isEmpty()) continue;
+                    List<String> missing = new ArrayList<>();
+                    for (String r : c.routes) if (!tested.contains(r)) missing.add(r);
+                    if (!missing.isEmpty())
+                        notes.add("Place '" + place.getLabel() + "': " + c.service + " routes on " + String.join(", ", missing) + ", but no arc from " + out.getTarget().getLabel()
+                            + " tests " + (missing.size() == 1 ? "it" : "them") + ", so those tokens would be dropped. Draw an arc for " + String.join(", ", missing) + " (to a terminate node if the process ends there).");
+                }
+            }
+        }
+        notes.addAll(chainMismatches());
+        notes.addAll(routingGaps(reminders));
+        return notes;
+    }
+    /**
+     * Arcs that lead nowhere: a connected transition with nothing after it that is not a Terminate node (tokens
+     * reaching it stop with no end recorded, and a gateway arc to it is left out of the rules). With reminders,
+     * guards on arcs into a transition, which are never tested.
+     */
+    public List<String> routingGaps(boolean reminders) {
+        List<String> gaps = new ArrayList<>();
+        for (ProcessElement element : elements) {
+            if (element.getType() != ProcessElement.Type.TRANSITION) continue;
+            String kind = (element.getNodeType() + " " + element.getNodeValue()).toUpperCase();
+            boolean in = false, out = false;
+            for (Arrow a : arrows) { in |= a.getTarget() == element; out |= a.getSource() == element; }
+            if (in && !out && !kind.contains("TERMINATE"))
+                gaps.add("Transition '" + element.getLabel() + "' leads nowhere: tokens reaching it stop there. Make it a Terminate node if the process ends there, or connect it to the next place.");
+        }
+        if (reminders) for (Arrow a : arrows) {
+            String value = a.getDecisionValue();
+            if (a.getSource() != null && a.getSource().getType() == ProcessElement.Type.PLACE && a.getTarget() != null && value != null && !value.trim().isEmpty())
+                gaps.add("The arc from place " + a.getSource().getLabel() + " into " + a.getTarget().getLabel() + " carries the guard \"" + value.trim()
+                    + "\". It does nothing: only the arcs leaving " + a.getTarget().getLabel() + " are tested against what " + a.getSource().getLabel()
+                    + " returns. Select that arc and clear its guard.");
+        }
+        return gaps;
+    }
+    /** What the places after this one (one arc away) take as their input, and what the places before it publish. */
+    public Set<String> neighbourNames(ProcessElement place, boolean downstream) {
+        Set<String> names = new java.util.LinkedHashSet<>();
+        for (Arrow a : arrows) {
+            ProcessElement transition = downstream ? (a.getSource() == place ? a.getTarget() : null) : (a.getTarget() == place ? a.getSource() : null);
+            if (transition == null || transition.getType() != ProcessElement.Type.TRANSITION) continue;
+            for (Arrow b : arrows) {
+                ProcessElement next = downstream ? (b.getSource() == transition ? b.getTarget() : null) : (b.getTarget() == transition ? b.getSource() : null);
+                if (next == null || next.getType() != ProcessElement.Type.TRANSITION) continue;
+                for (Arrow c : arrows) {
+                    ProcessElement other = downstream ? (c.getSource() == next ? c.getTarget() : null) : (c.getTarget() == next ? c.getSource() : null);
+                    if (other == null || other.getType() != ProcessElement.Type.PLACE) continue;
+                    for (ServiceOperation operation : other.getServiceOperations()) {
+                        if (downstream && operation.getArguments().size() == 1) names.add(operation.getArguments().get(0).getName());
+                        if (!downstream && !operation.getReturnAttribute().isEmpty()) names.add(operation.getReturnAttribute());
+                    }
+                }
+            }
+        }
+        return names;
+    }
     public ServiceRegistry getServiceRegistry() { return serviceRegistry; }
     public void setDefinitionLocation(java.io.File file) { definitionLocation = file; }
     public java.io.File getDefinitionLocation() { return definitionLocation; }
@@ -2779,6 +2895,50 @@ public class Canvas extends JPanel {
      * A join place names one input for each arc arriving at its join T_in (from T_outs; an event generator's
      * arc brings a join set and is checked by Build and Run). A place with several operations needs one that fits.
      */
+    /**
+     * A place reached along one arc takes, as its input, what the place before it publishes. When the names differ
+     * the host drops the token at run time ("expects attribute ... but received ..."), so it is reported while designing.
+     * Joins (several inputs) are checked by joinInputMismatches.
+     */
+    public List<String> chainMismatches() {
+        List<String> problems = new ArrayList<>();
+        for (ProcessElement place : getPlaces()) {
+            if (place.getServiceOperations().isEmpty()) continue;
+            Set<String> takes = new HashSet<>();
+            for (ServiceOperation operation : place.getServiceOperations())
+                if (operation.getArguments().size() == 1) takes.add(operation.getArguments().get(0).getName());
+            if (takes.isEmpty()) continue;
+            for (Arrow toPlace : arrows) {
+                ProcessElement tIn = toPlace.getTarget() == place ? toPlace.getSource() : null;
+                if (tIn == null || tIn.getType() != ProcessElement.Type.TRANSITION || "JoinNode".equals(tIn.getNodeType())) continue;
+                for (Arrow toTIn : arrows) {
+                    ProcessElement tOut = toTIn.getTarget() == tIn ? toTIn.getSource() : null;
+                    if (tOut == null || tOut.getType() != ProcessElement.Type.TRANSITION) continue;
+                    for (Arrow fromUpstream : arrows) {
+                        ProcessElement upstream = fromUpstream.getTarget() == tOut ? fromUpstream.getSource() : null;
+                        if (upstream == null || upstream.getType() != ProcessElement.Type.PLACE || upstream.getServiceOperations().isEmpty()) continue;
+                        // Boolean services travel as tokens under the deployment's aliases, which the boolean-token adapter matches up.
+                        if (isBooleanService(place) || isBooleanService(upstream)) continue;
+                        Set<String> publishes = new java.util.LinkedHashSet<>();
+                        for (ServiceOperation operation : upstream.getServiceOperations()) publishes.add(operation.getReturnAttribute());
+                        if (java.util.Collections.disjoint(takes, publishes))
+                            problems.add("Place '" + place.getLabel() + "' takes " + String.join(" or ", takes) + ", but '" + upstream.getLabel() + "' publishes "
+                                + String.join(" or ", publishes) + "; the names must match, or the token stops at '" + place.getLabel() + "'.");
+                    }
+                }
+            }
+        }
+        return problems;
+    }
+
+    private boolean isBooleanService(ProcessElement place) {
+        for (String op : place.getOperations()) {
+            ServiceRegistry.Contract c = serviceRegistry.contract(place.getService(), op);
+            if (c != null && "boolean".equals(c.resultType)) return true;
+        }
+        return false;
+    }
+
     public List<String> joinInputMismatches() {
         List<String> errors = new ArrayList<>();
         for (ProcessElement join : elements) {

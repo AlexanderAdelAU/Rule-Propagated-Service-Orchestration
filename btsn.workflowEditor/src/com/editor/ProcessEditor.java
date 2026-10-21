@@ -979,17 +979,26 @@ public class ProcessEditor extends JFrame {
             errors.add(0, "Process Type must be specified (PetriNet or SOA)");
         }
         
+        java.util.List<String> notes = canvas.serviceNotes();
+        // "Still to do" is shown in red: it does not stop saving, but the process cannot be deployed until it is done.
+        StringBuilder html = new StringBuilder("<html><div style='width:520px'>");
+        if (errors.isEmpty()) html.append("Validation passed!<br><br>No duplicate labels or other issues found.");
+        else {
+            html.append("Validation found the following issues:<ul>");
+            for (String error : errors) html.append("<li>").append(htmlText(error)).append("</li>");
+            html.append("</ul>Please fix these issues before saving.");
+        }
+        if (!notes.isEmpty()) {
+            html.append("<br><br><font color='#C00000'><b>Still to do</b> (this does not stop you saving):<ul>");
+            for (String note : notes) html.append("<li>").append(htmlText(note)).append("</li>");
+            html.append("</ul></font>");
+        }
+        html.append("</div></html>");
         if (errors.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                "Validation passed!\n\nNo duplicate labels or other issues found.",
-                "Validation Successful",
-                JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, html.toString(), "Validation Successful",
+                notes.isEmpty() ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.WARNING_MESSAGE);
         } else {
-            StringBuilder message = new StringBuilder("Validation found the following issues:\n\n");
-            for (String error : errors) {
-                message.append("- ").append(error).append("\n");
-            }
-            message.append("\nPlease fix these issues before saving.");
+            Object message = html;
             JOptionPane.showMessageDialog(this,
                 message.toString(),
                 "Validation Errors",
@@ -997,6 +1006,10 @@ public class ProcessEditor extends JFrame {
         }
     }
     
+    private static String htmlText(String text) {
+        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>");
+    }
+
     private void exportToGraphviz() {
         if (canvas.getElements().isEmpty()) {
             JOptionPane.showMessageDialog(this,
@@ -1297,7 +1310,7 @@ public class ProcessEditor extends JFrame {
         ServiceRegistry registry = canvas.getServiceRegistry();
         if (registry.problem() != null) problems.add(registry.problem());
         else if (canvas.getPlaces().isEmpty()) problems.add("Add at least one place before deploying.");
-        else problems.addAll(canvas.validateServiceContracts());
+        else { problems.addAll(canvas.validateServiceContracts()); problems.addAll(canvas.serviceBlockers()); }
         if (!problems.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Before deploying:\n" + String.join("\n", problems), "Deploy", JOptionPane.WARNING_MESSAGE);
             return;
@@ -1318,6 +1331,7 @@ public class ProcessEditor extends JFrame {
         java.io.File combined = problems.isEmpty() ? BuildAndRunGenerator.combinedLauncher(currentFile) : null;
         if (combined != null) { buildCombined(combined); return; }
         problems.addAll(canvas.validateServiceContracts());
+        problems.addAll(canvas.serviceBlockers());
         BuildAndRunGenerator.Plan plan = BuildAndRunGenerator.plan(canvas, currentFile);
         for (String problem : plan.problems) if (!problems.contains(problem)) problems.add(problem);
         if (!problems.isEmpty()) {
@@ -1368,6 +1382,14 @@ public class ProcessEditor extends JFrame {
         if (runWindow != null && runWindow.isDisplayable()) { runWindow.toFront(); return; }
         if (currentFile == null || isDirty) {
             JOptionPane.showMessageDialog(this, "Save the process first; the launcher runs the saved file.", "Run", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        // The hosts route exactly as drawn, so what Validate lists as still to do is fixed before a run, not found in its analysis.
+        java.util.List<String> blockers = canvas.serviceBlockers();
+        if (!blockers.isEmpty()) {
+            StringBuilder html = new StringBuilder("<html><div style='width:520px'>Fix these before running:<font color='#C00000'><ul>");
+            for (String blocker : blockers) html.append("<li>").append(htmlText(blocker)).append("</li>");
+            JOptionPane.showMessageDialog(this, html.append("</ul></font></div></html>").toString(), "Run", JOptionPane.WARNING_MESSAGE);
             return;
         }
         // Real, absolute paths only: a process opened through "..\\" must not carry ".." into the launcher's paths.

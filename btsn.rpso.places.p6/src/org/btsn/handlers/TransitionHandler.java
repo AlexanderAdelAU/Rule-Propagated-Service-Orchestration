@@ -373,14 +373,6 @@ class TransitionHandler {
             matchingBranchIndices.addAll(defaultBranchIndices);
         }
         
-        // EDGE FALLBACK: If no conditions matched and only ONE destination exists,
-        // treat as EdgeNode (simple pass-through) - supports mixed workflows where
-        // different versions may not have matching decision values
-        if (matchingBranchIndices.isEmpty() && nextServiceCollection.size() == 1) {
-            logger.info("XOR-DIAG: No conditions matched, but single destination exists - using EdgeNode fallback");
-            matchingBranchIndices.add(0);
-        }
-
         logger.info("XOR-DIAG: Total matching branches: " + matchingBranchIndices.size());
 
         if (matchingBranchIndices.isEmpty()) {
@@ -513,14 +505,6 @@ class TransitionHandler {
         }
 
         logger.info("GATEWAY-DIAG: Total matches: " + matchingIndices.size());
-
-        // EDGE FALLBACK: If no conditions matched and only ONE destination exists,
-        // treat as EdgeNode (simple pass-through) - supports mixed workflows where
-        // different versions may not have matching decision values
-        if (matchingIndices.isEmpty() && nextServiceCollection.size() == 1) {
-            logger.info("GATEWAY-DIAG: No conditions matched, but single destination exists - using EdgeNode fallback");
-            matchingIndices.add(0);
-        }
 
         if (matchingIndices.isEmpty()) {
             logger.error("GATEWAY: No destinations match routing_path '" + cleanRoutingPath + "' - token dropped");

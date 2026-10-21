@@ -1,0 +1,30 @@
+{
+  "definitionType": "ServiceDeployment",
+  "catalog": "BusinessServiceDefinitions/credit/Credit.json",
+  "capabilities": [
+    {
+      "node": "P1",
+      "service": "CreditLimitService",
+      "instance": "Credit",
+      "invocationAdapter": "rest",
+      "endpoint": "https://rule-propagated-service-orchestrati.vercel.app/api/credit/assess",
+      "operation": "assess",
+      "returnAttribute": "creditDecision",
+      "portSlot": 0,
+      "arguments": [
+        {"name": "token", "type": "String", "value": "String", "required": false}
+      ]
+    },
+    {
+      "node": "P2",
+      "service": "FraudService",
+      "instance": "Fraud",
+      "operation": "FraudeAssessment",
+      "returnAttribute": "token",
+      "portSlot": 0,
+      "arguments": [
+        {"name": "token", "type": "String", "value": "String", "required": false}
+      ]
+    }
+  ]
+}

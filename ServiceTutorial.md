@@ -132,6 +132,44 @@ that passes the token on unchanged, and `StochasticService`, a random `true`/`fa
 editor lists them after the domain's own services, marked *(standard)*. A domain catalogue
 may not reuse a standard service's name.
 
+### Add a service while designing
+
+Designing the catalogue first is best, but a design often shows that a service is missing.
+You do not need to leave the editor:
+
+1. Draw the place, then right-click it and choose **Add Service to Catalogue...** (or use
+   **Add service to catalogue...** under the place's Service).
+2. Give the service and its operation a name. Everything else can follow: what it does, what it
+   returns, its inputs and return attribute (suggested to match the places around it), and the
+   values it routes on.
+3. Choose how it runs:
+   - **A Java class**, with starting code (the default). The editor writes
+     `btsn.common/src/org/btsn/business/<domain>/<Service>.java`. The code keeps the contract and returns
+     `true`, or each routing value in turn, so the process can be deployed and run straight away.
+     Validate reminds you that it is still starting code until you replace the body with the real logic.
+   - **A service called over REST**, written in any language; set its endpoint in Deploy
+     ([Call it over REST](#8-call-it-over-rest)).
+   - **Not decided yet**: the entry stays a **draft**.
+
+The entry goes into the domain catalogue at once. A draft can be designed with and saved with the
+process, but Validate, Deploy and Build and Run say exactly what it still needs, and it is never
+deployed or packaged. **Edit Service in Catalogue...** on the place shows its service filled in, draft or
+finished, and saves your changes. While the class is still the editor's starting code, the code is rewritten
+to match, for example to return the routing values you add. Code you have written yourself is never changed.
+If other processes use the service, its name, operation, inputs, return attribute and how it runs are fixed
+in the form, and only its description and routes can change.
+
+Validate also checks that each place takes, as its input, the name the place before it publishes.
+If the names differ, the token would stop at that place when the process runs. It checks the routes too:
+a guard testing a value the service never returns, a value the service returns that no arc tests, and a
+transition that leads nowhere because it is not a Terminate node. Each of these stops Deploy, Build and Run on hosts.
+
+**An example.** [`Credit_Fraud_Rest_Workflow.json`](btsn.common/ProcessDefinitionFolder/credit/Workflow/Credit_Fraud_Rest_Workflow.json)
+puts a fraud screen in front of the credit check. `FraudService` was added this way and still runs its
+starting code, which routes `clear` and `review` in turn: `clear` goes on to Credit, called over REST
+([Call it over REST](#8-call-it-over-rest)), and `review` ends at Review. Its launcher is
+`Credit_Fraud_Rest_Workflow_BuildAndRun.xml`; a run completes all ten workflows, five ending at Review.
+
 ## 3. Package it
 
 Add the catalogue to [`btsn.services/packaging.json`](btsn.services/packaging.json),
