@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
@@ -65,6 +66,79 @@ public final class CatalogueWriter {
             updated = text.substring(0, end) + ",\n" + rendered + text.substring(end);
         }
         write(catalogue, updated);
+    }
+
+    /** A domain name: the catalogue's folder and the Java package of its services' starting code. */
+    public static boolean validDomain(String domain) {
+        return domain != null && domain.matches("[a-z][a-z0-9_]*") && javax.lang.model.SourceVersion.isName(domain);
+    }
+    /** claims -> Claims.json, home_loans -> HomeLoans.json */
+    public static String catalogueName(String domain) {
+        StringBuilder name = new StringBuilder();
+        for (String part : domain.split("_")) if (!part.isEmpty()) name.append(Character.toUpperCase(part.charAt(0))).append(part.substring(1));
+        return name + ".json";
+    }
+
+    /**
+     * A new domain's empty catalogue, BusinessServiceDefinitions/<domain>/<Name>.json, registered in
+     * btsn.services/packaging.json so the build packages the Java services that will be added to it.
+     */
+    public static File create(File common, String domain) throws Exception {
+        if (!validDomain(domain))
+            throw new IOException("A domain name is lower case letters, digits and _, starting with a letter (it is also the Java package of its services): " + domain);
+        File folder = new File(common, "BusinessServiceDefinitions/" + domain);
+        File catalogue = new File(folder, catalogueName(domain));
+        File[] existing = folder.listFiles((dir, name) -> name.endsWith(".json"));
+        if (existing != null && existing.length > 0)
+            throw new IOException("The " + domain + " domain already has a catalogue, " + existing[0].getName() + ": choose it from the list.");
+        for (File other : ServiceRegistry.domainCatalogues(common))
+            if (other.getName().equals(catalogue.getName()))
+                throw new IOException(catalogue.getName() + " is already the catalogue of the " + other.getParentFile().getName() + " domain; choose another domain name.");
+        String title = catalogue.getName().replaceFirst("\\.json$", "");
+        String text = "{\n"
+            + "  \"domain\": \"" + title + "\",\n"
+            + "  \"purpose\": \"Services of the " + domain + " processes, added while designing. Physical placement is defined separately by the service deployment.\",\n"
+            + "  \"services\": [\n"
+            + "  ]\n"
+            + "}\n";
+        Files.createDirectories(folder.toPath());
+        write(catalogue, text);
+        registerForPackaging(common, catalogue, domain);
+        return catalogue;
+    }
+
+    /**
+     * Lists the catalogue in btsn.services/packaging.json (catalogues and catalogueDomains), keeping the file's layout.
+     * Returns false when there is no packaging.json beside btsn.common, or the catalogue is already listed.
+     */
+    public static boolean registerForPackaging(File common, File catalogue, String domain) throws Exception {
+        File packaging = new File(common.getParentFile(), "btsn.services/packaging.json");
+        if (!packaging.isFile()) return false;
+        String text = read(packaging);
+        JSONObject data = (JSONObject)new JSONParser().parse(text);
+        String path = "../btsn.common/BusinessServiceDefinitions/" + domain + "/" + catalogue.getName();
+        Object listed = data.get("catalogues"), domains = data.get("catalogueDomains");
+        if (!(listed instanceof JSONArray) || !(domains instanceof JSONObject)) throw new IOException("packaging.json has no catalogues or catalogueDomains.");
+        if (((JSONArray)listed).contains(path)) return false;
+        Object mapped = ((JSONObject)domains).get(catalogue.getName());
+        if (mapped != null && !domain.equals(mapped)) throw new IOException(catalogue.getName() + " is already packaged for the " + mapped + " domain.");
+        text = append(text, "\"catalogues\"", '[', ']', "\"" + path + "\"");
+        if (mapped == null) text = append(text, "\"catalogueDomains\"", '{', '}', "\"" + catalogue.getName() + "\": \"" + domain + "\"");
+        write(packaging, text);
+        return true;
+    }
+    /** Adds an entry at the end of the array or object that follows key, indented like the entries before it. */
+    private static String append(String text, String key, char open, char close, String entry) throws IOException {
+        int at = text.indexOf(key);
+        int start = at < 0 ? -1 : text.indexOf(open, at), end = start < 0 ? -1 : text.indexOf(close, start);
+        if (end < 0) throw new IOException("packaging.json: " + key + " not found.");
+        String inside = text.substring(start + 1, end);
+        int last = inside.lastIndexOf('"');
+        if (last < 0) return text.substring(0, start + 1) + "\n    " + entry + "\n  " + text.substring(end);
+        int lineStart = inside.lastIndexOf('\n', last) + 1, indentEnd = lineStart;
+        while (indentEnd < inside.length() && (inside.charAt(indentEnd) == ' ' || inside.charAt(indentEnd) == '\t')) indentEnd++;
+        int insertAt = start + 1 + last + 1;
+        return text.substring(0, insertAt) + ",\n" + inside.substring(lineStart, indentEnd) + entry + text.substring(insertAt);
     }
 
     /** Rewrites the draft entry service.operation as entry, which may also rename it or make it active. */

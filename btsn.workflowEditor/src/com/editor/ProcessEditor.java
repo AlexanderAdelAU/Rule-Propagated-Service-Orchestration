@@ -1262,11 +1262,13 @@ public class ProcessEditor extends JFrame {
         fileChooser.setDialogTitle("Save Process Definition");
         fileChooser.setFileFilter(createJsonFilter());
         
-        // Use current filename as default, or "petri_net.json" if new
+        // Use current filename as default; a new process goes beside the other processes of its catalogue's domain.
         if (currentFile != null) {
             fileChooser.setSelectedFile(currentFile);
         } else {
-            fileChooser.setSelectedFile(new File("petri_net.json"));
+            File domainFolder = domainFolder();
+            if (domainFolder != null) fileChooser.setCurrentDirectory(domainFolder);
+            fileChooser.setSelectedFile(new File(domainFolder != null ? domainFolder : fileChooser.getCurrentDirectory(), "petri_net.json"));
         }
         
         int result = fileChooser.showSaveDialog(this);
@@ -1294,6 +1296,16 @@ public class ProcessEditor extends JFrame {
     
     // ==================== New / Open ====================
     
+    /** ProcessDefinitionFolder/<domain>/Workflow for the domain of the process's catalogue (made if new), or null. */
+    private File domainFolder() {
+        ServiceRegistry registry = canvas.getServiceRegistry();
+        File common = registry.common();
+        String domain = registry.catalogueDomain();
+        if (common == null || domain.isEmpty()) return null;
+        File folder = new File(common, "ProcessDefinitionFolder/" + domain + "/Workflow");
+        return folder.isDirectory() || folder.mkdirs() ? folder : null;
+    }
+
     private void newProcessDefinition() {
         clearCanvas();
     }

@@ -2765,6 +2765,8 @@ public class Canvas extends JPanel {
         }
         notes.addAll(chainMismatches());
         notes.addAll(routingGaps(reminders));
+        String mismatch = reminders ? domainMismatch() : null;
+        if (mismatch != null) notes.add(mismatch);
         return notes;
     }
     /**
@@ -2838,19 +2840,36 @@ public class Canvas extends JPanel {
         else pendingNodes.put(place.getId(), node);
         deploymentChanged();
     }
-    /** Choose the service catalogue whose services the places of this process may use. */
-    public void chooseCatalogue(java.awt.Component parent) {
-        JFileChooser chooser = new JFileChooser();
+    /** Choose (or create) the catalogue of this process's domain, whose services its places may use. */
+    public boolean chooseCatalogue(java.awt.Component parent) {
+        return chooseCatalogue(parent, serviceRegistry.hasDomainCatalogue() ? "Choose the catalogue for this process's services." : CatalogueChoice.BEFORE_WE_BEGIN);
+    }
+    public boolean chooseCatalogue(java.awt.Component parent, String why) {
         java.io.File common = ServiceRegistry.findCommon(definitionLocation);
-        if (common != null) chooser.setCurrentDirectory(new java.io.File(common, "BusinessServiceDefinitions"));
-        chooser.setDialogTitle("Choose the service catalogue for this process");
-        if (chooser.showOpenDialog(parent) != JFileChooser.APPROVE_OPTION) return;
-        try {
-            serviceRegistry.loadCatalogue(chooser.getSelectedFile());
-            serviceDeploymentReference = "";
-            pendingNodes.clear();
-            notifyChange(); notifySelectionChanged(selectedElements.size() == 1 ? selectedElements.iterator().next() : null); deploymentChanged();
-        } catch (Exception ex) { JOptionPane.showMessageDialog(parent, ex.getMessage(), "Invalid catalogue", JOptionPane.ERROR_MESSAGE); }
+        java.io.File chosen = CatalogueChoice.ask(parent, common, definitionLocation, why, serviceRegistry.hasDeployment());
+        if (chosen == null) return false;
+        try { useCatalogue(chosen); return true; }
+        catch (Exception ex) { JOptionPane.showMessageDialog(parent, ex.getMessage(), "Invalid catalogue", JOptionPane.ERROR_MESSAGE); return false; }
+    }
+    /** The process's services come from this catalogue (with the standard ones); its deployment is set aside. */
+    public void useCatalogue(java.io.File catalogue) throws Exception {
+        serviceRegistry.loadCatalogue(catalogue);
+        serviceDeploymentReference = "";
+        pendingNodes.clear();
+        notifyChange(); notifySelectionChanged(selectedElements.size() == 1 ? selectedElements.iterator().next() : null); deploymentChanged();
+    }
+    /**
+     * A process and its catalogue belong to one domain: saved under ProcessDefinitionFolder/<domain>, using
+     * BusinessServiceDefinitions/<domain>. Null when they agree, the process is unsaved, or it uses only standard services.
+     */
+    public String domainMismatch() {
+        if (!serviceRegistry.hasDomainCatalogue() || definitionLocation == null) return null;
+        String processDomain = CatalogueChoice.processDomain(serviceRegistry.common(), definitionLocation);
+        String catalogueDomain = serviceRegistry.catalogueDomain();
+        if (processDomain.isEmpty() || processDomain.equals(catalogueDomain)) return null;
+        return "This process is saved under ProcessDefinitionFolder/" + processDomain + " but uses the " + catalogueDomain + " catalogue ("
+            + serviceRegistry.catalogueFile().getName() + "). Save it under ProcessDefinitionFolder/" + catalogueDomain
+            + ", so the processes of a domain stay beside the catalogue they share.";
     }
     /**
      * Record a saved service deployment: the process links to it and each place uses its instance.
@@ -3785,7 +3804,7 @@ public class Canvas extends JPanel {
         processType = null;
         serviceDeploymentReference = "";
         pendingNodes.clear();
-        serviceRegistry.dropDeployment();
+        serviceRegistry.useStandardCatalogue(definitionLocation);   // a new process does not inherit the last one's catalogue
         notifySelectionChanged(null);  // Clear attributes panel
         deploymentChanged();
     }

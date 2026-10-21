@@ -81,11 +81,65 @@ public final class ServiceRegistry {
         try { loadCatalogue(new File(root, reference)); }
         catch (Exception ex) { problem = ex.getMessage(); }
     }
-    /** Keep the catalogue but forget the deployment, e.g. when a new process is started. */
-    public void dropDeployment() {
-        if (deployment == null) return;
-        File source = catalogue;
-        try { loadCatalogue(source); } catch (Exception ex) { reset(); }
+    /**
+     * A new process: only the standard services, shared by every process, until it needs services of its own and its
+     * domain's catalogue is chosen or created. A new process never inherits the previous process's catalogue.
+     */
+    public void useStandardCatalogue(File anchor) {
+        reset();
+        File root = findCommon(anchor);
+        if (root == null) return;
+        try { loadCatalogue(new File(root, STANDARD_CATALOGUE)); }
+        catch (Exception ex) { reset(); problem = ex.getMessage(); }
+    }
+    /** True when the process has its own domain's catalogue, not just the standard one. */
+    public boolean hasDomainCatalogue() {
+        return problem == null && catalogue != null && !isStandardCatalogue(catalogue);
+    }
+    static boolean isStandardCatalogue(File file) {
+        return file.getPath().replace(File.separatorChar, '/').endsWith(STANDARD_CATALOGUE);
+    }
+    /** The catalogue's domain: its folder under BusinessServiceDefinitions (petrinet for the standard catalogue). */
+    public String catalogueDomain() {
+        return catalogue == null ? "" : catalogue.getParentFile().getName();
+    }
+    /**
+     * The catalogue, other than ownCatalogue, that already defines this service: any domain's catalogue or one listed
+     * for packaging. Service names are shared by every domain's packages, so a name can belong to one catalogue only.
+     */
+    public static File definedElsewhere(File common, String service, File ownCatalogue) {
+        if (common == null || service == null || service.isEmpty()) return null;
+        List<File> catalogues = new ArrayList<>(domainCatalogues(common));
+        File services = new File(common.getParentFile(), "btsn.services");
+        try {
+            for (Object listed : array(read(new File(services, "packaging.json")), "catalogues")) catalogues.add(new File(services, listed.toString()));
+        } catch (Exception noPackaging) { }
+        for (File catalogue : catalogues) {
+            try {
+                if (ownCatalogue != null && catalogue.getCanonicalFile().equals(ownCatalogue.getCanonicalFile())) continue;
+                if (!catalogue.isFile()) continue;
+                for (Object item : array(read(catalogue), "services"))
+                    if (service.equals(text((JSONObject)item, "service"))) return catalogue.getCanonicalFile();
+            } catch (Exception unreadable) { }
+        }
+        return null;
+    }
+    /** Each domain's catalogue, BusinessServiceDefinitions/<domain>/<Name>.json, without the standard one. */
+    public static List<File> domainCatalogues(File common) {
+        List<File> found = new ArrayList<>();
+        File[] domains = common == null ? null : new File(common, "BusinessServiceDefinitions").listFiles(File::isDirectory);
+        if (domains == null) return found;
+        Arrays.sort(domains);
+        for (File domain : domains) {
+            File[] files = domain.listFiles((dir, name) -> name.endsWith(".json"));
+            if (files == null) continue;
+            Arrays.sort(files);
+            for (File file : files) {
+                if (isStandardCatalogue(file)) continue;
+                try { if (read(file).get("services") instanceof JSONArray) found.add(file); } catch (Exception notACatalogue) { }
+            }
+        }
+        return found;
     }
     /** BusinessServiceDefinitions/<domain>/X.json when a process lies under ProcessDefinitionFolder/<domain> and that folder has one catalogue. */
     static String domainCatalogue(File root, File anchor) {
@@ -147,8 +201,9 @@ public final class ServiceRegistry {
         File root = findCommon(source.getAbsoluteFile().getParentFile());
         if (root == null) throw new IOException("Select a catalogue in btsn.common/BusinessServiceDefinitions.");
         Map<String, Contract> loaded = new LinkedHashMap<>();
+        // A new domain's catalogue starts empty; anything without a services list is not a catalogue.
+        if (!(read(source).get("services") instanceof JSONArray)) throw new IOException(source.getName() + " is not a service catalogue: it has no services list.");
         readContracts(source, false, loaded);
-        if (loaded.isEmpty()) throw new IOException("Catalogue has no active or draft service operations.");
         // The standard services follow the domain's own; a domain may not reuse a standard service's name.
         File standard = new File(root, STANDARD_CATALOGUE);
         if (standard.isFile() && !standard.getCanonicalFile().equals(source.getCanonicalFile())) {
