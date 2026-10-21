@@ -25,13 +25,18 @@ public final class ServiceDefinitionDialog extends JDialog {
     private final File catalogue, common;
     private final String domain;
 
-    private final JTextField service = new JTextField(24), operation = new JTextField(24), returns = new JTextField(24),
-        inputs = new JTextField(24), returnAttribute = new JTextField(24), routes = new JTextField(24), javaClass = new JTextField(24);
-    private final JTextArea description = new JTextArea(3, 24);
+    // Each empty field shows, greyed, an example of what goes in it and in what form.
+    private final JTextField service = hinted("e.g. FraudScreenService"), operation = hinted("e.g. screen"),
+        returns = hinted("In words, e.g. a screening result for the application"),
+        inputs = hinted("Names, separated by commas, e.g. token"), returnAttribute = hinted("A name, e.g. token"),
+        routes = hinted("Values, separated by commas, e.g. clear, review"), javaClass = new JTextField(24);
+    private final JTextArea description = new HintTextArea("In words, e.g. Screens an application for signs of fraud.");
     private final JRadioButton undecided = new JRadioButton("Not decided yet: it stays a draft"),
         java = new JRadioButton("A Java class:"), rest = new JRadioButton("A service called over REST, in any language (endpoint set in Deploy)");
     private final JCheckBox startingCode = new JCheckBox("Write starting code for the class if it does not exist", true);
     private final JLabel outcome = new JLabel(" ");
+    /** Other processes that use the service being edited; its contract is then fixed here. */
+    private final List<String> usedElsewhere;
     private boolean saved;
 
     private ServiceDefinitionDialog(Window owner, Canvas canvas, ProcessElement place, ServiceRegistry.Contract existing) {
@@ -41,6 +46,7 @@ public final class ServiceDefinitionDialog extends JDialog {
         catalogue = registry.catalogueFile(); common = registry.common();
         domain = catalogue.getParentFile().getName();
 
+        usedElsewhere = existing == null ? new ArrayList<>() : registry.usedElsewhere(existing.service, canvas.getDefinitionLocation());
         CatalogueWriter.Entry start = existing != null ? CatalogueWriter.from(existing) : suggestion(canvas, place);
         service.setText(start.service); operation.setText(start.operation); description.setText(start.description);
         returns.setText(start.returns); inputs.setText(String.join(", ", start.inputs)); returnAttribute.setText(start.returnAttribute);
@@ -48,23 +54,31 @@ public final class ServiceDefinitionDialog extends JDialog {
         javaClass.setText(!start.implementationClass.isEmpty() ? start.implementationClass : ServiceStub.className(domain, start.service.isEmpty() ? "NewService" : start.service));
         ButtonGroup how = new ButtonGroup(); how.add(undecided); how.add(java); how.add(rest);
         // A new service gets runnable starting code by default, so the design can go straight through to a run.
-        (existing != null && existing.implementationClass.isEmpty() ? undecided : java).setSelected(true);
+        // An existing one shows how it runs now: its Java class, REST (finished without a class), or undecided (a draft).
+        (existing == null || !existing.implementationClass.isEmpty() ? java : existing.draft ? undecided : rest).setSelected(true);
 
         JPanel form = new JPanel(new GridBagLayout());
         form.setBorder(BorderFactory.createEmptyBorder(10, 10, 6, 10));
         GridBagConstraints c = new GridBagConstraints();
         c.insets = new Insets(3, 3, 3, 3); c.anchor = GridBagConstraints.WEST; c.fill = GridBagConstraints.HORIZONTAL;
-        JLabel intro = new JLabel("<html><div style='width:430px'>It is written to <b>" + catalogue.getName() + "</b> now, as a draft, so you can keep "
-            + "designing. Leave out what you do not know yet: the editor tells you what is still needed before the place can be deployed.</div></html>");
+        String introText = existing == null
+            ? "It is written to <b>" + catalogue.getName() + "</b> now, as a draft, so you can keep designing. Leave out what you do not know yet: "
+                + "the editor tells you what is still needed before the place can be deployed."
+            : usedElsewhere.isEmpty()
+            ? "<b>" + existing.service + "</b> in <b>" + catalogue.getName() + "</b>" + (existing.draft ? ", a draft." : ".") + " Changes are saved to the catalogue"
+                + " and, while its class is still the editor's starting code, to the code too."
+            : "<b>" + existing.service + "</b> in <b>" + catalogue.getName() + "</b> is also used by " + escape(String.join(", ", usedElsewhere))
+                + ", so its name, operation, inputs, return attribute and how it runs are fixed here. Its description and routes can still be changed.";
+        JLabel intro = new JLabel("<html><div style='width:430px'>" + introText + "</div></html>");
         c.gridx = 0; c.gridy = 0; c.gridwidth = 2; form.add(intro, c); c.gridwidth = 1;
         row(form, c, 1, "Service:", service, "A Java-style name, e.g. FraudScreenService.");
         row(form, c, 2, "Operation:", operation, "What the place asks the service to do, e.g. screen.");
         description.setLineWrap(true); description.setWrapStyleWord(true);
         row(form, c, 3, "What it does:", new JScrollPane(description), "Shown in the editor's What it does box.");
-        row(form, c, 4, "What it returns:", returns, "In words, e.g. clear when the payment looks normal, review otherwise.");
+        row(form, c, 4, "What it returns:", returns, "What the result is, in words. The values it routes on go in Routes on, not here.");
         row(form, c, 5, "Inputs:", inputs, "Names separated by commas, in the order of the method's parameters.");
         row(form, c, 6, "Return attribute:", returnAttribute, "The name the result is published under. The next place takes it as input, so it must be the name that place's input has.");
-        row(form, c, 7, "Routes on:", routes, "The values its result routes on, e.g. clear, review. Leave blank if the place has one way out.");
+        row(form, c, 7, "Routes on:", routes, "The values its result routes on, separated by commas; the guards leaving the place test these. Leave blank if the place has one way out.");
         JPanel howPanel = new JPanel(new GridBagLayout());
         howPanel.setBorder(BorderFactory.createTitledBorder("How it runs"));
         GridBagConstraints h = new GridBagConstraints(); h.anchor = GridBagConstraints.WEST; h.fill = GridBagConstraints.HORIZONTAL; h.gridx = 0; h.gridwidth = 2;
@@ -92,23 +106,23 @@ public final class ServiceDefinitionDialog extends JDialog {
                 javaClass.setText(ServiceStub.className(domain, service.getText().trim()));
         }));
         for (AbstractButton b : Arrays.asList(undecided, java, rest, startingCode)) b.addActionListener(e -> updateOutcome());
+        if (!usedElsewhere.isEmpty())
+            for (JComponent fixed : Arrays.<JComponent>asList(service, operation, inputs, returnAttribute, javaClass, undecided, java, rest, startingCode)) fixed.setEnabled(false);
         updateOutcome();
         pack();
         setLocationRelativeTo(owner);
     }
 
     /**
-     * Opens the form for a place: a new service when the place has none or a finished one, the draft it uses otherwise.
-     * Returns true when the catalogue was written and the place now uses the service.
+     * Opens the form for a place: edit shows the place's own service (draft or finished) filled in; otherwise it adds a
+     * new service. Returns true when the catalogue was written and the place now uses the service.
      */
-    public static boolean open(Component parent, Canvas canvas, ProcessElement place) {
+    public static boolean open(Component parent, Canvas canvas, ProcessElement place, boolean edit) {
         ServiceRegistry registry = canvas.getServiceRegistry();
         String refusal = refusal(registry);
         if (refusal != null) { JOptionPane.showMessageDialog(parent, refusal, "Add Service to Catalogue", JOptionPane.WARNING_MESSAGE); return false; }
-        ServiceRegistry.Contract draft = null;
-        if (registry.isDraft(place.getService()) && !place.getOperations().isEmpty())
-            draft = registry.contract(place.getService(), place.getOperations().get(0));
-        ServiceDefinitionDialog dialog = new ServiceDefinitionDialog(SwingUtilities.getWindowAncestor(parent), canvas, place, draft);
+        ServiceRegistry.Contract own = edit ? registry.domainContract(place) : null;
+        ServiceDefinitionDialog dialog = new ServiceDefinitionDialog(SwingUtilities.getWindowAncestor(parent), canvas, place, own);
         dialog.setVisible(true);
         return dialog.saved;
     }
@@ -184,6 +198,12 @@ public final class ServiceDefinitionDialog extends JDialog {
         startingCode.setEnabled(java.isSelected()); javaClass.setEnabled(java.isSelected());
         CatalogueWriter.Entry e = entry();
         List<String> errors = errors(e), needed = stillNeeded(e);
+        // Values typed into What it returns instead of Routes on would leave the starting code and guard checks without them.
+        if (e.routes.isEmpty() && e.returns.matches("[A-Za-z0-9_]+(\\s*,\\s*[A-Za-z0-9_]+)+")) {
+            outcome.setText("<html><div style='width:430px'><font color='#B00020'>What it returns looks like routing values. Put them in "
+                + "<b>Routes on</b>, which the guards and the starting code use, and describe the result in words here.</font></div></html>");
+            return;
+        }
         String text = e.service.isEmpty() || e.operation.isEmpty() ? "Name the service and its operation; everything else can follow later."
             : !errors.isEmpty() ? "<font color='#B00020'>" + escape(errors.get(0)) + "</font>"
             : needed.isEmpty() ? "<b>Ready:</b> it will be an active service that can be deployed."
@@ -198,17 +218,10 @@ public final class ServiceDefinitionDialog extends JDialog {
         List<String> needed = stillNeeded(e);
         e.draft = !needed.isEmpty();
         File source = e.implementationClass.isEmpty() ? null : ServiceStub.sourceFile(common, e.implementationClass);
-        boolean wroteCode = false;
+        boolean wroteCode;
         try {
-            if (!e.draft && source != null && !source.isFile() && startingCode.isSelected()) {
-                Files.createDirectories(source.getParentFile().toPath());
-                Files.write(source.toPath(), ServiceStub.source(e.implementationClass, e).getBytes(StandardCharsets.UTF_8));
-                wroteCode = true;
-            }
-            if (existing == null) CatalogueWriter.add(catalogue, e);
-            else CatalogueWriter.updateDraft(catalogue, existing.service, existing.operation, e);
-            ServiceRegistry registry = canvas.getServiceRegistry();
-            registry.reload();
+            wroteCode = write(catalogue, common, existing, e, startingCode.isSelected());
+            canvas.getServiceRegistry().reload();
             canvas.useService(place, e.service, e.operation);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Could not write " + catalogue.getName() + ":\n" + ex.getMessage(), getTitle(), JOptionPane.ERROR_MESSAGE);
@@ -219,9 +232,29 @@ public final class ServiceDefinitionDialog extends JDialog {
         JOptionPane.showMessageDialog(getOwner(), next(e, needed, source, wroteCode), e.service + (e.draft ? " is a draft" : " is ready"), JOptionPane.INFORMATION_MESSAGE);
     }
 
+    /**
+     * Writes the entry (new, or replacing existing) to the catalogue, and the class's code when it is starting code:
+     * new starting code if asked for and the class does not exist, or the editor's starting code brought in line with
+     * the edited contract and routes. Code the designer has written (no marker) is never touched. Returns true when
+     * code was written.
+     */
+    static boolean write(File catalogue, File common, ServiceRegistry.Contract existing, CatalogueWriter.Entry e, boolean writeStartingCode) throws Exception {
+        File source = e.implementationClass.isEmpty() ? null : ServiceStub.sourceFile(common, e.implementationClass);
+        boolean wroteCode = false;
+        boolean starting = source != null && ServiceStub.isStartingCode(common, e.implementationClass);
+        if (!e.draft && source != null && ((!source.isFile() && writeStartingCode) || starting)) {
+            Files.createDirectories(source.getParentFile().toPath());
+            Files.write(source.toPath(), ServiceStub.source(e.implementationClass, e).getBytes(StandardCharsets.UTF_8));
+            wroteCode = true;
+        }
+        if (existing == null) CatalogueWriter.add(catalogue, e);
+        else CatalogueWriter.update(catalogue, existing.service, existing.operation, e, true);
+        return wroteCode;
+    }
+
     /** What the designer does next: finish the draft, write the real logic, or write and point at the REST service. */
     private String next(CatalogueWriter.Entry e, List<String> needed, File source, boolean wroteCode) {
-        String where = e.service + " is in " + catalogue.getName() + " and the place uses it.\n\n";
+        String where = e.service + (existing == null ? " is in " : " is updated in ") + catalogue.getName() + " and the place uses it.\n\n";
         if (e.draft) return where + "It is a draft, so you can keep designing, but it cannot be deployed until it has "
             + String.join(", ", needed) + ".\nRight-click the place and choose Edit Service in Catalogue... to finish it.";
         String packaging = packagingNote();
@@ -229,7 +262,8 @@ public final class ServiceDefinitionDialog extends JDialog {
                 ? "Remember to write its code. The starting class is in " + relative(source) + ":\nit keeps the contract and returns "
                     + (e.routes.isEmpty() ? "true" : "the routes in turn") + ", so you can deploy and run the process now.\n"
                     + "Replace the body of " + e.operation + " with the real logic; until then Validate reminds you."
-                : "Its code is " + relative(source) + "; make sure " + e.operation + "(" + String.join(", ", e.inputs) + ") returns " + e.returnAttribute + ".")
+                : "Its code is " + relative(source) + "; make sure it has " + e.operation + "(" + String.join(", ", e.inputs) + "), returning "
+                    + e.returnAttribute + (e.routes.isEmpty() ? "" : " routed on " + String.join(", ", e.routes)) + ".")
             + packaging;
         return where + "Remember to write the service. It can be written in any language and run anywhere it can be reached over HTTP; "
             + "ServiceTutorial.md section 8 shows one in Node.js.\nThen, in Deploy, set this place's adapter to rest and give its endpoint.";
@@ -247,6 +281,28 @@ public final class ServiceDefinitionDialog extends JDialog {
     }
 
     // ------------------------------------------------------------------ small helpers
+
+    private static JTextField hinted(String hint) {
+        return new JTextField(24) {
+            @Override protected void paintComponent(Graphics g) { super.paintComponent(g); paintHint(this, g, hint); }
+        };
+    }
+    private static final class HintTextArea extends JTextArea {
+        private final String hint;
+        HintTextArea(String hint) { super(3, 24); this.hint = hint; }
+        @Override protected void paintComponent(Graphics g) { super.paintComponent(g); paintHint(this, g, hint); }
+    }
+    /** The greyed example, shown while the field is empty. */
+    private static void paintHint(javax.swing.text.JTextComponent field, Graphics g, String hint) {
+        if (!field.getText().isEmpty() || !field.isEnabled()) return;
+        Graphics2D g2 = (Graphics2D)g.create();
+        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g2.setColor(Color.GRAY);
+        g2.setFont(field.getFont().deriveFont(Font.ITALIC));
+        Insets in = field.getInsets();
+        g2.drawString(hint, in.left + 2, in.top + g2.getFontMetrics().getAscent());
+        g2.dispose();
+    }
 
     private static void row(JPanel form, GridBagConstraints c, int y, String label, JComponent field, String tip) {
         c.gridy = y; c.gridx = 0; c.weightx = 0; form.add(new JLabel(label), c);

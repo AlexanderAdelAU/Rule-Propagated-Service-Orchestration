@@ -980,18 +980,25 @@ public class ProcessEditor extends JFrame {
         }
         
         java.util.List<String> notes = canvas.serviceNotes();
-        String toFinish = notes.isEmpty() ? "" : "\n\nStill to do (these do not stop you saving):\n- " + String.join("\n- ", notes);
+        // "Still to do" is shown in red: it does not stop saving, but the process cannot be deployed until it is done.
+        StringBuilder html = new StringBuilder("<html><div style='width:520px'>");
+        if (errors.isEmpty()) html.append("Validation passed!<br><br>No duplicate labels or other issues found.");
+        else {
+            html.append("Validation found the following issues:<ul>");
+            for (String error : errors) html.append("<li>").append(htmlText(error)).append("</li>");
+            html.append("</ul>Please fix these issues before saving.");
+        }
+        if (!notes.isEmpty()) {
+            html.append("<br><br><font color='#C00000'><b>Still to do</b> (this does not stop you saving):<ul>");
+            for (String note : notes) html.append("<li>").append(htmlText(note)).append("</li>");
+            html.append("</ul></font>");
+        }
+        html.append("</div></html>");
         if (errors.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                "Validation passed!\n\nNo duplicate labels or other issues found." + toFinish,
-                "Validation Successful",
+            JOptionPane.showMessageDialog(this, html.toString(), "Validation Successful",
                 notes.isEmpty() ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.WARNING_MESSAGE);
         } else {
-            StringBuilder message = new StringBuilder("Validation found the following issues:\n\n");
-            for (String error : errors) {
-                message.append("- ").append(error).append("\n");
-            }
-            message.append("\nPlease fix these issues before saving.").append(toFinish);
+            Object message = html;
             JOptionPane.showMessageDialog(this,
                 message.toString(),
                 "Validation Errors",
@@ -999,6 +1006,10 @@ public class ProcessEditor extends JFrame {
         }
     }
     
+    private static String htmlText(String text) {
+        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>");
+    }
+
     private void exportToGraphviz() {
         if (canvas.getElements().isEmpty()) {
             JOptionPane.showMessageDialog(this,

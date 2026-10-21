@@ -153,8 +153,11 @@ You do not need to leave the editor:
 
 The entry goes into the domain catalogue at once. A draft can be designed with and saved with the
 process, but Validate, Deploy and Build and Run say exactly what it still needs, and it is never
-deployed or packaged. **Edit Service in Catalogue...** on the place finishes it. A finished (active)
-service is not changed from a design, since other processes may use it; edit the catalogue file instead.
+deployed or packaged. **Edit Service in Catalogue...** on the place shows its service filled in, draft or
+finished, and saves your changes. While the class is still the editor's starting code, the code is rewritten
+to match, for example to return the routing values you add. Code you have written yourself is never changed.
+If other processes use the service, its name, operation, inputs, return attribute and how it runs are fixed
+in the form, and only its description and routes can change.
 
 Validate also checks that each place takes, as its input, the name the place before it publishes.
 If the names differ, the token would stop at that place when the process runs.
