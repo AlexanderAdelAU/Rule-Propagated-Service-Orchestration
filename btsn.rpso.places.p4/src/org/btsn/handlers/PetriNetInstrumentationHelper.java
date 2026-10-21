@@ -902,7 +902,8 @@ public class PetriNetInstrumentationHelper {
 			record.put("bufferSize", bufferSize >= 0 ? Integer.toString(bufferSize) : "");
 			record.put("ruleVersion", ruleVersion != null ? ruleVersion : "");
             record.put("eventType", eventType != null ? eventType : "");
-            record.put("arcValue", arcValue != null ? arcValue : "");
+            // An unguarded arc matches through a rule variable ($ANON...); only a real guard value is a route.
+            record.put("arcValue", arcValue != null && !arcValue.startsWith("$") ? arcValue : "");
             
             dbWriter.writeTransitionFiring(record);
             

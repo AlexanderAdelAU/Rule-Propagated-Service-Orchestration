@@ -232,6 +232,41 @@ public final class DeployFlowCheck {
             finally { if (panel != null) panel.dispose(); }
         });
         if (failure[0] != null) throw new AssertionError("Existing deployment regression", failure[0]);
+        // Deploy from a process lists only its places: each picks a host node, whose address is shown, and the network
+        // is not offered as a table. A deployment shared with other processes keeps their rows, unshown and unchanged.
+        SwingUtilities.invokeAndWait(() -> {
+            InfrastructureDefinitionFrame panel = null;
+            try {
+                File credit = new File(common, "ProcessDefinitionFolder/credit/Workflow/Credit_Check_Rest_Workflow.json");
+                Canvas canvas = new Canvas(); canvas.setDefinitionLocation(credit); canvas.loadFromJSON(read(credit.toPath()));
+                panel = InfrastructureDefinitionFrame.openForProcess(null, canvas, credit);
+                JTable table = (JTable)field(panel, "capabilityTable");
+                check(table.getRowCount() == 1 && "Credit".equals(table.getValueAt(0, 0)), "Credit deploy rows: " + table.getRowCount());
+                check("Host node".equals(table.getColumnName(1)) && "Address".equals(table.getColumnName(2)), "Credit deploy columns: " + table.getColumnName(1) + ", " + table.getColumnName(2));
+                boolean endpointColumn = false;
+                for (int c = 0; c < table.getColumnCount(); c++) endpointColumn |= "Service endpoint".equals(table.getColumnName(c));
+                check(endpointColumn, "No Service endpoint column");
+                check("192.168.1.82:4001".equals(table.getValueAt(0, 2)), "Credit host address: " + table.getValueAt(0, 2));
+                check(!((JTable)field(panel, "nodeNetworkTable")).isShowing(), "Physical node network still shown when deploying a process");
+                for (AbstractButton b : buttons(panel.getContentPane()))
+                    if (b.getText().endsWith("capability")) check(!b.isVisible(), b.getText() + " offered when deploying a process");
+                panel.dispose(); panel = null;
+
+                File triage = new File(common, "ProcessDefinitionFolder/healthcare/Workflow/Triage_Workflow.json");
+                File shared = new File(common, "ServiceDeploymentFolder/healthcare/Healthcare.json");
+                int sharedRows = read(shared.toPath()).split("\"node\"", -1).length - 1;
+                canvas = new Canvas(); canvas.setDefinitionLocation(triage); canvas.loadFromJSON(read(triage.toPath()));
+                panel = InfrastructureDefinitionFrame.openForProcess(null, canvas, triage);
+                table = (JTable)field(panel, "capabilityTable");
+                Method toJson = InfrastructureDefinitionFrame.class.getDeclaredMethod("toJson"); toJson.setAccessible(true);
+                int kept = ((String)toJson.invoke(panel)).split("\"node\"", -1).length - 1;
+                check(table.getRowCount() > 0 && table.getRowCount() < sharedRows, "Triage shows " + table.getRowCount() + " of the shared deployment's " + sharedRows + " rows");
+                for (int row = 0; row < table.getRowCount(); row++) check(!String.valueOf(table.getValueAt(row, 0)).isEmpty(), "Triage row without place");
+                check(kept >= sharedRows, "Shared deployment would lose rows on save: " + kept + " of " + sharedRows);
+            } catch (Throwable ex) { failure[0] = ex; }
+            finally { if (panel != null) panel.dispose(); }
+        });
+        if (failure[0] != null) throw new AssertionError("Place-first deploy", failure[0]);
         // An analysis file with an earlier run appended in front replays only its last run.
         String older = "Auto-detected 1 workflow bases: [1000000]\nTime=1770648319905 Token=1000000 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=EG EventType=GENERATED\n";
         String latest = "Auto-detected 1 workflow bases: [1000000]\nTime=1791616256378 Token=1000000 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=EG11 EventType=GENERATED\n";
@@ -295,7 +330,7 @@ public final class DeployFlowCheck {
                 Canvas rest = new Canvas(); rest.setDefinitionLocation(restProcess.toFile()); rest.loadFromJSON(read(restProcess));
                 ProcessElement credit = rest.getPlaces().get(0);
                 check(rest.validateServiceContracts().isEmpty(), "REST credit check reported: " + rest.validateServiceContracts());
-                check("http://127.0.0.1:8080/credit/assess".equals(rest.getServiceRegistry().restEndpointFor(credit)), "REST endpoint not shown for the place");
+                check("https://rule-propagated-service-orchestrati.vercel.app/api/credit/assess".equals(rest.getServiceRegistry().restEndpointFor(credit)), "REST endpoint not shown for the place");
                 java.util.List<String> token = Arrays.asList("token");
                 check(rest.getServiceRegistry().validateEndpoint("CreditLimitService", "assess", "creditDecision", token, "rest", "not-a-url")
                     .stream().anyMatch(e -> e.contains("needs an Endpoint")), "A rest placement without an http(s) endpoint was accepted");
@@ -359,7 +394,7 @@ public final class DeployFlowCheck {
             } catch (Throwable ex) { replay[0] = ex; }
         });
         if (replay[0] != null) throw new AssertionError("Credit replay", replay[0]);
-        System.out.println("PASS: catalogue-only design, right-click Deploy to, filled Deploy panel with Place column, two-way node edits, save links process and instances, reopen, existing deployment unchanged, Create Build and Run files, Ant-prefixed analysis replay, What it does, transition names by label or node, one place per node, several event generators, healthcare launchers with their token generator, one input per join arc, rest placements, inventory replay mapped by service, terminations replayed to the node of the arc taken");
+        System.out.println("PASS: catalogue-only design, right-click Deploy to, filled Deploy panel with Place column, two-way node edits, save links process and instances, reopen, existing deployment unchanged, Create Build and Run files, Ant-prefixed analysis replay, What it does, transition names by label or node, one place per node, several event generators, healthcare launchers with their token generator, one input per join arc, rest placements, inventory replay mapped by service, terminations replayed to the node of the arc taken, Deploy lists only the process places with their host addresses");
     }
 
     /** Token -> the terminate node its replay ends at. */
@@ -380,6 +415,15 @@ public final class DeployFlowCheck {
         for (int row = 0; row < table.getRowCount(); row++) if (place.equals(String.valueOf(table.getValueAt(row, 0)))) return row;
         return -1;
     }
+    private static List<AbstractButton> buttons(Container parent) {
+        List<AbstractButton> result = new ArrayList<>();
+        for (Component c : parent.getComponents()) {
+            if (c instanceof AbstractButton) result.add((AbstractButton)c);
+            if (c instanceof Container) result.addAll(buttons((Container)c));
+        }
+        return result;
+    }
+
     private static List<String> texts(Container parent) {
         List<String> result = new ArrayList<>();
         for (Component c : parent.getComponents()) {

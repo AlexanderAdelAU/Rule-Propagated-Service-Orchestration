@@ -26,10 +26,10 @@ public class InfrastructureDefinitionFrame extends JFrame {
     private final JTable nodeNetworkTable = new JTable(nodeNetworkModel);
     private final JTable capabilityTable = new JTable(capabilityModel) {
         @Override public javax.swing.table.TableCellEditor getCellEditor(int row, int column) {
-            Capability cap = capabilities.get(convertRowIndexToModel(row));
+            Capability cap = rows().get(convertRowIndexToModel(row));
             column = convertColumnIndexToModel(column);
-            List<String> values = new ArrayList<>(); String current = String.valueOf(capabilityModel.getValueAt(row, column));
-            if (column == 0) { for (NodeNetwork node : nodes) values.add(node.node); }
+            List<String> values = new ArrayList<>(); String current = String.valueOf(capabilityModel.getValueAt(convertRowIndexToModel(row), column));
+            if (column == 0) { for (NodeNetwork node : nodes) values.add(node.node); return new DefaultCellEditor(hostNodeChoices(values, current, cap)); }
             else if (column == 1) values.addAll(serviceRegistry.services());
             else if (column == 2) values.addAll(serviceRegistry.operations(cap.service));
             else if (column == 6) { ServiceRegistry.Contract contract = serviceRegistry.contract(cap.service, cap.operation);
@@ -41,6 +41,14 @@ public class InfrastructureDefinitionFrame extends JFrame {
         }
     };
     private final JTable argumentTable = new JTable(argumentModel);
+    private JTextArea explanation;
+    private JPanel root;
+    private JSplitPane split;
+    private JSplitPane lowerSplit;
+    private JPanel capabilitiesPanel;
+    private JPanel capButtons;
+    private JButton addCapabilityButton;
+    private JButton removeCapabilityButton;
     private final TitledBorder argumentsBorder = BorderFactory.createTitledBorder("Arguments - select a capability");
     private static final String PREF_DEFINITION_DIR = "infrastructureDefinitionDir";
     private final Preferences preferences = Preferences.userNodeForPackage(InfrastructureDefinitionFrame.class);
@@ -78,10 +86,10 @@ public class InfrastructureDefinitionFrame extends JFrame {
         setMinimumSize(new Dimension(900, 620));
         setLocationByPlatform(true);
 
-        JPanel root = new JPanel(new BorderLayout(6, 6));
+        root = new JPanel(new BorderLayout(6, 6));
         root.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
 
-        JTextArea explanation = new JTextArea(
+        explanation = new JTextArea(
             deploymentEditor ?
             "Assign business service operations to nodes and fixed port slots from the shared infrastructure. " +
             "Slot 0 is the primary port; slot 1 is the second port, where defined. Network settings are read-only here. Instance identifies a deployment; gateway types remain in the process definition." :
@@ -111,12 +119,14 @@ public class InfrastructureDefinitionFrame extends JFrame {
             nodePanel.add(selection, BorderLayout.SOUTH);
         }
 
-        JPanel capabilitiesPanel = new JPanel(new BorderLayout(4, 4));
+        capabilitiesPanel = new JPanel(new BorderLayout(4, 4));
         capabilitiesPanel.setBorder(BorderFactory.createTitledBorder("Node capabilities"));
         capabilitiesPanel.add(new JScrollPane(capabilityTable), BorderLayout.CENTER);
-        JPanel capButtons = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        capButtons = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton addCapability = new JButton("Add capability");
         JButton removeCapability = new JButton("Remove capability");
+        addCapabilityButton = addCapability;
+        removeCapabilityButton = removeCapability;
         capButtons.add(addCapability);
         capButtons.add(removeCapability);
         JButton reloadCatalogue = new JButton("Reload catalogue");
@@ -144,10 +154,10 @@ public class InfrastructureDefinitionFrame extends JFrame {
         argButtons.add(removeArgument);
         argsPanel.add(argButtons, BorderLayout.SOUTH);
 
-        JSplitPane lowerSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, capabilitiesPanel, argsPanel);
+        lowerSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, capabilitiesPanel, argsPanel);
         lowerSplit.setResizeWeight(0.58);
         lowerSplit.setDividerLocation(255);
-        JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, nodePanel, lowerSplit);
+        split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, nodePanel, lowerSplit);
         split.setResizeWeight(0.28);
         split.setDividerLocation(145);
         root.add(deploymentEditor ? split : nodePanel, BorderLayout.CENTER);
@@ -172,12 +182,14 @@ public class InfrastructureDefinitionFrame extends JFrame {
             @Override public Component getTableCellRendererComponent(JTable table, Object value, boolean selected, boolean focus, int row, int column) {
                 super.getTableCellRendererComponent(table, value, selected, focus, row, column);
                 column = table.convertColumnIndexToModel(column);
-                Capability cap = capabilities.get(row);
+                Capability cap = rows().get(table.convertRowIndexToModel(row));
                 List<String> names = new ArrayList<>(); for (Argument argument : cap.arguments) names.add(argument.name);
                 List<String> errors = serviceRegistry.validateEndpoint(cap.service, cap.operation, cap.returnAttribute, names, cap.adapter, cap.endpoint);
                 String described = column == 1 ? serviceRegistry.describe(cap.service) : column == 2 ? serviceRegistry.describe(cap.service, cap.operation)
                     : column == 6 ? "Blank: the host calls the service's Java class. rest: the host calls the Endpoint over HTTP instead. boolean-token: a Boolean service as a token."
-                    : column == 7 ? "For the rest adapter: the http(s) address the host POSTs each call to, e.g. http://127.0.0.1:8080/credit/assess" : "";
+                    : column == 7 ? "For the rest adapter: the http(s) address the host POSTs each call to, e.g. http://127.0.0.1:8080/credit/assess. The service runs there; the place's host stays on its host node."
+                    : column == 0 && processCanvas != null ? "The node whose host runs this place: its queue, rules and routing. With the rest adapter the service itself runs at the Service endpoint."
+                    : column == 9 ? "Where this place's host listens: the node's address and the port of the row's slot." : "";
                 setToolTipText(!errors.isEmpty() ? String.join("; ", errors) : ServiceRegistry.tooltip(described));
                 if (!selected) setForeground(errors.isEmpty() ? table.getForeground() : Color.RED);
                 if ((column == 1 && !serviceRegistry.services().contains(cap.service)) || (column == 2 && !serviceRegistry.operations(cap.service).contains(cap.operation))) setText("Unresolved: " + value);
@@ -188,7 +200,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
         capabilityTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 int row = capabilityTable.getSelectedRow();
-                Capability selected = row >= 0 ? capabilities.get(row) : null;
+                Capability selected = row >= 0 ? rows().get(row) : null;
                 argumentModel.setCapability(selected);
                 updateArgumentsTitle(selected);
             }
@@ -241,7 +253,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
         removeCapability.addActionListener(e -> {
             int row = capabilityTable.getSelectedRow();
             if (row >= 0) {
-                capabilities.remove(row);
+                capabilities.remove(rows().get(row));
                 capabilityModel.fireTableDataChanged();
                 argumentModel.setCapability(null);
                 updateArgumentsTitle(null);
@@ -361,7 +373,9 @@ public class InfrastructureDefinitionFrame extends JFrame {
 
     private void updateArgumentsTitle(Capability c) {
         if (c == null) {
-            argumentsBorder.setTitle("Arguments - select a capability");
+            argumentsBorder.setTitle(processCanvas != null ? "Arguments - select a place" : "Arguments - select a capability");
+        } else if (placeRows.containsKey(c)) {
+            argumentsBorder.setTitle("Arguments for " + placeLabel(c) + " (" + c.service + "." + c.operation + ")");
         } else {
             String node = blank(c.node) ? "<node>" : c.node;
             String service = blank(c.service) ? "<service>" : c.service;
@@ -539,7 +553,9 @@ public class InfrastructureDefinitionFrame extends JFrame {
             suggestedFile = suggestedDeploymentFile(processFile);
         }
         capabilityModel.fireTableStructureChanged();
-        capabilityTable.moveColumn(capabilityModel.getColumnCount() - 1, 0);
+        capabilityTable.moveColumn(8, 0);   // Place first
+        capabilityTable.moveColumn(9, 2);   // Address beside Host node
+        usePlaceFirstLayout(processFile);
         refreshFromProcess();
         markSaved();
         // Rows filled from the process are new work until saved.
@@ -547,7 +563,93 @@ public class InfrastructureDefinitionFrame extends JFrame {
         updateTitle();
         canvas.addDeploymentListener(processListener);
         String name = processFile == null ? "unsaved process" : processFile.getName();
-        setStatus("Deploying " + name + ": choose a node for each place, then Save.", "Rows were filled from the process. Saving writes the deployment and links the process to it.");
+        int others = capabilities.size() - rows().size();
+        setStatus("Deploying " + name + ": choose a host node for each place, then Save."
+                + (others > 0 ? " The deployment also holds " + others + " row" + (others == 1 ? "" : "s") + " for places not in this process; they are kept." : ""),
+            "Rows come from the process diagram: add or remove places there." + (others > 0 ? "\n" + otherRowsSummary() : "")
+                + "\nSaving writes the deployment and links the process to it.");
+    }
+
+    /**
+     * Deploy from a process starts from its places: the network is not shown as a table to choose from,
+     * rows cannot be added or removed here, and the node of each place is picked from a list that gives its address.
+     */
+    private void usePlaceFirstLayout(File processFile) {
+        String name = processFile == null ? "this process" : processFile.getName().replaceFirst("(?i)\\.json$", "");
+        explanation.setText("Each place of " + name + " is listed below; choose the host node it runs on. The host node runs the place's host: "
+            + "its queue, rules and routing. With the rest adapter, the host calls the service at its Service endpoint, which may be anywhere. "
+            + "Places come from the process diagram: add or remove them there.");
+        capabilitiesPanel.setBorder(BorderFactory.createTitledBorder("Places in " + name));
+        addCapabilityButton.setVisible(false);
+        removeCapabilityButton.setVisible(false);
+        JButton chooseInfrastructure = new JButton("Choose infrastructure...");
+        chooseInfrastructure.addActionListener(e -> { chooseInfrastructure(); capabilityModel.fireTableDataChanged(); });
+        capButtons.add(chooseInfrastructure, 0);
+        root.remove(split);
+        split.setBottomComponent(null);
+        root.add(lowerSplit, BorderLayout.CENTER);
+        lowerSplit.setDividerLocation(300);
+        updateArgumentsTitle(null);
+        root.revalidate();
+    }
+
+    /** Rows shown in the table: when deploying a process, only the rows for its places. */
+    private List<Capability> rows() {
+        if (processCanvas == null) return capabilities;
+        List<Capability> shown = new ArrayList<>();
+        for (Capability c : capabilities) if (placeRows.containsKey(c)) shown.add(c);
+        return shown;
+    }
+
+    private String otherRowsSummary() {
+        List<String> lines = new ArrayList<>();
+        for (Capability c : capabilities)
+            if (!placeRows.containsKey(c)) lines.add(c.node + ": " + c.service + "." + c.operation + (blank(c.instance) ? "" : " (" + c.instance + ")"));
+        return "Kept for other processes or earlier versions:\n" + String.join("\n", lines);
+    }
+
+    /** Address and port of a row's host: the node's address and the base port of the row's slot. */
+    private String hostAddress(Capability c) {
+        NodeNetwork n = findNode(c.node);
+        if (n == null) return "";
+        String port = c.portSlot >= 0 && c.portSlot < n.basePorts.size() ? ":" + n.basePorts.get(c.portSlot) : "";
+        return n.address + port;
+    }
+
+    /** Host nodes with their addresses; a node another place of the process already runs on is marked. */
+    private JComboBox<String> hostNodeChoices(List<String> values, String current, Capability row) {
+        JComboBox<String> combo = new JComboBox<String>() {
+            // The open list is as wide as its entries, not the column, so each node's address is readable.
+            private boolean layingOut;
+            @Override public void doLayout() { layingOut = true; try { super.doLayout(); } finally { layingOut = false; } }
+            @Override public Dimension getSize() {
+                Dimension size = super.getSize();
+                if (!layingOut) size.width = Math.max(size.width, 320);
+                return size;
+            }
+        };
+        combo.addItem("");
+        for (String value : values) combo.addItem(value);
+        if (!blank(current) && !values.contains(current)) combo.addItem(current);
+        combo.setSelectedItem(current == null ? "" : current);
+        combo.setRenderer(new DefaultListCellRenderer() {
+            @Override public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean selected, boolean focus) {
+                super.getListCellRendererComponent(list, value, index, selected, focus);
+                String node = value == null ? "" : value.toString();
+                NodeNetwork n = findNode(node);
+                if (n == null) { setText(node.isEmpty() ? " " : "Unresolved: " + node); return this; }
+                if (index < 0) { setText(node); return this; }   // the closed cell shows the node; the list gives its address
+                StringBuilder text = new StringBuilder(node).append("  \u2014  ").append(n.address);
+                if (!n.basePorts.isEmpty()) text.append(", ports ").append(n.basePorts.toString().replaceAll("[\\[\\]]", ""));
+                List<String> users = new ArrayList<>();
+                for (Map.Entry<Capability, ProcessElement> e : placeRows.entrySet())
+                    if (e.getKey() != row && node.equals(e.getKey().node) && !users.contains(e.getValue().getLabel())) users.add(e.getValue().getLabel());
+                if (!users.isEmpty()) { text.append("  (used by ").append(String.join(", ", users)).append(")"); if (!selected) setForeground(Color.GRAY); }
+                setText(text.toString());
+                return this;
+            }
+        });
+        return combo;
     }
 
     private boolean processHasPendingNodes() {
@@ -637,7 +739,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
             }
             int selected = capabilityTable.getSelectedRow();
             capabilityModel.fireTableDataChanged();
-            if (selected >= 0 && selected < capabilities.size()) capabilityTable.setRowSelectionInterval(selected, selected);
+            if (selected >= 0 && selected < rows().size()) capabilityTable.setRowSelectionInterval(selected, selected);
             updateTitle();
         } finally { refreshing = false; }
     }
@@ -835,7 +937,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
         capabilityModel.fireTableDataChanged();
         argumentModel.setCapability(null);
         if (!nodes.isEmpty()) nodeNetworkTable.setRowSelectionInterval(0, 0);
-        if (!capabilities.isEmpty()) capabilityTable.setRowSelectionInterval(0, 0);
+        if (!rows().isEmpty()) capabilityTable.setRowSelectionInterval(0, 0);
     }
 
     private void loadPhysicalNodes(String json) {
@@ -1175,18 +1277,23 @@ public class InfrastructureDefinitionFrame extends JFrame {
     }
 
     private final class CapabilityModel extends AbstractTableModel {
-        private final String[] columns = {"Node", "Service", "Operation", "Return Attribute", "Port Slot", "Instance", "Invocation Adapter", "Endpoint", "Place"};
-        public int getRowCount() { return capabilities.size(); }
-        public int getColumnCount() { return processCanvas == null ? columns.length - 1 : columns.length; }
-        public String getColumnName(int c) { return columns[c]; }
+        private final String[] columns = {"Node", "Service", "Operation", "Return Attribute", "Port Slot", "Instance", "Invocation Adapter", "Endpoint", "Place", "Address"};
+        public int getRowCount() { return rows().size(); }
+        public int getColumnCount() { return processCanvas == null ? columns.length - 2 : columns.length; }
+        public String getColumnName(int c) {
+            if (processCanvas != null && c == 0) return "Host node";
+            if (processCanvas != null && c == 7) return "Service endpoint";
+            return columns[c];
+        }
         public Class<?> getColumnClass(int c) { return c == 4 ? Integer.class : String.class; }
         public boolean isCellEditable(int r, int c) {
-            Capability x = capabilities.get(r);
-            return c != 8 && (c != 3 || aliasing(x)) && (c != 7 || ServiceRegistry.REST.equals(x.adapter));
+            Capability x = rows().get(r);
+            return c != 8 && c != 9 && (c != 3 || aliasing(x)) && (c != 7 || ServiceRegistry.REST.equals(x.adapter));
         }
         public Object getValueAt(int r, int c) {
-            Capability x = capabilities.get(r);
+            Capability x = rows().get(r);
             switch (c) {
+                case 9: return hostAddress(x);
                 case 8: return placeLabel(x);
                 case 7: return x.endpoint;
                 case 0: return x.node;
@@ -1200,7 +1307,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
             }
         }
         public void setValueAt(Object v, int r, int c) {
-            Capability x = capabilities.get(r);
+            Capability x = rows().get(r);
             String s = v == null ? "" : String.valueOf(v).trim();
             if (c == 0) {
                 if (s.equals(x.node)) return;

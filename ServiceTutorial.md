@@ -288,18 +288,23 @@ service receives in its constructor.
 
 **Try it.** The supplied
 [`Credit_Check_Rest_Workflow.json`](btsn.common/ProcessDefinitionFolder/credit/Workflow/Credit_Check_Rest_Workflow.json)
-is the same process, deployed this way.
+is the same process, deployed this way. Its supplied deployment calls this project's own
+copy of the service on Vercel, `https://rule-propagated-service-orchestrati.vercel.app/api/credit/assess`
+(see [Host it on the internet](#host-it-on-the-internet)), so it runs with nothing to start;
+the hosts need outbound internet access. To run the service on your own machine instead:
 
 1. Start the service: `node examples/rest/credit-service.js`. It listens on `http://127.0.0.1:8080/credit/assess`.
 2. Open `credit/Workflow/Credit_Check_Rest_Workflow.json` and click **Deploy**. In `Credit`'s row:
    - **Invocation Adapter**: `rest`;
-   - **Endpoint**: `http://127.0.0.1:8080/credit/assess`.
+   - **Service endpoint**: `http://127.0.0.1:8080/credit/assess`.
+
+   The place's host still runs on its **Host node** (P1); only the service runs at the endpoint.
 
    Save the deployment (the editor suggests `ServiceDeploymentFolder/credit/Credit_Check_Rest_Workflow.json`), then the process. Selecting the place now shows **Runs on** `P1 — ...`, calling the endpoint (REST).
 3. Click **Build**, then **Run on hosts**.
 
-The Node console prints each application and its decision, and the run gives the
-same result as before: ten workflows completed, five approved and five referred.
+Run locally, the Node console prints each application and its decision. Either way the
+run gives the same result as before: ten workflows completed, five approved and five referred.
 
 - **Where the endpoint is called from.** The host (P1 here) makes the call, so the
   address must be reachable from P1's machine. `127.0.0.1` works when the service runs
@@ -319,7 +324,7 @@ same result as before: ten workflows completed, five approved and five referred.
 ### Host it on the internet
 
 To call the service across a real network, host it on a public platform and use its
-`https://` address as the Endpoint. You need your own account; the hosts need outbound
+`https://` address as the Service endpoint. You need your own account; the hosts need outbound
 internet access. Both of these have free plans:
 
 | | Render (a Node server) | Vercel (a function) |
@@ -327,10 +332,10 @@ internet access. Both of these have free plans:
 | **Create** | New **Web Service** from your GitHub repository | New **Project** from your GitHub repository |
 | **Root directory** | `examples/rest` | `examples/rest` |
 | **Start** | Build command: `npm install`; start command: `npm start` | Nothing to set; Vercel finds `api/` |
-| **Endpoint** | `https://<your-service>.onrender.com/credit/assess` | `https://<your-project>.vercel.app/api/credit/assess` |
+| **Endpoint** | `https://<your-service>.onrender.com/credit/assess` | `https://<your-project>.vercel.app/api/credit/assess`; this project's is `https://rule-propagated-service-orchestrati.vercel.app/api/credit/assess` |
 | **Check it** | Open the address without `/credit/assess`: it answers *Credit service* | Open the endpoint in a browser: it answers *POST a call to this address* |
 
-Then set the placement's **Endpoint** to that address in the Deploy panel, save,
+Then set the place's **Service endpoint** to that address in the Deploy panel, save,
 **Build** and **Run on hosts**. The result shows which platform answered: `served_by`
 is `node` or `vercel` in each credit decision.
 
