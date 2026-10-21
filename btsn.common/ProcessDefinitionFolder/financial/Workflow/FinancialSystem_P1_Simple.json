@@ -24,7 +24,7 @@
       "rotation": 0.0,
       "node_type": "EdgeNode",
       "node_value": "EDGE_NODE",
-      "transition_type": "Other"
+      "transition_type": "T_in"
     },
     {
       "id": "P1",
@@ -54,10 +54,31 @@
       "rotation": 0.0,
       "node_type": "EdgeNode",
       "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "End",
+      "type": "TRANSITION",
+      "x": 428,
+      "y": 190,
+      "width": 24,
+      "height": 60,
+      "label": "End",
+      "rotation": 0.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
       "transition_type": "Other"
     }
   ],
   "arrows": [
+    {
+      "source": "T4",
+      "target": "End",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
     {
       "source": "T2",
       "target": "P1",

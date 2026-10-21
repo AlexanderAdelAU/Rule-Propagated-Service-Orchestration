@@ -224,19 +224,13 @@ public class TokenAnimator {
     /** Canvas place -> the node it is deployed to, for mapping the instrumented transition names. */
     private final Map<String, String> placeNodes = new HashMap<>();
 
-    /** A T_in: typed T_in, named T_in_..., or a transition with an arc into a place. */
-    private boolean isTIn(ProcessElement e) {
-        if (e == null || e.getType() != ProcessElement.Type.TRANSITION) return false;
-        if ("T_in".equals(e.getTransitionType()) || (e.getLabel() != null && e.getLabel().startsWith("T_in_"))) return true;
-        for (Arrow a : canvas.getArrows()) if (a.getSource() == e && a.getTarget() != null && a.getTarget().getType() == ProcessElement.Type.PLACE) return true;
-        return false;
+    /** A T_in by its transition type, which the editor keeps in step with its arcs; its label is only a name. */
+    private static boolean isTIn(ProcessElement e) {
+        return e != null && e.getType() == ProcessElement.Type.TRANSITION && "T_in".equals(e.getTransitionType());
     }
-    /** A T_out: typed T_out, named T_out_..., or a transition a place's arc leads into. */
-    private boolean isTOut(ProcessElement e) {
-        if (e == null || e.getType() != ProcessElement.Type.TRANSITION) return false;
-        if ("T_out".equals(e.getTransitionType()) || (e.getLabel() != null && e.getLabel().startsWith("T_out_"))) return true;
-        for (Arrow a : canvas.getArrows()) if (a.getTarget() == e && a.getSource() != null && a.getSource().getType() == ProcessElement.Type.PLACE) return true;
-        return false;
+    /** A T_out by its transition type. */
+    private static boolean isTOut(ProcessElement e) {
+        return e != null && e.getType() == ProcessElement.Type.TRANSITION && "T_out".equals(e.getTransitionType());
     }
 
     private String deploymentNode(ProcessElement place) {

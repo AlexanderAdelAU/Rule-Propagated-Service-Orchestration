@@ -310,7 +310,8 @@ public class EditorFrame extends JPanel {
                     }
                     
                     // Only update transition type and dropdown if label matches pattern AND it's different
-                    if (newTransType != null && !newTransType.equals(currentTransType)) {
+                    // A transition attached to a place takes its type from its arcs, not its name.
+                    if (newTransType != null && !newTransType.equals(currentTransType) && canvas.requiredTransitionType(element) == null) {
                         element.setTransitionType(newTransType);
                         canvas.repaint();
                         // Update the dropdown to reflect the new type without destroying the text field
@@ -333,6 +334,14 @@ public class EditorFrame extends JPanel {
             }
             currentTransitionTypeCombo.setSelectedItem(currentTransitionType);
             addComboField("Transition Type:", currentTransitionTypeCombo, currentTransitionType);
+            // Attached to a place, the type follows the arcs: an arc into a place makes a T_in, one from a place a T_out.
+            String requiredType = canvas.requiredTransitionType(element);
+            if (requiredType != null) {
+                currentTransitionTypeCombo.setEnabled(false);
+                currentTransitionTypeCombo.setToolTipText("both".equals(requiredType)
+                    ? "This transition both feeds a place and is fed by one: see Validate"
+                    : "Set by its arc " + ("T_in".equals(requiredType) ? "into" : "from") + " a place");
+            }
             
             // Get filtered node types based on transition type
             String[][] validNodeTypes = getNodeTypesForTransitionType(currentTransitionType);

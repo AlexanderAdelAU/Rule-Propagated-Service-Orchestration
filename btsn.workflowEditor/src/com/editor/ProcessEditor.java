@@ -1190,6 +1190,7 @@ public class ProcessEditor extends JFrame {
             
             try (FileWriter writer = new FileWriter(currentFile)) {
                 writer.write(canvas.saveToJSON());
+                canvas.markSaved();
                 setDirty(false); // Clear dirty flag after successful save
                 updateStatusBar(); // Update status bar
                 JOptionPane.showMessageDialog(this,
@@ -1277,6 +1278,7 @@ public class ProcessEditor extends JFrame {
             saveLastDirectory(file.getParentFile());
             try (FileWriter writer = new FileWriter(file)) {
                 writer.write(canvas.saveToJSON());
+                canvas.markSaved();
                 currentFile = file; // Remember this file for future saves
                 canvas.setDefinitionLocation(file);
                 setDirty(false); // Clear dirty flag after successful save

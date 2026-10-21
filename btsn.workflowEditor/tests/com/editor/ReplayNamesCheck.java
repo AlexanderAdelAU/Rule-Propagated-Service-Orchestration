@@ -43,6 +43,23 @@ public final class ReplayNamesCheck {
                 }
                 check(path.equals(Arrays.asList("EG2->T1", "T1->P3", "P3->T4", "T4->Terminate")), "Token path: " + path);
 
+                // Types follow the arcs: a wrong type in the file is corrected on load and reported until saved;
+                // a transition both fed by and feeding a place is a contradiction that stops Deploy and Run.
+                ProcessElement t1 = null, p3 = null;
+                for (ProcessElement e : canvas.getElements()) { if ("T1".equals(e.getLabel())) t1 = e; if ("P3".equals(e.getLabel())) p3 = e; }
+                check("T_in".equals(canvas.requiredTransitionType(t1)) && canvas.transitionTypeConflicts().isEmpty(), "T1 not a T_in by its arcs");
+                t1.setTransitionType("Other");
+                check(canvas.fixTransitionTypes().equals(Arrays.asList("T1: Other -> T_in")) && "T_in".equals(t1.getTransitionType()), "Type not corrected from the arcs");
+                String saved = canvas.saveToJSON().replace("\"transition_type\": \"T_in\"", "\"transition_type\": \"Other\"");
+                Canvas reopened = new Canvas(); reopened.setDefinitionLocation(process.toFile()); reopened.loadFromJSON(saved);
+                check(reopened.serviceNotes().stream().anyMatch(n -> n.startsWith("Transition types corrected from their arcs (T1: Other -> T_in)")), "Load correction not reported: " + reopened.serviceNotes());
+                reopened.markSaved();
+                check(reopened.serviceNotes().stream().noneMatch(n -> n.startsWith("Transition types corrected")), "Correction still reported after saving");
+                Arrow back = new Arrow(p3, t1); canvas.getArrows().add(back);
+                check("both".equals(canvas.requiredTransitionType(t1)) && canvas.serviceBlockers().stream().anyMatch(n -> n.startsWith("Transition 'T1' both feeds a place and is fed by one")),
+                    "Contradiction not reported: " + canvas.serviceBlockers());
+                canvas.getArrows().remove(back);
+
                 // The control panel: the run loads with its controls enabled, so it can be paused and reset.
                 AnimationControlPanel panel = new AnimationControlPanel(canvas);
                 panel.loadAnalysisText(run);
@@ -58,7 +75,7 @@ public final class ReplayNamesCheck {
             } catch (Throwable t) { failure[0] = t; }
         });
         if (failure[0] != null) throw new AssertionError("Replay with T1/T4", failure[0]);
-        System.out.println("PASS: transitions recognised by role, not name: T_in_P3/T_out_P3 replay on T1/T4, the token travels to each element, controls enabled; an unmapped run is not played behind disabled controls");
+        System.out.println("PASS: transitions recognised by their type, which follows their arcs (corrected on load, contradictions reported): T_in_P3/T_out_P3 replay on T1/T4, the token travels to each element, controls enabled; an unmapped run is not played behind disabled controls");
     }
 
     private static void copy(Path from, Path to) throws Exception { Files.createDirectories(to.getParent()); Files.copy(from, to); }
