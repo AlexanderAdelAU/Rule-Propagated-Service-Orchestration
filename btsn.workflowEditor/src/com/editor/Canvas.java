@@ -2760,8 +2760,9 @@ public class Canvas extends JPanel {
         if (reminders) for (Arrow a : arrows) {
             String value = a.getDecisionValue();
             if (a.getSource() != null && a.getSource().getType() == ProcessElement.Type.PLACE && a.getTarget() != null && value != null && !value.trim().isEmpty())
-                gaps.add("The arc from " + a.getSource().getLabel() + " to " + a.getTarget().getLabel() + " has the guard \"" + value.trim()
-                    + "\", which is never tested: guards belong on the arcs leaving " + a.getTarget().getLabel() + ". Clear it.");
+                gaps.add("The arc from place " + a.getSource().getLabel() + " into " + a.getTarget().getLabel() + " carries the guard \"" + value.trim()
+                    + "\". It does nothing: only the arcs leaving " + a.getTarget().getLabel() + " are tested against what " + a.getSource().getLabel()
+                    + " returns. Select that arc and clear its guard.");
         }
         return gaps;
     }

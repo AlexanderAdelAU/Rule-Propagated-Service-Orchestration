@@ -112,7 +112,7 @@ public final class DraftServiceCheck {
         Arrow into = null;
         for (Arrow a : arcs) if (a.getSource() == fraud) into = a;
         into.setDecisionValue("true");
-        check(canvas.serviceBlockers().isEmpty() && canvas.serviceNotes().stream().anyMatch(n -> n.startsWith("The arc from Fraud to T_out_Fraud has the guard \"true\", which is never tested")),
+        check(canvas.serviceBlockers().isEmpty() && canvas.serviceNotes().stream().anyMatch(n -> n.startsWith("The arc from place Fraud into T_out_Fraud carries the guard \"true\". It does nothing")),
             "An untested guard is not noted: " + canvas.serviceNotes());
         into.setDecisionValue("");
         String ownCode = Files.readString(source).replace(ServiceStub.MARKER, "real logic");
