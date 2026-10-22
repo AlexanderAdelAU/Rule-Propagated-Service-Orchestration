@@ -113,7 +113,7 @@ Right-click **Triage** and choose **Add Service to Catalogue...** (or click
 A catalogue belongs to a **domain**: every process of the domain shares it, so a service
 is written once and used by each of them.
 
-![The catalogue prompt: Before we begin, we need a catalogue to hold the services you will be creating or importing. The second choice, Create a catalogue for a new domain, is selected, with claims typed; below it, Creates BusinessServiceDefinitions/claims/Claims.json and lists it for packaging.](images/claims-catalogue.png)
+![The catalogue prompt: Before we begin, we need a catalogue to hold the services you will be creating or importing. Of the two choices, Select an existing catalogue and Create a catalogue for a new domain, the second is selected, with claims typed; below it, Creates BusinessServiceDefinitions/claims/Claims.json and lists it for packaging.](images/claims-catalogue.png)
 
 Choose **Create a catalogue for a new domain**, type `claims` and click **OK**. The editor:
 
@@ -121,7 +121,9 @@ Choose **Create a catalogue for a new domain**, type `claims` and click **OK**. 
 - lists it in [`btsn.services/packaging.json`](btsn.services/packaging.json), so the build
   packages the Java services you add to it.
 
-A process of an existing domain (credit, healthcare, ...) chooses that domain's catalogue instead.
+A process of an existing domain (credit, healthcare, ...) uses **Select an existing catalogue** instead.
+Either way, the standard Petri-net services (`StochasticService`, `AlwaysTrueService`) stay
+available beside the catalogue, unchanged.
 
 **Describe the service.** The form opens with what it can suggest:
 
