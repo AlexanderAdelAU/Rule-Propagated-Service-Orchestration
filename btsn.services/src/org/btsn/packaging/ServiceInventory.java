@@ -58,6 +58,9 @@ public final class ServiceInventory {
         for (Object name : (JSONArray) config.get("catalogues")) {
             Path catalogue = resolve(configPath, name);
             if (!catalogueNames.add(catalogue.getFileName().toString())) throw new IllegalArgumentException("Duplicate catalogue filename");
+            if (!Files.isRegularFile(catalogue))
+                throw new IllegalArgumentException(configPath.getFileName() + " lists " + name + ", which does not exist (" + catalogue
+                    + "). Remove it from \"catalogues\" and \"catalogueDomains\" there, or restore the catalogue. Run on hosts in the editor offers to remove it.");
             Files.write(inventory.resolve("catalogues").resolve(catalogue.getFileName()), Files.readAllBytes(catalogue));
             JSONObject catalogueData = read(catalogue);
             Object selectedDomain = catalogueDomains.getOrDefault(catalogue.getFileName().toString(), catalogueData.get("domain"));

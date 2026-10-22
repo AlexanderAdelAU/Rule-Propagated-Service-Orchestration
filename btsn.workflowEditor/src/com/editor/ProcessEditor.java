@@ -1427,6 +1427,16 @@ public class ProcessEditor extends JFrame {
             JOptionPane.showMessageDialog(this, "No launcher runs " + processName + " yet. Use Build and Run to create one first.", "Run", JOptionPane.WARNING_MESSAGE);
             return;
         }
+        // Packaging reads every catalogue packaging.json lists: one deleted after it was listed would stop the build.
+        java.util.List<String> missing = CatalogueWriter.missingFromPackaging(common);
+        if (!missing.isEmpty()) {
+            StringBuilder html = new StringBuilder("<html><div style='width:520px'>btsn.services/packaging.json lists catalogues that no longer exist, so the build would stop:<font color='#C00000'><ul>");
+            for (String path : missing) html.append("<li>").append(htmlText(path)).append("</li>");
+            html.append("</ul></font>Remove them from packaging.json and continue?</div></html>");
+            if (JOptionPane.showConfirmDialog(this, html.toString(), "Run", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) != JOptionPane.YES_OPTION) return;
+            try { for (String path : missing) CatalogueWriter.unregisterFromPackaging(common, path); }
+            catch (Exception ex) { JOptionPane.showMessageDialog(this, "Could not update packaging.json: " + ex.getMessage(), "Run", JOptionPane.ERROR_MESSAGE); return; }
+        }
         // A REST service that does not answer would stop every token that reaches it: say so before the run, not in its analysis.
         setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.WAIT_CURSOR));
         java.util.List<String> silent;
