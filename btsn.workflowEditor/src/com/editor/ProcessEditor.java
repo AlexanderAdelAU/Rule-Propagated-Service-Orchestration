@@ -1325,6 +1325,15 @@ public class ProcessEditor extends JFrame {
 
     /** Deploy: the service deployment panel beside the editor, filled from the places of this process. */
     private void openDeployPanel() {
+        // The folder a process is saved in decides its domain, its catalogue and where its deployment goes: save first.
+        if (currentFile == null || isDirty) {
+            String why = currentFile == null
+                ? "Save the process before deploying it. The folder you save it in, ProcessDefinitionFolder/<domain>,\ndecides its catalogue and where its deployment is saved."
+                : "Save the process before deploying it, so the deployment matches what is on the canvas.";
+            if (JOptionPane.showConfirmDialog(this, why + "\n\nSave it now?", "Deploy", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE) != JOptionPane.OK_OPTION) return;
+            saveToJSON();
+            if (currentFile == null || isDirty) return;
+        }
         java.util.List<String> problems = new ArrayList<>();
         ServiceRegistry registry = canvas.getServiceRegistry();
         if (registry.problem() != null) problems.add(registry.problem());
