@@ -77,8 +77,13 @@ Select each element or arrow, then change it in the Attributes panel.
 ### Run it
 
 24. Click **Build**. Leave **Tokens** at 10 and click **Create**.
-25. Click **Run on hosts**. Tick **Run every host on this computer**, then click **Run**.
+25. Click **Run on hosts**. Leave **Run every host on this computer** ticked, then click **Run**.
 26. Wait for **Run complete**. You should see `v001: 10 generated, 10 completed`.
+
+![The Run window after the run: every phase from Build and start hosts to Replay is green, the hosts P1_Place and Monitor are stopped, the output reads v001: 10 generated, 10 completed, structure OK, and the Next steps buttons offer the replay, the charts and the analysis report.](images/ex1-run.png)
+
+*The Run window when the run is complete.*
+
 27. Click **Replay the recorded run**. Some tokens loop back through P1 before they reach **Terminate**.
 
 ![The replay of the recorded run: a token travels along the false arrow back to T_in_P1, and one token has reached Terminate.](images/ex1-replay.png)
