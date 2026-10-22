@@ -12,7 +12,8 @@ import javax.swing.*;
 public final class CatalogueChoice {
     public static final String BEFORE_WE_BEGIN = "Before we begin, we need a catalogue to hold the services you will be creating or importing.";
     public static final String EXPLAIN = "A catalogue belongs to a domain (credit, claims, ...): the processes of that domain share it, "
-        + "so a service is written once and used by each of them. Processes of the domain are saved under ProcessDefinitionFolder/<domain>.";
+        + "so a service is written once and used by each of them. Processes of the domain are saved under ProcessDefinitionFolder/<domain>. "
+        + "The standard Petri-net services stay available beside it, unchanged.";
 
     private CatalogueChoice() {}
 
@@ -43,8 +44,9 @@ public final class CatalogueChoice {
     public static File ask(Component parent, File common, File process, String why, boolean deployed) {
         List<File> catalogues = ServiceRegistry.domainCatalogues(common);
         String domain = processDomain(common, process);
-        JRadioButton useExisting = new JRadioButton("Use an existing domain's catalogue:");
+        JRadioButton useExisting = new JRadioButton("Select an existing catalogue:");
         JComboBox<File> existing = new JComboBox<>(catalogues.toArray(new File[0]));
+        existing.setSelectedIndex(-1);   // nothing chosen until the list is opened
         existing.setRenderer(new DefaultListCellRenderer() {
             @Override public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean selected, boolean focus) {
                 File file = (File)value;
@@ -59,11 +61,15 @@ public final class CatalogueChoice {
         for (File c : catalogues) if (c.getParentFile().getName().equals(domain)) own = c;
         if (own != null) { useExisting.setSelected(true); existing.setSelectedItem(own); }
         else if (!domain.isEmpty() && !"petrinet".equals(domain)) { createNew.setSelected(true); newDomain.setText(domain); }
-        else if (catalogues.isEmpty()) createNew.setSelected(true);
-        else useExisting.setSelected(true);
+        else createNew.setSelected(true);   // a new process: no other domain's catalogue is offered as if it were its own
         useExisting.setEnabled(!catalogues.isEmpty());
         Runnable enable = () -> { existing.setEnabled(useExisting.isSelected()); newDomain.setEnabled(createNew.isSelected()); };
-        useExisting.addActionListener(e -> enable.run()); createNew.addActionListener(e -> enable.run()); enable.run();
+        useExisting.addActionListener(e -> {
+            enable.run();
+            if (existing.getSelectedIndex() < 0) SwingUtilities.invokeLater(() -> { if (existing.isShowing()) existing.showPopup(); });
+        });
+        createNew.addActionListener(e -> { enable.run(); newDomain.requestFocusInWindow(); });
+        enable.run();
         JLabel creates = new JLabel(" ");
         creates.setForeground(Color.GRAY);
         Runnable preview = () -> {
