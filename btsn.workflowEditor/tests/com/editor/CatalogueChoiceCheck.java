@@ -85,6 +85,25 @@ public final class CatalogueChoiceCheck {
             && ServiceRegistry.definedElsewhere(common.toFile(), "TriageService", travel) == null, "Names used by other catalogues not found");
         check(ServiceDefinitionDialog.domainName("home_loans").equals("HomeLoans"), "Domain prefix");
 
+        // A listed catalogue deleted later is found, and removing it restores packaging.json as it was.
+        // (This copy of the project has only the credit and travel catalogues; the others are missing from the start.)
+        List<String> notCopied = CatalogueWriter.missingFromPackaging(common.toFile());
+        check(!notCopied.isEmpty() && !notCopied.contains("../btsn.common/BusinessServiceDefinitions/travel/Travel.json")
+            && !notCopied.contains("../btsn.common/BusinessServiceDefinitions/credit/Credit.json"), "Catalogues reported missing: " + notCopied);
+        Path saved = Files.move(travel.toPath(), project.resolve("Travel.json.saved"));
+        List<String> expected = new ArrayList<>(notCopied); expected.add("../btsn.common/BusinessServiceDefinitions/travel/Travel.json");
+        check(CatalogueWriter.missingFromPackaging(common.toFile()).equals(expected),
+            "Deleted catalogue not found: " + CatalogueWriter.missingFromPackaging(common.toFile()));
+        check(CatalogueWriter.unregisterFromPackaging(common.toFile(), "../btsn.common/BusinessServiceDefinitions/travel/Travel.json")
+            && Files.readString(packaging).equals(packagingBefore) && CatalogueWriter.missingFromPackaging(common.toFile()).equals(notCopied),
+            "Removing the deleted catalogue did not restore packaging.json:\n" + Files.readString(packaging));
+        String crlf = packagingAfter.replace("\n", "\r\n");   // as git checks it out on Windows
+        Files.writeString(packaging, crlf);
+        check(CatalogueWriter.unregisterFromPackaging(common.toFile(), "../btsn.common/BusinessServiceDefinitions/travel/Travel.json")
+            && Files.readString(packaging).equals(packagingBefore.replace("\n", "\r\n")), "CRLF packaging.json not restored:\n" + Files.readString(packaging));
+        Files.move(saved, travel.toPath());
+        CatalogueWriter.registerForPackaging(common.toFile(), travel, "travel");
+
         // Process and catalogue in one domain: saved under travel, nothing to say; under credit, Validate says so.
         File travelProcess = common.resolve("ProcessDefinitionFolder/travel/Workflow/Travel_Workflow.json").toFile();
         canvas.setDefinitionLocation(travelProcess);
@@ -92,7 +111,7 @@ public final class CatalogueChoiceCheck {
         canvas.setDefinitionLocation(process.toFile());
         check(canvas.domainMismatch() != null && canvas.domainMismatch().startsWith("This process is saved under ProcessDefinitionFolder/credit but uses the travel catalogue (Travel.json)")
             && canvas.serviceNotes().contains(canvas.domainMismatch()) && !canvas.serviceBlockers().contains(canvas.domainMismatch()), "Mismatch not a Validate reminder: " + canvas.domainMismatch());
-        System.out.println("PASS: new process offers only standard services; first own service asks for the domain catalogue; new domain catalogue created empty and listed for packaging with its layout kept; service names unique across catalogues; process and catalogue domains checked at Validate; a new process saved under a domain takes its catalogue");
+        System.out.println("PASS: new process offers only standard services; first own service asks for the domain catalogue; new domain catalogue created empty and listed for packaging with its layout kept; service names unique across catalogues; a listed catalogue deleted later found and removed from packaging (LF and CRLF); process and catalogue domains checked at Validate; a new process saved under a domain takes its catalogue");
     }
 
     private static void check(boolean condition, String message) { if (!condition) throw new AssertionError(message); }

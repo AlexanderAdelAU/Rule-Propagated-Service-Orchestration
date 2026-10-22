@@ -127,6 +127,59 @@ public final class CatalogueWriter {
         write(packaging, text);
         return true;
     }
+    /**
+     * The catalogues btsn.services/packaging.json lists that no longer exist (deleted or moved after they were listed),
+     * as written there. Packaging reads every listed catalogue, so one of these stops every build.
+     */
+    public static List<String> missingFromPackaging(File common) {
+        List<String> missing = new ArrayList<>();
+        File services = common == null ? null : new File(common.getParentFile(), "btsn.services");
+        File packaging = services == null ? null : new File(services, "packaging.json");
+        if (packaging == null || !packaging.isFile()) return missing;
+        try {
+            Object listed = ((JSONObject)new JSONParser().parse(read(packaging))).get("catalogues");
+            if (listed instanceof JSONArray)
+                for (Object path : (JSONArray)listed) if (!new File(services, path.toString()).isFile()) missing.add(path.toString());
+        } catch (Exception unreadable) { }
+        return missing;
+    }
+
+    /** Removes a listed catalogue from packaging.json (catalogues and its catalogueDomains entry), keeping the file's layout. */
+    public static boolean unregisterFromPackaging(File common, String path) throws Exception {
+        File packaging = new File(common.getParentFile(), "btsn.services/packaging.json");
+        if (!packaging.isFile()) return false;
+        String text = read(packaging);
+        String after = remove(text, "\"catalogues\"", '[', "\"" + path + "\"");
+        if (after.equals(text)) return false;
+        String name = new File(path).getName();
+        boolean stillListed = false;
+        for (Object other : (JSONArray)((JSONObject)new JSONParser().parse(after)).get("catalogues"))
+            if (new File(other.toString()).getName().equals(name)) stillListed = true;
+        if (!stillListed) after = remove(after, "\"catalogueDomains\"", '{', "\"" + name + "\"");
+        new JSONParser().parse(after);   // never leave packaging.json unreadable
+        write(packaging, after);
+        return true;
+    }
+    /** Removes the entry starting with start (and its value, in an object) from the list after key, with its comma. */
+    private static String remove(String text, String key, char open, String start) throws IOException {
+        int at = text.indexOf(key), from = at < 0 ? -1 : text.indexOf(open, at);
+        int entry = from < 0 ? -1 : text.indexOf(start, from);
+        if (entry < 0) return text;
+        int end = entry + start.length();
+        if (open == '{') { end = text.indexOf('"', text.indexOf(':', end)); end = text.indexOf('"', end + 1) + 1; }
+        int before = entry - 1;
+        while (before > from && Character.isWhitespace(text.charAt(before))) before--;
+        if (text.charAt(before) == ',') return text.substring(0, before) + text.substring(end);
+        int next = end;
+        while (next < text.length() && Character.isWhitespace(text.charAt(next))) next++;
+        if (next < text.length() && text.charAt(next) == ',') {
+            next++;
+            while (next < text.length() && Character.isWhitespace(text.charAt(next))) next++;
+            return text.substring(0, entry) + text.substring(next);
+        }
+        return text.substring(0, entry) + text.substring(end);
+    }
+
     /** Adds an entry at the end of the array or object that follows key, indented like the entries before it. */
     private static String append(String text, String key, char open, char close, String entry) throws IOException {
         int at = text.indexOf(key);
