@@ -31,6 +31,7 @@ public final class SharedInfrastructureCheck {
             for (Object entry : (JSONArray)catalog.get("services")) {
                 JSONObject service = (JSONObject)entry;
                 if (!"active".equals(service.get("status"))) continue;
+                if (service.get("implementationClass") == null) continue;   // a service called only over REST has no class to resolve
                 check(service.get("implementationClass").equals(resolver.resolve((String)service.get("service"), (String)service.get("operation"), (String)service.get("returnAttribute"), ((JSONArray)service.get("inputs")).size(), null)), "Wrong implementation: " + service.get("service"));
                 capabilities++;
             }

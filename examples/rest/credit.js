@@ -42,4 +42,4 @@ function assess(call, servedBy) {
   };
 }
 
-module.exports = { assess, LIMIT };
+module.exports = { assess, LIMIT, find, applicationNumber };

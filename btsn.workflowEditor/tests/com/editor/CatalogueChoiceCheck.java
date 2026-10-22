@@ -37,6 +37,12 @@ public final class CatalogueChoiceCheck {
             && registry.services().contains("StochasticService") && registry.services().contains("AlwaysTrueService"),
             "New process should offer only the standard services: " + registry.services());
         check(ServiceDefinitionDialog.refusal(registry) != null, "A service could be added to the standard catalogue");
+        // Saved under a domain's folder, a process with only the standard services takes that domain's catalogue.
+        canvas.setDefinitionLocation(common.resolve("ProcessDefinitionFolder/credit/Workflow/New_Workflow.json").toFile());
+        check(canvas.adoptDomainCatalogue() && registry.hasDomainCatalogue() && "credit".equals(registry.catalogueDomain())
+            && registry.services().contains("CreditLimitService") && !canvas.adoptDomainCatalogue(), "Saved under credit, the process does not use Credit.json");
+        canvas.clear(); canvas.setDefinitionLocation(null);
+        check(!registry.hasDomainCatalogue(), "Clearing kept the credit catalogue");
 
         // The choice: existing domains are listed (not the standard catalogue); a new domain gets an empty catalogue.
         List<File> domains = ServiceRegistry.domainCatalogues(common.toFile());
@@ -86,7 +92,7 @@ public final class CatalogueChoiceCheck {
         canvas.setDefinitionLocation(process.toFile());
         check(canvas.domainMismatch() != null && canvas.domainMismatch().startsWith("This process is saved under ProcessDefinitionFolder/credit but uses the travel catalogue (Travel.json)")
             && canvas.serviceNotes().contains(canvas.domainMismatch()) && !canvas.serviceBlockers().contains(canvas.domainMismatch()), "Mismatch not a Validate reminder: " + canvas.domainMismatch());
-        System.out.println("PASS: new process offers only standard services; first own service asks for the domain catalogue; new domain catalogue created empty and listed for packaging with its layout kept; service names unique across catalogues; process and catalogue domains checked at Validate");
+        System.out.println("PASS: new process offers only standard services; first own service asks for the domain catalogue; new domain catalogue created empty and listed for packaging with its layout kept; service names unique across catalogues; process and catalogue domains checked at Validate; a new process saved under a domain takes its catalogue");
     }
 
     private static void check(boolean condition, String message) { if (!condition) throw new AssertionError(message); }

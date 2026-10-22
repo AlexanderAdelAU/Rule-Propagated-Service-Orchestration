@@ -1188,6 +1188,7 @@ public class ProcessEditor extends JFrame {
                 // User chose "Save Anyway" - continue with save
             }
             
+            canvas.adoptDomainCatalogue();   // a process saved under a domain uses its catalogue
             try (FileWriter writer = new FileWriter(currentFile)) {
                 writer.write(canvas.saveToJSON());
                 canvas.markSaved();
@@ -1276,6 +1277,10 @@ public class ProcessEditor extends JFrame {
         if (result == JFileChooser.APPROVE_OPTION) {
             File file = ensureJsonExtension(fileChooser.getSelectedFile());
             saveLastDirectory(file.getParentFile());
+            // A process saved under a domain uses its catalogue, as when it is opened from there.
+            File previousLocation = canvas.getDefinitionLocation();
+            canvas.setDefinitionLocation(file);
+            if (!canvas.adoptDomainCatalogue()) canvas.setDefinitionLocation(previousLocation);
             try (FileWriter writer = new FileWriter(file)) {
                 writer.write(canvas.saveToJSON());
                 canvas.markSaved();

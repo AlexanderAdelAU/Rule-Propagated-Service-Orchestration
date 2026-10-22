@@ -2898,6 +2898,18 @@ public class Canvas extends JPanel {
         try { useCatalogue(chosen); return true; }
         catch (Exception ex) { JOptionPane.showMessageDialog(parent, ex.getMessage(), "Invalid catalogue", JOptionPane.ERROR_MESSAGE); return false; }
     }
+    /**
+     * Once a process with only the standard services is saved under ProcessDefinitionFolder/<domain>, it uses that
+     * domain's catalogue, as it would when opened from there. True when it changed.
+     */
+    public boolean adoptDomainCatalogue() {
+        if (definitionLocation == null || serviceRegistry.hasDeployment() || serviceRegistry.hasDomainCatalogue()) return false;
+        java.io.File common = ServiceRegistry.findCommon(definitionLocation);
+        String reference = common == null ? "" : ServiceRegistry.domainCatalogue(common, definitionLocation);
+        if (reference.isEmpty()) return false;
+        try { useCatalogue(new java.io.File(common, reference)); return true; }
+        catch (Exception ex) { return false; }
+    }
     /** The process's services come from this catalogue (with the standard ones); its deployment is set aside. */
     public void useCatalogue(java.io.File catalogue) throws Exception {
         serviceRegistry.loadCatalogue(catalogue);
