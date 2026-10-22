@@ -361,6 +361,9 @@ internet access. Both of these have free plans:
 | **Endpoint** | `https://<your-service>.onrender.com/credit/assess` | `https://<your-project>.vercel.app/api/credit/assess`; this project's is `https://rule-propagated-service-orchestrati.vercel.app/api/credit/assess` |
 | **Check it** | Open the address without `/credit/assess`: it answers *Credit service* | Open the endpoint in a browser: it answers *POST a call to this address* |
 
+The same project also serves the claims assessment of [Tutorial.md, Example 2](Tutorial.md#example-2-a-claims-process-with-a-remote-service),
+at `/claims/assess` (Render) or `/api/claims/assess` (Vercel).
+
 Then set the place's **Service endpoint** to that address in the Deploy panel, save,
 **Build** and **Run on hosts**. The result shows which platform answered: `served_by`
 is `node` or `vercel` in each credit decision.

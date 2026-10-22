@@ -32,7 +32,9 @@
           "value": "String",
           "required": false
         }
-      ]
+      ],
+      "invocationAdapter": "rest",
+      "endpoint": "https://rule-propagated-service-orchestrati.vercel.app/api/claims/assess"
     }
   ]
 }

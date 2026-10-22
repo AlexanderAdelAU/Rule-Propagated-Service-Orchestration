@@ -102,8 +102,13 @@ public final class LauncherRuntimeCheck {
                                 check(expected.equals(names),"Workflow/catalogue input order mismatch: "+process+" / "+service);
                             }
                             check(java.util.Objects.toString(op.get("returnAttribute"),java.util.Objects.toString(node.get("returnAttribute"),"token")).equals(placement.get("returnAttribute")),"Workflow/catalogue return mismatch: "+service);
-                            String implementation=resolver.resolve(instance,(String)capability.get("operation"),(String)placement.get("returnAttribute"),expected.size(),null);
-                            check(implementation.equals(capability.get("implementationClass")),"Wrong configured implementation: "+service);
+                            if(capability.get("implementationClass")==null) {
+                                // No Java class: the service exists only behind its endpoint, so it must be called over REST.
+                                check("rest".equals(placement.get("invocationAdapter"))&&placement.get("endpoint")!=null,"A service without a Java class is not called over REST: "+service);
+                            } else {
+                                String implementation=resolver.resolve(instance,(String)capability.get("operation"),(String)placement.get("returnAttribute"),expected.size(),null);
+                                check(implementation.equals(capability.get("implementationClass")),"Wrong configured implementation: "+service);
+                            }
                             operations++;
                         }
                     }

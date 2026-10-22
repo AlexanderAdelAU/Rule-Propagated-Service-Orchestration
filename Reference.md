@@ -278,6 +278,8 @@ packages the new class.
 
 - **Assess** still runs its starting code. Write it the same way, or let a service written in
   any language answer it over REST ([Call it over REST](ServiceTutorial.md#8-call-it-over-rest)).
+  The supplied example does the second: [Tutorial.md, Example 2](Tutorial.md#example-2-a-claims-process-with-a-remote-service)
+  calls Assess on the internet, so `AssessService` has no Java class in the catalogue.
 - **If a service fails** at run time, the analysis says why, for example
   `5 failed at P1_Place: REST service ... could not be reached`, and the replay removes each
   failed token at its place. **Run on hosts** checks that every REST service answers before it starts.
@@ -1532,18 +1534,18 @@ regeneration command are documented in [images/README.md](images/README.md).
 
 ## Repository artefacts
 
-The supplied claims process of [Adding services while designing](#adding-services-while-designing), made with its steps:
+The supplied claims process of [Tutorial.md, Example 2](Tutorial.md#example-2-a-claims-process-with-a-remote-service), first made with the steps of [Adding services while designing](#adding-services-while-designing):
 
 | Artefact | Role |
 |---|---|
 | [Claims_Workflow.json](btsn.common/ProcessDefinitionFolder/claims/Workflow/Claims_Workflow.json) | Process design, linked to its deployment |
 | [Claims.json](btsn.common/BusinessServiceDefinitions/claims/Claims.json) | The claims catalogue the editor created, with `ClaimsTriageService` and `AssessService` |
 | [ClaimsTriageService.java](btsn.common/src/org/btsn/business/claims/ClaimsTriageService.java) | Triage, with the real logic of step 7 |
-| [AssessService.java](btsn.common/src/org/btsn/business/claims/AssessService.java) | Assess, still the editor's starting code |
-| [Claims_Workflow.json](btsn.common/ServiceDeploymentFolder/claims/Claims_Workflow.json) (deployment) | Triage on node P1, Assess on P2 |
+| [claims.js](examples/rest/claims.js) | Assess, called over REST: the Node server (`credit-service.js`) and the Vercel function (`api/claims/assess.js`) share it |
+| [Claims_Workflow.json](btsn.common/ServiceDeploymentFolder/claims/Claims_Workflow.json) (deployment) | Triage on node P1; Assess on P2, calling `https://rule-propagated-service-orchestrati.vercel.app/api/claims/assess` |
 | [Claims_WorkflowDeployment.json](btsn.services/deployments/claims/Claims_WorkflowDeployment.json) | Deployment profile written by Build and Run |
 | [Claims_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/Claims_Workflow_BuildAndRun.xml) | Launcher written by Build and Run |
-| [Analysis_Claims_Workflow.txt](btsn.common/AnalysisFolder/Claims/Analysis_Claims_Workflow.txt) | Analysis of the run in step 7, ready to replay |
+| [Analysis_Claims_Workflow.txt](btsn.common/AnalysisFolder/Claims/Analysis_Claims_Workflow.txt) | Analysis of a run of Example 2, ready to replay |
 | [packaging.json](btsn.services/packaging.json) | Lists `Claims.json`, as the editor did when it created the catalogue |
 
 The supplied P2 example of [Each step in detail](#each-step-in-detail), built with exactly these steps:

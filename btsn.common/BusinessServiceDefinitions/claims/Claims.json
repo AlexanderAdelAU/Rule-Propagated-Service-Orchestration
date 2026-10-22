@@ -15,10 +15,9 @@
     },
     {
       "service": "AssessService",
-      "implementationClass": "org.btsn.business.claims.AssessService",
       "operation": "assess",
-      "description": "Assesses a complex claim and accepts or rejects it.",
-      "returns": "The assessment. Routes on \"accept\" or \"reject\".",
+      "description": "Assesses a complex claim: accepts it up to 4,000 and rejects the rest. Called over REST: examples/rest/claims.js, hosted on Vercel.",
+      "returns": "The assessment, with the claim, its amount and the limit. Routes on \"accept\" or \"reject\".",
       "inputs": ["token"],
       "returnAttribute": "token",
       "routes": ["accept", "reject"],

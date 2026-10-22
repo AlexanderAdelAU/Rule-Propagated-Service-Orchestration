@@ -394,7 +394,7 @@ public final class DeployFlowCheck {
             } catch (Throwable ex) { replay[0] = ex; }
         });
         if (replay[0] != null) throw new AssertionError("Credit replay", replay[0]);
-        // The claims process of Reference.md (Adding services while designing): its supplied run replays to the terminate nodes the tutorial gives.
+        // The claims process of Tutorial.md Example 2: its supplied run replays to the terminate nodes the tutorial gives.
         SwingUtilities.invokeAndWait(() -> {
             try {
                 Path claims = common.toPath().resolve("ProcessDefinitionFolder/claims/Workflow/Claims_Workflow.json");
@@ -403,9 +403,12 @@ public final class DeployFlowCheck {
                 for (String end : ends.values()) counts.merge(end, 1, Integer::sum);
                 check(counts.equals(Map.of("Paid", 5, "Accepted", 3, "Rejected", 2)), "Claims replay: " + counts);
                 for (int n = 0; n < 5; n++) check("Paid".equals(ends.get(Integer.toString(1000000 + n * 10000))), "Claim " + (n + 1) + " not paid: " + ends);
+                for (int n = 5; n < 10; n++) check((n < 8 ? "Accepted" : "Rejected").equals(ends.get(Integer.toString(1000000 + n * 10000))), "Claim " + (n + 1) + ": " + ends);
                 Canvas claimsDesign = new Canvas(); claimsDesign.setDefinitionLocation(claims.toFile()); claimsDesign.loadFromJSON(read(claims));
-                check(claimsDesign.serviceBlockers().isEmpty() && claimsDesign.serviceNotes().size() == 1 && claimsDesign.serviceNotes().get(0).startsWith("Place 'Assess': AssessService still runs the starting code"),
-                    "Claims design not as Reference.md leaves it: " + claimsDesign.serviceNotes());
+                // Triage runs its real Java logic; Assess is called over REST (Tutorial.md, Example 2), so nothing is left to do.
+                check(claimsDesign.serviceBlockers().isEmpty() && claimsDesign.serviceNotes().isEmpty()
+                    && "https://rule-propagated-service-orchestrati.vercel.app/api/claims/assess".equals(claimsDesign.getServiceRegistry().restEndpointFor(claimsDesign.getPlaces().stream().filter(p -> "Assess".equals(p.getLabel())).findFirst().get())),
+                    "Claims design not as Tutorial Example 2 leaves it: " + claimsDesign.serviceNotes());
             } catch (Throwable ex) { replay[0] = ex; }
         });
         if (replay[0] != null) throw new AssertionError("Claims replay", replay[0]);
