@@ -2,7 +2,7 @@
 
 > **Running a host on another machine as part of a run?** Use the launcher's
 > `host-packages` target instead (see
-> [Run on several machines](../../Tutorial.md#7-run-on-several-machines)). Its
+> [Run on several machines](../../Reference.md#7-run-on-several-machines)). Its
 > packages carry the master ruleset generated for that deployment and the host's
 > business services. The place release below carries the source rules and no
 > business services, so it only checks that a place starts on its own.

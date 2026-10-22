@@ -1,0 +1,28 @@
+{
+  "domain": "Claims",
+  "purpose": "Services of the claims processes, added while designing. Physical placement is defined separately by the service deployment.",
+  "services": [
+    {
+      "service": "ClaimsTriageService",
+      "implementationClass": "org.btsn.business.claims.ClaimsTriageService",
+      "operation": "triage",
+      "description": "Sorts an insurance claim: a small claim is paid straight away, a larger one is assessed.",
+      "returns": "The claim, its amount and the threshold. Routes on \"simple\" (paid) or \"complex\" (assessed).",
+      "inputs": ["token"],
+      "returnAttribute": "token",
+      "routes": ["simple", "complex"],
+      "status": "active"
+    },
+    {
+      "service": "AssessService",
+      "implementationClass": "org.btsn.business.claims.AssessService",
+      "operation": "assess",
+      "description": "Assesses a complex claim and accepts or rejects it.",
+      "returns": "The assessment. Routes on \"accept\" or \"reject\".",
+      "inputs": ["token"],
+      "returnAttribute": "token",
+      "routes": ["accept", "reject"],
+      "status": "active"
+    }
+  ]
+}

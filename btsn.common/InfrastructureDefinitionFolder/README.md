@@ -47,7 +47,7 @@ then `ip1`, `ip2`, ...), each with that machine's address. Select it for a run w
 `host.address` override is restricted to single-host arrangements. Each host's
 initialisation and collector services follow it onto its channel, and
 `ant host-packages` builds a self-contained package for every host on another
-machine. See the [tutorial](../../Tutorial.md#7-run-on-several-machines).
+machine. See the [reference](../../Reference.md#7-run-on-several-machines).
 
 [TwoHost.json](TwoHost.json) is the two-machine test arrangement: P1, P3 and P5 on
 `ip0` (192.168.1.82, the launcher's machine) and P2, P4 and P6 on `ip1`
@@ -68,4 +68,4 @@ P6 on `ip2` (192.168.1.90), so the two branches join across machines.
 
 The previous domain/model infrastructure files have been replaced by this shared
 physical definition and separate service deployments. See the
-[tutorial](../../Tutorial.md#2-deploy-the-process) for an editor-to-run walkthrough.
+[reference](../../Reference.md#2-deploy-the-process) for an editor-to-run walkthrough.
