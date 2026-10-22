@@ -13,14 +13,14 @@ The finished files are supplied, so you can compare yours with them. To build
 your own alongside them, use another name throughout, for example `loan`
 instead of `credit`.
 
-**Before you start:** work through [Tutorial.md](Tutorial.md) once (Part 1, or Part 2
-sections 1 to 4). This tutorial uses the same editor steps (design, Deploy, Build, Run on
-hosts) and does not repeat them in detail.
+**Before you start:** work through Example 1 of [Tutorial.md](Tutorial.md) once. This
+tutorial uses the same editor steps (design, Deploy, Build, Run on hosts) and does not repeat
+them in detail.
 
 Here you write the service first, catalogue entry and all, then draw the process. To start
 from the process instead, and let the editor write the catalogue entry and starting code as
-you go, follow [Tutorial.md, Part 1](Tutorial.md#part-1-from-an-idea-to-a-running-process);
-step 7 there replaces the starting code with real logic the way section 1 here writes it.
+you go, see [Adding services while designing](Reference.md#adding-services-while-designing);
+its step 7 replaces the starting code with real logic the way section 1 here writes it.
 
 ## What RPSO needs from a service
 
@@ -140,7 +140,7 @@ may not reuse a standard service's name.
 ### Add a service while designing
 
 Designing the catalogue first is best, but a design often shows that a service is missing.
-You do not need to leave the editor ([Tutorial.md, Part 1](Tutorial.md#part-1-from-an-idea-to-a-running-process)
+You do not need to leave the editor ([Adding services while designing](Reference.md#adding-services-while-designing)
 works through it for a whole process):
 
 1. Draw the place, then right-click it and choose **Add Service to Catalogue...** (or use
@@ -376,8 +376,8 @@ is `node` or `vercel` in each credit decision.
 ## Going further
 
 - **State, several hosts and loops:** the inventory example in
-  [Tutorial.md, Add your own service](Tutorial.md#6-add-your-own-service) keeps a
+  [Add your own service](Reference.md#6-add-your-own-service) keeps a
   stock count in its host and sends orders between two hosts and back.
 - **A second place:** give the next place an input named after this one's
   `returnAttribute` (here `creditDecision`), and it receives this result.
-- **Several machines:** see [Tutorial.md, Run on several machines](Tutorial.md#7-run-on-several-machines).
+- **Several machines:** see [Run on several machines](Reference.md#7-run-on-several-machines).

@@ -226,7 +226,7 @@
     {
       "x": 60,
       "y": 60,
-      "text": "Insurance claims: Triage pays a small claim at once and sends a larger one to Assess (see Tutorial.md, Part 1)",
+      "text": "Insurance claims: Triage pays a small claim at once and sends a larger one to Assess",
       "fontSize": 12,
       "fontStyle": 0,
       "color": -16777216
