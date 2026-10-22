@@ -420,6 +420,9 @@ The process must be saved under `ProcessDefinitionFolder/<domain>/`:
 
 Deploying decides which **node** (physical host) each place runs on. Each node is one numbered generic host, P1 to P6.
 
+Save the process first: its folder decides its catalogue and where the deployment is saved.
+If it is unsaved or has changes, **Deploy** asks you to save it before the panel opens.
+
 ### Choose the node
 
 Use either route:
