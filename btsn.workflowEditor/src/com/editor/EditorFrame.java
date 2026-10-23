@@ -630,6 +630,14 @@ public class EditorFrame extends JPanel {
         attributesPanel.add(panel);
     }
     
+    /** A button on its own row, left-aligned with the fields (a bare button in the panel starts at its centre line). */
+    private void addButtonRow(JButton button) {
+        JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 2));
+        row.add(button);
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, row.getPreferredSize().height));
+        attributesPanel.add(row);
+    }
+
     private void addComboField(String labelText, JComboBox<String> combo, String value) {
         JPanel panel = new JPanel(new BorderLayout(5, 5));
         panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
@@ -762,12 +770,16 @@ public class EditorFrame extends JPanel {
     /**
      * Add the operations field with collapsible arguments support
      */
+    /** The button (and menu item) that keeps the standard catalogue or chooses or creates the domain's. */
+    static final String CHOOSE_CREATE_CATALOGUE = "Choose/Create catalogue...";
+
     private void addServiceSelection(ProcessElement element) {
         ServiceRegistry registry = canvas.getServiceRegistry();
         // Designing needs only the catalogue; where each place runs is decided later with Deploy.
-        JButton choose = new JButton("Choose catalogue...");
+        JButton choose = new JButton(CHOOSE_CREATE_CATALOGUE);
+        choose.setToolTipText("Keep the standard catalogue, or choose or create the catalogue of this process's domain to add services of its own.");
         choose.addActionListener(e -> { canvas.chooseCatalogue(this); updateSelection(element); });
-        attributesPanel.add(choose);
+        addButtonRow(choose);
         String sourceText = registry.problem() != null ? registry.problem()
             : "Catalogue: " + registry.catalogueFile().getName() + (registry.hasDeployment() ? "\nDeployment: " + registry.deploymentFile().getName() : "");
         JTextArea source = new JTextArea(sourceText);
@@ -790,11 +802,14 @@ public class EditorFrame extends JPanel {
         addComboField("Operation:", operations, op);
         addWhatItDoes(registry, element.getService(), op);
         // A service the catalogue lacks is described from here (or the place's right-click menu); a draft is finished the same way.
-        boolean ownService = registry.domainContract(element) != null;
-        JButton defineService = new JButton(ownService ? "Edit service in catalogue..." : "Add service to catalogue...");
-        defineService.setToolTipText("Describe a service this place needs that is not in the catalogue yet; you can keep designing while it is a draft.");
-        defineService.addActionListener(e -> { if (ServiceDefinitionDialog.open(this, canvas, element, ownService)) updateSelection(element); });
-        attributesPanel.add(defineService);
+        // Only a domain's catalogue takes services: on the standard catalogue, Choose/Create catalogue comes first.
+        if (registry.hasDomainCatalogue()) {
+            boolean ownService = registry.domainContract(element) != null;
+            JButton defineService = new JButton(ownService ? "Edit service in catalogue..." : "Add service to catalogue...");
+            defineService.setToolTipText("Describe a service this place needs that is not in the catalogue yet; you can keep designing while it is a draft.");
+            defineService.addActionListener(e -> { if (ServiceDefinitionDialog.open(this, canvas, element, ownService)) updateSelection(element); });
+            addButtonRow(defineService);
+        }
         operations.addActionListener(e -> {
             String value = (String)operations.getSelectedItem();
             if (!registry.operations(element.getService()).contains(value)) return;

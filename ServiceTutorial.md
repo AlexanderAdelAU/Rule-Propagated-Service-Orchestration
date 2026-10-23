@@ -144,7 +144,9 @@ You do not need to leave the editor ([Adding services while designing](Reference
 works through it for a whole process):
 
 1. Draw the place, then right-click it and choose **Add Service to Catalogue...** (or use
-   **Add service to catalogue...** under the place's Service).
+   **Add service to catalogue...** under the place's Service). On a new process, choose
+   **Choose/Create catalogue...** first: the standard catalogue is never changed, so Add waits
+   until the process has a catalogue of its own.
 2. Give the service and its operation a name. Everything else can follow: what it does, what it
    returns, its inputs and return attribute (suggested to match the places around it), and the
    values it routes on.
@@ -210,8 +212,8 @@ Start (or restart) the editor so that it reads the new catalogue. Then choose **
 | Transition | `Approved` | Transition Type: `Other`; Node Type: `TerminateNode` |
 | Transition | `Referred` | Transition Type: `Other`; Node Type: `TerminateNode` |
 
-If the **Service** list is empty, click **Choose catalogue...** and open
-`BusinessServiceDefinitions/credit/Credit.json`. Selecting the place shows the
+If the **Service** list is empty, click **Choose/Create catalogue...** and select the
+credit catalogue, `Credit.json`. Selecting the place shows the
 description from your catalogue and the contract `assess(token) → creditDecision`.
 
 | Source | Target | Guard Condition | Decision Value |

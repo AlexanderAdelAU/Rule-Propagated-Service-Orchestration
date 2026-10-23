@@ -284,6 +284,8 @@ public class Canvas extends JPanel {
         
         setBackground(Color.WHITE);
         setPreferredSize(new Dimension(800, 600));
+        // Drawing starts on the standard catalogue, so its services can be chosen before File > New or Open.
+        serviceRegistry.useStandardCatalogue(null);
         
         MouseAdapter mouseHandler = new MouseAdapter() {
             @Override
@@ -1199,12 +1201,20 @@ public class Canvas extends JPanel {
             addDeployMenu(menu, place);
             menu.addSeparator();
             // The place's own service is seen and finished from here; a service the catalogue lacks is added from here too.
-            if (serviceRegistry.domainContract(place) != null) {
-                JMenuItem editService = new JMenuItem("Edit Service in Catalogue...");
-                editService.addActionListener(ev -> ServiceDefinitionDialog.open(this, this, place, true));
-                menu.add(editService);
-            }
+            // Only a domain's catalogue takes services, so on the standard catalogue both wait for Choose/Create catalogue.
+            boolean domain = serviceRegistry.hasDomainCatalogue();
+            String first = "The standard catalogue is not changed: choose or create this process's catalogue first.";
+            JMenuItem chooseCatalogue = new JMenuItem(EditorFrame.CHOOSE_CREATE_CATALOGUE);
+            chooseCatalogue.addActionListener(ev -> chooseCatalogue(this));
+            menu.add(chooseCatalogue);
+            JMenuItem editService = new JMenuItem("Edit Service in Catalogue...");
+            editService.setEnabled(serviceRegistry.domainContract(place) != null);
+            if (!domain) editService.setToolTipText(first);
+            editService.addActionListener(ev -> ServiceDefinitionDialog.open(this, this, place, true));
+            menu.add(editService);
             JMenuItem addService = new JMenuItem("Add Service to Catalogue...");
+            addService.setEnabled(domain);
+            if (!domain) addService.setToolTipText(first);
             addService.addActionListener(ev -> ServiceDefinitionDialog.open(this, this, place, false));
             menu.add(addService);
             menu.addSeparator();
