@@ -520,7 +520,7 @@ The **Event generators** table has one row per generator in the process:
 
 **One generator feeding several places.** Each outgoing arc of an event generator
 is followed through its entry transition to its deployed place. The editor derives
-the number of branches from those arcs; there is no separate **Fork Children**
+the number of branches from those arcs (up to 99 per parent in the current host join contract); there is no separate **Fork Children**
 setting. If EG1 feeds two entry places, each scheduled parent event produces two
 children (for example `1000001` and `1000002` from parent `1000000`) with
 identical starting business data, a shared parent identity and independent
