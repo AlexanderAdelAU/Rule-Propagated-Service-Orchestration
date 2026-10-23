@@ -150,8 +150,8 @@ public final class BuildAndRunGenerator {
                 plan.problems.add(element.getId() + " has no outgoing path to a place.");
                 continue;
             }
-            if (entryPlaces.size() > 9999) {
-                plan.problems.add(element.getId() + " has too many outgoing branches for child sequence IDs.");
+            if (entryPlaces.size() > 99) {
+                plan.problems.add(element.getId() + " has too many outgoing branches; the current host join contract supports at most 99 children.");
                 continue;
             }
             List<Target> entries = new ArrayList<>();
