@@ -123,6 +123,11 @@
         <javac srcdir="tests" destdir="${build.dir}/contract-tests" source="11" target="11" includeantruntime="false" encoding="UTF-8">
             <classpath><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
         </javac>
+        <java classname="com.editor.TerminalJoinTopologyCheck" fork="true" failonerror="true">
+            <jvmarg value="-Djava.awt.headless=true"/>
+            <classpath><pathelement location="${build.dir}/contract-tests"/><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
+            <arg file=".."/>
+        </java>
         <java classname="com.editor.ServiceRegistryCheck" fork="true" failonerror="true">
             <sysproperty key="rpso.infrastructure" value="SingleHost"/><!-- not this computer's Machines choice -->
             <jvmarg value="-Djava.awt.headless=true"/>
