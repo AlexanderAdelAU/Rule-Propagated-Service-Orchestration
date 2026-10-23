@@ -1672,7 +1672,17 @@ public class TokenAnimator {
                 // Fork-derived does not by itself mean waiting at a join.
                 // Regular token (not a child, has GENERATED event) - full approach from EG
                 logger.debug("Regular token " + tokenId + " - calling generateRegularApproachSegments");
-                generateRegularApproachSegments(tokenId, version, firstEnterOrBuffered, generatedEvent);
+                MarkingEvent firstActualEnter = null;
+                for (MarkingEvent e : tokenEvents) {
+                    if (e.isEnter() && e.placeId.equals(firstEnterOrBuffered.placeId)) {
+                        firstActualEnter = e;
+                        break;
+                    }
+                }
+                // BUFFERED precedes ENTER in actual host traces. The approach must
+                // end at ENTER, not at the earlier BUFFERED instrumentation time.
+                generateRegularApproachSegments(tokenId, version,
+                    firstActualEnter != null ? firstActualEnter : firstEnterOrBuffered, generatedEvent);
             }
         }
         
