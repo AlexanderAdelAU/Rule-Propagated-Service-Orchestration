@@ -171,6 +171,9 @@
             <classpath><pathelement location="${build.dir}/contract-tests"/><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
             <arg file=".."/>
         </java>
+        <java classname="com.editor.ReplayGeneratedChildrenCheck" fork="true" failonerror="true">
+            <classpath><pathelement location="${build.dir}/contract-tests"/><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
+        </java>
         <java classname="com.editor.ReplayNamesCheck" fork="true" failonerror="true">
             <classpath><pathelement location="${build.dir}/contract-tests"/><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
             <arg file=".."/>
