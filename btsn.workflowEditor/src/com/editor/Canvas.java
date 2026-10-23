@@ -3153,16 +3153,7 @@ public class Canvas extends JPanel {
                 json.append(",\n      \"generator_rate\": \"").append(escapeJSON(element.getGeneratorRate())).append("\"");
                 json.append(",\n      \"token_version\": \"").append(escapeJSON(element.getTokenVersion())).append("\"");
                 
-                // Save fork_behavior if enabled
-                if (element.isForkEnabled()) {
-                    json.append(",\n      \"fork_behavior\": {");
-                    json.append("\n        \"enabled\": true");
-                    json.append(",\n        \"child_count\": ").append(element.getForkChildCount());
-                    if (element.getForkJoinTarget() != null) {
-                        json.append(",\n        \"join_target\": \"").append(escapeJSON(element.getForkJoinTarget())).append("\"");
-                    }
-                    json.append("\n      }");
-                }
+                // Fork topology is stored in the arrows, not a second fork_behavior setting.
             } else {
                 json.append(",\n      \"rotation\": ").append(element.getRotationAngle());
                 json.append(",\n      \"node_type\": \"").append(escapeJSON(element.getNodeType())).append("\"");
