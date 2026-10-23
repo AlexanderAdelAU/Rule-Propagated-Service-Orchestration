@@ -41,8 +41,15 @@ public final class BuildAndRunDialog extends JDialog {
             }
         });
 
-        JTable table = new JTable(generators);
+        JTable table = new JTable(generators) {
+            @Override public String getToolTipText(java.awt.event.MouseEvent e) {
+                int row = rowAtPoint(e.getPoint()), column = columnAtPoint(e.getPoint());
+                if (row >= 0 && column == 2) return String.valueOf(getValueAt(row, column));
+                return super.getToolTipText(e);
+            }
+        };
         table.setRowHeight(22);
+        table.getColumnModel().getColumn(2).setPreferredWidth(320);
         table.getColumnModel().getColumn(0).setMaxWidth(45);
         table.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(new JComboBox<>(BuildAndRunGenerator.VERSIONS.toArray(new String[0]))));
         table.setPreferredScrollableViewportSize(new Dimension(620, Math.min(4, Math.max(1, runs.size())) * 22 + 4));
