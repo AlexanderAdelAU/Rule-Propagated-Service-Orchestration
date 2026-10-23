@@ -162,18 +162,23 @@ public final class ServiceRegistry {
         JSONObject data = read(selected);
         if (!"ServiceDeployment".equals(data.get("definitionType"))) throw new IOException("Select a ServiceDeployment JSON definition.");
         Set<String> catalogues = new LinkedHashSet<>();
+        File namedBy = null;
         List<File> profiles = new ArrayList<>();
         profiles.add(new File(root, "BusinessServiceDefinitions/Deployment.json"));
         collect(new File(root.getParentFile(), "btsn.services/deployments"), profiles);
         for (File profile : profiles) {
             if (!profile.isFile()) continue;
             JSONObject config = read(profile);
-            if (config.get("serviceDeployment") != null && selected.equals(new File(root, text(config, "serviceDeployment")).getCanonicalFile()))
+            if (config.get("serviceDeployment") != null && selected.equals(new File(root, text(config, "serviceDeployment")).getCanonicalFile())) {
                 catalogues.add(text(config, "catalog"));
+                namedBy = profile;
+            }
         }
         if (data.get("catalog") != null) {
             String declared = text(data, "catalog");
-            if (!catalogues.isEmpty() && !catalogues.contains(declared)) throw new IOException("Deployment catalogue conflicts with its Deployment.json profile.");
+            if (!catalogues.isEmpty() && !catalogues.contains(declared))
+                throw new IOException("The service deployment " + selected.getName() + " uses the catalogue " + declared + ", but its profile "
+                    + namedBy.getName() + " names " + String.join(", ", catalogues) + ". Set \"catalog\" in " + namedBy.getPath() + " to " + declared + ".");
             catalogues.add(declared);
         }
         if (catalogues.size() != 1) throw new IOException("Deployment must have exactly one catalogue association in a Deployment.json profile; found " + catalogues.size() + ".");
@@ -249,12 +254,19 @@ public final class ServiceRegistry {
         if (c.draft) needed.add("its code: a Java class, or a service called over REST");
         return needed;
     }
+    /**
+     * The menu items and buttons name the catalogue a new service goes into, so a place on a standard service is not
+     * mistaken for one already in it: "Create New Service in Mytest.json...", "Edit Service in Mytest.json...".
+     */
+    public String createServiceLabel() { return "Create New Service in " + ownCatalogueName() + "..."; }
+    public String editServiceLabel() { return "Edit Service in " + ownCatalogueName() + "..."; }
+    private String ownCatalogueName() { return hasDomainCatalogue() ? catalogue.getName() : "Catalogue"; }
     /** The reason a draft service cannot be deployed yet, naming what it still needs and how to finish it. */
     public String draftReason(String service, String op) {
         Contract c = contract(service, op);
         if (c == null || !c.draft) return null;
         return service + "." + op + " is a draft in " + (catalogue == null ? "the catalogue" : catalogue.getName())
-            + ". It still needs " + String.join(", ", stillNeeded(c)) + ". Right-click the place and choose Edit Service in Catalogue... to finish it.";
+            + ". It still needs " + String.join(", ", stillNeeded(c)) + ". Right-click the place and choose " + editServiceLabel() + " to finish it.";
     }
     /** The place's service as an entry of the process's own catalogue (draft or finished), or null (none, or standard). */
     public Contract domainContract(ProcessElement place) {
@@ -287,6 +299,32 @@ public final class ServiceRegistry {
     public boolean isStandard(String service) {
         for (Contract c : contracts.values()) if (c.service.equals(service)) return c.standard;
         return false;
+    }
+    /**
+     * The Build profiles (btsn.services/deployments) that select this service deployment take its catalogue: Build wrote
+     * them for it, so when the process moves to another catalogue they follow. Only "catalog" is changed. Returns those updated.
+     */
+    public static List<File> alignProfiles(File deployment, String catalogue) throws Exception {
+        List<File> updated = new ArrayList<>();
+        File root = findCommon(deployment.getAbsoluteFile().getParentFile());
+        if (root == null || catalogue == null || catalogue.isEmpty()) return updated;
+        root = root.getCanonicalFile();
+        File target = deployment.getCanonicalFile();
+        List<File> profiles = new ArrayList<>();
+        collect(new File(root.getParentFile(), "btsn.services/deployments"), profiles);
+        java.util.regex.Pattern catalog = java.util.regex.Pattern.compile("(\"catalog\"\\s*:\\s*\")[^\"]*(\")");
+        for (File profile : profiles) {
+            JSONObject config;
+            try { config = read(profile); } catch (Exception unreadable) { continue; }
+            if (config.get("serviceDeployment") == null || config.get("catalog") == null || catalogue.equals(text(config, "catalog"))) continue;
+            if (!target.equals(new File(root, text(config, "serviceDeployment")).getCanonicalFile())) continue;
+            String body = new String(Files.readAllBytes(profile.toPath()), StandardCharsets.UTF_8);
+            String changed = catalog.matcher(body).replaceFirst("$1" + java.util.regex.Matcher.quoteReplacement(catalogue) + "$2");
+            new JSONParser().parse(changed);
+            Files.write(profile.toPath(), changed.getBytes(StandardCharsets.UTF_8));
+            updated.add(profile);
+        }
+        return updated;
     }
     private static void collect(File dir, List<File> files) {
         File[] children = dir.listFiles(); if (children == null) return;
@@ -377,7 +415,7 @@ public final class ServiceRegistry {
         if (c.draft) { errors.add(draftReason(service, op)); return errors; }
         if (c.implementationClass.isEmpty() && !REST.equals(adapter) && !"boolean".equals(c.resultType))
             errors.add(service + " has no Java class in the catalogue, so it runs only over REST: set the adapter to rest and give its endpoint, "
-                + "or write its Java class and name it as the catalogue's implementationClass (Edit Service in Catalogue... can create a starting class).");
+                + "or write its Java class and name it as the catalogue's implementationClass (" + editServiceLabel() + " can create a starting class).");
         if (REST.equals(adapter) && endpoint != null && !validRestEndpoint(endpoint))
             errors.add("The rest adapter needs an Endpoint: an http:// or https:// address.");
         if (adapter.isEmpty() || REST.equals(adapter)) {

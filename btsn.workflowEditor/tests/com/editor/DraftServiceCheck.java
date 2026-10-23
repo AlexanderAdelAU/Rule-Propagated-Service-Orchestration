@@ -47,7 +47,7 @@ public final class DraftServiceCheck {
         check(canvas.serviceBlockers().size() == 1 && canvas.serviceBlockers().get(0).startsWith("Place 'Fraud': FraudScreenService.screen is a draft"),
             "Deploy not stopped by the draft: " + canvas.serviceBlockers());
         check(refused.size() == 1 && refused.get(0).contains("is a draft in Credit.json") && refused.get(0).contains("its code: a Java class, or a service called over REST")
-            && refused.get(0).contains("Edit Service in Catalogue"), "Draft deployable or reason unclear: " + refused);
+            && refused.get(0).contains("Edit Service in "), "Draft deployable or reason unclear: " + refused);
 
         // 2. Finished as a Java class with the editor's starting code.
         CatalogueWriter.Entry done = new CatalogueWriter.Entry();
