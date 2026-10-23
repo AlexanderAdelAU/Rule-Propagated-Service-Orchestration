@@ -201,6 +201,14 @@ public final class BuildAndRunGenerator {
                 }
             } catch (Exception ignored) { }
         }
+        // Specialty token generators may have their own format but not this target-list protocol.
+        // Fail visibly rather than silently sending only to the first destination.
+        if (!plan.tokenGenerator.isEmpty()
+            && !"org.btsn.petrinet.eventgenerators.GenericPetriNetTokenGenerator".equals(plan.tokenGenerator)
+            && plan.destinations.values().stream().anyMatch(targets -> targets.size() > 1))
+            plan.problems.add("Topology fan-out requires GenericPetriNetTokenGenerator; the deployment profile selects "
+                + plan.tokenGenerator + ". Extend that generator's fork-target protocol before running this workflow.");
+
         String base = processFile.getName().replaceFirst("(?i)\\.json$", "");
         if (plan.profile == null) plan.profile = new File(deployments, ("petrinet".equals(plan.domain) || plan.domain.isEmpty() ? "models" : plan.domain) + "/" + base + "Deployment.json");
 
@@ -230,6 +238,9 @@ public final class BuildAndRunGenerator {
         List<String> problems = new ArrayList<>();
         List<Run> on = o.enabled();
         if (on.isEmpty()) problems.add("Choose at least one event generator to run.");
+        if (o.tokens > 100 && on.stream().anyMatch(r ->
+            plan.destinations.containsKey(r.generatorId) && plan.destinations.get(r.generatorId).size() > 1))
+            problems.add("A forked version can have at most 100 parent events (10,000 sequence IDs per parent in a 1,000,000-ID version range).");
         Map<String, String> byVersion = new LinkedHashMap<>();
         for (Run run : on) {
             String other = byVersion.put(run.version, run.generatorId);
