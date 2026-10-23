@@ -230,35 +230,7 @@ public class EditorFrame extends JPanel {
                 element.setTokenVersion(freshVersionField.getText().trim());
             }));
             
-            // Fork Children - number of child tokens this generator creates
-            // When >= 2, enables implicit fork behavior for animation
-            JSpinner forkSpinner = new JSpinner(new SpinnerNumberModel(
-                element.getForkChildCount(), 0, 10, 1));
-            forkSpinner.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
-            addSpinnerField("Fork Children:", forkSpinner, element.getForkChildCount());
-            forkSpinner.addChangeListener(e -> {
-                int childCount = (Integer) forkSpinner.getValue();
-                element.setForkChildCount(childCount);
-                
-                if (childCount >= 2) {
-                    element.setForkEnabled(true);
-                    // Auto-detect join target from outgoing arrow
-                    String joinTarget = detectJoinTarget(element);
-                    element.setForkJoinTarget(joinTarget);
-                } else {
-                    element.setForkEnabled(false);
-                    element.setForkJoinTarget(null);
-                }
-                canvas.repaint();
-            });
-            
-            // Show current join target (read-only, auto-detected)
-            if (element.isForkEnabled() && element.getForkJoinTarget() != null) {
-                JTextField joinTargetField = new JTextField(15);
-                joinTargetField.setEditable(false);
-                joinTargetField.setBackground(new Color(240, 240, 240));
-                addField("Join Target:", joinTargetField, element.getForkJoinTarget());
-            }
+            // Outgoing event-generator arcs determine fork children; no manual setting is needed.
             
             // Colors section
             Color defaultEGFill = new Color(220, 255, 220);  // Light green
