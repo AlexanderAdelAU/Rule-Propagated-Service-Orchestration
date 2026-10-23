@@ -29,6 +29,15 @@ public final class BuildAndRunGenerator {
         Run copy() { Run r = new Run(); r.generatorId = generatorId; r.version = version; r.intervalMs = intervalMs; r.enabled = enabled; return r; }
     }
 
+    /** One outgoing topology branch and the concrete deployed endpoint it feeds. */
+    public static final class Target {
+        public final String place;
+        public final String operation;
+        Target(String place, String operation) { this.place = place; this.operation = operation; }
+        public String describe() { return place + "." + operation; }
+        public String argument() { return place + ":" + operation; }
+    }
+
     /** Choices the user makes; defaults come from the process. */
     public static final class Options {
         public String launcherName = "";
@@ -45,7 +54,8 @@ public final class BuildAndRunGenerator {
         public File root, processFile;
         public String processName = "", domain = "";
         public final List<String> nodes = new ArrayList<>();
-        public final Map<String, String> targets = new LinkedHashMap<>();   // generator id -> runtime place
+        public final Map<String, String> targets = new LinkedHashMap<>();   // generator id -> first runtime place (legacy single target)
+        public final Map<String, List<Target>> destinations = new LinkedHashMap<>(); // all topology-derived destinations
         public final Map<String, String> operations = new LinkedHashMap<>(); // generator id -> operation
         public final Map<String, Integer> rates = new LinkedHashMap<>();
         public final Map<String, String> versions = new LinkedHashMap<>();
@@ -133,17 +143,47 @@ public final class BuildAndRunGenerator {
 
         for (ProcessElement element : canvas.getElements()) {
             if (element.getType() != ProcessElement.Type.EVENT_GENERATOR) continue;
-            ProcessElement place = firstPlaceAfter(canvas, element);
-            if (place == null || place.getServiceOperations().isEmpty() || registry.nodeFor(place).isEmpty()) continue;
-            plan.targets.put(element.getId(), registry.nodeFor(place) + "_Place");
-            plan.operations.put(element.getId(), place.getServiceOperations().get(0).getName());
-            if (place.getService() != null && !place.getService().isEmpty()) plan.services.put(element.getId(), place.getService());
+            List<ProcessElement> entryPlaces = entryPlaces(canvas, element);
+            if (entryPlaces.isEmpty()) {
+                plan.problems.add(element.getId() + " has no outgoing path to a place.");
+                continue;
+            }
+            if (entryPlaces.size() >= org.btsn.constants.VersionConstants.TOKEN_INCREMENT) {
+                plan.problems.add(element.getId() + " has too many outgoing branches for child sequence IDs.");
+                continue;
+            }
+            List<Target> entries = new ArrayList<>();
+            for (ProcessElement place : entryPlaces) {
+                String node = registry.nodeFor(place);
+                if (node.isEmpty() || place.getServiceOperations().isEmpty()) {
+                    plan.problems.add(element.getId() + " feeds " + place.getLabel()
+                        + " but its deployed service operation is unresolved.");
+                    continue;
+                }
+                Target target = new Target(node + "_Place", place.getServiceOperations().get(0).getName());
+                if (entries.stream().anyMatch(t -> t.describe().equals(target.describe()))) {
+                    plan.problems.add(element.getId() + " has multiple routes to " + target.describe()
+                        + "; fork branches must have distinct deployed destinations.");
+                    continue;
+                }
+                entries.add(target);
+            }
+            if (entries.size() != entryPlaces.size()) continue;
+            plan.destinations.put(element.getId(), entries);
+            Target first = entries.get(0);
+            plan.targets.put(element.getId(), first.place);
+            plan.operations.put(element.getId(), first.operation);
+            ProcessElement firstPlace = entryPlaces.get(0);
+            if (firstPlace.getService() != null && !firstPlace.getService().isEmpty())
+                plan.services.put(element.getId(), firstPlace.getService());
             plan.rates.put(element.getId(), parse(element.getGeneratorRate(), 1000));
             plan.versions.put(element.getId(), VERSIONS.contains(element.getTokenVersion()) ? element.getTokenVersion() : "v001");
-            int inputs = joinInputs(canvas, element, place);
-            if (inputs > 1) plan.joins.put(element.getId(), inputs);
-            else if (inputs >= 0) plan.problems.add(element.getId() + " feeds the join before " + place.getLabel()
-                + ", but " + place.getLabel() + "'s operation names " + inputs + " input(s); a join needs one argument for each input.");
+            if (entries.size() == 1) {
+                int inputs = joinInputs(canvas, element, firstPlace);
+                if (inputs > 1) plan.joins.put(element.getId(), inputs);
+                else if (inputs >= 0) plan.problems.add(element.getId() + " feeds the join before " + firstPlace.getLabel()
+                    + ", but " + firstPlace.getLabel() + "'s operation names " + inputs + " input(s); a join needs one argument for each input.");
+            }
         }
         if (plan.targets.isEmpty()) plan.problems.add("Add an event generator connected through a T_in transition to a deployed place.");
         if (!plan.problems.isEmpty()) return plan;
@@ -198,6 +238,16 @@ public final class BuildAndRunGenerator {
         return problems;
     }
 
+    /** Every deployed destination fed by an event generator, in its outgoing arrow order. */
+    public static String describeDestinations(Plan plan, String generatorId) {
+        List<Target> branches = plan.destinations.get(generatorId);
+        if (branches == null || branches.isEmpty())
+            return plan.targets.get(generatorId) + "." + plan.operations.get(generatorId);
+        List<String> names = new ArrayList<>();
+        for (Target branch : branches) names.add(branch.describe());
+        return String.join(", ", names);
+    }
+
     /** Files the launcher needs, in the order they will be written ("reuse" when they exist). */
     public static List<String> summary(Plan plan, Options o) {
         List<String> lines = new ArrayList<>();
@@ -210,7 +260,13 @@ public final class BuildAndRunGenerator {
         if (!plan.tokenGenerator.isEmpty()) lines.add("Tokens   made by " + plan.tokenGenerator + " (named by the deployment profile), each from its target service's token format");
         for (String packaged : packagedHosts(plan)) lines.add("Package  " + packaged + " (Build host packages; start it on its machine)");
         for (Run run : o.enabled())
-            if (plan.joins.containsKey(run.generatorId))
+            if (plan.destinations.containsKey(run.generatorId) && plan.destinations.get(run.generatorId).size() > 1)
+                lines.add("Tokens   " + o.tokens + " parent events from " + run.generatorId + " -> "
+                    + plan.destinations.get(run.generatorId).size() + " correlated children each ("
+                    + (o.tokens * plan.destinations.get(run.generatorId).size()) + " deliveries) to "
+                    + describeDestinations(plan, run.generatorId) + ", one parent every " + run.intervalMs
+                    + " ms, version " + run.version);
+            else if (plan.joins.containsKey(run.generatorId))
                 lines.add("Tokens   one set of " + plan.joins.get(run.generatorId) + " join tokens from " + run.generatorId + " to "
                     + plan.targets.get(run.generatorId) + "." + plan.operations.get(run.generatorId) + ", version " + run.version
                     + " (the generator feeds a join, which needs all its inputs to start)");
@@ -296,6 +352,13 @@ public final class BuildAndRunGenerator {
             x.append("    <property name=\"").append(slot).append(".place\" value=\"").append(plan.targets.get(run.generatorId)).append("\"/>\n");
             x.append("    <property name=\"").append(slot).append(".operation\" value=\"").append(xml(plan.operations.get(run.generatorId))).append("\"/>\n");
             x.append("    <property name=\"").append(slot).append(".trigger.file\" location=\"").append(xml(relative(dir, plan.schedule(o, run)))).append("\"/>\n");
+            List<Target> branches = plan.destinations.get(run.generatorId);
+            if (branches != null && branches.size() > 1) {
+                List<String> arguments = new ArrayList<>();
+                for (Target branch : branches) arguments.add(branch.argument());
+                x.append("    <property name=\"").append(slot).append(".fork.targets\" value=\"")
+                    .append(xml(String.join(",", arguments))).append("\"/>\n");
+            }
             if (!plan.tokenGenerator.isEmpty() && plan.services.containsKey(run.generatorId))
                 x.append("    <property name=\"").append(slot).append(".format.service\" value=\"").append(xml(plan.services.get(run.generatorId))).append("\"/>\n");
             Integer join = plan.joins.get(run.generatorId);
@@ -374,7 +437,6 @@ public final class BuildAndRunGenerator {
             + "\",\n      \"label\": \"\",\n      \"guardCondition\": \"\",\n      \"decision_value\": \"\",\n      \"endpoint\": \"\"\n    }";
     }
 
-    /** The place reached from an event generator through its transition (generator -> T_in -> place). */
     /** The number of inputs of the join a generator feeds through its T_in (its place's arguments), or -1 when that T_in is not a join. */
     static int joinInputs(Canvas canvas, ProcessElement generator, ProcessElement place) {
         for (Arrow out : canvas.getArrows()) {
@@ -387,15 +449,28 @@ public final class BuildAndRunGenerator {
         return -1;
     }
 
-    static ProcessElement firstPlaceAfter(Canvas canvas, ProcessElement generator) {
+    /** A generator fans out through each outgoing transition; topology defines the count, not fork_behavior JSON. */
+    static List<ProcessElement> entryPlaces(Canvas canvas, ProcessElement generator) {
+        List<ProcessElement> result = new ArrayList<>();
         for (Arrow out : canvas.getArrows()) {
             if (out.getSource() != generator) continue;
             ProcessElement next = out.getTarget();
-            if (next != null && next.getType() == ProcessElement.Type.PLACE) return next;
-            for (Arrow onward : canvas.getArrows())
-                if (onward.getSource() == next && onward.getTarget() != null && onward.getTarget().getType() == ProcessElement.Type.PLACE) return onward.getTarget();
+            if (next == null) continue;
+            if (next.getType() == ProcessElement.Type.PLACE) {
+                result.add(next);
+            } else if (next.getType() == ProcessElement.Type.TRANSITION) {
+                for (Arrow onward : canvas.getArrows())
+                    if (onward.getSource() == next && onward.getTarget() != null
+                        && onward.getTarget().getType() == ProcessElement.Type.PLACE)
+                        result.add(onward.getTarget());
+            }
         }
-        return null;
+        return result;
+    }
+
+    static ProcessElement firstPlaceAfter(Canvas canvas, ProcessElement generator) {
+        List<ProcessElement> places = entryPlaces(canvas, generator);
+        return places.isEmpty() ? null : places.get(0);
     }
 
     private static List<File> jsonFiles(File dir) {
