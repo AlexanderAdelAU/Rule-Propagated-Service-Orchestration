@@ -2252,50 +2252,38 @@ public class TokenAnimator {
             generatedTime = enterTime - 500;
         }
         
-        // Total available time between GENERATED and ENTER
-        long availableTime = enterTime - generatedTime;
-        
-        // Ensure minimum reasonable time for animation visibility
-        if (availableTime < MIN_TRAVEL_DURATION * 4) {
-            availableTime = MIN_TRAVEL_DURATION * 4;
-            generatedTime = enterTime - availableTime;
-        }
-        
-        // Get actual distances from topology for VELOCITY-BASED timing
+        // Preserve actual measured timestamps. The old replay shifted GENERATED
+        // backwards and kept minimum 50ms legs even if the real interval was
+        // shorter; that made fast fork children appear before generation or
+        // remain buffered after ENTER.
+        long availableTime = Math.max(0L, enterTime - generatedTime);
         double distEgToTIn = calculatePathDistance(eventGen, destTIn);
         double distTInToPlace = calculatePathDistance(destTIn, destPlace);
-        
-        // Fallback distances if positions unavailable
         if (distEgToTIn < 0) distEgToTIn = 100.0;
         if (distTInToPlace < 0) distTInToPlace = 60.0;
-        
-        // VELOCITY-BASED TIMING: Calculate travel durations from distance and fixed velocity
-        // This ensures consistent visual speed regardless of available time gap
-        long travelToTInDuration = calculateTravelDuration(distEgToTIn, FALLBACK_TRAVEL_DURATION_EG_TO_TIN);
-        long travelToPlaceDuration = calculateTravelDuration(distTInToPlace, FALLBACK_TRAVEL_DURATION_TO_PLACE);
-        
-        // Fixed dwell time at event generator (visible appearance)
-        long atEgDuration = TIME_AT_EVENT_GEN;
-        
-        // Calculate minimum required time for animation phases
-        long minRequiredTime = atEgDuration + travelToTInDuration + travelToPlaceDuration + MIN_TRAVEL_DURATION;
-        
-        // BUFFER ABSORPTION: All extra time goes into buffer at T_in
-        // This represents the token waiting for admission to the place
-        long bufferDuration;
-        if (availableTime > minRequiredTime) {
-            // Extra time = buffer wait (this is where tokens "queue" visually)
-            bufferDuration = availableTime - atEgDuration - travelToTInDuration - travelToPlaceDuration;
+
+        long wantedEg = TIME_AT_EVENT_GEN;
+        long wantedToTIn = calculateTravelDuration(distEgToTIn, FALLBACK_TRAVEL_DURATION_EG_TO_TIN);
+        long wantedToPlace = calculateTravelDuration(distTInToPlace, FALLBACK_TRAVEL_DURATION_TO_PLACE);
+        long wantedTotal = wantedEg + wantedToTIn + wantedToPlace;
+        long atEgDuration, travelToTInDuration, travelToPlaceDuration, bufferDuration;
+        if (availableTime >= wantedTotal) {
+            atEgDuration = wantedEg;
+            travelToTInDuration = wantedToTIn;
+            travelToPlaceDuration = wantedToPlace;
+            bufferDuration = availableTime - wantedTotal;
         } else {
-            // Tight timing - compress proportionally but keep minimum buffer
-            double scale = (double) availableTime / minRequiredTime;
-            atEgDuration = Math.max(MIN_TRAVEL_DURATION, (long)(atEgDuration * scale));
-            travelToTInDuration = Math.max(MIN_TRAVEL_DURATION, (long)(travelToTInDuration * scale));
-            travelToPlaceDuration = Math.max(MIN_TRAVEL_DURATION, (long)(travelToPlaceDuration * scale));
-            bufferDuration = availableTime - atEgDuration - travelToTInDuration - travelToPlaceDuration;
-            bufferDuration = Math.max(MIN_TRAVEL_DURATION / 2, bufferDuration);
+            // Fit all movement inside the measured interval, reserving at most
+            // 10% for the visual T_in buffer. No artificial time is introduced.
+            bufferDuration = availableTime / 10;
+            long travelBudget = availableTime - bufferDuration;
+            atEgDuration = wantedTotal == 0 ? 0
+                : travelBudget * wantedEg / wantedTotal;
+            travelToTInDuration = wantedTotal == 0 ? 0
+                : travelBudget * wantedToTIn / wantedTotal;
+            travelToPlaceDuration = travelBudget - atEgDuration - travelToTInDuration;
         }
-        
+
         // Calculate timestamps - all fit exactly within generatedTime to enterTime
         long atEventGenStart = generatedTime;
         long travelToTInStart = atEventGenStart + atEgDuration;
