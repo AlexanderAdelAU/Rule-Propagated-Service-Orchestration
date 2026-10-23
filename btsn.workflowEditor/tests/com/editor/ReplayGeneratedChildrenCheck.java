@@ -55,7 +55,7 @@ public final class ReplayGeneratedChildrenCheck {
                 ProcessElement p2 = element(canvas, ProcessElement.Type.PLACE, "P2_Place", 200, 120, null, null);
                 ProcessElement t4 = element(canvas, ProcessElement.Type.TRANSITION, "T4", 300, 0, "T_out", "EdgeNode");
                 ProcessElement t8 = element(canvas, ProcessElement.Type.TRANSITION, "T8", 300, 120, "T_out", "EdgeNode");
-                ProcessElement t5 = element(canvas, ProcessElement.Type.TRANSITION, "T5", 400, 60, "Other", "TerminateNode");
+                ProcessElement t5 = element(canvas, ProcessElement.Type.TRANSITION, "T5", 400, 60, "Other", "JoinNode");
                 link(canvas, eg, t2); link(canvas, eg, t7);
                 link(canvas, t2, p1); link(canvas, t7, p2);
                 link(canvas, p1, t4); link(canvas, p2, t8);
@@ -104,7 +104,7 @@ public final class ReplayGeneratedChildrenCheck {
                     check(own.stream().noneMatch(s -> s.phase == Phase.BUFFERED_AT_TIN
                             && s.endTime > enter),
                         "Child " + child + " falsely waits for a later parent or join: " + own);
-                    // The host log says TERMINATE but there is no T_out -> T9 arc.
+                    // The host log says TERMINATE but no T_out directly feeds T9; both feed T5 Join.
                     // A terminal join is not yet a runnable backend operation, so
                     // replay must not invent a direct jump to T9.
                     check(own.stream().noneMatch(s -> s.phase == Phase.TRAVELING_TO_TERMINATE
