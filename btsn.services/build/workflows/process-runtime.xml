@@ -222,6 +222,7 @@
                 <arg value="-triggerfile" if:set="@{slot}.trigger.set"/><arg value="${@{slot}.trigger.file}" if:set="@{slot}.trigger.set"/>
                 <arg value="-data" if:set="@{slot}.data"/><arg value="${@{slot}.data}" if:set="@{slot}.data"/>
                 <arg value="-joininputs" if:set="@{slot}.join.inputs"/><arg value="${@{slot}.join.inputs}" if:set="@{slot}.join.inputs"/>
+                <arg value="-forktargets" if:set="@{slot}.fork.targets"/><arg value="${@{slot}.fork.targets}" if:set="@{slot}.fork.targets"/>
                 <arg value="-format-service" if:set="@{slot}.format.service"/><arg value="${@{slot}.format.service}" if:set="@{slot}.format.service"/>
                 <arg value="-skipdeploy"/>
             </java>
