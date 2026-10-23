@@ -518,6 +518,26 @@ The **Event generators** table has one row per generator in the process:
 | **Version** | The generator's Version | Rule version for its tokens (`v001`–`v003`) |
 | **Interval (ms)** | The generator's Rate | Spacing of its token schedule |
 
+**One generator feeding several places.** Each outgoing arc of an event generator
+is followed through its entry transition to its deployed place. The editor derives
+the number of branches from those arcs; there is no separate **Fork Children**
+setting. If EG1 feeds two entry places, each scheduled parent event produces two
+children (for example `1000001` and `1000002` from parent `1000000`) with
+identical starting business data, a shared parent identity and independent
+destinations. The next parent starts at `1010000`, using BTSN's established
+`TOKEN_INCREMENT = 10000`. For 10 scheduled parent events there are 20
+child deliveries, not 20 unrelated workflows. The **Feeds** column lists both
+deployed destinations, and the summary reports the child delivery count. Forked
+generators are limited to 100 parents per version to preserve the version's ID
+range. The standard Petri-net token generator supports this form of multi-target
+injection; Build reports an error rather than silently dropping routes when a
+different generator does not support it.
+
+**This is a fork, not automatically a join.** A later converging transition
+must be configured as a **JoinNode** (shown with **J**) with the appropriate
+downstream place and input contract if synchronization is required. A
+**TerminateNode** (shown with **T**) consumes arrivals individually.
+
 With more than one generator:
 
 - **They all fire together.** Their workflows share the places and compete for them.
