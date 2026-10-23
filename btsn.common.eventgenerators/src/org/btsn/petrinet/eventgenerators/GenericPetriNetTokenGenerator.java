@@ -574,7 +574,7 @@ public class GenericPetriNetTokenGenerator {
 		
         if (!topologyTargets.isEmpty()) {
             if (topologyTargets.size() < 2 || topologyTargets.size() > 99)
-                throw new IllegalArgumentException("Topology fork requires 2 to 9999 destinations");
+                throw new IllegalArgumentException("Topology fork requires 2 to 99 destinations (current host join-ID contract)");
             if (forkMode || joinInputs > 0 || !joinArgs.isEmpty())
                 throw new IllegalArgumentException("Topology fork cannot be combined with legacy fork/join injection");
             if (!topologyTargets.get(0).place.equals(targetPlaceName)
