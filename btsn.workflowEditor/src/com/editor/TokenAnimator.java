@@ -334,20 +334,8 @@ public class TokenAnimator {
                 eventGeneratorIds.add(label);
                 elementPositions.put(label, center);
                 
-                // Read fork_behavior from EVENT_GENERATOR
-                // This tells us if this generator produces multiple child tokens that need to join
-                if (elem.isForkEnabled()) {
-                    String joinTarget = elem.getForkJoinTarget();
-                    int childCount = elem.getForkChildCount();
-                    
-                    if (joinTarget != null && childCount > 1) {
-                        eventGenImplicitForkToJoin.put(label, joinTarget);
-                        eventGenForkChildCount.put(label, childCount);
-                        implicitJoinTIns.add(joinTarget);
-                        logger.info("Registered implicit fork: " + label + " -> " + joinTarget + 
-                            " (expects " + childCount + " children)");
-                    }
-                }
+                // Event-generator fan-out is determined from outgoing arcs. Legacy
+                // fork_behavior in saved JSON is not evidence of a JoinNode.
             } else if (elem.getType() == ProcessElement.Type.TRANSITION) {
                 String label = elem.getLabel();
                 elementPositions.put(label, center);
@@ -1589,7 +1577,8 @@ public class TokenAnimator {
             // Determine what kind of token this is and how to handle approach segments
             
             boolean isReconstitutedParent = (generatedEvent == null && !isChild);
-            boolean isChildAtJoin = isChild && generatedEvent != null;
+            boolean isChildAtJoin = isChild && generatedEvent != null
+                && isJoin(placeToTIn.get(firstEnterOrBuffered.placeId));
             
             logger.debug("Token " + tokenId + " approach decision: isChild=" + isChild + 
                         " generatedEvent=" + (generatedEvent != null) + 
@@ -1678,6 +1667,9 @@ public class TokenAnimator {
                     }
                 }*/
             } else {
+                // No actual JoinNode at the entry. A GENERATED child follows the
+                // ordinary entry path, with its child ID preserved for genealogy.
+                // Fork-derived does not by itself mean waiting at a join.
                 // Regular token (not a child, has GENERATED event) - full approach from EG
                 logger.debug("Regular token " + tokenId + " - calling generateRegularApproachSegments");
                 generateRegularApproachSegments(tokenId, version, firstEnterOrBuffered, generatedEvent);
@@ -1687,6 +1679,19 @@ public class TokenAnimator {
         // Track which events we've processed to avoid duplicates
         Set<Integer> processedIndices = new HashSet<>();
         
+        // The calculated approach already visualizes admission buffering. Do not
+        // overlay a second synthetic buffer for the real BUFFERED instrumentation.
+        if (isChild && generatedEvent != null && firstEnterOrBuffered != null
+                && !isJoin(placeToTIn.get(firstEnterOrBuffered.placeId))) {
+            for (int i = 0; i < tokenEvents.size(); i++) {
+                MarkingEvent e = tokenEvents.get(i);
+                if (e.isBuffered() && firstEnterOrBuffered.placeId.equals(e.placeId)) {
+                    processedIndices.add(i);
+                    break;
+                }
+            }
+        }
+
         // For reconstituted parent, mark the first ENTER as processed 
         // (we already created the AT_PLACE segment above)
         // Reconstituted parent = no GENERATED event and not a child token
@@ -1704,7 +1709,8 @@ public class TokenAnimator {
         // For children with GENERATED events arriving at JOIN, mark their BUFFERED, ENTER,
         // and JOIN_CONSUMED as already processed (handled by generateChildApproachToJoin)
         // For JOIN_SURVIVOR, also mark EXIT and TERMINATE as processed
-        if (isChild && generatedEvent != null && firstEnterOrBuffered != null) {
+        if (isChild && generatedEvent != null && firstEnterOrBuffered != null
+                && isJoin(placeToTIn.get(firstEnterOrBuffered.placeId))) {
             // Mark the GENERATED event as processed
             int genIndex = tokenEvents.indexOf(generatedEvent);
             if (genIndex >= 0) {
@@ -2415,7 +2421,9 @@ public class TokenAnimator {
         long latestSiblingArrival = bufferStart;
         if (eventGen != null) {
             for (MarkingEvent e : events) {
-                if (e.isGenerated() && eventGen.equals(e.transitionId)) {
+                if (e.isGenerated() && eventGen.equals(e.transitionId)
+                        && getParentTokenId(tokenId).equals(getParentTokenId(e.tokenId))
+                        && destPlace.equals(e.placeId)) {
                     // This is a sibling - calculate when it arrives at the buffer
                     long siblingGenTime = e.timestamp;
                     long siblingTravelStart = siblingGenTime + TIME_AT_EVENT_GEN;
