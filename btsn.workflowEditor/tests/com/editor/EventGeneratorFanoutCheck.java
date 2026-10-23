@@ -33,7 +33,11 @@ public final class EventGeneratorFanoutCheck {
         eg.setForkChildCount(8);
         check(BuildAndRunGenerator.entryPlaces(canvas, eg).size() == 2, "Manual fork count affected topology");
         canvas.getArrows().add(new Arrow(eg, t9));
+        check(!BuildAndRunGenerator.invalidEntryArcs(canvas, eg).isEmpty(),
+            "Dangling third route was silently ignored");
         canvas.getArrows().add(new Arrow(t9, p9));
+        check(BuildAndRunGenerator.invalidEntryArcs(canvas, eg).isEmpty(),
+            "Connected third route still flagged as invalid");
         check(BuildAndRunGenerator.entryPlaces(canvas, eg).equals(List.of(p3, p6, p9)), "Three branch order");
 
         Path root = Files.createTempDirectory("fanout-launcher-");
@@ -75,6 +79,10 @@ public final class EventGeneratorFanoutCheck {
         check(csv.lines().count() == 10 && csv.contains("0,0,1")
             && csv.contains("9000,0,1"), "Expected ten parent-event schedule rows: " + csv);
 
+        options.tokens = 101;
+        check(BuildAndRunGenerator.problems(plan, options).stream()
+            .anyMatch(x -> x.contains("at most 100 parent events")), "Fork IDs must stay inside version range");
+        options.tokens = 10;
         plan.destinations.put(generatorId, List.of(new BuildAndRunGenerator.Target("P1_Place", "processToken")));
         String single = BuildAndRunGenerator.launcherXml(plan, options);
         check(!single.contains(".fork.targets"), "Single-entry workflow was marked as a fork");
