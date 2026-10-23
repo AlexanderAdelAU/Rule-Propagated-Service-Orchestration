@@ -137,6 +137,15 @@ that passes the token on unchanged, and `StochasticService`, a random `true`/`fa
 editor lists them after the domain's own services, marked *(standard)*. A domain catalogue
 may not reuse a standard service's name.
 
+The **Catalogue Status** panel in the upper-right of the workflow canvas identifies each place
+by its visible label and shows whether its selected service comes from the **Standard Service**
+catalogue or the process's own catalogue (for example, `P1 → Standard Service` and
+`P2 → Claims`). An incomplete or unknown service assignment reads **Unresolved**, while a
+service still being defined shows **(draft)**. Hover over a row to see its service name.
+The panel stays in the visible corner while the workflow scrolls, keeps a readable size at
+different zoom levels, scrolls when there are many places, and collapses when you click its heading.
+It is an indicator only: it does not modify the services or their catalogue membership.
+
 ### Add a service while designing
 
 Designing the catalogue first is best, but a design often shows that a service is missing.

@@ -19,6 +19,10 @@ import java.util.Set;
  */
 public class Canvas extends JPanel {
     private static final int GRID_SIZE = 20; // Grid spacing in pixels
+    private final CatalogueStatusOverlay catalogueStatus = new CatalogueStatusOverlay(this);
+    private JViewport catalogueStatusViewport;
+    private final javax.swing.event.ChangeListener catalogueScrollListener = e -> positionCatalogueStatus();
+
     
     private List<ProcessElement> elements;
     private List<Arrow> arrows;
@@ -284,6 +288,12 @@ public class Canvas extends JPanel {
         
         setBackground(Color.WHITE);
         setPreferredSize(new Dimension(800, 600));
+        // A screen-pixel child of the canvas: its position follows the viewport, not the workflow zoom.
+        setLayout(null);
+        add(catalogueStatus);
+        addComponentListener(new ComponentAdapter() {
+            @Override public void componentResized(ComponentEvent e) { positionCatalogueStatus(); }
+        });
         // Drawing starts on the standard catalogue, so its services can be chosen before File > New or Open.
         serviceRegistry.useStandardCatalogue(null);
         
@@ -398,6 +408,47 @@ public class Canvas extends JPanel {
         });
     }
     
+    /** Keep the legend in the visible upper-right corner, even when the diagram scrolls or zooms. */
+    void positionCatalogueStatus() {
+        Rectangle visible = getVisibleRect();
+        if (visible.width <= 0 || visible.height <= 0) return;
+        int width = Math.min(CatalogueStatusOverlay.WIDTH, visible.width - 16);
+        if (width < 120) {
+            catalogueStatus.setVisible(false);
+            return;
+        }
+        if (!catalogueStatus.isVisible()) catalogueStatus.setVisible(true);
+        int wanted = catalogueStatus.isCollapsed() ? CatalogueStatusOverlay.HEADER
+            : CatalogueStatusOverlay.HEADER + CatalogueStatusOverlay.SUBTITLE
+                + Math.max(1, getPlaces().size()) * CatalogueStatusOverlay.ROW_HEIGHT
+                + CatalogueStatusOverlay.FOOTER;
+        int height = Math.min(wanted, Math.min(320, Math.max(CatalogueStatusOverlay.HEADER, visible.height - 16)));
+        Rectangle target = new Rectangle(visible.x + visible.width - width - 8, visible.y + 8, width, height);
+        if (!target.equals(catalogueStatus.getBounds())) catalogueStatus.setBounds(target);
+    }
+
+    @Override public void addNotify() {
+        super.addNotify();
+        JViewport viewport = (JViewport) SwingUtilities.getAncestorOfClass(JViewport.class, this);
+        if (catalogueStatusViewport != viewport) {
+            if (catalogueStatusViewport != null)
+                catalogueStatusViewport.removeChangeListener(catalogueScrollListener);
+            catalogueStatusViewport = viewport;
+            if (viewport != null) viewport.addChangeListener(catalogueScrollListener);
+        }
+        positionCatalogueStatus();
+    }
+
+    @Override public void removeNotify() {
+        if (catalogueStatusViewport != null)
+            catalogueStatusViewport.removeChangeListener(catalogueScrollListener);
+        catalogueStatusViewport = null;
+        super.removeNotify();
+    }
+
+    /** For editor checks and future visibility preferences. */
+    CatalogueStatusOverlay getCatalogueStatusOverlay() { return catalogueStatus; }
+
     /**
      * Snap coordinate to grid
      */
@@ -1589,7 +1640,9 @@ public class Canvas extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Graphics2D g2 = (Graphics2D) g;
+        positionCatalogueStatus();
+        // Work on a copy: the overlay child is painted afterwards in unscaled screen pixels.
+        Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         
         // Apply zoom transformation
@@ -1738,6 +1791,7 @@ public class Canvas extends JPanel {
         if (!animatedTokenStates.isEmpty()) {
             drawAnimatedTokens(g2);
         }
+        g2.dispose();
     }
     
     /**
