@@ -184,6 +184,22 @@ public class GenericPetriNetTokenGenerator {
 	private static boolean forkMode = false;  // Enable fork injection mode
 	private static int forkCount = 0;  // Number of fork branches (e.g., 2 for a 2-way fork)
 	
+
+    /** Topology destinations and their individually resolved service endpoints. */
+    static final class ForkTarget {
+        final String place, operation;
+        String channel, port, channelId;
+        ForkTarget(String p, String o) { place = p; operation = o; }
+    }
+    private static final List<ForkTarget> topologyTargets = new ArrayList<>();
+
+    static int topologyChildId(int parent, int branch) {
+        if (parent % VersionConstants.TOKEN_INCREMENT != 0
+                || branch <= 0 || branch >= VersionConstants.TOKEN_INCREMENT)
+            throw new IllegalArgumentException("Invalid parent/branch token sequence");
+        return Math.addExact(parent, branch);
+    }
+
 	// Join args - explicit token IDs (e.g., -joinargs 1000201,1000202)
 	private static List<Integer> joinArgs = new ArrayList<>();
 	// Join inputs - the target join's input count; the token IDs follow from the version (-joininputs 2)
@@ -231,7 +247,10 @@ public class GenericPetriNetTokenGenerator {
 		System.out.println("Service Operation: " + serviceOperation);
 		System.out.println("Infrastructure Definition: " + (infrastructureDefinitionName == null ? "(none)" : infrastructureDefinitionName));
 		
-		if (forkMode) {
+		if (!topologyTargets.isEmpty()) {
+            System.out.println("MODE: TOPOLOGY_FANOUT");
+            System.out.println("Parent events: " + numberOfTokens + ", branches: " + topologyTargets.size());
+        } else if (forkMode) {
 			System.out.println("MODE: FORK_NODE");
 			System.out.println("Fork Count: " + forkCount);
 			System.out.println("Base Tokens: " + numberOfTokens);
@@ -306,6 +325,16 @@ public class GenericPetriNetTokenGenerator {
 				System.out.println("=== Skipping Deployment (already deployed) ===");
 			}
 
+            // Every destination must resolve before any parent forks into child tokens.
+            for (ForkTarget target : topologyTargets) {
+                if (!queryServiceConfiguration(target.place, target.operation, ruleBaseVersion))
+                    throw new IOException("Unresolved fork destination " + target.place + "." + target.operation);
+                target.channel = resolvedServiceChannel;
+                target.port = resolvedServicePort;
+                target.channelId = resolvedChannelId;
+            }
+            if (!topologyTargets.isEmpty()) selectTarget(topologyTargets.get(0));
+
 			Long timeToCommit = System.currentTimeMillis() - startTime;
 
 			// STEP 3: Generate and send tokens
@@ -323,7 +352,10 @@ public class GenericPetriNetTokenGenerator {
 			System.out.println("Token Generation: " + eventTime + "ms");
 			System.out.println("Target: " + targetPlaceName + " @ " + resolvedServiceChannel + ":" + resolvedServicePort);
 			
-			if (forkMode) {
+            if (!topologyTargets.isEmpty()) {
+                System.out.println("Parent Events: " + numberOfTokens);
+                System.out.println("Child Tokens Sent: " + (numberOfTokens * topologyTargets.size()));
+            } else if (forkMode) {
 				System.out.println("Base Tokens: " + numberOfTokens);
 				System.out.println("Child Tokens Sent: " + (numberOfTokens * forkCount));
 			} else {
@@ -451,7 +483,19 @@ public class GenericPetriNetTokenGenerator {
 					System.out.println("  Parsed -skipdeploy");
 					break;
 					
-				// Fork mode arguments
+                // Generated from the topology by Build and Run, not from a manual spinner.
+                case "-forktargets":
+                case "--forktargets":
+                    if (i + 1 < args.length) {
+                        for (String item : args[++i].split(",", -1)) {
+                            int colon = item.indexOf(':');
+                            if (colon <= 0 || colon == item.length() - 1 || item.indexOf(':', colon + 1) >= 0)
+                                throw new IllegalArgumentException("Invalid fork destination: " + item);
+                            topologyTargets.add(new ForkTarget(item.substring(0, colon), item.substring(colon + 1)));
+                        }
+                    }
+                    break;
+                // Legacy fork mode (one destination) remains available to old launchers.
 				case "-forkmode":
 				case "--forkmode":
 					forkMode = true;
@@ -528,6 +572,16 @@ public class GenericPetriNetTokenGenerator {
 			System.exit(1);
 		}
 		
+        if (!topologyTargets.isEmpty()) {
+            if (topologyTargets.size() < 2 || topologyTargets.size() >= VersionConstants.TOKEN_INCREMENT)
+                throw new IllegalArgumentException("Topology fork requires 2 to 9999 destinations");
+            if (forkMode || joinInputs > 0 || !joinArgs.isEmpty())
+                throw new IllegalArgumentException("Topology fork cannot be combined with legacy fork/join injection");
+            if (!topologyTargets.get(0).place.equals(targetPlaceName)
+                || !topologyTargets.get(0).operation.equals(serviceOperation))
+                throw new IllegalArgumentException("First fork target must match -place and -operation");
+        }
+
 		// Validate fork mode
 		if (forkMode && forkCount < 2) {
 			System.err.println("ERROR: Fork mode requires -forkcount >= 2");
@@ -561,6 +615,7 @@ public class GenericPetriNetTokenGenerator {
 	 * Query service configuration from rule base
 	 */
 	private static boolean queryServiceConfiguration(String serviceName, String operation, String version) {
+        resolvedServiceChannel = null; resolvedServicePort = null; resolvedChannelId = null;
 		try {
 			// Get base path (current directory is the generator project)
 			File currentDir = new File("").getAbsoluteFile();
@@ -750,8 +805,11 @@ public class GenericPetriNetTokenGenerator {
 			System.out.println("Firing single test token...");
 			
 			// Create single test token
-			String jsonToken = createPetriNetToken(sequenceID);
-			sendToken(jsonToken, sequenceID);
+            if (topologyTargets.isEmpty()) {
+                sendToken(createPetriNetToken(sequenceID), sequenceID);
+            } else {
+                sendTopologyFork(sequenceID);
+            }
 			
 		} else {
 			System.out.println("Processing token sequence from EventTriggeringFile.csv...");
@@ -816,10 +874,12 @@ public class GenericPetriNetTokenGenerator {
 							sequenceID += sidInc;
 						}
 						
-						String jsonToken = createPetriNetToken(tokenIdToUse);
-						
-						// FIRE IMMEDIATELY - as fast as possible
-						sendToken(jsonToken, tokenIdToUse, tokenAttrName, tokenJoinID);
+                        if (!topologyTargets.isEmpty()) {
+                            sendTopologyFork(tokenIdToUse);
+                        } else {
+                            String jsonToken = createPetriNetToken(tokenIdToUse);
+                            sendToken(jsonToken, tokenIdToUse, tokenAttrName, tokenJoinID);
+                        }
 						
 						totalTokensProcessed++;
 					}
@@ -849,13 +909,20 @@ public class GenericPetriNetTokenGenerator {
 	/**
 	 * Create Petri Net JSON token
 	 */
+    private static String createPetriNetToken(int seqID) {
+        return createPetriNetToken(seqID, -1, 0, 0, System.currentTimeMillis());
+    }
+
 	@SuppressWarnings("unchecked")
-	private static String createPetriNetToken(int seqID) {
+    private static String createPetriNetToken(int seqID, int parentId, int branch, int count, long currentTime) {
 		JSONObject token = new JSONObject();
 		
-		long currentTime = System.currentTimeMillis();
-		
 		token.put("tokenId", String.valueOf(seqID));
+        if (parentId >= 0) {
+            token.put("parentTokenId", String.valueOf(parentId));
+            token.put("branchNumber", branch);
+            token.put("forkCount", count);
+        }
 		token.put("version", ruleBaseVersion);
 		token.put("notAfter", currentTime + timeToExpire);
 		token.put("currentPlace", targetPlaceName);
@@ -877,6 +944,33 @@ public class GenericPetriNetTokenGenerator {
 		
 		return token.toJSONString();
 	}
+
+    private static void selectTarget(ForkTarget target) {
+        targetPlaceName = target.place;
+        serviceOperation = target.operation;
+        resolvedServiceChannel = target.channel;
+        resolvedServicePort = target.port;
+        resolvedChannelId = target.channelId;
+    }
+
+    /** One logical event becomes one independently routed child per outgoing topology arc. */
+    private static void sendTopologyFork(int parentId) throws IOException {
+        long timestamp = System.currentTimeMillis();
+        try {
+            for (int i = 0; i < topologyTargets.size(); i++) {
+                ForkTarget target = topologyTargets.get(i);
+                int childId = topologyChildId(parentId, i + 1);
+                selectTarget(target);
+                String token = createPetriNetToken(childId, parentId, i + 1, topologyTargets.size(), timestamp);
+                // At an entry service this is a normal token, not a JoinNode argument slot.
+                sendToken(token, childId, attributeName, -1);
+                System.out.println("FORK: " + parentId + " -> " + childId + " to "
+                    + target.place + "." + target.operation);
+            }
+        } finally {
+            if (!topologyTargets.isEmpty()) selectTarget(topologyTargets.get(0));
+        }
+    }
 
 	/**
 	 * Send token to target service
