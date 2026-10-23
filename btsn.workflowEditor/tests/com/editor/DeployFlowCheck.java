@@ -164,7 +164,7 @@ public final class DeployFlowCheck {
                 // Attributes panel offers the catalogue and shows where the place runs.
                 EditorFrame attributes = new EditorFrame(canvas); attributes.updateSelection(places.get("NS_Yellow"));
                 List<String> texts = texts(attributes);
-                check(texts.contains("Choose catalogue...") && !texts.contains("Choose service deployment..."), "Attributes still ask for a deployment first");
+                check(texts.contains("Choose/Create catalogue...") && !texts.contains("Choose service deployment..."), "Attributes still ask for a deployment first");
                 check(texts.stream().anyMatch(t -> t.startsWith("P6")), "Attributes do not show the node: " + texts);
                 check(texts.stream().anyMatch(t -> t.startsWith("Decides at random") && t.contains("Returns: true or false")), "Attributes do not say what the service does: " + texts);
                 // What it does: three lines in the fields' font, scrolling rather than pushing the design fields down.

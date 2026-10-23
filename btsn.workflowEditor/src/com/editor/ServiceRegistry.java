@@ -258,7 +258,8 @@ public final class ServiceRegistry {
     }
     /** The place's service as an entry of the process's own catalogue (draft or finished), or null (none, or standard). */
     public Contract domainContract(ProcessElement place) {
-        if (place.getOperations().isEmpty()) return null;
+        // On the standard catalogue alone a process has no services of its own: the standard ones are never edited.
+        if (!hasDomainCatalogue() || place.getOperations().isEmpty()) return null;
         Contract c = contract(place.getService(), place.getOperations().get(0));
         return c == null || c.standard ? null : c;
     }

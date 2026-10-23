@@ -38,7 +38,7 @@ explains each step on a single place.
 | Step | How | Walkthrough |
 |---|---|---|
 | **1 · Sketch** | Draw the places, transitions and arcs. Transitions become T_in or T_out from their arcs; labels are free | [Sketch the process](#step-1-sketch-the-process) |
-| **2 · Add services as you go** | Right-click a place and add its service to the catalogue of the process's domain (the editor creates the catalogue the first time). Give a name, an operation and the values it routes on; the editor writes starting code that keeps the contract and returns those values in turn, or leaves a draft to finish later. A finished service is chosen from the catalogue instead | [Add the first service](#step-2-add-the-first-service), [Choose the service](#choose-the-service-and-operation) |
+| **2 · Add services as you go** | Choose or create the catalogue of the process's domain, then right-click a place and add its service to it. Give a name, an operation and the values it routes on; the editor writes starting code that keeps the contract and returns those values in turn, or leaves a draft to finish later. A finished service is chosen from the catalogue instead | [Add the first service](#step-2-add-the-first-service), [Choose the service](#choose-the-service-and-operation) |
 | **3 · Validate** | Before anything runs, Validate checks the guards against the values each service returns, the names passed from place to place, drafts, and transitions that lead nowhere | [Validate and save](#step-5-validate-and-save) |
 | **4 · Deploy** | Choose the node (host) each place runs on and save the service deployment | [Deploy the process](#2-deploy-the-process) |
 | **5 · Build and Run** | The editor writes an Ant launcher: the hosts, the event generators with their versions, and the token schedule | [Create Build and Run](#3-create-build-and-run) |
@@ -100,16 +100,16 @@ and `T_out_Assess → Rejected`.
 - **Gateways route.** A T_out with `GatewayNode` sends each token along the arc whose guard
   matches what the place's service returned. You set the guards in [step 4](#step-4-set-the-guards).
 
-![The claims sketch in ProcessEditor: CLAIMS feeds T_in, place Triage, T_out, which leads to Paid and to T_in, place Assess and T_out, which leads to Accepted and Rejected. Triage is selected; its Attributes panel shows the standard catalogue PetriNetModels.json, no service chosen, the button Add service to catalogue, and the unresolved contract in red.](images/claims-sketch.png)
+![The claims sketch in ProcessEditor: CLAIMS feeds T_in, place Triage, T_out, which leads to Paid and to T_in, place Assess and T_out, which leads to Accepted and Rejected. Triage is selected; its Attributes panel shows the standard catalogue PetriNetModels.json, no service chosen, the button Choose/Create catalogue, and the unresolved contract in red.](images/claims-sketch.png)
 
 *The sketch. The red dot on a place means it has no service yet.*
 
 ### Step 2: Add the first service
 
-Right-click **Triage** and choose **Add Service to Catalogue...** (or click
-**Add service to catalogue...** in its Attributes panel).
-
-**Choose the catalogue.** The first service of a process needs a catalogue to hold it.
+**Choose the catalogue.** A new process uses only the standard catalogue, which is never
+changed, so a service of its own needs a catalogue to hold it first. Until then **Add Service
+to Catalogue...** is greyed out. Click **Choose/Create catalogue...** in Triage's Attributes
+panel (or right-click Triage and choose it).
 A catalogue belongs to a **domain**: every process of the domain shares it, so a service
 is written once and used by each of them.
 
@@ -124,6 +124,9 @@ Choose **Create a catalogue for a new domain**, type `claims` and click **OK**. 
 A process of an existing domain (credit, healthcare, ...) uses **Select an existing catalogue** instead.
 Either way, the standard Petri-net services (`StochasticService`, `AlwaysTrueService`) stay
 available beside the catalogue, unchanged.
+
+**Add the service.** Right-click **Triage** and choose **Add Service to Catalogue...** (or click
+**Add service to catalogue...** in its Attributes panel).
 
 **Describe the service.** The form opens with what it can suggest:
 
