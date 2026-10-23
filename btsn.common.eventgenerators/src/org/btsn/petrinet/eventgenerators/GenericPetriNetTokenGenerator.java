@@ -195,7 +195,7 @@ public class GenericPetriNetTokenGenerator {
 
     static int topologyChildId(int parent, int branch) {
         if (parent % VersionConstants.TOKEN_INCREMENT != 0
-                || branch <= 0 || branch >= VersionConstants.TOKEN_INCREMENT)
+                || branch <= 0 || branch > 99)
             throw new IllegalArgumentException("Invalid parent/branch token sequence");
         return Math.addExact(parent, branch);
     }
@@ -573,7 +573,7 @@ public class GenericPetriNetTokenGenerator {
 		}
 		
         if (!topologyTargets.isEmpty()) {
-            if (topologyTargets.size() < 2 || topologyTargets.size() >= VersionConstants.TOKEN_INCREMENT)
+            if (topologyTargets.size() < 2 || topologyTargets.size() > 99)
                 throw new IllegalArgumentException("Topology fork requires 2 to 9999 destinations");
             if (forkMode || joinInputs > 0 || !joinArgs.isEmpty())
                 throw new IllegalArgumentException("Topology fork cannot be combined with legacy fork/join injection");
