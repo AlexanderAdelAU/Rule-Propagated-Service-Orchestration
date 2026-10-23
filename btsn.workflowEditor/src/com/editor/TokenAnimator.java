@@ -2773,8 +2773,19 @@ public class TokenAnimator {
             if (arc == null && nextEvent != null && nextEvent.isTerminate()) arc = nextEvent.arcValue;
             String terminateNode = terminateFor(tOut, arc);
             if (terminateNode == null) {
-                // Try to find any terminate node
-                terminateNode = terminateIds.isEmpty() ? "TERMINATE" : terminateIds.iterator().next();
+                // TERMINATE instrumentation confirms the host ended the token, but does
+                // not establish a drawable route. In particular, a JoinNode -> TerminateNode
+                // is not a direct arc from this service's T_out. Never pick an arbitrary
+                // TerminateNode and pretend the token followed an arc that does not exist.
+                logger.warn("Token " + tokenId + " terminated at " + tOut
+                    + " without a direct termination arc in the canvas; no exit path will be invented.");
+                segments.add(new AnimationSegment(
+                    tokenId, version, Phase.CONSUMED,
+                    exitEvent.timestamp, endTime + 10000,
+                    fromPlace, null, tOut,
+                    null, null, null, null
+                ));
+                return;
             }
             
             // Calculate distance-based travel duration to terminate
