@@ -143,6 +143,8 @@ public final class BuildAndRunGenerator {
 
         for (ProcessElement element : canvas.getElements()) {
             if (element.getType() != ProcessElement.Type.EVENT_GENERATOR) continue;
+            for (String issue : invalidEntryArcs(canvas, element))
+                plan.problems.add(element.getId() + " " + issue);
             List<ProcessElement> entryPlaces = entryPlaces(canvas, element);
             if (entryPlaces.isEmpty()) {
                 plan.problems.add(element.getId() + " has no outgoing path to a place.");
@@ -458,6 +460,30 @@ public final class BuildAndRunGenerator {
             if (feedsPlace) return place.getServiceOperations().get(0).getArguments().size();
         }
         return -1;
+    }
+
+    /** A dangling EG arc must be a Build error; never silently omit its child destination. */
+    static List<String> invalidEntryArcs(Canvas canvas, ProcessElement generator) {
+        List<String> issues = new ArrayList<>();
+        for (Arrow out : canvas.getArrows()) {
+            if (out.getSource() != generator) continue;
+            ProcessElement next = out.getTarget();
+            if (next == null) {
+                issues.add("has a dangling outgoing arc.");
+                continue;
+            }
+            if (next.getType() == ProcessElement.Type.PLACE) continue;
+            if (next.getType() != ProcessElement.Type.TRANSITION) {
+                issues.add("has an unsupported outgoing arc to " + next.getLabel() + ".");
+                continue;
+            }
+            boolean hasPlace = false;
+            for (Arrow onward : canvas.getArrows())
+                if (onward.getSource() == next && onward.getTarget() != null
+                    && onward.getTarget().getType() == ProcessElement.Type.PLACE) hasPlace = true;
+            if (!hasPlace) issues.add("reaches " + next.getLabel() + " but no entry place.");
+        }
+        return issues;
     }
 
     /** A generator fans out through each outgoing transition; topology defines the count, not fork_behavior JSON. */
