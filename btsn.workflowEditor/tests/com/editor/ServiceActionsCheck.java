@@ -20,6 +20,10 @@ public final class ServiceActionsCheck {
         SwingUtilities.invokeAndWait(() -> {
             JFrame window = null;
             try {
+                // The editor starts on the standard catalogue: its services can be chosen straight away.
+                ServiceRegistry fresh = new Canvas().getServiceRegistry();
+                check(fresh.problem() == null && fresh.services().contains("StochasticService") && fresh.services().contains("AlwaysTrueService"),
+                    "A new canvas has no catalogue: " + fresh.problem() + " " + fresh.services());
                 Canvas canvas = new Canvas();
                 canvas.loadFromJSON(new String(Files.readAllBytes(process.toPath()), "UTF-8").replaceAll("\"(serviceDeployment|catalog)\"\\s*:\\s*\"[^\"]*\"", "\"$1\": \"\""));
                 canvas.getServiceRegistry().useStandardCatalogue(common);
@@ -59,7 +63,7 @@ public final class ServiceActionsCheck {
             }
         });
         if (failure[0] != null) throw new AssertionError("Service actions", failure[0]);
-        System.out.println("PASS: on the standard catalogue, Choose/Create catalogue only: no Add or Edit service button, right-click Add and Edit greyed out; with a domain catalogue Add returns, and Edit for the place's own service only");
+        System.out.println("PASS: the editor starts on the standard catalogue; on it, Choose/Create catalogue only: no Add or Edit service button, right-click Add and Edit greyed out; with a domain catalogue Add returns, and Edit for the place's own service only");
     }
 
     /** The place's right-click menu: each item's text and whether it is enabled. */

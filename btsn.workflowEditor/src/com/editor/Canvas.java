@@ -284,6 +284,8 @@ public class Canvas extends JPanel {
         
         setBackground(Color.WHITE);
         setPreferredSize(new Dimension(800, 600));
+        // Drawing starts on the standard catalogue, so its services can be chosen before File > New or Open.
+        serviceRegistry.useStandardCatalogue(null);
         
         MouseAdapter mouseHandler = new MouseAdapter() {
             @Override
