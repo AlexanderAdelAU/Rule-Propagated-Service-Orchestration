@@ -805,8 +805,9 @@ public class EditorFrame extends JPanel {
         // Only a domain's catalogue takes services: on the standard catalogue, Choose/Create catalogue comes first.
         if (registry.hasDomainCatalogue()) {
             boolean ownService = registry.domainContract(element) != null;
-            JButton defineService = new JButton(ownService ? "Edit service in catalogue..." : "Add service to catalogue...");
-            defineService.setToolTipText("Describe a service this place needs that is not in the catalogue yet; you can keep designing while it is a draft.");
+            JButton defineService = new JButton(ownService ? registry.editServiceLabel() : registry.createServiceLabel());
+            defineService.setToolTipText(ownService ? "Finish or change this place's service in " + registry.catalogueFile().getName() + "."
+                : "Describe a new service for this place in " + registry.catalogueFile().getName() + "; the standard services are never copied or changed. You can keep designing while it is a draft.");
             defineService.addActionListener(e -> { if (ServiceDefinitionDialog.open(this, canvas, element, ownService)) updateSelection(element); });
             addButtonRow(defineService);
         }

@@ -143,9 +143,9 @@ Designing the catalogue first is best, but a design often shows that a service i
 You do not need to leave the editor ([Adding services while designing](Reference.md#adding-services-while-designing)
 works through it for a whole process):
 
-1. Draw the place, then right-click it and choose **Add Service to Catalogue...** (or use
-   **Add service to catalogue...** under the place's Service). On a new process, choose
-   **Choose/Create catalogue...** first: the standard catalogue is never changed, so Add waits
+1. Draw the place, then right-click it and choose **Create New Service in** *your catalogue*
+   (the same button is under the place's Service). On a new process, choose
+   **Choose/Create catalogue...** first: the standard catalogue is never changed, so this waits
    until the process has a catalogue of its own.
 2. Give the service and its operation a name. Everything else can follow: what it does, what it
    returns, its inputs and return attribute (suggested to match the places around it), and the
@@ -161,7 +161,7 @@ works through it for a whole process):
 
 The entry goes into the domain catalogue at once. A draft can be designed with and saved with the
 process, but Validate, Deploy and Build and Run say exactly what it still needs, and it is never
-deployed or packaged. **Edit Service in Catalogue...** on the place shows its service filled in, draft or
+deployed or packaged. **Edit Service in** *your catalogue* on the place shows its service filled in, draft or
 finished, and saves your changes. While the class is still the editor's starting code, the code is rewritten
 to match, for example to return the routing values you add. Code you have written yourself is never changed.
 If other processes use the service, its name, operation, inputs, return attribute and how it runs are fixed

@@ -10,7 +10,7 @@ import java.util.List;
 import javax.swing.*;
 
 /**
- * Add Service to Catalogue / Edit Service in Catalogue: describe a service from the place that needs it.
+ * Create New Service in / Edit Service in the process's catalogue: describe a service from the place that needs it.
  *
  * What the designer knows is written to the process's domain catalogue straight away, as a draft, so the design
  * can go on. A draft is never deployed: Validate, Deploy and Build and Run say what it still needs. Once its
@@ -40,7 +40,7 @@ public final class ServiceDefinitionDialog extends JDialog {
     private boolean saved;
 
     private ServiceDefinitionDialog(Window owner, Canvas canvas, ProcessElement place, ServiceRegistry.Contract existing) {
-        super(owner, existing == null ? "Add Service to Catalogue" : "Edit Service in Catalogue", ModalityType.APPLICATION_MODAL);
+        super(owner, (existing == null ? "Create New Service in " : "Edit Service in ") + canvas.getServiceRegistry().catalogueFile().getName(), ModalityType.APPLICATION_MODAL);
         this.canvas = canvas; this.place = place; this.existing = existing;
         ServiceRegistry registry = canvas.getServiceRegistry();
         catalogue = registry.catalogueFile(); common = registry.common();
@@ -122,7 +122,7 @@ public final class ServiceDefinitionDialog extends JDialog {
         // The first service of a process needs its domain's catalogue: choose one, or create it for a new domain.
         if (registry.problem() == null && !registry.hasDomainCatalogue() && !canvas.chooseCatalogue(parent, CatalogueChoice.BEFORE_WE_BEGIN)) return false;
         String refusal = refusal(registry);
-        if (refusal != null) { JOptionPane.showMessageDialog(parent, refusal, "Add Service to Catalogue", JOptionPane.WARNING_MESSAGE); return false; }
+        if (refusal != null) { JOptionPane.showMessageDialog(parent, refusal, "Create New Service", JOptionPane.WARNING_MESSAGE); return false; }
         ServiceRegistry.Contract own = edit ? registry.domainContract(place) : null;
         ServiceDefinitionDialog dialog = new ServiceDefinitionDialog(SwingUtilities.getWindowAncestor(parent), canvas, place, own);
         dialog.setVisible(true);
@@ -271,7 +271,7 @@ public final class ServiceDefinitionDialog extends JDialog {
     private String next(CatalogueWriter.Entry e, List<String> needed, File source, boolean wroteCode) {
         String where = e.service + (existing == null ? " is in " : " is updated in ") + catalogue.getName() + " and the place uses it.\n\n";
         if (e.draft) return where + "It is a draft, so you can keep designing, but it cannot be deployed until it has "
-            + String.join(", ", needed) + ".\nRight-click the place and choose Edit Service in Catalogue... to finish it.";
+            + String.join(", ", needed) + ".\nRight-click the place and choose Edit Service in " + catalogue.getName() + "... to finish it.";
         String packaging = packagingNote();
         if (source != null) return where + (wroteCode
                 ? "Remember to write its code. The starting class is in " + relative(source) + ":\nit keeps the contract and returns "

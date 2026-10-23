@@ -482,6 +482,8 @@ public class InfrastructureDefinitionFrame extends JFrame {
                 JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) != JOptionPane.YES_OPTION) return false;
         try {
             Files.write(file.toPath(), toJson().getBytes(StandardCharsets.UTF_8));
+            // A process that moved to another catalogue is deployed again under the same name: its Build profile follows.
+            if (deploymentEditor) ServiceRegistry.alignProfiles(file, catalogueReference);
             currentFile = file;
             if (deploymentEditor) loadCatalogue();
             markSaved();

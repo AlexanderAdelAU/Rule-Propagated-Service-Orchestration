@@ -35,27 +35,27 @@ public final class ServiceActionsCheck {
                 triage.setService("StochasticService"); registry.applyCatalogue(triage, "processToken");
                 window = new JFrame(); window.add(new JScrollPane(canvas)); window.setSize(1200, 650); window.setVisible(true);
 
-                // Standard catalogue: a standard service is not "Edit service in catalogue", and nothing can be added.
+                // Standard catalogue: a standard service is not offered for editing, and nothing can be added.
                 EditorFrame attributes = new EditorFrame(canvas); attributes.updateSelection(triage);
                 List<String> texts = texts(attributes);
-                check(texts.contains("Choose/Create catalogue...") && !texts.contains("Edit service in catalogue...") && !texts.contains("Add service to catalogue..."),
+                check(texts.contains("Choose/Create catalogue...") && texts.stream().noneMatch(t -> t.startsWith("Edit Service in") || t.startsWith("Create New Service in")),
                     "Standard catalogue attributes: " + texts);
                 Map<String, Boolean> menu = rightClick(canvas, triage);
                 check(Boolean.TRUE.equals(menu.get("Choose/Create catalogue...")) && Boolean.FALSE.equals(menu.get("Edit Service in Catalogue..."))
-                    && Boolean.FALSE.equals(menu.get("Add Service to Catalogue...")), "Standard catalogue menu: " + menu);
+                    && Boolean.FALSE.equals(menu.get("Create New Service in Catalogue...")), "Standard catalogue menu: " + menu);
 
                 // The claims catalogue: Add comes back; Edit for the place's own service, not for a standard one.
                 canvas.useCatalogue(new File(common, "BusinessServiceDefinitions/claims/Claims.json"));
                 attributes.updateSelection(triage);
                 texts = texts(attributes);
-                check(texts.contains("Add service to catalogue...") && !texts.contains("Edit service in catalogue..."), "Domain catalogue, standard service: " + texts);
+                check(texts.contains("Create New Service in Claims.json...") && !texts.contains("Edit Service in Claims.json..."), "Domain catalogue, standard service: " + texts);
                 menu = rightClick(canvas, triage);
-                check(Boolean.TRUE.equals(menu.get("Add Service to Catalogue...")) && Boolean.FALSE.equals(menu.get("Edit Service in Catalogue...")), "Domain catalogue, standard service menu: " + menu);
+                check(Boolean.TRUE.equals(menu.get("Create New Service in Claims.json...")) && Boolean.FALSE.equals(menu.get("Edit Service in Claims.json...")), "Domain catalogue, standard service menu: " + menu);
                 triage.setServiceOperations(new ArrayList<>()); triage.setService("ClaimsTriageService"); registry.applyCatalogue(triage, "triage");
                 attributes.updateSelection(triage);
-                check(texts(attributes).contains("Edit service in catalogue..."), "Own service not editable: " + texts(attributes));
+                check(texts(attributes).contains("Edit Service in Claims.json..."), "Own service not editable: " + texts(attributes));
                 menu = rightClick(canvas, triage);
-                check(Boolean.TRUE.equals(menu.get("Edit Service in Catalogue...")) && Boolean.TRUE.equals(menu.get("Add Service to Catalogue...")), "Own service menu: " + menu);
+                check(Boolean.TRUE.equals(menu.get("Edit Service in Claims.json...")) && Boolean.TRUE.equals(menu.get("Create New Service in Claims.json...")), "Own service menu: " + menu);
             } catch (Throwable ex) {
                 failure[0] = ex;
             } finally {

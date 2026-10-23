@@ -107,8 +107,8 @@ and `T_out_Assess → Rejected`.
 ### Step 2: Add the first service
 
 **Choose the catalogue.** A new process uses only the standard catalogue, which is never
-changed, so a service of its own needs a catalogue to hold it first. Until then **Add Service
-to Catalogue...** is greyed out. Click **Choose/Create catalogue...** in Triage's Attributes
+changed, so a service of its own needs a catalogue to hold it first. Until then **Create New Service
+in Catalogue...** is greyed out. Click **Choose/Create catalogue...** in Triage's Attributes
 panel (or right-click Triage and choose it).
 A catalogue belongs to a **domain**: every process of the domain shares it, so a service
 is written once and used by each of them.
@@ -125,12 +125,14 @@ A process of an existing domain (credit, healthcare, ...) uses **Select an exist
 Either way, the standard Petri-net services (`StochasticService`, `AlwaysTrueService`) stay
 available beside the catalogue, unchanged.
 
-**Add the service.** Right-click **Triage** and choose **Add Service to Catalogue...** (or click
-**Add service to catalogue...** in its Attributes panel).
+**Add the service.** Right-click **Triage** and choose **Create New Service in Claims.json...**
+(the same button is in its Attributes panel). The menu names the catalogue the service goes into.
+A place on a standard service such as `StochasticService` keeps it until you choose another: the
+standard services are offered beside your catalogue, never copied into it or changed.
 
 **Describe the service.** The form opens with what it can suggest:
 
-![The Add Service to Catalogue form: Service ClaimsTriageService, Operation triage, What it does, What it returns, Inputs token, Return attribute token, Routes on simple, complex; How it runs: A Java class org.btsn.business.claims.ClaimsTriageService, with Write starting code checked; button Add to Claims.json.](images/claims-add-service.png)
+![The Create New Service in Claims.json form: Service ClaimsTriageService, Operation triage, What it does, What it returns, Inputs token, Return attribute token, Routes on simple, complex; How it runs: A Java class org.btsn.business.claims.ClaimsTriageService, with Write starting code checked; button Add to Claims.json.](images/claims-add-service.png)
 
 | Field | Enter | Why |
 |---|---|---|
@@ -166,7 +168,7 @@ The other two ways a service can run:
 
 - **Not decided yet**: the entry is a **draft**. You can keep designing and save the
   process; Validate, Deploy and Build say exactly what it still needs.
-  **Edit Service in Catalogue...** on the place finishes it later.
+  **Edit Service in Claims.json...** on the place finishes it later.
 - **A service called over REST**, in any language; its endpoint is set in Deploy
   ([Call it over REST](ServiceTutorial.md#8-call-it-over-rest)).
 

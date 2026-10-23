@@ -111,7 +111,23 @@ public final class CatalogueChoiceCheck {
         canvas.setDefinitionLocation(process.toFile());
         check(canvas.domainMismatch() != null && canvas.domainMismatch().startsWith("This process is saved under ProcessDefinitionFolder/credit but uses the travel catalogue (Travel.json)")
             && canvas.serviceNotes().contains(canvas.domainMismatch()) && !canvas.serviceBlockers().contains(canvas.domainMismatch()), "Mismatch not a Validate reminder: " + canvas.domainMismatch());
-        System.out.println("PASS: new process offers only standard services; first own service asks for the domain catalogue; new domain catalogue created empty and listed for packaging with its layout kept; service names unique across catalogues; a listed catalogue deleted later found and removed from packaging (LF and CRLF); process and catalogue domains checked at Validate; a new process saved under a domain takes its catalogue");
+        // Deployed on the standard catalogue, then moved to a domain's: deploying again under the same name, the Build
+        // profile written for the first deployment follows the new catalogue instead of stopping the save.
+        File deployed = common.resolve("ServiceDeploymentFolder/credit/Credit_Fraud_Rest_Workflow.json").toFile();
+        Path profile = project.resolve("btsn.services/deployments/credit/Credit_Fraud_Rest_WorkflowDeployment.json");
+        Files.createDirectories(profile.getParent());
+        String stale = "{\n  \"catalog\": \"BusinessServiceDefinitions/petrinet/PetriNetModels.json\",\n  \"infrastructure\": \"InfrastructureDefinitionFolder/SingleHost.json\",\n"
+            + "  \"serviceDeployment\": \"ServiceDeploymentFolder/credit/Credit_Fraud_Rest_Workflow.json\"\n}\n";
+        Files.writeString(profile, stale);
+        try { new ServiceRegistry().loadDeployment(deployed); throw new AssertionError("A stale profile was not noticed"); }
+        catch (java.io.IOException conflict) {
+            check(conflict.getMessage().contains("uses the catalogue BusinessServiceDefinitions/credit/Credit.json, but its profile Credit_Fraud_Rest_WorkflowDeployment.json names BusinessServiceDefinitions/petrinet/PetriNetModels.json"), conflict.getMessage());
+        }
+        check(ServiceRegistry.alignProfiles(deployed, "BusinessServiceDefinitions/credit/Credit.json").equals(Arrays.asList(profile.toFile().getCanonicalFile()))
+            && Files.readString(profile).equals(stale.replace("petrinet/PetriNetModels.json", "credit/Credit.json")), "Profile not aligned:\n" + Files.readString(profile));
+        ServiceRegistry redeployed = new ServiceRegistry(); redeployed.loadDeployment(deployed);
+        check(redeployed.problem() == null && ServiceRegistry.alignProfiles(deployed, "BusinessServiceDefinitions/credit/Credit.json").isEmpty(), "Aligned profile not usable");
+        System.out.println("PASS: new process offers only standard services; first own service asks for the domain catalogue; new domain catalogue created empty and listed for packaging with its layout kept; service names unique across catalogues; a listed catalogue deleted later found and removed from packaging (LF and CRLF); process and catalogue domains checked at Validate; a Build profile follows its deployment to a new catalogue; a new process saved under a domain takes its catalogue");
     }
 
     private static void check(boolean condition, String message) { if (!condition) throw new AssertionError(message); }

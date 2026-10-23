@@ -1207,12 +1207,12 @@ public class Canvas extends JPanel {
             JMenuItem chooseCatalogue = new JMenuItem(EditorFrame.CHOOSE_CREATE_CATALOGUE);
             chooseCatalogue.addActionListener(ev -> chooseCatalogue(this));
             menu.add(chooseCatalogue);
-            JMenuItem editService = new JMenuItem("Edit Service in Catalogue...");
+            JMenuItem editService = new JMenuItem(serviceRegistry.editServiceLabel());
             editService.setEnabled(serviceRegistry.domainContract(place) != null);
             if (!domain) editService.setToolTipText(first);
             editService.addActionListener(ev -> ServiceDefinitionDialog.open(this, this, place, true));
             menu.add(editService);
-            JMenuItem addService = new JMenuItem("Add Service to Catalogue...");
+            JMenuItem addService = new JMenuItem(serviceRegistry.createServiceLabel());
             addService.setEnabled(domain);
             if (!domain) addService.setToolTipText(first);
             addService.addActionListener(ev -> ServiceDefinitionDialog.open(this, this, place, false));
@@ -2755,7 +2755,7 @@ public class Canvas extends JPanel {
                         if (route.getSource() == out.getTarget() && value != null && !value.trim().isEmpty() && !routesOn.contains(value.trim()))
                             notes.add("Place '" + place.getLabel() + "': the arc from " + out.getTarget().getLabel() + " to " + (route.getTarget() == null ? "?" : route.getTarget().getLabel())
                                 + " tests \"" + value.trim() + "\", but " + c.service + (c.routes.isEmpty() ? " (starting code)" : "") + " routes on " + String.join(", ", routesOn)
-                                + (c.routes.isEmpty() ? ". Add the values it routes on with Edit Service in Catalogue..." : ".") );
+                                + (c.routes.isEmpty() ? ". Add the values it routes on with " + serviceRegistry.editServiceLabel() : ".") );
                     }
                     // The other way round: a value the service routes on that no arc tests, with no unguarded arc to take it.
                     // The host drops such a token, so the design is fixed before it runs.
