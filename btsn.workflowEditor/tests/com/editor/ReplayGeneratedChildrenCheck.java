@@ -104,10 +104,18 @@ public final class ReplayGeneratedChildrenCheck {
                     check(own.stream().noneMatch(s -> s.phase == Phase.BUFFERED_AT_TIN
                             && s.endTime > enter),
                         "Child " + child + " falsely waits for a later parent or join: " + own);
+                    // The host log says TERMINATE but there is no T_out -> T9 arc.
+                    // A terminal join is not yet a runnable backend operation, so
+                    // replay must not invent a direct jump to T9.
+                    check(own.stream().noneMatch(s -> s.phase == Phase.TRAVELING_TO_TERMINATE
+                            || s.phase == Phase.AT_TERMINATE),
+                        "Child " + child + " drew a non-existent route to T9: " + own);
+                    check(own.stream().anyMatch(s -> s.phase == Phase.CONSUMED),
+                        "Child " + child + " should disappear after the recorded termination: " + own);
                 }
             } catch (Throwable ex) { error[0] = ex; }
         });
         if (error[0] != null) throw new AssertionError("Replay generated children", error[0]);
-        System.out.println("PASS: 10 two-branch EG forks replay as ordinary entries, no artificial join wait");
+        System.out.println("PASS: 10 two-branch EG forks use their arcs; no artificial join wait or invented terminate arc");
     }
 }
