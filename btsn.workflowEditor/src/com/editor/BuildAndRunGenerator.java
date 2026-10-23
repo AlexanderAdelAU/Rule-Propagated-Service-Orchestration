@@ -148,7 +148,7 @@ public final class BuildAndRunGenerator {
                 plan.problems.add(element.getId() + " has no outgoing path to a place.");
                 continue;
             }
-            if (entryPlaces.size() >= org.btsn.constants.VersionConstants.TOKEN_INCREMENT) {
+            if (entryPlaces.size() > 9999) {
                 plan.problems.add(element.getId() + " has too many outgoing branches for child sequence IDs.");
                 continue;
             }
