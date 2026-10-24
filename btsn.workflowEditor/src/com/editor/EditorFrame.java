@@ -370,7 +370,6 @@ public class EditorFrame extends JPanel {
                             break;
                         }
                     }
-                    canvas.fitJoinInputs();   // a JoinNode T_in gives a standard service one input per arc
                     canvas.repaint();
                     // Refresh the attributes panel to show updated Node Value
                     showElementAttributes(element);
@@ -569,6 +568,38 @@ public class EditorFrame extends JPanel {
         attributesPanel.add(panel);
     }
     
+    /**
+     * A standard service (true/false) takes whatever inputs its place names and returns under any name, so the designer
+     * sets them here: e.g. a join's place takes one input per arc, and each place feeding the join returns its input's name.
+     */
+    private void addEditableContract(ProcessElement place, ServiceOperation operation) {
+        JTextField inputs = new JTextField(20), returns = new JTextField(20);
+        List<String> names = new ArrayList<>();
+        for (ServiceArgument argument : operation.getArguments()) names.add(argument.getName());
+        addField("Inputs (comma-separated):", inputs, String.join(", ", names));
+        inputs.setToolTipText("The names this place takes. A join's place takes one per incoming arc, e.g. token_branch1, token_branch2.");
+        addField("Returns:", returns, operation.getReturnAttribute());
+        returns.setToolTipText("The name this place's result is passed on under. A place feeding a join returns the input its arc fills, e.g. token_branch1.");
+        inputs.getDocument().addDocumentListener(new SimpleDocumentListener(() -> {
+            operation.getArguments().clear();
+            for (String name : inputs.getText().split(",")) if (!name.trim().isEmpty()) operation.addArgument(new ServiceArgument(name.trim(), "String", "String", false));
+            canvas.serviceContractChanged();
+        }));
+        returns.getDocument().addDocumentListener(new SimpleDocumentListener(() -> {
+            operation.setReturnAttribute(returns.getText().trim());
+            canvas.serviceContractChanged();
+        }));
+        int arcs = canvas.joinArcs(place);
+        String slot = canvas.joinSlots().get(place);
+        if (arcs > 1 || slot != null) {
+            JTextArea hint = new JTextArea((arcs > 1 ? "Join of " + arcs + " arcs: give it " + arcs + " inputs, e.g. " + String.join(", ", Canvas.joinInputNames(arcs)) + "." : "")
+                + (slot != null ? (arcs > 1 ? "\n" : "") + "Feeds a join: return " + slot + "." : ""));
+            hint.setEditable(false); hint.setOpaque(false); hint.setLineWrap(true); hint.setWrapStyleWord(true); hint.setFont(fieldFont());
+            hint.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
+            attributesPanel.add(hint);
+        }
+    }
+
     private void addField(String labelText, JTextField field, String value) {
         JPanel panel = new JPanel(new BorderLayout(5, 5));
         panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
@@ -798,6 +829,8 @@ public class EditorFrame extends JPanel {
         runsOn.setPreferredSize(new Dimension(220, 52)); runsOn.setMinimumSize(new Dimension(0, 52)); runsOn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
         attributesPanel.add(runsOn);
         for (ServiceOperation operation : element.getServiceOperations()) {
+            ServiceRegistry.Contract contract = registry.contract(element.getService(), operation.getName());
+            if (contract != null && "boolean".equals(contract.resultType)) { addEditableContract(element, operation); continue; }
             StringBuilder text = new StringBuilder(operation.getName()).append("(");
             for (ServiceArgument argument : operation.getArguments()) { if (text.charAt(text.length()-1) != '(') text.append(", "); text.append(argument.getName()); }
             text.append(") \u2192 ").append(operation.getReturnAttribute());
