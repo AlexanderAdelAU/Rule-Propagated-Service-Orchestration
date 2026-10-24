@@ -2789,6 +2789,8 @@ public class Canvas extends JPanel {
     private String serviceDeploymentReference = "";
     /** Catalogue of a process that has not been deployed yet; once deployed, the deployment names it. */
     private String catalogueReference = "";
+    /** The launcher a picture of a combined run names (kept as written), or "". */
+    private String launcherReference = "";
     private java.io.File definitionLocation;
     /** Node choices made on the canvas (place id -> node) that the Deploy panel has not saved yet. */
     private final Map<String, String> pendingNodes = new java.util.LinkedHashMap<>();
@@ -2843,6 +2845,7 @@ public class Canvas extends JPanel {
                         String value = route.getDecisionValue();
                         if (value == null || value.trim().isEmpty()) unguarded = true; else tested.add(value.trim());
                     }
+                    if (unguarded && "GatewayNode".equals(out.getTarget().getNodeType())) unguarded = false;   // a gateway never takes an unguarded arc
                     if (unguarded || tested.isEmpty() || c.routes.isEmpty()) continue;
                     List<String> missing = new ArrayList<>();
                     for (String r : c.routes) if (!tested.contains(r)) missing.add(r);
@@ -2924,6 +2927,14 @@ public class Canvas extends JPanel {
             for (Arrow a : arrows) { in |= a.getTarget() == element; out |= a.getSource() == element; }
             if (in && !out && !kind.contains("TERMINATE"))
                 gaps.add("Transition '" + element.getLabel() + "' leads nowhere: tokens reaching it stop there. Make it a Terminate node if the process ends there, or connect it to the next place.");
+            // A gateway follows only the arcs whose guard matches what its place returned; an arc without a guard is
+            // never taken. (A picture of a combined run draws several versions' arcs, so it is not checked.)
+            if ("GatewayNode".equals(element.getNodeType()) && BuildAndRunGenerator.combinedLauncher(definitionLocation) == null)
+                for (Arrow a : arrows)
+                    if (a.getSource() == element && a.getTarget() != null && (a.getDecisionValue() == null || a.getDecisionValue().trim().isEmpty()))
+                        gaps.add("'" + element.getLabel() + "' is a GatewayNode: it follows only the arcs whose guard matches what its place returns, so its arc to "
+                            + a.getTarget().getLabel() + ", which has no guard, is never taken. Give that arc a guard, or set " + element.getLabel()
+                            + "'s Node Type to EdgeNode if every token goes there.");
         }
         if (reminders) for (Arrow a : arrows) {
             String value = a.getDecisionValue();
@@ -3347,6 +3358,7 @@ public class Canvas extends JPanel {
         json.append("{\n");
         if (!serviceDeploymentReference.isEmpty()) json.append("  \"serviceDeployment\": \"").append(escapeJSON(serviceDeploymentReference)).append("\",\n");
         else if (!getCatalogueReference().isEmpty()) json.append("  \"catalog\": \"").append(escapeJSON(getCatalogueReference())).append("\",\n");
+        if (!launcherReference.isEmpty()) json.append("  \"launcher\": \"").append(escapeJSON(launcherReference)).append("\",\n");
         
         // Include metadata if present
         if (metadataJSON != null && !metadataJSON.isEmpty()) {
@@ -3522,6 +3534,8 @@ public class Canvas extends JPanel {
         serviceDeploymentReference = extractValue(json, "serviceDeployment");
         if (serviceDeploymentReference == null) serviceDeploymentReference = "";
         catalogueReference = extractValue(json, "catalog");
+        launcherReference = extractValue(json, "launcher");
+        if (launcherReference == null) launcherReference = "";
         if (catalogueReference == null) catalogueReference = "";
         serviceRegistry.loadProcessReferences(serviceDeploymentReference, catalogueReference, definitionLocation);
         // An initialiser or collector names no catalogue (its places run the hosts' own services): show the standard one.
@@ -4139,6 +4153,7 @@ public class Canvas extends JPanel {
         documentationJSON = null;
         processType = null;
         serviceDeploymentReference = "";
+        launcherReference = "";
         pendingNodes.clear();
         serviceRegistry.useStandardCatalogue(definitionLocation);   // a new process does not inherit the last one's catalogue
         notifySelectionChanged(null);  // Clear attributes panel

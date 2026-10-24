@@ -19,6 +19,21 @@ public final class CombinedProcessCheck {
             "Run on hosts does not find the combined launcher");
         check(BuildAndRunGenerator.combinedLauncher(new File(root, "btsn.common/ProcessDefinitionFolder/petrinet/LiveChange/P1_P2_P3_P4_ForkRebalance_Workflow.json")) == null,
             "An ordinary process was taken for a combined one");
+        // A picture of a combined run names its launcher: Build and Run on hosts use it, and saving keeps the name.
+        String[][] pictures = {
+            {"healthcare/Workflow/Emergency_Department_With_Federated_Radiology", "Triple_Workflow_Emergencey_Department_Concurrent.xml", "EG1: v003", "EG2: v002", "EG3: v001"},
+            {"petrinet/Workflow/P1_P2_P3_P4_Concurrent_Workflow", "P1_P2_P3_P4_Concurrent_BuildAndRun.xml", "EG1: v001", "EG2: v002"}};
+        for (String[] p : pictures) {
+            File design = new File(root, "btsn.common/ProcessDefinitionFolder/" + p[0] + ".json");
+            File named = BuildAndRunGenerator.combinedLauncher(design);
+            check(named != null && named.getName().equals(p[1]), p[0] + " did not find its launcher: " + named);
+            List<String> run = BuildAndRunGenerator.combinedSummary(named);
+            check(run.size() == p.length - 2, p[0] + " summary: " + run);
+            for (int i = 2; i < p.length; i++) check(run.get(i - 2).startsWith(p[i]), p[0] + " summary: " + run);
+            check(LauncherRun.launchersFor(root, p[0]).contains(named.getCanonicalFile()) || LauncherRun.launchersFor(root, p[0]).contains(named), p[0] + ": Run on hosts does not find " + p[1]);
+            Canvas canvas = new Canvas(); canvas.setDefinitionLocation(design); canvas.loadFromJSON(java.nio.file.Files.readString(design.toPath()));
+            check(canvas.saveToJSON().contains("\"launcher\": \"" + named.getParentFile().getName() + "/" + p[1] + "\""), p[0] + ": saving dropped its launcher");
+        }
         if (args.length > 1 && !java.awt.GraphicsEnvironment.isHeadless()) {
             File picture = new File(args[1], "combined-build.png");
             javax.swing.SwingUtilities.invokeAndWait(() -> {
@@ -31,7 +46,7 @@ public final class CombinedProcessCheck {
                 dialog.dispose();
             });
         }
-        System.out.println("PASS: combined process finds its launcher, summarises both versions, and Run on hosts finds it");
+        System.out.println("PASS: combined process finds its launcher, summarises both versions, and Run on hosts finds it; the two combined pictures (healthcare triple run, petrinet concurrent run) name theirs, which Build and Run use and saving keeps");
     }
     private static void check(boolean condition, String message) { if (!condition) throw new AssertionError(message); }
 }
