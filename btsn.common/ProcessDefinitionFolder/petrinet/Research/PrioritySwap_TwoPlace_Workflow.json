@@ -121,7 +121,8 @@
       "height": 60,
       "label": "EG_B",
       "rotation": 0,
-      "generator_rate": "1000"
+      "generator_rate": "1000",
+      "token_version": "v001"
     },
     {
       "id": "EG_A",
@@ -132,7 +133,8 @@
       "height": 60,
       "label": "EG_A",
       "rotation": 0,
-      "generator_rate": "1000"
+      "generator_rate": "1000",
+      "token_version": "v002"
     }
   ],
   "arrows": [
