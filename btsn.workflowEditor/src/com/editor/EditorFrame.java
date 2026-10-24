@@ -257,9 +257,6 @@ public class EditorFrame extends JPanel {
                     notifyColorChange(element.getFillColor(), element.getBorderColor());
                 });
             
-            // Add network connectivity
-            addNetworkConnectivity(element);
-            
         } else {
             titleLabel.setText("Transition");
             
@@ -970,7 +967,7 @@ public class EditorFrame extends JPanel {
         
         JScrollPane scrollPane = new JScrollPane(networkText);
         scrollPane.setPreferredSize(new Dimension(230, 100));
-        scrollPane.setMaximumSize(new Dimension(230, 100));
+        scrollPane.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));   // as wide as the panel
         
         networkPanel.add(scrollPane);
         attributesPanel.add(networkPanel);

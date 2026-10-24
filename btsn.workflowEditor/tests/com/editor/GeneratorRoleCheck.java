@@ -48,6 +48,7 @@ public final class GeneratorRoleCheck {
                 EditorFrame attributes = new EditorFrame(canvas); attributes.updateSelection(generator);
                 check(texts(attributes).stream().anyMatch(t -> t.startsWith("Initial marking: 2 tokens, once")), "No Role box: " + texts(attributes));
                 check(fields(attributes).stream().anyMatch(f -> "1000".equals(f.getText()) && !f.isEnabled()), "Rate not greyed out for an initial marking");
+                check(titled(attributes, "Network") == 1, "Network boxes for a generator: " + titled(attributes, "Network"));
 
                 // Build: the summary and the dialog's row say it; the interval cannot be edited.
                 BuildAndRunGenerator.Plan plan = BuildAndRunGenerator.plan(canvas, traffic);
@@ -92,6 +93,15 @@ public final class GeneratorRoleCheck {
             if (c instanceof Container) result.addAll(texts((Container) c));
         }
         return result;
+    }
+    private static int titled(Container parent, String title) {
+        int n = 0;
+        for (Component c : parent.getComponents()) {
+            if (c instanceof JComponent && ((JComponent) c).getBorder() instanceof javax.swing.border.TitledBorder
+                    && title.equals(((javax.swing.border.TitledBorder) ((JComponent) c).getBorder()).getTitle())) n++;
+            if (c instanceof Container) n += titled((Container) c, title);
+        }
+        return n;
     }
     private static List<JTextField> fields(Container parent) {
         List<JTextField> result = new ArrayList<>();
