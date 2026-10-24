@@ -1019,6 +1019,7 @@ public class Canvas extends JPanel {
                     Arrow newArrow = new Arrow(connectionSource, element);
                     arrows.add(newArrow);
                     fixTransitionType(connectionSource); fixTransitionType(element);   // an arc to or from a place sets T_in / T_out
+                    fitJoinInputs();
                     
                     // Select the newly created arrow so it's visible (red highlight)
                     selectedArrow = newArrow;
@@ -2374,6 +2375,7 @@ public class Canvas extends JPanel {
         
         arrows.add(newArrow);
         fixTransitionType(connectionSource); fixTransitionType(target);   // an arc to or from a place sets T_in / T_out
+        fitJoinInputs();
         
         // Select the newly created arrow
         selectedArrow = newArrow;
@@ -2772,7 +2774,7 @@ public class Canvas extends JPanel {
     private final Map<String, String> pendingNodes = new java.util.LinkedHashMap<>();
     private Runnable deployAction;
     private final List<Runnable> deploymentListeners = new ArrayList<>();
-    public void serviceContractChanged() { notifyChange(); repaint(); }
+    public void serviceContractChanged() { fitJoinInputs(); notifyChange(); repaint(); }
     /** The place now uses service.operation from the (reloaded) catalogue: contract applied, panels and Deploy refreshed. */
     public void useService(ProcessElement place, String service, String operation) {
         saveUndoState();
@@ -2832,6 +2834,7 @@ public class Canvas extends JPanel {
         notes.addAll(chainMismatches());
         notes.addAll(routingGaps(reminders));
         notes.addAll(transitionTypeConflicts());
+        notes.addAll(joinsWithoutPlace());
         if (reminders && !typesCorrectedOnLoad.isEmpty())
             notes.add("Transition types corrected from their arcs (" + String.join("; ", typesCorrectedOnLoad) + "). Save to keep the correction.");
         String mismatch = reminders ? domainMismatch() : null;
@@ -3050,6 +3053,8 @@ public class Canvas extends JPanel {
         } catch (Exception ex) { JOptionPane.showMessageDialog(parent, ex.getMessage(), "Unresolved catalogue", JOptionPane.ERROR_MESSAGE); }
     }
     public List<String> validateServiceContracts() {
+        // Standard services on a join place follow the arcs first, so a drawn join is not reported as a contract error.
+        if (BuildAndRunGenerator.combinedLauncher(definitionLocation) == null) fitJoinInputs();
         List<String> errors = new ArrayList<>();
         for (ProcessElement element : elements) if (element.getType() == ProcessElement.Type.PLACE)
             for (String error : serviceRegistry.validatePlace(element)) errors.add(element.getLabel() + ": " + error);
@@ -3106,6 +3111,101 @@ public class Canvas extends JPanel {
         return false;
     }
 
+    /**
+     * The arcs into a place's join (its T_in with JoinNode), not counting event generators: the inputs it waits for.
+     * 0 when the place is not a join.
+     */
+    public int joinArcs(ProcessElement place) {
+        for (Arrow in : arrows) {
+            ProcessElement join = in.getTarget() == place ? in.getSource() : null;
+            if (join == null || join.getType() != ProcessElement.Type.TRANSITION || !"JoinNode".equals(join.getNodeType())) continue;
+            int arcs = 0;
+            for (Arrow into : arrows)
+                if (into.getTarget() == join && into.getSource() != null && into.getSource().getType() != ProcessElement.Type.EVENT_GENERATOR) arcs++;
+            return arcs;
+        }
+        return 0;
+    }
+    /** The inputs a join of n arcs passes on, one per arc: token_branch1 .. token_branchN. */
+    public static List<String> joinInputNames(int n) {
+        List<String> names = new ArrayList<>();
+        for (int i = 1; i <= n; i++) names.add("token_branch" + i);
+        return names;
+    }
+    /**
+     * A standard service (true/false) takes whatever inputs its place is given, so on a join place it takes one per
+     * arc, token_branch1..N, and one feeding a join returns the input its arc fills. (Names are left alone otherwise: a
+     * deployment shared with another process may need them.) Services of a domain catalogue keep the inputs their
+     * catalogue declares. True when any place changed.
+     */
+    public boolean fitJoinInputs() {
+        boolean changed = false;
+        for (ProcessElement place : getPlaces()) {
+            int arcs = joinArcs(place);
+            for (ServiceOperation op : place.getServiceOperations()) {
+                if (!isStandardContract(place, op)) continue;
+                List<String> names = new ArrayList<>();
+                for (ServiceArgument a : op.getArguments()) names.add(a.getName());
+                if (arcs < 2 || names.size() == arcs) continue;   // the count matters; names chosen by the designer stay
+                List<String> wanted = joinInputNames(arcs);
+                op.getArguments().clear();
+                for (String name : wanted) op.addArgument(new ServiceArgument(name, "String", "String", false));
+                changed = true;
+            }
+        }
+        // Each arc into a join fills one of its place's inputs, in the order the arcs were drawn: a standard service
+        // feeding that arc returns that input's name, so the join can tell its inputs apart.
+        Map<ServiceOperation, String> slots = new java.util.IdentityHashMap<>();
+        for (Map.Entry<ProcessElement, String> fed : joinSlots().entrySet())
+            for (ServiceOperation op : fed.getKey().getServiceOperations()) slots.put(op, fed.getValue());
+        for (ProcessElement place : getPlaces())
+            for (ServiceOperation op : place.getServiceOperations()) {
+                if (!isStandardContract(place, op)) continue;
+                if (!slots.containsKey(op) || slots.get(op).equals(op.getReturnAttribute())) continue;
+                op.setReturnAttribute(slots.get(op)); changed = true;
+            }
+        return changed;
+    }
+    private boolean isStandardContract(ProcessElement place, ServiceOperation op) {
+        ServiceRegistry.Contract c = serviceRegistry.contract(place.getService(), op.getName());
+        return c != null && "boolean".equals(c.resultType);
+    }
+    /**
+     * The places that feed a join, each with the join input its arc fills: the k-th arc into the join (in the order
+     * drawn, generators aside) fills its place's k-th input, as the hosts assign them.
+     */
+    public Map<ProcessElement, String> joinSlots() {
+        Map<ProcessElement, String> slots = new java.util.LinkedHashMap<>();
+        for (ProcessElement join : elements) {
+            if (join.getType() != ProcessElement.Type.TRANSITION || !"JoinNode".equals(join.getNodeType())) continue;
+            ProcessElement place = null;
+            for (Arrow out : arrows) if (out.getSource() == join && out.getTarget() != null && out.getTarget().getType() == ProcessElement.Type.PLACE) place = out.getTarget();
+            if (place == null || place.getServiceOperations().isEmpty()) continue;
+            List<ServiceArgument> inputs = place.getServiceOperations().get(0).getArguments();
+            int k = 0;
+            for (Arrow in : arrows) {
+                if (in.getTarget() != join || in.getSource() == null || in.getSource().getType() == ProcessElement.Type.EVENT_GENERATOR) continue;
+                if (k < inputs.size())
+                    for (Arrow feed : arrows)
+                        if (feed.getTarget() == in.getSource() && feed.getSource() != null && feed.getSource().getType() == ProcessElement.Type.PLACE)
+                            slots.put(feed.getSource(), inputs.get(k).getName());
+                k++;
+            }
+        }
+        return slots;
+    }
+    /** A join waits for its inputs at the T_in of a place; one that leads to no place has nothing to host it. */
+    public List<String> joinsWithoutPlace() {
+        List<String> notes = new ArrayList<>();
+        for (ProcessElement join : elements) {
+            if (join.getType() != ProcessElement.Type.TRANSITION || !"JoinNode".equals(join.getNodeType())) continue;
+            boolean place = false;
+            for (Arrow out : arrows) if (out.getSource() == join && out.getTarget() != null && out.getTarget().getType() == ProcessElement.Type.PLACE) place = true;
+            if (!place) notes.add(join.getLabel() + " is a join but no place follows it. A join is the T_in of the place that waits for its inputs, "
+                + "so nothing would host " + join.getLabel() + ": draw an arc from " + join.getLabel() + " into a place, and lead that place's T_out on (to a terminate node if the process ends there).");
+        }
+        return notes;
+    }
     public List<String> joinInputMismatches() {
         List<String> errors = new ArrayList<>();
         for (ProcessElement join : elements) {
@@ -3122,9 +3222,18 @@ public class Canvas extends JPanel {
                     named = operation.getArguments().size();
                     if (named == arcs) fits = true;
                 }
-                if (!fits) errors.add(place.getLabel() + " is a join with " + arcs + " incoming arcs but its operation names " + named
-                    + (named == 1 ? " input" : " inputs") + "; name one input for each arc.");
+                if (!fits) errors.add(place.getLabel() + " is a join with " + arcs + " incoming arcs but " + place.getService() + " takes " + named
+                    + (named == 1 ? " input" : " inputs") + "; a join's place takes one input per arc (" + String.join(", ", joinInputNames(arcs)) + "). "
+                    + "Choose a standard service, which takes them automatically, or a service of your catalogue with " + arcs + " inputs ("
+                    + serviceRegistry.createServiceLabel() + " suggests them).");
             }
+        }
+        for (Map.Entry<ProcessElement, String> fed : joinSlots().entrySet()) {
+            ProcessElement feeder = fed.getKey();
+            for (ServiceOperation op : feeder.getServiceOperations())
+                if (!isStandardContract(feeder, op) && !fed.getValue().equals(op.getReturnAttribute()))
+                    errors.add(feeder.getLabel() + " feeds a join where its arc fills the input " + fed.getValue() + ", but " + feeder.getService()
+                        + " returns " + op.getReturnAttribute() + "; the join tells its inputs apart by name, so its service must return " + fed.getValue() + ".");
         }
         return errors;
     }
@@ -3207,16 +3316,7 @@ public class Canvas extends JPanel {
                 json.append(",\n      \"generator_rate\": \"").append(escapeJSON(element.getGeneratorRate())).append("\"");
                 json.append(",\n      \"token_version\": \"").append(escapeJSON(element.getTokenVersion())).append("\"");
                 
-                // Save fork_behavior if enabled
-                if (element.isForkEnabled()) {
-                    json.append(",\n      \"fork_behavior\": {");
-                    json.append("\n        \"enabled\": true");
-                    json.append(",\n        \"child_count\": ").append(element.getForkChildCount());
-                    if (element.getForkJoinTarget() != null) {
-                        json.append(",\n        \"join_target\": \"").append(escapeJSON(element.getForkJoinTarget())).append("\"");
-                    }
-                    json.append("\n      }");
-                }
+                // A generator's fork follows from its arcs (Build reads them), so no fork_behavior is saved.
             } else {
                 json.append(",\n      \"rotation\": ").append(element.getRotationAngle());
                 json.append(",\n      \"node_type\": \"").append(escapeJSON(element.getNodeType())).append("\"");

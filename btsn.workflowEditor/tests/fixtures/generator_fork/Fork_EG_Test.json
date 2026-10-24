@@ -1,0 +1,278 @@
+{
+  "serviceDeployment": "ServiceDeploymentFolder/petrinet/Fork_EG_Test.json",
+  "processType": "PetriNet",
+  "elements": [
+    {
+      "id": "EG1",
+      "type": "EVENT_GENERATOR",
+      "x": 80,
+      "y": 180,
+      "width": 24,
+      "height": 60,
+      "label": "EG1",
+      "rotation": 0.0,
+      "generator_rate": "1000",
+      "token_version": "v001"
+    },
+    {
+      "id": "T2",
+      "type": "TRANSITION",
+      "x": 180,
+      "y": 120,
+      "width": 24,
+      "height": 60,
+      "label": "T2",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "50"
+    },
+    {
+      "id": "P3",
+      "type": "PLACE",
+      "x": 260,
+      "y": 125,
+      "width": 50,
+      "height": 50,
+      "label": "P3",
+      "service": "StochasticService",
+      "serviceInstance": "ForkTestP3",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "token",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T4",
+      "type": "TRANSITION",
+      "x": 360,
+      "y": 120,
+      "width": 24,
+      "height": 60,
+      "label": "T4",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T7",
+      "type": "TRANSITION",
+      "x": 180,
+      "y": 260,
+      "width": 24,
+      "height": 60,
+      "label": "T7",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "50"
+    },
+    {
+      "id": "P6",
+      "type": "PLACE",
+      "x": 260,
+      "y": 265,
+      "width": 50,
+      "height": 50,
+      "label": "P6",
+      "service": "StochasticService",
+      "serviceInstance": "ForkTestP6",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "token",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T8",
+      "type": "TRANSITION",
+      "x": 360,
+      "y": 260,
+      "width": 24,
+      "height": 60,
+      "label": "T8",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T5",
+      "type": "TRANSITION",
+      "x": 460,
+      "y": 190,
+      "width": 24,
+      "height": 60,
+      "label": "T5",
+      "rotation": 0.0,
+      "node_type": "JoinNode",
+      "node_value": "JOIN_NODE",
+      "transition_type": "T_in",
+      "buffer": "50"
+    },
+    {
+      "id": "P10",
+      "type": "PLACE",
+      "x": 540,
+      "y": 195,
+      "width": 50,
+      "height": 50,
+      "label": "P10",
+      "service": "StochasticService",
+      "serviceInstance": "ForkTestP10",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "token",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T11",
+      "type": "TRANSITION",
+      "x": 640,
+      "y": 190,
+      "width": 24,
+      "height": 60,
+      "label": "T11",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T9",
+      "type": "TRANSITION",
+      "x": 740,
+      "y": 190,
+      "width": 24,
+      "height": 60,
+      "label": "T9",
+      "rotation": 0.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "EG1",
+      "target": "T2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "EG1",
+      "target": "T7",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T2",
+      "target": "P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P3",
+      "target": "T4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T7",
+      "target": "P6",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P6",
+      "target": "T8",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T4",
+      "target": "T5",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T8",
+      "target": "T5",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T5",
+      "target": "P10",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P10",
+      "target": "T11",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T11",
+      "target": "T9",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    }
+  ],
+  "textElements": []
+}
