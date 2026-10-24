@@ -105,8 +105,8 @@
       "height": 60,
       "label": "T_out_P1",
       "rotation": 0,
-      "node_type": "GatewayNode",
-      "node_value": "GATEWAY_NODE",
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
       "transition_type": "T_out",
       "fill_color": "#FF9933"
     },

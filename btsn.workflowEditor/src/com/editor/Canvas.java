@@ -2845,6 +2845,7 @@ public class Canvas extends JPanel {
                         String value = route.getDecisionValue();
                         if (value == null || value.trim().isEmpty()) unguarded = true; else tested.add(value.trim());
                     }
+                    if (unguarded && "GatewayNode".equals(out.getTarget().getNodeType())) unguarded = false;   // a gateway never takes an unguarded arc
                     if (unguarded || tested.isEmpty() || c.routes.isEmpty()) continue;
                     List<String> missing = new ArrayList<>();
                     for (String r : c.routes) if (!tested.contains(r)) missing.add(r);
@@ -2926,6 +2927,14 @@ public class Canvas extends JPanel {
             for (Arrow a : arrows) { in |= a.getTarget() == element; out |= a.getSource() == element; }
             if (in && !out && !kind.contains("TERMINATE"))
                 gaps.add("Transition '" + element.getLabel() + "' leads nowhere: tokens reaching it stop there. Make it a Terminate node if the process ends there, or connect it to the next place.");
+            // A gateway follows only the arcs whose guard matches what its place returned; an arc without a guard is
+            // never taken. (A picture of a combined run draws several versions' arcs, so it is not checked.)
+            if ("GatewayNode".equals(element.getNodeType()) && BuildAndRunGenerator.combinedLauncher(definitionLocation) == null)
+                for (Arrow a : arrows)
+                    if (a.getSource() == element && a.getTarget() != null && (a.getDecisionValue() == null || a.getDecisionValue().trim().isEmpty()))
+                        gaps.add("'" + element.getLabel() + "' is a GatewayNode: it follows only the arcs whose guard matches what its place returns, so its arc to "
+                            + a.getTarget().getLabel() + ", which has no guard, is never taken. Give that arc a guard, or set " + element.getLabel()
+                            + "'s Node Type to EdgeNode if every token goes there.");
         }
         if (reminders) for (Arrow a : arrows) {
             String value = a.getDecisionValue();
