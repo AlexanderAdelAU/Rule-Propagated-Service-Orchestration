@@ -1,5 +1,6 @@
 {
-   "processType":"PetriNet",
+  "serviceDeployment": "ServiceDeploymentFolder/petrinet/ForkModels.json",
+  "processType": "PetriNet",
   "elements": [
     {
       "id": "T_in_P1",
@@ -23,12 +24,22 @@
       "width": 50,
       "height": 50,
       "label": "P1",
-      "service": "P1_Place",
+      "service": "StochasticService",
       "operations": [
         {
-          "name": "processToken"
+          "name": "processToken",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ],
+          "returnAttribute": "token"
         }
-      ]
+      ],
+      "serviceInstance": "StochasticInstance1"
     },
     {
       "id": "T_out_P1",
@@ -65,12 +76,22 @@
       "width": 50,
       "height": 50,
       "label": "P3",
-      "service": "P3_Place",
+      "service": "StochasticService",
       "operations": [
         {
-          "name": "processToken"
+          "name": "processToken",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ],
+          "returnAttribute": "token_branch1"
         }
-      ]
+      ],
+      "serviceInstance": "StochasticInstance4"
     },
     {
       "id": "T_out_P3",
@@ -107,12 +128,22 @@
       "width": 50,
       "height": 50,
       "label": "P2",
-      "service": "P2_Place",
+      "service": "StochasticService",
       "operations": [
         {
-          "name": "processToken"
+          "name": "processToken",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ],
+          "returnAttribute": "token_branch2"
         }
-      ]
+      ],
+      "serviceInstance": "StochasticInstance3"
     },
     {
       "id": "T_out_P2",
@@ -149,12 +180,28 @@
       "width": 50,
       "height": 50,
       "label": "P4",
-      "service": "P4_Place",
+      "service": "StochasticService",
       "operations": [
         {
-          "name": "processToken"
+          "name": "processToken",
+          "arguments": [
+            {
+              "name": "token_branch1",
+              "type": "String",
+              "value": "String",
+              "required": false
+            },
+            {
+              "name": "token_branch2",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ],
+          "returnAttribute": "token"
         }
-      ]
+      ],
+      "serviceInstance": "StochasticInstance5"
     },
     {
       "id": "T_out_P4",
@@ -167,48 +214,6 @@
       "rotation": 0.0,
       "node_type": "EdgeNode",
       "node_value": "EDGE_NODE",
-      "transition_type": "T_out"
-    },
-    {
-      "id": "T_in_Monitor",
-      "type": "TRANSITION",
-      "x": 910,
-      "y": 370,
-      "width": 20,
-      "height": 60,
-      "label": "T_in_Monitor",
-      "rotation": 90.0,
-      "node_type": "EdgeNode",
-      "node_value": "EDGE_NODE",
-      "transition_type": "T_in",
-      "buffer": "10"
-    },
-    {
-      "id": "Monitor",
-      "type": "PLACE",
-      "x": 895,
-      "y": 455,
-      "width": 50,
-      "height": 50,
-      "label": "Monitor",
-      "service": "MonitorService",
-      "operations": [
-        {
-          "name": "acknowledgeTokenArrival"
-        }
-      ]
-    },
-    {
-      "id": "T_out_Monitor",
-      "type": "TRANSITION",
-      "x": 910,
-      "y": 530,
-      "width": 20,
-      "height": 60,
-      "label": "T_out_Monitor",
-      "rotation": 90.0,
-      "node_type": "TerminateNode",
-      "node_value": "TERMINATE_NODE",
       "transition_type": "T_out"
     },
     {
@@ -247,6 +252,19 @@
       "rotation": 0.0,
       "generator_rate": "1000",
       "token_version": "v001"
+    },
+    {
+      "id": "T_in_Model_Terminate",
+      "type": "TRANSITION",
+      "x": 910,
+      "y": 455,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Model_Terminate",
+      "rotation": 90.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
     }
   ],
   "arrows": [
@@ -258,7 +276,10 @@
       "decision_value": "true",
       "endpoint": "processToken",
       "waypoints": [
-        {"x": 440, "y": 240}
+        {
+          "x": 440,
+          "y": 240
+        }
       ]
     },
     {
@@ -269,7 +290,10 @@
       "decision_value": "true",
       "endpoint": "processToken",
       "waypoints": [
-        {"x": 440, "y": 340}
+        {
+          "x": 440,
+          "y": 340
+        }
       ]
     },
     {
@@ -305,6 +329,14 @@
       "endpoint": ""
     },
     {
+      "source": "T_out_P3",
+      "target": "T_in_P4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
       "source": "T_out_P2",
       "target": "T_in_P4",
       "label": "",
@@ -328,38 +360,20 @@
       "decision_value": "",
       "endpoint": "",
       "waypoints": [
-        {"x": 860, "y": 300},
-        {"x": 880, "y": 300}
+        {
+          "x": 860,
+          "y": 300
+        },
+        {
+          "x": 880,
+          "y": 300
+        }
       ]
     },
     {
       "source": "T_out_P4",
-      "target": "T_in_Monitor",
+      "target": "T_in_Model_Terminate",
       "label": "v001",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
-    },
-    {
-      "source": "T_in_Monitor",
-      "target": "Monitor",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
-    },
-    {
-      "source": "Monitor",
-      "target": "T_out_Monitor",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
-    },
-    {
-      "source": "T_out_P3",
-      "target": "T_in_P4",
-      "label": "",
       "guardCondition": "",
       "decision_value": "",
       "endpoint": ""
@@ -396,7 +410,10 @@
       "decision_value": "",
       "endpoint": "",
       "waypoints": [
-        {"x": 180, "y": 380}
+        {
+          "x": 180,
+          "y": 380
+        }
       ]
     },
     {
@@ -409,13 +426,16 @@
     },
     {
       "source": "T_out_P2",
-      "target": "T_in_Monitor",
+      "target": "T_in_Model_Terminate",
       "label": "v002",
       "guardCondition": "",
       "decision_value": "",
       "endpoint": "",
       "waypoints": [
-        {"x": 760, "y": 400}
+        {
+          "x": 760,
+          "y": 400
+        }
       ],
       "labelOffsetX": -17,
       "labelOffsetY": 15
