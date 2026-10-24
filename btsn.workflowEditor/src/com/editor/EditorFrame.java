@@ -230,35 +230,7 @@ public class EditorFrame extends JPanel {
                 element.setTokenVersion(freshVersionField.getText().trim());
             }));
             
-            // Fork Children - number of child tokens this generator creates
-            // When >= 2, enables implicit fork behavior for animation
-            JSpinner forkSpinner = new JSpinner(new SpinnerNumberModel(
-                element.getForkChildCount(), 0, 10, 1));
-            forkSpinner.setMaximumSize(new Dimension(Integer.MAX_VALUE, 25));
-            addSpinnerField("Fork Children:", forkSpinner, element.getForkChildCount());
-            forkSpinner.addChangeListener(e -> {
-                int childCount = (Integer) forkSpinner.getValue();
-                element.setForkChildCount(childCount);
-                
-                if (childCount >= 2) {
-                    element.setForkEnabled(true);
-                    // Auto-detect join target from outgoing arrow
-                    String joinTarget = detectJoinTarget(element);
-                    element.setForkJoinTarget(joinTarget);
-                } else {
-                    element.setForkEnabled(false);
-                    element.setForkJoinTarget(null);
-                }
-                canvas.repaint();
-            });
-            
-            // Show current join target (read-only, auto-detected)
-            if (element.isForkEnabled() && element.getForkJoinTarget() != null) {
-                JTextField joinTargetField = new JTextField(15);
-                joinTargetField.setEditable(false);
-                joinTargetField.setBackground(new Color(240, 240, 240));
-                addField("Join Target:", joinTargetField, element.getForkJoinTarget());
-            }
+            // A generator forks when it has several arcs: Build sends one child of each token down each (see the Network box).
             
             // Colors section
             Color defaultEGFill = new Color(220, 255, 220);  // Light green
@@ -398,6 +370,7 @@ public class EditorFrame extends JPanel {
                             break;
                         }
                     }
+                    canvas.fitJoinInputs();   // a JoinNode T_in gives a standard service one input per arc
                     canvas.repaint();
                     // Refresh the attributes panel to show updated Node Value
                     showElementAttributes(element);
@@ -748,25 +721,7 @@ public class EditorFrame extends JPanel {
         return luminance > 0.5 ? Color.BLACK : Color.WHITE;
     }
     
-    /**
-     * Detect the join target T_in transition from an EVENT_GENERATOR's outgoing arrow
-     */
-    private String detectJoinTarget(ProcessElement eventGen) {
-        List<Arrow> allArrows = canvas.getArrows();
-        for (Arrow arrow : allArrows) {
-            if (arrow.getSource() == eventGen) {
-                ProcessElement target = arrow.getTarget();
-                if (target != null && target.getType() == ProcessElement.Type.TRANSITION) {
-                    String label = target.getLabel();
-                    if (label != null && label.startsWith("T_in_")) {
-                        return label;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-    
+        
     /**
      * Add the operations field with collapsible arguments support
      */

@@ -23,6 +23,9 @@
                                e.g. outcome=true
     eg1.join.inputs            optional: the generator feeds a join with this many inputs; it fires one
                                workflow's join tokens, numbered from that version's base
+    eg1.branches               optional: the generator forks: place:operation for each branch, e.g.
+                               P1_Place:processToken,P2_Place:test_token; child k of each token
+                               (N01, N02, ...) goes to branch k
     eg1.format.service         optional: the token format (TokenFormats) the generator fills its tokens from,
                                for a token generator that has formats (e.g. TriageService)
     token.generator.class      optional: the token generator; default GenericPetriNetTokenGenerator
@@ -222,6 +225,7 @@
                 <arg value="-triggerfile" if:set="@{slot}.trigger.set"/><arg value="${@{slot}.trigger.file}" if:set="@{slot}.trigger.set"/>
                 <arg value="-data" if:set="@{slot}.data"/><arg value="${@{slot}.data}" if:set="@{slot}.data"/>
                 <arg value="-joininputs" if:set="@{slot}.join.inputs"/><arg value="${@{slot}.join.inputs}" if:set="@{slot}.join.inputs"/>
+                <arg value="-branches" if:set="@{slot}.branches"/><arg value="${@{slot}.branches}" if:set="@{slot}.branches"/>
                 <arg value="-format-service" if:set="@{slot}.format.service"/><arg value="${@{slot}.format.service}" if:set="@{slot}.format.service"/>
                 <arg value="-skipdeploy"/>
             </java>

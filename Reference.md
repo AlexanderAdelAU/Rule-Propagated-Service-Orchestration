@@ -407,6 +407,20 @@ Use **Arrow (drag)**, or **Arrow (click waypoints)** to bend the return route.
   - T_out routes on the result: `false` repeats the visit with the same token, and `true` completes the workflow.
 - `StochasticService` returns `true` with probability 0.5, so on average each workflow visits P2 twice.
 
+### Forks and joins
+
+- **A generator forks when it has several arcs.** Draw an arc from the event generator to each branch's T_in.
+  - Each token becomes children numbered N01, N02, ..., one per branch, from the top branch down.
+  - These are the same numbers a fork inside the process gives its children. There is no Fork Children setting.
+- **A join is the T_in of a place.** Set the T_in's **Node Type** to `JoinNode`; the place's host waits for one child from each arc.
+  - A join with no place after it has nothing to host it, and Validate says so.
+  - To end after a join, give it a place, then lead that place's T_out to a terminate node.
+- **The join's place takes one input per arc.**
+  - A standard service gets `token_branch1`, `token_branch2`, ... automatically.
+  - The service on each arc's place returns that arc's input name, so the join can tell the children apart.
+  - A service from your own catalogue must declare one input per arc. **Create New Service** on a join place suggests them.
+- After changing a fork or join, **Deploy** again so the deployment carries the new inputs.
+
 ### Validate and save
 
 1. Click **Validate**. Fix any missing labels, incomplete operations or invalid connections.

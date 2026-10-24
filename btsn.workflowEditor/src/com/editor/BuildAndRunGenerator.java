@@ -51,6 +51,14 @@ public final class BuildAndRunGenerator {
         public final Map<String, String> versions = new LinkedHashMap<>();
         public final Map<String, Integer> joins = new LinkedHashMap<>();     // generator id -> inputs of the join it feeds
         public final Map<String, String> services = new LinkedHashMap<>();  // generator id -> service at its target place
+        // generator id -> its branches when its arcs fork (runtime place:operation, top to bottom): child k of each token goes to branch k
+        public final Map<String, List<String>> branches = new LinkedHashMap<>();
+        /** What a generator feeds: "P1_Place.processToken", or its branches "P1_Place.processToken + P2_Place.test_token". */
+        public String feeds(String generatorId) {
+            List<String> forked = branches.get(generatorId);
+            if (forked != null) { List<String> shown = new ArrayList<>(); for (String b : forked) shown.add(b.replace(':', '.')); return String.join(" + ", shown); }
+            return targets.get(generatorId) + "." + operations.get(generatorId);
+        }
         public String tokenGenerator = "";  // the profile's "tokenGenerator", when it names one (else the runtime's default)
         public File profile; public boolean profileExists;
         public String serviceDeployment = "", catalogue = "";
@@ -133,14 +141,28 @@ public final class BuildAndRunGenerator {
 
         for (ProcessElement element : canvas.getElements()) {
             if (element.getType() != ProcessElement.Type.EVENT_GENERATOR) continue;
-            ProcessElement place = firstPlaceAfter(canvas, element);
+            List<ProcessElement> forked = placesAfter(canvas, element);
+            ProcessElement place = forked.isEmpty() ? null : forked.get(0);
             if (place == null || place.getServiceOperations().isEmpty() || registry.nodeFor(place).isEmpty()) continue;
+            // Several arcs fork the generator: each token's children (N01, N02, ...) go one to each branch, as a fork inside the process would.
+            if (forked.size() > 1) {
+                List<String> branchList = new ArrayList<>();
+                for (ProcessElement branch : forked) {
+                    if (branch.getServiceOperations().isEmpty() || registry.nodeFor(branch).isEmpty()) {
+                        plan.problems.add(element.getId() + " forks to " + branch.getLabel() + ", which has no service or is not deployed."); continue;
+                    }
+                    if (joinInputs(canvas, element, branch) >= 0)
+                        plan.problems.add(element.getId() + " forks to " + branch.getLabel() + " through a join; a generator's branch starts at an ordinary T_in.");
+                    branchList.add(registry.nodeFor(branch) + "_Place:" + branch.getServiceOperations().get(0).getName());
+                }
+                plan.branches.put(element.getId(), branchList);
+            }
             plan.targets.put(element.getId(), registry.nodeFor(place) + "_Place");
             plan.operations.put(element.getId(), place.getServiceOperations().get(0).getName());
             if (place.getService() != null && !place.getService().isEmpty()) plan.services.put(element.getId(), place.getService());
             plan.rates.put(element.getId(), parse(element.getGeneratorRate(), 1000));
             plan.versions.put(element.getId(), VERSIONS.contains(element.getTokenVersion()) ? element.getTokenVersion() : "v001");
-            int inputs = joinInputs(canvas, element, place);
+            int inputs = forked.size() > 1 ? -1 : joinInputs(canvas, element, place);
             if (inputs > 1) plan.joins.put(element.getId(), inputs);
             else if (inputs >= 0) plan.problems.add(element.getId() + " feeds the join before " + place.getLabel()
                 + ", but " + place.getLabel() + "'s operation names " + inputs + " input(s); a join needs one argument for each input.");
@@ -190,6 +212,9 @@ public final class BuildAndRunGenerator {
         List<String> problems = new ArrayList<>();
         List<Run> on = o.enabled();
         if (on.isEmpty()) problems.add("Choose at least one event generator to run.");
+        for (Run run : on)
+            if (plan.branches.containsKey(run.generatorId) && !plan.tokenGenerator.isEmpty())
+                problems.add(run.generatorId + " forks, but this deployment's token generator (" + plan.tokenGenerator + ") sends to one place; fork inside the process instead.");
         Map<String, String> byVersion = new LinkedHashMap<>();
         for (Run run : on) {
             String other = byVersion.put(run.version, run.generatorId);
@@ -214,6 +239,9 @@ public final class BuildAndRunGenerator {
                 lines.add("Tokens   one set of " + plan.joins.get(run.generatorId) + " join tokens from " + run.generatorId + " to "
                     + plan.targets.get(run.generatorId) + "." + plan.operations.get(run.generatorId) + ", version " + run.version
                     + " (the generator feeds a join, which needs all its inputs to start)");
+            else if (plan.branches.containsKey(run.generatorId))
+                lines.add("Tokens   " + o.tokens + " from " + run.generatorId + ", each forked into " + plan.branches.get(run.generatorId).size()
+                    + " children (N01, N02, ...): " + plan.feeds(run.generatorId) + ", one every " + run.intervalMs + " ms, version " + run.version);
             else lines.add("Tokens   " + o.tokens + " from " + run.generatorId + " to " + plan.targets.get(run.generatorId) + "." + plan.operations.get(run.generatorId)
                 + ", one every " + run.intervalMs + " ms, version " + run.version);
         if (o.enabled().size() > 1) lines.add("         The generators fire together; the analysis reports each version separately.");
@@ -298,6 +326,11 @@ public final class BuildAndRunGenerator {
             x.append("    <property name=\"").append(slot).append(".trigger.file\" location=\"").append(xml(relative(dir, plan.schedule(o, run)))).append("\"/>\n");
             if (!plan.tokenGenerator.isEmpty() && plan.services.containsKey(run.generatorId))
                 x.append("    <property name=\"").append(slot).append(".format.service\" value=\"").append(xml(plan.services.get(run.generatorId))).append("\"/>\n");
+            List<String> forked = plan.branches.get(run.generatorId);
+            if (forked != null) {
+                x.append("    <!-- ").append(xml(run.generatorId)).append(" forks: child k of each token (N01, N02, ...) goes to branch k. -->\n");
+                x.append("    <property name=\"").append(slot).append(".branches\" value=\"").append(xml(String.join(",", forked))).append("\"/>\n");
+            }
             Integer join = plan.joins.get(run.generatorId);
             if (join != null) {
                 x.append("    <!-- ").append(xml(run.generatorId)).append(" feeds a join: it fires one token for each of the join's inputs. -->\n");
@@ -385,6 +418,24 @@ public final class BuildAndRunGenerator {
             if (feedsPlace) return place.getServiceOperations().get(0).getArguments().size();
         }
         return -1;
+    }
+
+    /**
+     * The places an event generator feeds, one per arc (generator -> T_in -> place, or straight to a place), top to
+     * bottom on the canvas: with more than one, the generator forks and child k of each token goes to the k-th.
+     */
+    static List<ProcessElement> placesAfter(Canvas canvas, ProcessElement generator) {
+        List<ProcessElement> places = new ArrayList<>();
+        for (Arrow out : canvas.getArrows()) {
+            if (out.getSource() != generator || out.getTarget() == null) continue;
+            ProcessElement next = out.getTarget();
+            if (next.getType() == ProcessElement.Type.PLACE) { if (!places.contains(next)) places.add(next); continue; }
+            for (Arrow onward : canvas.getArrows())
+                if (onward.getSource() == next && onward.getTarget() != null && onward.getTarget().getType() == ProcessElement.Type.PLACE && !places.contains(onward.getTarget()))
+                    places.add(onward.getTarget());
+        }
+        places.sort(Comparator.comparingInt((ProcessElement p) -> p.getY()).thenComparingInt(ProcessElement::getX));
+        return places;
     }
 
     static ProcessElement firstPlaceAfter(Canvas canvas, ProcessElement generator) {

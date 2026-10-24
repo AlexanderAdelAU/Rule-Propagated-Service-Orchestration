@@ -141,7 +141,7 @@ public final class ServiceDefinitionDialog extends JDialog {
      * For a new service: a name from the place's label, and input and result names that match the neighbouring
      * places, since a place takes as input what the place before it publishes.
      */
-    private static CatalogueWriter.Entry suggestion(Canvas canvas, ProcessElement place) {
+    static CatalogueWriter.Entry suggestion(Canvas canvas, ProcessElement place) {
         CatalogueWriter.Entry e = new CatalogueWriter.Entry();
         String label = place.getLabel() == null ? "" : place.getLabel().replaceAll("[^A-Za-z0-9_]", "");
         if (!label.isEmpty() && Character.isLetter(label.charAt(0))) {
@@ -153,7 +153,9 @@ public final class ServiceDefinitionDialog extends JDialog {
                 e.service = domainName(registry.catalogueDomain()) + e.service;
         }
         java.util.Set<String> before = canvas.neighbourNames(place, false), after = canvas.neighbourNames(place, true);
-        e.inputs.add(before.size() == 1 ? before.iterator().next() : "token");
+        int joinArcs = canvas.joinArcs(place);
+        if (joinArcs > 1) e.inputs.addAll(Canvas.joinInputNames(joinArcs));   // a join's place takes one input per arc
+        else e.inputs.add(before.size() == 1 ? before.iterator().next() : "token");
         e.returnAttribute = after.size() == 1 ? after.iterator().next() : "token";
         return e;
     }
