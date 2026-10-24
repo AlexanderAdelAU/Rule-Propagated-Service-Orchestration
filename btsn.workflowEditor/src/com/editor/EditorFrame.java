@@ -229,6 +229,18 @@ public class EditorFrame extends JPanel {
             freshVersionField.getDocument().addDocumentListener(new SimpleDocumentListener(() -> {
                 element.setTokenVersion(freshVersionField.getText().trim());
             }));
+
+            // What this generator does, from its one arc: arrivals, or the initial marking of a closed net (sent once).
+            Canvas.GeneratorRole role = canvas.generatorRole(element);
+            if (role.marking()) {
+                freshRateField.setEnabled(false);
+                freshRateField.setToolTipText("An initial marking is sent once, so the rate does not apply.");
+            }
+            JTextArea roleText = new JTextArea(canvas.generatorRoleText(element));
+            roleText.setEditable(false); roleText.setLineWrap(true); roleText.setWrapStyleWord(true); roleText.setFont(fieldFont());
+            roleText.setBorder(BorderFactory.createTitledBorder("Role"));
+            roleText.setMaximumSize(new Dimension(Integer.MAX_VALUE, 110));
+            attributesPanel.add(roleText);
             
             // A generator issues its version's tokens to one place; forks are made by a place's T_out, not here.
             

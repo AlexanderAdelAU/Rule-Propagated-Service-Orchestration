@@ -211,9 +211,9 @@ public final class BuildAndRunGenerator {
         for (String packaged : packagedHosts(plan)) lines.add("Package  " + packaged + " (Build host packages; start it on its machine)");
         for (Run run : o.enabled())
             if (plan.joins.containsKey(run.generatorId))
-                lines.add("Tokens   one set of " + plan.joins.get(run.generatorId) + " join tokens from " + run.generatorId + " to "
+                lines.add("Tokens   initial marking from " + run.generatorId + ": " + plan.joins.get(run.generatorId) + " tokens, once, into the join before "
                     + plan.targets.get(run.generatorId) + "." + plan.operations.get(run.generatorId) + ", version " + run.version
-                    + " (the generator feeds a join, which needs all its inputs to start)");
+                    + " (a closed net needs all its join's inputs marked to start)");
             else lines.add("Tokens   " + o.tokens + " from " + run.generatorId + " to " + plan.targets.get(run.generatorId) + "." + plan.operations.get(run.generatorId)
                 + ", one every " + run.intervalMs + " ms, version " + run.version);
         if (o.enabled().size() > 1) lines.add("         The generators fire together; the analysis reports each version separately.");

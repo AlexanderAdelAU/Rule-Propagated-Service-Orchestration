@@ -410,7 +410,12 @@ Use **Arrow (drag)**, or **Arrow (click waypoints)** to bend the return route.
 ### Forks and joins
 
 - **An event generator feeds one place.** It issues one version's tokens, shaped for the service it feeds; it is not a step of the process.
-  - Validate reports a generator with more than one arc.
+  - Validate reports a generator with more than one arc. The runtime's own initialisers and collectors (`ProcessDefinitionFolder/common`) are the exception.
+- **A generator has one of two roles, set by where its arc goes:**
+  - **Arrivals** (an open process): its arc enters an ordinary T_in, and it sends one token per arrival into that place, at its rate.
+  - **Initial marking** (a closed net, such as `TrafficLight_Workflow`): its arc enters a JoinNode T_in. It sends one token per input of the join's place, once, so the cycle can start. Rate and token count do not apply.
+  - The editor shows which: a **M₀ ×2** badge on the diagram, a **Role** box in the generator's Attributes (with Rate greyed out), a Validate reminder, and the generator's row in Build.
+  - A join's initial marking comes from one generator. Each generator runs under its own version, so two would start two copies of the net; Validate reports it.
 - **A fork is a place's T_out.** Lead the generator to a first place, set that place's T_out **Node Type** to `ForkNode`, and draw an arc from it to each branch's T_in.
   - Each token's children are numbered N01, N02, ..., one per branch.
 - **A join is the T_in of a place.** Set the T_in's **Node Type** to `JoinNode`; the place's host waits for one child from each arc.

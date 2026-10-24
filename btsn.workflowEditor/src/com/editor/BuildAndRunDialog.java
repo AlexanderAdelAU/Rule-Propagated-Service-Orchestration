@@ -54,6 +54,7 @@ public final class BuildAndRunDialog extends JDialog {
         GridBagConstraints c = new GridBagConstraints();
         c.insets = new Insets(4, 6, 4, 6); c.anchor = GridBagConstraints.WEST; c.fill = GridBagConstraints.HORIZONTAL;
         row(form, c, 0, "Process:", new JLabel(plan.processName));
+        tokens.setToolTipText("For generators that issue arrivals. A generator that sets the initial marking sends its tokens once.");
         row(form, c, 1, "Tokens per generator:", tokens);
         row(form, c, 2, "Wait after last token (s):", completion);
         row(form, c, 3, "Launcher name:", name);
@@ -104,13 +105,17 @@ public final class BuildAndRunDialog extends JDialog {
         public int getColumnCount() { return columns.length; }
         @Override public String getColumnName(int column) { return columns[column]; }
         @Override public Class<?> getColumnClass(int column) { return column == 0 ? Boolean.class : column == 4 ? Integer.class : String.class; }
-        @Override public boolean isCellEditable(int row, int column) { return column == 0 || column == 3 || column == 4; }
+        @Override public boolean isCellEditable(int row, int column) {
+            // An initial marking is sent once, so it has no interval.
+            return column == 0 || column == 3 || (column == 4 && !plan.joins.containsKey(runs.get(row).generatorId));
+        }
         public Object getValueAt(int row, int column) {
             BuildAndRunGenerator.Run run = runs.get(row);
             switch (column) {
                 case 0: return run.enabled;
                 case 1: return run.generatorId;
-                case 2: return plan.targets.get(run.generatorId) + "." + plan.operations.get(run.generatorId);
+                case 2: return plan.targets.get(run.generatorId) + "." + plan.operations.get(run.generatorId)
+                    + (plan.joins.containsKey(run.generatorId) ? " \u2014 initial marking: " + plan.joins.get(run.generatorId) + " tokens, once" : "");
                 case 3: return run.version;
                 default: return run.intervalMs;
             }
