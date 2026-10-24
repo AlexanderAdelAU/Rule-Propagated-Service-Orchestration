@@ -1157,6 +1157,7 @@ public class ProcessEditor extends JFrame {
                 return;
             }
             java.util.List<String> errors = canvas.validatePetriNet();
+            errors.removeAll(canvas.deploymentGaps());   // placing places on nodes is what Deploy does, after saving
             
             // Check if processType is specified
             String processType = canvas.getProcessType();
@@ -1226,6 +1227,7 @@ public class ProcessEditor extends JFrame {
                 return;
             }
             java.util.List<String> errors = canvas.validatePetriNet();
+            errors.removeAll(canvas.deploymentGaps());   // placing places on nodes is what Deploy does, after saving
         
         // Check if processType is specified
         String processType = canvas.getProcessType();
