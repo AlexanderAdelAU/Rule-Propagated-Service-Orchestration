@@ -35,6 +35,7 @@ public class ProcessElement {
     private String nodeValue = "";
     private String transitionType = "Other";  // T_in, T_out, or Other
     private String buffer = "10";  // Buffer size for T_in transitions
+    private String joinInputCount = "";  // A JoinNode's input count as written in the file (kept as is)
     
     // Additional attributes for Event Generators
     private String generatorRate = "1000";  // Token generation rate in ms
@@ -503,6 +504,8 @@ public class ProcessElement {
     public String getNodeValue() { return nodeValue; }
     public String getTransitionType() { return transitionType; }
     public String getBuffer() { return buffer; }
+    public String getJoinInputCount() { return joinInputCount; }
+    public void setJoinInputCount(String count) { joinInputCount = count == null ? "" : count.trim(); }
     public double getRotationAngle() { return rotationAngle; }
     public String getGeneratorRate() { return generatorRate; }
     public String getTokenVersion() { return tokenVersion; }

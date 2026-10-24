@@ -31,6 +31,7 @@ public final class GeneratorRoleCheck {
                     "Traffic light generator not an initial marking: " + role.inputs);
                 check("M₀ ×2".equals(canvas.generatorBadge(generator)), "Badge: " + canvas.generatorBadge(generator));
                 check(canvas.generatorRoleText(generator).startsWith("Initial marking: 2 tokens, once, into NS_Green's join (token_branch1, token_branch2)"), canvas.generatorRoleText(generator));
+                check(canvas.saveToJSON().split("\"joinInputCount\": 2", -1).length == 3, "Saving dropped the joins' joinInputCount");
                 String reminder = "TRAFFICLIGHT_EVENTGENERATOR sets the initial marking: 2 tokens, once, into NS_Green's join.";
                 check(canvas.serviceNotes().contains(reminder) && !canvas.serviceBlockers().contains(reminder), "Reminder: " + canvas.serviceNotes());
 
@@ -79,7 +80,7 @@ public final class GeneratorRoleCheck {
             } catch (Throwable t) { failure[0] = t; }
         });
         if (failure[0] != null) throw new AssertionError("Generator roles", failure[0]);
-        System.out.println("PASS: a generator into a JoinNode T_in sets the initial marking (traffic light: 2 tokens, once) and the author is told: badge on the diagram, Role box with Rate greyed out, Validate reminder, Build summary and row; two generators on one join reported; an arrival generator says so; initialisers exempt from the one-arc rule");
+        System.out.println("PASS: a generator into a JoinNode T_in sets the initial marking (traffic light: 2 tokens, once) and the author is told: badge on the diagram, Role box with Rate greyed out, Validate reminder, Build summary and row; two generators on one join reported; an arrival generator says so; initialisers exempt from the one-arc rule; saving keeps the joins' joinInputCount");
     }
 
     private static Canvas load(File process) throws Exception {
