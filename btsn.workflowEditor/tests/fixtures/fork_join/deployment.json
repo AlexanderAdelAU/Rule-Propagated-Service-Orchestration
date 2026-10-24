@@ -3,6 +3,23 @@
   "catalog": "BusinessServiceDefinitions/petrinet/PetriNetModels.json",
   "capabilities": [
     {
+      "node": "P4",
+      "service": "StochasticService",
+      "operation": "processToken",
+      "returnAttribute": "token",
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "ForkTestP0",
+      "invocationAdapter": "boolean-token"
+    },
+    {
       "node": "P1",
       "service": "StochasticService",
       "operation": "processToken",

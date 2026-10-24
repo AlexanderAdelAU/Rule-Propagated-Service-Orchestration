@@ -2054,26 +2054,15 @@ public class PetriNetAnalyzer {
                 pstmt.setInt(1, workflowBase);
                 ResultSet rs = pstmt.executeQuery();
                 while (rs.next()) {
-                    int token = rs.getInt("tokenId");
+                    int root = rs.getInt("tokenId");
                     long timestamp = rs.getLong("generatedAt");
-                    // A generator that forks sends a token's children (N01, N02, ...) straight to its branches:
-                    // they are one workflow, rooted at their parent N00, as if a fork inside the process made them.
-                    int root = token % 100 == 0 ? token : token - token % 100;
-                    if (root != token) {
-                        parentByChild.put(token, root);
-                        childrenByParent.computeIfAbsent(root, k -> new HashSet<>()).add(token);
-                    }
-                    WorkflowInstanceSummary instance = analysis.instances.get(root);
-                    if (instance == null) {
-                        instance = new WorkflowInstanceSummary();
-                        instance.rootTokenId = root;
-                        instance.generatedAt = timestamp;
-                        analysis.instances.put(root, instance);
-                        analysis.generatedRoots.add(root);
-                    }
-                    instance.generatedAt = Math.min(instance.generatedAt, timestamp);
-                    generatedAt.merge(root, timestamp, Math::min);
-                    instance.members.add(token);
+                    generatedAt.put(root, timestamp);
+                    analysis.generatedRoots.add(root);
+                    WorkflowInstanceSummary instance = new WorkflowInstanceSummary();
+                    instance.rootTokenId = root;
+                    instance.generatedAt = timestamp;
+                    instance.members.add(root);
+                    analysis.instances.put(root, instance);
                 }
             }
             

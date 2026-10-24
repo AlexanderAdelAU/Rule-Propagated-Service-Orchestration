@@ -11,25 +11,25 @@ import java.util.List;
 import javax.swing.*;
 
 /**
- * An event generator with two arcs forks: EG1 -> T2 -> P3 and EG1 -> T7 -> P6, joined at T5 before P10, ending at T9.
- * The fork follows from the arcs (no Fork Children setting); Build sends child N01 of each token to P3's host and N02 to
- * P6's; the join's standard service takes one input per arc and the services feeding it return those inputs' names;
- * a join with no place after it is reported; the recorded run (5 tokens, every family joined) replays on the design.
+ * A fork and join built from places: EG1 -> T1 -> P0, whose T_out T0 is a ForkNode to T2 -> P3 and T7 -> P6, joined at
+ * T5 before P10, ending at T9. The event generator feeds one place (one with two arcs is reported); the designer types
+ * the join's Inputs and the feeding places' Returns, which Validate advises but the editor never changes; a join with
+ * no place after it is reported; the recorded run (5 tokens, every family joined) replays on the design.
  */
-public final class GeneratorForkCheck {
+public final class ForkJoinDesignCheck {
     public static void main(String[] args) throws Exception {
         File root = new File(args[0]).getCanonicalFile();
-        Path fixtures = root.toPath().resolve("btsn.workflowEditor/tests/fixtures/generator_fork");
-        Path common = Files.createTempDirectory("generator-fork-").resolve("btsn.common");
-        Path process = common.resolve("ProcessDefinitionFolder/petrinet/Workflow/Fork_EG_Test.json");
-        copy(fixtures.resolve("Fork_EG_Test.json"), process);
-        copy(fixtures.resolve("deployment.json"), common.resolve("ServiceDeploymentFolder/petrinet/Fork_EG_Test.json"));
+        Path fixtures = root.toPath().resolve("btsn.workflowEditor/tests/fixtures/fork_join");
+        Path common = Files.createTempDirectory("fork-join-").resolve("btsn.common");
+        Path process = common.resolve("ProcessDefinitionFolder/petrinet/Workflow/Fork_Place_Test.json");
+        copy(fixtures.resolve("Fork_Place_Test.json"), process);
+        copy(fixtures.resolve("deployment.json"), common.resolve("ServiceDeploymentFolder/petrinet/Fork_Place_Test.json"));
         copy(root.toPath().resolve("btsn.common").resolve(ServiceRegistry.STANDARD_CATALOGUE), common.resolve(ServiceRegistry.STANDARD_CATALOGUE));
-        String run = Files.readString(fixtures.resolve("Analysis_Fork_EG_Test.txt"));
+        String run = Files.readString(fixtures.resolve("Analysis_Fork_Place_Test.txt"));
         // The same process deployed before its join was fitted: the deployment still says P3 and P6 return token.
-        Path staleProcess = common.resolve("ProcessDefinitionFolder/petrinet/Workflow/Fork_EG_Stale.json");
-        Files.writeString(staleProcess, Files.readString(process).replace("ServiceDeploymentFolder/petrinet/Fork_EG_Test.json", "ServiceDeploymentFolder/petrinet/Fork_EG_Stale.json"));
-        Files.writeString(common.resolve("ServiceDeploymentFolder/petrinet/Fork_EG_Stale.json"),
+        Path staleProcess = common.resolve("ProcessDefinitionFolder/petrinet/Workflow/Fork_Place_Stale.json");
+        Files.writeString(staleProcess, Files.readString(process).replace("ServiceDeploymentFolder/petrinet/Fork_Place_Test.json", "ServiceDeploymentFolder/petrinet/Fork_Place_Stale.json"));
+        Files.writeString(common.resolve("ServiceDeploymentFolder/petrinet/Fork_Place_Stale.json"),
             Files.readString(fixtures.resolve("deployment.json")).replace("token_branch1", "token").replace("\"returnAttribute\": \"token_branch2\"", "\"returnAttribute\": \"token\""));
 
         Throwable[] failure = new Throwable[1];
@@ -57,16 +57,17 @@ public final class GeneratorForkCheck {
                 check(canvas.serviceBlockers().isEmpty() && canvas.validatePetriNet().isEmpty(), "Blockers: " + canvas.serviceBlockers() + " " + canvas.validatePetriNet());
                 check(canvas.saveToJSON().contains("\"name\": \"token_branch2\""), "Typed inputs not saved");
 
-                // Build: one generator, two branches; child k of each token goes to branch k (top to bottom).
+                // Build: the generator feeds P0's host; the fork is P0's T_out.
                 BuildAndRunGenerator.Plan plan = BuildAndRunGenerator.plan(canvas, process.toFile());
-                check(plan.problems.isEmpty() && plan.feeds("EG1").equals("P1_Place.processToken + P2_Place.processToken")
-                    && plan.branches.get("EG1").equals(Arrays.asList("P1_Place:processToken", "P2_Place:processToken")) && !plan.joins.containsKey("EG1"),
-                    "Plan: " + plan.problems + " " + plan.branches);
-                BuildAndRunGenerator.Options o = plan.defaults; o.folder = common.getParent().resolve("btsn.petrinet.ProjectLoader").toFile();
-                check(BuildAndRunGenerator.launcherXml(plan, o).contains("<property name=\"eg1.branches\" value=\"P1_Place:processToken,P2_Place:processToken\"/>"), "Launcher has no branches");
-                check(BuildAndRunGenerator.summary(plan, o).stream().anyMatch(l -> l.contains("each forked into 2 children (N01, N02, ...)")), "Summary: " + BuildAndRunGenerator.summary(plan, o));
+                check(plan.problems.isEmpty() && "P4_Place".equals(plan.targets.get("EG1")) && !plan.joins.containsKey("EG1"), "Plan: " + plan.problems + " " + plan.targets);
 
-                // No Fork Children setting: the fork is the generator's arcs.
+                // An event generator issues its tokens to one place: a second arc is reported, with how to fork instead.
+                Arrow second = new Arrow(e.get("EG1"), e.get("T2")); canvas.getArrows().add(second);
+                check(canvas.serviceBlockers().contains("EG1 has 2 arcs, but an event generator issues its tokens to one place. To fork, lead EG1 to one T_in and place, and make that place's T_out a ForkNode with an arc to each branch."),
+                    "Generator with two arcs not reported: " + canvas.serviceBlockers());
+                canvas.getArrows().remove(second);
+
+                // No Fork Children setting on a generator.
                 EditorFrame attributes = new EditorFrame(canvas); attributes.updateSelection(e.get("EG1"));
                 check(labels(attributes).stream().noneMatch(t -> t.startsWith("Fork Children") || t.startsWith("Join Target")), "Fork setting still offered: " + labels(attributes));
                 check(!canvas.saveToJSON().contains("fork_behavior"), "fork_behavior saved");
@@ -79,15 +80,16 @@ public final class GeneratorForkCheck {
                     AnimationSegment seg = (AnimationSegment) s;
                     if (seg.fromElement != null && seg.toElement != null) moves.computeIfAbsent(seg.tokenId, k -> new LinkedHashSet<>()).add(seg.fromElement + "->" + seg.toElement);
                 }
-                check(moves.getOrDefault("1000001", Set.of()).containsAll(Arrays.asList("EG1->T2", "T2->P3", "P3->T4", "T4->T5", "P10->T11", "T11->T9")), "Child 1: " + moves.get("1000001"));
-                check(moves.getOrDefault("1000002", Set.of()).containsAll(Arrays.asList("EG1->T7", "T7->P6", "P6->T8", "T8->T5")), "Child 2: " + moves.get("1000002"));
+                check(moves.getOrDefault("1000000", Set.of()).containsAll(Arrays.asList("EG1->T1", "T1->P0")), "Parent: " + moves.get("1000000"));
+                check(moves.getOrDefault("1000001", Set.of()).containsAll(Arrays.asList("T0->T2", "P3->T4", "T4->T5", "P10->T11", "T11->T9")), "Child 1: " + moves.get("1000001"));
+                check(moves.getOrDefault("1000002", Set.of()).containsAll(Arrays.asList("T0->T7", "P6->T8", "T8->T5")), "Child 2: " + moves.get("1000002"));
 
                 // Deployed before the join was set up: the design still saves, Deploy is not refused, and Build and Run
                 // wait for the deployment to be saved again.
                 Canvas stale = new Canvas(); stale.setDefinitionLocation(staleProcess.toFile()); stale.loadFromJSON(Files.readString(staleProcess));
                 for (ProcessElement p : stale.getPlaces()) if (p.getLabel().equals("P3")) p.getServiceOperations().get(0).setReturnAttribute("token_branch1");
                 check(stale.validateServiceContracts().isEmpty(), "An out-of-date deployment stops saving: " + stale.validateServiceContracts());
-                check(stale.deploymentDifferences().stream().anyMatch(d -> d.startsWith("Place 'P3' returns token_branch1 but the saved deployment (Fork_EG_Stale.json, instance ForkTestP3) still has token. Deploy again"))
+                check(stale.deploymentDifferences().stream().anyMatch(d -> d.startsWith("Place 'P3' returns token_branch1 but the saved deployment (Fork_Place_Stale.json, instance ForkTestP3) still has token. Deploy again"))
                     && stale.serviceBlockers().containsAll(stale.deploymentDifferences()), "Out-of-date deployment not reported: " + stale.serviceBlockers());
 
                 // A join whose service takes too few inputs does not stop saving the design; it stops Deploy, Build and Run.
@@ -109,7 +111,7 @@ public final class GeneratorForkCheck {
             } catch (Throwable t) { failure[0] = t; }
         });
         if (failure[0] != null) throw new AssertionError("Generator fork", failure[0]);
-        System.out.println("PASS: a generator with two arcs forks (no Fork Children setting): Build sends child N01 to P3's host and N02 to P6's; nothing is changed by the editor: Validate says what a join needs and the designer types the join's Inputs and the feeding places' Returns; a new service for a join is suggested one input per arc; a process deployed before its join was set up saves and asks to Deploy again; a join whose service takes too few inputs is saved but stops Deploy, Build and Run; a join with no place is reported; the recorded run replays each child along its branch to the join and on to T9");
+        System.out.println("PASS: a fork made by a place's T_out (ForkNode), joined at P10: the generator feeds one place and a second arc is reported (no Fork Children setting); nothing is changed by the editor: Validate says what a join needs and the designer types the join's Inputs and the feeding places' Returns; a new service for a join is suggested one input per arc; a process deployed before its join was set up saves and asks to Deploy again; a join whose service takes too few inputs is saved but stops Deploy, Build and Run; a join with no place is reported; the recorded run (5 forks, 5 joined, 5 completed) replays each child from the fork along its branch to the join and on to T9");
     }
 
     /** Selects the place and types into its Inputs or Returns field, as the designer would. */

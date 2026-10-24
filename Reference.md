@@ -409,9 +409,10 @@ Use **Arrow (drag)**, or **Arrow (click waypoints)** to bend the return route.
 
 ### Forks and joins
 
-- **A generator forks when it has several arcs.** Draw an arc from the event generator to each branch's T_in.
-  - Each token becomes children numbered N01, N02, ..., one per branch, from the top branch down.
-  - These are the same numbers a fork inside the process gives its children. There is no Fork Children setting.
+- **An event generator feeds one place.** It issues one version's tokens, shaped for the service it feeds; it is not a step of the process.
+  - Validate reports a generator with more than one arc.
+- **A fork is a place's T_out.** Lead the generator to a first place, set that place's T_out **Node Type** to `ForkNode`, and draw an arc from it to each branch's T_in.
+  - Each token's children are numbered N01, N02, ..., one per branch.
 - **A join is the T_in of a place.** Set the T_in's **Node Type** to `JoinNode`; the place's host waits for one child from each arc.
   - A join with no place after it has nothing to host it, and Validate says so.
   - To end after a join, give it a place, then lead that place's T_out to a terminate node.

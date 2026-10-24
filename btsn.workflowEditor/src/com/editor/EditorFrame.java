@@ -230,7 +230,7 @@ public class EditorFrame extends JPanel {
                 element.setTokenVersion(freshVersionField.getText().trim());
             }));
             
-            // A generator forks when it has several arcs: Build sends one child of each token down each (see the Network box).
+            // A generator issues its version's tokens to one place; forks are made by a place's T_out, not here.
             
             // Colors section
             Color defaultEGFill = new Color(220, 255, 220);  // Light green

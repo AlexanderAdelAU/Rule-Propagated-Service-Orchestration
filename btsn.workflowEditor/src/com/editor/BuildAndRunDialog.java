@@ -110,7 +110,7 @@ public final class BuildAndRunDialog extends JDialog {
             switch (column) {
                 case 0: return run.enabled;
                 case 1: return run.generatorId;
-                case 2: return plan.feeds(run.generatorId);
+                case 2: return plan.targets.get(run.generatorId) + "." + plan.operations.get(run.generatorId);
                 case 3: return run.version;
                 default: return run.intervalMs;
             }
