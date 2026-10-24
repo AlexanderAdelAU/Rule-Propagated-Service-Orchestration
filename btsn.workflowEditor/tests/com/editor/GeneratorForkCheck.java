@@ -67,6 +67,16 @@ public final class GeneratorForkCheck {
                 check(moves.getOrDefault("1000001", Set.of()).containsAll(Arrays.asList("EG1->T2", "T2->P3", "P3->T4", "T4->T5", "P10->T11", "T11->T9")), "Child 1: " + moves.get("1000001"));
                 check(moves.getOrDefault("1000002", Set.of()).containsAll(Arrays.asList("EG1->T7", "T7->P6", "P6->T8", "T8->T5")), "Child 2: " + moves.get("1000002"));
 
+                // A join whose service takes too few inputs does not stop saving the design; it stops Deploy, Build and Run.
+                ProcessElement p10 = e.get("P10");
+                List<ServiceOperation> kept = new ArrayList<>(p10.getServiceOperations());
+                ServiceOperation narrow = new ServiceOperation("processToken"); narrow.addArgument(new ServiceArgument("token", "String", "String", false));
+                narrow.setReturnAttribute("token");
+                Canvas domain = new Canvas(); domain.setDefinitionLocation(process.toFile()); domain.loadFromJSON(Files.readString(process));
+                for (ProcessElement p : domain.getPlaces()) if (p.getLabel().equals("P10")) { p.setService("UnknownJoinService"); p.setServiceOperations(new ArrayList<>(List.of(narrow))); }
+                check(domain.validateServiceContracts().stream().noneMatch(m -> m.contains("incoming arcs")), "Join inputs stop saving: " + domain.validateServiceContracts());
+                check(domain.serviceBlockers().stream().anyMatch(m -> m.startsWith("P10 is a join with 2 incoming arcs but UnknownJoinService takes 1 input")), "Join inputs not a blocker: " + domain.serviceBlockers());
+
                 // A join with no place after it has nothing to host it: reported, and it stops Deploy, Build and Run.
                 Arrow toP10 = null;
                 for (Arrow a : canvas.getArrows()) if (a.getSource() == e.get("T5") && a.getTarget() == e.get("P10")) toP10 = a;
@@ -76,7 +86,7 @@ public final class GeneratorForkCheck {
             } catch (Throwable t) { failure[0] = t; }
         });
         if (failure[0] != null) throw new AssertionError("Generator fork", failure[0]);
-        System.out.println("PASS: a generator with two arcs forks (no Fork Children setting): Build sends child N01 to P3's host and N02 to P6's; the join's standard service takes token_branch1/2 and the services feeding it return them; a new service for a join is suggested one input per arc; a join with no place is reported; the recorded run replays each child along its branch to the join and on to T9");
+        System.out.println("PASS: a generator with two arcs forks (no Fork Children setting): Build sends child N01 to P3's host and N02 to P6's; the join's standard service takes token_branch1/2 and the services feeding it return them; a new service for a join is suggested one input per arc; a join whose service takes too few inputs is saved but stops Deploy, Build and Run; a join with no place is reported; the recorded run replays each child along its branch to the join and on to T9");
     }
 
     private static List<String> names(ProcessElement place) {

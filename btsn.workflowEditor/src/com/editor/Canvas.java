@@ -2835,6 +2835,8 @@ public class Canvas extends JPanel {
         notes.addAll(routingGaps(reminders));
         notes.addAll(transitionTypeConflicts());
         notes.addAll(joinsWithoutPlace());
+        // A combined process overlays several versions, so a join may draw every version's arcs.
+        if (BuildAndRunGenerator.combinedLauncher(definitionLocation) == null) notes.addAll(joinInputMismatches());
         if (reminders && !typesCorrectedOnLoad.isEmpty())
             notes.add("Transition types corrected from their arcs (" + String.join("; ", typesCorrectedOnLoad) + "). Save to keep the correction.");
         String mismatch = reminders ? domainMismatch() : null;
@@ -3058,8 +3060,8 @@ public class Canvas extends JPanel {
         List<String> errors = new ArrayList<>();
         for (ProcessElement element : elements) if (element.getType() == ProcessElement.Type.PLACE)
             for (String error : serviceRegistry.validatePlace(element)) errors.add(element.getLabel() + ": " + error);
-        // A combined process overlays several versions, so a join may draw every version's arcs.
-        if (BuildAndRunGenerator.combinedLauncher(definitionLocation) == null) errors.addAll(joinInputMismatches());
+        // A join whose inputs do not fit yet is still saved (the design is in progress): Validate, Deploy, Build and
+        // Run report it instead (serviceBlockers).
         return errors;
     }
 
