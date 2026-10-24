@@ -2789,6 +2789,8 @@ public class Canvas extends JPanel {
     private String serviceDeploymentReference = "";
     /** Catalogue of a process that has not been deployed yet; once deployed, the deployment names it. */
     private String catalogueReference = "";
+    /** The launcher a picture of a combined run names (kept as written), or "". */
+    private String launcherReference = "";
     private java.io.File definitionLocation;
     /** Node choices made on the canvas (place id -> node) that the Deploy panel has not saved yet. */
     private final Map<String, String> pendingNodes = new java.util.LinkedHashMap<>();
@@ -3347,6 +3349,7 @@ public class Canvas extends JPanel {
         json.append("{\n");
         if (!serviceDeploymentReference.isEmpty()) json.append("  \"serviceDeployment\": \"").append(escapeJSON(serviceDeploymentReference)).append("\",\n");
         else if (!getCatalogueReference().isEmpty()) json.append("  \"catalog\": \"").append(escapeJSON(getCatalogueReference())).append("\",\n");
+        if (!launcherReference.isEmpty()) json.append("  \"launcher\": \"").append(escapeJSON(launcherReference)).append("\",\n");
         
         // Include metadata if present
         if (metadataJSON != null && !metadataJSON.isEmpty()) {
@@ -3522,6 +3525,8 @@ public class Canvas extends JPanel {
         serviceDeploymentReference = extractValue(json, "serviceDeployment");
         if (serviceDeploymentReference == null) serviceDeploymentReference = "";
         catalogueReference = extractValue(json, "catalog");
+        launcherReference = extractValue(json, "launcher");
+        if (launcherReference == null) launcherReference = "";
         if (catalogueReference == null) catalogueReference = "";
         serviceRegistry.loadProcessReferences(serviceDeploymentReference, catalogueReference, definitionLocation);
         // An initialiser or collector names no catalogue (its places run the hosts' own services): show the standard one.
@@ -4139,6 +4144,7 @@ public class Canvas extends JPanel {
         documentationJSON = null;
         processType = null;
         serviceDeploymentReference = "";
+        launcherReference = "";
         pendingNodes.clear();
         serviceRegistry.useStandardCatalogue(definitionLocation);   // a new process does not inherit the last one's catalogue
         notifySelectionChanged(null);  // Clear attributes panel

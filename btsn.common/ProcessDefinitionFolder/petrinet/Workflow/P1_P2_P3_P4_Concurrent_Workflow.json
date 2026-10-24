@@ -1,5 +1,6 @@
 {
   "serviceDeployment": "ServiceDeploymentFolder/petrinet/ForkModels.json",
+  "launcher": "btsn.petrinet.ProjectLoader/P1_P2_P3_P4_Concurrent_BuildAndRun.xml",
   "processType": "PetriNet",
   "elements": [
     {
@@ -251,7 +252,7 @@
       "label": "P1_EVENTGENERATOR",
       "rotation": 0.0,
       "generator_rate": "1000",
-      "token_version": "v001"
+      "token_version": "v002"
     },
     {
       "id": "T_in_Model_Terminate",

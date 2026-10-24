@@ -406,6 +406,9 @@ public final class LauncherRun {
                 catch (IOException ignored) { }
             }
         }
+        // A picture of a combined run names its launcher.
+        File declared = BuildAndRunGenerator.declaredLauncher(new File(root, "btsn.common/ProcessDefinitionFolder/" + processName + ".json"));
+        if (declared != null && !found.contains(declared)) found.add(declared);
         // A combined process is run by the launcher of the same name.
         String own = processName.substring(processName.lastIndexOf('/') + 1) + ".xml";
         for (File loader : loaders) { File xml = new File(loader, own); if (xml.isFile() && !found.contains(xml)) found.add(xml); }
