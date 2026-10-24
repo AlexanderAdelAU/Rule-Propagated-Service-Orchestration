@@ -2832,6 +2832,7 @@ public class Canvas extends JPanel {
         notes.addAll(chainMismatches());
         notes.addAll(routingGaps(reminders));
         notes.addAll(transitionTypeConflicts());
+        notes.addAll(generatorsWithSeveralArcs());
         notes.addAll(joinsWithoutPlace());
         notes.addAll(deploymentDifferences());
         // A combined process overlays several versions, so a join may draw every version's arcs.
@@ -3170,6 +3171,21 @@ public class Canvas extends JPanel {
             for (String difference : serviceRegistry.deploymentDifferences(place)) notes.add("Place '" + place.getLabel() + "' " + difference);
         return notes;
     }
+    /**
+     * An event generator issues one version's tokens, shaped for the service it feeds, to one place. It is not a step
+     * of the business process, so it does not fork: a fork is a place whose T_out splits, like any other.
+     */
+    public List<String> generatorsWithSeveralArcs() {
+        List<String> notes = new ArrayList<>();
+        for (ProcessElement generator : elements) {
+            if (generator.getType() != ProcessElement.Type.EVENT_GENERATOR) continue;
+            int arcs = 0;
+            for (Arrow out : arrows) if (out.getSource() == generator) arcs++;
+            if (arcs > 1) notes.add(generator.getLabel() + " has " + arcs + " arcs, but an event generator issues its tokens to one place. "
+                + "To fork, lead " + generator.getLabel() + " to one T_in and place, and make that place's T_out a ForkNode with an arc to each branch.");
+        }
+        return notes;
+    }
     /** A join waits for its inputs at the T_in of a place; one that leads to no place has nothing to host it. */
     public List<String> joinsWithoutPlace() {
         List<String> notes = new ArrayList<>();
@@ -3297,7 +3313,7 @@ public class Canvas extends JPanel {
                 json.append(",\n      \"generator_rate\": \"").append(escapeJSON(element.getGeneratorRate())).append("\"");
                 json.append(",\n      \"token_version\": \"").append(escapeJSON(element.getTokenVersion())).append("\"");
                 
-                // A generator's fork follows from its arcs (Build reads them), so no fork_behavior is saved.
+                // A generator feeds one place; forks are a place's T_out, so no fork_behavior is saved.
             } else {
                 json.append(",\n      \"rotation\": ").append(element.getRotationAngle());
                 json.append(",\n      \"node_type\": \"").append(escapeJSON(element.getNodeType())).append("\"");

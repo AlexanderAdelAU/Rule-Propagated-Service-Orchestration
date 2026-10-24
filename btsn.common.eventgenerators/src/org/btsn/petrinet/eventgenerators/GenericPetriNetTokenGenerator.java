@@ -188,11 +188,6 @@ public class GenericPetriNetTokenGenerator {
 	private static List<Integer> joinArgs = new ArrayList<>();
 	// Join inputs - the target join's input count; the token IDs follow from the version (-joininputs 2)
 	private static int joinInputs = 0;
-
-	// Branches - the generator forks (-branches P1_Place:processToken,P2_Place:test_token): each token's child k
-	// (parent + k: N01, N02, ...) goes to branch k, as a fork inside the process numbers its children.
-	// Each branch: {place, operation, channel address, port, channel id}
-	private static final List<String[]> branches = new ArrayList<>();
 	
 	// Control settings
 	private static boolean exitOnCompletion = true;
@@ -274,17 +269,6 @@ public class GenericPetriNetTokenGenerator {
 			
 			System.out.println("Resolved Channel: " + resolvedServiceChannel);
 			System.out.println("Resolved Port: " + resolvedServicePort);
-			// A forking generator resolves every branch's place the same way.
-			for (String[] branch : branches) {
-				if (!queryServiceConfiguration(branch[0], branch[1], ruleBaseVersion)) {
-					System.err.println("ERROR: Could not find service configuration for branch " + branch[0] + "." + branch[1] + " in " + ruleBaseVersion);
-					cleanup();
-					if (exitOnCompletion) System.exit(1);
-					return;
-				}
-				branch[2] = resolvedServiceChannel; branch[3] = resolvedServicePort; branch[4] = resolvedChannelId;
-				System.out.println("Branch " + branch[0] + "." + branch[1] + " -> " + branch[2] + ":" + branch[3]);
-			}
 			System.out.println("=== Service Configuration Complete ===\n");
 
 			// STEP 2: Deploy process rules (unless skipped)
@@ -495,21 +479,6 @@ public class GenericPetriNetTokenGenerator {
 					}
 					break;
 				
-				case "-branches":
-				case "--branches":
-					if (i + 1 < args.length) {
-						for (String branch : args[++i].split(",")) {
-							String[] parts = branch.trim().split(":");
-							if (parts.length != 2 || parts[0].isEmpty() || parts[1].isEmpty()) {
-								System.err.println("ERROR: -branches takes place:operation pairs, e.g. P1_Place:processToken,P2_Place:test_token");
-								System.exit(1);
-							}
-							branches.add(new String[] {parts[0], parts[1], null, null, null});
-						}
-						System.out.println("  Parsed -branches: " + branches.size() + " branch(es)");
-					}
-					break;
-
 				case "-joininputs":
 				case "--joininputs":
 					if (i + 1 < args.length) {
@@ -841,20 +810,6 @@ public class GenericPetriNetTokenGenerator {
 							tokenJoinID = sequenceID;
 							System.out.printf("  JOIN_NODE: Token %d with attributeName=%s, joinID=%d\n", 
 							                  tokenIdToUse, tokenAttrName, tokenJoinID);
-						} else if (!branches.isEmpty()) {
-							// FORK: the parent number is spent on its children, one to each branch.
-							int parent = sequenceID;
-							sequenceID += sidInc;
-							for (int k = 0; k < branches.size(); k++) {
-								String[] branch = branches.get(k);
-								targetPlaceName = branch[0]; serviceOperation = branch[1];
-								resolvedServiceChannel = branch[2]; resolvedServicePort = branch[3]; resolvedChannelId = branch[4];
-								int child = parent + k + 1;
-								System.out.printf("  FORK: child %d of %d -> %s.%s%n", child, parent, targetPlaceName, serviceOperation);
-								sendToken(createPetriNetToken(child), child);
-							}
-							totalTokensProcessed++;
-							continue;
 						} else {
 							// EDGE_NODE mode: Use sequential token IDs
 							tokenIdToUse = sequenceID;

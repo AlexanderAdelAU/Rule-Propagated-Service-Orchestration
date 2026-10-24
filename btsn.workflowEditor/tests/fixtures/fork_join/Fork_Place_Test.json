@@ -1,12 +1,12 @@
 {
-  "serviceDeployment": "ServiceDeploymentFolder/petrinet/Fork_EG_Test.json",
+  "serviceDeployment": "ServiceDeploymentFolder/petrinet/Fork_Place_Test.json",
   "processType": "PetriNet",
   "elements": [
     {
       "id": "EG1",
       "type": "EVENT_GENERATOR",
-      "x": 80,
-      "y": 180,
+      "x": 40,
+      "y": 190,
       "width": 24,
       "height": 60,
       "label": "EG1",
@@ -15,9 +15,61 @@
       "token_version": "v001"
     },
     {
+      "id": "T1",
+      "type": "TRANSITION",
+      "x": 110,
+      "y": 190,
+      "width": 24,
+      "height": 60,
+      "label": "T1",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "50"
+    },
+    {
+      "id": "P0",
+      "type": "PLACE",
+      "x": 170,
+      "y": 195,
+      "width": 50,
+      "height": 50,
+      "label": "P0",
+      "service": "StochasticService",
+      "serviceInstance": "ForkTestP0",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "token",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T0",
+      "type": "TRANSITION",
+      "x": 250,
+      "y": 190,
+      "width": 24,
+      "height": 60,
+      "label": "T0",
+      "rotation": 0.0,
+      "node_type": "ForkNode",
+      "node_value": "FORK_NODE",
+      "transition_type": "T_out"
+    },
+    {
       "id": "T2",
       "type": "TRANSITION",
-      "x": 180,
+      "x": 330,
       "y": 120,
       "width": 24,
       "height": 60,
@@ -31,7 +83,7 @@
     {
       "id": "P3",
       "type": "PLACE",
-      "x": 260,
+      "x": 400,
       "y": 125,
       "width": 50,
       "height": 50,
@@ -56,7 +108,7 @@
     {
       "id": "T4",
       "type": "TRANSITION",
-      "x": 360,
+      "x": 480,
       "y": 120,
       "width": 24,
       "height": 60,
@@ -69,7 +121,7 @@
     {
       "id": "T7",
       "type": "TRANSITION",
-      "x": 180,
+      "x": 330,
       "y": 260,
       "width": 24,
       "height": 60,
@@ -83,7 +135,7 @@
     {
       "id": "P6",
       "type": "PLACE",
-      "x": 260,
+      "x": 400,
       "y": 265,
       "width": 50,
       "height": 50,
@@ -108,7 +160,7 @@
     {
       "id": "T8",
       "type": "TRANSITION",
-      "x": 360,
+      "x": 480,
       "y": 260,
       "width": 24,
       "height": 60,
@@ -121,7 +173,7 @@
     {
       "id": "T5",
       "type": "TRANSITION",
-      "x": 460,
+      "x": 570,
       "y": 190,
       "width": 24,
       "height": 60,
@@ -135,7 +187,7 @@
     {
       "id": "P10",
       "type": "PLACE",
-      "x": 540,
+      "x": 640,
       "y": 195,
       "width": 50,
       "height": 50,
@@ -160,7 +212,7 @@
     {
       "id": "T11",
       "type": "TRANSITION",
-      "x": 640,
+      "x": 730,
       "y": 190,
       "width": 24,
       "height": 60,
@@ -173,7 +225,7 @@
     {
       "id": "T9",
       "type": "TRANSITION",
-      "x": 740,
+      "x": 810,
       "y": 190,
       "width": 24,
       "height": 60,
@@ -187,6 +239,30 @@
   "arrows": [
     {
       "source": "EG1",
+      "target": "T1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T1",
+      "target": "P0",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P0",
+      "target": "T0",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T0",
       "target": "T2",
       "label": "",
       "guardCondition": "",
@@ -194,7 +270,7 @@
       "endpoint": ""
     },
     {
-      "source": "EG1",
+      "source": "T0",
       "target": "T7",
       "label": "",
       "guardCondition": "",
