@@ -1,5 +1,6 @@
 {
-   "processType":"SOA",
+  "serviceDeployment": "ServiceDeploymentFolder/healthcare/Healthcare.json",
+  "processType": "SOA",
   "elements": [
     {
       "id": "Triage",
@@ -12,7 +13,16 @@
       "service": "TriageService",
       "operations": [
         {
-          "name": "processTriageAssessment"
+          "name": "processTriageAssessment",
+          "returnAttribute": "triageResults",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
         }
       ],
       "fill_color": "#99FF66"
@@ -102,7 +112,16 @@
       "service": "LaboratoryService",
       "operations": [
         {
-          "name": "processLabRequest"
+          "name": "processLabRequest",
+          "returnAttribute": "laboratoryResults",
+          "arguments": [
+            {
+              "name": "triageResults",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
         }
       ],
       "fill_color": "#99FF66"
@@ -118,7 +137,16 @@
       "service": "CardiologyService",
       "operations": [
         {
-          "name": "processCardiacAssessment"
+          "name": "processCardiacAssessment",
+          "returnAttribute": "cardiologyResults",
+          "arguments": [
+            {
+              "name": "triageResults",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
         }
       ],
       "fill_color": "#99FF66"
@@ -134,7 +162,28 @@
       "service": "RadiologyService",
       "operations": [
         {
-          "name": "processImagingRequest"
+          "name": "processImagingRequest",
+          "returnAttribute": "radiologyResults",
+          "arguments": [
+            {
+              "name": "triageResults",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "federatedRadiologyRequest",
+          "returnAttribute": "radiologyResults",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
         }
       ],
       "fill_color": "#99FF66"
@@ -193,7 +242,28 @@
       "service": "DiagnosisService",
       "operations": [
         {
-          "name": "processClinicalDecision"
+          "name": "processClinicalDecision",
+          "returnAttribute": "diagnosisResults",
+          "arguments": [
+            {
+              "name": "radiologyResults",
+              "type": "String",
+              "value": "String",
+              "required": false
+            },
+            {
+              "name": "laboratoryResults",
+              "type": "String",
+              "value": "String",
+              "required": false
+            },
+            {
+              "name": "cardiologyResults",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
         }
       ],
       "fill_color": "#99FF66"
@@ -238,10 +308,28 @@
       "service": "TreatmentService",
       "operations": [
         {
-          "name": "executeTreatmentPlan"
+          "name": "executeTreatmentPlan",
+          "returnAttribute": "treatmentResults",
+          "arguments": [
+            {
+              "name": "diagnosisResults",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
         },
         {
-          "name": "executeDirectTreatment"
+          "name": "executeDirectTreatment",
+          "returnAttribute": "treatmentResults",
+          "arguments": [
+            {
+              "name": "triageResults",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
         }
       ],
       "fill_color": "#99FF66"
@@ -273,51 +361,6 @@
       "node_value": "EDGE_NODE",
       "transition_type": "T_out",
       "fill_color": "#FFCC00"
-    },
-    {
-      "id": "T_in_Monitor",
-      "type": "TRANSITION",
-      "x": 410,
-      "y": 390,
-      "width": 20,
-      "height": 60,
-      "label": "T_in_Monitor",
-      "rotation": 180.0,
-      "node_type": "EdgeNode",
-      "node_value": "EDGE_NODE",
-      "transition_type": "T_in",
-      "buffer": "10",
-      "fill_color": "#CCCCCC"
-    },
-    {
-      "id": "Monitor",
-      "type": "PLACE",
-      "x": 395,
-      "y": 475,
-      "width": 50,
-      "height": 50,
-      "label": "Monitor",
-      "service": "MonitorService",
-      "operations": [
-        {
-          "name": "acknowledgeTokenArrival"
-        }
-      ],
-      "fill_color": "#99FF66"
-    },
-    {
-      "id": "T_out_Monitor",
-      "type": "TRANSITION",
-      "x": 510,
-      "y": 470,
-      "width": 20,
-      "height": 60,
-      "label": "T_out_Monitor",
-      "rotation": 180.0,
-      "node_type": "TerminateNode",
-      "node_value": "TERMINATE_NODE",
-      "transition_type": "T_out",
-      "fill_color": "#FF9999"
     },
     {
       "id": "PATIENT_ARRIVAL",
@@ -356,31 +399,17 @@
       "token_version": "v001"
     },
     {
-      "id": "Rule-Propagated|Service-Orchestration| Infrastructure Element|(Local To Service)",
+      "id": "Terminate",
       "type": "TRANSITION",
-      "x": 68,
-      "y": 13,
-      "width": 24,
-      "height": 54,
-      "label": "Rule-Propagated|Service-Orchestration| Infrastructure Element|(Local To Service)",
+      "x": 410,
+      "y": 475,
+      "width": 20,
+      "height": 60,
+      "label": "Terminate",
       "rotation": 0.0,
-      "node_type": "EdgeNode",
-      "node_value": "EDGE_NODE",
-      "transition_type": "Other",
-      "fill_color": "#CCCCCC"
-    },
-    {
-      "id": "Network|Services",
-      "type": "PLACE",
-      "x": 175,
-      "y": 15,
-      "width": 50,
-      "height": 50,
-      "label": "Network|Services",
-      "service": "",
-      "operations": [
-      ],
-      "fill_color": "#99FF66"
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
     }
   ],
   "arrows": [
@@ -388,8 +417,8 @@
       "source": "T_out_Triage",
       "target": "T_in_Laboratory",
       "label": "Laboratory",
-      "guardCondition": "DECISION_NOT_EQUAL",
-      "decision_value": "DIRECT_TO_TREATMENT",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "STANDARD_WORKFLOW",
       "endpoint": "",
       "connection_type": "NETWORK",
       "availability": 1.0
@@ -398,8 +427,8 @@
       "source": "T_out_Triage",
       "target": "T_in_Cardiology",
       "label": "Cardiology",
-      "guardCondition": "DECISION_NOT_EQUAL",
-      "decision_value": "DIRECT_TO_TREATMENT",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "STANDARD_WORKFLOW",
       "endpoint": "",
       "connection_type": "NETWORK",
       "availability": 1.0
@@ -408,9 +437,9 @@
       "source": "T_out_Triage",
       "target": "T_in_Radiology",
       "label": "Radiology",
-      "guardCondition": "DECISION_NOT_EQUAL",
-      "decision_value": "DIRECT_TO_TREATMENT",
-      "endpoint": "",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "STANDARD_WORKFLOW",
+      "endpoint": "processImagingRequest",
       "connection_type": "NETWORK",
       "availability": 1.0
     },
@@ -455,6 +484,16 @@
       "endpoint": ""
     },
     {
+      "source": "T_out_Radiology",
+      "target": "T_in_Diagnosis",
+      "label": "v003",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "connection_type": "NETWORK",
+      "availability": 1.0
+    },
+    {
       "source": "T_out_Laboratory",
       "target": "T_in_Diagnosis",
       "label": "",
@@ -465,9 +504,9 @@
       "availability": 1.0
     },
     {
-      "source": "T_out_Radiology",
+      "source": "T_out_Cardiology",
       "target": "T_in_Diagnosis",
-      "label": "v003",
+      "label": "",
       "guardCondition": "",
       "decision_value": "",
       "endpoint": "",
@@ -482,8 +521,14 @@
       "decision_value": "DIRECT_TO_TREATMENT",
       "endpoint": "executeDirectTreatment",
       "waypoints": [
-        {"x": 440, "y": 100},
-        {"x": 680, "y": 100}
+        {
+          "x": 440,
+          "y": 100
+        },
+        {
+          "x": 680,
+          "y": 100
+        }
       ],
       "labelOffsetX": -93,
       "labelOffsetY": 11,
@@ -513,16 +558,6 @@
       "guardCondition": "",
       "decision_value": "",
       "endpoint": ""
-    },
-    {
-      "source": "T_out_Cardiology",
-      "target": "T_in_Diagnosis",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": "",
-      "connection_type": "NETWORK",
-      "availability": 1.0
     },
     {
       "source": "T_in_Diagnosis",
@@ -568,14 +603,20 @@
     },
     {
       "source": "T_out_Treatment",
-      "target": "T_in_Monitor",
+      "target": "Terminate",
       "label": "v003",
       "guardCondition": "",
       "decision_value": "",
       "endpoint": "",
       "waypoints": [
-        {"x": 780, "y": 420},
-        {"x": 640, "y": 420}
+        {
+          "x": 780,
+          "y": 420
+        },
+        {
+          "x": 640,
+          "y": 420
+        }
       ],
       "labelOffsetX": 36,
       "labelOffsetY": 25,
@@ -583,32 +624,25 @@
       "availability": 1.0
     },
     {
-      "source": "T_in_Monitor",
-      "target": "Monitor",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
-    },
-    {
-      "source": "Monitor",
-      "target": "T_out_Monitor",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
-    },
-    {
       "source": "T_out_Radiology",
-      "target": "T_in_Monitor",
+      "target": "Terminate",
       "label": "v001",
       "guardCondition": "",
       "decision_value": "",
       "endpoint": "",
       "waypoints": [
-        {"x": 640, "y": 320},
-        {"x": 640, "y": 380},
-        {"x": 420, "y": 380}
+        {
+          "x": 640,
+          "y": 320
+        },
+        {
+          "x": 640,
+          "y": 380
+        },
+        {
+          "x": 420,
+          "y": 380
+        }
       ],
       "labelOffsetX": 36,
       "labelOffsetY": 15,
@@ -616,22 +650,17 @@
       "availability": 1.0
     },
     {
-      "source": "Monitor",
-      "target": "T_out_Monitor",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
-    },
-    {
       "source": "T_out_Triage",
-      "target": "T_in_Monitor",
+      "target": "Terminate",
       "label": "v002",
       "guardCondition": "",
       "decision_value": "",
       "endpoint": "",
       "waypoints": [
-        {"x": 320, "y": 420}
+        {
+          "x": 320,
+          "y": 420
+        }
       ],
       "labelOffsetX": -2,
       "labelOffsetY": 27,
@@ -646,7 +675,10 @@
       "decision_value": "",
       "endpoint": "",
       "waypoints": [
-        {"x": 120, "y": 280}
+        {
+          "x": 120,
+          "y": 280
+        }
       ],
       "labelOffsetX": 16,
       "labelOffsetY": -23,
@@ -661,7 +693,10 @@
       "decision_value": "",
       "endpoint": "",
       "waypoints": [
-        {"x": 120, "y": 200}
+        {
+          "x": 120,
+          "y": 200
+        }
       ],
       "labelOffsetX": 31,
       "labelOffsetY": -7,
@@ -674,10 +709,16 @@
       "label": "v001",
       "guardCondition": "",
       "decision_value": "",
-      "endpoint": "",
+      "endpoint": "federatedRadiologyRequest",
       "waypoints": [
-        {"x": 160, "y": 380},
-        {"x": 260, "y": 320}
+        {
+          "x": 160,
+          "y": 380
+        },
+        {
+          "x": 260,
+          "y": 320
+        }
       ],
       "labelOffsetX": -55,
       "labelOffsetY": 1,
@@ -757,6 +798,14 @@
       "fontSize": 12,
       "fontStyle": 0,
       "color": -16777216
+    },
+    {
+      "x": 40,
+      "y": 24,
+      "text": "Key:|Grey transition: rule-propagated|service-orchestration element|(local to service)|Green place: network service",
+      "fontSize": 11,
+      "fontStyle": 2,
+      "color": -12566464
     }
   ]
 }

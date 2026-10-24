@@ -118,6 +118,7 @@ public final class BuildAndRunGenerator {
         plan.domain = plan.processName.contains("/") ? plan.processName.substring(0, plan.processName.indexOf('/')) : "";
 
         ServiceRegistry registry = canvas.getServiceRegistry();
+        if (canvas.isAdministrativeProcess()) { plan.problems.add(Canvas.ADMINISTRATIVE); return plan; }
         if (!registry.hasDeployment()) { plan.problems.add("Deploy the process first: no service deployment is linked."); return plan; }
         plan.serviceDeployment = canvas.getServiceDeploymentReference();
         plan.catalogue = registry.catalogueReference();
