@@ -1616,6 +1616,27 @@ public class Canvas extends JPanel {
     }
     
     /** Small label at the lower right of each place naming the node it runs on (dashed while unsaved). */
+    /** A generator that sets the initial marking shows it on the diagram: "M0 x2" above it. */
+    private void drawGeneratorRoles(Graphics2D g2) {
+        Font previous = g2.getFont();
+        g2.setFont(previous.deriveFont(Font.BOLD, 10f));
+        FontMetrics metrics = g2.getFontMetrics();
+        for (ProcessElement generator : elements) {
+            if (generator.getType() != ProcessElement.Type.EVENT_GENERATOR) continue;
+            String badge = generatorBadge(generator);
+            if (badge == null) continue;
+            int w = metrics.stringWidth(badge) + 8, h = metrics.getHeight();
+            int x = generator.getX() + generator.getWidth() / 2 - w / 2, y = generator.getY() - h - 3;
+            g2.setColor(new Color(237, 228, 255));
+            g2.fillRoundRect(x, y, w, h, 8, 8);
+            g2.setColor(new Color(90, 50, 160));
+            g2.setStroke(new BasicStroke(1f));
+            g2.drawRoundRect(x, y, w, h, 8, 8);
+            g2.drawString(badge, x + 4, y + metrics.getAscent());
+        }
+        g2.setFont(previous);
+    }
+
     private void drawDeploymentNodes(Graphics2D g2) {
         Font previous = g2.getFont();
         g2.setFont(previous.deriveFont(Font.BOLD, 10f));
@@ -1695,6 +1716,7 @@ public class Canvas extends JPanel {
         }
         
         drawDeploymentNodes(g2);
+        drawGeneratorRoles(g2);
 
         // Draw warning indicators for incomplete Places
         g2.setStroke(new BasicStroke(2));
@@ -2833,6 +2855,8 @@ public class Canvas extends JPanel {
         notes.addAll(routingGaps(reminders));
         notes.addAll(transitionTypeConflicts());
         notes.addAll(generatorsWithSeveralArcs());
+        notes.addAll(joinsMarkedTwice());
+        if (reminders) notes.addAll(generatorMarkings());
         notes.addAll(joinsWithoutPlace());
         notes.addAll(deploymentDifferences());
         // A combined process overlays several versions, so a join may draw every version's arcs.
@@ -3177,6 +3201,7 @@ public class Canvas extends JPanel {
      */
     public List<String> generatorsWithSeveralArcs() {
         List<String> notes = new ArrayList<>();
+        if (isAdministrativeProcess()) return notes;   // initialisers and collectors reach every host at once
         for (ProcessElement generator : elements) {
             if (generator.getType() != ProcessElement.Type.EVENT_GENERATOR) continue;
             int arcs = 0;
@@ -3186,6 +3211,81 @@ public class Canvas extends JPanel {
         }
         return notes;
     }
+    /** The runtime's own initialisers and collectors (ProcessDefinitionFolder/common), not business processes. */
+    public boolean isAdministrativeProcess() {
+        return definitionLocation != null && definitionLocation.getAbsolutePath().replace(java.io.File.separatorChar, '/').contains("/ProcessDefinitionFolder/common/");
+    }
+
+    /**
+     * What an event generator does, worked out from its one arc. Into an ordinary T_in it issues arrivals: one token
+     * per arrival into that place. Into a JoinNode T_in it sets the initial marking of a closed net: one token per input
+     * of the join's place, once, so the cycle can start.
+     */
+    public static final class GeneratorRole {
+        public ProcessElement place;                       // the place it issues tokens to, or null
+        public ProcessElement join;                        // the JoinNode T_in its arc enters (initial marking), or null
+        public final List<String> inputs = new ArrayList<>();   // the join place's inputs: one marking token each
+        public boolean marking() { return join != null && place != null; }
+        public int tokens() { return inputs.size(); }
+    }
+    public GeneratorRole generatorRole(ProcessElement generator) {
+        GeneratorRole role = new GeneratorRole();
+        for (Arrow out : arrows) {
+            if (out.getSource() != generator || out.getTarget() == null) continue;
+            ProcessElement next = out.getTarget();
+            if (next.getType() == ProcessElement.Type.PLACE) { role.place = next; break; }
+            for (Arrow onward : arrows)
+                if (onward.getSource() == next && onward.getTarget() != null && onward.getTarget().getType() == ProcessElement.Type.PLACE) role.place = onward.getTarget();
+            if ("JoinNode".equals(next.getNodeType())) role.join = next;
+            break;
+        }
+        if (role.marking()) {
+            if (!role.place.getServiceOperations().isEmpty())
+                for (ServiceArgument input : role.place.getServiceOperations().get(0).getArguments()) role.inputs.add(input.getName());
+            if (role.inputs.isEmpty()) role.inputs.addAll(joinInputNames(joinArcs(role.place)));
+        }
+        return role;
+    }
+    /** "M0 x2" for a generator that sets the initial marking; null for one that issues arrivals. */
+    public String generatorBadge(ProcessElement generator) {
+        GeneratorRole role = generatorRole(generator);
+        return role.marking() ? "M\u2080 \u00d7" + role.tokens() : null;
+    }
+    /** The generator's role in words, for its Attributes. */
+    public String generatorRoleText(ProcessElement generator) {
+        GeneratorRole role = generatorRole(generator);
+        if (role.marking())
+            return "Initial marking: " + role.tokens() + " tokens, once, into " + role.place.getLabel() + "'s join (" + String.join(", ", role.inputs)
+                + "), so the cycle can start. Rate and token count do not apply.";
+        if (role.place != null) return "Arrivals: one token per arrival into " + role.place.getLabel() + ".";
+        return "Not connected yet: draw an arc to the T_in of the place it feeds.";
+    }
+    /** Reminders that a generator sets the initial marking, so the author knows it is happening. */
+    public List<String> generatorMarkings() {
+        List<String> notes = new ArrayList<>();
+        for (ProcessElement generator : elements) {
+            if (generator.getType() != ProcessElement.Type.EVENT_GENERATOR) continue;
+            GeneratorRole role = generatorRole(generator);
+            if (role.marking()) notes.add(generator.getLabel() + " sets the initial marking: " + role.tokens() + " tokens, once, into " + role.place.getLabel() + "'s join.");
+        }
+        return notes;
+    }
+    /** A join's initial marking comes from one generator: each runs under its own version, so each would start its own copy. */
+    public List<String> joinsMarkedTwice() {
+        List<String> notes = new ArrayList<>();
+        Map<ProcessElement, List<String>> byJoin = new java.util.LinkedHashMap<>();
+        for (ProcessElement generator : elements) {
+            if (generator.getType() != ProcessElement.Type.EVENT_GENERATOR) continue;
+            GeneratorRole role = generatorRole(generator);
+            if (role.marking()) byJoin.computeIfAbsent(role.join, k -> new ArrayList<>()).add(generator.getLabel());
+        }
+        for (Map.Entry<ProcessElement, List<String>> entry : byJoin.entrySet())
+            if (entry.getValue().size() > 1)
+                notes.add(entry.getKey().getLabel() + " is marked by " + String.join(" and ", entry.getValue()) + ". A join's initial marking comes from one generator: "
+                    + "each generator runs under its own version, so each would start its own copy of the net. Keep one of them.");
+        return notes;
+    }
+
     /** A join waits for its inputs at the T_in of a place; one that leads to no place has nothing to host it. */
     public List<String> joinsWithoutPlace() {
         List<String> notes = new ArrayList<>();
