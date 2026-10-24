@@ -2835,6 +2835,7 @@ public class Canvas extends JPanel {
         notes.addAll(routingGaps(reminders));
         notes.addAll(transitionTypeConflicts());
         notes.addAll(joinsWithoutPlace());
+        notes.addAll(deploymentDifferences());
         // A combined process overlays several versions, so a join may draw every version's arcs.
         if (BuildAndRunGenerator.combinedLauncher(definitionLocation) == null) notes.addAll(joinInputMismatches());
         if (reminders && !typesCorrectedOnLoad.isEmpty())
@@ -3195,6 +3196,13 @@ public class Canvas extends JPanel {
             }
         }
         return slots;
+    }
+    /** Places whose design no longer matches the saved deployment: they stop Build and Run until Deploy is saved again. */
+    public List<String> deploymentDifferences() {
+        List<String> notes = new ArrayList<>();
+        for (ProcessElement place : getPlaces())
+            for (String difference : serviceRegistry.deploymentDifferences(place)) notes.add("Place '" + place.getLabel() + "' " + difference);
+        return notes;
     }
     /** A join waits for its inputs at the T_in of a place; one that leads to no place has nothing to host it. */
     public List<String> joinsWithoutPlace() {

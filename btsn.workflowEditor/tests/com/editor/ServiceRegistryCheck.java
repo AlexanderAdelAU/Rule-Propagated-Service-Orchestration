@@ -104,10 +104,10 @@ public final class ServiceRegistryCheck {
             check(combos(frame).stream().anyMatch(combo -> contains(combo, "DecisionNode")), "Full routing type vocabulary unavailable");
         });
         selected.getServiceOperations().get(0).getArguments().get(0).setName("wrong");
-        check(!canvas.validateServiceContracts().isEmpty(), "Process input mismatch accepted");
+        check(canvas.validateServiceContracts().isEmpty() && canvas.serviceBlockers().stream().anyMatch(b -> b.contains("Deploy again")), "Process input mismatch accepted (or it stops saving): " + canvas.serviceBlockers());
         canvas.getServiceRegistry().apply(selected, "processToken", "StochasticInstance8");
         selected.getServiceOperations().get(0).setReturnAttribute("wrong");
-        check(!canvas.validateServiceContracts().isEmpty(), "Process result mismatch accepted");
+        check(canvas.validateServiceContracts().isEmpty() && canvas.serviceBlockers().stream().anyMatch(b -> b.contains("returns wrong but the saved deployment")), "Process result mismatch accepted (or it stops saving): " + canvas.serviceBlockers());
         canvas.getServiceRegistry().apply(selected, "processToken", "StochasticInstance8");
         SwingUtilities.invokeAndWait(() -> {
             try {

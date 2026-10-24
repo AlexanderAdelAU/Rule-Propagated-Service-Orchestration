@@ -1338,7 +1338,12 @@ public class ProcessEditor extends JFrame {
         ServiceRegistry registry = canvas.getServiceRegistry();
         if (registry.problem() != null) problems.add(registry.problem());
         else if (canvas.getPlaces().isEmpty()) problems.add("Add at least one place before deploying.");
-        else { problems.addAll(canvas.validateServiceContracts()); problems.addAll(canvas.serviceBlockers()); }
+        else {
+            problems.addAll(canvas.validateServiceContracts());
+            // A deployment that is out of date is what Deploy fixes, so it does not stop Deploy.
+            java.util.List<String> outOfDate = canvas.deploymentDifferences();
+            for (String blocker : canvas.serviceBlockers()) if (!outOfDate.contains(blocker)) problems.add(blocker);
+        }
         if (!problems.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Before deploying:\n" + String.join("\n", problems), "Deploy", JOptionPane.WARNING_MESSAGE);
             return;
