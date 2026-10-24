@@ -3422,6 +3422,8 @@ public class Canvas extends JPanel {
                 // Only save buffer for T_in transitions
                 if ("T_in".equals(element.getTransitionType())) {
                     json.append(",\n      \"buffer\": \"").append(escapeJSON(element.getBuffer())).append("\"");
+                    if ("JoinNode".equals(element.getNodeType()) && element.getJoinInputCount().matches("\\d+"))
+                        json.append(",\n      \"joinInputCount\": ").append(element.getJoinInputCount());
                 }
             }
             
@@ -3727,6 +3729,7 @@ public class Canvas extends JPanel {
                     }
                     element.setBuffer(buffer);
                 }
+                element.setJoinInputCount(extractValue(block, "joinInputCount"));   // kept as written, so saving does not drop it
             }
             
             // Load colors if present (applies to all element types)
@@ -4638,6 +4641,7 @@ public class Canvas extends JPanel {
             copy.setNodeValue(original.getNodeValue());
             copy.setTransitionType(original.getTransitionType());
             copy.setBuffer(original.getBuffer());
+            copy.setJoinInputCount(original.getJoinInputCount());
         }
         
         return copy;
