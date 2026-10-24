@@ -806,7 +806,8 @@ public class EditorFrame extends JPanel {
             detail.setPreferredSize(new Dimension(220, 70)); detail.setMinimumSize(new Dimension(0, 70)); detail.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
             attributesPanel.add(detail);
         }
-        List<String> errors = registry.validatePlace(element);
+        List<String> errors = new ArrayList<>(registry.validatePlace(element));
+        for (String difference : registry.deploymentDifferences(element)) errors.add("This place " + difference);
         if (!errors.isEmpty()) {
             JTextArea warning = new JTextArea(String.join("\n", errors)); warning.setEditable(false); warning.setLineWrap(true); warning.setWrapStyleWord(true); warning.setForeground(Color.RED);
             warning.setBorder(BorderFactory.createTitledBorder("Unresolved service contract")); attributesPanel.add(warning);

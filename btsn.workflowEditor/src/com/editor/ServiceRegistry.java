@@ -428,6 +428,23 @@ public final class ServiceRegistry {
         if (output.isEmpty() || inputs.contains("") || new HashSet<>(inputs).size() != inputs.size()) errors.add("Result and input aliases must be nonempty and input aliases unique.");
         return errors;
     }
+    /**
+     * Where the place's design and its saved deployment differ (inputs or result), e.g. after the editor fitted a join.
+     * The design is right and the deployment is out of date: Deploy again and save the deployment.
+     */
+    public List<String> deploymentDifferences(ProcessElement place) {
+        List<String> differences = new ArrayList<>();
+        if (problem != null) return differences;
+        for (ServiceOperation operation : place.getServiceOperations()) {
+            Endpoint e = endpoint(place.getService(), operation.getName(), identity(place));
+            if (e == null) continue;
+            List<String> names = new ArrayList<>(); for (ServiceArgument input : operation.getArguments()) names.add(input.getName());
+            String where = "the saved deployment (" + (deployment == null ? "" : deployment.getName() + ", ") + "instance " + e.instance + ")";
+            if (!e.inputs.equals(names)) differences.add("takes " + names + " but " + where + " still has " + e.inputs + ". Deploy again and save the deployment.");
+            if (!e.output.equals(operation.getReturnAttribute())) differences.add("returns " + operation.getReturnAttribute() + " but " + where + " still has " + e.output + ". Deploy again and save the deployment.");
+        }
+        return differences;
+    }
     public List<String> validatePlace(ProcessElement place) {
         List<String> errors = new ArrayList<>();
         if (problem != null) { errors.add(problem); return errors; }
@@ -440,9 +457,7 @@ public final class ServiceRegistry {
             Endpoint e = endpoint(place.getService(), operation.getName(), identity(place));
             if (e != null) {
                 errors.addAll(validateEndpoint(e.service, e.operation, e.output, e.inputs, e.adapter, e.endpoint));
-                if (!e.inputs.equals(names)) errors.add("Process inputs differ from deployment " + e.instance + ": expected " + e.inputs);
-                if (!e.output.equals(operation.getReturnAttribute())) errors.add("Process result differs from deployment " + e.instance + ": expected " + e.output);
-                continue;
+                continue;   // where the design and its deployment differ is deploymentDifferences: Deploy again, not a reason to refuse saving
             }
             // Not deployed yet: the catalogue fixes the contract. Deployment is a later, separate step.
             Contract c = contract(place.getService(), operation.getName());

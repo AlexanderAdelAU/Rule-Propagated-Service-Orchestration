@@ -26,6 +26,11 @@ public final class GeneratorForkCheck {
         copy(fixtures.resolve("deployment.json"), common.resolve("ServiceDeploymentFolder/petrinet/Fork_EG_Test.json"));
         copy(root.toPath().resolve("btsn.common").resolve(ServiceRegistry.STANDARD_CATALOGUE), common.resolve(ServiceRegistry.STANDARD_CATALOGUE));
         String run = Files.readString(fixtures.resolve("Analysis_Fork_EG_Test.txt"));
+        // The same process deployed before its join was fitted: the deployment still says P3 and P6 return token.
+        Path staleProcess = common.resolve("ProcessDefinitionFolder/petrinet/Workflow/Fork_EG_Stale.json");
+        Files.writeString(staleProcess, Files.readString(process).replace("ServiceDeploymentFolder/petrinet/Fork_EG_Test.json", "ServiceDeploymentFolder/petrinet/Fork_EG_Stale.json"));
+        Files.writeString(common.resolve("ServiceDeploymentFolder/petrinet/Fork_EG_Stale.json"),
+            Files.readString(fixtures.resolve("deployment.json")).replace("token_branch1", "token").replace("\"returnAttribute\": \"token_branch2\"", "\"returnAttribute\": \"token\""));
 
         Throwable[] failure = new Throwable[1];
         SwingUtilities.invokeAndWait(() -> {
@@ -67,6 +72,13 @@ public final class GeneratorForkCheck {
                 check(moves.getOrDefault("1000001", Set.of()).containsAll(Arrays.asList("EG1->T2", "T2->P3", "P3->T4", "T4->T5", "P10->T11", "T11->T9")), "Child 1: " + moves.get("1000001"));
                 check(moves.getOrDefault("1000002", Set.of()).containsAll(Arrays.asList("EG1->T7", "T7->P6", "P6->T8", "T8->T5")), "Child 2: " + moves.get("1000002"));
 
+                // Deployed before the join was fitted: the design still saves, Deploy is not refused, and Build and Run
+                // wait for the deployment to be saved again.
+                Canvas stale = new Canvas(); stale.setDefinitionLocation(staleProcess.toFile()); stale.loadFromJSON(Files.readString(staleProcess));
+                check(stale.validateServiceContracts().isEmpty(), "An out-of-date deployment stops saving: " + stale.validateServiceContracts());
+                check(stale.deploymentDifferences().stream().anyMatch(d -> d.startsWith("Place 'P3' returns token_branch1 but the saved deployment (Fork_EG_Stale.json, instance ForkTestP3) still has token. Deploy again"))
+                    && stale.serviceBlockers().containsAll(stale.deploymentDifferences()), "Out-of-date deployment not reported: " + stale.serviceBlockers());
+
                 // A join whose service takes too few inputs does not stop saving the design; it stops Deploy, Build and Run.
                 ProcessElement p10 = e.get("P10");
                 List<ServiceOperation> kept = new ArrayList<>(p10.getServiceOperations());
@@ -86,7 +98,7 @@ public final class GeneratorForkCheck {
             } catch (Throwable t) { failure[0] = t; }
         });
         if (failure[0] != null) throw new AssertionError("Generator fork", failure[0]);
-        System.out.println("PASS: a generator with two arcs forks (no Fork Children setting): Build sends child N01 to P3's host and N02 to P6's; the join's standard service takes token_branch1/2 and the services feeding it return them; a new service for a join is suggested one input per arc; a join whose service takes too few inputs is saved but stops Deploy, Build and Run; a join with no place is reported; the recorded run replays each child along its branch to the join and on to T9");
+        System.out.println("PASS: a generator with two arcs forks (no Fork Children setting): Build sends child N01 to P3's host and N02 to P6's; the join's standard service takes token_branch1/2 and the services feeding it return them; a new service for a join is suggested one input per arc; a process deployed before its join was fitted saves and asks to Deploy again; a join whose service takes too few inputs is saved but stops Deploy, Build and Run; a join with no place is reported; the recorded run replays each child along its branch to the join and on to T9");
     }
 
     private static List<String> names(ProcessElement place) {
