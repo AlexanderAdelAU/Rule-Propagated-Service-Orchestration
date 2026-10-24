@@ -982,7 +982,8 @@ public class ProcessEditor extends JFrame {
         java.util.List<String> notes = canvas.serviceNotes();
         // "Still to do" is shown in red: it does not stop saving, but the process cannot be deployed until it is done.
         StringBuilder html = new StringBuilder("<html><div style='width:520px'>");
-        if (errors.isEmpty()) html.append("Validation passed!<br><br>No duplicate labels or other issues found.");
+        if (errors.isEmpty()) html.append("Validation passed!<br><br>No duplicate labels or other issues found."
+            + (canvas.isAdministrativeProcess() ? "<br><br>" + htmlText(Canvas.ADMINISTRATIVE) : ""));
         else {
             html.append("Validation found the following issues:<ul>");
             for (String error : errors) html.append("<li>").append(htmlText(error)).append("</li>");
@@ -1338,7 +1339,8 @@ public class ProcessEditor extends JFrame {
         }
         java.util.List<String> problems = new ArrayList<>();
         ServiceRegistry registry = canvas.getServiceRegistry();
-        if (registry.problem() != null) problems.add(registry.problem());
+        if (canvas.isAdministrativeProcess()) problems.add(Canvas.ADMINISTRATIVE);
+        else if (registry.problem() != null) problems.add(registry.problem());
         else if (canvas.getPlaces().isEmpty()) problems.add("Add at least one place before deploying.");
         else {
             problems.addAll(canvas.validateServiceContracts());

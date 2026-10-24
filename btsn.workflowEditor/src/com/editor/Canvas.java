@@ -2812,6 +2812,7 @@ public class Canvas extends JPanel {
     public List<String> serviceBlockers() { return serviceNotes(false); }
     private List<String> serviceNotes(boolean reminders) {
         List<String> notes = new ArrayList<>();
+        if (isAdministrativeProcess()) return notes;
         for (ProcessElement place : getPlaces()) {
             for (String op : place.getOperations()) {
                 ServiceRegistry.Contract c = serviceRegistry.contract(place.getService(), op);
@@ -3060,6 +3061,7 @@ public class Canvas extends JPanel {
     }
     /** Places that the linked deployment does not run (only reported once a deployment is linked). */
     public List<String> deploymentGaps() {
+        if (isAdministrativeProcess()) return new ArrayList<>();
         List<String> gaps = new ArrayList<>();
         if (!serviceRegistry.hasDeployment()) return gaps;
         for (ProcessElement place : getPlaces())
@@ -3079,6 +3081,7 @@ public class Canvas extends JPanel {
         } catch (Exception ex) { JOptionPane.showMessageDialog(parent, ex.getMessage(), "Unresolved catalogue", JOptionPane.ERROR_MESSAGE); }
     }
     public List<String> validateServiceContracts() {
+        if (isAdministrativeProcess()) return new ArrayList<>();   // the hosts' own services: no catalogue contracts
         List<String> errors = new ArrayList<>();
         for (ProcessElement element : elements) if (element.getType() == ProcessElement.Type.PLACE)
             for (String error : serviceRegistry.validatePlace(element)) errors.add(element.getLabel() + ": " + error);
@@ -3213,8 +3216,13 @@ public class Canvas extends JPanel {
     }
     /** The runtime's own initialisers and collectors (ProcessDefinitionFolder/common), not business processes. */
     public boolean isAdministrativeProcess() {
-        return definitionLocation != null && definitionLocation.getAbsolutePath().replace(java.io.File.separatorChar, '/').contains("/ProcessDefinitionFolder/common/");
+        if (definitionLocation == null) return false;
+        String path = definitionLocation.getAbsolutePath().replace(java.io.File.separatorChar, '/');
+        return path.contains("/ProcessDefinitionFolder/common/") || path.contains("/Initializers/") || path.contains("/Collectors/");
     }
+    /** Why an initialiser or collector is not deployed or built on its own. */
+    public static final String ADMINISTRATIVE = "This is an initialiser or collector: its places run the hosts' own initialisation and collection services, "
+        + "not catalogue services, and every launcher runs it alongside the process. It is not deployed or built on its own.";
 
     /**
      * What an event generator does, worked out from its one arc. Into an ordinary T_in it issues arrivals: one token
@@ -3514,6 +3522,8 @@ public class Canvas extends JPanel {
         catalogueReference = extractValue(json, "catalog");
         if (catalogueReference == null) catalogueReference = "";
         serviceRegistry.loadProcessReferences(serviceDeploymentReference, catalogueReference, definitionLocation);
+        // An initialiser or collector names no catalogue (its places run the hosts' own services): show the standard one.
+        if (serviceRegistry.problem() != null && isAdministrativeProcess()) serviceRegistry.useStandardCatalogue(definitionLocation);
 
         // Extract and store metadata section if present
         if (json.contains("\"metadata\"")) {
