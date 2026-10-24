@@ -39,13 +39,23 @@ public final class GeneratorForkCheck {
                 Map<String, ProcessElement> e = new HashMap<>();
                 for (ProcessElement element : canvas.getElements()) e.put(element.getLabel(), element);
 
-                // The join's standard service takes one input per arc; the services feeding it return those names.
+                // Nothing is changed for the designer: the process saves, and Validate says what the join needs and where to type it.
                 check(canvas.joinArcs(e.get("P10")) == 2 && canvas.validateServiceContracts().isEmpty(), "Contracts: " + canvas.validateServiceContracts());
-                check(names(e.get("P10")).equals(Arrays.asList("token_branch1", "token_branch2")), "Join inputs: " + names(e.get("P10")));
-                check("token_branch1".equals(returns(e.get("P3"))) && "token_branch2".equals(returns(e.get("P6"))) && "token".equals(returns(e.get("P10"))),
-                    "Returns: " + returns(e.get("P3")) + ", " + returns(e.get("P6")) + ", " + returns(e.get("P10")));
+                check(names(e.get("P10")).equals(Arrays.asList("token")) && "token".equals(returns(e.get("P3"))), "The editor changed the design by itself");
+                check(canvas.serviceBlockers().contains("P10 is a join with 2 incoming arcs but its service takes 1 input; a join's place takes one input per arc, e.g. token_branch1, token_branch2. Type them in P10's Inputs field.")
+                    && canvas.serviceBlockers().contains("P3 feeds a join where its arc fills the input token_branch1, but it returns token; the join tells its inputs apart by name. Type token_branch1 in P3's Returns field."),
+                    "Join advice: " + canvas.serviceBlockers());
                 check(ServiceDefinitionDialog.suggestion(canvas, e.get("P10")).inputs.equals(Arrays.asList("token_branch1", "token_branch2")), "New service for a join not suggested one input per arc");
+
+                // The designer types them in the place's Attributes: Inputs for the join, Returns for the places feeding it.
+                EditorFrame form = new EditorFrame(canvas);
+                type(form, e.get("P10"), "Inputs", "token_branch1, token_branch2");
+                type(form, e.get("P3"), "Returns", "token_branch1");
+                type(form, e.get("P6"), "Returns", "token_branch2");
+                check(names(e.get("P10")).equals(Arrays.asList("token_branch1", "token_branch2")) && "token_branch1".equals(returns(e.get("P3"))) && "token_branch2".equals(returns(e.get("P6"))),
+                    "Typed contract not applied: " + names(e.get("P10")) + " " + returns(e.get("P3")) + " " + returns(e.get("P6")));
                 check(canvas.serviceBlockers().isEmpty() && canvas.validatePetriNet().isEmpty(), "Blockers: " + canvas.serviceBlockers() + " " + canvas.validatePetriNet());
+                check(canvas.saveToJSON().contains("\"name\": \"token_branch2\""), "Typed inputs not saved");
 
                 // Build: one generator, two branches; child k of each token goes to branch k (top to bottom).
                 BuildAndRunGenerator.Plan plan = BuildAndRunGenerator.plan(canvas, process.toFile());
@@ -72,9 +82,10 @@ public final class GeneratorForkCheck {
                 check(moves.getOrDefault("1000001", Set.of()).containsAll(Arrays.asList("EG1->T2", "T2->P3", "P3->T4", "T4->T5", "P10->T11", "T11->T9")), "Child 1: " + moves.get("1000001"));
                 check(moves.getOrDefault("1000002", Set.of()).containsAll(Arrays.asList("EG1->T7", "T7->P6", "P6->T8", "T8->T5")), "Child 2: " + moves.get("1000002"));
 
-                // Deployed before the join was fitted: the design still saves, Deploy is not refused, and Build and Run
+                // Deployed before the join was set up: the design still saves, Deploy is not refused, and Build and Run
                 // wait for the deployment to be saved again.
                 Canvas stale = new Canvas(); stale.setDefinitionLocation(staleProcess.toFile()); stale.loadFromJSON(Files.readString(staleProcess));
+                for (ProcessElement p : stale.getPlaces()) if (p.getLabel().equals("P3")) p.getServiceOperations().get(0).setReturnAttribute("token_branch1");
                 check(stale.validateServiceContracts().isEmpty(), "An out-of-date deployment stops saving: " + stale.validateServiceContracts());
                 check(stale.deploymentDifferences().stream().anyMatch(d -> d.startsWith("Place 'P3' returns token_branch1 but the saved deployment (Fork_EG_Stale.json, instance ForkTestP3) still has token. Deploy again"))
                     && stale.serviceBlockers().containsAll(stale.deploymentDifferences()), "Out-of-date deployment not reported: " + stale.serviceBlockers());
@@ -87,7 +98,7 @@ public final class GeneratorForkCheck {
                 Canvas domain = new Canvas(); domain.setDefinitionLocation(process.toFile()); domain.loadFromJSON(Files.readString(process));
                 for (ProcessElement p : domain.getPlaces()) if (p.getLabel().equals("P10")) { p.setService("UnknownJoinService"); p.setServiceOperations(new ArrayList<>(List.of(narrow))); }
                 check(domain.validateServiceContracts().stream().noneMatch(m -> m.contains("incoming arcs")), "Join inputs stop saving: " + domain.validateServiceContracts());
-                check(domain.serviceBlockers().stream().anyMatch(m -> m.startsWith("P10 is a join with 2 incoming arcs but UnknownJoinService takes 1 input")), "Join inputs not a blocker: " + domain.serviceBlockers());
+                check(domain.serviceBlockers().stream().anyMatch(m -> m.startsWith("P10 is a join with 2 incoming arcs but its service takes 1 input")), "Join inputs not a blocker: " + domain.serviceBlockers());
 
                 // A join with no place after it has nothing to host it: reported, and it stops Deploy, Build and Run.
                 Arrow toP10 = null;
@@ -98,9 +109,25 @@ public final class GeneratorForkCheck {
             } catch (Throwable t) { failure[0] = t; }
         });
         if (failure[0] != null) throw new AssertionError("Generator fork", failure[0]);
-        System.out.println("PASS: a generator with two arcs forks (no Fork Children setting): Build sends child N01 to P3's host and N02 to P6's; the join's standard service takes token_branch1/2 and the services feeding it return them; a new service for a join is suggested one input per arc; a process deployed before its join was fitted saves and asks to Deploy again; a join whose service takes too few inputs is saved but stops Deploy, Build and Run; a join with no place is reported; the recorded run replays each child along its branch to the join and on to T9");
+        System.out.println("PASS: a generator with two arcs forks (no Fork Children setting): Build sends child N01 to P3's host and N02 to P6's; nothing is changed by the editor: Validate says what a join needs and the designer types the join's Inputs and the feeding places' Returns; a new service for a join is suggested one input per arc; a process deployed before its join was set up saves and asks to Deploy again; a join whose service takes too few inputs is saved but stops Deploy, Build and Run; a join with no place is reported; the recorded run replays each child along its branch to the join and on to T9");
     }
 
+    /** Selects the place and types into its Inputs or Returns field, as the designer would. */
+    private static void type(EditorFrame form, ProcessElement place, String field, String text) {
+        form.updateSelection(place);
+        JTextField target = null;
+        for (JTextField f : fields(form)) if (f.getToolTipText() != null && f.getToolTipText().startsWith(field.equals("Inputs") ? "The names this place takes" : "The name this place's result")) target = f;
+        check(target != null, "No " + field + " field for " + place.getLabel());
+        target.setText(text);
+    }
+    private static List<JTextField> fields(Container parent) {
+        List<JTextField> result = new ArrayList<>();
+        for (Component c : parent.getComponents()) {
+            if (c instanceof JTextField) result.add((JTextField) c);
+            if (c instanceof Container) result.addAll(fields((Container) c));
+        }
+        return result;
+    }
     private static List<String> names(ProcessElement place) {
         List<String> n = new ArrayList<>();
         for (ServiceArgument a : place.getServiceOperations().get(0).getArguments()) n.add(a.getName());

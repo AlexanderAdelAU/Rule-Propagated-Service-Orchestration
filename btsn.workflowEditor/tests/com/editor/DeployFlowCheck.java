@@ -319,7 +319,7 @@ public final class DeployFlowCheck {
                 check(ed.validateServiceContracts().isEmpty(), "Emergency Department joins reported: " + ed.validateServiceContracts());
                 for (ProcessElement place : ed.getPlaces())
                     if ("Diagnosis".equals(place.getLabel())) { ServiceOperation op = place.getServiceOperations().get(0); op.setArguments(new ArrayList<>(op.getArguments().subList(0, 2))); }
-                check(ed.joinInputMismatches().size() == 1 && ed.joinInputMismatches().get(0).startsWith("Diagnosis is a join with 3 incoming arcs but DiagnosisService takes 2 inputs; a join's place takes one input per arc"),
+                check(ed.joinInputMismatches().size() == 1 && ed.joinInputMismatches().get(0).startsWith("Diagnosis is a join with 3 incoming arcs but its service takes 2 inputs; a join's place takes one input per arc"),
                     "Join with a missing input: " + ed.joinInputMismatches());
                 Path combined = workflows.resolve("petrinet/LiveChange/P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.json");
                 Canvas both2 = new Canvas(); both2.setDefinitionLocation(combined.toFile()); both2.loadFromJSON(read(combined));
