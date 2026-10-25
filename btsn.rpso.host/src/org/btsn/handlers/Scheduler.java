@@ -7,6 +7,8 @@ import java.util.TreeMap;
 import org.btsn.utils.XPathHelperCommon;
 
 public class Scheduler {
+	/** Returned instead of a priority when the token's lifetime (notAfter) has passed: it is dropped and reported. */
+	public static final long EXPIRED = -2;
 
 	public ArrayList<Long> prioritiseToken(int queueAction, String servicePacket) throws IOException {
 		long costKey = 0;
@@ -46,7 +48,7 @@ public class Scheduler {
 
 			attrMap = xph.findMultipleXMLItems(servicePacket, "//joinAttribute/*");
 			if (timeofArrival > notAfter) {
-				costKey = -1;
+				costKey = EXPIRED;
 				returnArgs.add(costKey);
 				return returnArgs;
 			}

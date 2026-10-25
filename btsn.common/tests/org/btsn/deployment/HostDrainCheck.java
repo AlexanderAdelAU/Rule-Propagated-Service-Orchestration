@@ -41,7 +41,16 @@ public final class HostDrainCheck {
         out = capture(Map.of("plan", plan.toString(), "runtime", run.toString(), "quiet", "1", "limit", "3"));
         busy.join();
         check(out.contains("WORKFLOWS STILL RUNNING at the 3 s limit"), "Limit not applied: " + out);
-        System.out.println("PASS: the run collects once nothing has moved on the hosts or Monitor for the quiet time, names unwatched remote hosts, and stops at the limit for a net that keeps moving");
+
+        // Without a limit, the wait ends when every token's lifetime has run out: the longest generator's, plus the margin.
+        busy = writer(database.resolve("log.dat"), 6000);
+        start = System.currentTimeMillis();
+        out = capture(Map.of("plan", plan.toString(), "runtime", run.toString(), "quiet", "1", "expire1", "1000", "expire2", "2000", "margin", "1"));
+        took = System.currentTimeMillis() - start;
+        busy.join();
+        check(out.contains("at most 3 s (when every token's lifetime has run out)") && out.contains("TOKEN LIFETIMES RUN OUT after 3 s") && took < 5000,
+            "Lifetime bound not applied (" + took + " ms): " + out);
+        System.out.println("PASS: the run collects once nothing has moved on the hosts or Monitor for the quiet time, names unwatched remote hosts, and stops at the limit, or when the longest token lifetime has run out, for a net that keeps moving");
     }
 
     private static Thread writer(Path file, long millis) {

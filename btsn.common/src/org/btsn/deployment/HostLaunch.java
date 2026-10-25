@@ -33,10 +33,12 @@ import java.util.stream.Stream;
  *   collect     plan=... classpath=... dir=... generator=class operation=... version=v999 process=... queryVersion=v001 delay=3
  *               Sends each host its administrative token (initialise also Monitor's), the first host's call deploying
  *               the process's rules.
- *   drain       plan=hosts.properties runtime=dir monitor=dir quiet=5 limit=120
+ *   drain       plan=hosts.properties runtime=dir monitor=dir quiet=5 expire1=120000 ... margin=5 [limit=N]
  *               Waits, after the last token is fired, until the workflows have finished: nothing written by this
  *               machine's hosts or Monitor for quiet seconds (every place visit and every hand-over to Monitor is
- *               written as it happens). Stops at limit seconds even if they have not: a closed net never finishes.
+ *               written as it happens). At the latest it stops when every token's lifetime has run out (the longest
+ *               expireN, in ms, plus margin seconds for a call in progress and clock differences): after that no
+ *               token can still move, on any machine. limit, when given, stops it sooner.
  *   settle      database=dir quiet=6 limit=180
  *               Waits until Monitor has written what the collectors sent: its database unchanged for quiet seconds.
  */
@@ -177,9 +179,16 @@ public final class HostLaunch {
         for (String host : split(plan.getProperty("hosts.local", ""))) watched.add(runtime.resolve(host).resolve("ServiceAnalysisDataBase"));
         if (a.containsKey("monitor")) watched.add(Path.of(a.get("monitor")));
         List<String> remote = split(plan.getProperty("hosts.remote", ""));
-        long quiet = Long.parseLong(a.getOrDefault("quiet", "5")) * 1000, limit = Long.parseLong(a.getOrDefault("limit", "120")) * 1000;
+        long quiet = Long.parseLong(a.getOrDefault("quiet", "5")) * 1000;
+        long lifetime = 0;
+        for (Map.Entry<String, String> e : a.entrySet()) if (e.getKey().startsWith("expire")) lifetime = Math.max(lifetime, Long.parseLong(e.getValue()));
+        if (lifetime == 0) lifetime = 120000;
+        long expiry = lifetime + Long.parseLong(a.getOrDefault("margin", "5")) * 1000;
+        boolean capped = a.containsKey("limit") && Long.parseLong(a.get("limit")) * 1000 < expiry;
+        long limit = capped ? Long.parseLong(a.get("limit")) * 1000 : expiry;
         System.out.println("Waiting for the workflows to finish: until nothing moves for " + quiet / 1000 + " s, at most " + limit / 1000 + " s"
-            + (remote.isEmpty() ? "." : " (" + String.join(", ", remote) + " on other machines: not watched)."));
+            + (capped ? " (workflow.completion.seconds)" : " (when every token's lifetime has run out)")
+            + (remote.isEmpty() ? "." : "; " + String.join(", ", remote) + " on other machines: not watched."));
         long start = System.currentTimeMillis(), last = latestChange(watched), lastActivity = start, quietSince = start;
         while (System.currentTimeMillis() - start < limit) {
             Thread.sleep(500);
@@ -191,8 +200,10 @@ public final class HostLaunch {
                 return;
             }
         }
-        System.out.println("WORKFLOWS STILL RUNNING at the " + limit / 1000 + " s limit (workflow.completion.seconds); collecting now."
-            + " A closed net cycles until this limit; for an open process, raise it if the analysis shows unfinished workflows.");
+        if (capped) System.out.println("WORKFLOWS STILL RUNNING at the " + limit / 1000 + " s limit (workflow.completion.seconds); collecting now."
+            + " For an open process, raise it if the analysis shows unfinished workflows.");
+        else System.out.println("TOKEN LIFETIMES RUN OUT after " + limit / 1000 + " s: no token can still move; collecting now."
+            + " A closed net stops here; tokens dropped on the way are reported as expired in the analysis.");
     }
 
     private static long latestChange(List<Path> folders) throws IOException {

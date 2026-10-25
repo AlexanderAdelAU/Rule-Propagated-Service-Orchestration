@@ -66,9 +66,11 @@
     <property name="init.delay.seconds" value="3"/>
     <property name="phase.delay.seconds" value="5"/>
     <!-- After the last token: collect once nothing has moved for workflow.quiet.seconds (longer than the slowest
-         service), or at workflow.completion.seconds at the latest. -->
-    <property name="workflow.completion.seconds" value="10"/>
+         service), or once every token's lifetime has run out (egN.expire, plus workflow.expiry.margin.seconds for
+         a call in progress and clock differences), when nothing can still be moving. workflow.completion.seconds,
+         when a launcher sets it, collects earlier than that. -->
     <property name="workflow.quiet.seconds" value="5"/>
+    <property name="workflow.expiry.margin.seconds" value="5"/>
     <!-- The hosts and Monitor are stopped after this long (ms) in any case; raise it for long runs. -->
     <property name="run.timeout.ms" value="600000"/>
     <property name="collector.delay.seconds" value="3"/>
@@ -97,6 +99,10 @@
     <property name="eg1.process" value="${workflow.process.name}"/>
     <property name="eg2.process" value="${workflow.process.name}"/>
     <property name="eg3.process" value="${workflow.process.name}"/>
+    <!-- Each generator's token lifetime (ms): a token is dropped, and reported as expired, once it has passed. -->
+    <property name="eg1.expire" value="${token.expire}"/>
+    <property name="eg2.expire" value="${token.expire}"/>
+    <property name="eg3.expire" value="${token.expire}"/>
     <property name="eg1.tokens" value="${token.count}"/>
     <property name="eg2.tokens" value="${token.count}"/>
     <property name="eg3.tokens" value="${token.count}"/>
@@ -153,7 +159,7 @@
                 <arg value="-place"/><arg value="${@{slot}.place}"/>
                 <arg value="-operation"/><arg value="${@{slot}.operation}"/>
                 <arg value="-tokens"/><arg value="0"/>
-                <arg value="-expire"/><arg value="${token.expire}"/>
+                <arg value="-expire"/><arg value="${@{slot}.expire}"/>
                 <arg value="-generator"/><arg value="${@{slot}.id}"/>
                 <arg value="-format-service" if:set="@{slot}.format.service"/><arg value="${@{slot}.format.service}" if:set="@{slot}.format.service"/>
             </java>
@@ -173,7 +179,7 @@
                 <arg value="-place"/><arg value="${@{slot}.place}"/>
                 <arg value="-operation"/><arg value="${@{slot}.operation}"/>
                 <arg value="-tokens"/><arg value="${@{slot}.tokens}"/>
-                <arg value="-expire"/><arg value="${token.expire}"/>
+                <arg value="-expire"/><arg value="${@{slot}.expire}"/>
                 <arg value="-generator"/><arg value="${@{slot}.id}"/>
                 <arg value="-triggerfile" if:set="@{slot}.trigger.set"/><arg value="${@{slot}.trigger.file}" if:set="@{slot}.trigger.set"/>
                 <arg value="-data" if:set="@{slot}.data"/><arg value="${@{slot}.data}" if:set="@{slot}.data"/>
@@ -275,12 +281,15 @@
                 <echo message="=== PHASE 2: WORKFLOW EXECUTION ==="/>
                 <antcall target="deploy-workflow"/>
                 <antcall target="fire-tokens"/>
-                <!-- Collect when the workflows have finished (nothing moves for workflow.quiet.seconds), or at
-                     workflow.completion.seconds at the latest: a closed net runs until then. -->
+                <!-- Collect when the workflows have finished (nothing moves for workflow.quiet.seconds), or when every
+                     token's lifetime has run out: a closed net runs until then. -->
                 <host-launch command="drain">
                     <arg value="plan=${hosts.plan.file}"/><arg value="runtime=${launcher.runtime.dir}"/>
                     <arg value="monitor=${monitor.project.dir}/ServiceAnalysisDataBase"/>
-                    <arg value="quiet=${workflow.quiet.seconds}"/><arg value="limit=${workflow.completion.seconds}"/>
+                    <arg value="quiet=${workflow.quiet.seconds}"/><arg value="margin=${workflow.expiry.margin.seconds}"/>
+                    <arg value="expire1=${eg1.expire}" if:set="eg1.id"/><arg value="expire2=${eg2.expire}" if:set="eg2.id"/>
+                    <arg value="expire3=${eg3.expire}" if:set="eg3.id"/>
+                    <arg value="limit=${workflow.completion.seconds}" if:set="workflow.completion.seconds"/>
                 </host-launch>
                 <echo message="=== Phase 2 Complete ==="/>
 
@@ -329,9 +338,11 @@
         <echo message="ant                      initialise, run ${workflow.process.name} and collect (default)"/>
         <echo message="ant analyse              analyse the Monitor database after a run"/>
         <echo message="-Dtoken.count=N          tokens to fire (default ${token.count})"/>
-        <echo message="-Dworkflow.completion.seconds=N  longest wait after the last token; collects earlier once nothing moves (default ${workflow.completion.seconds})"/>
-        <echo message="-Dworkflow.quiet.seconds=N       how long nothing must move to count as finished (default ${workflow.quiet.seconds})"/>
-        <echo message="-Dtoken.expire=MS        how long each token lives (default ${token.expire}); -Drun.timeout.ms=MS stops the hosts (default ${run.timeout.ms})"/>
+        <echo message="-Dtoken.expire=MS        each token's lifetime (default ${token.expire}); the run collects once all have run out, or earlier when nothing moves"/>
+        <echo message="-Deg2.expire=MS          one generator's own lifetime, e.g. for a version that queues behind others"/>
+        <echo message="-Dworkflow.quiet.seconds=N  how long nothing must move to count as finished (default ${workflow.quiet.seconds})"/>
+        <echo message="-Dworkflow.completion.seconds=N  collect after N s at the latest, before the lifetimes run out"/>
+        <echo message="-Drun.timeout.ms=MS      stop the hosts after this long in any case (default ${run.timeout.ms})"/>
         <echo message="-Dhost.address=127.0.0.1 run every host on this machine"/>
         <echo message="-Dp1.mode=local|remote   start or skip a host, e.g. -Dp7.mode=remote (default auto)"/>
         <echo message="-Dinfrastructure=MultiHost  use InfrastructureDefinitionFolder/MultiHost.json"/>

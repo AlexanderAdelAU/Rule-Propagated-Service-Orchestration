@@ -21,7 +21,9 @@
     <property name="eg1.tokens" value="2"/>
     <property name="eg1.marking" value="P1_Place.processToken=token;P2_Place.processToken=token"/>
     <property name="token.count" value="10"/>
-    <property name="workflow.completion.seconds" value="10"/>
+    <!-- Each token's lifetime (ms). The run collects when the workflows have finished, or once every token's
+         lifetime has run out: a closed net runs until then. -->
+    <property name="token.expire" value="10000"/>
 
     <!-- Hosts used by the service deployment: nodes of the infrastructure, each running the host program -->
     <property name="hosts" value="P1,P2,P3"/>

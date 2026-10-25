@@ -14,7 +14,7 @@ public final class BuildAndRunDialog extends JDialog {
     final List<BuildAndRunGenerator.Run> runs = new ArrayList<>();
     final GeneratorModel generators = new GeneratorModel();
     final JSpinner tokens = new JSpinner(new SpinnerNumberModel(10, 1, 100000, 1));
-    final JSpinner completion = new JSpinner(new SpinnerNumberModel(10, 1, 3600, 1));
+    final JSpinner completion = new JSpinner(new SpinnerNumberModel(120, 1, 86400, 1));
     final JTextField name = new JTextField(28);
     final JComboBox<File> folder;
     final JTextArea summary = new JTextArea(11, 92);
@@ -29,7 +29,7 @@ public final class BuildAndRunDialog extends JDialog {
         BuildAndRunGenerator.Options d = plan.defaults;
         for (BuildAndRunGenerator.Run run : d.runs) runs.add(run.copy());
         tokens.setValue(d.tokens);
-        completion.setValue(d.completionSeconds);
+        completion.setValue(d.lifetimeSeconds);
         name.setText(d.launcherName);
         folder = new JComboBox<>(plan.folders.toArray(new File[0]));
         folder.setSelectedItem(d.folder);
@@ -56,9 +56,10 @@ public final class BuildAndRunDialog extends JDialog {
         row(form, c, 0, "Process:", new JLabel(plan.processName));
         tokens.setToolTipText("For generators that issue arrivals. A generator that sets the initial marking sends its tokens once.");
         row(form, c, 1, "Tokens per generator:", tokens);
-        completion.setToolTipText("<html>After the last token, the run collects as soon as nothing has moved for a few seconds (the workflows have finished),<br>"
-            + "or after this many seconds at the latest. A closed net never finishes, so it runs for this long.</html>");
-        row(form, c, 2, "Longest wait for the workflows (s):", completion);
+        completion.setToolTipText("<html>How long each token may live. A token still moving after this is dropped and reported as expired.<br>"
+            + "After the last token the run collects as soon as nothing moves, or once every lifetime has run out.<br>"
+            + "Set it above the longest time a workflow takes under load. A closed net never finishes, so it runs for this long.</html>");
+        row(form, c, 2, "Token lifetime (s):", completion);
         row(form, c, 3, "Launcher name:", name);
         row(form, c, 4, "Folder:", folder);
         java.util.List<ServiceRegistry.Node> nodes = ServiceRegistry.infrastructureNodes(plan.profile);
@@ -141,7 +142,7 @@ public final class BuildAndRunDialog extends JDialog {
         BuildAndRunGenerator.Options o = new BuildAndRunGenerator.Options();
         for (BuildAndRunGenerator.Run run : runs) o.runs.add(run.copy());
         o.tokens = (Integer)tokens.getValue();
-        o.completionSeconds = (Integer)completion.getValue();
+        o.lifetimeSeconds = (Integer)completion.getValue();
         o.launcherName = name.getText().trim();
         o.folder = (File)folder.getSelectedItem();
         return o;
