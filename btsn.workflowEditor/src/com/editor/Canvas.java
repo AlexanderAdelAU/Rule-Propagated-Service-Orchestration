@@ -2064,11 +2064,7 @@ public class Canvas extends JPanel {
                 // Interpolate from T_in to Place
                 ProcessElement tInStart = findTransitionByLabel(state.tInId);
                 ProcessElement place = findPlaceByName(state.currentPlaceId);
-                if (tInStart != null && place != null) {
-                    Point start = getElementCenter(tInStart);
-                    Point end = getElementCenter(place);
-                    return interpolate(start, end, state.progress);
-                }
+                if (tInStart != null && place != null) return travelAlong(tInStart, place, state.progress);
                 break;
                 
             case AT_PLACE:
@@ -2084,19 +2080,11 @@ public class Canvas extends JPanel {
                 // Try using fromElementId/toElementId first (more reliable)
                 ProcessElement fromElemTout = findElementByIdOrLabel(state.fromElementId);
                 ProcessElement toElemTout = findElementByIdOrLabel(state.toElementId);
-                if (fromElemTout != null && toElemTout != null) {
-                    Point start = getElementCenter(fromElemTout);
-                    Point end = getElementCenter(toElemTout);
-                    return interpolate(start, end, state.progress);
-                }
+                if (fromElemTout != null && toElemTout != null) return travelAlong(fromElemTout, toElemTout, state.progress);
                 // Fallback to original lookup
                 ProcessElement fromPlaceToTout = findPlaceByName(state.currentPlaceId);
                 ProcessElement tOutDest = findTransitionByLabel(state.tOutId);
-                if (fromPlaceToTout != null && tOutDest != null) {
-                    Point start = getElementCenter(fromPlaceToTout);
-                    Point end = getElementCenter(tOutDest);
-                    return interpolate(start, end, state.progress);
-                }
+                if (fromPlaceToTout != null && tOutDest != null) return travelAlong(fromPlaceToTout, tOutDest, state.progress);
                 break;
                 
             case TRAVELING_TO_NEXT_TIN:
@@ -2148,19 +2136,11 @@ public class Canvas extends JPanel {
                 // Try using fromElementId/toElementId first
                 ProcessElement fromElemTerm = findElementByIdOrLabel(state.fromElementId);
                 ProcessElement toElemTerm = findElementByIdOrLabel(state.toElementId);
-                if (fromElemTerm != null && toElemTerm != null) {
-                    Point start = getElementCenter(fromElemTerm);
-                    Point end = getElementCenter(toElemTerm);
-                    return interpolate(start, end, state.progress);
-                }
+                if (fromElemTerm != null && toElemTerm != null) return travelAlong(fromElemTerm, toElemTerm, state.progress);
                 // Fallback
                 ProcessElement tOutForTerminate = findTransitionByLabel(state.tOutId);
                 ProcessElement terminateNode = findTerminateNodeByLabel(state.terminateNodeId);
-                if (tOutForTerminate != null && terminateNode != null) {
-                    Point start = getElementCenter(tOutForTerminate);
-                    Point end = getElementCenter(terminateNode);
-                    return interpolate(start, end, state.progress);
-                }
+                if (tOutForTerminate != null && terminateNode != null) return travelAlong(tOutForTerminate, terminateNode, state.progress);
                 break;
                 
             case AT_TERMINATE:
@@ -2244,6 +2224,13 @@ public class Canvas extends JPanel {
      * @param progress 0.0 to 1.0 progress along the path
      * @return The interpolated point
      */
+    /** A token moving from one element to the next follows the arc between them, bends included, or a straight line if there is none. */
+    Point travelAlong(ProcessElement from, ProcessElement to, double progress) {
+        Arrow arc = findArrowBetween(from, to);
+        if (arc != null && !arc.getWaypoints().isEmpty()) return interpolateAlongArrowPath(arc, progress);
+        return interpolate(getElementCenter(from), getElementCenter(to), progress);
+    }
+
     private Point interpolateAlongArrowPath(Arrow arrow, double progress) {
         // Build the full path: source center -> waypoints -> target center
         List<Point> path = new ArrayList<>();

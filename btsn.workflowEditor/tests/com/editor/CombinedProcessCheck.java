@@ -34,6 +34,20 @@ public final class CombinedProcessCheck {
             Canvas canvas = new Canvas(); canvas.setDefinitionLocation(design); canvas.loadFromJSON(java.nio.file.Files.readString(design.toPath()));
             check(canvas.saveToJSON().contains("\"launcher\": \"" + named.getParentFile().getName() + "/" + p[1] + "\""), p[0] + ": saving dropped its launcher");
         }
+        // Replay: a token going to a terminate node follows the arc's bends, not a straight line.
+        File healthcare = new File(root, "btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Emergency_Department_With_Federated_Radiology.json");
+        Canvas drawn = new Canvas(); drawn.setDefinitionLocation(healthcare); drawn.loadFromJSON(java.nio.file.Files.readString(healthcare.toPath()));
+        ProcessElement from = drawn.findTransitionByLabel("T_out_Radiology"), end = drawn.findTransitionByLabel("Terminate");
+        Arrow arc = null;
+        for (Arrow a : drawn.getArrows()) if (a.getSource() == from && a.getTarget() == end) arc = a;
+        check(arc != null && !arc.getWaypoints().isEmpty(), "Fixture: no bent arc from T_out_Radiology to Terminate");
+        List<java.awt.Point> path = new java.util.ArrayList<>(); path.add(from.getCenter()); path.addAll(arc.getWaypoints()); path.add(end.getCenter());
+        for (double t : new double[] {0.25, 0.5, 0.75}) {
+            java.awt.Point at = drawn.travelAlong(from, end, t);
+            double nearest = Double.MAX_VALUE;
+            for (int i = 0; i + 1 < path.size(); i++) nearest = Math.min(nearest, java.awt.geom.Line2D.ptSegDist(path.get(i).x, path.get(i).y, path.get(i + 1).x, path.get(i + 1).y, at.x, at.y));
+            check(nearest <= 1.5, "Token at " + t + " is off the arc to Terminate: " + at + " (" + nearest + " px away)");
+        }
         if (args.length > 1 && !java.awt.GraphicsEnvironment.isHeadless()) {
             File picture = new File(args[1], "combined-build.png");
             javax.swing.SwingUtilities.invokeAndWait(() -> {
@@ -46,7 +60,7 @@ public final class CombinedProcessCheck {
                 dialog.dispose();
             });
         }
-        System.out.println("PASS: combined process finds its launcher, summarises both versions, and Run on hosts finds it; the two combined pictures (healthcare triple run, petrinet concurrent run) name theirs, which Build and Run use and saving keeps");
+        System.out.println("PASS: combined process finds its launcher, summarises both versions, and Run on hosts finds it; the two combined pictures (healthcare triple run, petrinet concurrent run) name theirs, which Build and Run use and saving keeps; a replayed token follows the bends of its arc to Terminate");
     }
     private static void check(boolean condition, String message) { if (!condition) throw new AssertionError(message); }
 }
