@@ -1,5 +1,6 @@
 {
   "serviceDeployment": "ServiceDeploymentFolder/healthcare/Healthcare.json",
+  "launcher": "btsn.healthcare.ProjectLoader/Triple_Workflow_Emergencey_Department_Concurrent.xml",
   "processType": "SOA",
   "elements": [
     {
@@ -372,7 +373,7 @@
       "label": "PATIENT_ARRIVAL",
       "rotation": 0.0,
       "generator_rate": "1000",
-      "token_version": "v001"
+      "token_version": "v003"
     },
     {
       "id": "CANARY_TEST",
@@ -384,7 +385,7 @@
       "label": "CANARY_TEST",
       "rotation": 0.0,
       "generator_rate": "1000",
-      "token_version": "v001"
+      "token_version": "v002"
     },
     {
       "id": "FEDERATED_RADIOLOGY_REQUEST",

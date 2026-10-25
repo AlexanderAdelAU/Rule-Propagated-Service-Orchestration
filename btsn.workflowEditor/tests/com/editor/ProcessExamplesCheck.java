@@ -6,7 +6,8 @@ import java.util.*;
 
 /**
  * Every process definition in ProcessDefinitionFolder opens cleanly in the editor: it saves without contract errors and
- * Validate has nothing that stops Deploy, Build or Run. A business process also plans a build without problems; an
+ * Validate has nothing that stops Deploy, Build or Run. A business process also plans a build whose Create is enabled
+ * (or, for a picture of a combined run, names the launcher Build and Run use); an
  * initialiser or collector is recognised as one (it is run by every launcher, not built on its own).
  */
 public final class ProcessExamplesCheck {
@@ -24,7 +25,12 @@ public final class ProcessExamplesCheck {
             if (canvas.getServiceRegistry().problem() != null) found.add(canvas.getServiceRegistry().problem());
             List<String> plan = BuildAndRunGenerator.plan(canvas, process.toFile()).problems;
             if (canvas.isAdministrativeProcess()) { if (!plan.equals(List.of(Canvas.ADMINISTRATIVE))) found.add("not recognised as an initialiser or collector: " + plan); administrative++; }
-            else found.addAll(plan);
+            else if (BuildAndRunGenerator.combinedLauncher(process.toFile()) == null) {
+                // What the Build dialog checks before Create: the plan, then the generators' choices (one version each).
+                found.addAll(plan);
+                BuildAndRunGenerator.Plan built = BuildAndRunGenerator.plan(canvas, process.toFile());
+                if (built.problems.isEmpty()) found.addAll(BuildAndRunGenerator.problems(built, built.defaults));
+            }
             for (String p : found) problems.add(folder.relativize(process) + ": " + p);
         }
         if (processes.size() < 40 || administrative < 10 || !problems.isEmpty())

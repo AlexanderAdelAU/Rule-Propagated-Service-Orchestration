@@ -74,12 +74,28 @@ public final class BuildAndRunGenerator {
      */
     public static File combinedLauncher(File processFile) {
         if (processFile == null) return null;
+        // A picture of a combined run names the launcher it shows: "launcher": "btsn.healthcare.ProjectLoader/....xml".
+        File declared = declaredLauncher(processFile);
+        if (declared != null) return declared;
         String base = processFile.getName().replaceFirst("\\.json$", "");
         if (!base.endsWith("_LiveChange")) return null;
         File common = ServiceRegistry.findCommon(processFile);
         File[] loaders = common == null ? null : common.getParentFile().listFiles(f -> f.isDirectory() && f.getName().matches("btsn\\..+\\.ProjectLoader"));
         if (loaders != null) for (File loader : loaders) { File xml = new File(loader, base + ".xml"); if (xml.isFile()) return xml; }
         return null;
+    }
+
+    /** The launcher a process definition names with "launcher" (relative to the repository), when it exists. */
+    static File declaredLauncher(File processFile) {
+        try {
+            if (!processFile.isFile()) return null;
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("\"launcher\"\\s*:\\s*\"([^\"]+)\"")
+                .matcher(new String(java.nio.file.Files.readAllBytes(processFile.toPath()), java.nio.charset.StandardCharsets.UTF_8));
+            File common = ServiceRegistry.findCommon(processFile);
+            if (!m.find() || common == null) return null;
+            File launcher = new File(common.getParentFile(), m.group(1));
+            return launcher.isFile() ? launcher : null;
+        } catch (java.io.IOException unreadable) { return null; }
     }
 
     /** What a combined launcher runs, one line per event generator: "EG2: v002, P1_P3_P4_P6_..._Workflow, 30 tokens, deployed at 45 s". */
