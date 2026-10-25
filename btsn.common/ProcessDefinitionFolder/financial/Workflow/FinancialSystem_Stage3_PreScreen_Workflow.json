@@ -11,7 +11,8 @@
       "label": "Pre-Screen Submitted",
       "rotation": 0,
       "generator_rate": "1000",
-      "token_version": "v002"
+      "token_version": "v002",
+      "token_data": "application_id=PRESCREEN-1,annual_income=90000,requested_amount=22000,credit_score=680,fraud_risk=low"
     },
     {
       "id": "T_in_Validation",

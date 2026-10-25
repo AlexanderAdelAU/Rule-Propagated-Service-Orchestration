@@ -230,6 +230,19 @@ public class EditorFrame extends JPanel {
                 element.setTokenVersion(freshVersionField.getText().trim());
             }));
 
+            // The business data every token carries, for services that read fields from it (an application's amount, ...).
+            JTextField dataField = new JTextField(15);
+            addField("Token data:", dataField, element.getTokenData());
+            dataField.setToolTipText("<html>Fields put in every token this generator sends, as name=value pairs separated by commas,<br>"
+                + "e.g. application_id=LOAN-1, annual_income=85000, requested_amount=25000.<br>"
+                + "Services that read fields from their token need them; leave it blank for services that don't.</html>");
+            dataField.getDocument().addDocumentListener(new SimpleDocumentListener(() -> {
+                String text = dataField.getText().trim();
+                if (text.equals(element.getTokenData())) return;
+                element.setTokenData(text);
+                canvas.saveUndoState();
+            }));
+
             // What this generator does, from its one arc: arrivals, or the initial marking of a closed net (sent once).
             Canvas.GeneratorRole role = canvas.generatorRole(element);
             if (role.marking()) {

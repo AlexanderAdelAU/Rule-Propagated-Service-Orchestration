@@ -353,6 +353,11 @@ place has an arc into it.
   Here both are `P2`; business models use the label, for example `T_in_Validation`.
 - The generator's **Rate** and **Version** become the defaults in
   [Build and Run](#3-create-build-and-run).
+- The generator's **Token data** is the business data every token it sends carries, as `name=value` pairs separated by commas, for example `application_id=LOAN-1, annual_income=85000, requested_amount=25000`.
+  - Services that read fields from their token need it. The financial ValidationService rejects an application with no `application_id`, income or amount, so without it every token takes the `invalid` arc.
+  - Leave it blank for services that don't read fields: the Petri-net models, and services that fall back on values from the token's number, such as claims, credit and inventory.
+  - Healthcare tokens are filled from the catalogue's token formats instead.
+  - Build and Run writes it to the launcher as `eg1.data`. To try other data without regenerating, add `-Deg1.data=...` to the run.
 - The supplied `P2_Tutorial_Workflow.json` stores `T_out_P2` as a `DecisionNode`. The runtime accepts it too, and both route on the guards below.
 
 ### Choose the service and operation

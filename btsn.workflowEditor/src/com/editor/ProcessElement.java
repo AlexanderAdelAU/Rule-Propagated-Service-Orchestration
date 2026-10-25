@@ -40,6 +40,7 @@ public class ProcessElement {
     // Additional attributes for Event Generators
     private String generatorRate = "1000";  // Token generation rate in ms
     private String tokenVersion = "v001";   // Version prefix for generated tokens
+    private String tokenData = "";          // name=value,... put in every token the generator sends (e.g. application_id=LOAN-1)
     
     // Fork behavior for Event Generators (implicit fork to join)
     private boolean forkEnabled = false;
@@ -676,6 +677,9 @@ public class ProcessElement {
     public void setTokenVersion(String version) {
         this.tokenVersion = version;
     }
+
+    public String getTokenData() { return tokenData; }
+    public void setTokenData(String data) { this.tokenData = data == null ? "" : data.trim(); }
     
     // Fork behavior setters
     public void setForkEnabled(boolean enabled) {

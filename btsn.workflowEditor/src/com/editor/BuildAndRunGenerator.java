@@ -52,6 +52,7 @@ public final class BuildAndRunGenerator {
         public final Map<String, String> operations = new LinkedHashMap<>(); // generator id -> operation
         public final Map<String, Integer> rates = new LinkedHashMap<>();
         public final Map<String, String> versions = new LinkedHashMap<>();
+        public final Map<String, String> data = new LinkedHashMap<>();       // generator id -> fields every token carries (name=value,...)
         public final Map<String, Integer> joins = new LinkedHashMap<>();     // generator id -> tokens of the initial marking it sets, once
         public final Map<String, String> markings = new LinkedHashMap<>();   // generator id -> marking over several places (place.operation=input,...;...)
         public final Map<String, String> services = new LinkedHashMap<>();  // generator id -> service at its target place
@@ -152,6 +153,9 @@ public final class BuildAndRunGenerator {
 
         for (ProcessElement element : canvas.getElements()) {
             if (element.getType() != ProcessElement.Type.EVENT_GENERATOR) continue;
+            String data = tokenData(element.getTokenData());
+            if (data == null) plan.problems.add(element.getLabel() + "'s Token data is not name=value pairs separated by commas: " + element.getTokenData());
+            else if (!data.isEmpty()) plan.data.put(element.getId(), data);
             Canvas.GeneratorRole role = canvas.generatorRole(element);
             if (role.marking()) { planMarking(plan, registry, element, role); continue; }
             ProcessElement place = firstPlaceAfter(canvas, element);
@@ -230,6 +234,18 @@ public final class BuildAndRunGenerator {
         if (!oneJoin) plan.markings.put(id, String.join(";", entries));
     }
 
+    /** "a = 1, b=x" -> "a=1,b=x" (as the generator's -data takes it); "" when blank; null when not name=value pairs. */
+    static String tokenData(String text) {
+        if (text == null || text.trim().isEmpty()) return "";
+        List<String> pairs = new ArrayList<>();
+        for (String pair : text.split(",")) {
+            int eq = pair.indexOf('=');
+            if (eq <= 0 || pair.substring(0, eq).trim().isEmpty() || !pair.substring(0, eq).trim().matches("[A-Za-z_][A-Za-z0-9_.-]*")) return null;
+            pairs.add(pair.substring(0, eq).trim() + "=" + pair.substring(eq + 1).trim());
+        }
+        return String.join(",", pairs);
+    }
+
     /** Choices that cannot run: no generator chosen, or two generators sharing a version (their tokens would collide). */
     public static List<String> problems(Plan plan, Options o) {
         List<String> problems = new ArrayList<>();
@@ -262,6 +278,8 @@ public final class BuildAndRunGenerator {
                     + " (a closed net needs all its join's inputs marked to start)");
             else lines.add("Tokens   " + o.tokens + " from " + run.generatorId + " to " + plan.targets.get(run.generatorId) + "." + plan.operations.get(run.generatorId)
                 + ", one every " + run.intervalMs + " ms, version " + run.version);
+        for (Run run : o.enabled())
+            if (plan.data.containsKey(run.generatorId)) lines.add("Data     every token from " + run.generatorId + " carries " + plan.data.get(run.generatorId));
         if (o.enabled().size() > 1) lines.add("         The generators fire together; the analysis reports each version separately.");
         for (String problem : problems(plan, o)) lines.add("Problem  " + problem);
         return lines;
@@ -340,6 +358,8 @@ public final class BuildAndRunGenerator {
             x.append("    <property name=\"").append(slot).append(".trigger.file\" location=\"").append(xml(relative(dir, plan.schedule(o, run)))).append("\"/>\n");
             if (!plan.tokenGenerator.isEmpty() && plan.services.containsKey(run.generatorId))
                 x.append("    <property name=\"").append(slot).append(".format.service\" value=\"").append(xml(plan.services.get(run.generatorId))).append("\"/>\n");
+            if (plan.data.containsKey(run.generatorId))
+                x.append("    <property name=\"").append(slot).append(".data\" value=\"").append(xml(plan.data.get(run.generatorId))).append("\"/>\n");
             Integer join = plan.joins.get(run.generatorId);
             if (join != null && plan.markings.containsKey(run.generatorId)) {
                 x.append("    <!-- ").append(xml(run.generatorId)).append(" sets the initial marking, once: these tokens, in these places, as one workflow. -->\n");
