@@ -95,6 +95,12 @@ import org.json.simple.JSONObject;
  *                        (e.g., "1000201,1000202")
  *   -joininputs <n>      The target is a join with n inputs: inject one workflow's n join
  *                        tokens, numbered from this version's base (v001 with 2: 1000001,1000002)
+ *
+ * INITIAL MARKING (a closed net's starting tokens, in one or more places):
+ *   -marking <targets>   "P1_Place.processToken=token_branch1,token_branch2;P3_Place.processToken=token"
+ *                        Fires once: one token per named input, into that place, all in this version's
+ *                        first workflow (v001: 1000001, 1000002, 1000003, ...) so the joins they reach
+ *                        match them. At most 99 tokens.
  * 
  * ================================================================================
  * USAGE EXAMPLES
@@ -188,6 +194,9 @@ public class GenericPetriNetTokenGenerator {
 	private static List<Integer> joinArgs = new ArrayList<>();
 	// Join inputs - the target join's input count; the token IDs follow from the version (-joininputs 2)
 	private static int joinInputs = 0;
+
+	// Initial marking: place.operation=input,input;place.operation=input (-marking)
+	private static String marking = null;
 	
 	// Control settings
 	private static boolean exitOnCompletion = true;
@@ -310,7 +319,10 @@ public class GenericPetriNetTokenGenerator {
 
 			// STEP 3: Generate and send tokens
 			System.out.println("=== Generating Tokens ===");
-			if (forkMode) {
+			if (marking != null && !marking.trim().isEmpty()) {
+				if (numberOfTokens > 0) fireMarking();
+				else System.out.println("Initial marking deployed; its tokens fire in the next call");
+			} else if (forkMode) {
 				generateForkTokens();
 			} else {
 				generateTokens();
@@ -479,6 +491,14 @@ public class GenericPetriNetTokenGenerator {
 					}
 					break;
 				
+				case "-marking":
+				case "--marking":
+					if (i + 1 < args.length) {
+						marking = args[++i];
+						System.out.println("  Parsed -marking: " + marking);
+					}
+					break;
+
 				case "-joininputs":
 				case "--joininputs":
 					if (i + 1 < args.length) {
@@ -721,6 +741,34 @@ public class GenericPetriNetTokenGenerator {
 		token.put("data", data);
 		
 		return token.toJSONString();
+	}
+
+	/**
+	 * Fires the initial marking once: for each target place, one token per named input, every token in this
+	 * version's first workflow (base + 1, base + 2, ...) so that the joins they meet group them together.
+	 */
+	private static void fireMarking() throws Exception {
+		int base = sequenceID, next = 1;
+		String[] targets = marking.split(";");
+		System.out.println("MODE: INITIAL_MARKING into " + targets.length + " place(s), workflow " + base);
+		for (String target : targets) {
+			if (target.trim().isEmpty()) continue;
+			int eq = target.indexOf('='), dot = target.lastIndexOf('.', eq < 0 ? target.length() : eq);
+			if (eq < 0 || dot < 0) throw new IllegalArgumentException("Marking target is place.operation=input,...: " + target);
+			String place = target.substring(0, dot).trim(), operation = target.substring(dot + 1, eq).trim();
+			if (!queryServiceConfiguration(place, operation, ruleBaseVersion))
+				throw new IllegalStateException("No service configuration for marked place " + place + "." + operation);
+			targetPlaceName = place;
+			serviceOperation = operation;
+			for (String input : target.substring(eq + 1).split(",")) {
+				if (input.trim().isEmpty()) continue;
+				if (next > 99) throw new IllegalArgumentException("An initial marking holds at most 99 tokens");
+				int tokenId = base + next++;
+				System.out.printf("  M0: token %d (%s) -> %s.%s @ %s:%s%n", tokenId, input.trim(), place, operation, resolvedServiceChannel, resolvedServicePort);
+				sendToken(createPetriNetToken(tokenId), tokenId, input.trim(), base);
+			}
+		}
+		System.out.println("Initial marking fired: " + (next - 1) + " token(s), once");
 	}
 
 	/**

@@ -453,6 +453,28 @@ public class EditorFrame extends JPanel {
             canvas.repaint();
         }));
         
+        // An arc out of an event generator can set the initial marking: how many tokens it puts in its place, once.
+        if (arrow.getSource() != null && arrow.getSource().getType() == ProcessElement.Type.EVENT_GENERATOR) {
+            JTextField tokensField = new JTextField(15);
+            addField("Initial tokens:", tokensField, arrow.getTokens() == null ? "" : arrow.getTokens().toString());
+            tokensField.setToolTipText("<html>Tokens this arc puts in its place, once, as the net's initial marking.<br>"
+                + "Blank: one per input of a join's place, or 1 for an ordinary place when the generator has several arcs.<br>"
+                + "Blank on a generator's only arc into an ordinary place: arrivals (rate and token count apply).</html>");
+            boolean[] saved = { false };
+            tokensField.getDocument().addDocumentListener(new SimpleDocumentListener(() -> {
+                String text = tokensField.getText().trim();
+                Integer value = null;
+                if (!text.isEmpty()) {
+                    try { value = Integer.valueOf(text); } catch (NumberFormatException ex) { tokensField.setForeground(Color.RED); return; }
+                }
+                tokensField.setForeground(UIManager.getColor("TextField.foreground"));
+                if (java.util.Objects.equals(value, arrow.getTokens())) return;
+                if (!saved[0]) { canvas.saveUndoState(); saved[0] = true; }
+                arrow.setTokens(value);
+                canvas.repaint();
+            }));
+        }
+
         // Connection Type checkbox
         JCheckBox networkCheckbox = new JCheckBox("Network Connection");
         networkCheckbox.setSelected(arrow.isNetworkConnection());

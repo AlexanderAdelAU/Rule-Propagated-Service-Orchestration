@@ -24,6 +24,9 @@
                                e.g. outcome=true
     eg1.join.inputs            optional: the generator feeds a join with this many inputs; it fires one
                                workflow's join tokens, numbered from that version's base
+    eg1.marking                optional: the generator sets an initial marking in one or more places, once:
+                               place.operation=input,input;place.operation=input (one token per input, all in
+                               that version's first workflow); eg1.tokens is then the marking's token count
     eg1.format.service         optional: the token format (TokenFormats) the generator fills its tokens from,
                                for a token generator that has formats (e.g. TriageService)
     token.generator.class      optional: the token generator; default GenericPetriNetTokenGenerator
@@ -170,6 +173,7 @@
                 <arg value="-triggerfile" if:set="@{slot}.trigger.set"/><arg value="${@{slot}.trigger.file}" if:set="@{slot}.trigger.set"/>
                 <arg value="-data" if:set="@{slot}.data"/><arg value="${@{slot}.data}" if:set="@{slot}.data"/>
                 <arg value="-joininputs" if:set="@{slot}.join.inputs"/><arg value="${@{slot}.join.inputs}" if:set="@{slot}.join.inputs"/>
+                <arg value="-marking" if:set="@{slot}.marking"/><arg value="${@{slot}.marking}" if:set="@{slot}.marking"/>
                 <arg value="-format-service" if:set="@{slot}.format.service"/><arg value="${@{slot}.format.service}" if:set="@{slot}.format.service"/>
                 <arg value="-skipdeploy"/>
             </java>

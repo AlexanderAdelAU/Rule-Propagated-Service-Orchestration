@@ -1633,6 +1633,26 @@ public class Canvas extends JPanel {
             g2.setStroke(new BasicStroke(1f));
             g2.drawRoundRect(x, y, w, h, 8, 8);
             g2.drawString(badge, x + 4, y + metrics.getAscent());
+            // A marking over several arcs (or with a count) shows each arc's share: "x1" a third of the way along it.
+            GeneratorRole role = generatorRole(generator);
+            boolean perArc = role.marks.size() > 1;
+            for (Mark m : role.marks) if (m.arc.getTokens() != null) perArc = true;
+            if (!perArc) continue;
+            for (Mark m : role.marks) {
+                // On the arc's last stretch, just above it, where it enters its T_in.
+                ProcessElement t = m.arc.getTarget();
+                List<Point> bends = m.arc.getWaypoints();
+                Point from = bends.isEmpty() ? new Point(generator.getX() + generator.getWidth() / 2, generator.getY() + generator.getHeight() / 2) : bends.get(bends.size() - 1);
+                Point to = new Point(t.getX() + t.getWidth() / 2, t.getY() + t.getHeight() / 2);
+                String share = "\u00d7" + m.count;
+                int sw = metrics.stringWidth(share) + 8;
+                int sx = (from.x + to.x) / 2 - sw / 2, sy = (from.y + to.y) / 2 - h - 2;
+                g2.setColor(new Color(237, 228, 255));
+                g2.fillRoundRect(sx, sy, sw, h, 8, 8);
+                g2.setColor(new Color(90, 50, 160));
+                g2.drawRoundRect(sx, sy, sw, h, 8, 8);
+                g2.drawString(share, sx + 4, sy + metrics.getAscent());
+            }
         }
         g2.setFont(previous);
     }
@@ -3201,20 +3221,12 @@ public class Canvas extends JPanel {
         return notes;
     }
     /**
-     * An event generator issues one version's tokens, shaped for the service it feeds, to one place. It is not a step
-     * of the business process, so it does not fork: a fork is a place whose T_out splits, like any other.
+     * An event generator that issues arrivals sends them to one place: it is not a step of the business process, so it
+     * does not fork (a fork is a place whose T_out splits). A generator with several arcs sets an initial marking
+     * instead, once, which is checked by markingProblems.
      */
     public List<String> generatorsWithSeveralArcs() {
-        List<String> notes = new ArrayList<>();
-        if (isAdministrativeProcess()) return notes;   // initialisers and collectors reach every host at once
-        for (ProcessElement generator : elements) {
-            if (generator.getType() != ProcessElement.Type.EVENT_GENERATOR) continue;
-            int arcs = 0;
-            for (Arrow out : arrows) if (out.getSource() == generator) arcs++;
-            if (arcs > 1) notes.add(generator.getLabel() + " has " + arcs + " arcs, but an event generator issues its tokens to one place. "
-                + "To fork, lead " + generator.getLabel() + " to one T_in and place, and make that place's T_out a ForkNode with an arc to each branch.");
-        }
-        return notes;
+        return new ArrayList<>();
     }
     /** The runtime's own initialisers and collectors (ProcessDefinitionFolder/common), not business processes. */
     public boolean isAdministrativeProcess() {
@@ -3227,32 +3239,62 @@ public class Canvas extends JPanel {
         + "not catalogue services, and each run generates one for its hosts. It is not deployed or built on its own.";
 
     /**
-     * What an event generator does, worked out from its one arc. Into an ordinary T_in it issues arrivals: one token
-     * per arrival into that place. Into a JoinNode T_in it sets the initial marking of a closed net: one token per input
-     * of the join's place, once, so the cycle can start.
+     * What an event generator does, worked out from its arcs.
+     * - Arrivals: one arc, into an ordinary T_in, with no token count. One token per arrival into that place.
+     * - Initial marking (a closed net's starting tokens): an arc into a JoinNode T_in, several arcs, or an arc with a
+     *   token count. Each arc puts its tokens into its place, once: by default one per input of a join's place, or one
+     *   for an ordinary T_in; a count on the arc says otherwise. All of them run as one workflow of the generator's
+     *   version, so the joins they meet group them.
      */
+    public static final class Mark {
+        public Arrow arc;                                     // the generator's arc
+        public ProcessElement place;                          // the place it marks
+        public ProcessElement join;                           // its JoinNode T_in, or null for an ordinary T_in
+        public final List<String> available = new ArrayList<>();  // the place's inputs
+        public final List<String> inputs = new ArrayList<>();     // the inputs this arc's tokens fill, one token each
+        public int count;                                     // tokens this arc puts in
+    }
     public static final class GeneratorRole {
-        public ProcessElement place;                       // the place it issues tokens to, or null
-        public ProcessElement join;                        // the JoinNode T_in its arc enters (initial marking), or null
-        public final List<String> inputs = new ArrayList<>();   // the join place's inputs: one marking token each
-        public boolean marking() { return join != null && place != null; }
-        public int tokens() { return inputs.size(); }
+        public ProcessElement place;                          // arrivals: the place fed; marking: the first marked place
+        public ProcessElement join;                           // the first marked join, or null
+        public final List<String> inputs = new ArrayList<>(); // every marked input, in token order
+        public final List<Mark> marks = new ArrayList<>();
+        public boolean marking() { return !marks.isEmpty(); }
+        public int tokens() { int n = 0; for (Mark m : marks) n += m.count; return n; }
+    }
+    /** At most 99 tokens: the marking is one workflow, numbered base + 1 ... base + 99. */
+    public static final int MAX_MARKING = 99;
+
+    private ProcessElement placeAfter(ProcessElement next) {
+        if (next.getType() == ProcessElement.Type.PLACE) return next;
+        for (Arrow onward : arrows)
+            if (onward.getSource() == next && onward.getTarget() != null && onward.getTarget().getType() == ProcessElement.Type.PLACE) return onward.getTarget();
+        return null;
     }
     public GeneratorRole generatorRole(ProcessElement generator) {
         GeneratorRole role = new GeneratorRole();
-        for (Arrow out : arrows) {
-            if (out.getSource() != generator || out.getTarget() == null) continue;
-            ProcessElement next = out.getTarget();
-            if (next.getType() == ProcessElement.Type.PLACE) { role.place = next; break; }
-            for (Arrow onward : arrows)
-                if (onward.getSource() == next && onward.getTarget() != null && onward.getTarget().getType() == ProcessElement.Type.PLACE) role.place = onward.getTarget();
-            if ("JoinNode".equals(next.getNodeType())) role.join = next;
-            break;
-        }
-        if (role.marking()) {
-            if (!role.place.getServiceOperations().isEmpty())
-                for (ServiceArgument input : role.place.getServiceOperations().get(0).getArguments()) role.inputs.add(input.getName());
-            if (role.inputs.isEmpty()) role.inputs.addAll(joinInputNames(joinArcs(role.place)));
+        List<Arrow> out = new ArrayList<>();
+        for (Arrow a : arrows) if (a.getSource() == generator && a.getTarget() != null) out.add(a);
+        if (out.isEmpty()) return role;
+        boolean marking = out.size() > 1;
+        for (Arrow a : out) if (a.getTokens() != null || "JoinNode".equals(a.getTarget().getNodeType())) marking = true;
+        if (!marking) { role.place = placeAfter(out.get(0).getTarget()); return role; }
+        for (Arrow a : out) {
+            Mark m = new Mark();
+            m.arc = a;
+            m.place = placeAfter(a.getTarget());
+            if ("JoinNode".equals(a.getTarget().getNodeType())) m.join = a.getTarget();
+            if (m.place != null && !m.place.getServiceOperations().isEmpty())
+                for (ServiceArgument input : m.place.getServiceOperations().get(0).getArguments()) m.available.add(input.getName());
+            if (m.available.isEmpty()) m.available.addAll(m.join != null && m.place != null ? joinInputNames(joinArcs(m.place)) : java.util.Collections.singletonList("token"));
+            m.count = a.getTokens() != null ? a.getTokens() : m.join != null ? m.available.size() : 1;
+            // A join's tokens fill its inputs in order; an ordinary place takes each token on its one input.
+            for (int t = 0; t < m.count; t++)
+                m.inputs.add(m.join != null ? (t < m.available.size() ? m.available.get(t) : "") : m.available.get(0));
+            role.marks.add(m);
+            role.inputs.addAll(m.inputs);
+            if (role.place == null) role.place = m.place;
+            if (role.join == null) role.join = m.join;
         }
         return role;
     }
@@ -3261,12 +3303,25 @@ public class Canvas extends JPanel {
         GeneratorRole role = generatorRole(generator);
         return role.marking() ? "M\u2080 \u00d7" + role.tokens() : null;
     }
+    /** One mark in words: "2 into NS_Green's join (token_branch1, token_branch2)", "1 into Left (token)". */
+    private static String markText(Mark m) {
+        String where = m.place == null ? (m.arc.getTarget().getLabel() + " (no place after it)") : m.join != null ? m.place.getLabel() + "'s join" : m.place.getLabel();
+        return m.count + " into " + where + " (" + String.join(", ", m.inputs) + ")";
+    }
     /** The generator's role in words, for its Attributes. */
     public String generatorRoleText(ProcessElement generator) {
         GeneratorRole role = generatorRole(generator);
-        if (role.marking())
-            return "Initial marking: " + role.tokens() + " tokens, once, into " + role.place.getLabel() + "'s join (" + String.join(", ", role.inputs)
-                + "), so the cycle can start. Rate and token count do not apply.";
+        if (role.marking()) {
+            if (role.marks.size() == 1) {
+                Mark m = role.marks.get(0);
+                return "Initial marking: " + m.count + (m.count == 1 ? " token" : " tokens") + ", once, into " + (m.place == null ? m.arc.getTarget().getLabel() : m.join != null ? m.place.getLabel() + "'s join" : m.place.getLabel())
+                    + " (" + String.join(", ", m.inputs) + "), so the cycle can start. Rate and token count do not apply.";
+            }
+            List<String> parts = new ArrayList<>();
+            for (Mark m : role.marks) parts.add(markText(m));
+            return "Initial marking: " + role.tokens() + " tokens, once: " + String.join("; ", parts)
+                + ". They start as one workflow, so the joins they meet group them. Rate and token count do not apply.";
+        }
         if (role.place != null) return "Arrivals: one token per arrival into " + role.place.getLabel() + ".";
         return "Not connected yet: draw an arc to the T_in of the place it feeds.";
     }
@@ -3276,22 +3331,44 @@ public class Canvas extends JPanel {
         for (ProcessElement generator : elements) {
             if (generator.getType() != ProcessElement.Type.EVENT_GENERATOR) continue;
             GeneratorRole role = generatorRole(generator);
-            if (role.marking()) notes.add(generator.getLabel() + " sets the initial marking: " + role.tokens() + " tokens, once, into " + role.place.getLabel() + "'s join.");
+            if (!role.marking()) continue;
+            if (role.marks.size() == 1 && role.join != null)
+                notes.add(generator.getLabel() + " sets the initial marking: " + role.tokens() + " tokens, once, into " + role.place.getLabel() + "'s join.");
+            else {
+                List<String> parts = new ArrayList<>();
+                for (Mark m : role.marks) parts.add(markText(m));
+                notes.add(generator.getLabel() + " sets the initial marking: " + role.tokens() + (role.tokens() == 1 ? " token" : " tokens") + ", once: " + String.join("; ", parts) + "."
+                    + (role.marks.size() > 1 ? " For a stream of arrivals that forks instead, give " + generator.getLabel() + " one arc and make its place's T_out a ForkNode." : ""));
+            }
         }
         return notes;
     }
-    /** A join's initial marking comes from one generator: each runs under its own version, so each would start its own copy. */
+    /**
+     * A marking that cannot start: an arc with no place after it, a count below 1, more tokens into a join than it has
+     * inputs, more than 99 tokens in all, or a place marked by two generators.
+     */
     public List<String> joinsMarkedTwice() {
         List<String> notes = new ArrayList<>();
-        Map<ProcessElement, List<String>> byJoin = new java.util.LinkedHashMap<>();
+        if (isAdministrativeProcess()) return notes;   // initialisers and collectors reach every host at once
+        Map<ProcessElement, List<String>> byPlace = new java.util.LinkedHashMap<>();
         for (ProcessElement generator : elements) {
             if (generator.getType() != ProcessElement.Type.EVENT_GENERATOR) continue;
             GeneratorRole role = generatorRole(generator);
-            if (role.marking()) byJoin.computeIfAbsent(role.join, k -> new ArrayList<>()).add(generator.getLabel());
+            for (Mark m : role.marks) {
+                String arc = generator.getLabel() + " \u2192 " + m.arc.getTarget().getLabel();
+                if (m.place == null) notes.add(arc + " marks no place: draw an arc from " + m.arc.getTarget().getLabel() + " into the place it should mark.");
+                else if (m.count < 1) notes.add(arc + " puts " + m.count + " tokens in " + m.place.getLabel() + ": a marking arc puts in at least 1 (or delete the arc).");
+                else if (m.join != null && m.count > m.available.size())
+                    notes.add(arc + " puts " + m.count + " tokens into " + m.place.getLabel() + "'s join, which takes " + m.available.size() + " inputs (" + String.join(", ", m.available)
+                        + "). Mark at most one token per input.");
+                if (m.place != null) byPlace.computeIfAbsent(m.join != null ? m.join : m.place, x -> new ArrayList<>()).add(generator.getLabel());
+            }
+            if (role.tokens() > MAX_MARKING)
+                notes.add(generator.getLabel() + " marks " + role.tokens() + " tokens; an initial marking holds at most " + MAX_MARKING + " (one workflow, numbered base + 1 to base + 99).");
         }
-        for (Map.Entry<ProcessElement, List<String>> entry : byJoin.entrySet())
-            if (entry.getValue().size() > 1)
-                notes.add(entry.getKey().getLabel() + " is marked by " + String.join(" and ", entry.getValue()) + ". A join's initial marking comes from one generator: "
+        for (Map.Entry<ProcessElement, List<String>> entry : byPlace.entrySet())
+            if (new java.util.LinkedHashSet<>(entry.getValue()).size() > 1)
+                notes.add(entry.getKey().getLabel() + " is marked by " + String.join(" and ", new java.util.LinkedHashSet<>(entry.getValue())) + ". A net's initial marking comes from one generator: "
                     + "each generator runs under its own version, so each would start its own copy of the net. Keep one of them.");
         return notes;
     }
@@ -3464,6 +3541,7 @@ public class Canvas extends JPanel {
             json.append("      \"guardCondition\": \"").append(escapeJSON(arrow.getGuardCondition())).append("\",\n");
             json.append("      \"decision_value\": \"").append(escapeJSON(arrow.getDecisionValue())).append("\",\n");
             json.append("      \"endpoint\": \"").append(escapeJSON(arrow.getEndpoint())).append("\"");
+            if (arrow.getTokens() != null) json.append(",\n      \"tokens\": ").append(arrow.getTokens());
             
             // Add waypoints if any
             if (!arrow.getWaypoints().isEmpty()) {
@@ -3790,6 +3868,8 @@ public class Canvas extends JPanel {
                 // Load endpoint if present
                 String endpoint = extractValue(block, "endpoint");
                 if (endpoint != null) arrow.setEndpoint(endpoint);
+                String tokens = extractValue(block, "tokens");
+                if (tokens != null && tokens.trim().matches("\\d+")) arrow.setTokens(Integer.valueOf(tokens.trim()));
                 
                 // Load waypoints if present
                 String waypointsSection = extractSection(block, "\"waypoints\"");
@@ -4510,6 +4590,7 @@ public class Canvas extends JPanel {
                     clipArrow.setGuardCondition(arrow.getGuardCondition());
                     clipArrow.setDecisionValue(arrow.getDecisionValue());
                     clipArrow.setEndpoint(arrow.getEndpoint());
+                    clipArrow.setTokens(arrow.getTokens());
                     
                     // Copy waypoints
                     for (Point wp : arrow.getWaypoints()) {
@@ -4593,6 +4674,7 @@ public class Canvas extends JPanel {
                 newArrow.setGuardCondition(clipArrow.getGuardCondition());
                 newArrow.setDecisionValue(clipArrow.getDecisionValue());
                 newArrow.setEndpoint(clipArrow.getEndpoint());
+                newArrow.setTokens(clipArrow.getTokens());
                 
                 // Copy waypoints with offset
                 for (Point wp : clipArrow.getWaypoints()) {

@@ -411,13 +411,28 @@ Use **Arrow (drag)**, or **Arrow (click waypoints)** to bend the return route.
 
 ### Forks and joins
 
-- **An event generator feeds one place.** It issues one version's tokens, shaped for the service it feeds; it is not a step of the process.
-  - Validate reports a generator with more than one arc. The runtime's own initialisers and collectors (`ProcessDefinitionFolder/common`) are the exception.
-- **A generator has one of two roles, set by where its arc goes:**
-  - **Arrivals** (an open process): its arc enters an ordinary T_in, and it sends one token per arrival into that place, at its rate.
-  - **Initial marking** (a closed net, such as `TrafficLight_Workflow`): its arc enters a JoinNode T_in. It sends one token per input of the join's place, once, so the cycle can start. Rate and token count do not apply.
-  - The editor shows which: a **M₀ ×2** badge on the diagram, a **Role** box in the generator's Attributes (with Rate greyed out), a Validate reminder, and the generator's row in Build.
-  - A join's initial marking comes from one generator. Each generator runs under its own version, so two would start two copies of the net; Validate reports it.
+- **An event generator is not a step of the process.** It issues one version's tokens, shaped for the services it feeds.
+- **A generator has one of two roles, set by its arcs:**
+  - **Arrivals** (an open process): one arc, into an ordinary T_in, with no count. It sends one token per arrival into that place, at its rate.
+  - **Initial marking** (a closed net's starting tokens, M₀): any of these:
+    - an arc into a JoinNode T_in (`TrafficLight_Workflow`);
+    - several arcs (`Rendezvous_Workflow`: one token each into Left and Right, which meet at a join);
+    - an arc with a count.
+  - A marking is sent once, so the cycle can start. Rate and token count do not apply.
+- **Each marking arc carries a count:** the tokens it puts in its place.
+  - Set it in the arc's Attributes, **Initial tokens**.
+  - Blank means one per input of a join's place, or 1 for an ordinary place.
+  - A join's tokens fill its inputs in order; a join takes at most one token per input.
+- **The editor shows the role:**
+  - a **M₀ ×2** badge on the generator, and a **×n** badge on each arc when there are several arcs or a count;
+  - a **Role** box in the generator's Attributes (with Rate greyed out);
+  - a Validate reminder, and the generator's row in Build.
+- **Limits for now:**
+  - One generator marks a net. Each generator runs under its own version, so two would start two copies of the net; Validate reports it.
+  - All marked tokens start as one workflow, so a marking holds at most 99 tokens.
+  - Marked tokens join only with tokens of the same marking.
+  - For a stream of arrivals that forks, give the generator one arc and make its place's T_out a ForkNode (below).
+- **In the launcher:** Build writes `eg1.marking` (`P1_Place.processToken=token;P2_Place.processToken=token`) and `eg1.tokens`, the total. A single join keeps `eg1.join.inputs`.
 - **A fork is a place's T_out.** Lead the generator to a first place, set that place's T_out **Node Type** to `ForkNode`, and draw an arc from it to each branch's T_in.
   - Each token's children are numbered N01, N02, ..., one per branch.
 - **A join is the T_in of a place.** Set the T_in's **Node Type** to `JoinNode`; the place's host waits for one child from each arc.
@@ -1067,6 +1082,7 @@ Every launcher runs the same way:
 | Your first service: credit check ([ServiceTutorial.md](ServiceTutorial.md)) | [Credit_Check_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/Credit_Check_Workflow_BuildAndRun.xml) |
 | Your own service: inventory and supplier | [Inventory_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/Inventory_Workflow_BuildAndRun.xml) |
 | P1–P4 fork/join model | [P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.xml) |
+| Initial marking over two places (Rendezvous) | [Rendezvous_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/Rendezvous_Workflow_BuildAndRun.xml) |
 | Six-place double-join model | [P1_to_P6_Double_Join_Workflow.xml](btsn.petrinet.ProjectLoader/P1_to_P6_Double_Join_Workflow.xml) |
 | Emergency department | [Emergency_Department_BuildAndRun.xml](btsn.healthcare.ProjectLoader/Emergency_Department_BuildAndRun.xml) |
 | Full Financial application | [FinancialSystem_P1_P5_BuildAndRun.xml](btsn.financial.ProjectLoader/FinancialSystem_P1_P5_BuildAndRun.xml) |

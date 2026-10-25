@@ -52,7 +52,8 @@ public final class BuildAndRunGenerator {
         public final Map<String, String> operations = new LinkedHashMap<>(); // generator id -> operation
         public final Map<String, Integer> rates = new LinkedHashMap<>();
         public final Map<String, String> versions = new LinkedHashMap<>();
-        public final Map<String, Integer> joins = new LinkedHashMap<>();     // generator id -> inputs of the join it feeds
+        public final Map<String, Integer> joins = new LinkedHashMap<>();     // generator id -> tokens of the initial marking it sets, once
+        public final Map<String, String> markings = new LinkedHashMap<>();   // generator id -> marking over several places (place.operation=input,...;...)
         public final Map<String, String> services = new LinkedHashMap<>();  // generator id -> service at its target place
         public String tokenGenerator = "";  // the profile's "tokenGenerator", when it names one (else the runtime's default)
         public File profile; public boolean profileExists;
@@ -151,6 +152,8 @@ public final class BuildAndRunGenerator {
 
         for (ProcessElement element : canvas.getElements()) {
             if (element.getType() != ProcessElement.Type.EVENT_GENERATOR) continue;
+            Canvas.GeneratorRole role = canvas.generatorRole(element);
+            if (role.marking()) { planMarking(plan, registry, element, role); continue; }
             ProcessElement place = firstPlaceAfter(canvas, element);
             if (place == null || place.getServiceOperations().isEmpty() || registry.nodeFor(place).isEmpty()) continue;
             plan.targets.put(element.getId(), registry.nodeFor(place) + "_Place");
@@ -163,6 +166,7 @@ public final class BuildAndRunGenerator {
             else if (inputs >= 0) plan.problems.add(element.getId() + " feeds the join before " + place.getLabel()
                 + ", but " + place.getLabel() + "'s operation names " + inputs + " input(s); a join needs one argument for each input.");
         }
+        plan.problems.addAll(canvas.joinsMarkedTwice());
         if (plan.targets.isEmpty()) plan.problems.add("Add an event generator connected through a T_in transition to a deployed place.");
         if (!plan.problems.isEmpty()) return plan;
 
@@ -197,6 +201,33 @@ public final class BuildAndRunGenerator {
         return plan;
     }
 
+    /**
+     * A generator that sets the initial marking. One join with one token per input keeps the join form (eg.join.inputs);
+     * any other marking is written out place by place (eg.marking), and the generator fires it once as one workflow.
+     */
+    static void planMarking(Plan plan, ServiceRegistry registry, ProcessElement generator, Canvas.GeneratorRole role) {
+        List<String> entries = new ArrayList<>();
+        for (Canvas.Mark m : role.marks) {
+            if (m.place == null || m.place.getServiceOperations().isEmpty() || registry.nodeFor(m.place).isEmpty()) return;  // reported by the canvas checks or the deployment
+            entries.add(registry.nodeFor(m.place) + "_Place." + m.place.getServiceOperations().get(0).getName() + "=" + String.join(",", m.inputs));
+        }
+        Canvas.Mark first = role.marks.get(0);
+        String id = generator.getId();
+        plan.targets.put(id, registry.nodeFor(first.place) + "_Place");
+        plan.operations.put(id, first.place.getServiceOperations().get(0).getName());
+        if (first.place.getService() != null && !first.place.getService().isEmpty()) plan.services.put(id, first.place.getService());
+        plan.rates.put(id, parse(generator.getGeneratorRate(), 1000));
+        plan.versions.put(id, VERSIONS.contains(generator.getTokenVersion()) ? generator.getTokenVersion() : "v001");
+        boolean oneJoin = role.marks.size() == 1 && first.join != null && first.count == first.available.size();
+        if (oneJoin && first.count < 2) {
+            plan.problems.add(id + " feeds the join before " + first.place.getLabel() + ", but " + first.place.getLabel() + "'s operation names "
+                + first.count + " input(s); a join needs one argument for each input.");
+            return;
+        }
+        plan.joins.put(id, role.tokens());
+        if (!oneJoin) plan.markings.put(id, String.join(";", entries));
+    }
+
     /** Choices that cannot run: no generator chosen, or two generators sharing a version (their tokens would collide). */
     public static List<String> problems(Plan plan, Options o) {
         List<String> problems = new ArrayList<>();
@@ -220,7 +251,10 @@ public final class BuildAndRunGenerator {
         if (!plan.tokenGenerator.isEmpty()) lines.add("Tokens   made by " + plan.tokenGenerator + " (named by the deployment profile), each from its target service's token format");
         for (String packaged : packagedHosts(plan)) lines.add("Package  " + packaged + " (Build host packages; start it on its machine)");
         for (Run run : o.enabled())
-            if (plan.joins.containsKey(run.generatorId))
+            if (plan.markings.containsKey(run.generatorId))
+                lines.add("Tokens   initial marking from " + run.generatorId + ": " + plan.joins.get(run.generatorId) + " tokens, once, version " + run.version
+                    + ": " + plan.markings.get(run.generatorId).replace(";", "; ") + " (they start as one workflow)");
+            else if (plan.joins.containsKey(run.generatorId))
                 lines.add("Tokens   initial marking from " + run.generatorId + ": " + plan.joins.get(run.generatorId) + " tokens, once, into the join before "
                     + plan.targets.get(run.generatorId) + "." + plan.operations.get(run.generatorId) + ", version " + run.version
                     + " (a closed net needs all its join's inputs marked to start)");
@@ -305,7 +339,11 @@ public final class BuildAndRunGenerator {
             if (!plan.tokenGenerator.isEmpty() && plan.services.containsKey(run.generatorId))
                 x.append("    <property name=\"").append(slot).append(".format.service\" value=\"").append(xml(plan.services.get(run.generatorId))).append("\"/>\n");
             Integer join = plan.joins.get(run.generatorId);
-            if (join != null) {
+            if (join != null && plan.markings.containsKey(run.generatorId)) {
+                x.append("    <!-- ").append(xml(run.generatorId)).append(" sets the initial marking, once: these tokens, in these places, as one workflow. -->\n");
+                x.append("    <property name=\"").append(slot).append(".tokens\" value=\"").append(join).append("\"/>\n");
+                x.append("    <property name=\"").append(slot).append(".marking\" value=\"").append(xml(plan.markings.get(run.generatorId))).append("\"/>\n");
+            } else if (join != null) {
                 x.append("    <!-- ").append(xml(run.generatorId)).append(" feeds a join: it fires one token for each of the join's inputs. -->\n");
                 x.append("    <property name=\"").append(slot).append(".tokens\" value=\"").append(join).append("\"/>\n");
                 x.append("    <property name=\"").append(slot).append(".join.inputs\" value=\"").append(join).append("\"/>\n");

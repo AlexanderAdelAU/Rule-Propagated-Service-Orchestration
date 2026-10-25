@@ -1,0 +1,9 @@
+{
+  "catalog": "BusinessServiceDefinitions/petrinet/PetriNetModels.json",
+  "infrastructure": "InfrastructureDefinitionFolder/SingleHost.json",
+  "deploymentRules": "RuleBase/Generated/InfrastructureDeployment.ruleml.xml",
+  "directServiceRules": [
+    "RuleBase/Generated/HostAdministration.ruleml.xml"
+  ],
+  "serviceDeployment": "ServiceDeploymentFolder/petrinet/Rendezvous.json"
+}
