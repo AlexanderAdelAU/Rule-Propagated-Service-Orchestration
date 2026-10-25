@@ -8,6 +8,9 @@ and fixed base ports. Every node runs the same host program. Service functions a
 are selected separately, so changing a service function leaves its network
 endpoint unchanged.
 
+In these JSON files a **node** is a host: `"nodes"` lists the hosts, and `"node"` (here and in a service
+deployment) names one. The editor shows them as **Host**.
+
 | Node | Port slot 0 | Port slot 1 |
 |---|---|---|
 | P1 | 4001 | — |
