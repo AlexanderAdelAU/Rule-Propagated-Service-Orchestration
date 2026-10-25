@@ -23,6 +23,7 @@ public class Arrow {
     private String guardCondition;
     private String decisionValue;
     private String endpoint;  // Specifies which operation to invoke for multi-operation services
+    private Integer tokens;   // On an arc from an event generator: the tokens it puts in that place at the start (null: the default)
     private List<Point> waypoints;  // Control points for bending
     private Point newlyCreatedWaypoint;  // Track the just-created waypoint (shown in blue)
     
@@ -576,6 +577,9 @@ public class Arrow {
     public void setDecisionValue(String decisionValue) { this.decisionValue = decisionValue; }
     public String getEndpoint() { return endpoint; }
     public void setEndpoint(String endpoint) { this.endpoint = endpoint; }
+    /** Initial-marking tokens this arc puts into its place (arcs from an event generator only); null = the default. */
+    public Integer getTokens() { return tokens; }
+    public void setTokens(Integer tokens) { this.tokens = tokens; }
     
     // Label offset methods
     public Point getLabelOffset() { return labelOffset; }

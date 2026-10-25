@@ -20,6 +20,7 @@ public final class GeneratorRoleCheck {
         File common = new File(root, "btsn.common");
         File traffic = new File(common, "ProcessDefinitionFolder/petrinet/Workflow/TrafficLight_Workflow.json");
         File tutorial = new File(common, "ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json");
+        File rendezvous = new File(common, "ProcessDefinitionFolder/petrinet/Workflow/Rendezvous_Workflow.json");
         File initializer = new File(root, "btsn.workflowEditor/tests/fixtures/admin/Initializers/Hosts_Initialization.json"); // as a run generates it
         Throwable[] failure = new Throwable[1];
         SwingUtilities.invokeAndWait(() -> {
@@ -72,15 +73,56 @@ public final class GeneratorRoleCheck {
                 check(open.generatorBadge(arrivals) == null && "Arrivals: one token per arrival into P1.".equals(open.generatorRoleText(arrivals)), open.generatorRoleText(arrivals));
                 check(open.generatorMarkings().isEmpty(), "Arrivals reported as a marking");
 
-                // The runtime's own initialiser reaches every host from one generator; the same net elsewhere is reported.
+                // The runtime's own initialiser reaches every host from one generator and is never checked as a marking;
+                // the same net in a business process reads as a marking of one token per host place.
                 Canvas admin = load(initializer);
-                check(admin.isAdministrativeProcess() && admin.generatorsWithSeveralArcs().isEmpty(), "Initialiser reported: " + admin.generatorsWithSeveralArcs());
+                check(admin.isAdministrativeProcess() && admin.joinsMarkedTwice().isEmpty(), "Initialiser reported: " + admin.joinsMarkedTwice());
                 Canvas copy = new Canvas(); copy.loadFromJSON(Files.readString(initializer.toPath()));
-                check(!copy.generatorsWithSeveralArcs().isEmpty(), "A business process with a several-arc generator not reported");
+                ProcessElement adminGenerator = null;
+                for (ProcessElement e : copy.getElements()) if (e.getType() == ProcessElement.Type.EVENT_GENERATOR) adminGenerator = e;
+                check(copy.generatorRole(adminGenerator).marks.size() > 1, "A several-arc generator not read as a marking");
+
+                // A marking over several places (Rendezvous: one token each into Left and Right, which meet at a join).
+                Canvas meet = load(rendezvous);
+                ProcessElement start = meet.findEventGeneratorByLabel("START");
+                Canvas.GeneratorRole marking = meet.generatorRole(start);
+                check(marking.marks.size() == 2 && marking.tokens() == 2 && marking.inputs.equals(Arrays.asList("token", "token")), "Rendezvous marking: " + marking.inputs);
+                check("M₀ ×2".equals(meet.generatorBadge(start)), "Rendezvous badge: " + meet.generatorBadge(start));
+                check(meet.generatorRoleText(start).startsWith("Initial marking: 2 tokens, once: 1 into Left (token); 1 into Right (token)"), meet.generatorRoleText(start));
+                check(meet.joinsMarkedTwice().isEmpty(), "Rendezvous reported: " + meet.joinsMarkedTwice());
+                check(meet.saveToJSON().split("\"tokens\": 1", -1).length == 3, "Saving dropped the arcs' token counts");
+                BuildAndRunGenerator.Plan rplan = BuildAndRunGenerator.plan(meet, rendezvous);
+                check(rplan.problems.isEmpty() && "P1_Place.processToken=token;P2_Place.processToken=token".equals(rplan.markings.get("START")) && rplan.joins.get("START") == 2,
+                    "Rendezvous plan: " + rplan.problems + " " + rplan.markings);
+                String launcher = BuildAndRunGenerator.launcherXml(rplan, rplan.defaults);
+                check(launcher.contains("name=\"eg1.marking\" value=\"P1_Place.processToken=token;P2_Place.processToken=token\"") && launcher.contains("name=\"eg1.tokens\" value=\"2\"")
+                    && !launcher.contains("join.inputs"), "Rendezvous launcher: " + launcher);
+                check(BuildAndRunGenerator.summary(rplan, rplan.defaults).stream().anyMatch(l -> l.startsWith("Tokens   initial marking from START: 2 tokens, once, version v001: P1_Place")),
+                    "Rendezvous summary: " + BuildAndRunGenerator.summary(rplan, rplan.defaults));
+
+                // Each arc's count is set in its Attributes; bad counts are reported.
+                Arrow left = marking.marks.get(0).arc;
+                EditorFrame arcAttributes = new EditorFrame(meet); arcAttributes.updateSelection(left);
+                JTextField count = null;
+                for (JTextField f : fields(arcAttributes)) if (f.getToolTipText() != null && f.getToolTipText().contains("initial marking")) count = f;
+                check(count != null && "1".equals(count.getText()), "No Initial tokens field on a generator's arc");
+                count.setText("3");
+                check(Integer.valueOf(3).equals(left.getTokens()) && meet.generatorRole(start).tokens() == 4, "Initial tokens field did not set the arc: " + left.getTokens());
+                left.setTokens(0);
+                check(meet.joinsMarkedTwice().stream().anyMatch(n -> n.startsWith("START \u2192 T_in_Left puts 0 tokens")), "Count 0 not reported: " + meet.joinsMarkedTwice());
+                left.setTokens(120);
+                check(meet.joinsMarkedTwice().stream().anyMatch(n -> n.startsWith("START marks 121 tokens")), "Over 99 not reported: " + meet.joinsMarkedTwice());
+                left.setTokens(1);
+
+                // More tokens into a join than it has inputs.
+                Canvas light = load(traffic);
+                ProcessElement tl = light.findEventGeneratorByLabel("TRAFFICLIGHT_EVENTGENERATOR");
+                light.generatorRole(tl).marks.get(0).arc.setTokens(3);
+                check(light.joinsMarkedTwice().stream().anyMatch(n -> n.contains("puts 3 tokens into NS_Green's join, which takes 2 inputs")), "Overfull join not reported: " + light.joinsMarkedTwice());
             } catch (Throwable t) { failure[0] = t; }
         });
         if (failure[0] != null) throw new AssertionError("Generator roles", failure[0]);
-        System.out.println("PASS: a generator into a JoinNode T_in sets the initial marking (traffic light: 2 tokens, once) and the author is told: badge on the diagram, Role box with Rate greyed out, Validate reminder, Build summary and row; two generators on one join reported; an arrival generator says so; initialisers exempt from the one-arc rule; saving keeps the joins' joinInputCount");
+        System.out.println("PASS: a generator into a JoinNode T_in sets the initial marking (traffic light: 2 tokens, once) and the author is told: badge on the diagram, Role box with Rate greyed out, Validate reminder, Build summary and row; two generators on one join reported; an arrival generator says so; initialisers exempt; a marking over several places (Rendezvous) is shown, planned and written as eg1.marking; each arc's count is set in its Attributes and bad counts are reported; saving keeps joinInputCount and arc counts");
     }
 
     private static Canvas load(File process) throws Exception {

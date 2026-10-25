@@ -1,0 +1,367 @@
+{
+  "processType": "PetriNet",
+  "elements": [
+    {
+      "id": "START",
+      "type": "EVENT_GENERATOR",
+      "x": 30,
+      "y": 290,
+      "width": 24,
+      "height": 60,
+      "label": "START",
+      "rotation": 0.0,
+      "generator_rate": "1000",
+      "token_version": "v001"
+    },
+    {
+      "id": "T_in_Left",
+      "type": "TRANSITION",
+      "x": 150,
+      "y": 190,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_Left",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "Left",
+      "type": "PLACE",
+      "x": 225,
+      "y": 195,
+      "width": 50,
+      "height": 50,
+      "label": "Left",
+      "service": "StochasticService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "token_branch1",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "LeftInstance"
+    },
+    {
+      "id": "T_out_Left",
+      "type": "TRANSITION",
+      "x": 310,
+      "y": 190,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_Left",
+      "rotation": 0.0,
+      "node_type": "XorNode",
+      "node_value": "XOR_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_Right",
+      "type": "TRANSITION",
+      "x": 150,
+      "y": 390,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_Right",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "Right",
+      "type": "PLACE",
+      "x": 225,
+      "y": 395,
+      "width": 50,
+      "height": 50,
+      "label": "Right",
+      "service": "StochasticService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "token_branch2",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "RightInstance"
+    },
+    {
+      "id": "T_out_Right",
+      "type": "TRANSITION",
+      "x": 310,
+      "y": 390,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_Right",
+      "rotation": 0.0,
+      "node_type": "XorNode",
+      "node_value": "XOR_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_Meet",
+      "type": "TRANSITION",
+      "x": 430,
+      "y": 290,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_Meet",
+      "rotation": 0.0,
+      "node_type": "JoinNode",
+      "node_value": "JOIN_NODE",
+      "transition_type": "T_in",
+      "buffer": "10",
+      "joinInputCount": "2"
+    },
+    {
+      "id": "Meet",
+      "type": "PLACE",
+      "x": 505,
+      "y": 295,
+      "width": 50,
+      "height": 50,
+      "label": "Meet",
+      "service": "StochasticService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "token",
+          "arguments": [
+            {
+              "name": "token_branch1",
+              "type": "String",
+              "value": "String",
+              "required": false
+            },
+            {
+              "name": "token_branch2",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "MeetInstance"
+    },
+    {
+      "id": "T_out_Meet",
+      "type": "TRANSITION",
+      "x": 590,
+      "y": 290,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_Meet",
+      "rotation": 0.0,
+      "node_type": "ForkNode",
+      "node_value": "FORK_NODE",
+      "transition_type": "T_out"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "START",
+      "target": "T_in_Left",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "waypoints": [
+        {
+          "x": 100,
+          "y": 220
+        }
+      ],
+      "tokens": 1
+    },
+    {
+      "source": "START",
+      "target": "T_in_Right",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "waypoints": [
+        {
+          "x": 100,
+          "y": 420
+        }
+      ],
+      "tokens": 1
+    },
+    {
+      "source": "T_in_Left",
+      "target": "Left",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Left",
+      "target": "T_out_Left",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_Left",
+      "target": "T_in_Meet",
+      "label": "true",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "true",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_Left",
+      "target": "T_in_Left",
+      "label": "false",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "false",
+      "endpoint": "",
+      "waypoints": [
+        {
+          "x": 322,
+          "y": 165
+        },
+        {
+          "x": 162,
+          "y": 165
+        }
+      ]
+    },
+    {
+      "source": "T_in_Right",
+      "target": "Right",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Right",
+      "target": "T_out_Right",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_Right",
+      "target": "T_in_Meet",
+      "label": "true",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "true",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_Right",
+      "target": "T_in_Right",
+      "label": "false",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "false",
+      "endpoint": "",
+      "waypoints": [
+        {
+          "x": 322,
+          "y": 475
+        },
+        {
+          "x": 162,
+          "y": 475
+        }
+      ]
+    },
+    {
+      "source": "T_in_Meet",
+      "target": "Meet",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Meet",
+      "target": "T_out_Meet",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_Meet",
+      "target": "T_in_Left",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "waypoints": [
+        {
+          "x": 640,
+          "y": 320
+        },
+        {
+          "x": 640,
+          "y": 120
+        },
+        {
+          "x": 162,
+          "y": 120
+        }
+      ]
+    },
+    {
+      "source": "T_out_Meet",
+      "target": "T_in_Right",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "waypoints": [
+        {
+          "x": 660,
+          "y": 320
+        },
+        {
+          "x": 660,
+          "y": 520
+        },
+        {
+          "x": 162,
+          "y": 520
+        }
+      ]
+    }
+  ],
+  "textElements": [
+    {
+      "x": 150,
+      "y": 80,
+      "text": "Rendezvous: two tokens, marked in two places, meet at a join and go round again",
+      "fontSize": 13,
+      "fontStyle": 1,
+      "color": -16777216
+    }
+  ],
+  "serviceDeployment": "ServiceDeploymentFolder/petrinet/Rendezvous.json"
+}

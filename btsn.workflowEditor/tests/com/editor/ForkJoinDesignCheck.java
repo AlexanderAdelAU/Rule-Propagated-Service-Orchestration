@@ -61,10 +61,11 @@ public final class ForkJoinDesignCheck {
                 BuildAndRunGenerator.Plan plan = BuildAndRunGenerator.plan(canvas, process.toFile());
                 check(plan.problems.isEmpty() && "P4_Place".equals(plan.targets.get("EG1")) && !plan.joins.containsKey("EG1"), "Plan: " + plan.problems + " " + plan.targets);
 
-                // An event generator issues its tokens to one place: a second arc is reported, with how to fork instead.
+                // A second arc makes the generator an initial marking (sent once), and Validate says so, with how to fork arrivals instead.
                 Arrow second = new Arrow(e.get("EG1"), e.get("T2")); canvas.getArrows().add(second);
-                check(canvas.serviceBlockers().contains("EG1 has 2 arcs, but an event generator issues its tokens to one place. To fork, lead EG1 to one T_in and place, and make that place's T_out a ForkNode with an arc to each branch."),
-                    "Generator with two arcs not reported: " + canvas.serviceBlockers());
+                check(canvas.generatorRole(e.get("EG1")).marks.size() == 2 && canvas.serviceNotes().stream().anyMatch(n -> n.startsWith("EG1 sets the initial marking: 2 tokens, once")
+                        && n.endsWith("For a stream of arrivals that forks instead, give EG1 one arc and make its place's T_out a ForkNode.")),
+                    "Generator with two arcs not reported as a marking: " + canvas.serviceNotes());
                 canvas.getArrows().remove(second);
 
                 // No Fork Children setting on a generator.
@@ -111,7 +112,7 @@ public final class ForkJoinDesignCheck {
             } catch (Throwable t) { failure[0] = t; }
         });
         if (failure[0] != null) throw new AssertionError("Generator fork", failure[0]);
-        System.out.println("PASS: a fork made by a place's T_out (ForkNode), joined at P10: the generator feeds one place and a second arc is reported (no Fork Children setting); nothing is changed by the editor: Validate says what a join needs and the designer types the join's Inputs and the feeding places' Returns; a new service for a join is suggested one input per arc; a process deployed before its join was set up saves and asks to Deploy again; a join whose service takes too few inputs is saved but stops Deploy, Build and Run; a join with no place is reported; the recorded run (5 forks, 5 joined, 5 completed) replays each child from the fork along its branch to the join and on to T9");
+        System.out.println("PASS: a fork made by a place's T_out (ForkNode), joined at P10: the generator feeds one place and a second arc makes it an initial marking, with how to fork arrivals instead (no Fork Children setting); nothing is changed by the editor: Validate says what a join needs and the designer types the join's Inputs and the feeding places' Returns; a new service for a join is suggested one input per arc; a process deployed before its join was set up saves and asks to Deploy again; a join whose service takes too few inputs is saved but stops Deploy, Build and Run; a join with no place is reported; the recorded run (5 forks, 5 joined, 5 completed) replays each child from the fork along its branch to the join and on to T9");
     }
 
     /** Selects the place and types into its Inputs or Returns field, as the designer would. */
