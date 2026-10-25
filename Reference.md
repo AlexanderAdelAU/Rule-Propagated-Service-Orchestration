@@ -571,9 +571,9 @@ Click **Create**. For `My_P2_Workflow` the editor writes:
 | `btsn.petrinet.ProjectLoader/My_P2_Workflow_BuildAndRun.xml` | The launcher: your choices as properties, plus an import of the shared run phases |
 | `btsn.services/deployments/models/My_P2_WorkflowDeployment.json` | Deployment profile: catalogue, infrastructure and your service deployment. An existing profile for the same deployment is reused. |
 | `btsn.common.eventgenerators/EventTriggeringFile/My_P2_Workflow_BuildAndRun.csv` | Token schedule, one `time_ms,0,1` row per token. With several generators, each gets its own file, named after it (for example `..._BuildAndRun_EG6.csv`). |
-| `ProcessDefinitionFolder/common/Initializers/P2_Initialization.json` | Resets the hosts and Monitor. Reused when it exists; written for a new set of nodes (for example `P3_P5_Initialization`). |
-| `ProcessDefinitionFolder/common/Collectors/P2_Collector.json` | Collects the observations into Monitor. Reused or written the same way. |
 
+- The launcher lists its hosts (`<property name="hosts" value="P2"/>`). Each run generates the initialiser
+  (which resets those hosts and Monitor) and the collector (which gathers their observations into Monitor).
 - The launcher is about 25 lines; the supplied [`P2_Tutorial_Workflow_BuildAndRun.xml`](btsn.petrinet.ProjectLoader/P2_Tutorial_Workflow_BuildAndRun.xml) is an example.
 - The run phases live in
   [`btsn.services/process-runtime.xml`](btsn.services/process-runtime.xml).
@@ -654,9 +654,9 @@ The default target `run-complete-workflow` does everything:
 
 | Phase | What happens | Definition used |
 |---|---|---|
-| 1 — Database initialization | Reset P2 and Monitor (administrative version `v999`) | `common/Initializers/P2_Initialization` |
+| 1 — Database initialization | Reset P2 and Monitor (administrative version `v999`) | `common/Initializers/Hosts_Initialization`, generated for the run's hosts |
 | 2 — Workflow execution | Generate the rules for P2 and send them as `v001`. P2 commits to them (a confirmation per version), and only then are the tokens fired from EG11 | `petrinet/Workflow/My_P2_Workflow` |
-| 3 — Data collection | Request P2's observations and write them to Monitor | `common/Collectors/P2_Collector` |
+| 3 — Data collection | Request P2's observations and write them to Monitor | `common/Collectors/Hosts_Collector`, generated for the run's hosts |
 
 ### Stop it when collection finishes
 
@@ -1609,7 +1609,7 @@ The supplied P2 example of [Each step in detail](#each-step-in-detail), built wi
 | [P2_Tutorial_WorkflowDeployment.json](btsn.services/deployments/models/P2_Tutorial_WorkflowDeployment.json) | Deployment profile written by Build and Run |
 | [P2_Tutorial_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P2_Tutorial_Workflow_BuildAndRun.xml) | Launcher written by Build and Run |
 | [`P2_Tutorial_Workflow_BuildAndRun*.csv`](btsn.common.eventgenerators/EventTriggeringFile) | Token schedules, one per event generator |
-| [P2_Initialization.json](btsn.common/ProcessDefinitionFolder/common/Initializers/P2_Initialization.json) / [P2_Collector.json](btsn.common/ProcessDefinitionFolder/common/Collectors/P2_Collector.json) | Administrative processes for node P2 |
+| `Hosts_Initialization.json` / `Hosts_Collector.json` | Administrative processes, generated into the run's own `btsn.common` for its hosts |
 | [Analysis_P2_Tutorial_Workflow.txt](btsn.common/AnalysisFolder/PetriNet/Analysis_P2_Tutorial_Workflow.txt) | Analysis of a ten-token run, ready to replay |
 | [process-runtime.xml](btsn.services/process-runtime.xml) | Shared phases imported by every generated launcher |
 
