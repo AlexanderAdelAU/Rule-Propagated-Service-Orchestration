@@ -1,65 +1,45 @@
-# Separate P1–P6 releases
+# Host release
 
 > **Running a host on another machine as part of a run?** Use the launcher's
 > `host-packages` target instead (see
 > [Run on several machines](../../Reference.md#7-run-on-several-machines)). Its
 > packages carry the master ruleset generated for that deployment and the host's
-> business services. The place release below carries the source rules and no
-> business services, so it only checks that a place starts on its own.
+> business services. The release below carries the source rules and no
+> business services, so it only checks that a host starts on its own.
 
-The six host projects are now named `btsn.rpso.places.p1` through
-`btsn.rpso.places.p6`. Their executable JARs and release ZIPs use those names as
-well. Physical orchestration identities (`P1_Place` through `P6_Place`), Java
-packages, handlers, network ports and rule semantics are unchanged.
+Every node runs the same host program, `btsn.rpso.host`. It used to be six
+numbered projects, `btsn.rpso.places.p1` to `p6`, identical apart from their names.
+The node a host runs as is given when it starts (`-node P3`), so a node added to
+the infrastructure (P7, P8, ...) needs no project of its own.
 
-After pulling the rename into an existing Eclipse workspace, remove the old
-`btsn.petrinet.places.p1` through `p6` project entries without deleting files
-from disk. Use **File → Import → General → Existing Projects into Workspace**
-to import the six renamed folders; leave **Copy projects into workspace**
-unchecked. Remove obsolete closed healthcare host entries in the same way.
-Keep `btsn.healthcare.ProjectLoader`, which is still the active healthcare
-launcher project. Run your usual BuildAndRun XML after refreshing the workspace;
-it builds the renamed JARs automatically.
+After pulling this into an existing Eclipse workspace:
 
-Each numbered project's `build.xml` builds only that place. Run its default
-target or select `release` (the `jar` target produces the same portable release):
+- delete the `btsn.rpso.places.p1` to `p6` project entries (the folders are gone
+  from the repository; any left on disk hold only old run output);
+- **File → Import → General → Existing Projects into Workspace**, choose
+  `btsn.rpso.host`, leave **Copy projects into workspace** unchecked.
+
+Build the release with the project's default target (`jar` and `release` do the same):
 
 ```sh
-ant -f btsn.rpso.places.p1/build.xml release
-ant -f btsn.rpso.places.p2/build.xml release
-ant -f btsn.rpso.places.p3/build.xml release
-ant -f btsn.rpso.places.p4/build.xml release
-ant -f btsn.rpso.places.p5/build.xml release
-ant -f btsn.rpso.places.p6/build.xml release
+ant -f btsn.rpso.host/build.xml
 ```
 
-For P1 the outputs are:
+- Executable JAR: `btsn.rpso.host/target/release/btsn.rpso.host/btsn.rpso.host.jar`
+- Portable ZIP: `btsn.rpso.host/target/btsn.rpso.host.zip`
 
-- Executable JAR: `btsn.rpso.places.p1/target/release/btsn.rpso.places.p1/btsn.rpso.places.p1.jar`
-- Portable ZIP: `btsn.rpso.places.p1/target/btsn.rpso.places.p1.zip`
+The release holds the host classes, generic infrastructure, runtime libraries,
+rule and configuration files and launch commands. Business implementations and
+their business/simulation base classes are excluded.
 
-P2–P6 use the corresponding project and filenames. Builds compile shared
-infrastructure into the selected place's own output; they do not invoke another
-place's build or a business-service build. A release contains the selected place's
-classes, generic infrastructure, runtime libraries, rule/configuration files and
-its own launch commands. Business implementations and their business/simulation
-base classes are excluded. Existing handlers are unchanged.
+Copy the ZIP to the destination, extract the **entire ZIP** into a writable folder
+and start it as a node: `launch.bat P3` on Windows or `sh launch.sh P3` on
+Linux/macOS. The script runs the JAR with `-version v001 -node P3`; further
+arguments go to the `ServiceLoader`. Keep the libraries, configuration and
+sibling `btsn.common` directory with the JAR. The destination needs Java 15+,
+not Ant or the source checkout. Set the channel/address mappings for the
+destination before startup.
 
-Copy that place's ZIP to the destination and extract the **entire ZIP** into a
-writable folder. Run `launch.bat` on Windows or `sh launch.sh` on Linux/macOS.
-The launch command selects the correct working directory and runs that place's
-executable JAR with `-version v001`. Arguments supplied to the script are passed
-to the existing loader. Keep the libraries, configuration and sibling
-`btsn.common` directory with the executable JAR. The destination requires Java
-15+; it does not require Ant or the source checkout.
-
-Set the existing channel/address mappings for the destination before startup.
-The service and rule-handler threads start through the unchanged `ServiceLoader`.
-Each ZIP starts one numbered place, never the other numbered places. Business
-service packaging and the separate business-service invocation boundary are not
-implemented by this place-build step.
-
-To check a release, use its own `check-release` target. It extracts that ZIP outside
-the repository into a directory with spaces, checks the manifest and dependency
-paths, rejects business or other-place classes, and starts the executable JAR to
-verify service and rule-handler threads without business implementation JARs.
+`check-release` extracts the ZIP outside the repository into a directory with
+spaces, checks the manifest and dependency paths, rejects business classes, and
+starts the JAR as P1 and as P2 to verify their service and rule-handler threads.

@@ -20,7 +20,7 @@ public final class GeneratorRoleCheck {
         File common = new File(root, "btsn.common");
         File traffic = new File(common, "ProcessDefinitionFolder/petrinet/Workflow/TrafficLight_Workflow.json");
         File tutorial = new File(common, "ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json");
-        File initializer = new File(common, "ProcessDefinitionFolder/common/Initializers/P1_P2_Initialization.json");
+        File initializer = new File(root, "btsn.workflowEditor/tests/fixtures/admin/Initializers/Hosts_Initialization.json"); // as a run generates it
         Throwable[] failure = new Throwable[1];
         SwingUtilities.invokeAndWait(() -> {
             try {

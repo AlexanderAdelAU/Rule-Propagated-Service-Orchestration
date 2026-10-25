@@ -17,7 +17,9 @@
 
 	<!-- COLLECTOR PARAMETERS -->
 	<property name="rule.version" value="v999" />
-	<property name="process.name" value="common/Collectors/TrafficLight_Collector" />
+	<property name="process.name" value="common/Collectors/Hosts_Collector" />
+	<!-- Hosts this file starts; the run generates its initialiser and collector for them -->
+	<property name="hosts" value="P1,P2,P3,P4,P5,P6" />
 	<property name="service.operation" value="collectAllData" />
 	<property name="collection.delay.seconds" value="3" />
 
@@ -115,12 +117,13 @@
 
 	<target name="load-p1-collector" description="Load P1_CollectorService" depends="prepare-runtime">
 		<echo message="Starting P1_CollectorService..." />
+		<prepare-host-folder node="P1"/>
 		<java classname="${service.loader.class}"
 		      fork="true"
-		      dir="${p1.project.dir}"
+		      dir="${launcher.runtime.dir}/P1"
 		      output="${p1.output.file}">
-			<classpath refid="p1.classpath" />
-			<arg value="${p1.project.dir}" />
+			<classpath refid="host.classpath" />
+			<arg value="${launcher.runtime.dir}/P1" /><arg value="-node" /><arg value="P1" />
 			<arg value="-version" />
 			<arg value="${rule.version}" />
 			<arg value="-service" />
@@ -130,12 +133,13 @@
 
 	<target name="load-p2-collector" description="Load P2_CollectorService" depends="prepare-runtime">
 		<echo message="Starting P2_CollectorService..." />
+		<prepare-host-folder node="P2"/>
 		<java classname="${service.loader.class}"
 		      fork="true"
-		      dir="${p2.project.dir}"
+		      dir="${launcher.runtime.dir}/P2"
 		      output="${p2.output.file}">
-			<classpath refid="p2.classpath" />
-			<arg value="${p2.project.dir}" />
+			<classpath refid="host.classpath" />
+			<arg value="${launcher.runtime.dir}/P2" /><arg value="-node" /><arg value="P2" />
 			<arg value="-version" />
 			<arg value="${rule.version}" />
 			<arg value="-service" />
@@ -145,12 +149,13 @@
 
 	<target name="load-p3-collector" description="Load P3_CollectorService" depends="prepare-runtime">
 		<echo message="Starting P3_CollectorService..." />
+		<prepare-host-folder node="P3"/>
 		<java classname="${service.loader.class}"
 		      fork="true"
-		      dir="${p3.project.dir}"
+		      dir="${launcher.runtime.dir}/P3"
 		      output="${p3.output.file}">
-			<classpath refid="p3.classpath" />
-			<arg value="${p3.project.dir}" />
+			<classpath refid="host.classpath" />
+			<arg value="${launcher.runtime.dir}/P3" /><arg value="-node" /><arg value="P3" />
 			<arg value="-version" />
 			<arg value="${rule.version}" />
 			<arg value="-service" />
@@ -160,12 +165,13 @@
 
 	<target name="load-p4-collector" description="Load P4_CollectorService" depends="prepare-runtime">
 		<echo message="Starting P4_CollectorService..." />
+		<prepare-host-folder node="P4"/>
 		<java classname="${service.loader.class}"
 		      fork="true"
-		      dir="${p4.project.dir}"
+		      dir="${launcher.runtime.dir}/P4"
 		      output="${p4.output.file}">
-			<classpath refid="p4.classpath" />
-			<arg value="${p4.project.dir}" />
+			<classpath refid="host.classpath" />
+			<arg value="${launcher.runtime.dir}/P4" /><arg value="-node" /><arg value="P4" />
 			<arg value="-version" />
 			<arg value="${rule.version}" />
 			<arg value="-service" />
@@ -175,12 +181,13 @@
 
 	<target name="load-p5-collector" description="Load P5_CollectorService" depends="prepare-runtime">
 		<echo message="Starting P5_CollectorService..." />
+		<prepare-host-folder node="P5"/>
 		<java classname="${service.loader.class}"
 		      fork="true"
-		      dir="${p5.project.dir}"
+		      dir="${launcher.runtime.dir}/P5"
 		      output="${p5.output.file}">
-			<classpath refid="p5.classpath" />
-			<arg value="${p5.project.dir}" />
+			<classpath refid="host.classpath" />
+			<arg value="${launcher.runtime.dir}/P5" /><arg value="-node" /><arg value="P5" />
 			<arg value="-version" />
 			<arg value="${rule.version}" />
 			<arg value="-service" />
@@ -190,12 +197,13 @@
 
 	<target name="load-p6-collector" description="Load P6_CollectorService" depends="prepare-runtime">
 		<echo message="Starting P6_CollectorService..." />
+		<prepare-host-folder node="P6"/>
 		<java classname="${service.loader.class}"
 		      fork="true"
-		      dir="${p6.project.dir}"
+		      dir="${launcher.runtime.dir}/P6"
 		      output="${p6.output.file}">
-			<classpath refid="p6.classpath" />
-			<arg value="${p6.project.dir}" />
+			<classpath refid="host.classpath" />
+			<arg value="${launcher.runtime.dir}/P6" /><arg value="-node" /><arg value="P6" />
 			<arg value="-version" />
 			<arg value="${rule.version}" />
 			<arg value="-service" />

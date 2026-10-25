@@ -32,7 +32,6 @@ public final class DeployFlowCheck {
         Path scratchCommon = scratch.resolve("btsn.common");
         copy(common.toPath().resolve("BusinessServiceDefinitions"), scratchCommon.resolve("BusinessServiceDefinitions"));
         copy(common.toPath().resolve("InfrastructureDefinitionFolder"), scratchCommon.resolve("InfrastructureDefinitionFolder"));
-        copy(common.toPath().resolve("ProcessDefinitionFolder/common"), scratchCommon.resolve("ProcessDefinitionFolder/common"));
         Files.createDirectories(scratch.resolve("btsn.services/deployments/models"));
         Files.createDirectories(scratch.resolve("btsn.petrinet.ProjectLoader"));
         Files.createDirectories(scratchCommon.resolve("ServiceDeploymentFolder/petrinet"));
@@ -123,8 +122,8 @@ public final class DeployFlowCheck {
                 Files.write(processFile, linked.getBytes(StandardCharsets.UTF_8));
                 BuildAndRunGenerator.Plan plan = BuildAndRunGenerator.plan(canvas, processFile.toFile());
                 check(plan.problems.isEmpty(), "Deployed process not ready for Build and Run: " + plan.problems);
-                check("petrinet/Workflow/TrafficLight_Design".equals(plan.processName) && plan.nodes.size() == 6 && "P1_to_P6".equals(plan.nodeSetName), "Plan: " + plan.processName + plan.nodes);
-                check(plan.initializerExists && plan.collectorExists && !plan.profileExists, "Existing P1_to_P6 admin processes not reused / profile not new");
+                check("petrinet/Workflow/TrafficLight_Design".equals(plan.processName) && plan.nodes.size() == 6, "Plan: " + plan.processName + plan.nodes);
+                check(!plan.profileExists, "Profile not new");
                 String target = canvas.nodeFor(green) + "_Place";
                 check(target.equals(plan.targets.get("TRAFFICLIGHT_EVENTGENERATOR")), "Generator target: " + plan.targets);
                 BuildAndRunDialog dialog = new BuildAndRunDialog(null, plan);
@@ -132,20 +131,19 @@ public final class DeployFlowCheck {
                 File launcher = dialog.createFiles(); dialog.dispose();
                 check(launcher.equals(scratch.resolve("btsn.petrinet.ProjectLoader/TrafficLight_Design_BuildAndRun.xml").toFile()), "Launcher location: " + launcher);
                 String xml = read(launcher.toPath());
-                for (String expected : new String[] {"value=\"petrinet/Workflow/TrafficLight_Design\"", "value=\"common/Initializers/P1_to_P6_Initialization\"",
-                        "name=\"eg1.place\" value=\"" + target + "\"", "name=\"eg1.tokens\" value=\"2\"", "name=\"eg1.join.inputs\" value=\"2\"", "name=\"eg1.id\" value=\"TRAFFICLIGHT_EVENTGENERATOR\"", "name=\"query.version\" value=\"v001\"", "name=\"token.count\" value=\"4\"", "name=\"run.p6\" value=\"true\"",
+                for (String expected : new String[] {"value=\"petrinet/Workflow/TrafficLight_Design\"", "name=\"hosts\" value=\"P1,P2,P3,P4,P5,P6\"",
+                        "name=\"eg1.place\" value=\"" + target + "\"", "name=\"eg1.tokens\" value=\"2\"", "name=\"eg1.join.inputs\" value=\"2\"", "name=\"eg1.id\" value=\"TRAFFICLIGHT_EVENTGENERATOR\"", "name=\"query.version\" value=\"v001\"", "name=\"token.count\" value=\"4\"",
                         "location=\"../btsn.services/deployments/models/TrafficLight_DesignDeployment.json\"", "<import file=\"../btsn.services/process-runtime.xml\"/>"})
                     check(xml.contains(expected), "Launcher lacks " + expected + "\n" + xml);
+                // The run generates the initialiser and collector for its hosts; the launcher names neither, nor run.pN.
+                check(!xml.contains("init.process.name") && !xml.contains("collector.process.name") && !xml.contains("run.p"), "Launcher names admin processes or run.pN\n" + xml);
                 javax.xml.parsers.DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(launcher);
                 check(read(scratch.resolve("btsn.common.eventgenerators/EventTriggeringFile/TrafficLight_Design_BuildAndRun.csv")).equals("0,0,2\n"), "Join token schedule: the traffic light starts at a join, so both inputs fire together");
                 JSONObject profile = (JSONObject)new JSONParser().parse(read(scratch.resolve("btsn.services/deployments/models/TrafficLight_DesignDeployment.json")));
                 check("ServiceDeploymentFolder/petrinet/TrafficLight_Design.json".equals(profile.get("serviceDeployment"))
-                    && "BusinessServiceDefinitions/petrinet/PetriNetModels.json".equals(profile.get("catalog")), "Profile: " + profile);
-                // A host set without admin processes gets a generated initialiser and collector.
-                JSONObject collector = (JSONObject)new JSONParser().parse(BuildAndRunGenerator.adminProcess(Arrays.asList("P3", "P5"), false, "P3_P5"));
-                JSONObject initializer = (JSONObject)new JSONParser().parse(BuildAndRunGenerator.adminProcess(Arrays.asList("P3", "P5"), true, "P3_P5"));
-                check(collector.toJSONString().contains("P5_CollectorService") && collector.toJSONString().contains("writeCollectorData")
-                    && initializer.toJSONString().contains("P3_InitializationService") && initializer.toJSONString().contains("Monitor_InitializationService"), "Generated admin processes");
+                    && "BusinessServiceDefinitions/petrinet/PetriNetModels.json".equals(profile.get("catalog"))
+                    && ((java.util.List<?>)profile.get("directServiceRules")).contains("RuleBase/Generated/HostAdministration.ruleml.xml"), "Profile: " + profile);
+                check(BuildAndRunGenerator.isHost("P7") && BuildAndRunGenerator.isHost("P42") && !BuildAndRunGenerator.isHost("P0") && !BuildAndRunGenerator.isHost("Monitor"), "Host node names");
                 // A join whose operation names fewer than two inputs is reported, not guessed.
                 Canvas oneInput = new Canvas(); oneInput.setDefinitionLocation(processFile.toFile()); oneInput.loadFromJSON(linked);
                 for (ProcessElement place : oneInput.getPlaces())
@@ -247,7 +245,7 @@ public final class DeployFlowCheck {
                 for (int c = 0; c < table.getColumnCount(); c++) endpointColumn |= "Service endpoint".equals(table.getColumnName(c));
                 check(endpointColumn, "No Service endpoint column");
                 check("192.168.1.82:4001".equals(table.getValueAt(0, 2)), "Credit host address: " + table.getValueAt(0, 2));
-                check(!((JTable)field(panel, "nodeNetworkTable")).isShowing(), "Physical node network still shown when deploying a process");
+                check(!((JTable)field(panel, "nodeNetworkTable")).isShowing(), "Hosts table still shown when deploying a process");
                 for (AbstractButton b : buttons(panel.getContentPane()))
                     if (b.getText().endsWith("capability")) check(!b.isVisible(), b.getText() + " offered when deploying a process");
                 panel.dispose(); panel = null;
@@ -313,7 +311,7 @@ public final class DeployFlowCheck {
                 String edXml = BuildAndRunGenerator.launcherXml(edPlan, edPlan.defaults);
                 for (String expected : new String[] {"name=\"token.generator.class\" value=\"org.btsn.healthcare.eventgenerators.GenericHealthcareTokenGenerator\"",
                         "name=\"eg1.id\" value=\"PATIENT_ARRIVAL\"", "name=\"eg1.place\" value=\"P1_Place\"", "name=\"eg1.operation\" value=\"processTriageAssessment\"",
-                        "name=\"eg1.format.service\" value=\"TriageService\"", "location=\"../btsn.services/deployments/healthcare/Deployment.json\"", "name=\"run.p6\" value=\"true\""})
+                        "name=\"eg1.format.service\" value=\"TriageService\"", "location=\"../btsn.services/deployments/healthcare/Deployment.json\"", "name=\"hosts\" value=\"P1,P2,P3,P4,P5,P6\""})
                     check(edXml.contains(expected), "Healthcare launcher lacks " + expected + "\n" + edXml);
                 // A join names one input for each arc arriving at it; the supplied joins do, and a missing one is reported on Validate and Save.
                 check(ed.validateServiceContracts().isEmpty(), "Emergency Department joins reported: " + ed.validateServiceContracts());

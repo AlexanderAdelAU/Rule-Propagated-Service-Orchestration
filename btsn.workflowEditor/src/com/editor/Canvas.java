@@ -3224,7 +3224,7 @@ public class Canvas extends JPanel {
     }
     /** Why an initialiser or collector is not deployed or built on its own. */
     public static final String ADMINISTRATIVE = "This is an initialiser or collector: its places run the hosts' own initialisation and collection services, "
-        + "not catalogue services, and every launcher runs it alongside the process. It is not deployed or built on its own.";
+        + "not catalogue services, and each run generates one for its hosts. It is not deployed or built on its own.";
 
     /**
      * What an event generator does, worked out from its one arc. Into an ordinary T_in it issues arrivals: one token

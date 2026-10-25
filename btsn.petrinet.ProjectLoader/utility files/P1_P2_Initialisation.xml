@@ -28,7 +28,9 @@
     <property name="sequence.id.p2" value="999100000" />
     <property name="sequence.id.monitor" value="999600000" />
     <property name="db.init.operation" value="purgeAndInitialize" />
-    <property name="process.name" value="common/Initializers/P1_P2_Initialization" />
+    <property name="process.name" value="common/Initializers/Hosts_Initialization" />
+    <!-- Hosts this file starts; the run generates its initialiser and collector for them -->
+    <property name="hosts" value="P1,P2" />
 
     <!-- Timing -->
     <property name="port.release.seconds" value="5" />
@@ -78,12 +80,13 @@
 
     <target name="load-p1-init-service" description="Load P1_InitializationService" depends="prepare-runtime">
         <echo message="Starting P1_InitializationService..." />
+        <prepare-host-folder node="P1"/>
         <java classname="${service.loader.class}"
               fork="true"
-              dir="${p1.project.dir}"
+              dir="${launcher.runtime.dir}/P1"
               output="${p1.init.output.file}">
-            <classpath refid="p1.classpath" />
-            <arg value="${p1.project.dir}" />
+            <classpath refid="host.classpath" />
+            <arg value="${launcher.runtime.dir}/P1" /><arg value="-node" /><arg value="P1" />
             <arg value="-version" />
             <arg value="${rule.version}" />
             <arg value="-service" />
@@ -93,12 +96,13 @@
 
     <target name="load-p2-init-service" description="Load P2_InitializationService" depends="prepare-runtime">
         <echo message="Starting P2_InitializationService..." />
+        <prepare-host-folder node="P2"/>
         <java classname="${service.loader.class}"
               fork="true"
-              dir="${p2.project.dir}"
+              dir="${launcher.runtime.dir}/P2"
               output="${p2.init.output.file}">
-            <classpath refid="p2.classpath" />
-            <arg value="${p2.project.dir}" />
+            <classpath refid="host.classpath" />
+            <arg value="${launcher.runtime.dir}/P2" /><arg value="-node" /><arg value="P2" />
             <arg value="-service" />
             <arg value="P2_InitializationService" />
             <arg value="-version" />

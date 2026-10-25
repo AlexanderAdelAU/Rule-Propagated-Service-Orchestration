@@ -2,15 +2,15 @@
 
 This is the build-support project for independent business-service JARs and the
 generic host/workflow launchers. It contains no business-service implementations
-or execution handlers. Implementations remain in `btsn.common`; the numbered
-places remain the runtime hosts. Its default build packages the business JARs.
+or execution handlers. Implementations remain in `btsn.common`; `btsn.rpso.host`
+is the runtime host, run once for each node. Its default build packages the business JARs.
 Host and workflow builds are optional targets.
 
-This module builds service implementations independently of the generic P1–P6
-hosts. P1–P6 `build.xml` files now import the same generic host build; handlers
-and `ServiceThread` are unchanged.
+This module builds service implementations independently of the host.
+`btsn.rpso.host/build.xml` imports the shared host build; every node (P1, P2, ...)
+runs that one JAR, started with `-node Pn`.
 Service identity and host placement remain separate: none of the generated service
-JARs belongs to a numbered host.
+JARs belongs to a host.
 
 ## Organisation
 
@@ -52,8 +52,8 @@ To build and check the actual host JARs and their service classpaths:
 ant -f btsn.services/build.xml check-hosts
 ```
 
-This builds all six hosts, shared infrastructure, Monitor and event generators.
-Each host passes the existing 108 invocation checks with its own packaged
+This builds the host, shared infrastructure, Monitor and event generators.
+The host passes the invocation checks as P1 to P7 with its packaged
 `ServiceHelper`, and the origin check verifies that every implementation and
 shared service helper loads exactly once from the deployed service JARs.
 

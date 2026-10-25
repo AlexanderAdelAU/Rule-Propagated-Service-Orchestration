@@ -52,6 +52,8 @@ public final class GuardEditingCheck {
 
         // OTHERWISE: the arc a T_out takes when no other guard matches. It takes no value, and Validate accepts it on a gateway.
         Arrow referred = arcs.get("T_out_Credit>Referred");
+        // Choosing (none) above redraws the panel later, on the event thread; let it finish so it cannot replace this selection.
+        SwingUtilities.invokeAndWait(() -> { });
         panel.updateSelection(referred);
         condition = combo(panel, "DECISION_EQUAL_TO");
         condition.setSelectedItem(GuardEditing.OTHERWISE);

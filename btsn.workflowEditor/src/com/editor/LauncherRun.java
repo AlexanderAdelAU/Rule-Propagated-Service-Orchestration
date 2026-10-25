@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
  * Runs a BuildAndRun launcher from the editor, start to replay:
  * <ol>
  *   <li>runs the launcher's default target with Ant and reports its output and phases;</li>
- *   <li>after the launcher's last line ("Services are still running") waits until Monitor's database stops changing, then stops
+ *   <li>after the launcher's last line ("RUN FINISHED", once Monitor has stored the collected records) waits until Monitor's database stays unchanged, then stops
  *       the launcher and every host it started (the whole process tree);</li>
  *   <li>runs the launcher's analyse target and saves its output as the run's analysis file.</li>
  * </ol>
@@ -130,7 +130,7 @@ public final class LauncherRun {
                 Phase phase = phaseOf(line, current);
                 if (phase != null && phase != current) { current = phase; listener.phase(phase, line.trim()); }
                 // The launcher's last line; earlier steps also print "... COMPLETED SUCCESSFULLY".
-                if (line.contains("Services are still running")) { completed = true; break; }
+                if (line.contains("RUN FINISHED") || line.contains("Services are still running")) { completed = true; break; }
                 if (line.startsWith("BUILD FAILED")) break;
             }
         }
@@ -156,7 +156,7 @@ public final class LauncherRun {
             try (BufferedReader out = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
                 for (String line; (line = out.readLine()) != null; ) {
                     listener.line(line);
-                    java.util.regex.Matcher zip = java.util.regex.Pattern.compile("((?:P\\d)+): (.+\\.zip)\\s+\\(copy to (\\S+)").matcher(line);
+                    java.util.regex.Matcher zip = java.util.regex.Pattern.compile("((?:P\\d+)+): (.+\\.zip)\\s+\\(copy to (\\S+)").matcher(line);
                     if (zip.find()) zips.add(zip.group(1) + " for " + zip.group(3) + ": " + zip.group(2));
                     if (line.contains("nothing to package")) none = true;
                 }

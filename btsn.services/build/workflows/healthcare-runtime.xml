@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="healthcare-jar-runtime-support" default="prepare-runtime" basedir="../..">
-    <description>Build support for healthcare workflows on the generic PN hosts.</description>
+    <description>Build support for healthcare workflows on the generic host (btsn.rpso.host).</description>
     <property name="host.address" value=""/>
     <property name="source.root" location=".."/>
     <property name="services.project.dir" location="${source.root}/btsn.services"/>
@@ -52,12 +52,10 @@
         <java classname="org.btsn.deployment.GenerateDeploymentRules" fork="true" failonerror="true" dir="${common.project.dir}">
             <classpath refid="healthcare.dependencies"/><arg file="${common.project.dir}"/><arg value="${host.address}"/>
         </java>
-        <copy-healthcare-component directory="btsn.rpso.places.p1"/>
-        <copy-healthcare-component directory="btsn.rpso.places.p2"/>
-        <copy-healthcare-component directory="btsn.rpso.places.p3"/>
-        <copy-healthcare-component directory="btsn.rpso.places.p4"/>
-        <copy-healthcare-component directory="btsn.rpso.places.p5"/>
-        <copy-healthcare-component directory="btsn.rpso.places.p6"/>
+        <!-- The initialiser and collector for the importing file's hosts (hosts=P1,...). -->
+        <java classname="org.btsn.deployment.HostAdministration" fork="true" failonerror="true" classpathref="healthcare.dependencies">
+            <arg value="processes"/><arg file="${common.project.dir}"/><arg value="${hosts}"/>
+        </java>
         <copy-healthcare-component directory="btsn.common.eventgenerators"/>
         <copy file="${source.root}/btsn.common.eventgenerators/PayLoad/payload.xml" tofile="${generator.project.dir}/Payload/payLoad.xml"/>
         <build-healthcare-master version="${rule.version}"/>

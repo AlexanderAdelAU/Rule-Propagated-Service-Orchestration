@@ -375,8 +375,12 @@ public class WorkflowSpatialView extends JPanel {
             System.out.println("Places found: " + places);
             System.out.println("Workflows found: " + workflows);
             
-            // Order places logically (P1 → P2 → P3 → P4 → P5 → Monitor)
-            String[] preferredOrder = {"P1_Place", "P2_Place", "P3_Place", "P4_Place", "P5_Place", "P6_Place", "MonitorService", "TERMINATE"};
+            // Order places logically: host places by node number (P1, P2, ... P7, ...), then Monitor and TERMINATE
+            java.util.List<String> preferredOrder = new ArrayList<>();
+            for (String p : places) if (p.matches("P\\d+_Place")) preferredOrder.add(p);
+            preferredOrder.sort(Comparator.comparingInt(p -> Integer.parseInt(p.substring(1, p.indexOf('_')))));
+            preferredOrder.add("MonitorService");
+            preferredOrder.add("TERMINATE");
             for (String p : preferredOrder) {
                 if (places.contains(p)) {
                     placeOrder.add(p);

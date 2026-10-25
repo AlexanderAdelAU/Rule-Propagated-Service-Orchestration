@@ -445,7 +445,8 @@ The process must be saved under `ProcessDefinitionFolder/<domain>/`:
 
 ## 2. Deploy the process
 
-Deploying decides which **node** (physical host) each place runs on. Each node is one numbered generic host, P1 to P6.
+Deploying decides which **node** (physical host) each place runs on. A node is one of the hosts the infrastructure
+definition names (P1, P2, ...). Every node runs the same host program, `btsn.rpso.host`, started as that node.
 
 Save the process first: its folder decides its catalogue and where the deployment is saved.
 If it is unsaved or has changes, **Deploy** asks you to save it before the panel opens.
@@ -490,6 +491,23 @@ The nodes you can choose come from
 - To change the nodes themselves, choose **File → Open → Infrastructure Definition...**.
 - For a run on one computer you do not need to edit the address; [step 4](#4-run-it) overrides it.
 
+### Add a host
+
+More places do not need more hosts: a node runs one place operation for each of its fixed base ports, so give a
+node another port (P4 and P6 have two) and deploy the extra place to it. A new host is for a process that needs more nodes, or
+another machine.
+
+1. Choose **File → Open → Infrastructure Definition...**, open the definition (`SingleHost.json`) and click **Add host**.
+   It adds the next node, `P7`, on the first machine with the first free port (`4009` here, as P4 and P6 use 4007 and 4008).
+   Change its channel and address if it runs on another machine, then save.
+2. Deploy places to `P7` as to any node, and save the deployment and the process.
+3. **Build** writes `hosts` with P7 in it (`<property name="hosts" value="P1,P7"/>`). The run starts the
+   host program as P7 in its own folder, initialises its database, and collects its records into Monitor.
+
+Nothing is copied or registered: P7's initialisation and collector services (ports `4106` and `4306`) and the run's
+initialiser and collector processes are generated from the node's name. Hosts are named `P1` to `P99`, and ports
+4100–4198 and 4300–4398 are kept for those services.
+
 ### Save the deployment, then the process
 
 1. In the panel, click **Save deployment...**. It suggests
@@ -513,7 +531,7 @@ to generate here.
 Click **Build and Run** in the toolbar. The editor first checks that:
 
 - the process and its deployment are both saved;
-- every place is deployed on one of P1–P6;
+- every place is deployed on a host node (P1, P2, ...);
 - an event generator feeds a deployed place through a `T_in` transition.
 
 It lists anything missing. When the deployment profile names a token generator
@@ -553,9 +571,9 @@ Click **Create**. For `My_P2_Workflow` the editor writes:
 | `btsn.petrinet.ProjectLoader/My_P2_Workflow_BuildAndRun.xml` | The launcher: your choices as properties, plus an import of the shared run phases |
 | `btsn.services/deployments/models/My_P2_WorkflowDeployment.json` | Deployment profile: catalogue, infrastructure and your service deployment. An existing profile for the same deployment is reused. |
 | `btsn.common.eventgenerators/EventTriggeringFile/My_P2_Workflow_BuildAndRun.csv` | Token schedule, one `time_ms,0,1` row per token. With several generators, each gets its own file, named after it (for example `..._BuildAndRun_EG6.csv`). |
-| `ProcessDefinitionFolder/common/Initializers/P2_Initialization.json` | Resets the hosts and Monitor. Reused when it exists; written for a new set of nodes (for example `P3_P5_Initialization`). |
-| `ProcessDefinitionFolder/common/Collectors/P2_Collector.json` | Collects the observations into Monitor. Reused or written the same way. |
 
+- The launcher lists its hosts (`<property name="hosts" value="P2"/>`). Each run generates the initialiser
+  (which resets those hosts and Monitor) and the collector (which gathers their observations into Monitor).
 - The launcher is about 25 lines; the supplied [`P2_Tutorial_Workflow_BuildAndRun.xml`](btsn.petrinet.ProjectLoader/P2_Tutorial_Workflow_BuildAndRun.xml) is an example.
 - The run phases live in
   [`btsn.services/process-runtime.xml`](btsn.services/process-runtime.xml).
@@ -636,17 +654,19 @@ The default target `run-complete-workflow` does everything:
 
 | Phase | What happens | Definition used |
 |---|---|---|
-| 1 — Database initialization | Reset P2 and Monitor (administrative version `v999`) | `common/Initializers/P2_Initialization` |
+| 1 — Database initialization | Reset P2 and Monitor (administrative version `v999`) | `common/Initializers/Hosts_Initialization`, generated for the run's hosts |
 | 2 — Workflow execution | Generate the rules for P2 and send them as `v001`. P2 commits to them (a confirmation per version), and only then are the tokens fired from EG11 | `petrinet/Workflow/My_P2_Workflow` |
-| 3 — Data collection | Request P2's observations and write them to Monitor | `common/Collectors/P2_Collector` |
+| 3 — Data collection | Request P2's observations and write them to Monitor | `common/Collectors/Hosts_Collector`, generated for the run's hosts |
 
 ### Stop it when collection finishes
 
-The console ends with `... COMPLETED SUCCESSFULLY` and
-`Services are still running. Press Ctrl+C to stop.`
+After the collection requests the console says
+`Collection requests sent; waiting for Monitor to store the hosts' records - keep the run going...`.
+Leave it running: the launcher waits until Monitor's database stops changing. It then ends with
+`... COMPLETED SUCCESSFULLY` and `RUN FINISHED: every phase is done and Monitor holds the collected records.`
 
-1. Allow Monitor a few seconds to finish writing.
-2. Stop the run with Eclipse's red **Terminate** button, or **Ctrl+C** in the terminal. This releases the Monitor database for the analyser and viewers.
+Only then stop the run, with Eclipse's red **Terminate** button or **Ctrl+C** in the terminal. This stops the hosts
+and releases the Monitor database for the analyser and viewers. (**Run on hosts** in the editor does this for you.)
 
 Host logs go to `P2_Place.out.txt` and `MonitorService.out.txt` beside the
 launcher. The collected data is in `btsn.common.Monitor/ServiceAnalysisDataBase`.
@@ -746,7 +766,7 @@ ant -f btsn.petrinet.ProjectLoader/P1_Tutorial_Local_BuildAndRun.xml export-tuto
 
 | Observation | Check |
 |---|---|
-| Build and Run lists problems | Save the process and the deployment; deploy every place on P1–P6, each on its own node; connect the generator to a `T_in` |
+| Build and Run lists problems | Save the process and the deployment; deploy every place on a host node (P1, P2, ...), each on its own node; connect the generator to a `T_in` |
 | The Deploy panel's node table is empty | Start ProcessEditor with `btsn.workflowEditor` as its working directory |
 | A host or Monitor was skipped at startup | Add `-Dhost.address=127.0.0.1`, or start that host on its configured machine |
 | Derby reports another active instance | Stop the previous run, and any viewer holding the database, before analysing |
@@ -1354,7 +1374,7 @@ check from Node.js this way, on the same machine or [hosted on the internet](Ser
 | Process model | Places, transitions, fork/join structure, guards and termination | `btsn.common/ProcessDefinitionFolder` |
 | Service contract | Logical service identity, operations, named inputs and returned attribute; each domain's catalogue plus the standard services every process may use | `BusinessServiceDefinitions`, `ServiceAttributeBindings` in `btsn.common` |
 | Deployment | Map capabilities to implementation classes or REST endpoints, hosts and channels | [Physical infrastructure](btsn.common/InfrastructureDefinitionFolder/README.md), [service deployments](btsn.common/ServiceDeploymentFolder/README.md) and `btsn.services/deployments/{healthcare,financial,models}` |
-| Generic execution fabric | Transport, buffering, synchronization, version selection, invocation and publication | `btsn.rpso.places.p1`–`p6`, shared infrastructure |
+| Generic execution fabric | Transport, buffering, synchronization, version selection, invocation and publication | `btsn.rpso.host` (run once per node), shared infrastructure |
 | Business computation | Domain objects, calculations and routing values | Here `btsn.common/src/org/btsn/business`, packaged as independent service JARs and called by reflection; any implementation that honours the binding would do |
 | Observation | Collect records, reconstruct workflow families and display measurements | `btsn.common.Monitor` |
 
@@ -1507,7 +1527,7 @@ provide entry points for preparing the packaged runtime.
 |---|---|
 | `btsn.common` | Shared source, business implementations, contracts, physical infrastructure, service deployments, process definitions and rules |
 | `btsn.services` | Service packaging, shared Ant builds, deployment profiles and checks |
-| `btsn.rpso.places.p1`–`p6` | Generic numbered orchestration hosts |
+| `btsn.rpso.host` | The orchestration host: one program that each node (P1, P2, ...) runs, started with `-node Pn` |
 | `btsn.common.Monitor` | Collection, reconstruction and visualization |
 | `btsn.common.eventgenerators` | Shared workflow and administration generators |
 | `btsn.healthcare.ProjectLoader` | Healthcare launchers and process tests |
@@ -1551,10 +1571,10 @@ For packaging/checks without starting a workflow:
 ant -f btsn.services/build.xml check
 ```
 
-For a portable numbered-host JAR and ZIP:
+For a portable host JAR and ZIP (start it as a node: `launch.bat P3`):
 
 ```sh
-ant -f btsn.rpso.places.p1/build.xml
+ant -f btsn.rpso.host/build.xml
 ```
 
 See [shared build support](btsn.services/README.md),
@@ -1587,11 +1607,11 @@ The supplied P2 example of [Each step in detail](#each-step-in-detail), built wi
 | [P2_Tutorial_Workflow.json](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P2_Tutorial_Workflow.json) | Process design, linked to its deployment |
 | [P2_Tutorial.json](btsn.common/ServiceDeploymentFolder/petrinet/P2_Tutorial.json) | Service deployment: P2 on node P2, linked to its catalogue |
 | [PetriNetModels.json](btsn.common/BusinessServiceDefinitions/petrinet/PetriNetModels.json) | Petri-net service catalogue (`StochasticService`) |
-| [SingleHost.json](btsn.common/InfrastructureDefinitionFolder/SingleHost.json) | Shared nodes P1–P6, addresses and fixed ports |
+| [SingleHost.json](btsn.common/InfrastructureDefinitionFolder/SingleHost.json) | Shared nodes (P1–P6 as supplied), addresses and fixed ports |
 | [P2_Tutorial_WorkflowDeployment.json](btsn.services/deployments/models/P2_Tutorial_WorkflowDeployment.json) | Deployment profile written by Build and Run |
 | [P2_Tutorial_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P2_Tutorial_Workflow_BuildAndRun.xml) | Launcher written by Build and Run |
 | [`P2_Tutorial_Workflow_BuildAndRun*.csv`](btsn.common.eventgenerators/EventTriggeringFile) | Token schedules, one per event generator |
-| [P2_Initialization.json](btsn.common/ProcessDefinitionFolder/common/Initializers/P2_Initialization.json) / [P2_Collector.json](btsn.common/ProcessDefinitionFolder/common/Collectors/P2_Collector.json) | Administrative processes for node P2 |
+| `Hosts_Initialization.json` / `Hosts_Collector.json` | Administrative processes, generated into the run's own `btsn.common` for its hosts |
 | [Analysis_P2_Tutorial_Workflow.txt](btsn.common/AnalysisFolder/PetriNet/Analysis_P2_Tutorial_Workflow.txt) | Analysis of a ten-token run, ready to replay |
 | [process-runtime.xml](btsn.services/process-runtime.xml) | Shared phases imported by every generated launcher |
 

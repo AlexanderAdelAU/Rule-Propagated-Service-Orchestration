@@ -7,8 +7,6 @@
     <property name="process.title" value="Two concurrent workflows on P1-P4: fork/join (v001) and its P1-P2 companion (v002)"/>
     <property name="launcher.profile.file" location="../btsn.services/deployments/models/ForkDeployment.json"/>
     <property name="workflow.process.name" value="petrinet/Workflow/P1_P2_P3_P4_Fork_Join_Workflow"/>
-    <property name="init.process.name" value="common/Initializers/P1_P2_P3_P4_Initialization"/>
-    <property name="collector.process.name" value="common/Collectors/P1_P2_P3_P4_Collector"/>
     <property name="rule.version" value="v001"/>
     <property name="query.version" value="v001,v002"/>
 
@@ -28,12 +26,8 @@
     <property name="token.count" value="10"/>
     <property name="workflow.completion.seconds" value="5"/>
 
-    <!-- Hosts used by the service deployment -->
-    <property name="run.p1" value="true"/>
-    <property name="run.p2" value="true"/>
-    <property name="run.p3" value="true"/>
-    <property name="run.p4" value="true"/>
-    <property name="first.node" value="p1"/>
+    <!-- Hosts used by the service deployment: nodes of the infrastructure, each running the host program -->
+    <property name="hosts" value="P1,P2,P3,P4"/>
 
     <import file="../btsn.services/process-runtime.xml"/>
 </project>

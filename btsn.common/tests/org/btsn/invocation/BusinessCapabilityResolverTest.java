@@ -79,16 +79,10 @@ public final class BusinessCapabilityResolverTest {
             equal(initializer, resolver.resolve(initializer, "purgeAndInitialize", "token", 1, "v999"));
             equal(collector, resolver.resolve(collector, "collectAllData", "token", 1, "v999"));
         }
-        // Isolated checks exclude all placeholders. A packaged-host check may
-        // contain its own inert placeholder, which still supplies no operations.
-        for (int i = 1; i <= 6; i++) {
+        // A node's places have no class of their own: the host invokes business implementations only.
+        for (int i = 1; i <= 7; i++) {
             final String placeholder = "org.btsn.places.P" + i + "_Place";
-            if (args.length > 1 && placeholder.equals(args[1])) {
-                Class<?> type = Class.forName(placeholder);
-                equal(true, type.getSuperclass() == Object.class && type.getDeclaredMethods().length == 0);
-            } else {
-                rejects(() -> Class.forName(placeholder), placeholder);
-            }
+            rejects(() -> Class.forName(placeholder), placeholder);
         }
         verifyBusinessResults();
         verifyMetadataFailures();
@@ -178,7 +172,7 @@ public final class BusinessCapabilityResolverTest {
     private static void verifyGenericHosts() throws Exception {
         String originalCommon = System.getProperty("btsn.common.dir");
         try {
-            for (int i = 1; i <= 6; i++) {
+            for (int i = 1; i <= 7; i++) { // P7 too: every node runs the same host
                 String runtime = "P" + i + "_Place";
                 Path metadata = hostFixture(runtime, "echo", "result", "payload", EchoService.class.getName());
                 System.setProperty("btsn.common.dir", metadata.toString());

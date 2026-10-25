@@ -21,7 +21,7 @@ import org.json.simple.JSONObject;
 
 /**
  * Lays out everything one machine needs to run its hosts, which reach the rest of the deployment only
- * through UDP: the host JARs and their libraries, the business service JARs placed on those nodes (kept as
+ * through UDP: the host JAR (one program that every node runs) and its libraries, the business service JARs placed on those nodes (kept as
  * separate JARs, outside the host JARs), the master ruleset and bindings generated for this deployment (the
  * same files the local hosts read), each host's own configuration, and launch scripts.
  *
@@ -36,6 +36,8 @@ public final class HostPackage {
     /** Folders of the launcher's generated btsn.common that a host reads (rules, bindings, contracts, placement). */
     static final String[] COMMON_FOLDERS = {"RuleBase", "RulePayLoad", "ServiceAttributeBindings", "BusinessServiceDefinitions",
         "ProcessDefinitionFolder", "InfrastructureDefinitionFolder", "ServiceDeploymentFolder", "PayLoad"};
+    /** The host program's project: one JAR that every node runs, started with -node Pn. */
+    static final String HOST_PROJECT = "btsn.rpso.host";
     /** A host's own configuration folders, as the launcher copies them for local hosts. */
     static final String[] HOST_FOLDERS = {"ServiceLoaderQueries", "resources", "PayLoad", "TokenFormats", "EventTriggeringFile"};
 
@@ -66,7 +68,7 @@ public final class HostPackage {
         Map<String, List<String>> byAddress = new java.util.LinkedHashMap<>();
         for (String name : nodeNames) {
             String node = name.toUpperCase(Locale.ROOT);
-            require(node.matches("P\\d+"), "Host node is P1 ... P6: " + name);
+            require(HostAdministration.isHost(node), "A host node is named P1 ... P" + HostAdministration.MAX_NODE + ": " + name);
             byAddress.computeIfAbsent(DeploymentConfiguration.text(config.node(node), "address"), k -> new ArrayList<>()).add(node);
         }
         // Keep the folder and replace what is in it, so an Explorer window open on it shows the new packages.
@@ -112,15 +114,15 @@ public final class HostPackage {
             JSONObject physical = config.node(node);
             require(address.equals(DeploymentConfiguration.text(physical, "address")), node + " is not on " + address);
             channels.put(node, DeploymentConfiguration.text(physical, "channel"));
-            String hostProject = "btsn.rpso.places." + node.toLowerCase(Locale.ROOT);
+            // Every node runs the one host program, each in a working folder named after it (P3), beside btsn.common.
+            String hostProject = node;
             hostProjects.put(node, hostProject);
-            Path hostJar = source.resolve(hostProject).resolve("target").resolve(hostProject + ".jar");
+            Path hostJar = source.resolve(HOST_PROJECT).resolve("target").resolve(HOST_PROJECT + ".jar");
             require(Files.isRegularFile(hostJar), "Host JAR not built: " + hostJar);
-            // The host's working folder.
             Path work = pkg.resolve(hostProject);
             Files.createDirectories(work);
-            for (String folder : HOST_FOLDERS) copyTree(source.resolve(hostProject).resolve(folder), work.resolve(folder));
-            require(Files.isDirectory(work.resolve("ServiceLoaderQueries")), "No ServiceLoaderQueries for " + hostProject);
+            for (String folder : HOST_FOLDERS) copyTree(source.resolve(HOST_PROJECT).resolve(folder), work.resolve(folder));
+            require(Files.isDirectory(work.resolve("ServiceLoaderQueries")), "No ServiceLoaderQueries in " + HOST_PROJECT);
 
             // Class path, in the order the local launcher uses: infrastructure, libraries, service libraries, services, host.
             List<String> classpath = new ArrayList<>();
@@ -212,13 +214,13 @@ public final class HostPackage {
         }
         String log = node + "_Place.out.txt";
         Files.writeString(pkg.resolve("launch-" + node + ".sh"), "#!/bin/sh\n"
-            + "# Starts " + node + " (" + hostProject + ") with the rules and services packaged beside it. Extra arguments go to the ServiceLoader.\n"
+            + "# Starts the host as " + node + " with the rules and services packaged beside it. Extra arguments go to the ServiceLoader.\n"
             + "cd \"$(dirname \"$0\")/" + hostProject + "\" || exit 1\n"
-            + "exec java -cp \"" + unix + "\" org.btsn.handlers.ServiceLoader . -version " + version + " \"$@\"\n");
+            + "exec java -cp \"" + unix + "\" org.btsn.handlers.ServiceLoader . -version " + version + " -node " + node + " \"$@\"\n");
         Files.writeString(pkg.resolve("launch-" + node + ".bat"), ("@echo off\n"
-            + "rem Starts " + node + " (" + hostProject + ") with the rules and services packaged beside it. Extra arguments go to the ServiceLoader.\n"
+            + "rem Starts the host as " + node + " with the rules and services packaged beside it. Extra arguments go to the ServiceLoader.\n"
             + "cd /d \"%~dp0" + hostProject + "\"\n"
-            + "java -cp \"" + windows + "\" org.btsn.handlers.ServiceLoader . -version " + version + " %*\n").replace("\n", "\r\n"));
+            + "java -cp \"" + windows + "\" org.btsn.handlers.ServiceLoader . -version " + version + " -node " + node + " %*\n").replace("\n", "\r\n"));
         Files.writeString(pkg.resolve("launch-to-file-" + node + ".sh"), "#!/bin/sh\n"
             + "# Starts " + node + " as launch-" + node + ".sh does, writing everything it prints to " + log + ".\n"
             + "out=\"$(cd \"$(dirname \"$0\")\" && pwd)/" + log + "\"\n"
@@ -325,7 +327,7 @@ public final class HostPackage {
          .append("Contents\n");
         for (String node : nodes) r.append("  ").append(String.format("%-29s", hostProjects.get(node) + "/")).append(node).append("'s working folder (service queries, logging, payload)\n");
         r.append("  btsn.common/                 master ruleset, bindings, contracts and deployment, generated by the launcher\n")
-         .append("  jars/host/                   host and shared infrastructure JARs (no business classes)\n")
+         .append("  jars/host/                   the host JAR every node runs, and shared infrastructure (no business classes)\n")
          .append("  jars/lib/, jars/service-lib/ runtime libraries\n")
          .append("  jars/services/               the business services placed on ").append(all).append(", as separate JARs\n");
         Files.writeString(pkg.resolve("README.txt"), r.toString());

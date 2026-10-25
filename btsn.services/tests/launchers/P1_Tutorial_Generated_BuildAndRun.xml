@@ -7,8 +7,6 @@
     <property name="process.title" value="petrinet/Workflow/P1_Tutorial_Workflow"/>
     <property name="launcher.profile.file" location="../../deployments/models/P1_Tutorial_LocalDeployment.json"/>
     <property name="workflow.process.name" value="petrinet/Workflow/P1_Tutorial_Workflow"/>
-    <property name="init.process.name" value="common/Initializers/P1_Initialization"/>
-    <property name="collector.process.name" value="common/Collectors/P1_Collector"/>
     <property name="rule.version" value="v001"/>
 
     <!-- Tokens: event generator, target place and schedule -->
@@ -19,9 +17,8 @@
     <property name="trigger.file" location="../../../btsn.common.eventgenerators/EventTriggeringFile/P1_Tutorial_Generated_BuildAndRun.csv"/>
     <property name="workflow.completion.seconds" value="10"/>
 
-    <!-- Hosts used by the service deployment -->
-    <property name="run.p1" value="true"/>
-    <property name="first.node" value="p1"/>
+    <!-- Hosts used by the service deployment: nodes of the infrastructure, each running the host program -->
+    <property name="hosts" value="P1"/>
 
     <import file="../../process-runtime.xml"/>
 </project>

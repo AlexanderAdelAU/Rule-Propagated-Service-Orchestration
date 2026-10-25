@@ -117,9 +117,10 @@ catalogue. `check-launchers` fails if a launcher's business process lacks the
 reference, or if its deployment does not name an existing catalogue, and checks
 each process against a profile that selects its own deployment.
 
-Initializers and collectors under `ProcessDefinitionFolder/common` (and the
-labelled healthcare copies) call host administration services, not catalogue
-services, so they carry no service deployment.
+Each run generates its own initializer and collector for the hosts it uses
+(`common/Initializers/Hosts_Initialization` and `common/Collectors/Hosts_Collector`
+in the run's copy of `btsn.common`). They call host administration services, not
+catalogue services, so they carry no service deployment.
 
 Unknown operations, mismatched inputs/results and incompatible adapters block
 binding generation and deployment preparation. Process service-contract errors

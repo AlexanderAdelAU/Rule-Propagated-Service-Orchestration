@@ -46,7 +46,7 @@ public final class HostPackageCheck {
         System.out.println("PASS: " + checks + " host package checks");
     }
 
-    /** A distributed infrastructure moves Pn's initialisation and collector services to Pn's channel; a single host changes nothing. */
+    /** Each node's initialisation and collector services are generated on that node's channel, for every node the infrastructure has (P7 too). */
     static void placement(Path root) throws Exception {
         Path common = Files.createTempDirectory("placement");
         try {
@@ -54,19 +54,25 @@ public final class HostPackageCheck {
                 copyTree(root.resolve("btsn.common").resolve(folder), common.resolve(folder));
             Files.copy(root.resolve("btsn.services/deployments/inventory/Inventory_WorkflowDeployment.json"),
                 common.resolve("BusinessServiceDefinitions/Deployment.json"), StandardCopyOption.REPLACE_EXISTING);
-            String init = "RuleBase/PetriNet/ListofPetriNetInitializationServices.ruleml.xml";
-            String collect = "RuleBase/PetriNet/ListofPetrinetCollectorServices.ruleml.xml";
+            String init = "RuleBase/Generated/HostAdministration.ruleml.xml", collect = init;
             String monitor = "RuleBase/Monitor/ListofMonitorActiveServices.ruleml.xml";
-            byte[] sourceInit = Files.readAllBytes(common.resolve(init));
+            byte[] sourceInit = Files.readAllBytes(root.resolve("btsn.common").resolve(init));
 
             GenerateDeploymentRules.main(new String[] {common.toString()});
-            check(java.util.Arrays.equals(sourceInit, Files.readAllBytes(common.resolve(init))), "A single host must leave the administrative services untouched");
+            check(java.util.Arrays.equals(sourceInit, Files.readAllBytes(common.resolve(init))), "The single-host administrative services must match the source's");
+            check(((JSONArray)DeploymentConfiguration.read(common.resolve("BusinessServiceDefinitions/Deployment.json")).get("directServiceRules")).contains(init),
+                "The profile must list the generated administrative services");
 
             JSONObject infrastructure = DeploymentConfiguration.read(common.resolve("InfrastructureDefinitionFolder/SingleHost.json"));
             for (Object item : (JSONArray)infrastructure.get("nodes")) {
                 JSONObject node = (JSONObject)item;
                 if ("P2".equals(node.get("node"))) { node.put("channel", "ip1"); node.put("address", "192.0.2.10"); }
             }
+            // A seventh node, added as the infrastructure editor adds one: it gets its own administrative services.
+            JSONObject p7 = new JSONObject();
+            p7.put("node", "P7"); p7.put("channel", "ip1"); p7.put("address", "192.0.2.10");
+            JSONArray p7Ports = new JSONArray(); p7Ports.add(4009L); p7.put("basePorts", p7Ports);
+            ((JSONArray)infrastructure.get("nodes")).add(p7);
             Files.writeString(common.resolve("InfrastructureDefinitionFolder/TwoHost.json"), infrastructure.toJSONString());
             GenerateDeploymentRules.main(new String[] {common.toString(), "", "TwoHost"});
             check(DeploymentConfiguration.read(common.resolve("BusinessServiceDefinitions/Deployment.json")).get("infrastructure")
@@ -77,6 +83,9 @@ public final class HostPackageCheck {
             check(channelOf(common.resolve(init), "P2_InitializationService").equals("ip1"), "P2's initialiser must follow P2 to ip1");
             check(channelOf(common.resolve(collect), "P2_CollectorService").equals("ip1"), "P2's collector must follow P2 to ip1");
             check(channelOf(common.resolve(init), "P1_InitializationService").equals("ip0"), "P1's initialiser stays on ip0");
+            check(channelOf(common.resolve(init), "P7_InitializationService").equals("ip1"), "P7 must get an initialiser on its channel");
+            check(Files.readString(common.resolve(init)).contains("<Ind>P7_CollectorService</Ind><Ind>collectAllData</Ind><Ind>ip1</Ind><Ind>4106</Ind>"),
+                "P7's collector must use base port 4106");
             check(channelOf(common.resolve(monitor), "MonitorService").equals("ip0"), "Monitor stays on ip0");
 
             for (Object item : (JSONArray)infrastructure.get("nodes")) {
@@ -108,15 +117,15 @@ public final class HostPackageCheck {
         java.util.Collections.sort(services);
         check(services.equals(expectedServices), "expected only " + expectedServices + ", found " + services);
         for (String node : nodes) {
-            String hostJar = "jars/host/btsn.rpso.places." + node.toLowerCase() + ".jar";
+            String hostJar = "jars/host/btsn.rpso.host.jar";
             try (ZipFile jar = new ZipFile(pkg.resolve(hostJar).toFile())) {
                 for (ZipEntry entry : java.util.Collections.list(jar.entries()))
                     check(!entry.getName().startsWith("org/btsn/business/") && !entry.getName().startsWith("org/btsn/services/"),
                         node + ": host JAR contains business class " + entry.getName());
             }
-            check(Files.isDirectory(pkg.resolve("btsn.rpso.places." + node.toLowerCase() + "/ServiceLoaderQueries")), node + ": no working folder");
+            check(Files.isDirectory(pkg.resolve(node + "/ServiceLoaderQueries")), node + ": no working folder");
             check(Files.readString(pkg.resolve("launch-" + node + ".bat")).contains("\r\n"), node + ": launch-" + node + ".bat needs Windows line endings");
-            check(Files.readString(pkg.resolve("launch-" + node + ".sh")).contains("org.btsn.handlers.ServiceLoader . -version v001"), node + ": launch-" + node + ".sh must start the ServiceLoader");
+            check(Files.readString(pkg.resolve("launch-" + node + ".sh")).contains("org.btsn.handlers.ServiceLoader . -version v001 -node " + node), node + ": launch-" + node + ".sh must start the host as " + node);
             String toFile = Files.readString(pkg.resolve("launch-to-file-" + node + ".bat"));
             check(toFile.contains("\r\n") && toFile.contains("call \"%~dp0launch-" + node + ".bat\" %* > \"%~dp0" + node + "_Place.out.txt\" 2>&1"),
                 node + ": launch-to-file-" + node + ".bat must run launch-" + node + ".bat into " + node + "_Place.out.txt");
@@ -145,7 +154,7 @@ public final class HostPackageCheck {
                     Thread.sleep(500);
                 }
                 check(listening >= handlers, node + " started " + listening + " of " + handlers + " service handlers:\n" + tail(output));
-                Path rules = pkg.resolve("btsn.rpso.places." + node.toLowerCase()).resolve("RuleFolder.v001/Service.ruleml");
+                Path rules = pkg.resolve(node).resolve("RuleFolder.v001/Service.ruleml");
                 check(Files.isRegularFile(rules), node + " built no rules in its own folder");
                 check(Files.readString(rules, StandardCharsets.ISO_8859_1).contains(node + "_Place"), node + "'s rules lack its own place");
             }

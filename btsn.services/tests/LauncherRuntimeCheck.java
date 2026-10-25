@@ -37,7 +37,7 @@ public final class LauncherRuntimeCheck {
             ProjectHelper.configureProject(p,build.toFile());
             p.executeTarget("prepare-runtime");
             if(p.getTargets().containsKey("generate-workflow-bindings")) p.executeTarget("generate-workflow-bindings");
-            for(String name:Arrays.asList("common","generator","monitor","p1","p2","p3","p4","p5","p6")) {
+            for(String name:Arrays.asList("common","generator","monitor","host")) {
                 String[] entries=((org.apache.tools.ant.types.Path)p.getReference(name+".classpath")).list();
                 for(String entry:entries) check(entry.endsWith(".jar")&&Files.isRegularFile(Path.of(entry)),"Non-JAR/missing classpath entry: "+entry);
             }
@@ -114,7 +114,7 @@ public final class LauncherRuntimeCheck {
                     }
                     // Monitor is observation infrastructure, never an active model business PLACE.
                     if(property.startsWith("workflow")||property.equals("process.name")&&process.contains("/Workflow/"))
-                        check(!"MonitorService".equals(service)&&!service.matches("P[1-6]_Place"),"Physical host retained as a business capability: "+process+" / "+service);
+                        check(!"MonitorService".equals(service)&&!service.matches("P\\d+_Place"),"Physical host retained as a business capability: "+process+" / "+service);
                 }
             }
             List<String> loaderCommand = new ArrayList<>(Arrays.asList(

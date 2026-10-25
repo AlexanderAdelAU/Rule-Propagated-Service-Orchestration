@@ -19,18 +19,8 @@
     <property name="local.channel.rules" location="${common.project.dir}/RuleBase/Generated/InfrastructureDeployment.ruleml.xml"/>
     <!-- -Dinfrastructure=MultiHost runs the launcher on InfrastructureDefinitionFolder/MultiHost.json instead of its profile's choice. -->
     <property name="infrastructure" value=""/>
-    <property name="p1.project.dir" location="${launcher.runtime.dir}/btsn.rpso.places.p1"/>
-    <property name="p2.project.dir" location="${launcher.runtime.dir}/btsn.rpso.places.p2"/>
-    <property name="p3.project.dir" location="${launcher.runtime.dir}/btsn.rpso.places.p3"/>
-    <property name="p4.project.dir" location="${launcher.runtime.dir}/btsn.rpso.places.p4"/>
-    <property name="p5.project.dir" location="${launcher.runtime.dir}/btsn.rpso.places.p5"/>
-    <property name="p6.project.dir" location="${launcher.runtime.dir}/btsn.rpso.places.p6"/>
-    <property name="p1.host.jar" location="${source.root}/btsn.rpso.places.p1/target/btsn.rpso.places.p1.jar"/>
-    <property name="p2.host.jar" location="${source.root}/btsn.rpso.places.p2/target/btsn.rpso.places.p2.jar"/>
-    <property name="p3.host.jar" location="${source.root}/btsn.rpso.places.p3/target/btsn.rpso.places.p3.jar"/>
-    <property name="p4.host.jar" location="${source.root}/btsn.rpso.places.p4/target/btsn.rpso.places.p4.jar"/>
-    <property name="p5.host.jar" location="${source.root}/btsn.rpso.places.p5/target/btsn.rpso.places.p5.jar"/>
-    <property name="p6.host.jar" location="${source.root}/btsn.rpso.places.p6/target/btsn.rpso.places.p6.jar"/>
+    <!-- Every node (P1, P2, ... P7) runs this one host program, started with -node Pn in its own folder beside btsn.common. -->
+    <property name="host.jar" location="${source.root}/btsn.rpso.host/target/btsn.rpso.host.jar"/>
     <import file="auto-deployment.xml"/>
     <path id="common.classpath">
         <pathelement location="${infrastructure.jar}"/>
@@ -40,17 +30,21 @@
     </path>
     <path id="generator.classpath"><path refid="common.classpath"/><pathelement location="${generator.runtime.jar}"/></path>
     <path id="monitor.classpath"><path refid="common.classpath"/><pathelement location="${monitor.runtime.jar}"/></path>
-    <path id="p1.classpath"><path refid="common.classpath"/><pathelement location="${p1.host.jar}"/></path>
-    <path id="p2.classpath"><path refid="common.classpath"/><pathelement location="${p2.host.jar}"/></path>
-    <path id="p3.classpath"><path refid="common.classpath"/><pathelement location="${p3.host.jar}"/></path>
-    <path id="p4.classpath"><path refid="common.classpath"/><pathelement location="${p4.host.jar}"/></path>
-    <path id="p5.classpath"><path refid="common.classpath"/><pathelement location="${p5.host.jar}"/></path>
-    <path id="p6.classpath"><path refid="common.classpath"/><pathelement location="${p6.host.jar}"/></path>
+    <path id="host.classpath"><path refid="common.classpath"/><pathelement location="${host.jar}"/></path>
     <macrodef name="copy-launcher-component">
         <attribute name="directory"/>
         <sequential>
             <copy todir="${launcher.runtime.dir}/@{directory}">
                 <fileset dir="${source.root}/@{directory}" includes="ServiceLoaderQueries/**,resources/**,PayLoad/**,TokenFormats/**,EventTriggeringFile/**"/>
+            </copy>
+        </sequential>
+    </macrodef>
+    <!-- A node's working folder, runtime/Pn: the host's configuration; its rules and database are written there when it runs. -->
+    <macrodef name="prepare-host-folder">
+        <attribute name="node"/>
+        <sequential>
+            <copy todir="${launcher.runtime.dir}/@{node}">
+                <fileset dir="${source.root}/btsn.rpso.host" includes="ServiceLoaderQueries/**,resources/**,PayLoad/**"/>
             </copy>
         </sequential>
     </macrodef>
@@ -79,12 +73,11 @@
         <java classname="org.btsn.deployment.GenerateDeploymentRules" fork="true" failonerror="true" dir="${common.project.dir}">
             <classpath refid="generator.classpath"/><arg file="${common.project.dir}"/><arg value="${host.address}"/><arg value="${infrastructure}"/>
         </java>
-        <copy-launcher-component directory="btsn.rpso.places.p1"/>
-        <copy-launcher-component directory="btsn.rpso.places.p2"/>
-        <copy-launcher-component directory="btsn.rpso.places.p3"/>
-        <copy-launcher-component directory="btsn.rpso.places.p4"/>
-        <copy-launcher-component directory="btsn.rpso.places.p5"/>
-        <copy-launcher-component directory="btsn.rpso.places.p6"/>
+        <!-- The initialiser and collector for the launcher's hosts (hosts=P1,P2,... or run.pN): every run generates its own. -->
+        <java classname="org.btsn.deployment.HostAdministration" fork="true" failonerror="true" classpathref="generator.classpath">
+            <syspropertyset><propertyref regex="^run\.p[0-9]+$"/></syspropertyset>
+            <arg value="processes"/><arg file="${common.project.dir}"/><arg value="${hosts}"/>
+        </java>
         <copy-launcher-component directory="btsn.common.eventgenerators"/>
         <copy file="${source.root}/btsn.common.eventgenerators/PayLoad/payload.xml" tofile="${generator.project.dir}/Payload/payLoad.xml"/>
         <build-launcher-master version="v001"/>

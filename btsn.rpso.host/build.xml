@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="btsn.rpso.host" default="release" basedir=".">
+    <description>Build the host: one executable JAR and manual-launch ZIP that runs as any node (-node P1, P2, ... P7).</description>
+    <property name="host.artifact" value="btsn.rpso.host"/>
+    <import file="../btsn.services/host-build.xml"/>
+</project>

@@ -17,7 +17,9 @@
 
 	<!-- COLLECTOR PARAMETERS -->
 	<property name="rule.version" value="v999" />
-	<property name="process.name" value="common/Collectors/P1_P2_Collector" />
+	<property name="process.name" value="common/Collectors/Hosts_Collector" />
+	<!-- Hosts this file starts; the run generates its initialiser and collector for them -->
+	<property name="hosts" value="P1,P2" />
 	<property name="service.operation" value="collectAllData" />
 	<property name="collection.delay.seconds" value="3" />
 
@@ -95,12 +97,13 @@
 
 	<target name="load-p1-service" description="Load P1_CollectorService" depends="prepare-runtime">
 		<echo message="Starting P1_CollectorService..." />
+		<prepare-host-folder node="P1"/>
 		<java classname="${service.loader.class}"
 		      fork="true"
-		      dir="${p1.project.dir}"
+		      dir="${launcher.runtime.dir}/P1"
 		      output="${p1.output.file}">
-			<classpath refid="p1.classpath" />
-			<arg value="${p1.project.dir}" />
+			<classpath refid="host.classpath" />
+			<arg value="${launcher.runtime.dir}/P1" /><arg value="-node" /><arg value="P1" />
 			<arg value="-version" />
 			<arg value="${rule.version}" />
 			<arg value="-service" />
@@ -110,12 +113,13 @@
 
 	<target name="load-p2-service" description="Load P2_CollectorService" depends="prepare-runtime">
 		<echo message="Starting P2_CollectorService..." />
+		<prepare-host-folder node="P2"/>
 		<java classname="${service.loader.class}"
 		      fork="true"
-		      dir="${p2.project.dir}"
+		      dir="${launcher.runtime.dir}/P2"
 		      output="${p2.output.file}">
-			<classpath refid="p2.classpath" />
-			<arg value="${p2.project.dir}" />
+			<classpath refid="host.classpath" />
+			<arg value="${launcher.runtime.dir}/P2" /><arg value="-node" /><arg value="P2" />
 			<arg value="-version" />
 			<arg value="${rule.version}" />
 			<arg value="-service" />

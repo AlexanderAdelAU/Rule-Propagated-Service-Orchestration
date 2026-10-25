@@ -33,9 +33,10 @@ public final class ProcessExamplesCheck {
             }
             for (String p : found) problems.add(folder.relativize(process) + ": " + p);
         }
-        if (processes.size() < 40 || administrative < 10 || !problems.isEmpty())
+        // Each run generates its initialiser and collector; none is kept among the process definitions.
+        if (administrative > 0) problems.add(administrative + " initialisers or collectors kept; each run generates its own");
+        if (processes.size() < 20 || !problems.isEmpty())
             throw new AssertionError(processes.size() + " processes; problems:\n" + String.join("\n", problems));
-        System.out.println("PASS: all " + processes.size() + " process definitions save and validate cleanly; " + (processes.size() - administrative)
-            + " business processes plan a build without problems; " + administrative + " initialisers and collectors are recognised as such");
+        System.out.println("PASS: all " + processes.size() + " process definitions save and validate cleanly and plan a build without problems; no initialisers or collectors kept (each run generates its own)");
     }
 }

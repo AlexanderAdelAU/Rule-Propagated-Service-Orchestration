@@ -34,8 +34,8 @@ bindings. Its two-place path is retained.
 Standalone initializer, workflow and collector XMLs in `utility files` share one
 prepared directory per family: `P1_P2_Phases`, `P1_P2_P3_P4_Phases`, or
 `TrafficLight_Phases`. This preserves the databases and installed rules between
-separate phases. Their process paths now use the current `Initializers`,
-`Workflow` and `Collectors` folders. Stop the preceding Ant run before starting
+separate phases. Each names its hosts (`hosts`); the initializer and
+collector it uses are generated for them when the runtime is prepared. Stop the preceding Ant run before starting
 a phase; the compatibility cleanup target waits for ports and does not kill
 unrelated Java applications.
 

@@ -12,13 +12,16 @@ import org.json.simple.parser.JSONParser;
 /**
  * Writes a BuildAndRun launcher for a saved, deployed process. The launcher holds only the choices
  * that differ between processes and imports btsn.services/process-runtime.xml for the shared phases.
- * Missing supporting files are written too: the deployment profile, a token schedule (CSV) per event
- * generator and an initialiser/collector pair for the hosts the deployment uses. Existing files are reused.
+ * Missing supporting files are written too: the deployment profile and a token schedule (CSV) per event
+ * generator. Existing files are reused. The launcher lists the hosts the process runs on (hosts=P1,P2,P7);
+ * each is a node of the infrastructure running the one host program, and the run generates their
+ * initialiser and collector.
  * Every event generator in the process runs, each under its own rule version, so their tokens stay apart.
  */
 public final class BuildAndRunGenerator {
     public static final List<String> VERSIONS = Arrays.asList("v001", "v002", "v003");
-    private static final List<String> NODES = Arrays.asList("P1", "P2", "P3", "P4", "P5", "P6");
+    /** A host node: P1 ... P99 (the runtime numbers each host's administrative ports and tokens by it). */
+    static boolean isHost(String node) { return node != null && node.matches("P[1-9]\\d?"); }
 
     /** One event generator's run: its rule version and the spacing of its tokens. */
     public static final class Run {
@@ -54,8 +57,6 @@ public final class BuildAndRunGenerator {
         public String tokenGenerator = "";  // the profile's "tokenGenerator", when it names one (else the runtime's default)
         public File profile; public boolean profileExists;
         public String serviceDeployment = "", catalogue = "";
-        public String nodeSetName = "";
-        public File initializer, collector; public boolean initializerExists, collectorExists;
         public final List<File> folders = new ArrayList<>();
         public Options defaults = new Options();
 
@@ -138,11 +139,11 @@ public final class BuildAndRunGenerator {
         if (!registry.hasDeployment()) { plan.problems.add("Deploy the process first: no service deployment is linked."); return plan; }
         plan.serviceDeployment = canvas.getServiceDeploymentReference();
         plan.catalogue = registry.catalogueReference();
-        Set<String> used = new TreeSet<>(Comparator.comparingInt(NODES::indexOf));
+        Set<String> used = new TreeSet<>(Comparator.comparingInt((String n) -> Integer.parseInt(n.substring(1))));
         for (ProcessElement place : canvas.getPlaces()) {
             String node = registry.nodeFor(place);
             if (node.isEmpty() || canvas.hasPendingNode(place)) plan.problems.add("Place " + place.getLabel() + " is not deployed; use Deploy and save the deployment.");
-            else if (!NODES.contains(node)) plan.problems.add("Place " + place.getLabel() + " runs on " + node + "; launchers start hosts P1 to P6 only.");
+            else if (!isHost(node)) plan.problems.add("Place " + place.getLabel() + " runs on " + node + "; a host node is named P1, P2, ... (up to P99).");
             else used.add(node);
         }
         plan.problems.addAll(canvas.nodeConflicts());
@@ -181,12 +182,6 @@ public final class BuildAndRunGenerator {
         String base = processFile.getName().replaceFirst("(?i)\\.json$", "");
         if (plan.profile == null) plan.profile = new File(deployments, ("petrinet".equals(plan.domain) || plan.domain.isEmpty() ? "models" : plan.domain) + "/" + base + "Deployment.json");
 
-        plan.nodeSetName = plan.nodes.size() == NODES.size() ? "P1_to_P6" : String.join("_", plan.nodes);
-        plan.initializer = new File(common, "ProcessDefinitionFolder/common/Initializers/" + plan.nodeSetName + "_Initialization.json");
-        plan.collector = new File(common, "ProcessDefinitionFolder/common/Collectors/" + plan.nodeSetName + "_Collector.json");
-        plan.initializerExists = plan.initializer.isFile();
-        plan.collectorExists = plan.collector.isFile();
-
         File[] loaders = plan.root.listFiles(f -> f.isDirectory() && f.getName().matches("btsn\\..+\\.ProjectLoader"));
         if (loaders != null) { Arrays.sort(loaders); plan.folders.addAll(Arrays.asList(loaders)); }
         File preferred = new File(plan.root, "btsn." + (plan.domain.isEmpty() ? "petrinet" : plan.domain) + ".ProjectLoader");
@@ -221,9 +216,7 @@ public final class BuildAndRunGenerator {
         lines.add((plan.launcher(o).exists() ? "Replace  " : "Write    ") + relative(plan.root, plan.launcher(o)));
         lines.add((plan.profileExists ? "Reuse    " : "Write    ") + relative(plan.root, plan.profile));
         for (Run run : o.enabled()) lines.add((plan.schedule(o, run).exists() ? "Replace  " : "Write    ") + relative(plan.root, plan.schedule(o, run)));
-        lines.add((plan.initializerExists ? "Reuse    " : "Write    ") + relative(plan.root, plan.initializer));
-        lines.add((plan.collectorExists ? "Reuse    " : "Write    ") + relative(plan.root, plan.collector));
-        lines.add("Hosts    " + String.join(", ", plan.nodes) + " and Monitor");
+        lines.add("Hosts    " + String.join(", ", plan.nodes) + " and Monitor (each host is initialised and collected by the run)");
         if (!plan.tokenGenerator.isEmpty()) lines.add("Tokens   made by " + plan.tokenGenerator + " (named by the deployment profile), each from its target service's token format");
         for (String packaged : packagedHosts(plan)) lines.add("Package  " + packaged + " (Build host packages; start it on its machine)");
         for (Run run : o.enabled())
@@ -272,8 +265,6 @@ public final class BuildAndRunGenerator {
             else for (int i = 0; i < o.tokens; i++) csv.append((long)i * run.intervalMs).append(",0,1\n");
             writeText(plan.schedule(o, run), csv.toString());
         }
-        if (!plan.initializerExists) writeText(plan.initializer, adminProcess(plan.nodes, true, plan.nodeSetName));
-        if (!plan.collectorExists) writeText(plan.collector, adminProcess(plan.nodes, false, plan.nodeSetName));
         File launcher = plan.launcher(o);
         writeText(launcher, launcherXml(plan, o));
         return launcher;
@@ -298,8 +289,6 @@ public final class BuildAndRunGenerator {
         if (!plan.tokenGenerator.isEmpty())
             x.append("    <property name=\"token.generator.class\" value=\"").append(xml(plan.tokenGenerator)).append("\"/>\n");
         x.append("    <property name=\"workflow.process.name\" value=\"").append(xml(plan.processName)).append("\"/>\n");
-        x.append("    <property name=\"init.process.name\" value=\"common/Initializers/").append(plan.nodeSetName).append("_Initialization\"/>\n");
-        x.append("    <property name=\"collector.process.name\" value=\"common/Collectors/").append(plan.nodeSetName).append("_Collector\"/>\n");
         List<Run> on = o.enabled();
         List<String> versions = new ArrayList<>(); for (Run run : on) versions.add(run.version);
         x.append("    <property name=\"rule.version\" value=\"").append(on.get(0).version).append("\"/>\n");
@@ -324,9 +313,8 @@ public final class BuildAndRunGenerator {
         }
         x.append("    <property name=\"token.count\" value=\"").append(o.tokens).append("\"/>\n");
         x.append("    <property name=\"workflow.completion.seconds\" value=\"").append(o.completionSeconds).append("\"/>\n\n");
-        x.append("    <!-- Hosts used by the service deployment -->\n");
-        for (String node : plan.nodes) x.append("    <property name=\"run.").append(node.toLowerCase(Locale.ROOT)).append("\" value=\"true\"/>\n");
-        x.append("    <property name=\"first.node\" value=\"").append(plan.nodes.get(0).toLowerCase(Locale.ROOT)).append("\"/>\n\n");
+        x.append("    <!-- Hosts used by the service deployment: nodes of the infrastructure, each running the host program -->\n");
+        x.append("    <property name=\"hosts\" value=\"").append(String.join(",", plan.nodes)).append("\"/>\n\n");
         if (!single) {
             x.append("    <!-- The machines chosen in the editor: InfrastructureDefinitionFolder/").append(xml(machines)).append(".json -->\n");
             x.append("    <property name=\"infrastructure\" value=\"").append(xml(machines)).append("\"/>\n\n");
@@ -342,53 +330,10 @@ public final class BuildAndRunGenerator {
             + "  \"infrastructure\": \"InfrastructureDefinitionFolder/SingleHost.json\",\n"
             + "  \"deploymentRules\": \"RuleBase/Generated/InfrastructureDeployment.ruleml.xml\",\n"
             + "  \"directServiceRules\": [\n"
-            + "    \"RuleBase/PetriNet/ListofPetriNetInitializationServices.ruleml.xml\",\n"
-            + "    \"RuleBase/PetriNet/ListofPetrinetCollectorServices.ruleml.xml\"\n"
+            + "    \"RuleBase/Generated/HostAdministration.ruleml.xml\"\n"
             + "  ],\n"
             + "  \"serviceDeployment\": \"" + plan.serviceDeployment + "\"\n"
             + "}\n";
-    }
-
-    /** Initialiser (purgeAndInitialize on each host and Monitor) or collector (each host reports to Monitor). */
-    static String adminProcess(List<String> nodes, boolean initializer, String nodeSetName) {
-        List<String> columns = new ArrayList<>(nodes); columns.add("Monitor");
-        String generator = initializer ? "INTIALISATION_GENERATOR" : "COLLECTION_GENERATOR";
-        List<String> elements = new ArrayList<>(), arrows = new ArrayList<>();
-        int generatorX = 110 + (columns.size() - 1) * 40;
-        elements.add(element(generator, "EVENT_GENERATOR", generatorX, 40, 24, 60,
-            "      \"rotation\": 90.0,\n      \"generator_rate\": \"1000\",\n      \"token_version\": \"v001\""));
-        for (int i = 0; i < columns.size(); i++) {
-            String column = columns.get(i);
-            boolean monitor = "Monitor".equals(column);
-            int x = 110 + i * 80;
-            elements.add(element("T_in_" + column, "TRANSITION", x, 150, 20, 60,
-                "      \"rotation\": 90.0,\n      \"node_type\": \"EdgeNode\",\n      \"node_value\": \"EDGE_NODE\",\n      \"transition_type\": \"T_in\",\n      \"buffer\": \"10\""));
-            String service = initializer ? (monitor ? "Monitor_InitializationService" : column + "_InitializationService")
-                                         : (monitor ? "MonitorService" : column + "_CollectorService");
-            String operation = initializer ? "purgeAndInitialize" : monitor ? "writeCollectorData" : "collectAllData";
-            elements.add(element(column, "PLACE", x - 15, 255, 50, 50,
-                "      \"service\": \"" + service + "\",\n      \"operations\": [\n        {\n          \"name\": \"" + operation + "\"\n        }\n      ]"));
-            boolean terminates = initializer || monitor;
-            elements.add(element("T_out_" + column, "TRANSITION", x, 360, 20, 60,
-                "      \"rotation\": 90.0,\n      \"node_type\": \"" + (terminates ? "TerminateNode" : "EdgeNode") + "\",\n      \"node_value\": \""
-                + (terminates ? "TERMINATE_NODE" : "EDGE_NODE") + "\",\n      \"transition_type\": \"T_out\""));
-            arrows.add(arrow("T_in_" + column, column));
-            arrows.add(arrow(column, "T_out_" + column));
-            if (initializer || !monitor) arrows.add(arrow(generator, "T_in_" + column));
-            if (!initializer && !monitor) arrows.add(arrow("T_out_" + column, "T_in_Monitor"));
-        }
-        return "{\n   \"processType\":\"PetriNet\",\n  \"elements\": [\n" + String.join(",\n", elements) + "\n  ],\n  \"arrows\": [\n"
-            + String.join(",\n", arrows) + "\n  ],\n  \"textElements\": [\n    {\n      \"x\": 110,\n      \"y\": 20,\n      \"text\": \""
-            + nodeSetName + (initializer ? "_Initialization" : "_Collector") + " (generated)\",\n      \"fontSize\": 12,\n      \"fontStyle\": 0,\n      \"color\": -16777216\n    }\n  ]\n}\n";
-    }
-
-    private static String element(String id, String type, int x, int y, int w, int h, String extra) {
-        return "    {\n      \"id\": \"" + id + "\",\n      \"type\": \"" + type + "\",\n      \"x\": " + x + ",\n      \"y\": " + y
-            + ",\n      \"width\": " + w + ",\n      \"height\": " + h + ",\n      \"label\": \"" + id + "\",\n" + extra + "\n    }";
-    }
-    private static String arrow(String source, String target) {
-        return "    {\n      \"source\": \"" + source + "\",\n      \"target\": \"" + target
-            + "\",\n      \"label\": \"\",\n      \"guardCondition\": \"\",\n      \"decision_value\": \"\",\n      \"endpoint\": \"\"\n    }";
     }
 
     /** The place reached from an event generator through its transition (generator -> T_in -> place). */
