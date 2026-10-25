@@ -252,7 +252,7 @@ public final class RunFromEditorCheck {
             + "    if (Files.exists(scratch.resolve(\"hang\"))) { host.waitFor(); return; }\n"
             + "    System.out.println(\"=== PHASE 3: DATA COLLECTION ===\");\n"
             + "    System.out.println(\"petrinet/Workflow/Demo COMPLETED SUCCESSFULLY\");\n"
-            + "    System.out.println(\"Services are still running. Press Ctrl+C to stop.\");\n"
+            + "    System.out.println(\"RUN FINISHED: every phase is done and Monitor holds the collected records.\");\n"
             + "    System.out.flush();\n"
             + "    host.waitFor();\n"
             + "  }\n"

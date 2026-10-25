@@ -29,9 +29,11 @@
 	<property name="rule.version" value="v001" />
 
 	<!-- Process names for each phase -->
-	<property name="init.process.name" value="common/Initializers/P1_P2_P3_P4_Initialization" />
+	<property name="init.process.name" value="common/Initializers/Hosts_Initialization" />
+	<!-- Hosts this file starts; the run generates its initialiser and collector for them -->
+	<property name="hosts" value="P1,P2,P3,P4" />
 	<property name="workflow.process.name" value="petrinet/Workflow/P1_P2_P3_P4_Fork_Join_Workflow" />
-	<property name="collector.process.name" value="common/Collectors/P1_P2_P3_P4_Collector" />
+	<property name="collector.process.name" value="common/Collectors/Hosts_Collector" />
 
 	<!-- Phase 1: Initialization parameters (v999 = admin/non-instrumented) -->
 	<property name="init.version" value="v999" />

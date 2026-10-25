@@ -32,7 +32,6 @@ public final class DeployFlowCheck {
         Path scratchCommon = scratch.resolve("btsn.common");
         copy(common.toPath().resolve("BusinessServiceDefinitions"), scratchCommon.resolve("BusinessServiceDefinitions"));
         copy(common.toPath().resolve("InfrastructureDefinitionFolder"), scratchCommon.resolve("InfrastructureDefinitionFolder"));
-        copy(common.toPath().resolve("ProcessDefinitionFolder/common"), scratchCommon.resolve("ProcessDefinitionFolder/common"));
         Files.createDirectories(scratch.resolve("btsn.services/deployments/models"));
         Files.createDirectories(scratch.resolve("btsn.petrinet.ProjectLoader"));
         Files.createDirectories(scratchCommon.resolve("ServiceDeploymentFolder/petrinet"));

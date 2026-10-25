@@ -52,6 +52,10 @@
         <java classname="org.btsn.deployment.GenerateDeploymentRules" fork="true" failonerror="true" dir="${common.project.dir}">
             <classpath refid="healthcare.dependencies"/><arg file="${common.project.dir}"/><arg value="${host.address}"/>
         </java>
+        <!-- The initialiser and collector for the importing file's hosts (hosts=P1,...). -->
+        <java classname="org.btsn.deployment.HostAdministration" fork="true" failonerror="true" classpathref="healthcare.dependencies">
+            <arg value="processes"/><arg file="${common.project.dir}"/><arg value="${hosts}"/>
+        </java>
         <copy-healthcare-component directory="btsn.common.eventgenerators"/>
         <copy file="${source.root}/btsn.common.eventgenerators/PayLoad/payload.xml" tofile="${generator.project.dir}/Payload/payLoad.xml"/>
         <build-healthcare-master version="${rule.version}"/>

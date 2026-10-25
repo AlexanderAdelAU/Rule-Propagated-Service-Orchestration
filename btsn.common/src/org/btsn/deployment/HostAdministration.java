@@ -204,7 +204,13 @@ public final class HostAdministration {
     public static void main(String[] args) throws Exception {
         require(args.length == 3 && "processes".equals(args[0]), "Expected: processes common-folder P1,P2,...");
         Path common = Path.of(args[1]);
-        List<String> hosts = HostLaunch.listed(args[2], System.getProperties());
+        List<String> hosts;
+        try { hosts = HostLaunch.listed(args[2], System.getProperties()); }
+        catch (IllegalArgumentException none) {
+            // A launcher that runs no hosts of its own (a single phase, for example) needs neither process.
+            System.out.println("No hosts listed: no initialiser or collector generated");
+            return;
+        }
         Path folder = common.resolve("ProcessDefinitionFolder");
         Files.createDirectories(folder.resolve(INITIALISER).getParent());
         Files.createDirectories(folder.resolve(COLLECTOR).getParent());

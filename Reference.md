@@ -501,7 +501,7 @@ another machine.
    It adds the next node, `P7`, on the first machine with the first free port (`4009` here, as P4 and P6 use 4007 and 4008).
    Change its channel and address if it runs on another machine, then save.
 2. Deploy places to `P7` as to any node, and save the deployment and the process.
-3. **Build and Run** writes `hosts` with P7 in it (`<property name="hosts" value="P1,P7"/>`). The run starts the
+3. **Build** writes `hosts` with P7 in it (`<property name="hosts" value="P1,P7"/>`). The run starts the
    host program as P7 in its own folder, initialises its database, and collects its records into Monitor.
 
 Nothing is copied or registered: P7's initialisation and collector services (ports `4106` and `4306`) and the run's
@@ -660,11 +660,13 @@ The default target `run-complete-workflow` does everything:
 
 ### Stop it when collection finishes
 
-The console ends with `... COMPLETED SUCCESSFULLY` and
-`Services are still running. Press Ctrl+C to stop.`
+After the collection requests the console says
+`Collection requests sent; waiting for Monitor to store the hosts' records - keep the run going...`.
+Leave it running: the launcher waits until Monitor's database stops changing. It then ends with
+`... COMPLETED SUCCESSFULLY` and `RUN FINISHED: every phase is done and Monitor holds the collected records.`
 
-1. Allow Monitor a few seconds to finish writing.
-2. Stop the run with Eclipse's red **Terminate** button, or **Ctrl+C** in the terminal. This releases the Monitor database for the analyser and viewers.
+Only then stop the run, with Eclipse's red **Terminate** button or **Ctrl+C** in the terminal. This stops the hosts
+and releases the Monitor database for the analyser and viewers. (**Run on hosts** in the editor does this for you.)
 
 Host logs go to `P2_Place.out.txt` and `MonitorService.out.txt` beside the
 launcher. The collected data is in `btsn.common.Monitor/ServiceAnalysisDataBase`.

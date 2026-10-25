@@ -32,7 +32,9 @@
     <property name="sequence.id.p6" value="999500000" />
     <property name="sequence.id.monitor" value="999600000" />
     <property name="db.init.operation" value="purgeAndInitialize" />
-    <property name="process.name" value="common/Initializers/TrafficLight_Initialization" />
+    <property name="process.name" value="common/Initializers/Hosts_Initialization" />
+    <!-- Hosts this file starts; the run generates its initialiser and collector for them -->
+    <property name="hosts" value="P1,P2,P3,P4,P5,P6" />
 
     <!-- Timing -->
     <property name="port.release.seconds" value="5" />

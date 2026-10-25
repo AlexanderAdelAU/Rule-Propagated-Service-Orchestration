@@ -17,7 +17,9 @@
 
 	<!-- COLLECTOR PARAMETERS -->
 	<property name="rule.version" value="v999" />
-	<property name="process.name" value="common/Collectors/TrafficLight_Collector" />
+	<property name="process.name" value="common/Collectors/Hosts_Collector" />
+	<!-- Hosts this file starts; the run generates its initialiser and collector for them -->
+	<property name="hosts" value="P1,P2,P3,P4,P5,P6" />
 	<property name="service.operation" value="collectAllData" />
 	<property name="collection.delay.seconds" value="3" />
 

@@ -17,9 +17,10 @@
     <property name="init.version" value="v999"/>
     <property name="collector.version" value="v999"/>
     <property name="query.version" value="${rule.version}"/>
-    <property name="init.process.name" value="healthcare/Initializers/Triage_Initialization"/>
+    <property name="hosts" value="P1"/><!-- the run generates its initialiser and collector for these hosts -->
+    <property name="init.process.name" value="common/Initializers/Hosts_Initialization"/>
     <property name="workflow.process.name" value="healthcare/Workflow/Triage_Workflow"/>
-    <property name="collector.process.name" value="healthcare/Collectors/Triage_Collector"/>
+    <property name="collector.process.name" value="common/Collectors/Hosts_Collector"/>
     <property name="db.init.operation" value="purgeAndInitialize"/>
     <property name="target.place" value="P1_Place"/>
     <property name="target.operation" value="processTriageAssessment"/>

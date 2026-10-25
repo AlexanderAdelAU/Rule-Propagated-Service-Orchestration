@@ -1,9 +1,10 @@
 # From an idea to a measured run
 
-We will walk you through two examples. Both are built graphically in the editor.
+We will walk you through three examples. All are built graphically in the editor.
 
 - **Example 1** runs a standard service that returns true or false.
 - **Example 2** builds a simple claims process that calls a remote service over REST.
+- **Example 3** adds a seventh host, P7, and moves Example 1 onto it.
 
 **Before you start:** you need a JDK (15 or later), Apache Ant (it comes with Eclipse), and
 the repository's projects imported into Eclipse.
@@ -76,7 +77,7 @@ Select each element or arrow, then change it in the Attributes panel.
 
 ### Run it
 
-24. Click **Build**. Leave **Tokens** at 10 and click **Create**.
+24. Click **Build**. The summary lists `Hosts    P1 and Monitor`. Leave **Tokens** at 10 and click **Create**.
 25. Click **Run on hosts**. Leave **Run every host on this computer** ticked, then click **Run**.
 26. Wait for **Run complete**. You should see `v001: 10 generated, 10 completed`.
 
@@ -89,6 +90,15 @@ Select each element or arrow, then change it in the Attributes panel.
 ![The replay of the recorded run: a token travels along the false arrow back to T_in_P1, and one token has reached Terminate.](images/ex1-replay.png)
 
 *A token going round again after P1 returned `false`.*
+
+### Look behind the run
+
+The run was real: P1 was a host process of its own, which recorded what it did.
+
+- **The launcher** Build wrote, `btsn.petrinet.ProjectLoader/My_P1_Workflow_BuildAndRun.xml`, names the hosts it starts:
+  `<property name="hosts" value="P1"/>`.
+- **P1's log** is beside it, in `P1_Place.out.txt`. Near the top: `node P1 runs [P1_Place, P1_CollectorService, P1_InitializationService]`.
+- **P1's folder**, `btsn.services/target/launchers/My_P1_Workflow_BuildAndRun/P1/`, holds the rules it was sent and the database it recorded into.
 
 ### Learn more
 
@@ -193,6 +203,62 @@ code is `examples/rest/claims.js`, and any service that answers the same way wil
 - [Writing a Java service](ServiceTutorial.md)
 - The finished copy: `btsn.common/ProcessDefinitionFolder/claims/Workflow/Claims_Workflow.json`
 - The ready-made examples, from Petri-net models to the financial and healthcare workflows: [Run an example](Reference.md#run-an-example)
+
+## Example 3: add a host
+
+Every host runs the same program. How many there are is up to the infrastructure definition, so a new host is a
+new row there: nothing is copied or registered. Here you add P7 and move Example 1's place onto it.
+
+### Add the host
+
+1. Choose **File → Open → Infrastructure Definition...** and open
+   `btsn.common/InfrastructureDefinitionFolder/SingleHost.json`.
+2. Click **Add node**. A new row appears: `P7`, channel `ip0`, address `192.168.1.82`, port `4009`.
+   It gets 4009 because P4 and P6 already use 4007 and 4008.
+3. Click **Save...** and keep `SingleHost.json`. The other examples are unchanged: none of them uses P7.
+
+![The Infrastructure Definition window for SingleHost.json: nodes P1 to P6 on 192.168.1.82, and the new row P7 on channel ip0 with fixed base port 4009.](images/ex3-add-node.png)
+
+### Move P1 onto P7
+
+4. Choose **File → Open → Process Definition...** and open `My_P1_Workflow.json` from Example 1.
+5. Right-click the place **P1**, then **Deploy to → P7**. The menu shows P7's address, `192.168.1.82:4009`.
+   If P7 is not listed, open the process again.
+6. Click **Deploy**. P1's row now shows **Host node** `P7`. Click **Save deployment...** and keep the name it suggests.
+7. Choose **File → Save Process Definition**.
+
+The place keeps its label, P1; only the host it runs on has changed.
+
+### Run it
+
+8. Click **Build**. The summary lists `Hosts    P7 and Monitor (each host is initialised and collected by the run)`.
+   Click **Create**.
+9. Click **Run on hosts**, then **Run**. The Hosts table shows `P7_Place` at `127.0.0.1:4009`.
+10. Wait for **Run complete**. You should see `v001: 10 generated, 10 completed`.
+
+![The Run window after the run on P7: every phase is green, the hosts P7_Place and Monitor are stopped, and the output reads v001: 10 generated, 10 completed.](images/ex3-run.png)
+
+### Look behind the run
+
+- **The launcher** now names the new host: `<property name="hosts" value="P7"/>`.
+- **P7's log** is `btsn.petrinet.ProjectLoader/P7_Place.out.txt`: `node P7 runs [P7_Place, P7_CollectorService, P7_InitializationService]`.
+- **P7's folder** is `btsn.services/target/launchers/My_P1_Workflow_BuildAndRun/P7/`.
+- **What the run generated for P7**, in that run's own `btsn.common`:
+  - its database and collection services, on ports 4306 and 4106: `RuleBase/Generated/HostAdministration.ruleml.xml`;
+  - the processes that reset and collect this run's hosts: `ProcessDefinitionFolder/common/Initializers/Hosts_Initialization.json`
+    and `ProcessDefinitionFolder/common/Collectors/Hosts_Collector.json`.
+
+### Try next
+
+- **Use both hosts.** In Example 2, deploy Assess to P7 instead of P2. The launcher then lists `P1,P7`.
+- **Put P7 on another machine.** In step 2, give P7 channel `ip1` and that machine's address. Build then offers a
+  host package for P7 to start there ([Run on several machines](Reference.md#7-run-on-several-machines)).
+- **Move P1 back.** Deploy P1 to `P1` again and save; P7 stays available for later.
+
+### Learn more
+
+- [Add a host](Reference.md#add-a-host): host names (P1 to P99) and the ports kept for each host's own services
+- [Choose the machines](Reference.md#choose-the-machines)
 
 ## Author
 

@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
  * Runs a BuildAndRun launcher from the editor, start to replay:
  * <ol>
  *   <li>runs the launcher's default target with Ant and reports its output and phases;</li>
- *   <li>after the launcher's last line ("Services are still running") waits until Monitor's database stops changing, then stops
+ *   <li>after the launcher's last line ("RUN FINISHED", once Monitor has stored the collected records) waits until Monitor's database stays unchanged, then stops
  *       the launcher and every host it started (the whole process tree);</li>
  *   <li>runs the launcher's analyse target and saves its output as the run's analysis file.</li>
  * </ol>
@@ -130,7 +130,7 @@ public final class LauncherRun {
                 Phase phase = phaseOf(line, current);
                 if (phase != null && phase != current) { current = phase; listener.phase(phase, line.trim()); }
                 // The launcher's last line; earlier steps also print "... COMPLETED SUCCESSFULLY".
-                if (line.contains("Services are still running")) { completed = true; break; }
+                if (line.contains("RUN FINISHED") || line.contains("Services are still running")) { completed = true; break; }
                 if (line.startsWith("BUILD FAILED")) break;
             }
         }

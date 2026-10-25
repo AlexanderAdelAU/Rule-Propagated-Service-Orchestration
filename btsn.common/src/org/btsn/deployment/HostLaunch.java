@@ -33,6 +33,8 @@ import java.util.stream.Stream;
  *   collect     plan=... classpath=... dir=... generator=class operation=... version=v999 process=... queryVersion=v001 delay=3
  *               Sends each host its administrative token (initialise also Monitor's), the first host's call deploying
  *               the process's rules.
+ *   settle      database=dir quiet=6 limit=180
+ *               Waits until Monitor has written what the collectors sent: its database unchanged for quiet seconds.
  */
 public final class HostLaunch {
     private HostLaunch() { }
@@ -50,6 +52,7 @@ public final class HostLaunch {
             case "start": start(a); break;
             case "initialise": administer(a, true); break;
             case "collect": administer(a, false); break;
+            case "settle": settle(a); break;
             default: throw new IllegalArgumentException("Unknown command: " + args[0]);
         }
     }
@@ -155,6 +158,30 @@ public final class HostLaunch {
         if (skipDeploy) command.add("-skipDeploy");
         int exit = new ProcessBuilder(command).directory(new File(required(a, "dir"))).inheritIO().start().waitFor();
         if (exit != 0) throw new IllegalStateException(service + " " + (initialise ? "initialisation" : "collection") + " failed (exit " + exit + ")");
+    }
+
+    /** Collection ends when Monitor has stored the records: its database stops changing. */
+    static void settle(Map<String, String> a) throws Exception {
+        Path database = Path.of(required(a, "database"));
+        long quiet = Long.parseLong(a.getOrDefault("quiet", "6")) * 1000, limit = Long.parseLong(a.getOrDefault("limit", "180")) * 1000;
+        long start = System.currentTimeMillis(), last = latestChange(database), quietSince = start;
+        while (System.currentTimeMillis() - start < limit) {
+            Thread.sleep(1000);
+            long now = latestChange(database);
+            if (now != last) { last = now; quietSince = System.currentTimeMillis(); }
+            else if (System.currentTimeMillis() - quietSince >= quiet) {
+                System.out.println("Monitor has stored the collected records (" + (System.currentTimeMillis() - start) / 1000 + " s).");
+                return;
+            }
+        }
+        System.out.println("Monitor was still writing after " + limit / 1000 + " s; the analysis may miss its last records.");
+    }
+
+    private static long latestChange(Path folder) throws IOException {
+        if (!Files.isDirectory(folder)) return 0;
+        try (Stream<Path> files = Files.walk(folder)) {
+            return files.mapToLong(p -> p.toFile().lastModified()).max().orElse(0);
+        }
     }
 
     private static String java() {

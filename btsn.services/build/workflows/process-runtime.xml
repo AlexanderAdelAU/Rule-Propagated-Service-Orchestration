@@ -106,14 +106,7 @@
         </sequential>
     </macrodef>
 
-    <target name="prepare-administration" depends="prepare-runtime" description="Generate the initialiser and collector for this run's hosts">
-        <java classname="org.btsn.deployment.HostAdministration" fork="true" failonerror="true" classpathref="generator.classpath">
-            <syspropertyset><propertyref regex="^run\.p[0-9]+$"/></syspropertyset>
-            <arg value="processes"/><arg file="${common.project.dir}"/><arg value="${hosts}"/>
-        </java>
-    </target>
-
-    <target name="resolve-deployment-modes" depends="prepare-runtime,prepare-administration,detect-local-channel">
+    <target name="resolve-deployment-modes" depends="prepare-runtime,detect-local-channel">
         <host-launch command="plan"><arg value="hosts=${hosts}"/><arg value="launch=${local.channel.result}"/><arg value="out=${hosts.plan.file}"/></host-launch>
         <property file="${hosts.plan.file}"/>
         <resolve-local-launch component="monitor" mode="${monitor.mode}"/>
@@ -185,7 +178,7 @@
 
     <!-- Versions published live (egN.publish.at.seconds) are compiled when they are published, not here:
          nothing about such a version exists before its publication. -->
-    <target name="generate-workflow-bindings" depends="prepare-runtime,prepare-administration" description="Generate canonical bindings and master rules for each version deployed at the start">
+    <target name="generate-workflow-bindings" depends="prepare-runtime" description="Generate canonical bindings and master rules for each version deployed at the start">
         <prepare-version slot="eg1" unless:set="eg1.publish.at.seconds"/>
         <prepare-version slot="eg2" unless:set="eg2.publish.at.seconds"/>
         <prepare-version slot="eg3" unless:set="eg3.publish.at.seconds"/>
@@ -284,10 +277,16 @@
                     <arg value="version=${collector.version}"/><arg value="process=${collector.process.name}"/>
                     <arg value="queryVersion=${query.version}"/><arg value="delay=${collector.delay.seconds}"/>
                 </host-launch>
+                <!-- Collection is finished only when Monitor has stored what the collectors sent: do not stop before. -->
+                <echo message="Collection requests sent; waiting for Monitor to store the hosts' records - keep the run going..."/>
+                <host-launch command="settle" if:set="monitor.is.local">
+                    <arg value="database=${monitor.project.dir}/ServiceAnalysisDataBase"/>
+                </host-launch>
+                <echo message="Monitor runs on another machine: wait until it has stored the records before analysing." unless:set="monitor.is.local"/>
                 <echo message="=== Phase 3 Complete ==="/>
                 <echo message="${process.title} COMPLETED SUCCESSFULLY"/>
-                <echo message="Analyse with: ant -f ${ant.file} analyse"/>
-                <echo message="Services are still running. Press Ctrl+C to stop."/>
+                <echo message="RUN FINISHED: every phase is done and Monitor holds the collected records."/>
+                <echo message="The hosts are still up; stop them now (Ctrl+C), then analyse with: ant -f ${ant.file} analyse"/>
             </sequential>
         </parallel>
     </target>
