@@ -14,17 +14,19 @@ same process runs across different machines. A service can run inside its host
 hosted locally or on the internet. No central engine routes the
 tokens; each host follows its own installed rules.
 
-Every run is measured as it happens (queue waits, service times, join waits and
-end-to-end workflow time) and can be replayed on the model. These are
-measurements, not guarantees of meeting hard real-time deadlines.
+![An emergency-department process in the editor: patient arrivals pass Triage, whose gateway sends them to Laboratory, Cardiology and Radiology, which join before Diagnosis, then Treatment; a triage canary and federated radiology requests from another hospital enter beside them. Each place runs on its own host, P1 to P6; dashed lines are network connections.](images/emergency-department-concurrent.png)
+
+*For example, three versions of an emergency-department process running at once on six hosts: the full patient workflow (v003), a triage canary (v002) and federated radiology requests from another hospital (v001), each deployed and measured separately.*
+
+How does a drawing like this become a running system? Each place runs on a host of its own:
 
 ![The Petri net you draw is the system that runs: a four-place model on the left, where P1 forks to P2 and P3 and they join before P4, is deployed as local rules to four separate hosts on the right. Each host runs its own T_in, place function and T_out; tokens travel between hosts as messages with no central engine, and Monitor observes every host for complete Petri-net analysis.](images/rpso-overview.svg)
 
 *Draw the net, deploy its rules, run it as separate hosts. A place can be any service: a Boolean function, a credit check or a clinical diagnosis.*
 
-![An emergency-department process in the editor: patient arrivals pass Triage, whose gateway sends them to Laboratory, Cardiology and Radiology, which join before Diagnosis, then Treatment; a triage canary and federated radiology requests from another hospital enter beside them. Each place runs on its own host, P1 to P6; dashed lines are network connections.](images/emergency-department-concurrent.png)
-
-*Three versions of an emergency-department process running at once on six hosts: the full patient workflow (v003), a triage canary (v002) and federated radiology requests from another hospital (v001), each deployed and measured separately. It is built from the same parts as the one-place example that follows.*
+Every run is measured as it happens (queue waits, service times, join waits and
+end-to-end workflow time) and can be replayed on the model. These are
+measurements, not guarantees of meeting hard real-time deadlines.
 
 ## From an idea to a measured run
 
