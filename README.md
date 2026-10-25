@@ -22,9 +22,13 @@ measurements, not guarantees of meeting hard real-time deadlines.
 
 *Draw the net, deploy its rules, run it as separate hosts. A place can be any service: a Boolean function, a credit check or a clinical diagnosis.*
 
+![An emergency-department process in the editor: patient arrivals pass Triage, whose gateway sends them to Laboratory, Cardiology and Radiology, which join before Diagnosis, then Treatment; a triage canary and federated radiology requests from another hospital enter beside them. Each place runs on its own host, P1 to P6; dashed lines are network connections.](images/emergency-department-concurrent.png)
+
+*Three versions of an emergency-department process running at once on six hosts: the full patient workflow (v003), a triage canary (v002) and federated radiology requests from another hospital (v001), each deployed and measured separately. It is built from the same parts as the one-place example that follows.*
+
 ## From an idea to a measured run
 
-You build a process graphically in the editor, run it on real hosts and replay the
+Let's start with something simple. You build a process graphically in the editor, run it on real hosts and replay the
 recorded run on the design. [Tutorial.md](Tutorial.md) walks you through two examples:
 
 1. **A standard service** that returns true or false: one place, a loop and ten tokens.
@@ -66,7 +70,7 @@ The detail is in [Reference.md](Reference.md).
 - [From the architecture pattern to a running service](Reference.md#from-the-architecture-pattern-to-a-running-service): from one place to six, and the financial and healthcare workflows
 - [Architecture: coordination and business meaning](Reference.md#architecture-coordination-and-business-meaning)
 - [Rule deployment and token execution](Reference.md#rule-deployment-and-token-execution)
-- [Execution examples](Reference.md#execution-examples)
+- [Execution examples](Reference.md#execution-examples), including the [concurrent healthcare run](Reference.md#concurrent-healthcare-execution) pictured above
 
 **The repository**
 
