@@ -3500,6 +3500,8 @@ public class Canvas extends JPanel {
                 json.append(",\n      \"rotation\": ").append(element.getRotationAngle());
                 json.append(",\n      \"generator_rate\": \"").append(escapeJSON(element.getGeneratorRate())).append("\"");
                 json.append(",\n      \"token_version\": \"").append(escapeJSON(element.getTokenVersion())).append("\"");
+                if (!element.getTokenData().isEmpty())
+                    json.append(",\n      \"token_data\": \"").append(escapeJSON(element.getTokenData())).append("\"");
                 
                 // A generator feeds one place; forks are a place's T_out, so no fork_behavior is saved.
             } else {
@@ -3766,6 +3768,8 @@ public class Canvas extends JPanel {
                 if (tokenVersion != null && !tokenVersion.isEmpty()) {
                     element.setTokenVersion(tokenVersion);
                 }
+                String tokenData = extractValue(block, "token_data");
+                if (tokenData != null) element.setTokenData(tokenData);
                 
                 // Parse fork_behavior if present
                 if (block.contains("\"fork_behavior\"")) {

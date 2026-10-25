@@ -73,6 +73,28 @@ public final class GeneratorRoleCheck {
                 check(open.generatorBadge(arrivals) == null && "Arrivals: one token per arrival into P1.".equals(open.generatorRoleText(arrivals)), open.generatorRoleText(arrivals));
                 check(open.generatorMarkings().isEmpty(), "Arrivals reported as a marking");
 
+                // Token data: typed in the generator's Attributes, saved with the process, written to the launcher as egN.data.
+                EditorFrame egAttributes = new EditorFrame(open); egAttributes.updateSelection(arrivals);
+                JTextField dataField = null;
+                for (JTextField f : fields(egAttributes)) if (f.getToolTipText() != null && f.getToolTipText().contains("name=value")) dataField = f;
+                check(dataField != null && dataField.getText().isEmpty(), "No Token data field on a generator");
+                dataField.setText("application_id = LOAN-1, annual_income=85000");
+                check("application_id = LOAN-1, annual_income=85000".equals(arrivals.getTokenData()), "Token data not set: " + arrivals.getTokenData());
+                Canvas reopened = new Canvas(); reopened.setDefinitionLocation(tutorial); reopened.loadFromJSON(open.saveToJSON());
+                check("application_id = LOAN-1, annual_income=85000".equals(reopened.findEventGeneratorByLabel("P1_EVENTGENERATOR").getTokenData()), "Token data not saved");
+                BuildAndRunGenerator.Plan dplan = BuildAndRunGenerator.plan(open, tutorial);
+                check(dplan.problems.isEmpty() && "application_id=LOAN-1,annual_income=85000".equals(dplan.data.get(arrivals.getId())), "Plan data: " + dplan.problems + " " + dplan.data);
+                check(BuildAndRunGenerator.launcherXml(dplan, dplan.defaults).contains("name=\"eg1.data\" value=\"application_id=LOAN-1,annual_income=85000\""), "Launcher has no eg1.data");
+                check(BuildAndRunGenerator.summary(dplan, dplan.defaults).stream().anyMatch(l -> l.startsWith("Data     every token from " + arrivals.getId() + " carries application_id=LOAN-1")), "Summary has no data line");
+                arrivals.setTokenData("not pairs");
+                check(BuildAndRunGenerator.plan(open, tutorial).problems.stream().anyMatch(m -> m.contains("Token data is not name=value pairs")), "Bad token data not reported");
+
+                // The financial processes carry the application their services validate.
+                File preScreen = new File(common, "ProcessDefinitionFolder/financial/Workflow/FinancialSystem_Stage3_PreScreen_Workflow.json");
+                Canvas fin = load(preScreen);
+                BuildAndRunGenerator.Plan fplan = BuildAndRunGenerator.plan(fin, preScreen);
+                check(fplan.problems.isEmpty() && String.join(" ", fplan.data.values()).contains("application_id=PRESCREEN-1"), "Pre-screen data: " + fplan.problems + " " + fplan.data);
+
                 // The runtime's own initialiser reaches every host from one generator and is never checked as a marking;
                 // the same net in a business process reads as a marking of one token per host place.
                 Canvas admin = load(initializer);
@@ -122,7 +144,7 @@ public final class GeneratorRoleCheck {
             } catch (Throwable t) { failure[0] = t; }
         });
         if (failure[0] != null) throw new AssertionError("Generator roles", failure[0]);
-        System.out.println("PASS: a generator into a JoinNode T_in sets the initial marking (traffic light: 2 tokens, once) and the author is told: badge on the diagram, Role box with Rate greyed out, Validate reminder, Build summary and row; two generators on one join reported; an arrival generator says so; initialisers exempt; a marking over several places (Rendezvous) is shown, planned and written as eg1.marking; each arc's count is set in its Attributes and bad counts are reported; saving keeps joinInputCount and arc counts");
+        System.out.println("PASS: a generator into a JoinNode T_in sets the initial marking (traffic light: 2 tokens, once) and the author is told: badge on the diagram, Role box with Rate greyed out, Validate reminder, Build summary and row; two generators on one join reported; an arrival generator says so; initialisers exempt; a marking over several places (Rendezvous) is shown, planned and written as eg1.marking; each arc's count is set in its Attributes and bad counts are reported; saving keeps joinInputCount and arc counts; a generator's Token data is saved and written as egN.data, malformed data reported");
     }
 
     private static Canvas load(File process) throws Exception {
