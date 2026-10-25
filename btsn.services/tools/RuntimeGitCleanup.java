@@ -155,6 +155,8 @@ public final class RuntimeGitCleanup {
 
     private List<String> discover() throws IOException {
         List<String> components = new ArrayList<>(Arrays.asList("btsn.common.Monitor", "btsn.common.eventgenerators"));
+        components.add("btsn.rpso.host");
+        // Hosts were six numbered projects before btsn.rpso.host; their local outputs may still be on disk.
         for (int n = 1; n <= 6; n++) components.add("btsn.rpso.places.p" + n);
         List<String> result = new ArrayList<>();
         for (String component : components) {
@@ -185,7 +187,7 @@ public final class RuntimeGitCleanup {
             Path path = Path.of(name).normalize();
             require(path.getNameCount() == 2 && !path.isAbsolute() && !name.contains("..") && runtimeName(path.getFileName().toString()), "Invalid runtime root: " + name);
             String component = path.getName(0).toString();
-            require(component.equals("btsn.common.Monitor") || component.equals("btsn.common.eventgenerators") || component.matches("btsn\\.rpso\\.places\\.p[1-6]"), "Invalid component: " + component);
+            require(component.equals("btsn.common.Monitor") || component.equals("btsn.common.eventgenerators") || component.equals("btsn.rpso.host") || component.matches("btsn\\.rpso\\.places\\.p[1-6]"), "Invalid component: " + component);
         }
     }
 

@@ -14,6 +14,9 @@ common = root / "btsn.common"
 libraries = os.pathsep.join(str(path) for path in (common / "lib").glob("*.jar"))
 sources = [
     common / "src/org/btsn/invocation/BusinessCapabilityResolver.java",
+    common / "src/org/btsn/invocation/BooleanTokenAdapter.java",
+    common / "src/org/btsn/invocation/RestAdapter.java",
+    common / "src/org/btsn/deployment/DeploymentConfiguration.java",
     common / "src/org/btsn/json/jsonLibrary.java",
     common / "src/org/btsn/business/BaseBusinessService.java",
     common / "src/org/btsn/base/BaseStochasticPetriNetPlace.java",
@@ -25,11 +28,11 @@ sources = [
     *sorted((common / "src/org/btsn/business/financial").glob("*.java")),
     common / "tests/org/btsn/invocation/BusinessCapabilityResolverTest.java",
 ]
-# Deliberately exclude all P1-P6 placeholder classes: the resolver must invoke
-# business implementations without a physical adapter available as a fallback.
+# Hosts have no place classes: the resolver must invoke business implementations
+# without a physical adapter available as a fallback.
 
-helpers = [root / f"btsn.rpso.places.p{index}/src/org/btsn/handlers/ServiceHelper.java" for index in range(1, 7)]
-assert len({path.read_bytes() for path in helpers}) == 1, "P1-P6 ServiceHelper copies differ"
+# Every node runs the one host program, so there is one invocation boundary.
+helpers = [root / "btsn.rpso.host/src/org/btsn/handlers/ServiceHelper.java"]
 with tempfile.TemporaryDirectory(prefix="capability-check-") as temporary:
     work = Path(temporary)
     classes = work / "classes"
@@ -45,5 +48,5 @@ with tempfile.TemporaryDirectory(prefix="capability-check-") as temporary:
                         "-d", str(output), str(helper)], check=True)
     subprocess.run(["java", "-cp", classpath, "org.btsn.invocation.BusinessCapabilityResolverTest",
                     str(common)], cwd=work, check=True)
-print("PASS: all six synchronized invocation boundaries compile")
-print("PASS: metadata-selected implementations execute on all six host identities with all placeholders absent")
+print("PASS: the host invocation boundary compiles")
+print("PASS: metadata-selected implementations execute with no place classes present")

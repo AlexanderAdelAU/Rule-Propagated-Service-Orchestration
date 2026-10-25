@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Used by one numbered place at a time. No other place or business build is invoked. -->
+<!-- Builds the host release: one executable JAR that runs as any node. No business build is invoked. -->
 <project name="individual-place-release-support" basedir="../..">
     <property name="host.address" value=""/>
     <property name="place.release.root" location="${host.target}/release"/>
@@ -7,7 +7,7 @@
     <property name="place.release.jar" location="${place.release.dir}/${host.artifact}.jar"/>
     <property name="place.release.zip" location="${host.target}/${host.artifact}.zip"/>
     <path id="place.compile.dependencies"><fileset dir="${common.dir}/lib" includes="*.jar"/></path>
-    <target name="place-compile" description="Compile this place and shared infrastructure only">
+    <target name="place-compile" description="Compile the host and shared infrastructure only">
         <delete dir="${host.target}/place-classes"/>
         <mkdir dir="${host.target}/place-classes"/>
         <mkdir dir="${host.target}/place-empty-sourcepath"/>
@@ -26,7 +26,7 @@
         <copy todir="${host.target}/place-classes"><fileset dir="${common.dir}/src" excludes="**/*.java,**/*.class,org/btsn/business/**,org/btsn/services/**"/></copy>
         <copy todir="${host.target}/place-classes"><fileset dir="${basedir}/src" excludes="**/*.java,**/*.class"/></copy>
     </target>
-    <target name="place-release" depends="place-compile" description="Package this place's executable JAR, dependencies, configuration and manual launch commands">
+    <target name="place-release" depends="place-compile" description="Package the host's executable JAR, dependencies, configuration and manual launch commands">
         <delete dir="${place.release.root}"/>
         <delete file="${host.target}/btsn-services.zip"/>
         <mkdir dir="${place.release.dir}/lib"/>
@@ -52,26 +52,29 @@
         </copy>
         <echo file="${place.release.root}/launch.bat">@echo off
 cd /d "%~dp0${host.artifact}"
-java -jar ${host.artifact}.jar -version v001 %*
+if "%~1"=="" (echo Name the node to run, for example: launch.bat P3 &amp; exit /b 1)
+java -jar ${host.artifact}.jar -version v001 -node %*
 </echo>
         <echo file="${place.release.root}/launch.sh">#!/bin/sh
 cd "$(dirname "$0")/${host.artifact}" || exit 1
-exec java -jar ${host.artifact}.jar -version v001 "$@"
+[ -n "$1" ] || { echo "Name the node to run, for example: sh launch.sh P3"; exit 1; }
+exec java -jar ${host.artifact}.jar -version v001 -node "$@"
 </echo>
-        <echo file="${place.release.root}/README.txt">${host.artifact} independent infrastructure release
+        <echo file="${place.release.root}/README.txt">${host.artifact} release: the host program every node runs
 
 Copy this ZIP to the destination machine and extract the entire ZIP into its own writable folder.
-Windows: run launch.bat
-Linux/macOS: run sh launch.sh
+Name the node this machine runs (as the infrastructure definition names it):
+Windows: run launch.bat P3
+Linux/macOS: run sh launch.sh P3
 Java 15+ must be installed. Ant and the source repository are not required there.
 
 The executable JAR is ${host.artifact}/${host.artifact}.jar.
 Keep its lib folder, service configuration and sibling btsn.common folder with it.
 To start it directly, open a terminal in ${host.artifact} and run:
-java -jar ${host.artifact}.jar -version v001
+java -jar ${host.artifact}.jar -version v001 -node P3
 
-This package contains only this numbered place, shared infrastructure and external libraries.
-It does not contain any business implementation JAR or another numbered place.
+This package contains only the host, shared infrastructure and external libraries.
+It does not contain any business implementation JAR.
 Business-service builds, launches and the separate invocation boundary are outside this step.
 The existing ServiceLoader, ServiceThread and ServiceHelper have not been changed.
 
@@ -89,7 +92,7 @@ Close the console or press Ctrl+C to stop this program.
         <echo>Independent executable JAR: ${place.release.jar}</echo>
         <echo>Independent place ZIP: ${place.release.zip}</echo>
     </target>
-    <target name="check-release" depends="place-release" description="Start this place from its extracted ZIP without a source checkout or business JARs">
+    <target name="check-release" depends="place-release" description="Start the host as a node from its extracted ZIP without a source checkout or business JARs">
         <mkdir dir="${host.target}/place-check"/>
         <javac srcdir="${services.dir}/tests" destdir="${host.target}/place-check" includes="IndividualPlaceReleaseCheck.java"
                release="${java.release}" includeantruntime="false"/>

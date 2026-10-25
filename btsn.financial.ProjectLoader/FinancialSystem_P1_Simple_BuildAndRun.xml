@@ -7,8 +7,6 @@
     <property name="process.title" value="financial/Workflow/FinancialSystem_P1_Simple"/>
     <property name="launcher.profile.file" location="../btsn.services/deployments/financial/Deployment.json"/>
     <property name="workflow.process.name" value="financial/Workflow/FinancialSystem_P1_Simple"/>
-    <property name="init.process.name" value="common/Initializers/P1_Initialization"/>
-    <property name="collector.process.name" value="common/Collectors/P1_Collector"/>
     <property name="rule.version" value="v001"/>
     <property name="query.version" value="v001"/>
 
@@ -21,9 +19,8 @@
     <property name="token.count" value="10"/>
     <property name="workflow.completion.seconds" value="5"/>
 
-    <!-- Hosts used by the service deployment -->
-    <property name="run.p1" value="true"/>
-    <property name="first.node" value="p1"/>
+    <!-- Hosts used by the service deployment: nodes of the infrastructure, each running the host program -->
+    <property name="hosts" value="P1"/>
 
     <import file="../btsn.services/process-runtime.xml"/>
 </project>

@@ -92,8 +92,8 @@ public final class QueuePriorityProbe {
     }
     public static void main(String[] args) throws Exception {
         String reactorOrigin = EventReactor.class.getProtectionDomain().getCodeSource().getLocation().toString();
-        if (!reactorOrigin.endsWith("/btsn.rpso.places.p1.jar"))
-            throw new AssertionError("Expected packaged P1 scheduler, loaded " + reactorOrigin);
+        if (!reactorOrigin.endsWith("/btsn.rpso.host.jar"))
+            throw new AssertionError("Expected the packaged host scheduler, loaded " + reactorOrigin);
         Path output = Path.of(args[0]);
         int repeats = Integer.parseInt(args[1]), requestedPort = Integer.parseInt(args[2]);
         boolean openResults = args.length < 4 || Boolean.parseBoolean(args[3]);

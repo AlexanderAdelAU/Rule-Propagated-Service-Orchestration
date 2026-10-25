@@ -5,17 +5,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.jar.*;
 import java.util.zip.*;
 
-/** Starts each place directly from its independent extracted release, without business JARs. */
+/** Starts the host as a node directly from its extracted release, without business JARs. */
 public final class IndividualPlaceReleaseCheck {
     public static void main(String[] args) throws Exception {
         Path repository = Path.of(args[0]);
-        if (args.length == 2) check(repository, Integer.parseInt(args[1].substring(args[1].lastIndexOf('p') + 1)));
-        else for (int n = 1; n <= 6; n++) check(repository, n);
-        System.out.println("PASS: independent executable place release startup without business implementation JARs");
+        for (int n : new int[] {1, 2}) check(repository, n);
+        System.out.println("PASS: one executable host release starts as each node without business implementation JARs");
     }
     private static void require(boolean ok, String message) { if (!ok) throw new AssertionError(message); }
     private static void check(Path repository, int number) throws Exception {
-        String artifact = "btsn.rpso.places.p" + number;
+        String artifact = "btsn.rpso.host";
         Path zip = repository.resolve(artifact + "/target/" + artifact + ".zip");
         Path root = Files.createTempDirectory("independent P" + number + " release ");
         try (ZipInputStream input = new ZipInputStream(Files.newInputStream(zip))) {
@@ -26,9 +25,6 @@ public final class IndividualPlaceReleaseCheck {
                 if (entry.isDirectory()) Files.createDirectories(target);
                 else { Files.createDirectories(target.getParent()); Files.copy(input, target); }
             }
-        }
-        for (int other = 1; other <= 6; other++) {
-            if (other != number) require(!Files.exists(root.resolve("btsn.rpso.places.p" + other)), "Release contains another numbered place");
         }
         Path work = root.resolve(artifact), jar = work.resolve(artifact + ".jar");
         try (JarFile input = new JarFile(jar.toFile())) {
@@ -42,13 +38,12 @@ public final class IndividualPlaceReleaseCheck {
                 require(!name.startsWith("org/btsn/business/") && !name.startsWith("org/btsn/services/")
                     && !name.contains("BaseStochasticPetriNetPlace") && !name.contains("BaseBusinessPetriNetPlace")
                     && !name.contains("BaseHealthcareService"), "Business code in place JAR: " + name);
-                if (name.matches("org/btsn/places/P[1-6]_.*\\.class"))
-                    require(name.startsWith("org/btsn/places/P" + number + "_"), "Another place class included: " + name);
+                require(!name.matches("org/btsn/places/P\\d+_.*\\.class"), "A numbered place class is included: " + name);
             }
         }
         Path log = root.resolve("startup.log");
         Process process = new ProcessBuilder(Path.of(System.getProperty("java.home"), "bin", "java").toString(),
-            "-jar", jar.toString(), "-version", "v001").directory(work.toFile()).redirectErrorStream(true).redirectOutput(log.toFile()).start();
+            "-jar", jar.toString(), "-version", "v001", "-node", "P" + number).directory(work.toFile()).redirectErrorStream(true).redirectOutput(log.toFile()).start();
         try {
             long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(25);
             boolean ready = false;
@@ -66,7 +61,7 @@ public final class IndividualPlaceReleaseCheck {
                 Thread.sleep(50);
             }
             require(ready, "Place threads did not start: " + log);
-            System.out.println("PASS: P" + number + " portable JAR, own place only, no business implementations, service and rule-handler startup; " + root);
+            System.out.println("PASS: portable host JAR started as P" + number + ", no business implementations, service and rule-handler startup; " + root);
         } finally {
             process.destroy(); if (!process.waitFor(10, TimeUnit.SECONDS)) process.destroyForcibly();
         }

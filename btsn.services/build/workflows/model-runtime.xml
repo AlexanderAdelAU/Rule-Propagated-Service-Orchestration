@@ -63,12 +63,6 @@
         <java classname="org.btsn.deployment.GenerateDeploymentRules" fork="true" failonerror="true" dir="${common.project.dir}">
             <classpath refid="generator.classpath"/><arg file="${common.project.dir}"/><arg value="${host.address}"/>
         </java>
-        <copy-model-component directory="btsn.rpso.places.p1"/>
-        <copy-model-component directory="btsn.rpso.places.p2"/>
-        <copy-model-component directory="btsn.rpso.places.p3"/>
-        <copy-model-component directory="btsn.rpso.places.p4"/>
-        <copy-model-component directory="btsn.rpso.places.p5"/>
-        <copy-model-component directory="btsn.rpso.places.p6"/>
         <copy-model-component directory="btsn.common.eventgenerators"/>
         <!-- The existing admin generators use this spelling, including on Linux. -->
         <copy file="${source.root}/btsn.common.eventgenerators/PayLoad/payload.xml" tofile="${generator.project.dir}/Payload/payLoad.xml"/>

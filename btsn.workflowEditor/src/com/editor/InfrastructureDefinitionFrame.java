@@ -400,8 +400,18 @@ public class InfrastructureDefinitionFrame extends JFrame {
         } else {
             node.channel = "ip0";
         }
-        node.basePorts.add(4000 + number);
+        // The first free port from 4000 + number (P7 gets 4009 when P4 and P6 already use 4007 and 4008).
+        Set<Integer> taken = new HashSet<>();
+        for (NodeNetwork n : nodes) if (n.channel.equals(node.channel)) taken.addAll(n.basePorts);
+        int port = 4000 + number;
+        while (taken.contains(port) || reservedPort(port)) port++;
+        node.basePorts.add(port);
         return node;
+    }
+
+    /** Ports hosts keep for their own administrative services: Pn's collector on 4100+n-1, its initialiser on 4300+n-1. */
+    static boolean reservedPort(int port) {
+        return (port >= 4100 && port <= 4198) || (port >= 4300 && port <= 4398);
     }
 
     private int allocateSlot(NodeNetwork node) {
@@ -1086,7 +1096,11 @@ public class InfrastructureDefinitionFrame extends JFrame {
             if (n.basePorts.isEmpty()) errors.add(identity + ": At least one fixed base port is required.");
             for (int port : n.basePorts) {
                 if (port <= 0 || port > 45535) errors.add(identity + ": Base ports must be between 1 and 45535.");
+                else if (!deploymentEditor && reservedPort(port))
+                    errors.add(identity + ": Port " + port + " is kept for the hosts' own services (4100-4198 and 4300-4398); choose another.");
             }
+            if (!deploymentEditor && !blank(n.node) && n.node.matches("P\\d+") && !n.node.matches("P[1-9]\\d?"))
+                errors.add(identity + ": Host nodes are named P1 to P99.");
             if (!blank(n.channel) && !blank(n.address)) {
                 String existing = channelAddresses.put(n.channel, n.address);
                 if (existing != null && !existing.equals(n.address)) {

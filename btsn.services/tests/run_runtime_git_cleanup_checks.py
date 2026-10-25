@@ -15,7 +15,7 @@ subprocess.run(["java", "-m", "jdk.compiler/com.sun.tools.javac.Main", "--releas
 ROOTS = ["btsn.common.Monitor/ServiceAnalysisDataBase", "btsn.common.Monitor/processMonitorDB",
          "btsn.common.Monitor/ServiceMonitorDatabase", "btsn.common.Monitor/RuleFolder.v999",
          "btsn.common.Monitor/charts", "btsn.common.Monitor/WorkflowRunMetadata",
-         "btsn.rpso.places.p1/ServiceAnalysisDatabase", "btsn.rpso.places.p1/RuleFolder.v001",
+         "btsn.rpso.host/ServiceAnalysisDatabase", "btsn.rpso.host/RuleFolder.v001",
          "btsn.common.eventgenerators/RuleFolder.v002"]
 
 def git(root, *args):
@@ -36,7 +36,7 @@ def fixture(name):
     source = root / "btsn.common.Monitor/src/Untouched.java"
     source.parent.mkdir()
     source.write_bytes(b"// user source\r\n")
-    settings = root / "btsn.rpso.places.p1/.project"
+    settings = root / "btsn.rpso.host/.project"
     settings.write_bytes(b"<project>keep</project>\r\n")
     return root
 
@@ -74,7 +74,7 @@ saved = backup(prepare)
 assert saved.parent == root.parent
 assert all(not (root / relative).exists() for relative in ROOTS)
 assert (root / "btsn.common.Monitor/src/Untouched.java").read_bytes() == b"// user source\r\n"
-assert (root / "btsn.rpso.places.p1/.project").read_bytes() == b"<project>keep</project>\r\n"
+assert (root / "btsn.rpso.host/.project").read_bytes() == b"<project>keep</project>\r\n"
 run(root, "prepare")  # Repeat preparation preserves the same backup.
 run(root, "restore", ok=False)  # Final ignore/tracking cleanup is required.
 git(root, "merge", "--ff-only", after)

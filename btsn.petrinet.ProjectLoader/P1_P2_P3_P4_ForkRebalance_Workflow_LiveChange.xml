@@ -19,8 +19,6 @@
     <property name="process.title" value="petrinet/LiveChange/P1_P2_P3_P4_ForkRebalance_Workflow (v001, then v002 published live)"/>
     <property name="launcher.profile.file" location="../btsn.services/deployments/models/P1_P2_P3_P4_ForkRebalance_WorkflowDeployment.json"/>
     <property name="workflow.process.name" value="petrinet/LiveChange/P1_P2_P3_P4_ForkRebalance_Workflow"/>
-    <property name="init.process.name" value="common/Initializers/P1_P2_P3_P4_P6_Initialization"/>
-    <property name="collector.process.name" value="common/Collectors/P1_P2_P3_P4_P6_Collector"/>
     <property name="rule.version" value="v001"/>
     <property name="query.version" value="v001,v002"/>
 
@@ -50,12 +48,7 @@
     <property name="infrastructure" value="ThreeHost"/>
 
     <!-- Hosts used by either version; P6 is the standby -->
-    <property name="run.p1" value="true"/>
-    <property name="run.p2" value="true"/>
-    <property name="run.p3" value="true"/>
-    <property name="run.p4" value="true"/>
-    <property name="run.p6" value="true"/>
-    <property name="first.node" value="p1"/>
+    <property name="hosts" value="P1,P2,P3,P4,P6"/>
 
     <import file="../btsn.services/process-runtime.xml"/>
 </project>

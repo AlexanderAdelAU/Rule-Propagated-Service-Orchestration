@@ -140,37 +140,41 @@
 			<!-- ============================================================= -->
 
 			<!-- P1 Service -->
+			<prepare-host-folder node="P1"/>
 			<java classname="${service.loader.class}" fork="true"
-			      dir="${p1.project.dir}" output="${p1.output.file}">
-				<classpath refid="p1.classpath" />
-				<arg value="${p1.project.dir}" />
+			      dir="${launcher.runtime.dir}/P1" output="${p1.output.file}">
+				<classpath refid="host.classpath" />
+				<arg value="${launcher.runtime.dir}/P1" /><arg value="-node" /><arg value="P1" />
 				<arg value="-version" />
 				<arg value="${rule.version}" />
 			</java>
 
 			<!-- P2 Service -->
+			<prepare-host-folder node="P2"/>
 			<java classname="${service.loader.class}" fork="true"
-			      dir="${p2.project.dir}" output="${p2.output.file}">
-				<classpath refid="p2.classpath" />
-				<arg value="${p2.project.dir}" />
+			      dir="${launcher.runtime.dir}/P2" output="${p2.output.file}">
+				<classpath refid="host.classpath" />
+				<arg value="${launcher.runtime.dir}/P2" /><arg value="-node" /><arg value="P2" />
 				<arg value="-version" />
 				<arg value="${rule.version}" />
 			</java>
 
 			<!-- P3 Service -->
+			<prepare-host-folder node="P3"/>
 			<java classname="${service.loader.class}" fork="true"
-			      dir="${p3.project.dir}" output="${p3.output.file}">
-				<classpath refid="p3.classpath" />
-				<arg value="${p3.project.dir}" />
+			      dir="${launcher.runtime.dir}/P3" output="${p3.output.file}">
+				<classpath refid="host.classpath" />
+				<arg value="${launcher.runtime.dir}/P3" /><arg value="-node" /><arg value="P3" />
 				<arg value="-version" />
 				<arg value="${rule.version}" />
 			</java>
 
 			<!-- P4 Service -->
+			<prepare-host-folder node="P4"/>
 			<java classname="${service.loader.class}" fork="true"
-			      dir="${p4.project.dir}" output="${p4.output.file}">
-				<classpath refid="p4.classpath" />
-				<arg value="${p4.project.dir}" />
+			      dir="${launcher.runtime.dir}/P4" output="${p4.output.file}">
+				<classpath refid="host.classpath" />
+				<arg value="${launcher.runtime.dir}/P4" /><arg value="-node" /><arg value="P4" />
 				<arg value="-version" />
 				<arg value="${rule.version}" />
 			</java>

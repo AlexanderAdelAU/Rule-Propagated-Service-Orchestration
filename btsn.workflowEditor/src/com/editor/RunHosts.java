@@ -32,13 +32,13 @@ public final class RunHosts {
     private static final Pattern CALL = Pattern.compile("SERVICE COMPLETE: org\\.btsn\\.places\\.\\w+_Place\\.");
     private static final Pattern CONFIRMATION = Pattern.compile("commitment confirmation received: (v\\d+):\\d+");
     private static final Pattern COMMITTED = Pattern.compile("Commitment confirmed for (\\w+):\\w+");
-    private static final Pattern SKIPPED = Pattern.compile("\\[(p\\d|monitor)\\] Skipping - running on remote host");
+    private static final Pattern SKIPPED = Pattern.compile("\\[([pP]\\d+|monitor)\\] Skipping - running on remote host");
 
     public final List<Host> hosts = new ArrayList<>();
     private long runStart;
     private String confirmingVersion = "";
 
-    /** The hosts a launcher starts (its run.pN properties) and Monitor, with their endpoints from SingleHost.json. */
+    /** The hosts a launcher starts (its hosts property, or run.pN in older launchers) and Monitor, with their endpoints from SingleHost.json. */
     public static RunHosts forLauncher(File launcher, File root, boolean allHostsHere) {
         return forLauncher(launcher, root, allHostsHere, ServiceRegistry.DEFAULT_INFRASTRUCTURE);
     }
@@ -49,9 +49,14 @@ public final class RunHosts {
         String xml;
         try { xml = new String(Files.readAllBytes(launcher.toPath()), StandardCharsets.UTF_8); } catch (IOException ex) { xml = ""; }
         Map<String, String> endpoints = endpoints(new File(root, "btsn.common/InfrastructureDefinitionFolder/" + infrastructure + ".json"), allHostsHere);
-        Matcher m = Pattern.compile("name=\"run\\.(p\\d)\"\\s+value=\"true\"").matcher(xml);
-        Set<String> nodes = new TreeSet<>();
-        while (m.find()) nodes.add(m.group(1).toUpperCase(Locale.ROOT));
+        Set<String> nodes = new TreeSet<>(java.util.Comparator.comparingInt((String n) -> Integer.parseInt(n.substring(1))));
+        Matcher listed = Pattern.compile("name=\"hosts\"\\s+value=\"([^\"]*)\"").matcher(xml);
+        if (listed.find()) {
+            for (String node : listed.group(1).split("[,\\s]+")) if (node.matches("[pP]\\d+")) nodes.add(node.toUpperCase(Locale.ROOT));
+        } else {
+            Matcher m = Pattern.compile("name=\"run\\.(p\\d+)\"\\s+value=\"true\"").matcher(xml);
+            while (m.find()) nodes.add(m.group(1).toUpperCase(Locale.ROOT));
+        }
         File dir = launcher.getParentFile();
         for (String node : nodes)
             run.hosts.add(new Host(node + "_Place", node, endpoints.getOrDefault(node, ""), new File(dir, node + "_Place.out.txt")));
@@ -126,7 +131,7 @@ public final class RunHosts {
     /** P2_Place, P2_InitializationService, P2_CollectorService -> P2_Place; Monitor... -> Monitor. */
     Host hostOfService(String service) {
         if (service.startsWith("Monitor")) { for (Host h : hosts) if ("Monitor".equals(h.name)) return h; return null; }
-        Matcher node = Pattern.compile("^(P\\d)_").matcher(service);
+        Matcher node = Pattern.compile("^(P\\d+)_").matcher(service);
         if (!node.find()) return null;
         for (Host h : hosts) if (node.group(1).equals(h.node)) return h;
         return null;

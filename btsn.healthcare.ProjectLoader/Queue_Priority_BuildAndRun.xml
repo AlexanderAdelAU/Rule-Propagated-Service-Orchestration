@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Controlled_Queue_Priority" default="run" basedir=".">
-    <description>Exercise the packaged P1 UDP priority queue with one controlled worker and an observed backlog.</description>
+    <description>Exercise the packaged host UDP priority queue with one controlled worker and an observed backlog.</description>
     <property name="services.dir" location="../btsn.services"/>
     <property name="common.dir" location="../btsn.common"/>
     <property name="probe.dir" location="target/queue-priority"/>
@@ -9,16 +9,16 @@
     <property name="probe.open.results" value="true"/>
     <property name="java.release" value="15"/>
     <target name="prepare">
-        <echo message="Controlled queue-priority probe: real P1 UDP queue, isolated worker and reports. Open the generated timeline; Monitor retains the previous healthcare data."/>
+        <echo message="Controlled queue-priority probe: real host UDP queue, isolated worker and reports. Open the generated timeline; Monitor retains the previous healthcare data."/>
         <ant antfile="${services.dir}/build.xml" target="runtime" inheritall="false"/>
-        <ant antfile="../btsn.rpso.places.p1/build.xml" target="jar-only" inheritall="false"/>
+        <ant antfile="../btsn.rpso.host/build.xml" target="jar-only" inheritall="false"/>
         <mkdir dir="${probe.dir}/classes"/>
         <mkdir dir="${probe.dir}/runtime/ServiceLoaderQueries"/>
-        <copy file="../btsn.rpso.places.p1/ServiceLoaderQueries/loaderSettings.xml"
+        <copy file="../btsn.rpso.host/ServiceLoaderQueries/loaderSettings.xml"
               tofile="${probe.dir}/runtime/ServiceLoaderQueries/loaderSettings.xml"/>
         <path id="probe.classpath">
             <pathelement location="${probe.dir}/classes"/>
-            <pathelement location="../btsn.rpso.places.p1/target/btsn.rpso.places.p1.jar"/>
+            <pathelement location="../btsn.rpso.host/target/btsn.rpso.host.jar"/>
             <pathelement location="${common.dir}/target/host-runtime/btsn-infrastructure.jar"/>
             <fileset dir="${services.dir}/target/deployment/services" includes="**/*.jar"/>
             <fileset dir="${services.dir}/target/deployment/lib" includes="*.jar"/>

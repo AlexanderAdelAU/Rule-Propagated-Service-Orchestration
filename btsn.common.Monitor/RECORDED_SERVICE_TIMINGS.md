@@ -7,7 +7,7 @@ Choose **View → Recorded Service Invocations** to inspect individual service e
 The default input is the existing collected `ServiceAnalysisDataBase` in the working directory. To inspect a stopped host directly, supply its local database directory as a program argument:
 
 ```text
--db "../btsn.services/target/launchers/TrafficLight_BuildAndRun/btsn.rpso.places.p1/ServiceAnalysisDataBase"
+-db "../btsn.services/target/launchers/TrafficLight_BuildAndRun/P1/ServiceAnalysisDataBase"
 ```
 
 Repeat `-db` for P2 through P6 to combine the stopped hosts, then choose **View → Recorded Service Invocations**. Paths are relative to the chart's working directory, or can be absolute. Stop the hosts before opening their embedded Derby databases, so their database locks are released.

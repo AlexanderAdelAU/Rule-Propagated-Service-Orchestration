@@ -12,8 +12,9 @@
   Required launcher properties
     launcher.profile.file      deployment profile (catalogue + infrastructure + service deployment)
     workflow.process.name      process under ProcessDefinitionFolder, e.g. petrinet/Workflow/X
-    init.process.name          initialiser covering the hosts in use
-    collector.process.name     collector covering the hosts in use
+    hosts                      the hosts the launcher uses, e.g. P1,P2,P7; each is the same host program run as
+                               that node. The initialiser and collector for these hosts are generated for the run.
+                               (Launchers written before hosts= set run.p1 ... run.p6 instead; those still work.)
     eg1.id, eg1.version, eg1.place, eg1.operation, eg1.trigger.file
                                one block per event generator (eg1 to eg3), each with its own rule
                                version so their tokens stay apart; query.version lists the versions
@@ -27,8 +28,7 @@
                                for a token generator that has formats (e.g. TriageService)
     token.generator.class      optional: the token generator; default GenericPetriNetTokenGenerator
                                (healthcare launchers use GenericHealthcareTokenGenerator)
-    run.p1 ... run.p6          set for each host the deployment uses
-    first.node                 first host in use (p1 ... p6); its calls deploy the admin rules
+    Optional: -Dp7.mode=local|remote starts or skips one host (default auto: by its channel's address).
 -->
 <project name="process-runtime" default="run-complete-workflow" basedir="../.."
          xmlns:if="ant:if" xmlns:unless="ant:unless">
@@ -46,13 +46,13 @@
     <property name="token.expire" value="120000"/>
     <property name="trigger.file" value=""/>
 
-    <property name="p1.mode" value="auto"/>
-    <property name="p2.mode" value="auto"/>
-    <property name="p3.mode" value="auto"/>
-    <property name="p4.mode" value="auto"/>
-    <property name="p5.mode" value="auto"/>
-    <property name="p6.mode" value="auto"/>
+    <property name="hosts" value=""/>
     <property name="monitor.mode" value="auto"/>
+    <!-- Generated for the run's hosts (HostAdministration); a launcher may still name its own. -->
+    <property name="init.process.name" value="common/Initializers/Hosts_Initialization"/>
+    <property name="collector.process.name" value="common/Collectors/Hosts_Collector"/>
+    <property name="hosts.plan.file" location="${launcher.runtime.dir}/hosts.properties"/>
+    <property name="host.template.dir" location="${source.root}/btsn.rpso.host"/>
 
     <property name="init.version" value="v999"/>
     <property name="db.init.operation" value="purgeAndInitialize"/>
@@ -82,7 +82,6 @@
     <condition property="eg1.trigger.set"><and><isset property="eg1.id"/><not><equals arg1="${eg1.trigger.file}" arg2=""/></not></and></condition>
     <condition property="eg2.trigger.set"><and><isset property="eg2.trigger.file"/><not><equals arg1="${eg2.trigger.file}" arg2=""/></not></and></condition>
     <condition property="eg3.trigger.set"><and><isset property="eg3.trigger.file"/><not><equals arg1="${eg3.trigger.file}" arg2=""/></not></and></condition>
-    <property name="${first.node}.first" value="true"/>
     <!-- Optional per generator: its own process definition (versions may differ by a rule delta), its own
          token count, and egN.publish.at.seconds to publish that version live, while the other generators run
          (egN.fire.after.seconds then waits between its commitment and its first token; for a version deployed
@@ -94,79 +93,35 @@
     <property name="eg2.tokens" value="${token.count}"/>
     <property name="eg3.tokens" value="${token.count}"/>
 
-    <!-- A host process for one node, started only when the deployment uses it and it runs here. -->
-    <macrodef name="start-host">
-        <attribute name="node"/><attribute name="label"/>
+    <!-- The run's hosts: run.pN properties (older launchers) and -Dpn.mode reach the planner as system properties. -->
+    <macrodef name="host-launch">
+        <attribute name="command"/>
+        <element name="arguments" implicit="true"/>
         <sequential>
-            <echo message="  [@{node}] Skipping - running on remote host" if:set="run.@{node}" unless:set="@{node}.is.local"/>
-            <java failonerror="true" classname="${service.loader.class}" if:set="@{node}.launch"
-                  fork="true" timeout="600000" dir="${@{node}.project.dir}" output="${output.dir}/@{label}_Place.out.txt">
-                <classpath refid="@{node}.classpath"/>
-                <arg value="${@{node}.project.dir}"/>
-                <arg value="-version"/><arg value="${rule.version}"/>
+            <java classname="org.btsn.deployment.HostLaunch" fork="true" failonerror="true" classpathref="generator.classpath">
+                <syspropertyset><propertyref regex="^run\.p[0-9]+$"/><propertyref regex="^p[0-9]+\.mode$"/></syspropertyset>
+                <arg value="@{command}"/>
+                <arguments/>
             </java>
         </sequential>
     </macrodef>
 
-    <macrodef name="initialise-host">
-        <attribute name="node"/><attribute name="service"/><attribute name="sequence"/>
-        <sequential>
-            <java classname="${init.event.generator.class}" fork="true" dir="${generator.project.dir}" failonerror="true" if:set="run.@{node}">
-                <classpath refid="generator.classpath"/>
-                <arg value="-service"/><arg value="@{service}"/>
-                <arg value="-operation"/><arg value="${db.init.operation}"/>
-                <arg value="-version"/><arg value="${init.version}"/>
-                <arg value="-process"/><arg value="${init.process.name}"/>
-                <arg value="-sequenceId"/><arg value="@{sequence}"/>
-                <arg value="-tokens"/><arg value="1"/>
-                <arg value="-skipDeploy" unless:set="@{node}.first"/>
-            </java>
-        </sequential>
-    </macrodef>
+    <target name="prepare-administration" depends="prepare-runtime" description="Generate the initialiser and collector for this run's hosts">
+        <java classname="org.btsn.deployment.HostAdministration" fork="true" failonerror="true" classpathref="generator.classpath">
+            <syspropertyset><propertyref regex="^run\.p[0-9]+$"/></syspropertyset>
+            <arg value="processes"/><arg file="${common.project.dir}"/><arg value="${hosts}"/>
+        </java>
+    </target>
 
-    <macrodef name="collect-host">
-        <attribute name="node"/><attribute name="service"/><attribute name="sequence"/>
-        <sequential>
-            <echo message="Collecting from @{service}..." if:set="run.@{node}"/>
-            <java classname="${collector.event.generator.class}" fork="true" dir="${generator.project.dir}" failonerror="true" if:set="run.@{node}">
-                <classpath refid="generator.classpath"/>
-                <arg value="-service"/><arg value="@{service}"/>
-                <arg value="-operation"/><arg value="${collector.operation}"/>
-                <arg value="-version"/><arg value="${collector.version}"/>
-                <arg value="-process"/><arg value="${collector.process.name}"/>
-                <arg value="-queryVersion"/><arg value="${query.version}"/>
-                <arg value="-sequenceId"/><arg value="@{sequence}"/>
-                <arg value="-skipDeploy" unless:set="@{node}.first"/>
-            </java>
-            <sleep seconds="${collector.delay.seconds}" if:set="run.@{node}"/>
-        </sequential>
-    </macrodef>
-
-    <macrodef name="resolve-host">
-        <attribute name="node"/>
-        <sequential>
-            <resolve-local-launch component="@{node}" mode="${@{node}.mode}" if:set="run.@{node}"/>
-            <condition property="@{node}.launch"><and><isset property="run.@{node}"/><isset property="@{node}.is.local"/></and></condition>
-        </sequential>
-    </macrodef>
-
-    <target name="resolve-deployment-modes" depends="prepare-runtime,detect-local-channel">
-        <resolve-host node="p1"/><resolve-host node="p2"/><resolve-host node="p3"/>
-        <resolve-host node="p4"/><resolve-host node="p5"/><resolve-host node="p6"/>
+    <target name="resolve-deployment-modes" depends="prepare-runtime,prepare-administration,detect-local-channel">
+        <host-launch command="plan"><arg value="hosts=${hosts}"/><arg value="launch=${local.channel.result}"/><arg value="out=${hosts.plan.file}"/></host-launch>
+        <property file="${hosts.plan.file}"/>
         <resolve-local-launch component="monitor" mode="${monitor.mode}"/>
-        <condition property="remote.hosts.present"><or>
-            <and><isset property="run.p1"/><not><isset property="p1.is.local"/></not></and>
-            <and><isset property="run.p2"/><not><isset property="p2.is.local"/></not></and>
-            <and><isset property="run.p3"/><not><isset property="p3.is.local"/></not></and>
-            <and><isset property="run.p4"/><not><isset property="p4.is.local"/></not></and>
-            <and><isset property="run.p5"/><not><isset property="p5.is.local"/></not></and>
-            <and><isset property="run.p6"/><not><isset property="p6.is.local"/></not></and>
-        </or></condition>
         <echo message="Infrastructure: ${infrastructure.definition.name}"/>
     </target>
 
     <target name="clean-output" description="Remove the previous host output files">
-        <delete quiet="true"><fileset dir="${output.dir}" includes="P?_Place.out.txt,MonitorService.out.txt"/></delete>
+        <delete quiet="true"><fileset dir="${output.dir}" includes="P*_Place.out.txt,MonitorService.out.txt"/></delete>
     </target>
 
     <!-- Bindings and master rules for one event generator's version (skipped when the slot is unused). -->
@@ -230,7 +185,7 @@
 
     <!-- Versions published live (egN.publish.at.seconds) are compiled when they are published, not here:
          nothing about such a version exists before its publication. -->
-    <target name="generate-workflow-bindings" depends="prepare-runtime" description="Generate canonical bindings and master rules for each version deployed at the start">
+    <target name="generate-workflow-bindings" depends="prepare-runtime,prepare-administration" description="Generate canonical bindings and master rules for each version deployed at the start">
         <prepare-version slot="eg1" unless:set="eg1.publish.at.seconds"/>
         <prepare-version slot="eg2" unless:set="eg2.publish.at.seconds"/>
         <prepare-version slot="eg3" unless:set="eg3.publish.at.seconds"/>
@@ -281,8 +236,12 @@
         <echo message="  Versions ${query.version}: ${token.count} tokens from each event generator"/>
         <echo message="================================================================"/>
         <parallel>
-            <start-host node="p1" label="P1"/><start-host node="p2" label="P2"/><start-host node="p3" label="P3"/>
-            <start-host node="p4" label="P4"/><start-host node="p5" label="P5"/><start-host node="p6" label="P6"/>
+            <!-- Every local host of the run, each the same host program started as its node. -->
+            <java classname="org.btsn.deployment.HostLaunch" fork="true" failonerror="true" timeout="600000" classpathref="generator.classpath">
+                <arg value="start"/><arg value="plan=${hosts.plan.file}"/><arg value="runtime=${launcher.runtime.dir}"/>
+                <arg value="template=${host.template.dir}"/><arg value="output=${output.dir}"/><arg value="version=${rule.version}"/>
+                <arg value="classpath=${toString:host.classpath}"/>
+            </java>
             <echo message="  [monitor] Skipping - running on remote host" unless:set="monitor.is.local"/>
             <java failonerror="true" classname="${service.loader.class}" if:set="monitor.is.local"
                   fork="true" timeout="600000" dir="${monitor.project.dir}" output="${monitor.output.file}">
@@ -301,22 +260,12 @@
                 <sleep seconds="${service.startup.seconds}"/>
 
                 <echo message="=== PHASE 1: DATABASE INITIALIZATION ==="/>
-                <initialise-host node="p1" service="P1_InitializationService" sequence="999000000"/>
-                <initialise-host node="p2" service="P2_InitializationService" sequence="999100000"/>
-                <initialise-host node="p3" service="P3_InitializationService" sequence="999200000"/>
-                <initialise-host node="p4" service="P4_InitializationService" sequence="999300000"/>
-                <initialise-host node="p5" service="P5_InitializationService" sequence="999400000"/>
-                <initialise-host node="p6" service="P6_InitializationService" sequence="999500000"/>
-                <java classname="${init.event.generator.class}" fork="true" dir="${generator.project.dir}" failonerror="true">
-                    <classpath refid="generator.classpath"/>
-                    <arg value="-service"/><arg value="Monitor_InitializationService"/>
-                    <arg value="-operation"/><arg value="${db.init.operation}"/>
-                    <arg value="-version"/><arg value="${init.version}"/>
-                    <arg value="-process"/><arg value="${init.process.name}"/>
-                    <arg value="-sequenceId"/><arg value="999600000"/>
-                    <arg value="-tokens"/><arg value="1"/>
-                    <arg value="-skipDeploy"/>
-                </java>
+                <!-- Each host, then Monitor; the first host's call deploys the initialiser's rules. -->
+                <host-launch command="initialise">
+                    <arg value="plan=${hosts.plan.file}"/><arg value="classpath=${toString:generator.classpath}"/><arg value="dir=${generator.project.dir}"/>
+                    <arg value="generator=${init.event.generator.class}"/><arg value="operation=${db.init.operation}"/>
+                    <arg value="version=${init.version}"/><arg value="process=${init.process.name}"/>
+                </host-launch>
                 <sleep seconds="${init.delay.seconds}"/>
                 <echo message="=== Phase 1 Complete ==="/>
                 <sleep seconds="${phase.delay.seconds}"/>
@@ -329,12 +278,12 @@
                 <echo message="=== Phase 2 Complete ==="/>
 
                 <echo message="=== PHASE 3: DATA COLLECTION ==="/>
-                <collect-host node="p1" service="P1_CollectorService" sequence="999010000"/>
-                <collect-host node="p2" service="P2_CollectorService" sequence="999020000"/>
-                <collect-host node="p3" service="P3_CollectorService" sequence="999030000"/>
-                <collect-host node="p4" service="P4_CollectorService" sequence="999040000"/>
-                <collect-host node="p5" service="P5_CollectorService" sequence="999050000"/>
-                <collect-host node="p6" service="P6_CollectorService" sequence="999060000"/>
+                <host-launch command="collect">
+                    <arg value="plan=${hosts.plan.file}"/><arg value="classpath=${toString:generator.classpath}"/><arg value="dir=${generator.project.dir}"/>
+                    <arg value="generator=${collector.event.generator.class}"/><arg value="operation=${collector.operation}"/>
+                    <arg value="version=${collector.version}"/><arg value="process=${collector.process.name}"/>
+                    <arg value="queryVersion=${query.version}"/><arg value="delay=${collector.delay.seconds}"/>
+                </host-launch>
                 <echo message="=== Phase 3 Complete ==="/>
                 <echo message="${process.title} COMPLETED SUCCESSFULLY"/>
                 <echo message="Analyse with: ant -f ${ant.file} analyse"/>
@@ -347,33 +296,19 @@
          P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange_P3P6 for P3 and P6 on 192.168.1.90. -->
     <property name="host.packages" value="remote"/>
     <property name="host.packages.dir" location="${services.project.dir}/target/host-packages/${ant.project.name}"/>
-    <macrodef name="choose-package-node">
-        <attribute name="node"/><attribute name="label"/>
-        <sequential>
-            <condition property="@{node}.package"><and>
-                <isset property="run.@{node}"/>
-                <or><not><isset property="@{node}.is.local"/></not><equals arg1="${host.packages}" arg2="all"/></or>
-            </and></condition>
-            <condition property="@{node}.package.label" value="@{label}," else=""><isset property="@{node}.package"/></condition>
-        </sequential>
-    </macrodef>
-
     <target name="host-packages" depends="prepare-runtime,resolve-deployment-modes,generate-workflow-bindings"
             description="Package the hosts that run on other machines, one package per machine (-Dhost.packages=all packages every host)">
         <echo message="Packaging hosts for ${process.title} on ${infrastructure.definition.name}, rules ${rule.version}..."/>
-        <choose-package-node node="p1" label="P1"/><choose-package-node node="p2" label="P2"/><choose-package-node node="p3" label="P3"/>
-        <choose-package-node node="p4" label="P4"/><choose-package-node node="p5" label="P5"/><choose-package-node node="p6" label="P6"/>
+        <!-- The hosts on other machines, or with -Dhost.packages=all every host of the run. -->
+        <condition property="host.packages.nodes" value="${hosts.list}" else="${hosts.remote}"><equals arg1="${host.packages}" arg2="all"/></condition>
         <java classname="org.btsn.deployment.HostPackage" fork="true" failonerror="true" classpathref="generator.classpath">
-            <arg value="nodes=${p1.package.label}${p2.package.label}${p3.package.label}${p4.package.label}${p5.package.label}${p6.package.label}"/>
+            <arg value="nodes=${host.packages.nodes}"/>
             <arg value="version=${rule.version}"/><arg value="launcher=${ant.project.name}"/>
             <arg value="runtime=${launcher.runtime.dir}"/><arg value="source=${source.root}"/><arg value="bundle=${service.bundle.dir}"/>
             <arg value="infrastructureJar=${infrastructure.jar}"/><arg value="libs=${lib.dir}"/>
             <arg value="libExcludes=${services.project.dir}/target/runtime-library-excludes.txt"/><arg value="out=${host.packages.dir}"/>
         </java>
-        <condition property="host.packages.none"><not><or>
-            <isset property="p1.package"/><isset property="p2.package"/><isset property="p3.package"/>
-            <isset property="p4.package"/><isset property="p5.package"/><isset property="p6.package"/>
-        </or></not></condition>
+        <condition property="host.packages.none"><equals arg1="${host.packages.nodes}" arg2=""/></condition>
         <echo message="Start each machine's package (launch.bat starts all its hosts), then run this launcher here (the ip0 machine, ${ip0.address}) with the same settings." unless:set="host.packages.none"/>
     </target>
 
@@ -382,7 +317,7 @@
         <echo message="ant analyse              analyse the Monitor database after a run"/>
         <echo message="-Dtoken.count=N          tokens to fire (default ${token.count})"/>
         <echo message="-Dhost.address=127.0.0.1 run every host on this machine"/>
-        <echo message="-Dp1.mode=local|remote   start or skip a host (default auto)"/>
+        <echo message="-Dp1.mode=local|remote   start or skip a host, e.g. -Dp7.mode=remote (default auto)"/>
         <echo message="-Dinfrastructure=MultiHost  use InfrastructureDefinitionFolder/MultiHost.json"/>
         <echo message="ant host-packages        package the hosts on other machines, one package per machine"/>
     </target>

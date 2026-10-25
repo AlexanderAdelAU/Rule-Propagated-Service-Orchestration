@@ -19,8 +19,6 @@
     <property name="process.title" value="Priority-swap control: ${priority.condition} (B=${eg1.version}, A=${eg2.version})"/>
     <property name="launcher.profile.file" location="../btsn.services/deployments/models/PrioritySwap_TwoPlaceDeployment.json"/>
     <property name="workflow.process.name" value="petrinet/Research/PrioritySwap_TwoPlace_Workflow"/>
-    <property name="init.process.name" value="common/Initializers/P1_P2_Initialization"/>
-    <property name="collector.process.name" value="common/Collectors/P1_P2_Collector"/>
 
     <property name="rule.version" value="v001"/>
     <property name="query.version" value="v001,v002"/>
@@ -43,9 +41,7 @@
     <property name="workflow.completion.seconds" value="45"/>
     <property name="collector.delay.seconds" value="3"/>
 
-    <property name="run.p1" value="true"/>
-    <property name="run.p2" value="true"/>
-    <property name="first.node" value="p1"/>
+    <property name="hosts" value="P1,P2"/>
 
     <import file="../btsn.services/process-runtime.xml"/>
 </project>

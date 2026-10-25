@@ -156,7 +156,7 @@ public final class LauncherRun {
             try (BufferedReader out = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
                 for (String line; (line = out.readLine()) != null; ) {
                     listener.line(line);
-                    java.util.regex.Matcher zip = java.util.regex.Pattern.compile("((?:P\\d)+): (.+\\.zip)\\s+\\(copy to (\\S+)").matcher(line);
+                    java.util.regex.Matcher zip = java.util.regex.Pattern.compile("((?:P\\d+)+): (.+\\.zip)\\s+\\(copy to (\\S+)").matcher(line);
                     if (zip.find()) zips.add(zip.group(1) + " for " + zip.group(3) + ": " + zip.group(2));
                     if (line.contains("nothing to package")) none = true;
                 }

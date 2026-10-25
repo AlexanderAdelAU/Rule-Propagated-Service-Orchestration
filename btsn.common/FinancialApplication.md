@@ -78,12 +78,12 @@ Authoritative logical service contracts:
 Canonical contracts are attached to logical business services, not physical P-node
 identities.
 
-## Current physical host placeholders
+## Physical hosts
 
-All P1-P6 place classes are retained physical host placeholders with their
-existing constructor signatures. Concrete service dependencies, operation
-methods, delegates, imports and service-base inheritance have been removed.
-The names remain available as deployment/routing identities. This host contract
+Hosts have no place classes: every node runs the one host program
+(`btsn.rpso.host`), and `P1_Place`, `P2_Place`, ... remain deployment/routing
+identities only. Concrete service dependencies, operation methods, delegates,
+imports and service-base inheritance live in the service JARs. This host contract
 is independent of this application's selected capabilities.
 
 The generic `ServiceHelper` invocation boundary resolves their configured runtime
@@ -138,8 +138,8 @@ The following changes are deliberately outside this branch-stabilization step:
 alongside shared service support and runtime libraries. Its packaging inventory
 also includes the independently preserved stochastic implementation. All services
 use the same packaging mechanism, independent of application and physical host.
-Implementation sources remain in `btsn.common`. All six host builds now import
-the same generic Ant build, and the Stage-5 launcher compiles and uses the
+Implementation sources remain in `btsn.common`. The host build imports
+the shared generic Ant build, and the Stage-5 launcher compiles and uses the
 independent service JARs and shared infrastructure without `bin` directories on
 its classpaths. No handler or service implementation changes are involved.
 See `../btsn.services/README.md` for build commands and packaged host checks.

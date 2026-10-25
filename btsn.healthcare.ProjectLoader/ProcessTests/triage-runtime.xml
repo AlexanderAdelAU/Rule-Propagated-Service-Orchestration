@@ -8,7 +8,7 @@
     <property name="local.channel.project.dir" location="${services.project.dir}"/>
     <property name="healthcare.runtime.dir" location="${services.project.dir}/target/healthcare-runtime"/>
     <property name="output.dir" location="."/>
-    <property name="triage.project.dir" location="${healthcare.runtime.dir}/btsn.rpso.places.p1"/>
+    <property name="triage.project.dir" location="${healthcare.runtime.dir}/P1"/>
     <property name="triage.output.file" location="${output.dir}/TriageService.out.txt"/>
     <property name="monitor.output.file" location="${output.dir}/MonitorService.out.txt"/>
     <property name="triage.mode" value="auto"/>
@@ -45,7 +45,7 @@
 
     <path id="triage.classpath">
         <path refid="healthcare.dependencies"/>
-        <pathelement location="${source.root}/btsn.rpso.places.p1/target/btsn.rpso.places.p1.jar"/>
+        <pathelement location="${source.root}/btsn.rpso.host/target/btsn.rpso.host.jar"/>
     </path>
     <path id="monitor.classpath">
         <path refid="healthcare.dependencies"/>
@@ -58,8 +58,8 @@
 
     <target name="validate-environment" depends="prepare-runtime"
             description="Build and validate the packaged healthcare runtime">
-        <fail message="Missing generic P1 host JAR">
-            <condition><not><available file="${source.root}/btsn.rpso.places.p1/target/btsn.rpso.places.p1.jar"/></not></condition>
+        <fail message="Missing host JAR (btsn.rpso.host)">
+            <condition><not><available file="${source.root}/btsn.rpso.host/target/btsn.rpso.host.jar"/></not></condition>
         </fail>
         <fail message="TriageService cannot be loaded from the packaged classpath">
             <condition><not><available classname="org.btsn.business.healthcare.TriageService" classpathref="triage.classpath"/></not></condition>
@@ -84,10 +84,14 @@
     <macrodef name="start-triage">
         <sequential>
             <echo message="Triage host is already running remotely" unless:set="triage.is.local"/>
+            <!-- Triage runs on node P1: the host program in its own folder beside the runtime's btsn.common. -->
+            <copy todir="${triage.project.dir}" if:set="triage.is.local">
+                <fileset dir="${source.root}/btsn.rpso.host" includes="ServiceLoaderQueries/**,resources/**,PayLoad/**"/>
+            </copy>
             <java classname="${service.loader.class}" fork="true" failonerror="true" if:set="triage.is.local"
                   dir="${triage.project.dir}" output="${triage.output.file}">
                 <classpath refid="triage.classpath"/>
-                <arg file="${triage.project.dir}"/><arg value="-version"/><arg value="${rule.version}"/>
+                <arg file="${triage.project.dir}"/><arg value="-version"/><arg value="${rule.version}"/><arg value="-node"/><arg value="P1"/>
             </java>
         </sequential>
     </macrodef>
