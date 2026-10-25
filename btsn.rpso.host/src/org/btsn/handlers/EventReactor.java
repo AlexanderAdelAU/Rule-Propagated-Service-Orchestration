@@ -603,6 +603,10 @@ public class EventReactor extends Thread {
 	/**
 	 * Same scheduling logic as original EventReactor - WITH DEBUG
 	 */
+	/** Told of each token dropped because its lifetime ran out: (token id, place it arrived at). */
+	private volatile java.util.function.BiConsumer<Integer, String> expiredHandler;
+	public void setExpiredHandler(java.util.function.BiConsumer<Integer, String> handler) { this.expiredHandler = handler; }
+
 	public synchronized void putScheduledToken(String servicePacket) throws InterruptedException, IOException {
 		// === DEBUG: Show what we received ===
 	//	System.out.println("=== DEBUG: EVENTREACTOR RECEIVED ===");
@@ -635,6 +639,21 @@ public class EventReactor extends Thread {
 		TreeMap<String, String> serviceMap = new TreeMap<String, String>();
 		TreeMap<String, String> monitorDataMap = new TreeMap<String, String>();
 		
+		if (pArgs.get(0) == Scheduler.EXPIRED) {
+			lostEvents++;
+			System.err.println("Discarded number of events: " + lostEvents + " (token expired)");
+			java.util.function.BiConsumer<Integer, String> handler = expiredHandler;
+			if (handler != null) {
+				try {
+					TreeMap<String, String> header = xph.findMultipleXMLItems(servicePacket, "//header/*");
+					TreeMap<String, String> service = xph.findMultipleXMLItems(servicePacket, "//service/*");
+					handler.accept(Integer.parseInt(header.get("sequenceId")), service.get("serviceName"));
+				} catch (Exception e) {
+					System.err.println("Could not record the expired token: " + e.getMessage());
+				}
+			}
+			return;
+		}
 		if (pArgs.get(0) == -1) {
 			lostEvents++;
 			System.err.println("Discarded number of events: " + lostEvents);

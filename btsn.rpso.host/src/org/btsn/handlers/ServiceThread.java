@@ -269,6 +269,7 @@ class ServiceThread implements Runnable {
 			for (int attempt = 1; attempt <= maxRetries; attempt++) {
 				try {
 					thread = new EventReactor(serviceChannel, rulePort);
+					thread.setExpiredHandler((tokenId, place) -> instrumentTokenFailed(tokenId, place, EXPIRED_REASON));
 					thread.start();
 					logger.info("EventReactor started successfully on attempt " + attempt);
 					break;
@@ -915,6 +916,7 @@ class ServiceThread implements Runnable {
 	                        Long windowTime = sequenceIDJoinWindow.get(key);
 	                        if (windowTime == null || AdjustJoinWindow(key, windowTime) == 0L) {
 	                            keyRemovalCollection.add(key);
+	                            instrumentJoinExpired(key);
 	                            logger.warn("Key " + key + " has expired - flagged for removal.");
 	                            continue;
 	                        }
@@ -948,6 +950,7 @@ class ServiceThread implements Runnable {
 	                    Long windowTime = sequenceIDJoinWindow.get(lowestSequenceKey);
 	                    if (windowTime == null || AdjustJoinWindow(lowestSequenceKey, windowTime) == 0L) {
 	                        keyRemovalCollection.add(lowestSequenceKey);
+	                        instrumentJoinExpired(lowestSequenceKey);
 	                        logger.warn("ORCHESTRATOR [SEQUENTIAL]: Lowest sequence key " + lowestSequenceKey
 	                                + " has expired - removing");
 	                    } else {
@@ -3234,6 +3237,17 @@ class ServiceThread implements Runnable {
 	 * which terminate node the token reached when a T_out has more than one.
 	 */
 	/** Record that the token stopped at this place, and why, so the analysis can report it. */
+	/** Why a token whose lifetime (notAfter, set from token.expire) ran out is reported as failed. */
+	static final String EXPIRED_REASON = "expired: its lifetime (token.expire) ran out";
+
+	/** Tokens waiting at a join whose lifetime ran out before their partners arrived. */
+	private void instrumentJoinExpired(Integer joinKey) {
+		List<JoinContribution> waiting = joinContributions.get(joinKey);
+		if (waiting == null) return;
+		for (JoinContribution c : new ArrayList<>(waiting))
+			instrumentTokenFailed(c.forkNumber, serviceName, EXPIRED_REASON + " while waiting at the join");
+	}
+
 	void instrumentTokenFailed(Integer tokenId, String place, String reason) {
 		if (petriNetHelper == null || tokenId == null) return;
 		petriNetHelper.recordTokenFailed(tokenId, place, reason);

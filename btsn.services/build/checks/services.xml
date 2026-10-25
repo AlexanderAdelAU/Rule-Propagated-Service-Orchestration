@@ -90,11 +90,19 @@
             <include name="HostClasspathCheck.java"/>
             <include name="org/btsn/invocation/BusinessCapabilityResolverTest.java"/>
             <include name="org/btsn/utils/OOjdrewConcurrencyTest.java"/>
+            <include name="org/btsn/deployment/HostDrainCheck.java"/>
             <classpath>
                 <pathelement location="../btsn.rpso.host/target/btsn.rpso.host.jar"/>
                 <path refid="host.check.dependencies"/>
             </classpath>
         </javac>
+        <!-- After the last token, a run collects once nothing moves on the hosts, or at its limit. -->
+        <java classname="org.btsn.deployment.HostDrainCheck" fork="true" failonerror="true">
+            <classpath>
+                <pathelement location="${target.dir}/host-check/classes"/>
+                <path refid="host.check.dependencies"/>
+            </classpath>
+        </java>
         <!-- One host JAR serves every node; the resolver check invokes services as P1 to P7. -->
         <mkdir dir="${target.dir}/host-check/host"/>
         <java classname="HostClasspathCheck" fork="true" failonerror="true">

@@ -38,7 +38,7 @@ public final class BuildAndRunGenerator {
         public File folder;
         public final List<Run> runs = new ArrayList<>();   // one per event generator, in canvas order
         public int tokens = 10;                            // per generator
-        public int completionSeconds = 10;
+        public int lifetimeSeconds = 120;   // each token's lifetime: the run collects once all have run out, or earlier when nothing moves
         public List<Run> enabled() { List<Run> on = new ArrayList<>(); for (Run r : runs) if (r.enabled) on.add(r); return on; }
     }
 
@@ -194,6 +194,8 @@ public final class BuildAndRunGenerator {
         Options o = plan.defaults;
         o.folder = preferred.isDirectory() ? preferred : models.isDirectory() ? models : plan.folders.isEmpty() ? plan.root : plan.folders.get(0);
         o.launcherName = base + "_BuildAndRun.xml";
+        // A closed net (one with an initial marking) never finishes: its tokens' lifetime is how long it runs.
+        if (!plan.joins.isEmpty()) o.lifetimeSeconds = 10;
         for (String id : plan.targets.keySet()) {
             Run run = new Run(); run.generatorId = id; run.intervalMs = plan.rates.get(id); run.version = plan.versions.get(id);
             o.runs.add(run);
@@ -350,7 +352,9 @@ public final class BuildAndRunGenerator {
             }
         }
         x.append("    <property name=\"token.count\" value=\"").append(o.tokens).append("\"/>\n");
-        x.append("    <property name=\"workflow.completion.seconds\" value=\"").append(o.completionSeconds).append("\"/>\n\n");
+        x.append("    <!-- Each token's lifetime (ms). The run collects when the workflows have finished, or once every token's\n");
+        x.append("         lifetime has run out").append(plan.joins.isEmpty() ? "" : ": a closed net runs until then").append(". -->\n");
+        x.append("    <property name=\"token.expire\" value=\"").append(o.lifetimeSeconds * 1000L).append("\"/>\n\n");
         x.append("    <!-- Hosts used by the service deployment: nodes of the infrastructure, each running the host program -->\n");
         x.append("    <property name=\"hosts\" value=\"").append(String.join(",", plan.nodes)).append("\"/>\n\n");
         if (!single) {

@@ -560,7 +560,7 @@ and each generator's tokens are filled from the token format of the service at i
 | Choice | Default | Meaning |
 |---|---|---|
 | **Tokens per generator** | `10` | Root workflows each generator starts |
-| **Wait after last token (s)** | `10` | Time for the last workflows to finish before collection |
+| **Token lifetime (s)** | `120` (`10` for a closed net) | How long each token may live; one still moving after that is dropped and reported as expired. After the last token, the run collects as soon as nothing has moved for 5 s, or once every lifetime has run out. A closed net runs for this long. |
 | **Launcher name** | `<process>_BuildAndRun.xml` | File name of the launcher |
 | **Folder** | `btsn.<domain>.ProjectLoader` | Where the launcher is written |
 
@@ -675,6 +675,15 @@ The default target `run-complete-workflow` does everything:
 
 ### Stop it when collection finishes
 
+After the last token, the run waits for the workflows to finish before it collects:
+
+- `WORKFLOWS FINISHED: last activity 6.1 s after the last token` means nothing has moved on this machine's hosts or Monitor for 5 s. The time is when the last workflow finished.
+- `TOKEN LIFETIMES RUN OUT after 125 s` means every token's lifetime (plus 5 s for a call in progress and clock differences) has passed, so no token can still move on any machine. A closed net ends this way: its tokens expire and it stops.
+- `WORKFLOWS STILL RUNNING at the 60 s limit` means the launcher sets `workflow.completion.seconds` and work was still moving then.
+- A visit is written when a token arrives and when it leaves, so keep the quiet time above your slowest service. Hosts on other machines can't be watched from here; the lifetime bound covers them.
+
+**Setting the lifetime.** Each token's lifetime starts when it is generated and doesn't reset. Set it from the analysis: above the longest time a workflow took, under the load you intend to run, with a margin. Priority matters here: a busy host serves the lowest token id first, so an earlier version (v001) is served before a later one (v002), and the later version's tokens age while they queue. Give that version more time with its own `egN.expire`. A token that expires is reported in the analysis as `failed at <place>: expired`, apart from unfinished workflows.
+
 After the collection requests the console says
 `Collection requests sent; waiting for Monitor to store the hosts' records - keep the run going...`.
 Leave it running: the launcher waits until Monitor's database stops changing. It then ends with
@@ -691,7 +700,11 @@ launcher. The collected data is in `btsn.common.Monitor/ServiceAnalysisDataBase`
 | Override | Effect |
 |---|---|
 | `-Dtoken.count=5` | Fire only the first 5 tokens of the schedule. To fire more than it holds, recreate the launcher with a larger number. |
-| `-Dworkflow.completion.seconds=30` | Wait longer after the last token before collecting |
+| `-Dtoken.expire=3600000` | Each token's lifetime, in ms (default 120000). The run collects once all lifetimes have run out, or earlier when nothing moves. A closed net runs this long. |
+| `-Deg2.expire=300000` | One generator's own lifetime, for example for a version that queues behind others |
+| `-Dworkflow.quiet.seconds=10` | How long nothing must move before the workflows count as finished (default 5 s). Keep it above your slowest service. |
+| `-Dworkflow.completion.seconds=60` | Collect after this long at the latest, even if lifetimes remain. Older launchers set it. |
+| `-Drun.timeout.ms=3600000` | When the hosts and Monitor are stopped in any case (default 600000, 10 minutes). Raise it for long runs. |
 | `-Dhost.address=127.0.0.1` | Run every host on this machine |
 | `-Dp2.mode=local` or `remote` | Force a host to start here, or expect it elsewhere |
 
@@ -785,7 +798,7 @@ ant -f btsn.petrinet.ProjectLoader/P1_Tutorial_Local_BuildAndRun.xml export-tuto
 | The Deploy panel's node table is empty | Start ProcessEditor with `btsn.workflowEditor` as its working directory |
 | A host or Monitor was skipped at startup | Add `-Dhost.address=127.0.0.1`, or start that host on its configured machine |
 | Derby reports another active instance | Stop the previous run, and any viewer holding the database, before analysing |
-| Fewer completed workflows than generated | Wait longer before collecting: `-Dworkflow.completion.seconds=30`, or raise **Wait after last token** and recreate the launcher |
+| Fewer completed workflows than generated | If the analysis says a workflow `failed ... expired`, its tokens outlived their lifetime, often while queued behind other work: raise `-Dtoken.expire` (or one generator's `-Deg2.expire`). If the run printed `WORKFLOWS STILL RUNNING`, raise or remove `workflow.completion.seconds`. If it printed `WORKFLOWS FINISHED` but a slow service was still working, raise `-Dworkflow.quiet.seconds`. |
 | Replay shows no tokens, or tokens skip a place | Load the analysis with the process that produced it, and check it is that run's file |
 | A design change did not run | Save the process. If you changed places, redeploy and save the deployment first. |
 
