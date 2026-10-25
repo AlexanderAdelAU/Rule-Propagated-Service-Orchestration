@@ -2767,8 +2767,9 @@ public class TokenAnimator {
             if (arc == null && nextEvent != null && nextEvent.isTerminate()) arc = nextEvent.arcValue;
             String terminateNode = terminateFor(tOut, arc);
             if (terminateNode == null) {
-                // Try to find any terminate node
-                terminateNode = terminateIds.isEmpty() ? "TERMINATE" : terminateIds.iterator().next();
+                // No terminate node is reached from this T_out: end the token at the T_out, never at an unrelated
+                // terminate node elsewhere in the process.
+                terminateNode = tOut != null ? tOut : "TERMINATE";
             }
             
             // Calculate distance-based travel duration to terminate
@@ -3092,7 +3093,11 @@ public class TokenAnimator {
             String byArc = tOutArcToTerminate.get(tOut + "#" + arcValue.trim());
             if (byArc != null) return byArc;
         }
-        return tOutToTerminate.get(tOut);
+        String byTOut = tOutToTerminate.get(tOut);
+        if (byTOut != null) return byTOut;
+        // A T_out that is itself a terminate node (T_out_CreditCheck as a TerminateNode) ends the token where it is.
+        if (tOut != null && terminateIds.contains(tOut)) return tOut;
+        return null;
     }
     public boolean isTerminateNode(String nodeId) { return terminateIds.contains(nodeId); }
     public Point getTerminatePosition(String terminateNodeId) { return terminatePositions.get(terminateNodeId); }
