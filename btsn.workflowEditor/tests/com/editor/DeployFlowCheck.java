@@ -245,7 +245,7 @@ public final class DeployFlowCheck {
                 for (int c = 0; c < table.getColumnCount(); c++) endpointColumn |= "Service endpoint".equals(table.getColumnName(c));
                 check(endpointColumn, "No Service endpoint column");
                 check("192.168.1.82:4001".equals(table.getValueAt(0, 2)), "Credit host address: " + table.getValueAt(0, 2));
-                check(!((JTable)field(panel, "nodeNetworkTable")).isShowing(), "Physical node network still shown when deploying a process");
+                check(!((JTable)field(panel, "nodeNetworkTable")).isShowing(), "Hosts table still shown when deploying a process");
                 for (AbstractButton b : buttons(panel.getContentPane()))
                     if (b.getText().endsWith("capability")) check(!b.isVisible(), b.getText() + " offered when deploying a process");
                 panel.dispose(); panel = null;

@@ -3,7 +3,7 @@
 All Petri-net, healthcare and financial examples share
 [SingleHost.json](SingleHost.json); [MultiHost.json](MultiHost.json) spreads the
 same nodes over three machines. Each defines the physical nodes (P1–P6 as
-supplied; **Add node** in the editor adds P7 and so on), their channels, address
+supplied; **Add host** in the editor adds P7 and so on), their channels, address
 and fixed base ports. Every node runs the same host program. Service functions and workflow topology
 are selected separately, so changing a service function leaves its network
 endpoint unchanged.

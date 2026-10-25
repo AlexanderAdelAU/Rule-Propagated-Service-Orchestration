@@ -39,18 +39,18 @@ public final class DeploymentEditorCheck {
             finally { frame.dispose(); }
         });
         if (failure[0] != null) throw new AssertionError("Deployment window regression", failure[0]);
-        // Add node on the supplied infrastructure gives P7 a port no node uses (4009: P4 and P6 hold 4007 and 4008), not 4007.
+        // Add host on the supplied infrastructure gives P7 a port no node uses (4009: P4 and P6 hold 4007 and 4008), not 4007.
         SwingUtilities.invokeAndWait(() -> {
             InfrastructureDefinitionFrame frame = new InfrastructureDefinitionFrame();
             try {
                 Method load = InfrastructureDefinitionFrame.class.getDeclaredMethod("loadPhysicalNodes", String.class); load.setAccessible(true);
                 load.invoke(frame, new String(java.nio.file.Files.readAllBytes(new File(common, "InfrastructureDefinitionFolder/SingleHost.json").toPath()), java.nio.charset.StandardCharsets.UTF_8));
-                JButton add = button(frame.getContentPane(), "Add node");
-                check(add != null, "No Add node button");
+                JButton add = button(frame.getContentPane(), "Add host");
+                check(add != null, "No Add host button");
                 add.doClick();
                 Method json = InfrastructureDefinitionFrame.class.getDeclaredMethod("toJson"); json.setAccessible(true);
                 String written = ((String)json.invoke(frame)).replaceAll("\\s+", "");
-                check(written.contains("\"node\":\"P7\"") && written.contains("\"basePorts\":[4009]"), "Add node did not give P7 port 4009: " + written);
+                check(written.contains("\"node\":\"P7\"") && written.contains("\"basePorts\":[4009]"), "Add host did not give P7 port 4009: " + written);
                 Method validate = InfrastructureDefinitionFrame.class.getDeclaredMethod("validateDefinition"); validate.setAccessible(true);
                 check(((List<?>)validate.invoke(frame)).isEmpty(), "Infrastructure with P7 invalid: " + validate.invoke(frame));
                 check(InfrastructureDefinitionFrame.reservedPort(4106) && InfrastructureDefinitionFrame.reservedPort(4300) && !InfrastructureDefinitionFrame.reservedPort(4009),
@@ -67,7 +67,7 @@ public final class DeploymentEditorCheck {
         check(!InfrastructureDefinitionFrame.wrongRepositoryFolder(infrastructure, infrastructure), "The right folder was replaced");
         check(!InfrastructureDefinitionFrame.wrongRepositoryFolder(new File(deployments, "inventory"), deployments), "A deployment subfolder was replaced");
         check(!InfrastructureDefinitionFrame.wrongRepositoryFolder(new File(System.getProperty("java.io.tmpdir")), infrastructure), "A folder outside btsn.common was replaced");
-        System.out.println("PASS: real deployment Open loads dropdowns immediately; six rows preserve aliases/adapters/ports; switching definitions replaces the catalogue; Open starts in the right definition folder; Add node gives P7 a free port");
+        System.out.println("PASS: real deployment Open loads dropdowns immediately; six rows preserve aliases/adapters/ports; switching definitions replaces the catalogue; Open starts in the right definition folder; Add host gives P7 a free port");
     }
     private static void selectCurrent(JTable table,int row,int column,String value) {
         check(table.editCellAt(row,column), "Cell not editable: "+row+"/"+column);

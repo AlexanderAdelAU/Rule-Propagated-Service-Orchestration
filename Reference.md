@@ -497,7 +497,7 @@ More places do not need more hosts: a node runs one place operation for each of 
 node another port (P4 and P6 have two) and deploy the extra place to it. A new host is for a process that needs more nodes, or
 another machine.
 
-1. Choose **File → Open → Infrastructure Definition...**, open the definition (`SingleHost.json`) and click **Add node**.
+1. Choose **File → Open → Infrastructure Definition...**, open the definition (`SingleHost.json`) and click **Add host**.
    It adds the next node, `P7`, on the first machine with the first free port (`4009` here, as P4 and P6 use 4007 and 4008).
    Change its channel and address if it runs on another machine, then save.
 2. Deploy places to `P7` as to any node, and save the deployment and the process.

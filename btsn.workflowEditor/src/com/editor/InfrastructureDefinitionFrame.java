@@ -93,7 +93,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
             deploymentEditor ?
             "Assign business service operations to nodes and fixed port slots from the shared infrastructure. " +
             "Slot 0 is the primary port; slot 1 is the second port, where defined. Network settings are read-only here. Instance identifies a deployment; gateway types remain in the process definition." :
-            "Define reusable physical nodes, channels, addresses and fixed base ports. " +
+            "Define the hosts (P1, P2, ...): each host's channel, address and fixed base ports. Places are deployed to hosts. " +
             "All service deployments reuse these settings. Comma-separated ports define slots 0, 1 and so on.");
         explanation.setEditable(false);
         explanation.setLineWrap(true);
@@ -102,11 +102,11 @@ public class InfrastructureDefinitionFrame extends JFrame {
         root.add(explanation, BorderLayout.NORTH);
 
         JPanel nodePanel = new JPanel(new BorderLayout(4, 4));
-        nodePanel.setBorder(BorderFactory.createTitledBorder("Physical node network"));
+        nodePanel.setBorder(BorderFactory.createTitledBorder("Hosts"));
         nodePanel.add(new JScrollPane(nodeNetworkTable), BorderLayout.CENTER);
         JPanel nodeButtons = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton addNode = new JButton("Add node");
-        JButton removeNode = new JButton("Remove node");
+        JButton addNode = new JButton("Add host");
+        JButton removeNode = new JButton("Remove host");
         nodeButtons.add(addNode);
         nodeButtons.add(removeNode);
         if (!deploymentEditor) {
@@ -231,7 +231,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
 
         addCapability.addActionListener(e -> {
             if (nodes.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Define a physical node first.");
+                JOptionPane.showMessageDialog(this, "Define a host first.");
                 return;
             }
             Capability c = new Capability();
@@ -1068,7 +1068,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
 
     private List<String> validateDefinition() {
         List<String> errors = new ArrayList<>();
-        if (nodes.isEmpty()) errors.add("No physical nodes have been defined.");
+        if (nodes.isEmpty()) errors.add("No hosts have been defined.");
         if (deploymentEditor && capabilities.isEmpty()) errors.add("No capabilities have been defined.");
         if (processCanvas != null) for (ProcessElement place : processCanvas.getPlaces())
             if (!placeRows.containsValue(place)) errors.add("Place " + place.getLabel() + " has no service and operation to deploy.");
@@ -1135,7 +1135,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
 
             NodeNetwork node = findNode(cap.node);
             if (node == null && !blank(cap.node)) {
-                errors.add(identity + "Node is not defined in Physical node network.");
+                errors.add(identity + "Host is not defined in the infrastructure's hosts.");
             } else if (node != null) {
                 if (cap.portSlot < 0 || cap.portSlot >= node.basePorts.size()) {
                     errors.add(identity + "Port slot is not defined on " + node.node + ".");
@@ -1247,7 +1247,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
     }
 
     private final class NodeNetworkModel extends AbstractTableModel {
-        private final String[] columns = {"Node", "Channel", "Address", "Fixed Base Ports"};
+        private final String[] columns = {"Host", "Channel", "Address", "Fixed Base Ports"};
         public int getRowCount() { return nodes.size(); }
         public int getColumnCount() { return columns.length; }
         public String getColumnName(int c) { return columns[c]; }

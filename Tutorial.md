@@ -213,11 +213,11 @@ new row there: nothing is copied or registered. Here you add P7 and move Example
 
 1. Choose **File → Open → Infrastructure Definition...** and open
    `btsn.common/InfrastructureDefinitionFolder/SingleHost.json`.
-2. Click **Add node**. A new row appears: `P7`, channel `ip0`, address `192.168.1.82`, port `4009`.
+2. Click **Add host**. A new row appears: `P7`, channel `ip0`, address `192.168.1.82`, port `4009`.
    It gets 4009 because P4 and P6 already use 4007 and 4008.
 3. Click **Save...** and keep `SingleHost.json`. The other examples are unchanged: none of them uses P7.
 
-![The Infrastructure Definition window for SingleHost.json: nodes P1 to P6 on 192.168.1.82, and the new row P7 on channel ip0 with fixed base port 4009.](images/ex3-add-node.png)
+![The Infrastructure Definition window for SingleHost.json: hosts P1 to P6 on 192.168.1.82, and the new row P7 on channel ip0 with fixed base port 4009.](images/ex3-add-host.png)
 
 ### Move P1 onto P7
 
