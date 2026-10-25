@@ -56,7 +56,9 @@ public final class BuildAndRunDialog extends JDialog {
         row(form, c, 0, "Process:", new JLabel(plan.processName));
         tokens.setToolTipText("For generators that issue arrivals. A generator that sets the initial marking sends its tokens once.");
         row(form, c, 1, "Tokens per generator:", tokens);
-        row(form, c, 2, "Wait after last token (s):", completion);
+        completion.setToolTipText("<html>After the last token, the run collects as soon as nothing has moved for a few seconds (the workflows have finished),<br>"
+            + "or after this many seconds at the latest. A closed net never finishes, so it runs for this long.</html>");
+        row(form, c, 2, "Longest wait for the workflows (s):", completion);
         row(form, c, 3, "Launcher name:", name);
         row(form, c, 4, "Folder:", folder);
         java.util.List<ServiceRegistry.Node> nodes = ServiceRegistry.infrastructureNodes(plan.profile);

@@ -560,7 +560,7 @@ and each generator's tokens are filled from the token format of the service at i
 | Choice | Default | Meaning |
 |---|---|---|
 | **Tokens per generator** | `10` | Root workflows each generator starts |
-| **Wait after last token (s)** | `10` | Time for the last workflows to finish before collection |
+| **Longest wait for the workflows (s)** | `120` (`10` for a closed net) | After the last token, the run collects as soon as nothing has moved for 5 s, or after this long at the latest. A closed net never finishes, so it runs for this long. |
 | **Launcher name** | `<process>_BuildAndRun.xml` | File name of the launcher |
 | **Folder** | `btsn.<domain>.ProjectLoader` | Where the launcher is written |
 
@@ -675,6 +675,12 @@ The default target `run-complete-workflow` does everything:
 
 ### Stop it when collection finishes
 
+After the last token, the run waits for the workflows to finish before it collects:
+
+- `WORKFLOWS FINISHED: last activity 6.1 s after the last token` means nothing has moved on this machine's hosts or Monitor for 5 s. The time is when the last workflow finished.
+- `WORKFLOWS STILL RUNNING at the 120 s limit` means they were still moving at the longest wait. That's expected for a closed net, which cycles until then.
+- Hosts on other machines can't be watched from here. A token spends one service call there before it comes back or ends, so keep the quiet time above your slowest service.
+
 After the collection requests the console says
 `Collection requests sent; waiting for Monitor to store the hosts' records - keep the run going...`.
 Leave it running: the launcher waits until Monitor's database stops changing. It then ends with
@@ -691,7 +697,10 @@ launcher. The collected data is in `btsn.common.Monitor/ServiceAnalysisDataBase`
 | Override | Effect |
 |---|---|
 | `-Dtoken.count=5` | Fire only the first 5 tokens of the schedule. To fire more than it holds, recreate the launcher with a larger number. |
-| `-Dworkflow.completion.seconds=30` | Wait longer after the last token before collecting |
+| `-Dworkflow.completion.seconds=300` | The longest wait after the last token. The run collects earlier once the workflows have finished. A closed net runs this long. |
+| `-Dworkflow.quiet.seconds=10` | How long nothing must move before the workflows count as finished (default 5 s). Keep it above your slowest service. |
+| `-Dtoken.expire=3600000` | How long each token lives, in ms (default 120000). Raise it for runs longer than two minutes, or tokens are dropped. |
+| `-Drun.timeout.ms=3600000` | When the hosts and Monitor are stopped in any case (default 600000, 10 minutes). Raise it for long runs. |
 | `-Dhost.address=127.0.0.1` | Run every host on this machine |
 | `-Dp2.mode=local` or `remote` | Force a host to start here, or expect it elsewhere |
 
@@ -785,7 +794,7 @@ ant -f btsn.petrinet.ProjectLoader/P1_Tutorial_Local_BuildAndRun.xml export-tuto
 | The Deploy panel's node table is empty | Start ProcessEditor with `btsn.workflowEditor` as its working directory |
 | A host or Monitor was skipped at startup | Add `-Dhost.address=127.0.0.1`, or start that host on its configured machine |
 | Derby reports another active instance | Stop the previous run, and any viewer holding the database, before analysing |
-| Fewer completed workflows than generated | Wait longer before collecting: `-Dworkflow.completion.seconds=30`, or raise **Wait after last token** and recreate the launcher |
+| Fewer completed workflows than generated | If the run printed `WORKFLOWS STILL RUNNING`, raise the longest wait: `-Dworkflow.completion.seconds=300`, or **Longest wait for the workflows** and recreate the launcher. If it printed `WORKFLOWS FINISHED` but a slow service was still working, raise `-Dworkflow.quiet.seconds`. |
 | Replay shows no tokens, or tokens skip a place | Load the analysis with the process that produced it, and check it is that run's file |
 | A design change did not run | Save the process. If you changed places, redeploy and save the deployment first. |
 

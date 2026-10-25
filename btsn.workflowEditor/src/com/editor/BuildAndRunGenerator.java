@@ -38,7 +38,7 @@ public final class BuildAndRunGenerator {
         public File folder;
         public final List<Run> runs = new ArrayList<>();   // one per event generator, in canvas order
         public int tokens = 10;                            // per generator
-        public int completionSeconds = 10;
+        public int completionSeconds = 120;   // the longest wait: the run collects as soon as the workflows have finished
         public List<Run> enabled() { List<Run> on = new ArrayList<>(); for (Run r : runs) if (r.enabled) on.add(r); return on; }
     }
 
@@ -194,6 +194,8 @@ public final class BuildAndRunGenerator {
         Options o = plan.defaults;
         o.folder = preferred.isDirectory() ? preferred : models.isDirectory() ? models : plan.folders.isEmpty() ? plan.root : plan.folders.get(0);
         o.launcherName = base + "_BuildAndRun.xml";
+        // A closed net (one with an initial marking) never finishes: the longest wait is how long it runs.
+        if (!plan.joins.isEmpty()) o.completionSeconds = 10;
         for (String id : plan.targets.keySet()) {
             Run run = new Run(); run.generatorId = id; run.intervalMs = plan.rates.get(id); run.version = plan.versions.get(id);
             o.runs.add(run);

@@ -33,6 +33,10 @@ import java.util.stream.Stream;
  *   collect     plan=... classpath=... dir=... generator=class operation=... version=v999 process=... queryVersion=v001 delay=3
  *               Sends each host its administrative token (initialise also Monitor's), the first host's call deploying
  *               the process's rules.
+ *   drain       plan=hosts.properties runtime=dir monitor=dir quiet=5 limit=120
+ *               Waits, after the last token is fired, until the workflows have finished: nothing written by this
+ *               machine's hosts or Monitor for quiet seconds (every place visit and every hand-over to Monitor is
+ *               written as it happens). Stops at limit seconds even if they have not: a closed net never finishes.
  *   settle      database=dir quiet=6 limit=180
  *               Waits until Monitor has written what the collectors sent: its database unchanged for quiet seconds.
  */
@@ -52,6 +56,7 @@ public final class HostLaunch {
             case "start": start(a); break;
             case "initialise": administer(a, true); break;
             case "collect": administer(a, false); break;
+            case "drain": drain(a); break;
             case "settle": settle(a); break;
             default: throw new IllegalArgumentException("Unknown command: " + args[0]);
         }
@@ -158,6 +163,42 @@ public final class HostLaunch {
         if (skipDeploy) command.add("-skipDeploy");
         int exit = new ProcessBuilder(command).directory(new File(required(a, "dir"))).inheritIO().start().waitFor();
         if (exit != 0) throw new IllegalStateException(service + " " + (initialise ? "initialisation" : "collection") + " failed (exit " + exit + ")");
+    }
+
+    /**
+     * The workflows have finished when nothing moves: no host on this machine and no Monitor has written a record
+     * for quiet seconds. Hosts on other machines cannot be watched from here; a token spends at most one service
+     * call there before it returns or ends, so quiet should be longer than the slowest service.
+     */
+    static void drain(Map<String, String> a) throws Exception {
+        Properties plan = load(Path.of(required(a, "plan")));
+        Path runtime = Path.of(required(a, "runtime"));
+        List<Path> watched = new ArrayList<>();
+        for (String host : split(plan.getProperty("hosts.local", ""))) watched.add(runtime.resolve(host).resolve("ServiceAnalysisDataBase"));
+        if (a.containsKey("monitor")) watched.add(Path.of(a.get("monitor")));
+        List<String> remote = split(plan.getProperty("hosts.remote", ""));
+        long quiet = Long.parseLong(a.getOrDefault("quiet", "5")) * 1000, limit = Long.parseLong(a.getOrDefault("limit", "120")) * 1000;
+        System.out.println("Waiting for the workflows to finish: until nothing moves for " + quiet / 1000 + " s, at most " + limit / 1000 + " s"
+            + (remote.isEmpty() ? "." : " (" + String.join(", ", remote) + " on other machines: not watched)."));
+        long start = System.currentTimeMillis(), last = latestChange(watched), lastActivity = start, quietSince = start;
+        while (System.currentTimeMillis() - start < limit) {
+            Thread.sleep(500);
+            long now = latestChange(watched);
+            if (now != last) { last = now; lastActivity = quietSince = System.currentTimeMillis(); }
+            else if (System.currentTimeMillis() - quietSince >= quiet) {
+                System.out.printf(Locale.ROOT, "WORKFLOWS FINISHED: last activity %.1f s after the last token; nothing has moved for %d s.%n",
+                    (lastActivity - start) / 1000.0, quiet / 1000);
+                return;
+            }
+        }
+        System.out.println("WORKFLOWS STILL RUNNING at the " + limit / 1000 + " s limit (workflow.completion.seconds); collecting now."
+            + " A closed net cycles until this limit; for an open process, raise it if the analysis shows unfinished workflows.");
+    }
+
+    private static long latestChange(List<Path> folders) throws IOException {
+        long latest = 0;
+        for (Path folder : folders) latest = Math.max(latest, latestChange(folder));
+        return latest;
     }
 
     /** Collection ends when Monitor has stored the records: its database stops changing. */
