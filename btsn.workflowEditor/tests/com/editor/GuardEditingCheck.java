@@ -49,7 +49,23 @@ public final class GuardEditingCheck {
         review.setLabel("to review"); review.setGuardCondition("DECISION_EQUAL_TO"); review.setDecisionValue("review");
         GuardEditing.choose(review, GuardEditing.NONE);
         check("to review".equals(review.getLabel()) && !GuardEditing.guarded(review), "A label of its own was removed");
-        System.out.println("PASS: guards only on arcs leaving a T_out; elsewhere greyed out with Clear guard; (none) removes condition, value and the label that repeated it");
+
+        // OTHERWISE: the arc a T_out takes when no other guard matches. It takes no value, and Validate accepts it on a gateway.
+        Arrow referred = arcs.get("T_out_Credit>Referred");
+        panel.updateSelection(referred);
+        condition = combo(panel, "DECISION_EQUAL_TO");
+        condition.setSelectedItem(GuardEditing.OTHERWISE);
+        check(GuardEditing.otherwise(referred) && referred.getDecisionValue().isEmpty() && "otherwise".equals(referred.getLabel()), "Otherwise: " + referred.getGuardCondition() + "/" + referred.getDecisionValue() + "/" + referred.getLabel());
+        panel.updateSelection(referred);
+        check(!field(panel, "Decision Value:").isEnabled(), "Otherwise still takes a decision value");
+        check(canvas.serviceBlockers().stream().noneMatch(n -> n.contains("T_out_Credit")), "Otherwise arc reported: " + canvas.serviceBlockers());
+        Arrow approved = arcs.get("T_out_Credit>Approved");
+        GuardEditing.choose(approved, GuardEditing.OTHERWISE);
+        check(canvas.serviceBlockers().contains("'T_out_Credit' has 2 Otherwise arcs; a T_out can take only one when no other guard matches. Keep one."), "Two Otherwise arcs not reported: " + canvas.serviceBlockers());
+        approved.setGuardCondition("DECISION_EQUAL_TO"); approved.setDecisionValue("approve");
+        GuardEditing.clear(referred);
+        check(canvas.serviceBlockers().stream().anyMatch(n -> n.startsWith("'T_out_Credit' is a GatewayNode") && n.contains("set its Guard Condition to OTHERWISE")), "Unguarded gateway arc not reported with Otherwise: " + canvas.serviceBlockers());
+        System.out.println("PASS: guards only on arcs leaving a T_out; elsewhere greyed out with Clear guard; (none) removes condition, value and the label that repeated it; Otherwise takes no value, is accepted on a gateway, and only once");
     }
 
     private static JComboBox<?> combo(Container parent, Object option) {
@@ -77,6 +93,18 @@ public final class GuardEditingCheck {
             if (c instanceof Container && text((Container) c, text)) return true;
         }
         return false;
+    }
+    /** The text field under a label in the Attributes panel. */
+    private static JTextField field(Container parent, String label) {
+        for (Component c : parent.getComponents()) {
+            if (c instanceof JPanel) {
+                JPanel p = (JPanel) c; boolean labelled = false; JTextField f = null;
+                for (Component x : p.getComponents()) { if (x instanceof JLabel && label.equals(((JLabel) x).getText())) labelled = true; if (x instanceof JTextField) f = (JTextField) x; }
+                if (labelled && f != null) return f;
+            }
+            if (c instanceof Container) { JTextField f = field((Container) c, label); if (f != null) return f; }
+        }
+        return null;
     }
     private static void check(boolean condition, String message) { if (!condition) throw new AssertionError(message); }
 }

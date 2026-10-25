@@ -511,6 +511,11 @@ public class EditorFrame extends JPanel {
                 GuardEditing.clear(arrow);
                 canvas.repaint();
                 SwingUtilities.invokeLater(() -> showArrowAttributes(arrow));
+            } else if (GuardEditing.OTHERWISE.equals(choice)) {
+                canvas.saveUndoState();
+                GuardEditing.choose(arrow, choice);   // no decision value: taken when no other guard matches
+                canvas.repaint();
+                SwingUtilities.invokeLater(() -> showArrowAttributes(arrow));
             } else if (!GuardEditing.NONE.equals(choice)) {
                 arrow.setGuardCondition(choice);
                 freshDecisionField.setEnabled(true);
@@ -522,7 +527,8 @@ public class EditorFrame extends JPanel {
         freshDecisionField.getDocument().addDocumentListener(new SimpleDocumentListener(() -> {
             arrow.setDecisionValue(freshDecisionField.getText());
         }));
-        freshDecisionField.setEnabled(guardApplies && !GuardEditing.NONE.equals(guardConditionCombo.getSelectedItem()));
+        freshDecisionField.setEnabled(guardApplies && GuardEditing.takesValue(guardConditionCombo.getSelectedItem()));
+        if (GuardEditing.otherwise(arrow)) freshDecisionField.setToolTipText("Otherwise takes no value: this arc is taken when no other guard on " + arrow.getSource().getLabel() + " matches.");
         if (!guardApplies) {
             guardConditionCombo.setEnabled(false);
             guardConditionCombo.setToolTipText(GuardEditing.NOT_HERE);

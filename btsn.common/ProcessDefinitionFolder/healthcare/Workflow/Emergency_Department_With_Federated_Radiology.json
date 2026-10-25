@@ -654,7 +654,7 @@
       "source": "T_out_Triage",
       "target": "Terminate",
       "label": "v002",
-      "guardCondition": "",
+      "guardCondition": "OTHERWISE",
       "decision_value": "",
       "endpoint": "",
       "waypoints": [

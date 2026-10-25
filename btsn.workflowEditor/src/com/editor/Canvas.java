@@ -1433,11 +1433,11 @@ public class Canvas extends JPanel {
          JTextField decisionValueField = new JTextField(arrow.getDecisionValue());
          panel.add(decisionValueField);
          conditionCombo.addActionListener(e -> {
-             boolean none = GuardEditing.NONE.equals(conditionCombo.getSelectedItem());
-             if (none) decisionValueField.setText("");
-             decisionValueField.setEnabled(guardApplies && !none);
+             boolean value = GuardEditing.takesValue(conditionCombo.getSelectedItem());
+             if (!value) decisionValueField.setText("");
+             decisionValueField.setEnabled(guardApplies && value);
          });
-         decisionValueField.setEnabled(guardApplies && !GuardEditing.NONE.equals(conditionCombo.getSelectedItem()));
+         decisionValueField.setEnabled(guardApplies && GuardEditing.takesValue(conditionCombo.getSelectedItem()));
          JButton clearGuardButton = new JButton("Clear guard");
          if (!guardApplies) {
              conditionCombo.setEnabled(false);
@@ -1474,7 +1474,7 @@ public class Canvas extends JPanel {
              arrow.setLabel(labelField.getText());
              if (guardApplies) {
                  String condition = (String) conditionCombo.getSelectedItem();
-                 if (GuardEditing.NONE.equals(condition)) GuardEditing.clear(arrow);
+                 if (GuardEditing.NONE.equals(condition) || GuardEditing.OTHERWISE.equals(condition)) GuardEditing.choose(arrow, condition);
                  else { arrow.setGuardCondition(condition); arrow.setDecisionValue(decisionValueField.getText()); }
              }
              arrow.setEndpoint(endpointField.getText());
@@ -2839,14 +2839,15 @@ public class Canvas extends JPanel {
                     // The other way round: a value the service routes on that no arc tests, with no unguarded arc to take it.
                     // The host drops such a token, so the design is fixed before it runs.
                     List<String> tested = new ArrayList<>();
-                    boolean unguarded = false;
+                    boolean unguarded = false, otherwiseArc = false;
                     for (Arrow route : arrows) {
                         if (route.getSource() != out.getTarget() || route.getTarget() == null) continue;
                         String value = route.getDecisionValue();
-                        if (value == null || value.trim().isEmpty()) unguarded = true; else tested.add(value.trim());
+                        if (GuardEditing.otherwise(route)) otherwiseArc = true;
+                        else if (value == null || value.trim().isEmpty()) unguarded = true; else tested.add(value.trim());
                     }
                     if (unguarded && "GatewayNode".equals(out.getTarget().getNodeType())) unguarded = false;   // a gateway never takes an unguarded arc
-                    if (unguarded || tested.isEmpty() || c.routes.isEmpty()) continue;
+                    if (otherwiseArc || unguarded || tested.isEmpty() || c.routes.isEmpty()) continue;   // Otherwise takes the values no arc tests
                     List<String> missing = new ArrayList<>();
                     for (String r : c.routes) if (!tested.contains(r)) missing.add(r);
                     if (!missing.isEmpty())
@@ -2931,10 +2932,13 @@ public class Canvas extends JPanel {
             // never taken. (A picture of a combined run draws several versions' arcs, so it is not checked.)
             if ("GatewayNode".equals(element.getNodeType()) && BuildAndRunGenerator.combinedLauncher(definitionLocation) == null)
                 for (Arrow a : arrows)
-                    if (a.getSource() == element && a.getTarget() != null && (a.getDecisionValue() == null || a.getDecisionValue().trim().isEmpty()))
+                    if (a.getSource() == element && a.getTarget() != null && !GuardEditing.otherwise(a) && (a.getDecisionValue() == null || a.getDecisionValue().trim().isEmpty()))
                         gaps.add("'" + element.getLabel() + "' is a GatewayNode: it follows only the arcs whose guard matches what its place returns, so its arc to "
-                            + a.getTarget().getLabel() + ", which has no guard, is never taken. Give that arc a guard, or set " + element.getLabel()
-                            + "'s Node Type to EdgeNode if every token goes there.");
+                            + a.getTarget().getLabel() + ", which has no guard, is never taken. Give that arc a guard, set its Guard Condition to OTHERWISE "
+                            + "(taken when no other guard matches), or set " + element.getLabel() + "'s Node Type to EdgeNode if every token goes there.");
+            int otherwise = 0;
+            for (Arrow a : arrows) if (a.getSource() == element && GuardEditing.otherwise(a)) otherwise++;
+            if (otherwise > 1) gaps.add("'" + element.getLabel() + "' has " + otherwise + " Otherwise arcs; a T_out can take only one when no other guard matches. Keep one.");
         }
         if (reminders) for (Arrow a : arrows) {
             String value = a.getDecisionValue();
