@@ -400,6 +400,8 @@ Use **Arrow (drag)**, or **Arrow (click waypoints)** to bend the return route.
 | `T_out_P2` | `T_in_P2` | `false` | `DECISION_EQUAL_TO` | `false` |
 
 - **The label is only a caption.** Guard Condition and Decision Value define the route.
+- **Otherwise:** set an arc's Guard Condition to `OTHERWISE` to have the T_out take it when no other guard matches, e.g. "anything else ends here". It takes no decision value, and a T_out has at most one.
+- **A GatewayNode follows only guarded arcs.** An arc leaving a gateway with no guard is never taken, and Validate says so: guard it, make it Otherwise, or make the T_out an EdgeNode if every token goes there.
 - Leave **Endpoint** blank.
 - How a token moves:
   - T_in receives and buffers the token.

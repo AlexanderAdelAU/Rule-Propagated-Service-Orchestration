@@ -2193,6 +2193,9 @@ public class RuleDeployer {
 	 *   Service returns "true" → matches P2 and P3 → FORK
 	 *   Service returns "false" → matches Monitor → EDGE
 	 */
+	/** The decision value of an OTHERWISE arc, which no service returns: a host takes it when no other guard matches. */
+	public static final String OTHERWISE_VALUE = "*OTHERWISE*";
+
 	private void processGatewayNode(ServiceNode serviceNode, TransitionNode transition, PrintWriter writer) {
 		logger.info("Processing GatewayNode: " + transition.nodeId);
 
@@ -2218,6 +2221,8 @@ public class RuleDeployer {
 				// Try label as final fallback
 				decisionValue = edge.attributes.get("label");
 			}
+			// OTHERWISE: the arc taken when no other guard matches; the hosts recognise its value.
+			if ("OTHERWISE".equals(edge.attributes.get("condition"))) decisionValue = OTHERWISE_VALUE;
 			
 			logger.info("GatewayNode edge: " + edge.fromNode + " -> " + edge.toNode + 
 			           " (decision_value='" + decisionValue + "', attributes=" + edge.attributes + ")");

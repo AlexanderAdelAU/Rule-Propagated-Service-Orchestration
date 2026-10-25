@@ -339,7 +339,8 @@ class TransitionHandler {
             String branchConditionType = nextServiceMap.get(i);
             String branchExpectedValue = decisionValueCollection.get(i);
 
-            if (branchConditionType == null || branchConditionType.isEmpty()) {
+            if (branchConditionType == null || branchConditionType.isEmpty() || "OTHERWISE".equals(branchConditionType)
+                    || "*OTHERWISE*".equals(cleanQuotes(String.valueOf(branchExpectedValue)))) {
                 logger.info("XOR-DIAG:   Branch " + i + " -> " + nextServiceCollection.get(i) +
                            ": DEFAULT (no condition) - will use if no other match");
                 defaultBranchIndices.add(i);
@@ -507,6 +508,13 @@ class TransitionHandler {
         }
 
         logger.info("GATEWAY-DIAG: Total matches: " + matchingIndices.size());
+
+        // OTHERWISE: when no guard matches, the arc marked Otherwise (if any) is taken.
+        if (matchingIndices.isEmpty()) {
+            for (int i = 0; i < nextServiceCollection.size(); i++)
+                if ("*OTHERWISE*".equals(cleanQuotes(String.valueOf(decisionValueCollection.get(i))))) matchingIndices.add(i);
+            if (!matchingIndices.isEmpty()) logger.info("GATEWAY-DIAG: No guard matched '" + cleanRoutingPath + "' - taking the Otherwise arc");
+        }
 
         if (matchingIndices.isEmpty()) {
             logger.error("GATEWAY: No destinations match routing_path '" + cleanRoutingPath + "' - token dropped");
