@@ -1,0 +1,57 @@
+name: Experimental single-fork end-to-end run
+on:
+  pull_request:
+    paths:
+      - 'btsn.common/**'
+      - 'btsn.services/**'
+      - 'btsn.petrinet.ProjectLoader/**'
+      - '.github/workflows/experimental-single-fork-execution.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  single-fork:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install Ant
+        run: sudo apt-get update && sudo apt-get install -y ant
+      - name: Execute unchanged RPSO launcher locally for bounded trial
+        shell: bash
+        run: |
+          mkdir -p ci-results
+          set -o pipefail
+          set +e
+          timeout -s INT -k 5s 110s ant -noinput -f btsn.petrinet.ProjectLoader/SingleFork_ExclusiveHandoff_Workflow_BuildAndRun.xml \
+            -Dhost.address=127.0.0.1 \
+            -Dworkflow.completion.seconds=18 \
+            -Dservice.startup.seconds=2 \
+            -Dinit.delay.seconds=1 \
+            -Dphase.delay.seconds=1 \
+            -Dcollector.delay.seconds=1 \
+            -Drun.timeout.ms=100000 2>&1 | tee ci-results/single-fork-launcher.log
+          code=${PIPESTATUS[0]}
+          set -e
+          echo "Launcher exit code: $code" | tee ci-results/launch-summary.txt
+          grep -E 'PHASE [123]|Phase [123] Complete|BUILD FAILED|BUILD SUCCESSFUL|Completed successfully|COMPLETED SUCCESSFULLY|ERROR|FATAL|PUBLISH FAILED|JOIN-CONTINUE|FORK: Created|FORK: Routed|FORK: Parallel' ci-results/single-fork-launcher.log | tail -120 >> ci-results/launch-summary.txt || true
+          cat ci-results/launch-summary.txt
+          if grep -q 'Phase 2 Complete' ci-results/single-fork-launcher.log; then
+            echo "Full token execution phase completed; inspect lifecycle log and monitor for correctness."
+          else
+            echo "::error::Workflow execution did not reach Phase 2 Complete"
+            exit 1
+          fi
+      - name: Upload launcher log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: experimental-single-fork-launcher
+          path: ci-results/
+          retention-days: 7
