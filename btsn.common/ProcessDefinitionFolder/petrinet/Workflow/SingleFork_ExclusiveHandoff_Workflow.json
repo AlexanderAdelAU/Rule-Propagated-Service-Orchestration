@@ -150,7 +150,7 @@
           "returnAttribute": "token_branch1",
           "arguments": [
             {
-              "name": "token_branch1",
+              "name": "token",
               "type": "String",
               "value": "String",
               "required": false
@@ -202,7 +202,7 @@
           "returnAttribute": "token_branch2",
           "arguments": [
             {
-              "name": "token_branch2",
+              "name": "token",
               "type": "String",
               "value": "String",
               "required": false
@@ -365,7 +365,7 @@
           "returnAttribute": "token_branch1",
           "arguments": [
             {
-              "name": "token_branch1",
+              "name": "token",
               "type": "String",
               "value": "String",
               "required": false
@@ -417,7 +417,7 @@
           "returnAttribute": "token_branch2",
           "arguments": [
             {
-              "name": "token_branch2",
+              "name": "token",
               "type": "String",
               "value": "String",
               "required": false

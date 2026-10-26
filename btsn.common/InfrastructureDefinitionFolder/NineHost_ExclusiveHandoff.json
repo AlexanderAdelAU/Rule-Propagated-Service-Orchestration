@@ -1,0 +1,77 @@
+{
+  "definitionType": "Infrastructure",
+  "nodes": [
+    {
+      "node": "P1",
+      "channel": "ip0",
+      "address": "127.0.0.1",
+      "basePorts": [
+        4001
+      ]
+    },
+    {
+      "node": "P2",
+      "channel": "ip0",
+      "address": "127.0.0.1",
+      "basePorts": [
+        4002
+      ]
+    },
+    {
+      "node": "P3",
+      "channel": "ip0",
+      "address": "127.0.0.1",
+      "basePorts": [
+        4003
+      ]
+    },
+    {
+      "node": "P4",
+      "channel": "ip0",
+      "address": "127.0.0.1",
+      "basePorts": [
+        4004
+      ]
+    },
+    {
+      "node": "P5",
+      "channel": "ip0",
+      "address": "127.0.0.1",
+      "basePorts": [
+        4005
+      ]
+    },
+    {
+      "node": "P6",
+      "channel": "ip0",
+      "address": "127.0.0.1",
+      "basePorts": [
+        4006
+      ]
+    },
+    {
+      "node": "P7",
+      "channel": "ip0",
+      "address": "127.0.0.1",
+      "basePorts": [
+        4007
+      ]
+    },
+    {
+      "node": "P8",
+      "channel": "ip0",
+      "address": "127.0.0.1",
+      "basePorts": [
+        4008
+      ]
+    },
+    {
+      "node": "P9",
+      "channel": "ip0",
+      "address": "127.0.0.1",
+      "basePorts": [
+        4009
+      ]
+    }
+  ]
+}

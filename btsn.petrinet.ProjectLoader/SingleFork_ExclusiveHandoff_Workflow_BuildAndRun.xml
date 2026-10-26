@@ -8,6 +8,7 @@
     <property name="process.title" value="petrinet/Workflow/SingleFork_ExclusiveHandoff_Workflow"/>
     <property name="launcher.profile.file" location="../btsn.services/deployments/models/SingleFork_ExclusiveHandoff_WorkflowDeployment.json"/>
     <property name="workflow.process.name" value="petrinet/Workflow/SingleFork_ExclusiveHandoff_Workflow"/>
+    <property name="infrastructure" value="NineHost_ExclusiveHandoff"/>
     <property name="rule.version" value="v001"/>
     <property name="query.version" value="v001"/>
     <property name="eg1.id" value="F1_START"/>
@@ -19,6 +20,6 @@
     <property name="eg1.marking" value="Arbiter_Place.processToken=token"/>
     <property name="token.count" value="10"/>
     <property name="token.expire" value="15000"/>
-    <property name="hosts" value="Arbiter,P1_Start,P1_Branch1,P1_Branch2,P1_Reunite,P2_Start,P2_Branch1,P2_Branch2,P2_Reunite"/>
+    <property name="hosts" value="P1,P2,P3,P4,P5,P6,P7,P8,P9"/>
     <import file="../btsn.services/process-runtime.xml"/>
 </project>

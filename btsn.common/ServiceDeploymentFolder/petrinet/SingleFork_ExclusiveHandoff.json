@@ -3,7 +3,7 @@
   "catalog": "BusinessServiceDefinitions/petrinet/PetriNetModels.json",
   "capabilities": [
     {
-      "node": "Arbiter",
+      "node": "P1",
       "service": "StochasticService",
       "operation": "processToken",
       "returnAttribute": "decision",
@@ -20,7 +20,7 @@
       "invocationAdapter": "boolean-token"
     },
     {
-      "node": "P1_Start",
+      "node": "P2",
       "service": "AlwaysTrueService",
       "operation": "processToken",
       "returnAttribute": "token",
@@ -37,13 +37,13 @@
       "invocationAdapter": "boolean-token"
     },
     {
-      "node": "P1_Branch1",
+      "node": "P3",
       "service": "AlwaysTrueService",
       "operation": "processToken",
       "returnAttribute": "token_branch1",
       "arguments": [
         {
-          "name": "token_branch1",
+          "name": "token",
           "type": "String",
           "value": "String",
           "required": false
@@ -54,13 +54,13 @@
       "invocationAdapter": "boolean-token"
     },
     {
-      "node": "P1_Branch2",
+      "node": "P4",
       "service": "AlwaysTrueService",
       "operation": "processToken",
       "returnAttribute": "token_branch2",
       "arguments": [
         {
-          "name": "token_branch2",
+          "name": "token",
           "type": "String",
           "value": "String",
           "required": false
@@ -71,7 +71,7 @@
       "invocationAdapter": "boolean-token"
     },
     {
-      "node": "P1_Reunite",
+      "node": "P5",
       "service": "AlwaysTrueService",
       "operation": "processToken",
       "returnAttribute": "token",
@@ -94,7 +94,7 @@
       "invocationAdapter": "boolean-token"
     },
     {
-      "node": "P2_Start",
+      "node": "P6",
       "service": "AlwaysTrueService",
       "operation": "processToken",
       "returnAttribute": "token",
@@ -111,13 +111,13 @@
       "invocationAdapter": "boolean-token"
     },
     {
-      "node": "P2_Branch1",
+      "node": "P7",
       "service": "AlwaysTrueService",
       "operation": "processToken",
       "returnAttribute": "token_branch1",
       "arguments": [
         {
-          "name": "token_branch1",
+          "name": "token",
           "type": "String",
           "value": "String",
           "required": false
@@ -128,13 +128,13 @@
       "invocationAdapter": "boolean-token"
     },
     {
-      "node": "P2_Branch2",
+      "node": "P8",
       "service": "AlwaysTrueService",
       "operation": "processToken",
       "returnAttribute": "token_branch2",
       "arguments": [
         {
-          "name": "token_branch2",
+          "name": "token",
           "type": "String",
           "value": "String",
           "required": false
@@ -145,7 +145,7 @@
       "invocationAdapter": "boolean-token"
     },
     {
-      "node": "P2_Reunite",
+      "node": "P9",
       "service": "AlwaysTrueService",
       "operation": "processToken",
       "returnAttribute": "token",

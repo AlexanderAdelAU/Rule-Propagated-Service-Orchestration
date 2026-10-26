@@ -1,6 +1,6 @@
 {
   "catalog": "BusinessServiceDefinitions/petrinet/PetriNetModels.json",
-  "infrastructure": "InfrastructureDefinitionFolder/SingleHost.json",
+  "infrastructure": "InfrastructureDefinitionFolder/NineHost_ExclusiveHandoff.json",
   "deploymentRules": "RuleBase/Generated/InfrastructureDeployment.ruleml.xml",
   "directServiceRules": [
     "RuleBase/Generated/HostAdministration.ruleml.xml"
