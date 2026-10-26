@@ -1644,6 +1644,8 @@ public class ProcessEditor extends JFrame {
             "- Drag to select multiple elements (rubber band)\n" +
             "- Ctrl+Click to add/remove from selection\n" +
             "- Drag selected group to move together\n" +
+            "- Ctrl+Click several text annotations, then drag any one to move the group\n" +
+            "- Mouse wheel: vertical scroll; Shift+wheel: horizontal scroll; Ctrl+wheel: zoom\n" +
             "- Ctrl+C to copy selection\n" +
             "- Ctrl+V to paste (with automatic offset)\n\n" +
             "Keyboard Shortcuts:\n" +
