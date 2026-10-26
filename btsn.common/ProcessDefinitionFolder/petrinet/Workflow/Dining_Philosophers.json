@@ -1,0 +1,528 @@
+{
+  "processType": "PetriNet",
+  "elements": [
+    {
+      "id": "T_in_P1",
+      "type": "TRANSITION",
+      "x": 424,
+      "y": 104,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P1",
+      "rotation": 0.0,
+      "node_type": "JoinNode",
+      "node_value": "JOIN_NODE",
+      "transition_type": "T_in",
+      "buffer": "10",
+      "joinInputCount": "2"
+    },
+    {
+      "id": "P1",
+      "type": "PLACE",
+      "x": 455,
+      "y": 105,
+      "width": 50,
+      "height": 50,
+      "label": "P1",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "fork_1",
+          "arguments": [
+            {
+              "name": "fork_2",
+              "type": "String",
+              "value": "String",
+              "required": false
+            },
+            {
+              "name": "fork_5",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "Philosopher1"
+    },
+    {
+      "id": "T_out_P1",
+      "type": "TRANSITION",
+      "x": 511,
+      "y": 104,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P1",
+      "rotation": 0.0,
+      "node_type": "ForkNode",
+      "node_value": "FORK_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P2",
+      "type": "TRANSITION",
+      "x": 669,
+      "y": 218,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P2",
+      "rotation": 0.0,
+      "node_type": "JoinNode",
+      "node_value": "JOIN_NODE",
+      "transition_type": "T_in",
+      "buffer": "10",
+      "joinInputCount": "2"
+    },
+    {
+      "id": "P2",
+      "type": "PLACE",
+      "x": 673,
+      "y": 263,
+      "width": 50,
+      "height": 50,
+      "label": "P2",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "fork_2",
+          "arguments": [
+            {
+              "name": "fork_3",
+              "type": "String",
+              "value": "String",
+              "required": false
+            },
+            {
+              "name": "fork_1",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "Philosopher2"
+    },
+    {
+      "id": "T_out_P2",
+      "type": "TRANSITION",
+      "x": 696,
+      "y": 301,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P2",
+      "rotation": 0.0,
+      "node_type": "ForkNode",
+      "node_value": "FORK_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P3",
+      "type": "TRANSITION",
+      "x": 636,
+      "y": 486,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P3",
+      "rotation": 0.0,
+      "node_type": "JoinNode",
+      "node_value": "JOIN_NODE",
+      "transition_type": "T_in",
+      "buffer": "10",
+      "joinInputCount": "2"
+    },
+    {
+      "id": "P3",
+      "type": "PLACE",
+      "x": 590,
+      "y": 521,
+      "width": 50,
+      "height": 50,
+      "label": "P3",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "fork_3",
+          "arguments": [
+            {
+              "name": "fork_4",
+              "type": "String",
+              "value": "String",
+              "required": false
+            },
+            {
+              "name": "fork_2",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "Philosopher3"
+    },
+    {
+      "id": "T_out_P3",
+      "type": "TRANSITION",
+      "x": 565,
+      "y": 538,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P3",
+      "rotation": 0.0,
+      "node_type": "ForkNode",
+      "node_value": "FORK_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P4",
+      "type": "TRANSITION",
+      "x": 370,
+      "y": 538,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P4",
+      "rotation": 0.0,
+      "node_type": "JoinNode",
+      "node_value": "JOIN_NODE",
+      "transition_type": "T_in",
+      "buffer": "10",
+      "joinInputCount": "2"
+    },
+    {
+      "id": "P4",
+      "type": "PLACE",
+      "x": 319,
+      "y": 521,
+      "width": 50,
+      "height": 50,
+      "label": "P4",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "fork_4",
+          "arguments": [
+            {
+              "name": "fork_5",
+              "type": "String",
+              "value": "String",
+              "required": false
+            },
+            {
+              "name": "fork_3",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "Philosopher4"
+    },
+    {
+      "id": "T_out_P4",
+      "type": "TRANSITION",
+      "x": 299,
+      "y": 486,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P4",
+      "rotation": 0.0,
+      "node_type": "ForkNode",
+      "node_value": "FORK_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P5",
+      "type": "TRANSITION",
+      "x": 239,
+      "y": 301,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P5",
+      "rotation": 0.0,
+      "node_type": "JoinNode",
+      "node_value": "JOIN_NODE",
+      "transition_type": "T_in",
+      "buffer": "10",
+      "joinInputCount": "2"
+    },
+    {
+      "id": "P5",
+      "type": "PLACE",
+      "x": 236,
+      "y": 263,
+      "width": 50,
+      "height": 50,
+      "label": "P5",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "fork_5",
+          "arguments": [
+            {
+              "name": "fork_1",
+              "type": "String",
+              "value": "String",
+              "required": false
+            },
+            {
+              "name": "fork_4",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "Philosopher5"
+    },
+    {
+      "id": "T_out_P5",
+      "type": "TRANSITION",
+      "x": 266,
+      "y": 218,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P5",
+      "rotation": 0.0,
+      "node_type": "ForkNode",
+      "node_value": "FORK_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "TABLE",
+      "type": "EVENT_GENERATOR",
+      "x": 468,
+      "y": 330,
+      "width": 24,
+      "height": 60,
+      "label": "TABLE",
+      "rotation": 0.0,
+      "generator_rate": "1000",
+      "token_version": "v001"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "T_in_P1",
+      "target": "P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P1",
+      "target": "T_out_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P2",
+      "target": "P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P2",
+      "target": "T_out_P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P3",
+      "target": "P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P3",
+      "target": "T_out_P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P4",
+      "target": "P4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P4",
+      "target": "T_out_P4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P5",
+      "target": "P5",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P5",
+      "target": "T_out_P5",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P2",
+      "target": "T_in_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P5",
+      "target": "T_in_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P3",
+      "target": "T_in_P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P1",
+      "target": "T_in_P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P4",
+      "target": "T_in_P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P2",
+      "target": "T_in_P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P5",
+      "target": "T_in_P4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P3",
+      "target": "T_in_P4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P1",
+      "target": "T_in_P5",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P4",
+      "target": "T_in_P5",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "TABLE",
+      "target": "T_in_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "tokens": 2
+    },
+    {
+      "source": "TABLE",
+      "target": "T_in_P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "tokens": 2
+    },
+    {
+      "source": "TABLE",
+      "target": "T_in_P4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "tokens": 1
+    }
+  ],
+  "textElements": [
+    {
+      "x": 40,
+      "y": 40,
+      "text": "Dining philosophers: five places in a ring, forks passed between neighbours",
+      "fontSize": 14,
+      "fontStyle": 1,
+      "color": -16777216
+    },
+    {
+      "x": 40,
+      "y": 62,
+      "text": "Initial marking (TABLE): P1 and P3 hold both forks, P4 holds the fork it shares with P5. No cycle, so no deadlock.",
+      "fontSize": 11,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 40,
+      "y": 80,
+      "text": "Philosopher Pk eats when its join holds both forks, then its ForkNode T_out hands fork_k to both neighbours.",
+      "fontSize": 11,
+      "fontStyle": 0,
+      "color": -16777216
+    }
+  ],
+  "serviceDeployment": "ServiceDeploymentFolder/petrinet/Dining_Philosophers.json"
+}

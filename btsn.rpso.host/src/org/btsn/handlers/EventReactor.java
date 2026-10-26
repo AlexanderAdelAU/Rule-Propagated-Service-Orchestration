@@ -27,6 +27,10 @@ public class EventReactor extends Thread {
 	private static boolean COMPRESSION_ENABLED = true;
 
 	private TreeMap<Long, String> costKeyTokenMap = new TreeMap<Long, String>();
+	/** Arrival order within one priority: two tokens with the same priority (the same token id, as a ring's forks reuse
+	 *  ids) get distinct queue keys, in the order they arrived, instead of the second replacing the first. */
+	private long arrivals = 0;
+	private static final long ARRIVAL_SLOTS = 1_000_000L;
 	public static ConcurrentLinkedQueue<String> tokenQueue = new ConcurrentLinkedQueue<String>();
 
 	private Scheduler s2 = new Scheduler();
@@ -722,7 +726,7 @@ public class EventReactor extends Thread {
 		} catch (NumberFormatException e) {
 		    System.err.println("PRIORITY: Failed to parse sequenceId, using Scheduler costKey: " + costKey);
 		}
-		costKey = priorityCostKey;
+		costKey = priorityCostKey * ARRIVAL_SLOTS + (arrivals++ % ARRIVAL_SLOTS);
 
 		// Add to processing queue
 		System.out.println("=== ADDING TO PROCESSING QUEUE ===");

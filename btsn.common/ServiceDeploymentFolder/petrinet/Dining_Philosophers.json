@@ -1,0 +1,121 @@
+{
+  "definitionType": "ServiceDeployment",
+  "catalog": "BusinessServiceDefinitions/petrinet/PetriNetModels.json",
+  "capabilities": [
+    {
+      "node": "P1",
+      "service": "AlwaysTrueService",
+      "operation": "processToken",
+      "returnAttribute": "fork_1",
+      "arguments": [
+        {
+          "name": "fork_2",
+          "type": "String",
+          "value": "String",
+          "required": false
+        },
+        {
+          "name": "fork_5",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "Philosopher1",
+      "invocationAdapter": "boolean-token"
+    },
+    {
+      "node": "P2",
+      "service": "AlwaysTrueService",
+      "operation": "processToken",
+      "returnAttribute": "fork_2",
+      "arguments": [
+        {
+          "name": "fork_3",
+          "type": "String",
+          "value": "String",
+          "required": false
+        },
+        {
+          "name": "fork_1",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "Philosopher2",
+      "invocationAdapter": "boolean-token"
+    },
+    {
+      "node": "P3",
+      "service": "AlwaysTrueService",
+      "operation": "processToken",
+      "returnAttribute": "fork_3",
+      "arguments": [
+        {
+          "name": "fork_4",
+          "type": "String",
+          "value": "String",
+          "required": false
+        },
+        {
+          "name": "fork_2",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "Philosopher3",
+      "invocationAdapter": "boolean-token"
+    },
+    {
+      "node": "P4",
+      "service": "AlwaysTrueService",
+      "operation": "processToken",
+      "returnAttribute": "fork_4",
+      "arguments": [
+        {
+          "name": "fork_5",
+          "type": "String",
+          "value": "String",
+          "required": false
+        },
+        {
+          "name": "fork_3",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "Philosopher4",
+      "invocationAdapter": "boolean-token"
+    },
+    {
+      "node": "P5",
+      "service": "AlwaysTrueService",
+      "operation": "processToken",
+      "returnAttribute": "fork_5",
+      "arguments": [
+        {
+          "name": "fork_1",
+          "type": "String",
+          "value": "String",
+          "required": false
+        },
+        {
+          "name": "fork_4",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "Philosopher5",
+      "invocationAdapter": "boolean-token"
+    }
+  ]
+}

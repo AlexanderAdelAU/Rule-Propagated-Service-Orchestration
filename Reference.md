@@ -1101,6 +1101,8 @@ Every launcher runs the same way:
 | Your own service: inventory and supplier | [Inventory_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/Inventory_Workflow_BuildAndRun.xml) |
 | P1–P4 fork/join model | [P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.xml) |
 | Initial marking over two places (Rendezvous) | [Rendezvous_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/Rendezvous_Workflow_BuildAndRun.xml) |
+| Dining philosophers: five places in a ring passing forks; runs until the forks' lifetime ends (`-Dtoken.expire=60000` for a minute) | [Dining_Philosophers_BuildAndRun.xml](btsn.petrinet.ProjectLoader/Dining_Philosophers_BuildAndRun.xml) |
+| Dining philosophers from a deadlocked start: every join holds one fork and waits | [Dining_Philosophers_Deadlock_BuildAndRun.xml](btsn.petrinet.ProjectLoader/Dining_Philosophers_Deadlock_BuildAndRun.xml) |
 | Six-place double-join model | [P1_to_P6_Double_Join_Workflow.xml](btsn.petrinet.ProjectLoader/P1_to_P6_Double_Join_Workflow.xml) |
 | Emergency department | [Emergency_Department_BuildAndRun.xml](btsn.healthcare.ProjectLoader/Emergency_Department_BuildAndRun.xml) |
 | Full Financial application | [FinancialSystem_P1_P5_BuildAndRun.xml](btsn.financial.ProjectLoader/FinancialSystem_P1_P5_BuildAndRun.xml) |
