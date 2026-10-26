@@ -4608,6 +4608,8 @@ public class Canvas extends JPanel {
             TextElement textCopy = new TextElement(text.getX(), text.getY(), text.getText());
             textCopy.setFont(text.getFont());
             textCopy.setColor(text.getColor());
+            textCopy.setMaxWidth(text.getMaxWidth());
+            textCopy.setCenterText(text.isCenterText());
             clipboardTextElements.add(textCopy);
         }
         
@@ -4747,10 +4749,15 @@ public class Canvas extends JPanel {
                                                  clipText.getText());
             newText.setFont(clipText.getFont());
             newText.setColor(clipText.getColor());
+            newText.setMaxWidth(clipText.getMaxWidth());
+            newText.setCenterText(clipText.isCenterText());
             textElements.add(newText);
-            selectedTextElement = newText; // Select last pasted text element
+            selectedTextElements.add(newText);
         }
-        
+        selectedTextElement = selectedTextElements.size() == 1
+            ? selectedTextElements.iterator().next() : null;
+        updateCanvasSize();
+
         repaint();
         notifyChange();
         
