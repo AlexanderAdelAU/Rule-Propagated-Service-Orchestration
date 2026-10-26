@@ -141,3 +141,22 @@ or call a family-only rendezvous classical Dining Philosophers.
   (`costKeyTokenMap`, `putScheduledToken`)
 - `btsn.common/ProcessDefinitionFolder/petrinet/Workflow/Rendezvous_Workflow.json`
   (existing fork/join topology example)
+
+## Experimental ProcessEditor workflow included on this branch
+
+The branch also contains `btsn.common/ProcessDefinitionFolder/petrinet/Workflow/SingleFork_ExclusiveHandoff_Workflow.json`, an **unverified test model**, with matching
+service deployment, launcher profile, build/run XML, and trigger CSV. It follows
+the controlled-exclusive-handoff diagram above and reuses existing node types.
+
+Run from `btsn.petrinet.ProjectLoader`:
+
+```sh
+ant -f SingleFork_ExclusiveHandoff_Workflow_BuildAndRun.xml -Dhost.address=127.0.0.1
+```
+
+**Do not treat a successful build as a behavioural proof.** Inspect the log and monitor for:
+child IDs and attribute names at each ForkNode/JoinNode, correct two-input
+waiting, exactly one granted philosopher at a time, no overwrite in
+`EventReactor.costKeyTokenMap`, and no family-map interference at upstream
+EdgeNode services. The workflow may expose an existing runtime limitation,
+which is useful evidence without requiring any runtime changes.

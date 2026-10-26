@@ -1,0 +1,825 @@
+{
+  "processType": "PetriNet",
+  "metadata": {
+    "name": "Single fork child-token exclusive handoff (experimental)",
+    "purpose": "Validate one unique fork family split to two children, reunited by either P1 or P2 (selected exclusively). Unverified with unchanged runtime."
+  },
+  "elements": [
+    {
+      "id": "F1_START",
+      "type": "EVENT_GENERATOR",
+      "x": 20,
+      "y": 420,
+      "width": 24,
+      "height": 60,
+      "label": "F1_START",
+      "rotation": 0,
+      "generator_rate": "1000",
+      "token_version": "v001"
+    },
+    {
+      "id": "T_in_Arbiter",
+      "type": "TRANSITION",
+      "x": 105,
+      "y": 420,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_Arbiter",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "Arbiter",
+      "type": "PLACE",
+      "x": 175,
+      "y": 425,
+      "width": 50,
+      "height": 50,
+      "label": "Arbiter",
+      "service": "StochasticService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "decision",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "ArbiterInstance"
+    },
+    {
+      "id": "T_out_Arbiter",
+      "type": "TRANSITION",
+      "x": 260,
+      "y": 420,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_Arbiter",
+      "rotation": 0,
+      "node_type": "XorNode",
+      "node_value": "XOR_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P1_Start",
+      "type": "TRANSITION",
+      "x": 390,
+      "y": 135,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P1_Start",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "P1_Start",
+      "type": "PLACE",
+      "x": 460,
+      "y": 140,
+      "width": 50,
+      "height": 50,
+      "label": "P1_Start",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "token",
+          "arguments": [
+            {
+              "name": "decision",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "P1_StartInstance"
+    },
+    {
+      "id": "T_out_P1_Start",
+      "type": "TRANSITION",
+      "x": 545,
+      "y": 135,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P1_Start",
+      "rotation": 0,
+      "node_type": "ForkNode",
+      "node_value": "FORK_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P1_Branch1",
+      "type": "TRANSITION",
+      "x": 650,
+      "y": 45,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P1_Branch1",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "P1_Branch1",
+      "type": "PLACE",
+      "x": 720,
+      "y": 50,
+      "width": 50,
+      "height": 50,
+      "label": "P1_Branch1",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "token_branch1",
+          "arguments": [
+            {
+              "name": "token_branch1",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "P1_Branch1Instance"
+    },
+    {
+      "id": "T_out_P1_Branch1",
+      "type": "TRANSITION",
+      "x": 805,
+      "y": 45,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P1_Branch1",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P1_Branch2",
+      "type": "TRANSITION",
+      "x": 650,
+      "y": 225,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P1_Branch2",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "P1_Branch2",
+      "type": "PLACE",
+      "x": 720,
+      "y": 230,
+      "width": 50,
+      "height": 50,
+      "label": "P1_Branch2",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "token_branch2",
+          "arguments": [
+            {
+              "name": "token_branch2",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "P1_Branch2Instance"
+    },
+    {
+      "id": "T_out_P1_Branch2",
+      "type": "TRANSITION",
+      "x": 805,
+      "y": 225,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P1_Branch2",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P1_Reunite",
+      "type": "TRANSITION",
+      "x": 910,
+      "y": 135,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P1_Reunite",
+      "rotation": 0,
+      "node_type": "JoinNode",
+      "node_value": "JOIN_NODE",
+      "transition_type": "T_in",
+      "buffer": "10",
+      "joinInputCount": "2"
+    },
+    {
+      "id": "P1_Reunite",
+      "type": "PLACE",
+      "x": 980,
+      "y": 140,
+      "width": 50,
+      "height": 50,
+      "label": "P1_Reunite",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "token",
+          "arguments": [
+            {
+              "name": "token_branch1",
+              "type": "String",
+              "value": "String",
+              "required": false
+            },
+            {
+              "name": "token_branch2",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "P1_ReuniteInstance"
+    },
+    {
+      "id": "T_out_P1_Reunite",
+      "type": "TRANSITION",
+      "x": 1065,
+      "y": 135,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P1_Reunite",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P2_Start",
+      "type": "TRANSITION",
+      "x": 390,
+      "y": 700,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P2_Start",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "P2_Start",
+      "type": "PLACE",
+      "x": 460,
+      "y": 705,
+      "width": 50,
+      "height": 50,
+      "label": "P2_Start",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "token",
+          "arguments": [
+            {
+              "name": "decision",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "P2_StartInstance"
+    },
+    {
+      "id": "T_out_P2_Start",
+      "type": "TRANSITION",
+      "x": 545,
+      "y": 700,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P2_Start",
+      "rotation": 0,
+      "node_type": "ForkNode",
+      "node_value": "FORK_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P2_Branch1",
+      "type": "TRANSITION",
+      "x": 650,
+      "y": 610,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P2_Branch1",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "P2_Branch1",
+      "type": "PLACE",
+      "x": 720,
+      "y": 615,
+      "width": 50,
+      "height": 50,
+      "label": "P2_Branch1",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "token_branch1",
+          "arguments": [
+            {
+              "name": "token_branch1",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "P2_Branch1Instance"
+    },
+    {
+      "id": "T_out_P2_Branch1",
+      "type": "TRANSITION",
+      "x": 805,
+      "y": 610,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P2_Branch1",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P2_Branch2",
+      "type": "TRANSITION",
+      "x": 650,
+      "y": 790,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P2_Branch2",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "P2_Branch2",
+      "type": "PLACE",
+      "x": 720,
+      "y": 795,
+      "width": 50,
+      "height": 50,
+      "label": "P2_Branch2",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "token_branch2",
+          "arguments": [
+            {
+              "name": "token_branch2",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "P2_Branch2Instance"
+    },
+    {
+      "id": "T_out_P2_Branch2",
+      "type": "TRANSITION",
+      "x": 805,
+      "y": 790,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P2_Branch2",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P2_Reunite",
+      "type": "TRANSITION",
+      "x": 910,
+      "y": 700,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P2_Reunite",
+      "rotation": 0,
+      "node_type": "JoinNode",
+      "node_value": "JOIN_NODE",
+      "transition_type": "T_in",
+      "buffer": "10",
+      "joinInputCount": "2"
+    },
+    {
+      "id": "P2_Reunite",
+      "type": "PLACE",
+      "x": 980,
+      "y": 705,
+      "width": 50,
+      "height": 50,
+      "label": "P2_Reunite",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "token",
+          "arguments": [
+            {
+              "name": "token_branch1",
+              "type": "String",
+              "value": "String",
+              "required": false
+            },
+            {
+              "name": "token_branch2",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "P2_ReuniteInstance"
+    },
+    {
+      "id": "T_out_P2_Reunite",
+      "type": "TRANSITION",
+      "x": 1065,
+      "y": 700,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P2_Reunite",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "T_in_Arbiter",
+      "target": "Arbiter",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "Arbiter",
+      "target": "T_out_Arbiter",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "F1_START",
+      "target": "T_in_Arbiter",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "tokens": 1
+    },
+    {
+      "source": "T_in_P1_Start",
+      "target": "P1_Start",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P1_Start",
+      "target": "T_out_P1_Start",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P1_Branch1",
+      "target": "P1_Branch1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P1_Branch1",
+      "target": "T_out_P1_Branch1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P1_Branch2",
+      "target": "P1_Branch2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P1_Branch2",
+      "target": "T_out_P1_Branch2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P1_Reunite",
+      "target": "P1_Reunite",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P1_Reunite",
+      "target": "T_out_P1_Reunite",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_Arbiter",
+      "target": "T_in_P1_Start",
+      "label": "true",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "true",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P1_Start",
+      "target": "T_in_P1_Branch1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P1_Start",
+      "target": "T_in_P1_Branch2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P1_Branch1",
+      "target": "T_in_P1_Reunite",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P1_Branch2",
+      "target": "T_in_P1_Reunite",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P1_Reunite",
+      "target": "T_in_Arbiter",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "waypoints": [
+        {
+          "x": 1190,
+          "y": 165
+        },
+        {
+          "x": 1190,
+          "y": 15
+        },
+        {
+          "x": 115,
+          "y": 15
+        }
+      ]
+    },
+    {
+      "source": "T_in_P2_Start",
+      "target": "P2_Start",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P2_Start",
+      "target": "T_out_P2_Start",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P2_Branch1",
+      "target": "P2_Branch1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P2_Branch1",
+      "target": "T_out_P2_Branch1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P2_Branch2",
+      "target": "P2_Branch2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P2_Branch2",
+      "target": "T_out_P2_Branch2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P2_Reunite",
+      "target": "P2_Reunite",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P2_Reunite",
+      "target": "T_out_P2_Reunite",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_Arbiter",
+      "target": "T_in_P2_Start",
+      "label": "false",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "false",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P2_Start",
+      "target": "T_in_P2_Branch1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P2_Start",
+      "target": "T_in_P2_Branch2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P2_Branch1",
+      "target": "T_in_P2_Reunite",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P2_Branch2",
+      "target": "T_in_P2_Reunite",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P2_Reunite",
+      "target": "T_in_Arbiter",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "waypoints": [
+        {
+          "x": 1210,
+          "y": 730
+        },
+        {
+          "x": 1210,
+          "y": 1000
+        },
+        {
+          "x": 115,
+          "y": 1000
+        }
+      ]
+    }
+  ],
+  "textElements": [
+    {
+      "x": 70,
+      "y": 40,
+      "text": "EXPERIMENT - ONE PHYSICAL FORK (F1) / TWO POSSIBLE RECIPIENTS / ONE FAMILY",
+      "fontSize": 15,
+      "fontStyle": 1,
+      "color": -16777216
+    },
+    {
+      "x": 70,
+      "y": 80,
+      "text": "XOR decides P1 or P2 BEFORE forking. Both child tokens go to the same selected JoinNode.",
+      "fontSize": 12,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 560,
+      "y": 180,
+      "text": "P1 receives F1 exclusively; reunited children release F1 to Arbiter",
+      "fontSize": 11,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 560,
+      "y": 745,
+      "text": "P2 receives F1 exclusively; reunited children release F1 to Arbiter",
+      "fontSize": 11,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 260,
+      "y": 1050,
+      "text": "NOT CLASSICAL DINING PHILOSOPHERS: this is a child-token rendezvous / controlled handoff probe.",
+      "fontSize": 12,
+      "fontStyle": 1,
+      "color": -16777216
+    }
+  ],
+  "serviceDeployment": "ServiceDeploymentFolder/petrinet/SingleFork_ExclusiveHandoff.json"
+}

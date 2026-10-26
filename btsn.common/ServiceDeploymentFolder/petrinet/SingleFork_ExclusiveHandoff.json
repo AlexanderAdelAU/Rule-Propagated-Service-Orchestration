@@ -1,0 +1,171 @@
+{
+  "definitionType": "ServiceDeployment",
+  "catalog": "BusinessServiceDefinitions/petrinet/PetriNetModels.json",
+  "capabilities": [
+    {
+      "node": "Arbiter",
+      "service": "StochasticService",
+      "operation": "processToken",
+      "returnAttribute": "decision",
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "ArbiterInstance",
+      "invocationAdapter": "boolean-token"
+    },
+    {
+      "node": "P1_Start",
+      "service": "AlwaysTrueService",
+      "operation": "processToken",
+      "returnAttribute": "token",
+      "arguments": [
+        {
+          "name": "decision",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "P1_StartInstance",
+      "invocationAdapter": "boolean-token"
+    },
+    {
+      "node": "P1_Branch1",
+      "service": "AlwaysTrueService",
+      "operation": "processToken",
+      "returnAttribute": "token_branch1",
+      "arguments": [
+        {
+          "name": "token_branch1",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "P1_Branch1Instance",
+      "invocationAdapter": "boolean-token"
+    },
+    {
+      "node": "P1_Branch2",
+      "service": "AlwaysTrueService",
+      "operation": "processToken",
+      "returnAttribute": "token_branch2",
+      "arguments": [
+        {
+          "name": "token_branch2",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "P1_Branch2Instance",
+      "invocationAdapter": "boolean-token"
+    },
+    {
+      "node": "P1_Reunite",
+      "service": "AlwaysTrueService",
+      "operation": "processToken",
+      "returnAttribute": "token",
+      "arguments": [
+        {
+          "name": "token_branch1",
+          "type": "String",
+          "value": "String",
+          "required": false
+        },
+        {
+          "name": "token_branch2",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "P1_ReuniteInstance",
+      "invocationAdapter": "boolean-token"
+    },
+    {
+      "node": "P2_Start",
+      "service": "AlwaysTrueService",
+      "operation": "processToken",
+      "returnAttribute": "token",
+      "arguments": [
+        {
+          "name": "decision",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "P2_StartInstance",
+      "invocationAdapter": "boolean-token"
+    },
+    {
+      "node": "P2_Branch1",
+      "service": "AlwaysTrueService",
+      "operation": "processToken",
+      "returnAttribute": "token_branch1",
+      "arguments": [
+        {
+          "name": "token_branch1",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "P2_Branch1Instance",
+      "invocationAdapter": "boolean-token"
+    },
+    {
+      "node": "P2_Branch2",
+      "service": "AlwaysTrueService",
+      "operation": "processToken",
+      "returnAttribute": "token_branch2",
+      "arguments": [
+        {
+          "name": "token_branch2",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "P2_Branch2Instance",
+      "invocationAdapter": "boolean-token"
+    },
+    {
+      "node": "P2_Reunite",
+      "service": "AlwaysTrueService",
+      "operation": "processToken",
+      "returnAttribute": "token",
+      "arguments": [
+        {
+          "name": "token_branch1",
+          "type": "String",
+          "value": "String",
+          "required": false
+        },
+        {
+          "name": "token_branch2",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "P2_ReuniteInstance",
+      "invocationAdapter": "boolean-token"
+    }
+  ]
+}
