@@ -39,13 +39,30 @@ jobs:
             -Drun.timeout.ms=100000 2>&1 | tee ci-results/single-fork-launcher.log
           code=${PIPESTATUS[0]}
           set -e
+          # Preserve host-level traces: the launcher log alone does not prove join correctness.
+          for log in btsn.petrinet.ProjectLoader/P*_Place.out.txt btsn.petrinet.ProjectLoader/MonitorService.out.txt; do
+            if [ -f "$log" ]; then cp "$log" ci-results/; fi
+          done
           echo "Launcher exit code: $code" | tee ci-results/launch-summary.txt
           grep -E 'PHASE [123]|Phase [123] Complete|BUILD FAILED|BUILD SUCCESSFUL|Completed successfully|COMPLETED SUCCESSFULLY|ERROR|FATAL|PUBLISH FAILED|JOIN-CONTINUE|FORK: Created|FORK: Routed|FORK: Parallel' ci-results/single-fork-launcher.log | tail -120 >> ci-results/launch-summary.txt || true
           cat ci-results/launch-summary.txt
-          if grep -q 'Phase 2 Complete' ci-results/single-fork-launcher.log; then
-            echo "Full token execution phase completed; inspect lifecycle log and monitor for correctness."
-          else
+          if ! grep -q 'Phase 2 Complete' ci-results/single-fork-launcher.log; then
             echo "::error::Workflow execution did not reach Phase 2 Complete"
+            exit 1
+          fi
+          shopt -s nullglob
+          host_logs=(ci-results/P*_Place.out.txt)
+          if [ "${#host_logs[@]}" -eq 0 ]; then
+            echo "::error::No host logs were captured"
+            exit 1
+          fi
+          grep -h -E 'JOIN-CONTINUE:|FORK: Parallel routing complete|FORK: Routed|PUBLISH FAILED|JOIN-COUNT|ORCHESTRATOR: Join|ERROR|FATAL' "${host_logs[@]}" | tail -140 > ci-results/token-lifecycle-summary.txt || true
+          cat ci-results/token-lifecycle-summary.txt
+          joins=$(grep -h -c 'JOIN-CONTINUE:' "${host_logs[@]}" | awk '{s += $1} END {print s+0}')
+          forks=$(grep -h -c 'FORK: Parallel routing complete' "${host_logs[@]}" | awk '{s += $1} END {print s+0}')
+          echo "Observed successful joins: $joins; observed completed fork fan-outs: $forks"
+          if [ "$joins" -lt 1 ] || [ "$forks" -lt 1 ]; then
+            echo "::error::Launcher completed but did not demonstrate an actual fork AND completed join"
             exit 1
           fi
       - name: Upload launcher log
