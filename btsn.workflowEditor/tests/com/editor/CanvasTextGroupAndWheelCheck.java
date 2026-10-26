@@ -50,13 +50,12 @@ public final class CanvasTextGroupAndWheelCheck {
         canvas.pasteFromClipboard();
         check(canvas.getTextElements().size() == 6, "Copy/Paste should duplicate all three annotations");
 
-        // Clicking an unselected text should revert to a single-text drag.
-        TextElement pasted = canvas.getTextElements().get(3);
-        int originalX = a.getX(), originalY = a.getY();
-        int px = pasted.getX() + 5, py = pasted.getY() - 4;
-        drag(canvas, px, py, px + 17, py + 9);
-        checkPosition(a, originalX, originalY);
-        checkPosition(pasted, px - 5 + 17, py + 4 + 9);
+        // Clicking an unselected original text replaces the pasted group's selection.
+        int bx = b.getX(), by = b.getY();
+        int ax = a.getX(), ay = a.getY();
+        drag(canvas, ax + 5, ay - 4, ax + 22, ay + 5);
+        checkPosition(a, ax + 17, ay + 9);
+        checkPosition(b, bx, by);
 
         // Start a fresh document and verify rubber-band-selected text can be dragged.
         canvas.clear();
