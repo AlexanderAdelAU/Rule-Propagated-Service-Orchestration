@@ -13,11 +13,11 @@
     <property name="query.version" value="v001"/>
     <property name="eg1.id" value="F1_START"/>
     <property name="eg1.version" value="v001"/>
-    <property name="eg1.place" value="Arbiter_Place"/>
+    <property name="eg1.place" value="P1_Place"/>
     <property name="eg1.operation" value="processToken"/>
     <property name="eg1.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/SingleFork_ExclusiveHandoff_Workflow_BuildAndRun.csv"/>
     <property name="eg1.tokens" value="1"/>
-    <property name="eg1.marking" value="Arbiter_Place.processToken=token"/>
+    <property name="eg1.marking" value="P1_Place.processToken=token"/>
     <property name="token.count" value="10"/>
     <property name="token.expire" value="15000"/>
     <property name="hosts" value="P1,P2,P3,P4,P5,P6,P7,P8,P9"/>
