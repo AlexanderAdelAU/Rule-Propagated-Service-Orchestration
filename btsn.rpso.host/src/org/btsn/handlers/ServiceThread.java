@@ -141,6 +141,8 @@ class ServiceThread implements Runnable {
 	// FIX: Store expected join count PER JOIN, not as instance variable
 	// Key = joinID (base token ID), Value = expected number of inputs
 	private static ConcurrentHashMap<Integer, Integer> joinExpectedCounts = new ConcurrentHashMap<>();
+	/** The input names each join waits for: it fires only when every one of them has arrived. */
+	private static ConcurrentHashMap<Integer, List<String>> joinExpectedInputs = new ConcurrentHashMap<>();
 
 	private String workingRuleBaseVersion = "vzzz";
 
@@ -417,6 +419,7 @@ class ServiceThread implements Runnable {
 			argValPriorityMap.clear();
 			sequenceIDJoinWindow.clear();
 			joinExpectedCounts.clear();  // FIX: Clear expected counts map
+			joinExpectedInputs.clear();
 			joinContributions.clear();   // FIX: Clear contributions map
 			knowledgeBaseMap.clear();
 			logger.info("ServiceThread shutdown completed");
@@ -864,7 +867,20 @@ class ServiceThread implements Runnable {
 	            // This ensures each join uses its OWN expected count, not the current token's
 	            if (expectedInputs > 0) {
 	                joinExpectedCounts.putIfAbsent(joinID, expectedInputs);
+	                joinExpectedInputs.putIfAbsent(joinID, new ArrayList<>(inputCollection));
 	                logger.debug("JOIN-COUNT: Stored expectedCount=" + expectedInputs + " for joinID=" + joinID);
+	            }
+
+	            // A token whose name is none of the join's inputs cannot fill a slot (it was sent to the wrong join, or
+	            // under the wrong name): take it out of the join and report it, rather than let it complete the join.
+	            if (!inputCollection.contains(payloadAttributeName)) {
+	                ConcurrentSkipListMap<String, String> slots = argValPriorityMap.get(joinID);
+	                if (slots != null) slots.remove(payloadAttributeName);
+	                instrumentTokenFailed(phaseSequenceID, serviceName, "arrived at the join as " + payloadAttributeName
+	                    + ", which is not one of its inputs " + inputCollection);
+	                logger.warn("JOIN: token " + phaseSequenceID + " arrived as " + payloadAttributeName + "; " + serviceName
+	                    + " joins " + inputCollection + " - not counted");
+	                return;
 	            }
 	            
 	            logger.info("ORCHESTRATOR: Input sync " + serviceName + ":" + operationName + 
@@ -1051,6 +1067,14 @@ class ServiceThread implements Runnable {
 		logger.debug("Join " + key + " using stored expectedCount=" + storedExpectedCount + 
 		            ", currentSize=" + currentSize);
 		
+		// Every input the join names must have arrived (a count alone would let a misnamed token complete it).
+		List<String> names = joinExpectedInputs.get(key);
+		if (names != null && !names.isEmpty()) {
+			boolean all = argVal.keySet().containsAll(names);
+			if (all) logger.debug("Join " + key + " is COMPLETE: has " + names);
+			return all;
+		}
+
 		// Count-based completion check (from canonical bindings)
 		if (currentSize >= requiredSize) {
 			logger.debug("Join " + key + " is COMPLETE: " + currentSize + " >= " + requiredSize);
@@ -1179,6 +1203,7 @@ class ServiceThread implements Runnable {
 	    sequenceIDJoinWindow.remove(joinKey);
 	    joinContributions.remove(joinKey);  // Clean up fork tracking
 	    joinExpectedCounts.remove(joinKey);  // FIX: Clean up expected count for this join
+	    joinExpectedInputs.remove(joinKey);
 	    logger.debug("ORCHESTRATOR: Cleaned up join " + joinKey);
 	}
 
