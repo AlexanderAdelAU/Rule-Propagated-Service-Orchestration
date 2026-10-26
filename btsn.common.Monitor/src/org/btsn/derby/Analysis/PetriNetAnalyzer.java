@@ -2300,6 +2300,16 @@ public class PetriNetAnalyzer {
                     String reason = hasDetail ? rs.getString("detail") : null;
                     if (reason == null || reason.isEmpty()) reason = "see the host's log";
                     analysis.failures.computeIfAbsent(place == null ? "?" : place, k -> new TreeMap<>()).merge(reason, 1, Integer::sum);
+                    // A workflow dropped as it arrived at its first place (its queue full, or its lifetime run out) was
+                    // generated, though no place recorded it: count it as generated, and failed.
+                    if (!analysis.instances.containsKey(root) && tokenId == root && tokenId % 10000 == 0) {
+                        WorkflowInstanceSummary instance = new WorkflowInstanceSummary();
+                        instance.rootTokenId = root;
+                        instance.generatedAt = rs.getLong("timestamp");
+                        instance.members.add(root);
+                        analysis.instances.put(root, instance);
+                        analysis.generatedRoots.add(root);
+                    }
                     if (analysis.instances.containsKey(root)) analysis.failedRoots.add(root);
                 }
             } catch (SQLException e) {
