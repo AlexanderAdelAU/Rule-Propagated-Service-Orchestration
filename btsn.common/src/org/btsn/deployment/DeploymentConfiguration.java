@@ -124,12 +124,21 @@ public final class DeploymentConfiguration {
         }
     }
 
+    /** Monitor's own operations (MonitorService, Monitor_InitializationService): infrastructure, like the hosts' administration. */
+    public static final String MONITOR_SERVICE_RULES = "RuleBase/Monitor/ListofMonitorActiveServices.ruleml.xml";
+
+    /** The rule files that register infrastructure operations: the profile's directServiceRules, then Monitor's. */
+    public static java.util.List<String> infrastructureServiceRules(JSONObject profile) throws Exception {
+        java.util.List<String> files = new java.util.ArrayList<>();
+        for (Object file : array(profile, "directServiceRules")) files.add(file.toString());
+        files.add(MONITOR_SERVICE_RULES);
+        return files;
+    }
+
     /** Administrative workflows use registered infrastructure operations, outside business placement. */
     public static void validateDirectWorkflow(Path common, JSONObject workflow) throws Exception {
         JSONObject profile = read(common.resolve("BusinessServiceDefinitions/Deployment.json"));
-        java.util.List<String> files = new java.util.ArrayList<>();
-        for (Object file : array(profile, "directServiceRules")) files.add(file.toString());
-        files.add("RuleBase/Monitor/ListofMonitorActiveServices.ruleml.xml");
+        java.util.List<String> files = infrastructureServiceRules(profile);
         Set<String> registered = new HashSet<>();
         javax.xml.parsers.DocumentBuilderFactory factory = javax.xml.parsers.DocumentBuilderFactory.newInstance();
         factory.setFeature(javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING, true);

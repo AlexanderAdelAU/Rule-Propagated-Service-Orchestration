@@ -31,6 +31,7 @@ import org.json.simple.JSONObject;
  *    - PROCESSMEASUREMENTS    : Token arrival measurements (captured by MonitorService)
  *    - SERVICECONTRIBUTION    : Workflow contribution analysis (captured by MonitorService)
  *    - MARKINGS               : Petri Net marking data (captured by MonitorService)
+ *    - CONSOLIDATED_SERVICE_IDENTITIES : business names of visited services (captured by MonitorService)
  * 
  * 2. LOCAL PETRI NET TABLES (3):
  *    - TRANSITION_FIRINGS     : Transition firing events (local to each service)
@@ -47,7 +48,7 @@ import org.json.simple.JSONObject;
  * 4. EVENT TRACKING TABLE (1):
  *    - EVENTRESPONSETABLE              : Event arrival and completion tracking
  * 
- * TOTAL: 13 TABLES
+ * TOTAL: 14 TABLES
  * 
  * @version 2.0
  * @author BTSN Team
@@ -72,6 +73,11 @@ public class BuildServiceAnalysisDatabase {
 	private static final String SERVICE_MEASUREMENTS_TABLE = "SERVICEMEASUREMENTS";
 	private static final String PROCESS_MEASUREMENTS_TABLE = "PROCESSMEASUREMENTS";
 	private static final String SERVICE_CONTRIBUTION_TABLE = "SERVICECONTRIBUTION";
+	/** Business names of the services a token visited, recorded by MonitorService for the analysis and charts only. */
+	public static final String SERVICE_IDENTITIES_TABLE = "CONSOLIDATED_SERVICE_IDENTITIES";
+	public static final String CREATE_SERVICE_IDENTITIES_SQL = "CREATE TABLE " + SERVICE_IDENTITIES_TABLE +
+		" (workflowBase BIGINT, sequenceID BIGINT, physicalPlace VARCHAR(255)," +
+		" operation VARCHAR(255), arrivalTime BIGINT, logicalService VARCHAR(255))";
 	private static final String MARKINGS_TABLE = "MARKINGS";
 
 	// Local Petri Net Analysis Tables
@@ -99,6 +105,7 @@ public class BuildServiceAnalysisDatabase {
 		SERVICE_MEASUREMENTS_TABLE,
 		PROCESS_MEASUREMENTS_TABLE,
 		SERVICE_CONTRIBUTION_TABLE,
+		SERVICE_IDENTITIES_TABLE,
 		MARKINGS_TABLE,
 		// Consolidated Petri Net tables
 		CONSOLIDATED_TRANSITION_FIRINGS_TABLE,
@@ -414,7 +421,7 @@ public class BuildServiceAnalysisDatabase {
 				// Create local Petri Net tables
 				createLocalPetriNetTables(statement);
 				
-				logger.info("Database initialization complete - 13 tables (4 core + 5 consolidated PN + 3 local PN + 1 event) created/verified");
+				logger.info("Database initialization complete - 14 tables (4 core + 1 business identity + 5 consolidated PN + 3 local PN + 1 event) created/verified");
 
 			} finally {
 				closeStatement(statement);
@@ -476,6 +483,7 @@ public class BuildServiceAnalysisDatabase {
 			+ "totalMarking INT"
 			+ ")";
 		manageTable(statement, SERVICE_CONTRIBUTION_TABLE, createServiceContributionSQL);
+		manageTable(statement, SERVICE_IDENTITIES_TABLE, CREATE_SERVICE_IDENTITIES_SQL);
 
 		// 4. MARKINGS - Petri Net marking data for analysis
 		String createMarkingsSQL = "CREATE TABLE " + MARKINGS_TABLE + " ("

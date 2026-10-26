@@ -23,10 +23,8 @@ import org.json.simple.parser.JSONParser;
 
 /** Business labels for observation only. Never changes routing, grouping or timing. */
 public final class ServiceDisplayNames {
-    public static final String TABLE = "CONSOLIDATED_SERVICE_IDENTITIES";
-    public static final String CREATE_TABLE = "CREATE TABLE " + TABLE +
-        " (workflowBase BIGINT, sequenceID BIGINT, physicalPlace VARCHAR(255)," +
-        " operation VARCHAR(255), arrivalTime BIGINT, logicalService VARCHAR(255))";
+    public static final String TABLE = org.btsn.derby.Analysis.BuildServiceAnalysisDatabase.SERVICE_IDENTITIES_TABLE;
+    public static final String CREATE_TABLE = org.btsn.derby.Analysis.BuildServiceAnalysisDatabase.CREATE_SERVICE_IDENTITIES_SQL;
     private final Map<String, Set<String>> byPlace = new HashMap<>();
     private final Map<String, String> byVisit = new HashMap<>();
     private final Map<String, Set<String>> byLane = new HashMap<>();

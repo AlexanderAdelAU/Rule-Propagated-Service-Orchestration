@@ -79,6 +79,12 @@ public final class BusinessCapabilityResolverTest {
             equal(initializer, resolver.resolve(initializer, "purgeAndInitialize", "token", 1, "v999"));
             equal(collector, resolver.resolve(collector, "collectAllData", "token", 1, "v999"));
         }
+        // Monitor runs the host's handlers: its own operations are infrastructure and invoke their class directly.
+        for (String operation : new String[] {"acknowledgeTokenArrival", "writeServiceTimingRecord", "writeCollectorData", "initiateWorkflowDataCollection"})
+            equal("org.btsn.places.MonitorService", resolver.resolve("org.btsn.places.MonitorService", operation, "token", 1, "v999"));
+        equal("org.btsn.places.Monitor_InitializationService",
+                resolver.resolve("org.btsn.places.Monitor_InitializationService", "purgeAndInitialize", "token", 1, "v999"));
+        rejects(() -> resolver.resolve("org.btsn.places.MonitorService", "dropAllTables", "token", 1, null), "No configured capability");
         // A node's places have no class of their own: the host invokes business implementations only.
         for (int i = 1; i <= 7; i++) {
             final String placeholder = "org.btsn.places.P" + i + "_Place";

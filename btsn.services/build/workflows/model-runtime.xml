@@ -38,6 +38,7 @@
     <path id="monitor.classpath">
         <path refid="model.dependencies"/>
         <pathelement location="${source.root}/btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+        <pathelement location="${source.root}/btsn.rpso.host/target/btsn.rpso.host.jar"/>
     </path>
     <macrodef name="copy-model-component">
         <attribute name="directory"/>

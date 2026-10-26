@@ -120,8 +120,10 @@ public final class BusinessCapabilityResolver {
         // A catalogue lists the services a process may choose from; a deployment places only those it uses.
         // Explicitly registered infrastructure operations keep their current invocation.
         // An unresolved business operation never falls through to a physical adapter.
-        for (Object file : array(config, "directServiceRules")) {
-            for (List<String> fact : facts(common.resolve(file.toString()), "activeService")) {
+        // Monitor's operations are infrastructure too; a host packaged without Monitor's rules has none to register.
+        for (String file : org.btsn.deployment.DeploymentConfiguration.infrastructureServiceRules(config)) {
+            if (file.equals(org.btsn.deployment.DeploymentConfiguration.MONITOR_SERVICE_RULES) && !Files.isRegularFile(common.resolve(file))) continue;
+            for (List<String> fact : facts(common.resolve(file), "activeService")) {
                 require(fact.size() == 4, "Malformed direct activeService fact");
                 String directKey = key(fact.get(0), fact.get(1));
                 require(!runtimeBindings.containsKey(directKey) && !logicalBindings.containsKey(directKey) && !instanceBindings.containsKey(directKey),
