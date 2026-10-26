@@ -34,10 +34,27 @@ public final class TerminateReplayCheck {
                 }
                 check(endings.keySet().stream().noneMatch(k -> k.endsWith("Invalid Pre-Screen")), "Valid applications replayed to Invalid Pre-Screen: " + endings);
                 check(endings.getOrDefault("AT_TERMINATE T_out_CreditCheck", 0) == 10, "Not all 10 tokens end at T_out_CreditCheck: " + endings);
+
+                // Every passage through a place is seen: into the place from its T_in, at the place, out to its T_out,
+                // each for at least MIN_VISIBLE_STEP of replay time, although CreditCheck took a few ms. The clock shown
+                // is the run's own.
+                Map<String, Integer> moves = new TreeMap<>();
+                for (Object o : (List<?>) f.get(animator)) {
+                    AnimationSegment seg = (AnimationSegment) o;
+                    boolean passage = seg.phase == Phase.TRAVELING_TO_PLACE || seg.phase == Phase.AT_PLACE || seg.phase == Phase.TRAVELING_TO_TOUT;
+                    if (!passage) continue;
+                    moves.merge(seg.phase + " " + seg.placeId, 1, Integer::sum);
+                    check(seg.endTime - seg.startTime >= TokenAnimator.MIN_VISIBLE_STEP, "Step too short to see: " + seg);
+                }
+                for (String place : List.of("Validation", "CreditCheck"))
+                    for (String phase : List.of("TRAVELING_TO_PLACE", "AT_PLACE", "TRAVELING_TO_TOUT"))
+                        check(moves.getOrDefault(phase + " " + place, 0) == 10, "Each token should show " + phase + " at " + place + " once: " + moves);
+                long real = animator.realTimeAt(animator.getEndTime()) - animator.realTimeAt(animator.getStartTime());
+                check(animator.getEndTime() - animator.getStartTime() > real && real < 30000, "Replay clock not the run's: " + real);
             } catch (Throwable t) { failure[0] = t; }
         });
         if (failure[0] != null) throw new AssertionError("Terminate replay", failure[0]);
-        System.out.println("PASS: the pre-screen run replays its 10 valid applications to T_out_CreditCheck (a T_out that is itself the terminate node), none to Invalid Pre-Screen");
+        System.out.println("PASS: the pre-screen run replays its 10 valid applications to T_out_CreditCheck (a T_out that is itself the terminate node), none to Invalid Pre-Screen; every token is seen moving into, through and out of both places although CreditCheck took a few ms, with the run's own clock");
     }
     private static void check(boolean condition, String message) { if (!condition) throw new AssertionError(message); }
 }

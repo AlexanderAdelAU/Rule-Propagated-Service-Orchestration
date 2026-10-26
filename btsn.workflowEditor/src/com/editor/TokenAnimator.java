@@ -809,6 +809,10 @@ public class TokenAnimator {
         // POST-PROCESSING: Resolve overlapping occupancy at places
         // This ensures only one token occupies a place at a time visually
         resolveOverlappingPlaceOccupancy();
+
+        // Every visit moves the token from its T_in into the place, and every step lasts long enough to be seen.
+        ensureTravelIntoPlaces();
+        stretchShortSteps();
         
         // Adjust time bounds
         if (!segments.isEmpty()) {
@@ -2924,6 +2928,115 @@ public class TokenAnimator {
         }
     }
     
+    /** Shortest time (replay ms at 1x) a token spends on one step, so a step of a few ms is still seen. */
+    static final long MIN_VISIBLE_STEP = 250;
+    /** The stretch applied by stretchShortSteps: run time warpReal[i] is shown at warpShown[i]. */
+    private long[] warpReal, warpShown;
+
+    private static AnimationSegment retimed(AnimationSegment s, long start, long end) {
+        return new AnimationSegment(s.tokenId, s.version, s.phase, start, end, s.placeId, s.tInId, s.tOutId,
+                                    s.fromElement, s.toElement, s.terminateId, s.eventGenId);
+    }
+
+    /**
+     * A token at a place got there from the place's T_in. Some paths (a place reached after a buffered arrival)
+     * put the token straight into the place; give them the move, taken from the step before it or from the visit.
+     */
+    private void ensureTravelIntoPlaces() {
+        Map<String, List<AnimationSegment>> byToken = new LinkedHashMap<>();
+        for (AnimationSegment s : segments) byToken.computeIfAbsent(s.tokenId, k -> new ArrayList<>()).add(s);
+        List<AnimationSegment> result = new ArrayList<>();
+        for (List<AnimationSegment> path : byToken.values()) {
+            path.sort(Comparator.comparingLong(x -> x.startTime));
+            for (int i = 0; i < path.size(); i++) {
+                AnimationSegment at = path.get(i);
+                AnimationSegment before = i > 0 ? path.get(i - 1) : null;
+                // Into the place, back to wait at its T_in, then into the place again: one move into the place.
+                if (at.phase == Phase.AT_PLACE && before != null && before.phase == Phase.BUFFERED_AT_TIN && i > 1
+                        && path.get(i - 2).phase == Phase.TRAVELING_TO_PLACE && Objects.equals(path.get(i - 2).placeId, at.placeId)
+                        && Objects.equals(before.tInId, at.tInId)) {
+                    AnimationSegment travel = path.get(i - 2);
+                    path.set(i - 2, retimed(travel, travel.startTime, before.endTime));
+                    path.remove(i - 1);
+                    i--;
+                    continue;
+                }
+                boolean moved = before != null && before.phase == Phase.TRAVELING_TO_PLACE;
+                if (at.phase != Phase.AT_PLACE || moved || at.tInId == null || at.placeId == null) continue;
+                long start = at.startTime;
+                if (before != null && before.endTime == start && before.endTime - before.startTime >= 2) {
+                    long mid = before.startTime + (before.endTime - before.startTime) / 2;
+                    path.set(i - 1, retimed(before, before.startTime, mid));
+                    path.add(i, new AnimationSegment(at.tokenId, at.version, Phase.TRAVELING_TO_PLACE, mid, start,
+                        at.placeId, at.tInId, at.tOutId, at.tInId, at.placeId, null, null));
+                    i++;
+                } else if (at.endTime - start >= 2) {
+                    long mid = start + (at.endTime - start) / 2;
+                    path.set(i, retimed(at, mid, at.endTime));
+                    path.add(i, new AnimationSegment(at.tokenId, at.version, Phase.TRAVELING_TO_PLACE, start, mid,
+                        at.placeId, at.tInId, at.tOutId, at.tInId, at.placeId, null, null));
+                    i++;
+                }
+            }
+            result.addAll(path);
+        }
+        result.sort(Comparator.comparingLong(x -> x.startTime));
+        segments.clear();
+        segments.addAll(result);
+    }
+
+    /**
+     * Gives each step of a token's passage through a place at least MIN_VISIBLE_STEP of replay time. The whole timeline is stretched together, only
+     * where some step is too short, so the order of events and what happens at the same time stay as they were.
+     */
+    private void stretchShortSteps() {
+        warpReal = warpShown = null;
+        if (segments.isEmpty()) return;
+        TreeSet<Long> times = new TreeSet<>();
+        for (AnimationSegment s : segments) { times.add(s.startTime); times.add(s.endTime); }
+        long[] real = new long[times.size()];
+        int k = 0; for (long t : times) real[k++] = t;
+        Map<Long, Integer> index = new HashMap<>();
+        for (int i = 0; i < real.length; i++) index.put(real[i], i);
+        // The steps that must last long enough: everything except a token's rest after it ends.
+        Map<Integer, List<Integer>> startsByEnd = new HashMap<>();
+        for (AnimationSegment s : segments) {
+            // The passage through a place (in, the service, out) and the step to a terminate node: the real steps
+            // that take a few ms. Travel between places and waits are already drawn at a visible pace.
+            boolean passage = s.phase == Phase.TRAVELING_TO_PLACE || s.phase == Phase.AT_PLACE
+                || s.phase == Phase.TRAVELING_TO_TOUT || s.phase == Phase.TRAVELING_TO_TERMINATE;
+            if (!passage || s.endTime <= s.startTime) continue;
+            startsByEnd.computeIfAbsent(index.get(s.endTime), x -> new ArrayList<>()).add(index.get(s.startTime));
+        }
+        long[] shown = new long[real.length];
+        shown[0] = real[0];
+        for (int i = 1; i < real.length; i++) {
+            shown[i] = shown[i - 1] + (real[i] - real[i - 1]);
+            for (int from : startsByEnd.getOrDefault(i, Collections.emptyList()))
+                shown[i] = Math.max(shown[i], shown[from] + MIN_VISIBLE_STEP);
+        }
+        warpReal = real; warpShown = shown;
+        List<AnimationSegment> stretched = new ArrayList<>(segments.size());
+        for (AnimationSegment s : segments) stretched.add(retimed(s, shown[index.get(s.startTime)], shown[index.get(s.endTime)]));
+        segments.clear();
+        segments.addAll(stretched);
+        if (startTime != Long.MAX_VALUE) startTime = shownAt(startTime);
+        if (endTime != Long.MIN_VALUE) endTime = shownAt(endTime);
+        if (recordingCutoff != 0) recordingCutoff = shownAt(recordingCutoff);
+    }
+
+    /** Where a run time falls on the stretched replay. */
+    private long shownAt(long real) {
+        int n = warpReal.length;
+        if (real <= warpReal[0]) return warpShown[0] - (warpReal[0] - real);
+        if (real >= warpReal[n - 1]) return warpShown[n - 1] + (real - warpReal[n - 1]);
+        int i = java.util.Arrays.binarySearch(warpReal, real);
+        if (i >= 0) return warpShown[i];
+        i = -i - 2;
+        double f = (double)(real - warpReal[i]) / (warpReal[i + 1] - warpReal[i]);
+        return warpShown[i] + Math.round(f * (warpShown[i + 1] - warpShown[i]));
+    }
+
     /**
      * Find JOIN_CONSUMED event
      */
@@ -3124,6 +3237,19 @@ public class TokenAnimator {
         return null;
     }
     
+    /** The run's own time (ms) at a point of the replay: the replay stretches steps too short to see. */
+    public long realTimeAt(long shown) {
+        if (warpReal == null || warpReal.length == 0) return shown;
+        int n = warpShown.length;
+        if (shown <= warpShown[0]) return warpReal[0] - (warpShown[0] - shown);
+        if (shown >= warpShown[n - 1]) return warpReal[n - 1] + (shown - warpShown[n - 1]);
+        int i = java.util.Arrays.binarySearch(warpShown, shown);
+        if (i >= 0) return warpReal[i];
+        i = -i - 2;   // warpShown[i] < shown < warpShown[i + 1]
+        double f = (double)(shown - warpShown[i]) / (warpShown[i + 1] - warpShown[i]);
+        return warpReal[i] + Math.round(f * (warpReal[i + 1] - warpReal[i]));
+    }
+
     public long getStartTime() { return startTime; }
     public long getEndTime() { return endTime; }
     public long getDuration() { return endTime - startTime; }

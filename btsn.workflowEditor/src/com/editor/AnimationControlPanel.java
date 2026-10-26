@@ -293,7 +293,8 @@ public class AnimationControlPanel extends JPanel {
     private String cutoffNote() {
         long cutoff = animator.getRecordingCutoff();
         if (cutoff == 0) return "";
-        return String.format("; replay ends at %.1f s, after which not every host was recording", (cutoff - animator.getStartTime()) / 1000.0);
+        return String.format("; replay ends at %.1f s, after which not every host was recording",
+            (animator.realTimeAt(cutoff) - animator.realTimeAt(animator.getStartTime())) / 1000.0);
     }
 
     /**
@@ -505,7 +506,8 @@ public class AnimationControlPanel extends JPanel {
      */
     private void updateDisplay() {
         // Update time label
-        long relativeTime = currentTime - animator.getStartTime();
+        // The run's own time: the replay stretches steps too short to see, so its clock runs ahead of the run's.
+        long relativeTime = Math.max(0, animator.realTimeAt(currentTime) - animator.realTimeAt(animator.getStartTime()));
         timeLabel.setText(String.format("Time: %d.%03ds", 
             relativeTime / 1000, relativeTime % 1000));
         

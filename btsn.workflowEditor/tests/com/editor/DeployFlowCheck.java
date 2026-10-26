@@ -429,7 +429,7 @@ public final class DeployFlowCheck {
                 Map<String, Long> lastAtCredit = new TreeMap<>();
                 for (Object o : (List<?>) f.get(animator)) {
                     com.editor.animator.AnimationSegment segment = (com.editor.animator.AnimationSegment) o;
-                    if ("Credit".equals(segment.placeId) && segment.phase == com.editor.animator.Phase.AT_PLACE) lastAtCredit.put(segment.tokenId, segment.endTime);
+                    if ("Credit".equals(segment.placeId) && segment.phase == com.editor.animator.Phase.AT_PLACE) lastAtCredit.put(segment.tokenId, animator.realTimeAt(segment.endTime));   // replay time back to the run's
                 }
                 check(failedAt.size() == 5 && lastAtCredit.equals(failedAt), "Failed tokens not removed at their failure: " + lastAtCredit + " vs " + failedAt);
             } catch (Throwable ex) { replay[0] = ex; }
