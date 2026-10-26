@@ -460,6 +460,7 @@ class ServiceThread implements Runnable {
 				nodeType = null;
 				ruleBaseLoaded = false;  // Force re-query of rule base facts for each message
 				
+				joinConsumedIds = new ArrayList<>();   // set again only if this message completes a join
 				costKey = dataMap.firstKey();
 				jsonAttributes = new jsonLibrary();
 
@@ -1158,6 +1159,7 @@ class ServiceThread implements Runnable {
 	        }
 	    }
 	    instrumentJoinComplete(continuingTokenId, this.serviceName, participantTokenIds, currentWorkflowStartTime);
+	    joinConsumedIds = participantTokenIds;   // a fork that follows hands these ids on, so no two tokens share one
 	    
 	    // PRIORITY FIX: Signal that this token has completed a join.
 	    // EventReactor will use this to boost the token in the priority queue,
@@ -3247,6 +3249,10 @@ class ServiceThread implements Runnable {
 		for (JoinContribution c : new ArrayList<>(waiting))
 			instrumentTokenFailed(c.forkNumber, serviceName, EXPIRED_REASON + " while waiting at the join");
 	}
+
+	/** The ids of the tokens the join just completed consumed (empty when this token did not come out of a join). */
+	private List<Integer> joinConsumedIds = new ArrayList<>();
+	List<Integer> getJoinConsumedIds() { return joinConsumedIds; }
 
 	void instrumentTokenFailed(Integer tokenId, String place, String reason) {
 		if (petriNetHelper == null || tokenId == null) return;
