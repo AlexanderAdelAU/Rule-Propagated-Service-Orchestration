@@ -33,7 +33,7 @@
         }
       ],
       "portSlot": 0,
-      "instance": "P1_StartInstance",
+      "instance": "P1StartInstance",
       "invocationAdapter": "boolean-token"
     },
     {
@@ -50,7 +50,7 @@
         }
       ],
       "portSlot": 0,
-      "instance": "P1_Branch1Instance",
+      "instance": "P1Branch1Instance",
       "invocationAdapter": "boolean-token"
     },
     {
@@ -67,7 +67,7 @@
         }
       ],
       "portSlot": 0,
-      "instance": "P1_Branch2Instance",
+      "instance": "P1Branch2Instance",
       "invocationAdapter": "boolean-token"
     },
     {
@@ -90,7 +90,7 @@
         }
       ],
       "portSlot": 0,
-      "instance": "P1_ReuniteInstance",
+      "instance": "P1ReuniteInstance",
       "invocationAdapter": "boolean-token"
     },
     {
@@ -107,7 +107,7 @@
         }
       ],
       "portSlot": 0,
-      "instance": "P2_StartInstance",
+      "instance": "P2StartInstance",
       "invocationAdapter": "boolean-token"
     },
     {
@@ -124,7 +124,7 @@
         }
       ],
       "portSlot": 0,
-      "instance": "P2_Branch1Instance",
+      "instance": "P2Branch1Instance",
       "invocationAdapter": "boolean-token"
     },
     {
@@ -141,7 +141,7 @@
         }
       ],
       "portSlot": 0,
-      "instance": "P2_Branch2Instance",
+      "instance": "P2Branch2Instance",
       "invocationAdapter": "boolean-token"
     },
     {
@@ -164,7 +164,7 @@
         }
       ],
       "portSlot": 0,
-      "instance": "P2_ReuniteInstance",
+      "instance": "P2ReuniteInstance",
       "invocationAdapter": "boolean-token"
     }
   ]

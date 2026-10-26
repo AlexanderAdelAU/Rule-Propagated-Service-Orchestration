@@ -106,7 +106,7 @@
           ]
         }
       ],
-      "serviceInstance": "P1_StartInstance"
+      "serviceInstance": "P1StartInstance"
     },
     {
       "id": "T_out_P1_Start",
@@ -158,7 +158,7 @@
           ]
         }
       ],
-      "serviceInstance": "P1_Branch1Instance"
+      "serviceInstance": "P1Branch1Instance"
     },
     {
       "id": "T_out_P1_Branch1",
@@ -210,7 +210,7 @@
           ]
         }
       ],
-      "serviceInstance": "P1_Branch2Instance"
+      "serviceInstance": "P1Branch2Instance"
     },
     {
       "id": "T_out_P1_Branch2",
@@ -269,7 +269,7 @@
           ]
         }
       ],
-      "serviceInstance": "P1_ReuniteInstance"
+      "serviceInstance": "P1ReuniteInstance"
     },
     {
       "id": "T_out_P1_Reunite",
@@ -321,7 +321,7 @@
           ]
         }
       ],
-      "serviceInstance": "P2_StartInstance"
+      "serviceInstance": "P2StartInstance"
     },
     {
       "id": "T_out_P2_Start",
@@ -373,7 +373,7 @@
           ]
         }
       ],
-      "serviceInstance": "P2_Branch1Instance"
+      "serviceInstance": "P2Branch1Instance"
     },
     {
       "id": "T_out_P2_Branch1",
@@ -425,7 +425,7 @@
           ]
         }
       ],
-      "serviceInstance": "P2_Branch2Instance"
+      "serviceInstance": "P2Branch2Instance"
     },
     {
       "id": "T_out_P2_Branch2",
@@ -484,7 +484,7 @@
           ]
         }
       ],
-      "serviceInstance": "P2_ReuniteInstance"
+      "serviceInstance": "P2ReuniteInstance"
     },
     {
       "id": "T_out_P2_Reunite",
