@@ -9,7 +9,7 @@
      The [LIVE] lines give when v002's publish started, every host had committed it, and its first token.
      Run:     ant -f Stress_SeqToPar_LiveChange.xml -Dhost.address=127.0.0.1
      Analyse: ant -f Stress_SeqToPar_LiveChange.xml analyse
-     Load:    -Deg1.tokens=N -Deg2.tokens=N (at most 99 each); the schedules fire one every 200 ms. -->
+     Load:    -Deg1.tokens=N -Deg2.tokens=N (at most 99 each); the schedules fire one every 400 ms (30 per version). -->
 <project name="Stress_SeqToPar_LiveChange" default="run-complete-workflow" basedir=".">
     <property name="process.title" value="Stress: sequential (v001) to parallel (v002), published live on the same hosts"/>
     <property name="launcher.profile.file" location="../btsn.services/deployments/models/Stress_SeqToParDeployment.json"/>
@@ -22,7 +22,7 @@
     <property name="eg1.version" value="v001"/>
     <property name="eg1.place" value="P1_Place"/>
     <property name="eg1.operation" value="processToken"/>
-    <property name="eg1.tokens" value="60"/>
+    <property name="eg1.tokens" value="30"/>
     <property name="eg1.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/Stress_SeqToPar_V001.csv"/>
 
     <!-- EG2, v002 (parallel): published live at 5 s, fires once every host has committed it. -->
@@ -31,11 +31,11 @@
     <property name="eg2.process" value="petrinet/Stress/Parallel_Workflow"/>
     <property name="eg2.place" value="P1_Place"/>
     <property name="eg2.operation" value="processToken"/>
-    <property name="eg2.tokens" value="60"/>
+    <property name="eg2.tokens" value="30"/>
     <property name="eg2.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/Stress_SeqToPar_V002.csv"/>
     <property name="eg2.publish.at.seconds" value="5"/>
 
-    <property name="token.count" value="60"/>
+    <property name="token.count" value="30"/>
 
     <!-- P4 serves only v001, P5 only v002 -->
     <property name="hosts" value="P1,P2,P3,P4,P5"/>
