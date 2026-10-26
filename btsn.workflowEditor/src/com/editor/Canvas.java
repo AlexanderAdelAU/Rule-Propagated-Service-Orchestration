@@ -2166,6 +2166,7 @@ public class Canvas extends JPanel {
             case AT_TERMINATE:
                 // Token at Terminate node (briefly visible before disappearing)
                 ProcessElement atTerminate = findTerminateNodeByLabel(state.terminateNodeId);
+                if (atTerminate == null) atTerminate = findElementByIdOrLabel(state.terminateNodeId);   // ended at its T_out
                 if (atTerminate != null) {
                     return getElementCenter(atTerminate);
                 }
