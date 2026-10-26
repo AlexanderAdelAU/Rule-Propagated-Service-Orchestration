@@ -9,6 +9,8 @@ import org.btsn.utils.XPathHelperCommon;
 public class Scheduler {
 	/** Returned instead of a priority when the token's lifetime (notAfter) has passed: it is dropped and reported. */
 	public static final long EXPIRED = -2;
+	/** Returned when the place's queue is full and the token does not complete a waiting join: it is dropped and reported. */
+	public static final long QUEUE_FULL = -3;
 
 	public ArrayList<Long> prioritiseToken(int queueAction, String servicePacket) throws IOException {
 		long costKey = 0;
@@ -34,7 +36,7 @@ public class Scheduler {
 
 			if (!(queueAction > 0)) {
 				if (!ServiceThread.argValPriorityMap.containsKey(sid)) {
-					costKey = -1;
+					costKey = QUEUE_FULL;
 					returnArgs.add(costKey);
 					return returnArgs;
 				}

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Stress test: a live change from sequential to parallel, on the same hosts.
+     v001 (petrinet/Stress/Sequential_Workflow): P1 -> P2 -> P3 -> P4.
+     v002 (petrinet/Stress/Parallel_Workflow):   P1 forks to P2 and P3, which join at P5.
+     P2 and P3 are the same services with the same contracts in both versions: only the rules change.
+     EG1 fires v001 work from the start. v002 is compiled and published to the running hosts at 5 s, while v001
+     work is in P2 and P3, and EG2 fires v002 work as soon as every host has committed it. Both run together
+     on P1, P2 and P3; every v001 workflow must still finish in sequence and every v002 one in parallel.
+     The [LIVE] lines give when v002's publish started, every host had committed it, and its first token.
+     Run:     ant -f Stress_SeqToPar_LiveChange.xml -Dhost.address=127.0.0.1
+     Analyse: ant -f Stress_SeqToPar_LiveChange.xml analyse
+     Load:    -Deg1.tokens=N -Deg2.tokens=N (at most 99 each); the schedules fire one every 400 ms (30 per version). -->
+<project name="Stress_SeqToPar_LiveChange" default="run-complete-workflow" basedir=".">
+    <property name="process.title" value="Stress: sequential (v001) to parallel (v002), published live on the same hosts"/>
+    <property name="launcher.profile.file" location="../btsn.services/deployments/models/Stress_SeqToParDeployment.json"/>
+    <property name="workflow.process.name" value="petrinet/Stress/Sequential_Workflow"/>
+    <property name="rule.version" value="v001"/>
+    <property name="query.version" value="v001,v002"/>
+
+    <!-- EG1, v001 (sequential): deployed before the run, fires from the start. -->
+    <property name="eg1.id" value="EG_V001"/>
+    <property name="eg1.version" value="v001"/>
+    <property name="eg1.place" value="P1_Place"/>
+    <property name="eg1.operation" value="processToken"/>
+    <property name="eg1.tokens" value="30"/>
+    <property name="eg1.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/Stress_SeqToPar_V001.csv"/>
+
+    <!-- EG2, v002 (parallel): published live at 5 s, fires once every host has committed it. -->
+    <property name="eg2.id" value="EG_V002"/>
+    <property name="eg2.version" value="v002"/>
+    <property name="eg2.process" value="petrinet/Stress/Parallel_Workflow"/>
+    <property name="eg2.place" value="P1_Place"/>
+    <property name="eg2.operation" value="processToken"/>
+    <property name="eg2.tokens" value="30"/>
+    <property name="eg2.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/Stress_SeqToPar_V002.csv"/>
+    <property name="eg2.publish.at.seconds" value="5"/>
+
+    <property name="token.count" value="30"/>
+
+    <!-- P4 serves only v001, P5 only v002 -->
+    <property name="hosts" value="P1,P2,P3,P4,P5"/>
+
+    <import file="../btsn.services/process-runtime.xml"/>
+</project>

@@ -603,9 +603,22 @@ public class EventReactor extends Thread {
 	/**
 	 * Same scheduling logic as original EventReactor - WITH DEBUG
 	 */
-	/** Told of each token dropped because its lifetime ran out: (token id, place it arrived at). */
-	private volatile java.util.function.BiConsumer<Integer, String> expiredHandler;
-	public void setExpiredHandler(java.util.function.BiConsumer<Integer, String> handler) { this.expiredHandler = handler; }
+	/** Told of each token dropped on arrival: (token id, place it arrived at, why). */
+	public interface DropHandler { void dropped(int tokenId, String place, String reason); }
+	private volatile DropHandler dropHandler;
+	public void setDropHandler(DropHandler handler) { this.dropHandler = handler; }
+
+	private void reportDrop(String servicePacket, String reason) {
+		DropHandler handler = dropHandler;
+		if (handler == null) return;
+		try {
+			TreeMap<String, String> header = xph.findMultipleXMLItems(servicePacket, "//header/*");
+			TreeMap<String, String> service = xph.findMultipleXMLItems(servicePacket, "//service/*");
+			handler.dropped(Integer.parseInt(header.get("sequenceId")), service.get("serviceName"), reason);
+		} catch (Exception e) {
+			System.err.println("Could not record the dropped token: " + e.getMessage());
+		}
+	}
 
 	public synchronized void putScheduledToken(String servicePacket) throws InterruptedException, IOException {
 		// === DEBUG: Show what we received ===
@@ -642,16 +655,13 @@ public class EventReactor extends Thread {
 		if (pArgs.get(0) == Scheduler.EXPIRED) {
 			lostEvents++;
 			System.err.println("Discarded number of events: " + lostEvents + " (token expired)");
-			java.util.function.BiConsumer<Integer, String> handler = expiredHandler;
-			if (handler != null) {
-				try {
-					TreeMap<String, String> header = xph.findMultipleXMLItems(servicePacket, "//header/*");
-					TreeMap<String, String> service = xph.findMultipleXMLItems(servicePacket, "//service/*");
-					handler.accept(Integer.parseInt(header.get("sequenceId")), service.get("serviceName"));
-				} catch (Exception e) {
-					System.err.println("Could not record the expired token: " + e.getMessage());
-				}
-			}
+			reportDrop(servicePacket, ServiceThread.EXPIRED_REASON);
+			return;
+		}
+		if (pArgs.get(0) == Scheduler.QUEUE_FULL) {
+			lostEvents++;
+			System.err.println("Discarded number of events: " + lostEvents + " (queue full)");
+			reportDrop(servicePacket, "dropped: the place's queue was full (maxQueue " + MAXQUEUE + ")");
 			return;
 		}
 		if (pArgs.get(0) == -1) {

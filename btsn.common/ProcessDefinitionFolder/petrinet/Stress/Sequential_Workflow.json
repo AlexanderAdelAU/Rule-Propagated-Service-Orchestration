@@ -1,0 +1,412 @@
+{
+  "processType": "PetriNet",
+  "elements": [
+    {
+      "id": "EG_V001",
+      "type": "EVENT_GENERATOR",
+      "x": 30,
+      "y": 245,
+      "width": 24,
+      "height": 60,
+      "label": "EG_V001",
+      "rotation": 0.0,
+      "generator_rate": "200",
+      "token_version": "v001"
+    },
+    {
+      "id": "T_in_P1",
+      "type": "TRANSITION",
+      "x": 90,
+      "y": 250,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P1",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "P1",
+      "type": "PLACE",
+      "x": 150,
+      "y": 255,
+      "width": 50,
+      "height": 50,
+      "label": "P1",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "token",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "StressP1Instance"
+    },
+    {
+      "id": "T_out_P1",
+      "type": "TRANSITION",
+      "x": 225,
+      "y": 250,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P1",
+      "rotation": 0.0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P2",
+      "type": "TRANSITION",
+      "x": 300,
+      "y": 250,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P2",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "P2",
+      "type": "PLACE",
+      "x": 360,
+      "y": 255,
+      "width": 50,
+      "height": 50,
+      "label": "P2",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "token",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "StressP2Instance"
+    },
+    {
+      "id": "T_out_P2",
+      "type": "TRANSITION",
+      "x": 435,
+      "y": 250,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P2",
+      "rotation": 0.0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P3",
+      "type": "TRANSITION",
+      "x": 510,
+      "y": 250,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P3",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "P3",
+      "type": "PLACE",
+      "x": 570,
+      "y": 255,
+      "width": 50,
+      "height": 50,
+      "label": "P3",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "token_branch1",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "StressP3Instance"
+    },
+    {
+      "id": "T_out_P3",
+      "type": "TRANSITION",
+      "x": 645,
+      "y": 250,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P3",
+      "rotation": 0.0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P4",
+      "type": "TRANSITION",
+      "x": 720,
+      "y": 250,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P4",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "P4",
+      "type": "PLACE",
+      "x": 780,
+      "y": 255,
+      "width": 50,
+      "height": 50,
+      "label": "P4",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "token",
+          "arguments": [
+            {
+              "name": "token_branch1",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "StressP4Instance"
+    },
+    {
+      "id": "T_out_P4",
+      "type": "TRANSITION",
+      "x": 855,
+      "y": 250,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P4",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "Done",
+      "type": "TRANSITION",
+      "x": 930,
+      "y": 250,
+      "width": 24,
+      "height": 60,
+      "label": "Done",
+      "rotation": 0.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    },
+    {
+      "id": "Rejected",
+      "type": "TRANSITION",
+      "x": 435,
+      "y": 380,
+      "width": 24,
+      "height": 60,
+      "label": "Rejected",
+      "rotation": 0.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "EG_V001",
+      "target": "T_in_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P1",
+      "target": "P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P1",
+      "target": "T_out_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P1",
+      "target": "T_in_P2",
+      "label": "true",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "true",
+      "endpoint": "processToken"
+    },
+    {
+      "source": "T_out_P1",
+      "target": "Rejected",
+      "label": "false",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "false",
+      "endpoint": "",
+      "waypoints": [
+        {
+          "x": 237,
+          "y": 410
+        }
+      ]
+    },
+    {
+      "source": "T_in_P2",
+      "target": "P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P2",
+      "target": "T_out_P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P2",
+      "target": "T_in_P3",
+      "label": "true",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "true",
+      "endpoint": "processToken"
+    },
+    {
+      "source": "T_out_P2",
+      "target": "Rejected",
+      "label": "false",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "false",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P3",
+      "target": "P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P3",
+      "target": "T_out_P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P3",
+      "target": "T_in_P4",
+      "label": "true",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "true",
+      "endpoint": "processToken"
+    },
+    {
+      "source": "T_out_P3",
+      "target": "Rejected",
+      "label": "false",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "false",
+      "endpoint": "",
+      "waypoints": [
+        {
+          "x": 657,
+          "y": 410
+        }
+      ]
+    },
+    {
+      "source": "T_in_P4",
+      "target": "P4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P4",
+      "target": "T_out_P4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P4",
+      "target": "Done",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    }
+  ],
+  "textElements": [
+    {
+      "x": 300,
+      "y": 120,
+      "text": "Stress v001: P2 and P3 in sequence (P1 -> P2 -> P3 -> P4)",
+      "fontSize": 14,
+      "fontStyle": 1,
+      "color": -16777216
+    },
+    {
+      "x": 300,
+      "y": 145,
+      "text": "v002 runs the same P2 and P3 in parallel; their contracts are the same in both versions",
+      "fontSize": 11,
+      "fontStyle": 0,
+      "color": -16777216
+    }
+  ],
+  "serviceDeployment": "ServiceDeploymentFolder/petrinet/Stress_SeqToPar.json"
+}

@@ -1,0 +1,97 @@
+{
+  "definitionType": "ServiceDeployment",
+  "catalog": "BusinessServiceDefinitions/petrinet/PetriNetModels.json",
+  "capabilities": [
+    {
+      "node": "P1",
+      "service": "AlwaysTrueService",
+      "operation": "processToken",
+      "returnAttribute": "token",
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "StressP1Instance",
+      "invocationAdapter": "boolean-token"
+    },
+    {
+      "node": "P2",
+      "service": "AlwaysTrueService",
+      "operation": "processToken",
+      "returnAttribute": "token",
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "StressP2Instance",
+      "invocationAdapter": "boolean-token"
+    },
+    {
+      "node": "P3",
+      "service": "AlwaysTrueService",
+      "operation": "processToken",
+      "returnAttribute": "token_branch1",
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "StressP3Instance",
+      "invocationAdapter": "boolean-token"
+    },
+    {
+      "node": "P4",
+      "service": "AlwaysTrueService",
+      "operation": "processToken",
+      "returnAttribute": "token",
+      "arguments": [
+        {
+          "name": "token_branch1",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "StressP4Instance",
+      "invocationAdapter": "boolean-token"
+    },
+    {
+      "node": "P5",
+      "service": "AlwaysTrueService",
+      "operation": "processToken",
+      "returnAttribute": "token",
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        },
+        {
+          "name": "token_branch1",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "StressP5Instance",
+      "invocationAdapter": "boolean-token"
+    }
+  ]
+}

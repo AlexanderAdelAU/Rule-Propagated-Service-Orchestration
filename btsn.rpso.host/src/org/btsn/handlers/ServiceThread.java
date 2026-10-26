@@ -269,7 +269,7 @@ class ServiceThread implements Runnable {
 			for (int attempt = 1; attempt <= maxRetries; attempt++) {
 				try {
 					thread = new EventReactor(serviceChannel, rulePort);
-					thread.setExpiredHandler((tokenId, place) -> instrumentTokenFailed(tokenId, place, EXPIRED_REASON));
+					thread.setDropHandler((tokenId, place, reason) -> instrumentTokenFailed(tokenId, place, reason));
 					thread.start();
 					logger.info("EventReactor started successfully on attempt " + attempt);
 					break;
