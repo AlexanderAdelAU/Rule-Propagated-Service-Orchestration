@@ -51,7 +51,6 @@ public class Canvas extends JPanel {
     
     private Point draggedWaypoint = null;  // Track dragged waypoint
     private Arrow draggedWaypointArrow = null;  // Arrow containing dragged waypoint
-    private Point dragOffset = null;
     private Point mousePos = null;
     
     // Arrow body dragging (moves all waypoints together)
@@ -394,15 +393,29 @@ public class Canvas extends JPanel {
             }
         });
         
-        // Add mouse wheel listener for zoom
+        // Wheel moves the viewport; Ctrl+wheel keeps zoom, Shift+wheel scrolls sideways.
         addMouseWheelListener(e -> {
             if (e.isControlDown()) {
-                // Ctrl+Wheel = zoom
-                if (e.getWheelRotation() < 0) {
+                if (e.getPreciseWheelRotation() < 0) {
                     zoomIn();
-                } else {
+                } else if (e.getPreciseWheelRotation() > 0) {
                     zoomOut();
                 }
+                e.consume();
+                return;
+            }
+            JScrollPane pane = (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, this);
+            if (pane == null) return;
+            JScrollBar bar = e.isShiftDown() ? pane.getHorizontalScrollBar()
+                                            : pane.getVerticalScrollBar();
+            if (bar == null || !bar.isVisible()) return;
+
+            int increment = e.getScrollType() == MouseWheelEvent.WHEEL_BLOCK_SCROLL
+                ? bar.getBlockIncrement()
+                : Math.max(16, bar.getUnitIncrement()) * e.getScrollAmount();
+            int delta = (int) Math.round(e.getPreciseWheelRotation() * increment);
+            if (delta != 0) {
+                bar.setValue(bar.getValue() + delta);
                 e.consume();
             }
         });
@@ -637,6 +650,7 @@ public class Canvas extends JPanel {
                     selectedElements.add(clickedElement);
                     selectedArrow = null;
                     selectedTextElements.clear();  // Clear text selection when clicking single element
+                    selectedTextElement = null;
                     notifySelectionChanged(clickedElement);
                     
                     // Start group dragging (even for single element)
@@ -678,13 +692,47 @@ public class Canvas extends JPanel {
             }
             
             if (clickedText != null) {
-                saveUndoState();  // Save before any changes
-                selectedTextElement = clickedText;
-                selectedElements.clear();
-                selectedArrow = null;
-                draggedElement = null;
-                dragOffset = new Point(canvasX - clickedText.getX(), canvasY - clickedText.getY());
-                notifySelectionChanged(clickedText);
+                if (e.isControlDown()) {
+                    // Ctrl+click toggles individual text annotations.
+                    if (!selectedTextElements.add(clickedText)) {
+                        selectedTextElements.remove(clickedText);
+                    }
+                    selectedTextElement = selectedTextElements.size() == 1
+                        ? selectedTextElements.iterator().next() : null;
+                    selectedArrow = null;
+                    notifySelectionChanged(selectedTextElement);
+                } else {
+                    // Drag any text in the current selection to move the whole group.
+                    if (!selectedTextElements.contains(clickedText)) {
+                        selectedElements.clear();
+                        selectedTextElements.clear();
+                        selectedTextElements.add(clickedText);
+                    }
+                    selectedTextElement = selectedTextElements.size() == 1 ? clickedText : null;
+                    selectedArrow = null;
+                    draggedElement = null;
+
+                    saveUndoState();
+                    draggingGroup = true;
+                    groupDragStart = new Point(canvasX, canvasY);
+                    groupInitialPositions = new ArrayList<>();
+                    for (ProcessElement element : selectedElements) {
+                        groupInitialPositions.add(new Point(element.getX(), element.getY()));
+                    }
+                    groupInitialWaypoints = new ArrayList<>();
+                    for (Arrow arrow : arrows) {
+                        List<Point> original = new ArrayList<>();
+                        for (Point waypoint : arrow.getWaypoints()) {
+                            original.add(new Point(waypoint.x, waypoint.y));
+                        }
+                        groupInitialWaypoints.add(original);
+                    }
+                    groupInitialTextPositions = new ArrayList<>();
+                    for (TextElement text : selectedTextElements) {
+                        groupInitialTextPositions.add(new Point(text.getX(), text.getY()));
+                    }
+                    notifySelectionChanged(selectedTextElement);
+                }
                 repaint();
                 return;
             }
@@ -789,11 +837,7 @@ public class Canvas extends JPanel {
         int canvasX = toCanvasX(e.getX());
         int canvasY = toCanvasY(e.getY());
         
-        if (selectedTextElement != null && dragOffset != null) {
-            // Drag text element
-            selectedTextElement.setPosition(canvasX - dragOffset.x, canvasY - dragOffset.y);
-            repaint();
-        } else if (draggingLeftHandle && selectedElements.size() == 1) {
+        if (draggingLeftHandle && selectedElements.size() == 1) {
             ProcessElement element = selectedElements.iterator().next();
             int dx = canvasX - lastHandlePos.x;
             int dy = canvasY - lastHandlePos.y;
@@ -882,15 +926,9 @@ public class Canvas extends JPanel {
                         }
                     }
                 }
-            } else if (!groupInitialTextPositions.isEmpty()) {
-                // Only text elements selected - snap based on first text element
-                Point firstTextPos = groupInitialTextPositions.get(0);
-                int snappedX = snapToGrid(firstTextPos.x + rawDx);
-                int snappedY = snapToGrid(firstTextPos.y + rawDy);
-                dx = snappedX - firstTextPos.x;
-                dy = snappedY - firstTextPos.y;
             }
-            
+            // Text-only groups use the raw delta so their original spacing is maintained.
+
             // Move selected text elements
             if (groupInitialTextPositions != null) {
                 int i = 0;
@@ -920,9 +958,7 @@ public class Canvas extends JPanel {
         int canvasX = toCanvasX(e.getX());
         int canvasY = toCanvasY(e.getY());
         
-        if (selectedTextElement != null && dragOffset != null) {
-            dragOffset = null;
-        } else if (draggingLeftHandle || draggingRightHandle || draggingRotationHandle) {
+        if (draggingLeftHandle || draggingRightHandle || draggingRotationHandle) {
             draggingLeftHandle = false;
             draggingRightHandle = false;
             draggingRotationHandle = false;
@@ -956,6 +992,7 @@ public class Canvas extends JPanel {
             groupInitialWaypoints = null;
             groupInitialTextPositions = null;
             draggedElement = null;
+            updateCanvasSize();  // Allow wheel scrolling to reach repositioned text.
         } else if (connectMode && connectionSource != null) {
             // Complete connection
             for (ProcessElement element : elements) {
@@ -1079,7 +1116,6 @@ public class Canvas extends JPanel {
         }
         
         draggedElement = null;
-        dragOffset = null;
     }
     
     private void handleDoubleClick(MouseEvent e) {
@@ -3988,7 +4024,13 @@ public class Canvas extends JPanel {
                 baseHeight = Math.max(baseHeight, bottom);
             }
         }
-        
+        // The canvas must also scroll far enough to reach text annotations.
+        for (TextElement text : textElements) {
+            Rectangle bounds = text.getBounds();
+            baseWidth = Math.max(baseWidth, bounds.x + bounds.width + 100);
+            baseHeight = Math.max(baseHeight, bounds.y + bounds.height + 100);
+        }
+
         // Apply zoom to the preferred size
         int scaledWidth = (int) (baseWidth * zoomScale);
         int scaledHeight = (int) (baseHeight * zoomScale);
@@ -4223,6 +4265,7 @@ public class Canvas extends JPanel {
         arrows.clear();
         textElements.clear();
         selectedElements.clear();
+        selectedTextElements.clear();
         selectedArrow = null;
         selectedTextElement = null;
         metadataJSON = null;
@@ -4547,7 +4590,7 @@ public class Canvas extends JPanel {
     public void copySelection() {
         System.out.println("=== COPY SELECTION CALLED ===");
         System.out.println("Selected elements: " + selectedElements.size());
-        System.out.println("Selected text: " + (selectedTextElement != null ? 1 : 0));
+        System.out.println("Selected text: " + selectedTextElements.size());
         
         clipboardElements.clear();
         clipboardArrows.clear();
@@ -4558,13 +4601,13 @@ public class Canvas extends JPanel {
             clipboardElements.add(copyElement(element));
         }
         
-        // Copy selected text elements (create copies, not references!)
-        if (selectedTextElement != null) {
-            TextElement textCopy = new TextElement(selectedTextElement.getX(), 
-                                                   selectedTextElement.getY(), 
-                                                   selectedTextElement.getText());
-            textCopy.setFont(selectedTextElement.getFont());
-            textCopy.setColor(selectedTextElement.getColor());
+        // Copy all selected annotations, not just the last clicked one.
+        Set<TextElement> textSelection = new HashSet<>(selectedTextElements);
+        if (selectedTextElement != null) textSelection.add(selectedTextElement);
+        for (TextElement text : textSelection) {
+            TextElement textCopy = new TextElement(text.getX(), text.getY(), text.getText());
+            textCopy.setFont(text.getFont());
+            textCopy.setColor(text.getColor());
             clipboardTextElements.add(textCopy);
         }
         
