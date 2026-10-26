@@ -6,7 +6,7 @@
      Use the monitor to check no packet loss, conflicting child IDs or leaked joins. -->
 <project name="SingleFork_ExclusiveHandoff_Workflow_BuildAndRun" default="run-complete-workflow" basedir=".">
     <property name="process.title" value="petrinet/Workflow/SingleFork_ExclusiveHandoff_Workflow"/>
-    <property name="launcher.profile.file" location="../btsn.services/deployments/models/SingleFork_ExclusiveHandoff_WorkflowDeployment.json"/>
+    <property name="launcher.profile.file" location="experimental-profiles/SingleFork_ExclusiveHandoff_WorkflowDeployment.json"/>
     <property name="workflow.process.name" value="petrinet/Workflow/SingleFork_ExclusiveHandoff_Workflow"/>
     <property name="infrastructure" value="NineHost_ExclusiveHandoff"/>
     <property name="rule.version" value="v001"/>
