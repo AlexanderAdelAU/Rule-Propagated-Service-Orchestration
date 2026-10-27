@@ -691,8 +691,11 @@ After the last token, the run waits for the workflows to finish before it collec
 
 After the collection requests the console says
 `Collection requests sent; waiting for Monitor to store the hosts' records - keep the run going...`.
-Leave it running: the launcher waits until Monitor's database stops changing. It then ends with
+Leave it running: the launcher waits until Monitor has stored every host's records, one reply per host for each
+version collected, and prints `Monitor has stored P3's records (12 s).` as each arrives. It then ends with
 `... COMPLETED SUCCESSFULLY` and `RUN FINISHED: every phase is done and Monitor holds the collected records.`
+If a host's records are still missing after `collection.limit.seconds` (default 300), or its collector reported
+an error, the run stops with `COLLECTION INCOMPLETE` and names the host; raise the limit for a large or slow run.
 
 Only then stop the run, with Eclipse's red **Terminate** button or **Ctrl+C** in the terminal. This stops the hosts
 and releases the Monitor database for the analyser and viewers. (**Run on hosts** in the editor does this for you.)
@@ -710,6 +713,7 @@ launcher. The collected data is in `btsn.common.Monitor/ServiceAnalysisDataBase`
 | `-Dworkflow.quiet.seconds=10` | How long nothing must move before the workflows count as finished (default 5 s). Keep it above your slowest service. |
 | `-Dworkflow.completion.seconds=60` | Collect after this long at the latest, even if lifetimes remain. Older launchers set it. |
 | `-Drun.timeout.ms=3600000` | When the hosts and Monitor are stopped in any case (default 600000, 10 minutes). Raise it for long runs. |
+| `-Dcollection.limit.seconds=600` | How long collection may take: the wait for Monitor to store every host's records (default 300 s) |
 | `-Dhost.address=127.0.0.1` | Run every host on this machine |
 | `-Dp2.mode=local` or `remote` | Force a host to start here, or expect it elsewhere |
 

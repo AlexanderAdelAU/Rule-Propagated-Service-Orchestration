@@ -91,6 +91,7 @@
             <include name="org/btsn/invocation/BusinessCapabilityResolverTest.java"/>
             <include name="org/btsn/utils/OOjdrewConcurrencyTest.java"/>
             <include name="org/btsn/deployment/HostDrainCheck.java"/>
+            <include name="org/btsn/deployment/CollectionSettleCheck.java"/>
             <include name="org/btsn/handlers/ForkNumberingCheck.java"/>
             <include name="org/btsn/handlers/DuplicateNumberCheck.java"/>
             <classpath>
@@ -114,6 +115,13 @@
                 <path refid="host.check.dependencies"/>
             </classpath>
             <arg file="../btsn.rpso.host/PayLoad/payload.xml"/>
+        </java>
+        <!-- Collection ends when Monitor has stored every host's records, not merely when its database is quiet. -->
+        <java classname="org.btsn.deployment.CollectionSettleCheck" fork="true" failonerror="true">
+            <classpath>
+                <pathelement location="${target.dir}/host-check/classes"/>
+                <path refid="host.check.dependencies"/>
+            </classpath>
         </java>
         <!-- After the last token, a run collects once nothing moves on the hosts, or at its limit. -->
         <java classname="org.btsn.deployment.HostDrainCheck" fork="true" failonerror="true">
