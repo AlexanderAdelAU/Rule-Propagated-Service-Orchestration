@@ -29,7 +29,7 @@
         <fileset dir="${service.bundle.dir}/services" includes="**/*.jar"/>
     </path>
     <path id="generator.classpath"><path refid="common.classpath"/><pathelement location="${generator.runtime.jar}"/></path>
-    <path id="monitor.classpath"><path refid="common.classpath"/><pathelement location="${monitor.runtime.jar}"/></path>
+    <path id="monitor.classpath"><path refid="common.classpath"/><pathelement location="${monitor.runtime.jar}"/><pathelement location="${host.jar}"/></path>
     <path id="host.classpath"><path refid="common.classpath"/><pathelement location="${host.jar}"/></path>
     <macrodef name="copy-launcher-component">
         <attribute name="directory"/>

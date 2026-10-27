@@ -8,6 +8,7 @@
         <path id="circulating.timings.classpath">
             <path refid="runtime.classpath"/>
             <pathelement location="../btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+            <pathelement location="../btsn.rpso.host/target/btsn.rpso.host.jar"/>
             <pathelement location="target/circulating-timings-check/classes"/>
         </path>
         <javac srcdir="../btsn.common.Monitor/tests" destdir="target/circulating-timings-check/classes"
@@ -27,6 +28,7 @@
         <path id="process.labels.check.classpath">
             <path refid="runtime.classpath"/>
             <pathelement location="../btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+            <pathelement location="../btsn.rpso.host/target/btsn.rpso.host.jar"/>
             <pathelement location="../btsn.common.eventgenerators/target/jar-runtime/btsn-eventgenerators.jar"/>
             <pathelement location="target/process-labels-check/classes"/>
         </path>
@@ -47,6 +49,7 @@
         <path id="clock.offset.check.classpath">
             <path refid="runtime.classpath"/>
             <pathelement location="../btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+            <pathelement location="../btsn.rpso.host/target/btsn.rpso.host.jar"/>
             <pathelement location="target/clock-offset-check/classes"/>
         </path>
         <javac srcdir="../btsn.common.Monitor/tests" destdir="target/clock-offset-check/classes"
@@ -67,6 +70,7 @@
         <path id="analysis.check.classpath">
             <path refid="runtime.classpath"/>
             <pathelement location="../btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+            <pathelement location="../btsn.rpso.host/target/btsn.rpso.host.jar"/>
             <pathelement location="target/analysis-check/classes"/>
         </path>
         <javac srcdir="../btsn.common.Monitor/tests" destdir="target/analysis-check/classes"
@@ -84,6 +88,7 @@
         <path id="service.names.check.classpath">
             <path refid="runtime.classpath"/>
             <pathelement location="../btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+            <pathelement location="../btsn.rpso.host/target/btsn.rpso.host.jar"/>
             <pathelement location="target/service-names-check/classes"/>
         </path>
         <javac srcdir="../btsn.common.Monitor/tests" destdir="target/service-names-check/classes"
@@ -104,6 +109,7 @@
         <path id="measured.timeline.check.classpath">
             <path refid="runtime.classpath"/>
             <pathelement location="../btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+            <pathelement location="../btsn.rpso.host/target/btsn.rpso.host.jar"/>
             <pathelement location="target/measured-timeline-check/classes"/>
         </path>
         <javac srcdir="../btsn.common.Monitor/tests" destdir="target/measured-timeline-check/classes"
@@ -123,6 +129,7 @@
         <path id="combined.workflow.check.classpath">
             <path refid="runtime.classpath"/>
             <pathelement location="../btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+            <pathelement location="../btsn.rpso.host/target/btsn.rpso.host.jar"/>
             <pathelement location="target/combined-workflow-check/classes"/>
         </path>
         <javac srcdir="../btsn.common.Monitor/tests" destdir="target/combined-workflow-check/classes"
@@ -142,6 +149,7 @@
         <path id="queue.view.check.classpath">
             <path refid="runtime.classpath"/>
             <pathelement location="../btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+            <pathelement location="../btsn.rpso.host/target/btsn.rpso.host.jar"/>
             <pathelement location="target/queue-view-check/classes"/>
         </path>
         <javac srcdir="../btsn.common.Monitor/tests" destdir="target/queue-view-check/classes"
@@ -159,6 +167,7 @@
         <path id="healthcare.names.check.classpath">
             <path refid="runtime.classpath"/>
             <pathelement location="../btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+            <pathelement location="../btsn.rpso.host/target/btsn.rpso.host.jar"/>
             <pathelement location="target/healthcare-names-check/classes"/>
         </path>
         <javac srcdir="../btsn.common.Monitor/tests" destdir="target/healthcare-names-check/classes"

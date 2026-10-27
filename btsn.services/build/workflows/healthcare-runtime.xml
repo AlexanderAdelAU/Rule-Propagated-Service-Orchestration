@@ -69,6 +69,7 @@
             <classpath>
                 <path refid="healthcare.dependencies"/>
                 <pathelement location="${source.root}/btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+                <pathelement location="${source.root}/btsn.rpso.host/target/btsn.rpso.host.jar"/>
             </classpath>
             <arg value="--all"/>
         </java>
@@ -79,6 +80,7 @@
             <classpath>
                 <path refid="healthcare.dependencies"/>
                 <pathelement location="${source.root}/btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+                <pathelement location="${source.root}/btsn.rpso.host/target/btsn.rpso.host.jar"/>
             </classpath>
         </java>
     </target>
@@ -87,6 +89,7 @@
             <classpath>
                 <path refid="healthcare.dependencies"/>
                 <pathelement location="${source.root}/btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar"/>
+                <pathelement location="${source.root}/btsn.rpso.host/target/btsn.rpso.host.jar"/>
             </classpath>
         </java>
     </target>
