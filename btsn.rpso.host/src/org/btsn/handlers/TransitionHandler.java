@@ -393,9 +393,11 @@ class TransitionHandler {
         // Calculate the BASE parent (workflow base) for genealogy
         int baseParentId = parentTokenId - (parentTokenId % 100);
         
-        // If parent token (ends in 00), start at 1 to create children
-        // If child token (from join), start at 0 to preserve winner's ID
+        // Branch numbers stay as before (logging and routing); the children's token numbers come from forkNumbers.
         int branchNumber = (parentTokenId % 100 == 0) ? 1 : 0;
+        ForkNumbers numbers = isMultiMatch
+            ? forkNumbers(parentTokenId, serviceThread.getHeaderMap().get(ServiceThread.HELD_IDS), matchingBranchIndices.size()) : null;
+        int child = 0;
 
         ArrayList<String> nextOperationCollection = serviceThread.getNextOperationCollection();
         ArrayList<String> nextChannelCollection = serviceThread.getNextChannelCollection();
@@ -414,8 +416,10 @@ class TransitionHandler {
             // Create child token ID for fork, OR preserve actual token ID for single-match
             // FIX: For single-match, use phaseSequenceID (actual incoming token) not parentTokenId
             // This ensures retry loops correctly track the same token through iterations
-            int newSequenceId = isMultiMatch ? (parentTokenId + branchNumber) : serviceThread.getPhaseSequenceID();
+            int newSequenceId = isMultiMatch ? numbers.ids[child] : serviceThread.getPhaseSequenceID();
             serviceThread.getHeaderMap().put("sequenceId", Integer.toString(newSequenceId));
+            if (isMultiMatch) serviceThread.getHeaderMap().put(ServiceThread.HELD_IDS, numbers.held[child]);
+            child++;
 
             String nextService = nextServiceCollection.get(branchIndex);
             String nextOp = nextOperationCollection.get(branchIndex);
@@ -537,6 +541,51 @@ class TransitionHandler {
         logger.info("GATEWAY-DIAG: === END GATEWAY ROUTING ===");
     }
 
+    /** The token numbers a fork gives its children, and the heldIds header each child carries. */
+    static final class ForkNumbers {
+        final int[] ids;
+        final String[] held;
+        ForkNumbers(int[] ids, String[] held) { this.ids = ids; this.held = held; }
+    }
+
+    /**
+     * Numbers for the count children of a fork whose incoming token is parentId.
+     *
+     * A workflow's first fork (parent NNNN00) numbers its children NNNN01, NNNN02, ... as before.
+     * Any other token hands out the numbers it holds: its own first, then those a join consumed (its heldIds
+     * header), in ascending order. A join therefore gives back exactly the numbers it took in, and no fork
+     * reissues a number another live token may still carry. Numbers left over stay with the first child, so a
+     * later, wider fork can use them. A fork that needs more numbers than it holds takes the next ones above
+     * its own, as before.
+     */
+    static ForkNumbers forkNumbers(int parentId, String heldHeader, int count) {
+        int[] ids = new int[count];
+        String[] held = new String[count];
+        java.util.Arrays.fill(held, "");
+        if (parentId % 100 == 0) {
+            for (int i = 0; i < count; i++) ids[i] = parentId + 1 + i;
+            return new ForkNumbers(ids, held);
+        }
+        java.util.TreeSet<Integer> holding = ServiceThread.heldIds(heldHeader, parentId);
+        List<Integer> order = new ArrayList<>();
+        order.add(parentId);
+        for (Integer n : holding) if (n != parentId) order.add(n);
+        java.util.Set<Integer> used = new java.util.HashSet<>(holding);
+        int next = parentId + 1;
+        for (int i = 0; i < count; i++) {
+            if (i < order.size()) { ids[i] = order.get(i); continue; }
+            while (used.contains(next)) next++;
+            ids[i] = next;
+            used.add(next);
+        }
+        if (order.size() > count) {
+            java.util.TreeSet<Integer> kept = new java.util.TreeSet<>(order.subList(count, order.size()));
+            kept.add(ids[0]);
+            held[0] = ServiceThread.formatHeldIds(kept, ids[0]);
+        }
+        return new ForkNumbers(ids, held);
+    }
+
     /**
      * Execute FORK routing by indices - parallel split with child tokens
      */
@@ -561,13 +610,15 @@ class TransitionHandler {
         // Calculate the BASE parent (workflow base) for genealogy
         int baseParentId = parentTokenId - (parentTokenId % 100);
 
-        // If parent token (ends in 00), start at 1 to create children
-        // If child token (from join), start at 0 to preserve winner's ID
+        // Branch numbers stay as before (logging and routing); the children's token numbers come from forkNumbers.
         int branchNumber = (parentTokenId % 100 == 0) ? 1 : 0;
+        ForkNumbers numbers = forkNumbers(parentTokenId, serviceThread.getHeaderMap().get(ServiceThread.HELD_IDS), matchingIndices.size());
+        int child = 0;
         for (int branchIndex : matchingIndices) {
-            // Create child token ID for fork (inline - no TokenIdManager dependency)
-            int childTokenId = parentTokenId + branchNumber;
+            int childTokenId = numbers.ids[child];
             serviceThread.getHeaderMap().put("sequenceId", Integer.toString(childTokenId));
+            serviceThread.getHeaderMap().put(ServiceThread.HELD_IDS, numbers.held[child]);
+            child++;
 
             String nextService = nextServiceCollection.get(branchIndex);
             String nextOp = nextOperationCollection.get(branchIndex);
@@ -707,14 +758,16 @@ class TransitionHandler {
             return;
         }
 
-        // If parent token (ends in 00), start at 1 to create children
-        // If child token (from join), start at 0 to preserve winner's ID
+        // Branch numbers stay as before (logging and routing); the children's token numbers come from forkNumbers.
         int branchNumber = (sequenceID % 100 == 0) ? 1 : 0;
+        ForkNumbers numbers = forkNumbers(sequenceID, serviceThread.getHeaderMap().get(ServiceThread.HELD_IDS), allServices.size());
+        int child = 0;
         
         for (ServiceThread.ServiceRoute route : allServices) {
-            // Create child token ID for fork (inline - no TokenIdManager dependency)
-            int childTokenId = sequenceID + branchNumber;
+            int childTokenId = numbers.ids[child];
             serviceThread.getHeaderMap().put("sequenceId", Integer.toString(childTokenId));
+            serviceThread.getHeaderMap().put(ServiceThread.HELD_IDS, numbers.held[child]);
+            child++;
 
             logger.info("FORK: Routing child token " + childTokenId + " to " + route.serviceName +
                        "." + route.operationName + " with attribute '" + forkAttribute + "'" +

@@ -888,6 +888,7 @@ class ServiceThread implements Runnable {
 	                });
 	            
 	            contribution.attributes.put(payloadAttributeName, payloadAttributeValue);
+	            contribution.held.addAll(heldIds(headerMap.get(HELD_IDS), currentForkNumber));
 
 	            // Process joins based on configuration (OPTIMIZED or SEQUENTIAL mode)
 	            List<Integer> sortedKeys = argValPriorityMap.keySet().stream().sorted().collect(Collectors.toList());
@@ -1152,11 +1153,17 @@ class ServiceThread implements Runnable {
 	    
 	    // Record join completion - continuing token ENTERS, others CONSUMED
 	    List<Integer> participantTokenIds = new ArrayList<>();
+	    java.util.TreeSet<Integer> held = new java.util.TreeSet<>();
+	    held.add(continuingTokenId);
 	    if (contributions != null) {
 	        for (JoinContribution contrib : contributions) {
 	            participantTokenIds.add(contrib.forkNumber);
+	            held.addAll(contrib.held);
+	            held.add(contrib.forkNumber);
 	        }
 	    }
+	    // The survivor holds every number the join consumed, so a later fork hands those back out.
+	    headerMap.put(HELD_IDS, formatHeldIds(held, continuingTokenId));
 	    instrumentJoinComplete(continuingTokenId, this.serviceName, participantTokenIds, currentWorkflowStartTime);
 	    
 	    // PRIORITY FIX: Signal that this token has completed a join.
@@ -2119,6 +2126,8 @@ class ServiceThread implements Runnable {
 	    int forkNumber;
 	    long workflowStartTime; 
 	    Map<String, String> attributes;
+	    /** The token numbers this contributor holds: its own, plus any it carried from an earlier join. */
+	    final java.util.TreeSet<Integer> held = new java.util.TreeSet<>();
 	    
 	    JoinContribution(int forkNumber, long workflowStartTime) {  
 	        this.forkNumber = forkNumber;
@@ -2128,6 +2137,28 @@ class ServiceThread implements Runnable {
 	}
 	
 	
+	/**
+	 * Header field listing the token numbers a token holds besides its own: the numbers a join consumed
+	 * and that its survivor carries until a fork hands them out again. Absent or empty: only its own number.
+	 */
+	static final String HELD_IDS = "heldIds";
+
+	/** The numbers a token holds: its own, plus those listed in its heldIds header. */
+	static java.util.TreeSet<Integer> heldIds(String header, int own) {
+		java.util.TreeSet<Integer> held = new java.util.TreeSet<>();
+		held.add(own);
+		if (header != null)
+			for (String part : header.split(","))
+				if (!part.trim().isEmpty()) held.add(Integer.parseInt(part.trim()));
+		return held;
+	}
+
+	/** The heldIds header for a token numbered own: empty when it holds only its own number. */
+	static String formatHeldIds(java.util.Set<Integer> held, int own) {
+		if (held.size() == 1 && held.contains(own)) return "";
+		return held.stream().map(String::valueOf).collect(Collectors.joining(","));
+	}
+
 	ServiceHelper.ServiceResult callServiceWithCanonicalBinding(String service, String operation,
 			ArrayList<?> sargs, String returnAttrName) {
 		String currentAttribute = attrMap.get("attributeName");
