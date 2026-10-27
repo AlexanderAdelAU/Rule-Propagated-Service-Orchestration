@@ -31,16 +31,19 @@ import java.util.stream.Stream;
  *               and waits; stopping this process stops them.
  *   initialise  plan=... classpath=... dir=... generator=class operation=... version=v999 process=...
  *   collect     plan=... classpath=... dir=... generator=class operation=... version=v999 process=... queryVersion=v001 delay=3
+ *               [receipts=dir]
  *               Sends each host its administrative token (initialise also Monitor's), the first host's call deploying
- *               the process's rules.
+ *               the process's rules. collect first clears Monitor's collection receipts (receipts=, when Monitor is local).
  *   drain       plan=hosts.properties runtime=dir monitor=dir quiet=5 expire1=120000 ... margin=5 [limit=N]
  *               Waits, after the last token is fired, until the workflows have finished: nothing written by this
  *               machine's hosts or Monitor for quiet seconds (every place visit and every hand-over to Monitor is
  *               written as it happens). At the latest it stops when every token's lifetime has run out (the longest
  *               expireN, in ms, plus margin seconds for a call in progress and clock differences): after that no
  *               token can still move, on any machine. limit, when given, stops it sooner.
- *   settle      database=dir quiet=6 limit=180
- *               Waits until Monitor has written what the collectors sent: its database unchanged for quiet seconds.
+ *   settle      database=dir quiet=6 limit=300 [receipts=dir plan=hosts.properties versions=v001,v002]
+ *               Waits until Monitor has stored what every host's collector sent: a receipt for each host and version,
+ *               then its database unchanged for quiet seconds. Fails, naming the hosts, if they are still missing at
+ *               the limit or a collector reported an error. Without receipts=, only the quiet database is waited for.
  */
 public final class HostLaunch {
     private HostLaunch() { }
@@ -146,6 +149,7 @@ public final class HostLaunch {
         List<String> hosts = split(plan.getProperty("hosts.list", ""));
         String first = plan.getProperty("hosts.first", "");
         long delay = Long.parseLong(a.getOrDefault("delay", "0"));
+        if (!initialise && a.containsKey("receipts")) CollectionReceipts.clear(Path.of(a.get("receipts")));
         for (String host : hosts) {
             String service = host + (initialise ? "_InitializationService" : "_CollectorService");
             if (!initialise) System.out.println("Collecting from " + service + "...");
@@ -212,11 +216,41 @@ public final class HostLaunch {
         return latest;
     }
 
-    /** Collection ends when Monitor has stored the records: its database stops changing. */
+    /**
+     * Collection ends when Monitor has stored every host's records: a receipt for each host and version collected
+     * (when receipts= is given), then its database unchanged for quiet seconds.
+     */
     static void settle(Map<String, String> a) throws Exception {
         Path database = Path.of(required(a, "database"));
-        long quiet = Long.parseLong(a.getOrDefault("quiet", "6")) * 1000, limit = Long.parseLong(a.getOrDefault("limit", "180")) * 1000;
-        long start = System.currentTimeMillis(), last = latestChange(database), quietSince = start;
+        long quiet = Long.parseLong(a.getOrDefault("quiet", "6")) * 1000, limit = Long.parseLong(a.getOrDefault("limit", "300")) * 1000;
+        long start = System.currentTimeMillis();
+        if (a.containsKey("receipts")) {
+            Path receipts = Path.of(a.get("receipts"));
+            List<String> hosts = split(load(Path.of(required(a, "plan"))).getProperty("hosts.list", ""));
+            List<String> versions = split(required(a, "versions"));
+            List<String> missing = CollectionReceipts.missing(receipts, hosts, versions);
+            List<String> reported = new ArrayList<>();
+            while (!missing.isEmpty() && System.currentTimeMillis() - start < limit) {
+                Thread.sleep(500);
+                missing = CollectionReceipts.missing(receipts, hosts, versions);
+                for (String host : hosts)
+                    if (!reported.contains(host) && missing.stream().noneMatch(m -> m.startsWith(host + " "))) {
+                        reported.add(host);
+                        System.out.println("Monitor has stored " + host + "'s records (" + (System.currentTimeMillis() - start) / 1000 + " s).");
+                    }
+            }
+            List<String> failures = CollectionReceipts.failures(receipts, hosts);
+            if (!missing.isEmpty() || !failures.isEmpty()) {
+                StringBuilder why = new StringBuilder("COLLECTION INCOMPLETE");
+                if (!missing.isEmpty()) why.append(" after ").append(limit / 1000).append(" s: Monitor has not stored the records of ")
+                    .append(String.join(", ", missing)).append(" (raise collection.limit.seconds for a large or slow run)");
+                if (!failures.isEmpty()) why.append(missing.isEmpty() ? ": " : "; ").append("collectors failed - ").append(String.join("; ", failures));
+                throw new IllegalStateException(why.toString());
+            }
+            System.out.println("Monitor has stored every host's records (" + String.join(", ", hosts) + "; " + String.join(", ", versions)
+                + ") after " + (System.currentTimeMillis() - start) / 1000 + " s.");
+        }
+        long last = latestChange(database), quietSince = System.currentTimeMillis();
         while (System.currentTimeMillis() - start < limit) {
             Thread.sleep(1000);
             long now = latestChange(database);

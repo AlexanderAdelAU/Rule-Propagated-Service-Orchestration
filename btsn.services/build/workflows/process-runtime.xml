@@ -71,6 +71,8 @@
          when a launcher sets it, collects earlier than that. -->
     <property name="workflow.quiet.seconds" value="5"/>
     <property name="workflow.expiry.margin.seconds" value="5"/>
+    <!-- Collection waits until Monitor has stored every host's records (a receipt per host and version), at most this long. -->
+    <property name="collection.limit.seconds" value="300"/>
     <!-- The hosts and Monitor are stopped after this long (ms) in any case; raise it for long runs. -->
     <property name="run.timeout.ms" value="600000"/>
     <property name="collector.delay.seconds" value="3"/>
@@ -299,11 +301,15 @@
                     <arg value="generator=${collector.event.generator.class}"/><arg value="operation=${collector.operation}"/>
                     <arg value="version=${collector.version}"/><arg value="process=${collector.process.name}"/>
                     <arg value="queryVersion=${query.version}"/><arg value="delay=${collector.delay.seconds}"/>
+                    <arg value="receipts=${monitor.project.dir}/CollectionReceipts" if:set="monitor.is.local"/>
                 </host-launch>
                 <!-- Collection is finished only when Monitor has stored what the collectors sent: do not stop before. -->
                 <echo message="Collection requests sent; waiting for Monitor to store the hosts' records - keep the run going..."/>
                 <host-launch command="settle" if:set="monitor.is.local">
                     <arg value="database=${monitor.project.dir}/ServiceAnalysisDataBase"/>
+                    <arg value="receipts=${monitor.project.dir}/CollectionReceipts"/>
+                    <arg value="plan=${hosts.plan.file}"/><arg value="versions=${query.version}"/>
+                    <arg value="limit=${collection.limit.seconds}"/>
                 </host-launch>
                 <echo message="Monitor runs on another machine: wait until it has stored the records before analysing." unless:set="monitor.is.local"/>
                 <echo message="=== Phase 3 Complete ==="/>
@@ -343,6 +349,7 @@
         <echo message="-Dworkflow.quiet.seconds=N  how long nothing must move to count as finished (default ${workflow.quiet.seconds})"/>
         <echo message="-Dworkflow.completion.seconds=N  collect after N s at the latest, before the lifetimes run out"/>
         <echo message="-Drun.timeout.ms=MS      stop the hosts after this long in any case (default ${run.timeout.ms})"/>
+        <echo message="-Dcollection.limit.seconds=N  how long Monitor may take to store every host's records (default ${collection.limit.seconds})"/>
         <echo message="-Dhost.address=127.0.0.1 run every host on this machine"/>
         <echo message="-Dp1.mode=local|remote   start or skip a host, e.g. -Dp7.mode=remote (default auto)"/>
         <echo message="-Dinfrastructure=MultiHost  use InfrastructureDefinitionFolder/MultiHost.json"/>

@@ -140,6 +140,18 @@ public class MonitorService extends BaseStochasticPetriNetPlace {
 	        System.out.println("Received data from: " + serviceName);
 	        System.out.println("Monitored place: " + place);
 	        System.out.println("Version: " + version);
+
+	        // A collector that failed sends an error instead of its records: the launcher reports it rather than wait.
+	        if ("error".equals(getStringValue(data, "status", "")) && !"Unknown".equals(place)) {
+	            String reason = getStringValue(data, "message", "no reason given");
+	            System.err.println("Collector for " + place + " reported an error: " + reason);
+	            org.btsn.deployment.CollectionReceipts.failed(
+	                java.nio.file.Path.of(org.btsn.deployment.CollectionReceipts.FOLDER), place, reason);
+	            JSONObject response = new JSONObject();
+	            response.put("status", "error");
+	            response.put("message", "collector for " + place + " failed: " + reason);
+	            return response.toJSONString();
+	        }
 	        
 	        int perfRecordsProcessed = 0;
 	        int petriNetRecordsProcessed = 0;
@@ -173,6 +185,9 @@ public class MonitorService extends BaseStochasticPetriNetPlace {
 	        
 	        System.out.println("=== UNIFIED COLLECTOR DATA PROCESSING COMPLETE ===");
 	        System.out.println("Total records processed: " + (perfRecordsProcessed + petriNetRecordsProcessed));
+	        // Receipt for the launcher: this host's records for this version are stored.
+	        org.btsn.deployment.CollectionReceipts.stored(java.nio.file.Path.of(org.btsn.deployment.CollectionReceipts.FOLDER),
+	            place, version, perfRecordsProcessed + " performance records, " + petriNetRecordsProcessed + " Petri net records");
 	        
 	        return response.toJSONString();
 	        
