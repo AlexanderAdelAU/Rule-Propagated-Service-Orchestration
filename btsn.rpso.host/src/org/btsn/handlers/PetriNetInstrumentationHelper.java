@@ -647,6 +647,32 @@ public class PetriNetInstrumentationHelper {
     }
 
     /**
+     * Record a duplicate token number resolved at a place: a different token arrived as oldId while a token with that
+     * number was waiting there, and carries on as newId. The new number joins the workflow's family (as a fork child
+     * does), and a RENAMED event says which number it arrived under.
+     */
+    public void recordTokenRenamed(int oldId, int newId, String placeName) {
+        if (shouldSkipInstrumentation(newId)) return;
+        int workflowBase = calculateWorkflowBase(newId);
+        String transition = buildTInTransitionId(placeName);
+        if (recordGenealogy) recordTokenGenealogy(workflowBase, newId, transition, System.currentTimeMillis(), workflowBase);
+        if (recordTransitions)
+            recordTransitionFiring(transition, "Rename", newId, placeName, placeName, null, "renamed_from_" + oldId,
+                                   0, -1, VersionConstants.getVersionFromSequenceId(newId), "RENAMED", null,
+                                   "renamed from " + oldId + ": a different token " + oldId + " was waiting here");
+        logger.warn("Token " + oldId + " arriving at " + placeName + " duplicated a waiting token: renamed " + newId);
+    }
+
+    /** Record a token delivered to a place a second time while the first copy was still waiting: the copy was discarded. */
+    public void recordRepeatDiscarded(int tokenId, String placeName) {
+        if (shouldSkipInstrumentation(tokenId) || !recordTransitions) return;
+        recordTransitionFiring(buildTInTransitionId(placeName), "Repeat", tokenId, placeName, placeName, null, null,
+                               0, -1, VersionConstants.getVersionFromSequenceId(tokenId), "REPEAT_DISCARDED", null,
+                               "delivered a second time; the copy was discarded");
+        logger.warn("Token " + tokenId + " delivered to " + placeName + " a second time: the copy was discarded");
+    }
+
+    /**
      * Record fork genealogy - parent to child relationship
      * 
      * Called from ServiceThread when a fork creates child tokens.

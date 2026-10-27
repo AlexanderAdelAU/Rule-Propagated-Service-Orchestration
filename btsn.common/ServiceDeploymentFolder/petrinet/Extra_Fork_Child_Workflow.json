@@ -1,0 +1,103 @@
+{
+  "definitionType": "ServiceDeployment",
+  "catalog": "BusinessServiceDefinitions/petrinet/PetriNetModels.json",
+  "capabilities": [
+    {
+      "node": "P1",
+      "service": "AlwaysTrueService",
+      "operation": "processToken",
+      "returnAttribute": "token",
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "Checker1",
+      "invocationAdapter": "boolean-token"
+    },
+    {
+      "node": "P2",
+      "service": "AlwaysTrueService",
+      "operation": "processToken",
+      "returnAttribute": "rework",
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "Checker2",
+      "invocationAdapter": "boolean-token"
+    },
+    {
+      "node": "P3",
+      "service": "AlwaysTrueService",
+      "operation": "processToken",
+      "returnAttribute": "checked",
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        },
+        {
+          "name": "rework",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "Checker3",
+      "invocationAdapter": "boolean-token"
+    },
+    {
+      "node": "P4",
+      "service": "AlwaysTrueService",
+      "operation": "processToken",
+      "returnAttribute": "reviewed",
+      "arguments": [
+        {
+          "name": "rework",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "Checker4",
+      "invocationAdapter": "boolean-token"
+    },
+    {
+      "node": "P5",
+      "service": "AlwaysTrueService",
+      "operation": "processToken",
+      "returnAttribute": "token",
+      "arguments": [
+        {
+          "name": "checked",
+          "type": "String",
+          "value": "String",
+          "required": false
+        },
+        {
+          "name": "reviewed",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 0,
+      "instance": "Checker5",
+      "invocationAdapter": "boolean-token"
+    }
+  ]
+}

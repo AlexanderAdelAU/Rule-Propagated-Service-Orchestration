@@ -418,7 +418,10 @@ class TransitionHandler {
             // This ensures retry loops correctly track the same token through iterations
             int newSequenceId = isMultiMatch ? numbers.ids[child] : serviceThread.getPhaseSequenceID();
             serviceThread.getHeaderMap().put("sequenceId", Integer.toString(newSequenceId));
-            if (isMultiMatch) serviceThread.getHeaderMap().put(ServiceThread.HELD_IDS, numbers.held[child]);
+            if (isMultiMatch) {
+                serviceThread.getHeaderMap().put(ServiceThread.HELD_IDS, numbers.held[child]);
+                serviceThread.getHeaderMap().put(TokenNumbers.ORIGIN, serviceThread.newOrigin());
+            }
             child++;
 
             String nextService = nextServiceCollection.get(branchIndex);
@@ -618,6 +621,7 @@ class TransitionHandler {
             int childTokenId = numbers.ids[child];
             serviceThread.getHeaderMap().put("sequenceId", Integer.toString(childTokenId));
             serviceThread.getHeaderMap().put(ServiceThread.HELD_IDS, numbers.held[child]);
+            serviceThread.getHeaderMap().put(TokenNumbers.ORIGIN, serviceThread.newOrigin());
             child++;
 
             String nextService = nextServiceCollection.get(branchIndex);
@@ -767,6 +771,7 @@ class TransitionHandler {
             int childTokenId = numbers.ids[child];
             serviceThread.getHeaderMap().put("sequenceId", Integer.toString(childTokenId));
             serviceThread.getHeaderMap().put(ServiceThread.HELD_IDS, numbers.held[child]);
+            serviceThread.getHeaderMap().put(TokenNumbers.ORIGIN, serviceThread.newOrigin());
             child++;
 
             logger.info("FORK: Routing child token " + childTokenId + " to " + route.serviceName +
