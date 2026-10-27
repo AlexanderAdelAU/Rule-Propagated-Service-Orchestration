@@ -1883,10 +1883,7 @@ public class Canvas extends JPanel {
         // Draw accumulated terminated tokens at Terminate nodes
         drawTerminatedTokens(g2);
         
-        // Then draw tokens that are traveling or at places. Tokens at the same spot (two forks sent along the same
-        // arc together) are drawn side by side, so each one is seen.
-        List<Point> positions = new ArrayList<>();
-        List<Color> colors = new ArrayList<>();
+        // Then draw tokens that are traveling or at places
         for (TokenAnimState state : animatedTokenStates.values()) {
             // Skip tokens that aren't visible yet or are buffered
             if (state.phase == null || state.phase == Phase.BUFFERED_AT_TIN) {
@@ -1898,29 +1895,13 @@ public class Canvas extends JPanel {
                 continue;
             }
             
+            Color color = tokenColors.getOrDefault(state.tokenId, getVersionColor(state.version));
             Point pos = calculateTokenPosition(state);
+            
             if (pos != null) {
-                positions.add(pos);
-                colors.add(tokenColors.getOrDefault(state.tokenId, getVersionColor(state.version)));
+                drawToken(g2, pos.x, pos.y, color);
             }
         }
-        List<Point> spread = spreadOverlapping(positions);
-        for (int i = 0; i < spread.size(); i++) drawToken(g2, spread.get(i).x, spread.get(i).y, colors.get(i));
-    }
-
-    /** Tokens within a few pixels of each other are spread 12 px apart, centred on where they were. */
-    static List<Point> spreadOverlapping(List<Point> positions) {
-        List<Point> spread = new ArrayList<>();
-        for (Point p : positions) spread.add(new Point(p));
-        boolean[] done = new boolean[positions.size()];
-        for (int i = 0; i < positions.size(); i++) {
-            if (done[i]) continue;
-            List<Integer> group = new ArrayList<>();
-            for (int j = i; j < positions.size(); j++)
-                if (!done[j] && positions.get(i).distance(positions.get(j)) < 6) { group.add(j); done[j] = true; }
-            for (int k = 0; k < group.size(); k++) spread.get(group.get(k)).x += (int) Math.round((k - (group.size() - 1) / 2.0) * 12);
-        }
-        return spread;
     }
     
     /**

@@ -719,8 +719,6 @@ public class PetriNetAnalyzer {
                 }
             }
 
-            boolean closedNet = isClosedNet(conn, workflowBase);
-            Map<String, List<Object[]>> eventsByTransition = new java.util.LinkedHashMap<>();   // closed net: (time, type, place) per T_in
             Map<String, JoinTemporalAccumulator> joinGroups = new HashMap<>();
             String joinSql =
                 "SELECT tokenId, transitionId, timestamp, toPlace, eventType " +
@@ -737,8 +735,6 @@ public class PetriNetAnalyzer {
                     String transitionId = rs.getString("transitionId");
                     String eventType = rs.getString("eventType");
                     String key = root + "|" + transitionId;
-                    if (closedNet) eventsByTransition.computeIfAbsent(transitionId, k -> new ArrayList<>())
-                        .add(new Object[] {rs.getLong("timestamp"), eventType, rs.getString("toPlace")});
 
                     JoinTemporalAccumulator acc =
                         joinGroups.computeIfAbsent(key, k -> new JoinTemporalAccumulator());
@@ -770,27 +766,6 @@ public class PetriNetAnalyzer {
             Map<String, ArrayList<Long>> waitByJoin = new TreeMap<>();
             Map<String, ArrayList<Long>> skewByJoin = new TreeMap<>();
             Map<String, String> placeByJoin = new HashMap<>();
-
-            // A closed net's tokens are one workflow, so its joins fire round after round under one key: measure each
-            // round, from the arrivals since the join last fired to its firing.
-            if (closedNet) {
-                joinGroups.clear();
-                for (Map.Entry<String, List<Object[]>> e : eventsByTransition.entrySet()) {
-                    List<Long> pending = new ArrayList<>();
-                    for (Object[] ev : e.getValue()) {
-                        if ("BUFFERED".equals(ev[1])) pending.add((Long) ev[0]);
-                        else if ("ENTER".equals(ev[1])) {
-                            if (pending.size() >= 2) {
-                                long first = Collections.min(pending), last = Collections.max(pending);
-                                waitByJoin.computeIfAbsent(e.getKey(), k -> new ArrayList<>()).add((Long) ev[0] - first);
-                                skewByJoin.computeIfAbsent(e.getKey(), k -> new ArrayList<>()).add(last - first);
-                                if (ev[2] != null) placeByJoin.put(e.getKey(), (String) ev[2]);
-                            }
-                            pending.clear();
-                        }
-                    }
-                }
-            }
 
             for (JoinTemporalAccumulator acc : joinGroups.values()) {
                 if (acc.consumedCount == 0 ||
@@ -883,8 +858,6 @@ public class PetriNetAnalyzer {
         report.append("Workflow Base: ").append(workflowBase).append("\n\n");
 
         report.append("1. END-TO-END WORKFLOW LATENCY\n");
-        if (isClosedNet(workflowBase))
-            report.append("   Closed net: its tokens circulate until they expire, so there is no end-to-end latency (see rounds per place).\n");
         report.append("   Canonical completed workflows: ")
               .append(temporal.expectedCompletedWorkflows).append("\n");
         report.append("   Timed completion samples:      ")
@@ -2411,87 +2384,6 @@ public class PetriNetAnalyzer {
     /**
      * Generate comprehensive workflow analysis report
      */
-    /**
-     * A closed net: the run started from an initial marking (its generated tokens are base + 1, + 2, ..., not workflow
-     * roots ending 00), so its tokens circulate until they expire and no workflow is expected to complete.
-     */
-    public boolean isClosedNet(int workflowBase) {
-        try (Connection conn = getConnection()) { return isClosedNet(conn, workflowBase); }
-        catch (SQLException e) { return false; }
-    }
-    private boolean isClosedNet(Connection conn, int workflowBase) throws SQLException {
-        boolean any = false;
-        try (PreparedStatement pstmt = conn.prepareStatement(
-                "SELECT DISTINCT tokenId FROM CONSOLIDATED_TRANSITION_FIRINGS WHERE workflowBase = ? AND eventType = 'GENERATED'")) {
-            pstmt.setInt(1, workflowBase);
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) { any = true; if (rs.getInt("tokenId") % 100 == 0) return false; }
-        }
-        return any;
-    }
-
-    /** Each place's service intervals (ENTER to the next EXIT or TERMINATE there), for which places ran together. */
-    private Map<String, List<long[]>> placeIntervals(Connection conn, int workflowBase) throws SQLException {
-        Map<String, List<long[]>> intervals = new TreeMap<>();
-        Map<String, Long> open = new HashMap<>();
-        try (PreparedStatement pstmt = conn.prepareStatement(
-                "SELECT timestamp, placeName, eventType FROM CONSOLIDATED_TRANSITION_FIRINGS " +
-                "WHERE workflowBase = ? AND eventType IN ('ENTER', 'EXIT', 'TERMINATE') ORDER BY timestamp")) {
-            pstmt.setInt(1, workflowBase);
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
-                String place = rs.getString("placeName");
-                if (place == null) continue;
-                long at = rs.getLong("timestamp");
-                if ("ENTER".equals(rs.getString("eventType"))) open.put(place, at);
-                else { Long from = open.remove(place); if (from != null) intervals.computeIfAbsent(place, k -> new ArrayList<>()).add(new long[] {from, at}); }
-            }
-        }
-        return intervals;
-    }
-
-    /** Section 1 for a closed net: rounds per place, how the run ended, and which places ran at the same time. */
-    private void appendClosedNetSummary(StringBuilder report, int workflowBase, CanonicalWorkflowAnalysis canonical, ServiceDisplayNames names) {
-        report.append("1. CLOSED NET (initial marking)\n");
-        report.append("   Marked tokens:             ").append(canonical.generatedWorkflows).append("\n");
-        report.append("   A closed net circulates its tokens until they expire: no workflow completes, and that is expected.\n");
-        int min = Integer.MAX_VALUE, max = 0;
-        report.append("   Rounds per place:\n");
-        for (Map.Entry<String, Integer> e : canonical.placeExecutions.entrySet()) {
-            report.append("     ").append(names.describe(workflowBase, e.getKey())).append(": ").append(e.getValue()).append("\n");
-            min = Math.min(min, e.getValue()); max = Math.max(max, e.getValue());
-        }
-        if (max > 0) report.append("   Fairness:                  ").append(min).append(" to ").append(max).append(" rounds per place")
-                           .append(max - min <= 1 ? " (even)" : "").append("\n");
-        int expired = 0, other = 0;
-        for (Map<String, Integer> byReason : canonical.failures.values())
-            for (Map.Entry<String, Integer> r : byReason.entrySet()) if (r.getKey().startsWith("expired")) expired += r.getValue(); else other += r.getValue();
-        report.append("   Ended:                     ").append(expired > 0 ? expired + " token(s) expired when their lifetime ran out" : "no token expired before collection").append("\n");
-        if (other > 0)
-            for (Map.Entry<String, Map<String, Integer>> place : canonical.failures.entrySet())
-                for (Map.Entry<String, Integer> reason : place.getValue().entrySet())
-                    if (!reason.getKey().startsWith("expired"))
-                        report.append("     ").append(reason.getValue()).append(" failed at ").append(names.describe(workflowBase, place.getKey()))
-                              .append(": ").append(reason.getKey()).append("\n");
-        try (Connection conn = getConnection()) {
-            Map<String, List<long[]>> intervals = placeIntervals(conn, workflowBase);
-            List<String> places = new ArrayList<>(intervals.keySet());
-            List<String> together = new ArrayList<>();
-            for (int i = 0; i < places.size(); i++)
-                for (int j = i + 1; j < places.size(); j++) {
-                    int overlaps = 0;
-                    for (long[] a : intervals.get(places.get(i))) for (long[] b : intervals.get(places.get(j))) if (a[0] < b[1] && b[0] < a[1]) overlaps++;
-                    if (overlaps > 0) together.add(places.get(i).replace("_Place", "") + "+" + places.get(j).replace("_Place", "") + " (" + overlaps + "x)");
-                }
-            report.append("   Ran at the same time:      ").append(together.isEmpty() ? "none" : String.join(", ", together)).append("\n");
-        } catch (SQLException e) {
-            report.append("   Ran at the same time:      unavailable (").append(e.getMessage()).append(")\n");
-        }
-        report.append("   Observed join sites:        ").append(canonical.successfulJoins).append("\n");
-        report.append("   Join-family violations:    ").append(canonical.joinFamilyViolations).append("\n");
-        report.append("   Structural result:         ").append(canonical.joinFamilyViolations == 0 && other == 0 ? "[OK]" : "[CHECK]").append("\n\n");
-    }
-
     public String generateWorkflowReport(int workflowBase) {
         ServiceDisplayNames names = getServiceDisplayNames();
         StringBuilder report = new StringBuilder();
@@ -2500,9 +2392,6 @@ public class PetriNetAnalyzer {
         report.append("=== PETRI NET ANALYSIS REPORT ===\n");
         report.append("Workflow Base: ").append(workflowBase).append("\n\n");
         
-        boolean closedNet = isClosedNet(workflowBase);
-        if (closedNet) appendClosedNetSummary(report, workflowBase, canonical, names);
-        else {
         report.append("1. CANONICAL WORKFLOW RECONSTRUCTION\n");
         report.append("   Generated workflows:       ").append(canonical.generatedWorkflows).append("\n");
         report.append("   Completed workflows:       ").append(canonical.completedWorkflows).append("\n");
@@ -2546,7 +2435,6 @@ public class PetriNetAnalyzer {
         
         if (canonical.generatedWorkflows == 0) {
             report.append("   Root provenance: unavailable; recorded place visits remain measurable.\n\n");
-        }
         }
         report.append("2. LOGICAL PLACE EXECUTIONS\n");
         if (canonical.placeExecutions.isEmpty()) {
@@ -3152,23 +3040,12 @@ public class PetriNetAnalyzer {
         Map<String, List<Long>> arrivalsAt = new HashMap<>();
         for (Hop a : arrivals) arrivalsAt.computeIfAbsent(a.token + "|" + a.to, k -> new ArrayList<>()).add(a.at);
         Map<String, ClockOffsetBound> bounds = new TreeMap<>();
-        // A token reaches a place once per send there: when it is sent to the same place again (a closed net's tokens
-        // circulate), only arrivals between its previous send and its next one can be this visit.
-        Map<String, List<Long>> sendsTo = new HashMap<>();
-        for (Hop s : sends) if (s.to != null) sendsTo.computeIfAbsent(s.token + "|" + s.to, k -> new ArrayList<>()).add(s.at);
-        for (List<Long> times : sendsTo.values()) Collections.sort(times);
         for (Hop s : sends) {
             if (s.from == null || s.to == null || s.from.equals(s.to)) continue;
             List<Long> candidates = arrivalsAt.get(s.token + "|" + s.to);
             if (candidates == null || candidates.isEmpty()) continue;
-            List<Long> times = sendsTo.get(s.token + "|" + s.to);
-            int at = times.indexOf(s.at);
-            long after = at > 0 ? times.get(at - 1) + (s.at - times.get(at - 1)) / 2 : Long.MIN_VALUE;
-            long before = at >= 0 && at + 1 < times.size() ? s.at + (times.get(at + 1) - s.at) / 2 : Long.MAX_VALUE;
-            Long nearest = null;
-            for (long candidate : candidates)
-                if (candidate > after && candidate < before && (nearest == null || Math.abs(candidate - s.at) < Math.abs(nearest - s.at))) nearest = candidate;
-            if (nearest == null) continue;
+            long nearest = candidates.get(0);
+            for (long candidate : candidates) if (Math.abs(candidate - s.at) < Math.abs(nearest - s.at)) nearest = candidate;
             long delta = nearest - s.at;
             boolean forward = s.from.compareTo(s.to) < 0;
             String a = forward ? s.from : s.to, b = forward ? s.to : s.from;

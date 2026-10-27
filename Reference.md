@@ -741,14 +741,6 @@ Check the report's first section, **CANONICAL WORKFLOW RECONSTRUCTION**:
 - `Structural result: [OK]`.
 - There should be no forks or joins.
 
-A closed net (one started from an initial marking, such as the traffic light or the dining philosophers) never completes a workflow, so its first section is **CLOSED NET (initial marking)** instead:
-
-- **Rounds per place**, with a fairness range, for example `3 to 4 rounds per place (even)`.
-- **How it ended**: normally `5 token(s) expired when their lifetime ran out`.
-- **Places that ran at the same time.** For the philosophers, only non-neighbours should appear.
-- `Join-family violations: 0` and `Structural result: [OK]`.
-- Join waits in section 5 are measured per round, and the clock check pairs each trip with its own visit.
-
 Count workflows separately from place visits:
 
 - Each `false` result makes the same workflow visit P2 again.
