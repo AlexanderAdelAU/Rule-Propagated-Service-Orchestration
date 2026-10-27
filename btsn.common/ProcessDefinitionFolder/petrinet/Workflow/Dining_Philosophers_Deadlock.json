@@ -1,0 +1,722 @@
+{
+  "processType": "PetriNet",
+  "elements": [
+    {
+      "id": "T_in_P1",
+      "type": "TRANSITION",
+      "x": 709,
+      "y": 233,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P1",
+      "rotation": 0.0,
+      "node_type": "JoinNode",
+      "node_value": "JOIN_NODE",
+      "transition_type": "T_in",
+      "buffer": "10",
+      "joinInputCount": "2"
+    },
+    {
+      "id": "P1",
+      "type": "PLACE",
+      "x": 615,
+      "y": 225,
+      "width": 50,
+      "height": 50,
+      "label": "Plato",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "fork_1",
+          "arguments": [
+            {
+              "name": "fork_2",
+              "type": "String",
+              "value": "String",
+              "required": false
+            },
+            {
+              "name": "fork_5",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "Philosopher1"
+    },
+    {
+      "id": "T_out_P1",
+      "type": "TRANSITION",
+      "x": 546,
+      "y": 233,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P1",
+      "rotation": 0.0,
+      "node_type": "ForkNode",
+      "node_value": "FORK_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P2",
+      "type": "TRANSITION",
+      "x": 428,
+      "y": 319,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P2",
+      "rotation": 0.0,
+      "node_type": "JoinNode",
+      "node_value": "JOIN_NODE",
+      "transition_type": "T_in",
+      "buffer": "10",
+      "joinInputCount": "2"
+    },
+    {
+      "id": "P2",
+      "type": "PLACE",
+      "x": 377,
+      "y": 397,
+      "width": 50,
+      "height": 50,
+      "label": "Socrates",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "fork_2",
+          "arguments": [
+            {
+              "name": "fork_3",
+              "type": "String",
+              "value": "String",
+              "required": false
+            },
+            {
+              "name": "fork_1",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "Philosopher2"
+    },
+    {
+      "id": "T_out_P2",
+      "type": "TRANSITION",
+      "x": 378,
+      "y": 474,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P2",
+      "rotation": 0.0,
+      "node_type": "ForkNode",
+      "node_value": "FORK_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P3",
+      "type": "TRANSITION",
+      "x": 423,
+      "y": 613,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P3",
+      "rotation": 0.0,
+      "node_type": "JoinNode",
+      "node_value": "JOIN_NODE",
+      "transition_type": "T_in",
+      "buffer": "10",
+      "joinInputCount": "2"
+    },
+    {
+      "id": "P3",
+      "type": "PLACE",
+      "x": 468,
+      "y": 677,
+      "width": 50,
+      "height": 50,
+      "label": "Kant",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "fork_3",
+          "arguments": [
+            {
+              "name": "fork_4",
+              "type": "String",
+              "value": "String",
+              "required": false
+            },
+            {
+              "name": "fork_2",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "Philosopher3"
+    },
+    {
+      "id": "T_out_P3",
+      "type": "TRANSITION",
+      "x": 554,
+      "y": 709,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P3",
+      "rotation": 0.0,
+      "node_type": "ForkNode",
+      "node_value": "FORK_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P4",
+      "type": "TRANSITION",
+      "x": 701,
+      "y": 709,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P4",
+      "rotation": 0.0,
+      "node_type": "JoinNode",
+      "node_value": "JOIN_NODE",
+      "transition_type": "T_in",
+      "buffer": "10",
+      "joinInputCount": "2"
+    },
+    {
+      "id": "P4",
+      "type": "PLACE",
+      "x": 761,
+      "y": 677,
+      "width": 50,
+      "height": 50,
+      "label": "Hume",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "fork_4",
+          "arguments": [
+            {
+              "name": "fork_5",
+              "type": "String",
+              "value": "String",
+              "required": false
+            },
+            {
+              "name": "fork_3",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "Philosopher4"
+    },
+    {
+      "id": "T_out_P4",
+      "type": "TRANSITION",
+      "x": 832,
+      "y": 613,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P4",
+      "rotation": 0.0,
+      "node_type": "ForkNode",
+      "node_value": "FORK_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P5",
+      "type": "TRANSITION",
+      "x": 877,
+      "y": 474,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P5",
+      "rotation": 0.0,
+      "node_type": "JoinNode",
+      "node_value": "JOIN_NODE",
+      "transition_type": "T_in",
+      "buffer": "10",
+      "joinInputCount": "2"
+    },
+    {
+      "id": "P5",
+      "type": "PLACE",
+      "x": 852,
+      "y": 397,
+      "width": 50,
+      "height": 50,
+      "label": "Locke",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "fork_5",
+          "arguments": [
+            {
+              "name": "fork_1",
+              "type": "String",
+              "value": "String",
+              "required": false
+            },
+            {
+              "name": "fork_4",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "Philosopher5"
+    },
+    {
+      "id": "T_out_P5",
+      "type": "TRANSITION",
+      "x": 827,
+      "y": 319,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P5",
+      "rotation": 0.0,
+      "node_type": "ForkNode",
+      "node_value": "FORK_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "TABLE",
+      "type": "EVENT_GENERATOR",
+      "x": 628,
+      "y": 470,
+      "width": 24,
+      "height": 60,
+      "label": "TABLE",
+      "rotation": 0.0,
+      "generator_rate": "1000",
+      "token_version": "v001"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "T_in_P1",
+      "target": "P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P1",
+      "target": "T_out_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P2",
+      "target": "P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P2",
+      "target": "T_out_P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P3",
+      "target": "P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P3",
+      "target": "T_out_P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P4",
+      "target": "P4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P4",
+      "target": "T_out_P4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P5",
+      "target": "P5",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P5",
+      "target": "T_out_P5",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P2",
+      "target": "T_in_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P5",
+      "target": "T_in_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P3",
+      "target": "T_in_P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P1",
+      "target": "T_in_P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P4",
+      "target": "T_in_P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P2",
+      "target": "T_in_P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P5",
+      "target": "T_in_P4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P3",
+      "target": "T_in_P4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P1",
+      "target": "T_in_P5",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P4",
+      "target": "T_in_P5",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "TABLE",
+      "target": "T_in_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "tokens": 1
+    },
+    {
+      "source": "TABLE",
+      "target": "T_in_P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "tokens": 1
+    },
+    {
+      "source": "TABLE",
+      "target": "T_in_P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "tokens": 1
+    },
+    {
+      "source": "TABLE",
+      "target": "T_in_P4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "tokens": 1
+    },
+    {
+      "source": "TABLE",
+      "target": "T_in_P5",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": "",
+      "tokens": 1
+    }
+  ],
+  "textElements": [
+    {
+      "x": 40,
+      "y": 40,
+      "text": "Dining philosophers, deadlocked start",
+      "fontSize": 14,
+      "fontStyle": 1,
+      "color": -16777216
+    },
+    {
+      "x": 40,
+      "y": 62,
+      "text": "Start: every philosopher holds his right-hand fork. A cycle: every join waits for a fork that never comes.",
+      "fontSize": 11,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 40,
+      "y": 80,
+      "text": "Seated facing the table, each philosopher's right-hand fork is shared with the next philosopher counter-clockwise.",
+      "fontSize": 11,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 40,
+      "y": 98,
+      "text": "A philosopher eats when its join (T_in) holds both forks; its ForkNode T_out then hands both forks back.",
+      "fontSize": 11,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 600,
+      "y": 137,
+      "text": "Seat 1: Plato (host P1)",
+      "fontSize": 11,
+      "fontStyle": 1,
+      "color": -16777216
+    },
+    {
+      "x": 600,
+      "y": 153,
+      "text": "right fork shared with Socrates",
+      "fontSize": 11,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 600,
+      "y": 167,
+      "text": "left fork shared with Locke",
+      "fontSize": 11,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 503,
+      "y": 374,
+      "text": "fork Plato/Socrates",
+      "fontSize": 10,
+      "fontStyle": 2,
+      "color": -16777216
+    },
+    {
+      "x": 72,
+      "y": 382,
+      "text": "Seat 2: Socrates (host P2)",
+      "fontSize": 11,
+      "fontStyle": 1,
+      "color": -16777216
+    },
+    {
+      "x": 72,
+      "y": 398,
+      "text": "right fork shared with Kant",
+      "fontSize": 11,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 72,
+      "y": 412,
+      "text": "left fork shared with Plato",
+      "fontSize": 11,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 447,
+      "y": 547,
+      "text": "fork Socrates/Kant",
+      "fontSize": 10,
+      "fontStyle": 2,
+      "color": -16777216
+    },
+    {
+      "x": 201,
+      "y": 779,
+      "text": "Seat 3: Kant (host P3)",
+      "fontSize": 11,
+      "fontStyle": 1,
+      "color": -16777216
+    },
+    {
+      "x": 201,
+      "y": 795,
+      "text": "right fork shared with Hume",
+      "fontSize": 11,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 201,
+      "y": 809,
+      "text": "left fork shared with Socrates",
+      "fontSize": 11,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 595,
+      "y": 655,
+      "text": "fork Kant/Hume",
+      "fontSize": 10,
+      "fontStyle": 2,
+      "color": -16777216
+    },
+    {
+      "x": 838,
+      "y": 779,
+      "text": "Seat 4: Hume (host P4)",
+      "fontSize": 11,
+      "fontStyle": 1,
+      "color": -16777216
+    },
+    {
+      "x": 838,
+      "y": 795,
+      "text": "right fork shared with Locke",
+      "fontSize": 11,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 838,
+      "y": 809,
+      "text": "left fork shared with Kant",
+      "fontSize": 11,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 742,
+      "y": 547,
+      "text": "fork Hume/Locke",
+      "fontSize": 10,
+      "fontStyle": 2,
+      "color": -16777216
+    },
+    {
+      "x": 967,
+      "y": 382,
+      "text": "Seat 5: Locke (host P5)",
+      "fontSize": 11,
+      "fontStyle": 1,
+      "color": -16777216
+    },
+    {
+      "x": 967,
+      "y": 398,
+      "text": "right fork shared with Plato",
+      "fontSize": 11,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 967,
+      "y": 412,
+      "text": "left fork shared with Hume",
+      "fontSize": 11,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 686,
+      "y": 374,
+      "text": "fork Locke/Plato",
+      "fontSize": 10,
+      "fontStyle": 2,
+      "color": -16777216
+    },
+    {
+      "x": 585,
+      "y": 555,
+      "text": "TABLE lays the forks",
+      "fontSize": 10,
+      "fontStyle": 2,
+      "color": -16777216
+    }
+  ],
+  "serviceDeployment": "ServiceDeploymentFolder/petrinet/Dining_Philosophers.json"
+}
