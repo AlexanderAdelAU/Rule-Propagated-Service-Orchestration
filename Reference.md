@@ -1107,6 +1107,8 @@ Every launcher runs the same way:
 | Initial marking over two places (Rendezvous) | [Rendezvous_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/Rendezvous_Workflow_BuildAndRun.xml) |
 | Six-place double-join model | [P1_to_P6_Double_Join_Workflow.xml](btsn.petrinet.ProjectLoader/P1_to_P6_Double_Join_Workflow.xml) |
 | A fork needing more token numbers than it holds: the duplicate is renamed at the join where it meets its twin | [Extra_Fork_Child_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/Extra_Fork_Child_Workflow_BuildAndRun.xml) |
+| Dining philosophers (Plato, Socrates, Kant, Hume and Locke on hosts P1–P5): five places in a ring passing forks; runs until the forks' lifetime ends (`-Dtoken.expire=60000` for a minute) | [Dining_Philosophers_BuildAndRun.xml](btsn.petrinet.ProjectLoader/Dining_Philosophers_BuildAndRun.xml) |
+| Dining philosophers from a deadlocked start: every join holds one fork and waits | [Dining_Philosophers_Deadlock_BuildAndRun.xml](btsn.petrinet.ProjectLoader/Dining_Philosophers_Deadlock_BuildAndRun.xml) |
 | Emergency department | [Emergency_Department_BuildAndRun.xml](btsn.healthcare.ProjectLoader/Emergency_Department_BuildAndRun.xml) |
 | Full Financial application | [FinancialSystem_P1_P5_BuildAndRun.xml](btsn.financial.ProjectLoader/FinancialSystem_P1_P5_BuildAndRun.xml) |
 | Concurrent healthcare versions | [Triple_Workflow_Emergencey_Department_Concurrent.xml](btsn.healthcare.ProjectLoader/Triple_Workflow_Emergencey_Department_Concurrent.xml) |
