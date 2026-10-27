@@ -47,6 +47,9 @@ public class DoubleJoinAnalysisCheck {
             event(c, 1000001, "T4", "ENTER");
             event(c, 1000001, "T4", "ENTER"); // duplicate collector observation
             try (Statement s = c.createStatement()) {
+                // As a host records a join: the consumed token's arrival (BUFFERED) first, then the firing's
+                // continuation ENTER and its JOIN_CONSUMED. The analysis anchors an observed join on that arrival.
+                s.executeUpdate("INSERT INTO CONSOLIDATED_TRANSITION_FIRINGS VALUES (1000000,1000002,'T4',1500,'model','BUFFERED')");
                 s.executeUpdate("INSERT INTO CONSOLIDATED_TRANSITION_FIRINGS VALUES (1000000,1000001,'T4',2000,'model','ENTER')");
                 s.executeUpdate("INSERT INTO CONSOLIDATED_TRANSITION_FIRINGS VALUES (1000000,1000002,'T4',2000,'JOIN_CONSUMED','JOIN_CONSUMED')");
             }
