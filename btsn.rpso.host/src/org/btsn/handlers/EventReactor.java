@@ -608,6 +608,26 @@ public class EventReactor extends Thread {
 	private volatile DropHandler dropHandler;
 	public void setDropHandler(DropHandler handler) { this.dropHandler = handler; }
 
+	/**
+	 * What the place knows about token numbers besides its queue, and where renames and repeats are reported.
+	 * Set by the ServiceThread that owns this reactor.
+	 */
+	public interface TokenNumberListener {
+		/** Numbers waiting at this place's joins: number -> stamp (TokenNumbers.HELD... for a number a waiting token holds). */
+		java.util.Map<Integer, String> waitingAtJoins();
+		/** A duplicate arriving as oldId was renamed newId. */
+		void renamed(int oldId, int newId, String place);
+		/** A token was delivered a second time; the copy was discarded. */
+		void repeated(int tokenId, String place);
+	}
+	private volatile TokenNumberListener tokenNumberListener;
+	public void setTokenNumberListener(TokenNumberListener listener) { this.tokenNumberListener = listener; }
+
+	/** The token number behind each queue key, and the numbers in the queue: number -> stamp (or HELD... for spares). */
+	private final java.util.Map<Long, Integer> queuedIdByKey = new java.util.HashMap<>();
+	private final java.util.Map<Long, java.util.List<Integer>> queuedSparesByKey = new java.util.HashMap<>();
+	private final java.util.Map<Integer, String> queuedNumbers = new java.util.HashMap<>();
+
 	private void reportDrop(String servicePacket, String reason) {
 		DropHandler handler = dropHandler;
 		if (handler == null) return;
@@ -690,6 +710,46 @@ public class EventReactor extends Thread {
 			return;
 		}
 		
+		// A token whose number is already waiting here is either the same token delivered again (discarded)
+		// or a different token under that number (renamed), never allowed to replace the one waiting.
+		int arrivingId;
+		try {
+			arrivingId = Integer.parseInt(headerMap.get("sequenceId"));
+		} catch (NumberFormatException e) {
+			arrivingId = -1;
+		}
+		String arrivingOrigin = TokenNumbers.normalise(headerMap.get(TokenNumbers.ORIGIN));
+		String place = serviceMap.get("serviceName");
+		// Administrative tokens (rule version 999) are numbered per host and never forked: left as they are.
+		boolean admin = arrivingId > 0 && arrivingId / 1_000_000 == 999;
+		if (arrivingId > 0 && !admin) {
+			TokenNumberListener listener = tokenNumberListener;
+			java.util.Map<Integer, String> inUse = new java.util.HashMap<>();
+			if (listener != null) inUse.putAll(listener.waitingAtJoins());
+			inUse.putAll(queuedNumbers);
+			switch (TokenNumbers.classify(arrivingOrigin, inUse.get(arrivingId))) {
+			case REPEAT:
+				System.err.println("Token " + arrivingId + " delivered a second time at " + place + ": the copy is discarded");
+				if (listener != null) listener.repeated(arrivingId, place);
+				return;
+			case DUPLICATE:
+				int renamed = TokenNumbers.renumber(arrivingId, inUse.keySet());
+				if (renamed < 0) {
+					lostEvents++;
+					reportDrop(servicePacket, "a different token numbered " + arrivingId
+						+ " was already waiting here and no other number of its workflow was free");
+					return;
+				}
+				System.err.println("Token " + arrivingId + " is already waiting at " + place + ": this different token is renamed " + renamed);
+				servicePacket = TokenNumbers.renumberPacket(servicePacket, headerMap, arrivingId, renamed);
+				if (listener != null) listener.renamed(arrivingId, renamed, place);
+				arrivingId = renamed;
+				break;
+			default:
+				break;
+			}
+		}
+
 		// Update monitoring data
 		monitorDataMap.put("eventArrivalTime", Long.toString(System.currentTimeMillis()));
 		monitorDataMap.put("lostEvents", Long.toString(lostEvents));
@@ -729,6 +789,14 @@ public class EventReactor extends Thread {
 		System.out.println("About to add costKey " + costKey + " to costKeyTokenMap");
 		
 		costKeyTokenMap.put(costKey, servicePacket);
+		if (arrivingId > 0) {
+			queuedIdByKey.put(costKey, arrivingId);
+			queuedNumbers.put(arrivingId, arrivingOrigin);
+			java.util.List<Integer> spares = new java.util.ArrayList<>();
+			for (int held : ServiceThread.heldIds(headerMap.get(ServiceThread.HELD_IDS), arrivingId))
+				if (held != arrivingId && queuedNumbers.putIfAbsent(held, TokenNumbers.HELD + arrivingId) == null) spares.add(held);
+			queuedSparesByKey.put(costKey, spares);
+		}
 		
 		System.out.println("Successfully added to costKeyTokenMap");
 		System.out.println("costKeyTokenMap size after: " + costKeyTokenMap.size());
@@ -790,6 +858,10 @@ public class EventReactor extends Thread {
 			wait();
 		costKey = costKeyTokenMap.firstKey();
 		dataMap.put(costKey, costKeyTokenMap.remove(costKey));
+		Integer leaving = queuedIdByKey.remove(costKey);
+		if (leaving != null) queuedNumbers.remove(leaving);
+		java.util.List<Integer> spares = queuedSparesByKey.remove(costKey);
+		if (spares != null) for (Integer spare : spares) queuedNumbers.remove(spare);
 		return dataMap;
 	}
 

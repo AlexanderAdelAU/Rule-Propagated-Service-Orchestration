@@ -1102,6 +1102,7 @@ Every launcher runs the same way:
 | P1–P4 fork/join model | [P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.xml) |
 | Initial marking over two places (Rendezvous) | [Rendezvous_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/Rendezvous_Workflow_BuildAndRun.xml) |
 | Six-place double-join model | [P1_to_P6_Double_Join_Workflow.xml](btsn.petrinet.ProjectLoader/P1_to_P6_Double_Join_Workflow.xml) |
+| A fork needing more token numbers than it holds: the duplicate is renamed at the join where it meets its twin | [Extra_Fork_Child_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/Extra_Fork_Child_Workflow_BuildAndRun.xml) |
 | Emergency department | [Emergency_Department_BuildAndRun.xml](btsn.healthcare.ProjectLoader/Emergency_Department_BuildAndRun.xml) |
 | Full Financial application | [FinancialSystem_P1_P5_BuildAndRun.xml](btsn.financial.ProjectLoader/FinancialSystem_P1_P5_BuildAndRun.xml) |
 | Concurrent healthcare versions | [Triple_Workflow_Emergencey_Department_Concurrent.xml](btsn.healthcare.ProjectLoader/Triple_Workflow_Emergencey_Department_Concurrent.xml) |

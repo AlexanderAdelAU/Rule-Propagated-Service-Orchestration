@@ -270,6 +270,15 @@ class ServiceThread implements Runnable {
 				try {
 					thread = new EventReactor(serviceChannel, rulePort);
 					thread.setDropHandler((tokenId, place, reason) -> instrumentTokenFailed(tokenId, place, reason));
+					thread.setTokenNumberListener(new EventReactor.TokenNumberListener() {
+						public Map<Integer, String> waitingAtJoins() {
+							Map<Integer, String> all = new HashMap<>();
+							for (Map<Integer, String> join : waitingAtJoin.values()) all.putAll(join);
+							return all;
+						}
+						public void renamed(int oldId, int newId, String place) { instrumentTokenRenamed(oldId, newId, place); }
+						public void repeated(int tokenId, String place) { instrumentRepeatDiscarded(tokenId, place); }
+					});
 					thread.start();
 					logger.info("EventReactor started successfully on attempt " + attempt);
 					break;
@@ -889,6 +898,13 @@ class ServiceThread implements Runnable {
 	            
 	            contribution.attributes.put(payloadAttributeName, payloadAttributeValue);
 	            contribution.held.addAll(heldIds(headerMap.get(HELD_IDS), currentForkNumber));
+	            contribution.origin = TokenNumbers.normalise(headerMap.get(TokenNumbers.ORIGIN));
+	            // The numbers now waiting at this join, as the reactor sees them when the next token arrives.
+	            java.util.concurrent.ConcurrentHashMap<Integer, String> waiting =
+	                waitingAtJoin.computeIfAbsent(joinID, k -> new java.util.concurrent.ConcurrentHashMap<>());
+	            waiting.put(currentForkNumber, contribution.origin);
+	            for (int spare : contribution.held)
+	                if (spare != currentForkNumber) waiting.putIfAbsent(spare, TokenNumbers.HELD + currentForkNumber);
 
 	            // Process joins based on configuration (OPTIMIZED or SEQUENTIAL mode)
 	            List<Integer> sortedKeys = argValPriorityMap.keySet().stream().sorted().collect(Collectors.toList());
@@ -1164,6 +1180,12 @@ class ServiceThread implements Runnable {
 	    }
 	    // The survivor holds every number the join consumed, so a later fork hands those back out.
 	    headerMap.put(HELD_IDS, formatHeldIds(held, continuingTokenId));
+	    // It keeps its own stamp (the header in hand is the last arrival's).
+	    String survivorOrigin = "";
+	    if (contributions != null)
+	        for (JoinContribution contrib : contributions)
+	            if (contrib.forkNumber == continuingTokenId) survivorOrigin = contrib.origin;
+	    headerMap.put(TokenNumbers.ORIGIN, survivorOrigin);
 	    instrumentJoinComplete(continuingTokenId, this.serviceName, participantTokenIds, currentWorkflowStartTime);
 	    
 	    // PRIORITY FIX: Signal that this token has completed a join.
@@ -1183,6 +1205,7 @@ class ServiceThread implements Runnable {
 	    argValPriorityMap.remove(joinKey);
 	    sequenceIDJoinWindow.remove(joinKey);
 	    joinContributions.remove(joinKey);  // Clean up fork tracking
+	    waitingAtJoin.remove(joinKey);
 	    joinExpectedCounts.remove(joinKey);  // FIX: Clean up expected count for this join
 	    logger.debug("ORCHESTRATOR: Cleaned up join " + joinKey);
 	}
@@ -2128,6 +2151,8 @@ class ServiceThread implements Runnable {
 	    Map<String, String> attributes;
 	    /** The token numbers this contributor holds: its own, plus any it carried from an earlier join. */
 	    final java.util.TreeSet<Integer> held = new java.util.TreeSet<>();
+	    /** The stamp its fork gave it (TokenNumbers.ORIGIN); empty for a token an event generator made. */
+	    String origin = "";
 	    
 	    JoinContribution(int forkNumber, long workflowStartTime) {  
 	        this.forkNumber = forkNumber;
@@ -2137,6 +2162,18 @@ class ServiceThread implements Runnable {
 	}
 	
 	
+	/** Numbers waiting at this place's joins, per join: number -> stamp (or TokenNumbers.HELD... for a spare). */
+	private final java.util.concurrent.ConcurrentHashMap<Integer, java.util.concurrent.ConcurrentHashMap<Integer, String>> waitingAtJoin =
+		new java.util.concurrent.ConcurrentHashMap<>();
+
+	private static final long ORIGIN_EPOCH = System.currentTimeMillis();
+	private static final java.util.concurrent.atomic.AtomicLong ORIGIN_COUNTER = new java.util.concurrent.atomic.AtomicLong();
+
+	/** A stamp for a token a fork creates here: unique to this place, this process and this token. */
+	String newOrigin() {
+		return serviceName + "@" + ORIGIN_EPOCH + "#" + ORIGIN_COUNTER.incrementAndGet();
+	}
+
 	/**
 	 * Header field listing the token numbers a token holds besides its own: the numbers a join consumed
 	 * and that its survivor carries until a fork hands them out again. Absent or empty: only its own number.
@@ -3282,6 +3319,16 @@ class ServiceThread implements Runnable {
 	void instrumentTokenFailed(Integer tokenId, String place, String reason) {
 		if (petriNetHelper == null || tokenId == null) return;
 		petriNetHelper.recordTokenFailed(tokenId, place, reason);
+	}
+
+	void instrumentTokenRenamed(int oldId, int newId, String place) {
+		if (petriNetHelper == null) return;
+		petriNetHelper.recordTokenRenamed(oldId, newId, place);
+	}
+
+	void instrumentRepeatDiscarded(int tokenId, String place) {
+		if (petriNetHelper == null) return;
+		petriNetHelper.recordRepeatDiscarded(tokenId, place);
 	}
 
 	void instrumentTokenTerminate(int tokenId, String fromPlace, String nodeType, String arcValue) {

@@ -1,0 +1,476 @@
+{
+  "processType": "PetriNet",
+  "elements": [
+    {
+      "id": "T_in_P1",
+      "type": "TRANSITION",
+      "x": 140,
+      "y": 195,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P1",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "P1",
+      "type": "PLACE",
+      "x": 180,
+      "y": 195,
+      "width": 50,
+      "height": 50,
+      "label": "P1",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "token",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "Checker1"
+    },
+    {
+      "id": "T_out_P1",
+      "type": "TRANSITION",
+      "x": 240,
+      "y": 195,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P1",
+      "rotation": 0.0,
+      "node_type": "ForkNode",
+      "node_value": "FORK_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P2",
+      "type": "TRANSITION",
+      "x": 380,
+      "y": 105,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P2",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "P2",
+      "type": "PLACE",
+      "x": 420,
+      "y": 105,
+      "width": 50,
+      "height": 50,
+      "label": "P2",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "rework",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "Checker2"
+    },
+    {
+      "id": "T_out_P2",
+      "type": "TRANSITION",
+      "x": 480,
+      "y": 105,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P2",
+      "rotation": 0.0,
+      "node_type": "ForkNode",
+      "node_value": "FORK_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P3",
+      "type": "TRANSITION",
+      "x": 620,
+      "y": 285,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P3",
+      "rotation": 0.0,
+      "node_type": "JoinNode",
+      "node_value": "JOIN_NODE",
+      "transition_type": "T_in",
+      "buffer": "10",
+      "joinInputCount": "2"
+    },
+    {
+      "id": "P3",
+      "type": "PLACE",
+      "x": 660,
+      "y": 285,
+      "width": 50,
+      "height": 50,
+      "label": "P3",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "checked",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            },
+            {
+              "name": "rework",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "Checker3"
+    },
+    {
+      "id": "T_out_P3",
+      "type": "TRANSITION",
+      "x": 720,
+      "y": 285,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P3",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P4",
+      "type": "TRANSITION",
+      "x": 620,
+      "y": 105,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P4",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "P4",
+      "type": "PLACE",
+      "x": 660,
+      "y": 105,
+      "width": 50,
+      "height": 50,
+      "label": "P4",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "reviewed",
+          "arguments": [
+            {
+              "name": "rework",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "Checker4"
+    },
+    {
+      "id": "T_out_P4",
+      "type": "TRANSITION",
+      "x": 720,
+      "y": 105,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P4",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_P5",
+      "type": "TRANSITION",
+      "x": 860,
+      "y": 195,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_P5",
+      "rotation": 0.0,
+      "node_type": "JoinNode",
+      "node_value": "JOIN_NODE",
+      "transition_type": "T_in",
+      "buffer": "10",
+      "joinInputCount": "2"
+    },
+    {
+      "id": "P5",
+      "type": "PLACE",
+      "x": 900,
+      "y": 195,
+      "width": 50,
+      "height": 50,
+      "label": "P5",
+      "service": "AlwaysTrueService",
+      "operations": [
+        {
+          "name": "processToken",
+          "returnAttribute": "token",
+          "arguments": [
+            {
+              "name": "checked",
+              "type": "String",
+              "value": "String",
+              "required": false
+            },
+            {
+              "name": "reviewed",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "serviceInstance": "Checker5"
+    },
+    {
+      "id": "T_out_P5",
+      "type": "TRANSITION",
+      "x": 960,
+      "y": 195,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_P5",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "EVENT_GENERATOR",
+      "type": "EVENT_GENERATOR",
+      "x": 40,
+      "y": 195,
+      "width": 60,
+      "height": 40,
+      "label": "EVENT_GENERATOR",
+      "generator_rate": "1000",
+      "token_version": "v001"
+    },
+    {
+      "id": "T_in_Model_Terminate",
+      "type": "TRANSITION",
+      "x": 1040,
+      "y": 195,
+      "width": 24,
+      "height": 60,
+      "label": "Terminate",
+      "rotation": 0.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "EVENT_GENERATOR",
+      "target": "T_in_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P1",
+      "target": "P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P1",
+      "target": "T_out_P1",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P2",
+      "target": "P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P2",
+      "target": "T_out_P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P3",
+      "target": "P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P3",
+      "target": "T_out_P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P4",
+      "target": "P4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P4",
+      "target": "T_out_P4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_P5",
+      "target": "P5",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "P5",
+      "target": "T_out_P5",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P1",
+      "target": "T_in_P2",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P1",
+      "target": "T_in_P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P2",
+      "target": "T_in_P4",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P2",
+      "target": "T_in_P3",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P3",
+      "target": "T_in_P5",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P4",
+      "target": "T_in_P5",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_P5",
+      "target": "T_in_Model_Terminate",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    }
+  ],
+  "textElements": [
+    {
+      "x": 40,
+      "y": 40,
+      "text": "Extra fork child: P2 forks two ways although it holds only its own token number",
+      "fontSize": 14,
+      "fontStyle": 1,
+      "color": -16777216
+    },
+    {
+      "x": 40,
+      "y": 62,
+      "text": "P1 forks 01 to P2 and 02 to P3. P2's second child needs a number it does not hold and takes 02, while P1's 02 waits at P3's join.",
+      "fontSize": 11,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 40,
+      "y": 80,
+      "text": "P3 renames the newer arrival (02 -> 03) instead of letting one replace the other; P5 joins both branches and the workflow ends.",
+      "fontSize": 11,
+      "fontStyle": 0,
+      "color": -16777216
+    }
+  ],
+  "serviceDeployment": "ServiceDeploymentFolder/petrinet/Extra_Fork_Child_Workflow.json"
+}

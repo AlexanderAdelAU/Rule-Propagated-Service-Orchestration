@@ -2315,6 +2315,29 @@ public class PetriNetAnalyzer {
             } catch (SQLException e) {
                 logger.warn("Canonical reconstruction: failed tokens unavailable: " + e.getMessage());
             }
+
+            // Duplicate token numbers a place resolved: a different token renamed, or a repeat delivery discarded.
+            String numbersSql =
+                "SELECT DISTINCT tokenId, fromPlace, detail, eventType FROM CONSOLIDATED_TRANSITION_FIRINGS " +
+                "WHERE workflowBase = ? AND eventType IN ('RENAMED', 'REPEAT_DISCARDED') ORDER BY tokenId";
+            try (PreparedStatement pstmt = conn.prepareStatement(numbersSql)) {
+                pstmt.setInt(1, workflowBase);
+                ResultSet rs = pstmt.executeQuery();
+                while (rs.next()) {
+                    String place = rs.getString("fromPlace");
+                    if ("RENAMED".equals(rs.getString("eventType"))) {
+                        // detail: "renamed from <old number>: ..."
+                        java.util.regex.Matcher m = java.util.regex.Pattern.compile("renamed from (\\d+)")
+                            .matcher(String.valueOf(rs.getString("detail")));
+                        String from = m.find() ? m.group(1) : "?";
+                        analysis.renamedTokens.add(from + " -> " + rs.getInt("tokenId") + " at " + place);
+                    } else {
+                        analysis.repeatDeliveries.add(rs.getInt("tokenId") + " at " + place);
+                    }
+                }
+            } catch (SQLException e) {
+                logger.warn("Canonical reconstruction: renamed tokens unavailable: " + e.getMessage());
+            }
             
         } catch (SQLException e) {
             logger.error("Error reconstructing canonical workflows for workflowBase=" + workflowBase, e);
@@ -2378,6 +2401,15 @@ public class PetriNetAnalyzer {
                 for (Map.Entry<String, Integer> reason : place.getValue().entrySet())
                     report.append("     ").append(reason.getValue()).append(" failed at ")
                           .append(names.describe(workflowBase, place.getKey())).append(": ").append(reason.getKey()).append("\n");
+        }
+        if (!canonical.renamedTokens.isEmpty()) {
+            report.append("   Duplicate numbers renamed: ").append(canonical.renamedTokens.size())
+                  .append(" (a fork needed more token numbers than it held)\n");
+            for (String rename : canonical.renamedTokens) report.append("     ").append(rename).append("\n");
+        }
+        if (!canonical.repeatDeliveries.isEmpty()) {
+            report.append("   Repeat deliveries discarded: ").append(canonical.repeatDeliveries.size()).append("\n");
+            for (String repeat : canonical.repeatDeliveries) report.append("     ").append(repeat).append("\n");
         }
         report.append("   Monitor handoffs:          ").append(canonical.monitorHandoffs).append("\n");
         report.append("   Monitor acknowledgements:  ").append(canonical.monitorAcknowledgements).append("\n");
@@ -2909,6 +2941,9 @@ public class PetriNetAnalyzer {
         public int failedWorkflows;
         /** place -> reason -> tokens that failed there for that reason */
         public Map<String, Map<String, Integer>> failures = new TreeMap<>();
+        /** Duplicate numbers renamed at a place ("02 -> 04 at P3_Place"), and repeat deliveries discarded. */
+        public List<String> renamedTokens = new ArrayList<>();
+        public List<String> repeatDeliveries = new ArrayList<>();
     }
     
     public static class WorkflowInstanceSummary {

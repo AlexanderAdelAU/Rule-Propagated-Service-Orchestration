@@ -92,6 +92,7 @@
             <include name="org/btsn/utils/OOjdrewConcurrencyTest.java"/>
             <include name="org/btsn/deployment/HostDrainCheck.java"/>
             <include name="org/btsn/handlers/ForkNumberingCheck.java"/>
+            <include name="org/btsn/handlers/DuplicateNumberCheck.java"/>
             <classpath>
                 <pathelement location="../btsn.rpso.host/target/btsn.rpso.host.jar"/>
                 <path refid="host.check.dependencies"/>
@@ -104,6 +105,15 @@
                 <pathelement location="../btsn.rpso.host/target/btsn.rpso.host.jar"/>
                 <path refid="host.check.dependencies"/>
             </classpath>
+        </java>
+        <!-- A place never lets one token replace another with the same number: duplicates are renamed, repeats discarded. -->
+        <java classname="org.btsn.handlers.DuplicateNumberCheck" fork="true" failonerror="true" dir="../btsn.rpso.host">
+            <classpath>
+                <pathelement location="${target.dir}/host-check/classes"/>
+                <pathelement location="../btsn.rpso.host/target/btsn.rpso.host.jar"/>
+                <path refid="host.check.dependencies"/>
+            </classpath>
+            <arg file="../btsn.rpso.host/PayLoad/payload.xml"/>
         </java>
         <!-- After the last token, a run collects once nothing moves on the hosts, or at its limit. -->
         <java classname="org.btsn.deployment.HostDrainCheck" fork="true" failonerror="true">
