@@ -1,0 +1,34 @@
+{
+  // RPSO in GitHub Codespaces: JDK 21 and Ant for the launchers, and a desktop in the browser
+  // (noVNC on port 6080, password "vscode") for the Swing editor.
+  "name": "RPSO",
+  "image": "mcr.microsoft.com/devcontainers/java:1-21-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "none",
+      "installAnt": "true"
+    },
+    "ghcr.io/devcontainers/features/desktop-lite:1": {}
+  },
+  // Five hosts, Monitor and the editor run side by side.
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "8gb"
+  },
+  // The editor started from the terminal draws on that desktop.
+  "containerEnv": {
+    "DISPLAY": ":1"
+  },
+  "forwardPorts": [6080],
+  "portsAttributes": {
+    "6080": {
+      "label": "Desktop for the editor (password: vscode)",
+      "onAutoForward": "notify"
+    }
+  },
+  "customizations": {
+    "codespaces": {
+      "openFiles": ["README.md"]
+    }
+  }
+}

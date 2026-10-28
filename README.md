@@ -49,6 +49,16 @@ logic one service at a time.
 
 Then start with [Tutorial.md](Tutorial.md).
 
+### Or try it in your browser
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/AlexanderAdelAU/Rule-Propagated-Service-Orchestration?quickstart=1)
+
+The codespace comes with Java, Ant and a desktop in the browser for the editor. In its terminal:
+
+- Run the Dining Philosophers on one machine: `ant -f btsn.petrinet.ProjectLoader/Dining_Philosophers_BuildAndRun.xml -Dhost.address=127.0.0.1 -Dinfrastructure=SingleHost`
+- Analyse the run: `ant -f btsn.petrinet.ProjectLoader/Dining_Philosophers_BuildAndRun.xml analyse`
+- To see the editor, open the forwarded port 6080 (**Ports** tab), connect with the password `vscode`, then start it with `ant -f btsn.workflowEditor/build.xml run`
+
 ## Learn more
 
 The detail is in [Reference.md](Reference.md).
