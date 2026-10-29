@@ -119,7 +119,7 @@ public class ProcessEditor extends JFrame {
     private static final String LAST_DIRECTORY_KEY = "lastDirectory";
     
     public ProcessEditor() {
-        super("Petri Net Editor - Export to Graphviz");
+        super("Petri Net Editor");
         
         // Load last directory from preferences
         loadLastDirectory();
@@ -200,7 +200,7 @@ public class ProcessEditor extends JFrame {
      * Update window title to show dirty state
      */
     private void updateTitle() {
-        String title = "Petri Net Editor - Export to Graphviz";
+        String title = "Petri Net Editor";
         if (isDirty) {
             title += " *";
         }
@@ -700,7 +700,7 @@ public class ProcessEditor extends JFrame {
         bottomPanel.add(animationPanel, BorderLayout.CENTER);
         
         // Status bar
-        statusLabel = new JLabel(" Ready - Draw your Petri net and export to Graphviz");
+        statusLabel = new JLabel(" Ready - Draw your Petri net");
         statusLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         bottomPanel.add(statusLabel, BorderLayout.SOUTH);
         
@@ -777,12 +777,6 @@ public class ProcessEditor extends JFrame {
         fileMenu.add(saveAsItem);
         
         fileMenu.addSeparator();
-        
-        JMenuItem exportItem = new JMenuItem("Export to Graphviz (.dot)");
-        exportItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, 
-            InputEvent.CTRL_DOWN_MASK));
-        exportItem.addActionListener(e -> exportToGraphviz());
-        fileMenu.add(exportItem);
         
         JMenuItem exportTikZItem = new JMenuItem("Export to TikZ (.tex)");
         exportTikZItem.addActionListener(e -> exportToTikZ());
@@ -1011,44 +1005,6 @@ public class ProcessEditor extends JFrame {
         return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>");
     }
 
-    private void exportToGraphviz() {
-        if (canvas.getElements().isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                "Canvas is empty! Add some elements first.",
-                "Nothing to Export",
-                JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
-        
-        JFileChooser fileChooser = new JFileChooser();
-        if (lastDirectory != null) {
-            fileChooser.setCurrentDirectory(lastDirectory);
-        }
-        fileChooser.setDialogTitle("Export to Graphviz File");
-        fileChooser.setSelectedFile(new File("petri_net.dot"));
-        
-        int result = fileChooser.showSaveDialog(this);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            File file = fileChooser.getSelectedFile();
-            lastDirectory = file.getParentFile();
-            try (FileWriter writer = new FileWriter(file)) {
-                writer.write(canvas.exportToGraphviz());
-                JOptionPane.showMessageDialog(this,
-                    "Exported successfully!\n\n" +
-                    "Use the command:\n" +
-                    "dot -Tpng " + file.getName() + " -o output.png\n\n" +
-                    "to generate an image.",
-                    "Export Successful",
-                    JOptionPane.INFORMATION_MESSAGE);
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(this,
-                    "Error saving file: " + ex.getMessage(),
-                    "Export Error",
-                    JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
-    
     private void exportToTikZ() {
         if (canvas.getElements().isEmpty()) {
             JOptionPane.showMessageDialog(this,
@@ -1118,7 +1074,7 @@ public class ProcessEditor extends JFrame {
                 JOptionPane.showMessageDialog(this,
                     "Error exporting to PDF: " + ex.getMessage() + "\n\n" +
                     "Note: PDF export requires iTextPDF library.\n" +
-                    "If not installed, use TikZ or Graphviz export instead.",
+                    "If not installed, use TikZ or PNG export instead.",
                     "Export Error",
                     JOptionPane.ERROR_MESSAGE);
                 ex.printStackTrace();
@@ -1639,7 +1595,7 @@ public class ProcessEditor extends JFrame {
             "11. Click Validate to check for duplicate labels\n" +
             "12. Save your work (File > Save) as JSON\n" +
             "13. Load saved work (File > Load)\n" +
-            "14. Export to Graphviz (File > Export) for rendering\n\n" +
+            "14. Export to TikZ, PDF or PNG (File > Export)\n\n" +
             "Multi-Selection & Copy/Paste:\n" +
             "- Drag to select multiple elements (rubber band)\n" +
             "- Ctrl+Click to add/remove from selection\n" +
@@ -1656,7 +1612,6 @@ public class ProcessEditor extends JFrame {
             "Ctrl+Shift+V - Validate\n" +
             "Ctrl+Z - Undo\n" +
             "Ctrl+Y - Redo\n" +
-            "Ctrl+E - Export to Graphviz\n" +
             "Delete - Delete selected element\n" +
             "Escape - Cancel/Clear selection\n\n" +
             "Important: Each element must have a unique label!\n" +
@@ -1672,7 +1627,7 @@ public class ProcessEditor extends JFrame {
         JOptionPane.showMessageDialog(this,
             "Petri Net Editor\n\n" +
             "A simple visual editor for Petri nets like Drawings\n" +
-            "Export to Graphviz DOT format\n\n" +
+            "Export to TikZ, PDF and PNG formats\n\n" +
             "Version 1.1 - Now with validation!",
             "About",
             JOptionPane.INFORMATION_MESSAGE);
