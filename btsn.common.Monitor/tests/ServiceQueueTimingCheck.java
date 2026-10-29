@@ -62,8 +62,8 @@ public final class ServiceQueueTimingCheck {
             // Legacy observations retain queue markers but never acquire invented elapsed bars.
             SwingGanttChart_WithLatency overview=new SwingGanttChart_WithLatency(false);
             String report=overview.generateWorkflowSummaryReport();
-            if(!report.contains(CombinedWorkflowMetrics.CAPTION)||!report.contains("N/A")||report.contains("Maxima Ratio")||report.contains("SUM OF MAXIMA")||report.contains("v999"))
-                throw new AssertionError("Misleading overview totals remain");
+            if(!report.contains("lighter lower shading")||report.contains(CombinedWorkflowMetrics.CAPTION)||!report.contains("N/A")||report.contains("Maxima Ratio")||report.contains("SUM OF MAXIMA")||report.contains("v999"))
+                throw new AssertionError("Queue-shading default or overview totals are incorrect");
             render(overview,"workflow-overview-fixture.png");
         }
         System.out.println("PASS: per-host/operation/version waits; zero waits; mean/median/P95; duplicate/conflicting/null/negative observations; ambiguous-host omission; admin exclusion; legacy host fallback; CSV escaping; queue and overview rendering");
