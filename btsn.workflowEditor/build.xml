@@ -162,6 +162,10 @@
     </target>
 
     <target name="check-deployment-editor" depends="check-contracts" description="Test real deployment table editors (requires a display or xvfb-run)">
+        <java classname="com.editor.EditorGraphvizRemovalCheck" fork="true" failonerror="true">
+            <classpath><pathelement location="${build.dir}/contract-tests"/><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
+            <arg file="../ci-results/editor-no-graphviz.png"/>
+        </java>
         <java classname="com.editor.DeploymentEditorCheck" fork="true" failonerror="true">
             <sysproperty key="rpso.infrastructure" value="SingleHost"/><!-- not this computer's Machines choice -->
             <classpath><pathelement location="${build.dir}/contract-tests"/><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
