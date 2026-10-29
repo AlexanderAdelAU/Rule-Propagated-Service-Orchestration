@@ -1595,7 +1595,7 @@ public class ProcessEditor extends JFrame {
             "11. Click Validate to check for duplicate labels\n" +
             "12. Save your work (File > Save) as JSON\n" +
             "13. Load saved work (File > Load)\n" +
-            "14. Export to TikZ, PDF or PNG (File > Export)\n\n" +
+            "14. Use File > Export to TikZ, PDF or PNG\n\n" +
             "Multi-Selection & Copy/Paste:\n" +
             "- Drag to select multiple elements (rubber band)\n" +
             "- Ctrl+Click to add/remove from selection\n" +
