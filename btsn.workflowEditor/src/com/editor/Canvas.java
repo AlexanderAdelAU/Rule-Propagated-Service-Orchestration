@@ -1883,8 +1883,8 @@ public class Canvas extends JPanel {
         // Draw accumulated terminated tokens at Terminate nodes
         drawTerminatedTokens(g2);
         
-        // Then draw tokens that are traveling or at places. Tokens at the same spot (two forks sent along the same
-        // arc together) are drawn side by side, so each one is seen.
+        // Keep moving and in-place tokens individual. Completed tokens are rendered once per version at
+        // their destination with a count, rather than spread into an ever-growing row of circles.
         List<Point> positions = new ArrayList<>();
         List<Color> colors = new ArrayList<>();
         for (TokenAnimState state : animatedTokenStates.values()) {
@@ -1893,8 +1893,10 @@ public class Canvas extends JPanel {
                 continue;
             }
             
-            // Skip terminated tokens - they're drawn by drawTerminatedTokens
-            if (state.phase == Phase.CONSUMED && state.terminateNodeId != null) {
+            // Both completed and consumed termination states are handled by drawTerminatedTokens.
+            // In particular, AT_TERMINATE must not also be drawn as individual overlapping circles.
+            if (state.phase == Phase.AT_TERMINATE ||
+                    (state.phase == Phase.CONSUMED && state.terminateNodeId != null)) {
                 continue;
             }
             
@@ -2029,54 +2031,67 @@ public class Canvas extends JPanel {
     }
     
     /**
-     * Draw accumulated terminated tokens at Terminate nodes.
-     * Shows a count badge indicating how many tokens have terminated.
+     * Count completed tokens by their replay version. Keeping this independent of drawing makes
+     * the markers deterministic even when the animator's state map changes iteration order.
+     */
+    static Map<String, Integer> terminatedCountsByVersion(List<TokenAnimState> tokens) {
+        Map<String, Integer> counts = new java.util.TreeMap<>();
+        if (tokens != null) {
+            for (TokenAnimState token : tokens) {
+                if (token != null) counts.merge(token.version == null ? "" : token.version, 1, Integer::sum);
+            }
+        }
+        return counts;
+    }
+
+    /**
+     * Draw one colour marker per version at each termination destination, with the number of
+     * completed tokens underneath. Counts are derived from the current replay snapshot, so
+     * seeking backwards also reduces them correctly. Movement and join buffers are unchanged.
      */
     private void drawTerminatedTokens(Graphics2D g2) {
         if (terminatedTokenStates == null || terminatedTokenStates.isEmpty()) return;
-        
-        for (Map.Entry<String, List<TokenAnimState>> entry : terminatedTokenStates.entrySet()) {
-            String terminateNodeId = entry.getKey();
-            List<TokenAnimState> tokens = entry.getValue();
-            
-            if (tokens == null || tokens.isEmpty()) continue;
-            
-            // Find the Terminate node element
-            ProcessElement terminateNode = findTerminateNodeByLabel(terminateNodeId);
-            if (terminateNode == null) continue;
-            
-            Point center = getElementCenter(terminateNode);
-            int nodeWidth = terminateNode.getWidth();
-            int nodeHeight = terminateNode.getHeight();
-            
-            // Draw count badge showing total terminated tokens
-            String countText = String.valueOf(tokens.size());
-            Font oldFont = g2.getFont();
+
+        Font originalFont = g2.getFont();
+        try {
             g2.setFont(new Font("SansSerif", Font.BOLD, 11));
-            FontMetrics fm = g2.getFontMetrics();
-            int textWidth = fm.stringWidth(countText);
-            int textHeight = fm.getHeight();
-            
-            // Position badge below the terminate node
-            int badgeX = center.x - textWidth/2 - 3;
-            int badgeY = center.y + nodeHeight/2 + 4;
-            
-            // Badge background
-            g2.setColor(new Color(60, 60, 60, 220));
-            g2.fillRoundRect(badgeX - 2, badgeY - 1, textWidth + 8, textHeight + 2, 6, 6);
-            
-            // Badge border
-            g2.setColor(Color.GRAY);
-            g2.drawRoundRect(badgeX - 2, badgeY - 1, textWidth + 8, textHeight + 2, 6, 6);
-            
-            // Badge text
-            g2.setColor(Color.WHITE);
-            g2.drawString(countText, badgeX + 3, badgeY + fm.getAscent());
-            
-            g2.setFont(oldFont);
+            FontMetrics metrics = g2.getFontMetrics();
+            final int maxPerRow = 4;
+            final int spacingX = 32;
+            final int spacingY = 37;
+
+            for (Map.Entry<String, List<TokenAnimState>> entry : terminatedTokenStates.entrySet()) {
+                Map<String, Integer> counts = terminatedCountsByVersion(entry.getValue());
+                if (counts.isEmpty()) continue;
+
+                ProcessElement terminateNode = findTerminateNodeByLabel(entry.getKey());
+                // A T_out can itself be the termination node, without a separate Terminate element.
+                if (terminateNode == null) terminateNode = findElementByIdOrLabel(entry.getKey());
+                if (terminateNode == null) continue;
+
+                Point center = getElementCenter(terminateNode);
+                int markerY = center.y + terminateNode.getHeight() / 2 + 18;
+                int index = 0;
+                for (Map.Entry<String, Integer> count : counts.entrySet()) {
+                    int row = index / maxPerRow;
+                    int column = index % maxPerRow;
+                    int rowSize = Math.min(maxPerRow, counts.size() - row * maxPerRow);
+                    int x = center.x + (int) Math.round((column - (rowSize - 1) / 2.0) * spacingX);
+                    int y = markerY + row * spacingY;
+
+                    drawToken(g2, x, y, getVersionColor(count.getKey()));
+
+                    String label = Integer.toString(count.getValue());
+                    g2.setColor(new Color(45, 45, 45));
+                    g2.drawString(label, x - metrics.stringWidth(label) / 2, y + 20);
+                    index++;
+                }
+            }
+        } finally {
+            g2.setFont(originalFont);
         }
     }
-    
+
     /**
      * Get color for a version string
      */
