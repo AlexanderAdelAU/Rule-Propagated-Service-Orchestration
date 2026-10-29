@@ -83,7 +83,7 @@ public class SwingGanttChart_WithLatency extends JPanel implements Scrollable {
     // Version display feature
     private boolean displayByVersion = true;
     private boolean independentLaneScales = true;
-    private boolean lightQueueBars = false;
+    private boolean lightQueueBars = true;
     private Map<String, List<Task>> versionGroups = new HashMap<>();
     private List<String> uniqueVersions = new ArrayList<>();
     private Map<String, Color> versionColors = new HashMap<>();
