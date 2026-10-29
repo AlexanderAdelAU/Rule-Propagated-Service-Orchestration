@@ -79,8 +79,15 @@ public final class CombinedWorkflowMetricsCheck {
                 &&find(rows,5000000).validQueueVisits==1,"Legacy queue data acquired fabricated elapsed time");
         check(!find(rows,6000000).hasDuration()&&!find(rows,6000000).hasQueueMaximum(),"PROCESS-only legacy row became measured");
         SwingGanttChart_WithLatency panel=new SwingGanttChart_WithLatency();
-        check(panel.generateLaTeXFigure().contains("(2.045,4.000) rectangle (2.645,4.800)"),
+        String defaultFigure=panel.generateLaTeXFigure();
+        check(defaultFigure.contains("\\definecolor{queue0}") && defaultFigure.contains("\\fill[queue1]")
+                && !defaultFigure.contains("\\fill[black]")
+                && panel.generateWorkflowSummaryReport().contains("lighter lower shading"),
+                "Workflow Elapsed Time must default to Lower Queue Shading, not Diamonds");
+        check(defaultFigure.contains("(2.045,4.000) rectangle (2.645,4.800)"),
                 "Default publication bars did not retain the arrival slot centre");
+        // Keep the existing diamond-specific regression checks as an explicit alternative selection.
+        panel.setLightQueueBars(false);
         panel.setWideBars(false);
         check(panel.tasks.size()==9&&panel.axisMaximum()==400,"Panel scale omitted a marker or included an orphan");
         check(panel.axisMaximum("v001")==200&&panel.axisMaximum("v002")==250
