@@ -691,6 +691,23 @@ function buildTimeline(events, T) {
   if (horizon !== Infinity && horizon < lastTime) { events = events.filter(e => e.t <= horizon); cutoff = horizon; lastTime = horizon; }
   const END = lastTime + 10000;
 
+  // A join fires when the last of its forks reaches the T_in: then the fork it keeps moves into the
+  // place and the fork it consumes is gone. The recorded ENTER and JOIN_CONSUMED come a few ms later.
+  const isJoin = p => { const t = T.byId.get(T.placeToTIn[p]); return !!t && (t.node_type === "JoinNode" || t.node_value === "JOIN_NODE"); };
+  const fires = {}, lastArrival = {};
+  for (const e of events) {
+    if (e.type === "BUFFERED") lastArrival[e.place] = e.t;
+    else if ((e.type === "ENTER" || e.type === "JOIN_SURVIVOR") && isJoin(e.place)) {
+      const f = lastArrival[e.place];
+      (fires[e.place] = fires[e.place] || []).push({ enter: e.t, fire: f != null && f <= e.t ? f : e.t });
+    }
+  }
+  const fireFor = (p, t) => {
+    let best = null;
+    for (const x of fires[p] || []) if (!best || Math.abs(x.enter - t) < Math.abs(best.enter - t)) best = x;
+    return best ? best.fire : null;
+  };
+
   const byToken = new Map();
   for (const e of events) { if (!byToken.has(e.token)) byToken.set(e.token, []); byToken.get(e.token).push(e); }
   const segs = [];
@@ -721,7 +738,8 @@ function buildTimeline(events, T) {
         const tIn = T.placeToTIn[ev.place];
         const done = after(i, e => e.place === ev.place && (e.type === "ENTER" || e.type === "JOIN_CONSUMED" || e.type === "JOIN_SURVIVOR" || e.type === "FAILED"));
         const prev = path[path.length - 1];
-        const end = done ? done.t : END;
+        let end = done ? done.t : END;
+        if (done && done.type === "JOIN_CONSUMED") { const f = fireFor(ev.place, done.t); if (f != null) end = Math.max(f, ev.t); }
         if (prev && prev.phase === PH.BUFFERED && prev.tIn === tIn && prev.e === ev.t) prev.e = end;
         else add(seg(tok, ver, PH.BUFFERED, ev.t, end, { place: ev.place, tIn }));
       } else if (ev.type === "ENTER" || ev.type === "JOIN_SURVIVOR") {
@@ -736,12 +754,13 @@ function buildTimeline(events, T) {
         } else atEnd = exit ? Math.max(exit.t, ev.t + 1) : END;
         // Every visit moves the token from its T_in into the place (ensureTravelIntoPlaces): taken from the
         // step before it when that step ends here, otherwise from the first half of the visit.
-        const prev = path[path.length - 1];
+        // At a join the move starts when the join fires, never before its last fork has arrived.
+        const prev = path[path.length - 1], fire = isJoin(p) ? fireFor(p, ev.t) : null;
         if (tIn) {
-          if (prev && prev.e === ev.t && prev.e - prev.s >= 2) {
-            const mid = prev.s + Math.floor((prev.e - prev.s) / 2);
-            prev.e = mid;
-            add(seg(tok, ver, PH.TO_PLACE, mid, ev.t, { place: p, from: tIn, to: p, tIn }));
+          if (prev && prev.e === ev.t && prev.e - prev.s >= 2 && (fire == null || fire < ev.t)) {
+            const start = fire != null ? Math.max(prev.s, fire) : prev.s + Math.floor((prev.e - prev.s) / 2);
+            prev.e = start;
+            add(seg(tok, ver, PH.TO_PLACE, start, ev.t, { place: p, from: tIn, to: p, tIn }));
           } else if (atEnd - atStart >= 2) {
             const mid = atStart + Math.floor((atEnd - atStart) / 2);
             add(seg(tok, ver, PH.TO_PLACE, atStart, mid, { place: p, from: tIn, to: p, tIn }));
