@@ -812,6 +812,7 @@ public class TokenAnimator {
 
         // Every visit moves the token from its T_in into the place, and every step lasts long enough to be seen.
         ensureTravelIntoPlaces();
+        startMovesWhenJoinsFire();
         stretchShortSteps();
         
         // Adjust time bounds
@@ -1560,6 +1561,12 @@ public class TokenAnimator {
         // In this case, treat the child token as if it came from the event generator.
         boolean forkBeforeFirstEnter = (forkEvent != null && firstEnterOrBuffered != null && 
                                         forkEvent.timestamp < firstEnterOrBuffered.timestamp);
+        // A fork a generator lays straight into a join (an initial marking) whose arrival there was recorded: it travels
+        // to the T_in and arrives at that time; the wait, the join and the visit then replay from the recorded events.
+        boolean approachToRecordedArrival = isChild && generatedEvent != null && !forkBeforeFirstEnter
+            && firstEnterOrBuffered != null && firstEnterOrBuffered.isBuffered()
+            && generatedEvent.transitionId != null && elementPositions.containsKey(generatedEvent.transitionId)
+            && placeToTIn.get(firstEnterOrBuffered.placeId) != null;
         
         if (isChild && forkEvent != null && forkBeforeFirstEnter) {
             // Child token with FORK that comes before first ENTER: animate from fork point to destination
@@ -1653,6 +1660,8 @@ public class TokenAnimator {
                     logger.debug("Reconstituted parent token " + tokenId + 
                                 " - no FORK found, using default processing");
                 }
+            } else if (approachToRecordedArrival) {
+                generateApproachToRecordedArrival(tokenId, version, firstEnterOrBuffered, generatedEvent);
             } else if (isChildAtJoin) {
                 // Child token with GENERATED event - it came from Event Generator
                 // but it's arriving at a JOIN. It should:
@@ -1708,7 +1717,10 @@ public class TokenAnimator {
         // For children with GENERATED events arriving at JOIN, mark their BUFFERED, ENTER,
         // and JOIN_CONSUMED as already processed (handled by generateChildApproachToJoin)
         // For JOIN_SURVIVOR, also mark EXIT and TERMINATE as processed
-        if (isChild && generatedEvent != null && firstEnterOrBuffered != null) {
+        if (approachToRecordedArrival) {
+            int genIndex = tokenEvents.indexOf(generatedEvent);
+            if (genIndex >= 0) processedIndices.add(genIndex);
+        } else if (isChild && generatedEvent != null && firstEnterOrBuffered != null) {
             // Mark the GENERATED event as processed
             int genIndex = tokenEvents.indexOf(generatedEvent);
             if (genIndex >= 0) {
@@ -2333,6 +2345,24 @@ public class TokenAnimator {
         ));
     }
     
+    /**
+     * A fork laid by a generator straight into a join: it shows at the generator, then travels to the T_in and arrives
+     * there at its recorded arrival (BUFFERED). It used to be drawn with set durations, arriving after the place had
+     * already been visited and the fork sent on, so the first visit was replayed late and twice.
+     */
+    private void generateApproachToRecordedArrival(String tokenId, String version, MarkingEvent arrival, MarkingEvent generatedEvent) {
+        String destPlace = arrival.placeId, destTIn = placeToTIn.get(destPlace), eventGen = generatedEvent.transitionId;
+        long arrive = arrival.timestamp;
+        long available = Math.max(arrive - generatedEvent.timestamp, 2 * MIN_TRAVEL_DURATION);
+        long generated = arrive - available;
+        long atEg = Math.min(TIME_AT_EVENT_GEN, available / 2);
+        long travel = Math.min(calculateTravelDuration(eventGen, destTIn, FALLBACK_TRAVEL_DURATION_EG_TO_TIN), available - atEg);
+        segments.add(new AnimationSegment(tokenId, version, Phase.AT_EVENT_GENERATOR, generated, arrive - travel,
+            null, destTIn, null, null, null, null, eventGen));
+        segments.add(new AnimationSegment(tokenId, version, Phase.TRAVELING_TO_TIN, arrive - travel, arrive,
+            destPlace, destTIn, null, eventGen, destTIn, null, eventGen));
+    }
+
     /**
      * Generate approach segments for regular token - backwards compatible version
      * without GENERATED event (falls back to reverse-engineering timestamps)
@@ -2983,6 +3013,69 @@ public class TokenAnimator {
         result.sort(Comparator.comparingLong(x -> x.startTime));
         segments.clear();
         segments.addAll(result);
+    }
+
+    /**
+     * A join fires when the last of its forks reaches the T_in: the last BUFFERED there before the place's ENTER. The
+     * fork the join keeps moves into the place from that moment, never earlier (the move used to start halfway through
+     * its own wait, sometimes before the other fork had arrived), and the fork it consumes is gone at that moment, not
+     * a few ms after the ENTER when JOIN_CONSUMED is recorded.
+     */
+    private void startMovesWhenJoinsFire() {
+        Map<String, List<long[]>> fires = new HashMap<>();   // place -> {ENTER time, firing time}
+        Map<String, Long> lastArrival = new HashMap<>();
+        for (MarkingEvent e : events) {
+            if (e.isBuffered()) lastArrival.put(e.placeId, e.timestamp);
+            else if ((e.isEnter() || e.isJoinSurvivor()) && isJoin(placeToTIn.get(e.placeId))) {
+                Long f = lastArrival.get(e.placeId);
+                fires.computeIfAbsent(e.placeId, k -> new ArrayList<>()).add(new long[] {e.timestamp, f != null && f <= e.timestamp ? f : e.timestamp});
+            }
+        }
+        if (fires.isEmpty()) return;
+        Map<String, List<AnimationSegment>> byToken = new LinkedHashMap<>();
+        for (AnimationSegment s : segments) byToken.computeIfAbsent(s.tokenId, k -> new ArrayList<>()).add(s);
+        List<AnimationSegment> result = new ArrayList<>();
+        for (List<AnimationSegment> path : byToken.values()) {
+            path.sort(Comparator.comparingLong(x -> x.startTime));
+            for (int i = 0; i < path.size(); i++) {
+                AnimationSegment s = path.get(i), before = i > 0 ? path.get(i - 1) : null, next = i + 1 < path.size() ? path.get(i + 1) : null;
+                // The fork the join keeps: waits in the T_in until the join fires, then moves into the place.
+                if (s.phase == Phase.TRAVELING_TO_PLACE && before != null && before.endTime == s.startTime) {
+                    Long fire = joinFiring(fires, s.placeId, s.endTime);
+                    boolean waiting = before.phase == Phase.BUFFERED_AT_TIN && Objects.equals(before.tInId, s.tInId);
+                    if (fire != null && fire < s.endTime && waiting) {
+                        long start = Math.max(before.startTime, fire);
+                        path.set(i - 1, retimed(before, before.startTime, start));
+                        path.set(i, retimed(s, start, s.endTime));
+                    } else if (fire != null && next != null && next.phase == Phase.AT_PLACE && next.startTime == s.endTime
+                            && next.endTime - next.startTime >= 2) {
+                        // The last fork arrived as the place was entered: the step before lasts until then, and the move is
+                        // taken from the visit.
+                        long mid = next.startTime + (next.endTime - next.startTime) / 2;
+                        path.set(i - 1, retimed(before, before.startTime, s.endTime));
+                        path.set(i, retimed(s, s.endTime, mid));
+                        path.set(i + 1, retimed(next, mid, next.endTime));
+                    }
+                }
+                // The fork the join consumes: gone when the join fires.
+                if (s.phase == Phase.BUFFERED_AT_TIN && next != null && next.phase == Phase.CONSUMED) {
+                    Long fire = joinFiring(fires, s.placeId, s.endTime);
+                    if (fire != null && fire < s.endTime) path.set(i, retimed(s, s.startTime, Math.max(s.startTime, fire)));
+                }
+            }
+            result.addAll(path);
+        }
+        result.sort(Comparator.comparingLong(x -> x.startTime));
+        segments.clear();
+        segments.addAll(result);
+    }
+
+    /** When the join at this place fired for the visit whose ENTER is nearest to the given time, or null. */
+    private static Long joinFiring(Map<String, List<long[]>> fires, String place, long time) {
+        long[] best = null;
+        for (long[] f : fires.getOrDefault(place, Collections.emptyList()))
+            if (best == null || Math.abs(f[0] - time) < Math.abs(best[0] - time)) best = f;
+        return best == null ? null : best[1];
     }
 
     /**
