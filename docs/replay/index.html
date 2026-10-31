@@ -1,0 +1,1132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RPSO Token Replay</title>
+<meta name="description" content="A recorded run of an RPSO process, replayed message by message on its model.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+  :root {
+    --bg: #f5f2eb; --ink: #182238; --muted: #5b6478; --accent: #c2521f; --accent-soft: #f3dccd;
+    --card: #ffffff; --line: #d9d3c6; --token: #e74c3c;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--ink); font: 15px/1.45 "IBM Plex Sans", system-ui, sans-serif; }
+  main { max-width: 1180px; margin: 0 auto; padding: 24px 16px 40px; }
+  .eyebrow { font: 600 12px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: .14em; color: var(--accent); text-transform: uppercase; }
+  h1 { font-size: 28px; line-height: 1.15; margin: 8px 0 6px; }
+  .lede { margin: 0 0 14px; color: var(--muted); max-width: 70ch; }
+  .tag { display: inline-block; font: 600 12px/1 "IBM Plex Mono", monospace; letter-spacing: .04em; padding: 6px 10px;
+         border-radius: 999px; background: var(--ink); color: #f5f2eb; vertical-align: middle; }
+  .stage { background: var(--card); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  svg#net { display: block; width: 100%; height: auto; touch-action: manipulation; }
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 12px;
+              padding: 10px 12px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+  button { font: 600 14px/1 "IBM Plex Sans", sans-serif; color: var(--ink); background: #ece7dc; border: 1px solid var(--line);
+           border-radius: 8px; padding: 9px 14px; cursor: pointer; min-width: 44px; }
+  button:hover { background: #e3dccd; }
+  button.primary { background: var(--ink); color: #f5f2eb; border-color: var(--ink); min-width: 84px; }
+  button.primary:hover { background: #26324d; }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .clock { font: 600 20px/1 "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; min-width: 8.5ch; }
+  .clock small { display: block; font: 400 11px/1.2 "IBM Plex Sans", sans-serif; color: var(--muted); margin-top: 4px; }
+  .scrub { flex: 1 1 260px; display: flex; align-items: center; }
+  .scrub input { width: 100%; accent-color: var(--accent); }
+  .speed { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+  .speed input { width: 120px; accent-color: var(--accent); }
+  .speed output { font: 600 13px "IBM Plex Mono", monospace; color: var(--ink); min-width: 4.5ch; }
+  .meals { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 12px 2px 0; font-size: 13px; color: var(--muted); }
+  .meals b { color: var(--ink); font: 600 13px "IBM Plex Mono", monospace; }
+  .foot { margin-top: 18px; font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+  .foot code { font: 12px "IBM Plex Mono", monospace; background: #ece7dc; padding: 2px 5px; border-radius: 4px; word-break: break-all; }
+  .foot label { cursor: pointer; text-decoration: underline; }
+  .foot input[type=file] { display: none; }
+  .error { color: #a12a1a; font-weight: 600; }
+  @media (max-width: 640px) { h1 { font-size: 22px; } .speed input { width: 90px; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">RPSO · Token replay</div>
+  <h1 id="title">Dining Philosophers <span class="tag">A recorded run, not a simulation</span></h1>
+  <p class="lede" id="lede">Every dot is a message recorded on the hosts during a real run, replayed on the model at its recorded times.
+    Red dots are forks travelling between hosts; a dot inside a T_in bar is a fork waiting there for its partner.
+    Steps of a few milliseconds are stretched so they can be seen; the clock shows the run's own time.</p>
+
+  <div class="stage"><svg id="net" role="img" aria-label="Petri net model with tokens replayed"></svg></div>
+
+  <div class="controls">
+    <button id="play" class="primary" aria-label="Play">Play</button>
+    <button id="reset" aria-label="Reset to the start">Reset</button>
+    <div class="clock" aria-live="off"><span id="clock">0.000 s</span><small>run time</small></div>
+    <div class="scrub"><input id="scrub" type="range" min="0" max="1000" value="0" step="1" aria-label="Position in the replay"></div>
+    <div class="speed"><label for="speed">Speed</label><input id="speed" type="range" min="0" max="100" value="15" step="1"><output id="speedOut">0.2×</output></div>
+  </div>
+  <div class="meals" id="meals"></div>
+
+  <div class="foot">
+    <span id="sources"></span>
+    <label for="files">Replay another model and analysis…</label>
+    <input id="files" type="file" multiple accept=".json,.txt">
+    <span id="status"></span>
+  </div>
+</main>
+
+<script type="application/json" id="embedded-model">{"processType":"PetriNet","elements":[{"id":"T_in_P1","type":"TRANSITION","x":709,"y":233,"width":24,"height":60,"label":"T_in_P1","rotation":0.0,"node_type":"JoinNode","node_value":"JOIN_NODE","transition_type":"T_in","buffer":"10","joinInputCount":"2"},{"id":"P1","type":"PLACE","x":615,"y":225,"width":50,"height":50,"label":"Plato","service":"AlwaysTrueService","operations":[{"name":"processToken","returnAttribute":"fork_1","arguments":[{"name":"fork_2","type":"String","value":"String","required":false},{"name":"fork_5","type":"String","value":"String","required":false}]}],"serviceInstance":"Philosopher1"},{"id":"T_out_P1","type":"TRANSITION","x":546,"y":233,"width":24,"height":60,"label":"T_out_P1","rotation":0.0,"node_type":"ForkNode","node_value":"FORK_NODE","transition_type":"T_out"},{"id":"T_in_P2","type":"TRANSITION","x":428,"y":319,"width":24,"height":60,"label":"T_in_P2","rotation":0.0,"node_type":"JoinNode","node_value":"JOIN_NODE","transition_type":"T_in","buffer":"10","joinInputCount":"2"},{"id":"P2","type":"PLACE","x":377,"y":397,"width":50,"height":50,"label":"Socrates","service":"AlwaysTrueService","operations":[{"name":"processToken","returnAttribute":"fork_2","arguments":[{"name":"fork_3","type":"String","value":"String","required":false},{"name":"fork_1","type":"String","value":"String","required":false}]}],"serviceInstance":"Philosopher2"},{"id":"T_out_P2","type":"TRANSITION","x":378,"y":474,"width":24,"height":60,"label":"T_out_P2","rotation":0.0,"node_type":"ForkNode","node_value":"FORK_NODE","transition_type":"T_out"},{"id":"T_in_P3","type":"TRANSITION","x":423,"y":613,"width":24,"height":60,"label":"T_in_P3","rotation":0.0,"node_type":"JoinNode","node_value":"JOIN_NODE","transition_type":"T_in","buffer":"10","joinInputCount":"2"},{"id":"P3","type":"PLACE","x":468,"y":677,"width":50,"height":50,"label":"Kant","service":"AlwaysTrueService","operations":[{"name":"processToken","returnAttribute":"fork_3","arguments":[{"name":"fork_4","type":"String","value":"String","required":false},{"name":"fork_2","type":"String","value":"String","required":false}]}],"serviceInstance":"Philosopher3"},{"id":"T_out_P3","type":"TRANSITION","x":554,"y":709,"width":24,"height":60,"label":"T_out_P3","rotation":0.0,"node_type":"ForkNode","node_value":"FORK_NODE","transition_type":"T_out"},{"id":"T_in_P4","type":"TRANSITION","x":701,"y":709,"width":24,"height":60,"label":"T_in_P4","rotation":0.0,"node_type":"JoinNode","node_value":"JOIN_NODE","transition_type":"T_in","buffer":"10","joinInputCount":"2"},{"id":"P4","type":"PLACE","x":761,"y":677,"width":50,"height":50,"label":"Hume","service":"AlwaysTrueService","operations":[{"name":"processToken","returnAttribute":"fork_4","arguments":[{"name":"fork_5","type":"String","value":"String","required":false},{"name":"fork_3","type":"String","value":"String","required":false}]}],"serviceInstance":"Philosopher4"},{"id":"T_out_P4","type":"TRANSITION","x":832,"y":613,"width":24,"height":60,"label":"T_out_P4","rotation":0.0,"node_type":"ForkNode","node_value":"FORK_NODE","transition_type":"T_out"},{"id":"T_in_P5","type":"TRANSITION","x":877,"y":474,"width":24,"height":60,"label":"T_in_P5","rotation":0.0,"node_type":"JoinNode","node_value":"JOIN_NODE","transition_type":"T_in","buffer":"10","joinInputCount":"2"},{"id":"P5","type":"PLACE","x":852,"y":397,"width":50,"height":50,"label":"Locke","service":"AlwaysTrueService","operations":[{"name":"processToken","returnAttribute":"fork_5","arguments":[{"name":"fork_1","type":"String","value":"String","required":false},{"name":"fork_4","type":"String","value":"String","required":false}]}],"serviceInstance":"Philosopher5"},{"id":"T_out_P5","type":"TRANSITION","x":827,"y":319,"width":24,"height":60,"label":"T_out_P5","rotation":0.0,"node_type":"ForkNode","node_value":"FORK_NODE","transition_type":"T_out"},{"id":"TABLE","type":"EVENT_GENERATOR","x":628,"y":470,"width":24,"height":60,"label":"TABLE","rotation":0.0,"generator_rate":"1000","token_version":"v001"}],"arrows":[{"source":"T_in_P1","target":"P1","label":"","guardCondition":"","decision_value":"","endpoint":""},{"source":"P1","target":"T_out_P1","label":"","guardCondition":"","decision_value":"","endpoint":""},{"source":"T_in_P2","target":"P2","label":"","guardCondition":"","decision_value":"","endpoint":""},{"source":"P2","target":"T_out_P2","label":"","guardCondition":"","decision_value":"","endpoint":""},{"source":"T_in_P3","target":"P3","label":"","guardCondition":"","decision_value":"","endpoint":""},{"source":"P3","target":"T_out_P3","label":"","guardCondition":"","decision_value":"","endpoint":""},{"source":"T_in_P4","target":"P4","label":"","guardCondition":"","decision_value":"","endpoint":""},{"source":"P4","target":"T_out_P4","label":"","guardCondition":"","decision_value":"","endpoint":""},{"source":"T_in_P5","target":"P5","label":"","guardCondition":"","decision_value":"","endpoint":""},{"source":"P5","target":"T_out_P5","label":"","guardCondition":"","decision_value":"","endpoint":""},{"source":"T_out_P2","target":"T_in_P1","label":"","guardCondition":"","decision_value":"","endpoint":""},{"source":"T_out_P5","target":"T_in_P1","label":"","guardCondition":"","decision_value":"","endpoint":""},{"source":"T_out_P3","target":"T_in_P2","label":"","guardCondition":"","decision_value":"","endpoint":""},{"source":"T_out_P1","target":"T_in_P2","label":"","guardCondition":"","decision_value":"","endpoint":""},{"source":"T_out_P4","target":"T_in_P3","label":"","guardCondition":"","decision_value":"","endpoint":""},{"source":"T_out_P2","target":"T_in_P3","label":"","guardCondition":"","decision_value":"","endpoint":""},{"source":"T_out_P5","target":"T_in_P4","label":"","guardCondition":"","decision_value":"","endpoint":""},{"source":"T_out_P3","target":"T_in_P4","label":"","guardCondition":"","decision_value":"","endpoint":""},{"source":"T_out_P1","target":"T_in_P5","label":"","guardCondition":"","decision_value":"","endpoint":""},{"source":"T_out_P4","target":"T_in_P5","label":"","guardCondition":"","decision_value":"","endpoint":""},{"source":"TABLE","target":"T_in_P1","label":"","guardCondition":"","decision_value":"","endpoint":"","tokens":2},{"source":"TABLE","target":"T_in_P3","label":"","guardCondition":"","decision_value":"","endpoint":"","tokens":2},{"source":"TABLE","target":"T_in_P4","label":"","guardCondition":"","decision_value":"","endpoint":"","tokens":1}],"textElements":[{"x":40,"y":40,"text":"Dining philosophers: five philosophers round a table, passing forks","fontSize":14,"fontStyle":1,"color":-16777216},{"x":40,"y":62,"text":"Start: Plato and Kant hold both their forks; Hume holds the fork he shares with Locke. No cycle, so no deadlock.","fontSize":11,"fontStyle":0,"color":-16777216},{"x":40,"y":80,"text":"Seated facing the table, each philosopher's right-hand fork is shared with the next philosopher counter-clockwise.","fontSize":11,"fontStyle":0,"color":-16777216},{"x":40,"y":98,"text":"A philosopher eats when its join (T_in) holds both forks; its ForkNode T_out then hands both forks back.","fontSize":11,"fontStyle":0,"color":-16777216},{"x":600,"y":137,"text":"Seat 1: Plato (host P1)","fontSize":11,"fontStyle":1,"color":-16777216},{"x":600,"y":153,"text":"right fork shared with Socrates","fontSize":11,"fontStyle":0,"color":-16777216},{"x":600,"y":167,"text":"left fork shared with Locke","fontSize":11,"fontStyle":0,"color":-16777216},{"x":503,"y":374,"text":"fork Plato/Socrates","fontSize":10,"fontStyle":2,"color":-16777216},{"x":72,"y":382,"text":"Seat 2: Socrates (host P2)","fontSize":11,"fontStyle":1,"color":-16777216},{"x":72,"y":398,"text":"right fork shared with Kant","fontSize":11,"fontStyle":0,"color":-16777216},{"x":72,"y":412,"text":"left fork shared with Plato","fontSize":11,"fontStyle":0,"color":-16777216},{"x":447,"y":547,"text":"fork Socrates/Kant","fontSize":10,"fontStyle":2,"color":-16777216},{"x":201,"y":779,"text":"Seat 3: Kant (host P3)","fontSize":11,"fontStyle":1,"color":-16777216},{"x":201,"y":795,"text":"right fork shared with Hume","fontSize":11,"fontStyle":0,"color":-16777216},{"x":201,"y":809,"text":"left fork shared with Socrates","fontSize":11,"fontStyle":0,"color":-16777216},{"x":595,"y":655,"text":"fork Kant/Hume","fontSize":10,"fontStyle":2,"color":-16777216},{"x":838,"y":779,"text":"Seat 4: Hume (host P4)","fontSize":11,"fontStyle":1,"color":-16777216},{"x":838,"y":795,"text":"right fork shared with Locke","fontSize":11,"fontStyle":0,"color":-16777216},{"x":838,"y":809,"text":"left fork shared with Kant","fontSize":11,"fontStyle":0,"color":-16777216},{"x":742,"y":547,"text":"fork Hume/Locke","fontSize":10,"fontStyle":2,"color":-16777216},{"x":967,"y":382,"text":"Seat 5: Locke (host P5)","fontSize":11,"fontStyle":1,"color":-16777216},{"x":967,"y":398,"text":"right fork shared with Plato","fontSize":11,"fontStyle":0,"color":-16777216},{"x":967,"y":412,"text":"left fork shared with Hume","fontSize":11,"fontStyle":0,"color":-16777216},{"x":686,"y":374,"text":"fork Locke/Plato","fontSize":10,"fontStyle":2,"color":-16777216},{"x":585,"y":555,"text":"TABLE lays the forks","fontSize":10,"fontStyle":2,"color":-16777216}],"serviceDeployment":"ServiceDeploymentFolder/petrinet/Dining_Philosophers.json"}</script>
+<script type="application/json" id="embedded-nodes">{"Philosopher1":"P1","Philosopher2":"P2","Philosopher3":"P3","Philosopher4":"P4","Philosopher5":"P5"}</script>
+<script type="text/plain" id="embedded-run">
+Time=1793147018544 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=TABLE EventType=GENERATED
+Time=1793147018657 Token=1000002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=TABLE EventType=GENERATED
+Time=1793147018692 Token=1000003 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=TABLE EventType=GENERATED
+Time=1793147018692 Token=1000004 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=TABLE EventType=GENERATED
+Time=1793147018765 Token=1000005 Place=P4_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=TABLE EventType=GENERATED
+Time=1793147018814 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793147018950 Token=1000002 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793147018972 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1793147018982 Token=1000002 Place=P1_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P1 EventType=JOIN_CONSUMED
+Time=1793147019133 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1793147019166 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P1 EventType=EXIT Arc=fork_1
+Time=1793147019234 Token=1000002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1793147019243 Token=1000002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P1 EventType=EXIT Arc=fork_1
+Time=1793147020172 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793147020612 Token=1000002 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793147020624 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1793147020628 Token=1000002 Place=P1_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P1 EventType=JOIN_CONSUMED
+Time=1793147020724 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1793147020733 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P1 EventType=EXIT Arc=fork_1
+Time=1793147020772 Token=1000002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1793147020781 Token=1000002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P1 EventType=EXIT Arc=fork_1
+Time=1793147021225 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793147021425 Token=1000002 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793147021434 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1793147021443 Token=1000002 Place=P1_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P1 EventType=JOIN_CONSUMED
+Time=1793147021560 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1793147021568 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P1 EventType=EXIT Arc=fork_1
+Time=1793147021617 Token=1000002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1793147021627 Token=1000002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P1 EventType=EXIT Arc=fork_1
+Time=1793147022092 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793147022335 Token=1000002 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793147022346 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1793147022352 Token=1000002 Place=P1_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P1 EventType=JOIN_CONSUMED
+Time=1793147022463 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1793147022476 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P1 EventType=EXIT Arc=fork_1
+Time=1793147022522 Token=1000002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1793147022531 Token=1000002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P1 EventType=EXIT Arc=fork_1
+Time=1793147022989 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793147023165 Token=1000002 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793147023175 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1793147023175 Token=1000002 Place=P1_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P1 EventType=JOIN_CONSUMED
+Time=1793147023301 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1793147023309 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P1 EventType=EXIT Arc=fork_1
+Time=1793147023348 Token=1000002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1793147023360 Token=1000002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P1 EventType=EXIT Arc=fork_1
+Time=1793147023787 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793147024001 Token=1000002 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793147024010 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1793147024017 Token=1000002 Place=P1_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P1 EventType=JOIN_CONSUMED
+Time=1793147024112 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1793147024116 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P1 EventType=EXIT Arc=fork_1
+Time=1793147024160 Token=1000002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1793147024165 Token=1000002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P1 EventType=EXIT Arc=fork_1
+Time=1793147024561 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793147024749 Token=1000002 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793147024761 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1793147024767 Token=1000002 Place=P1_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P1 EventType=JOIN_CONSUMED
+Time=1793147024874 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1793147024882 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P1 EventType=EXIT Arc=fork_1
+Time=1793147024925 Token=1000002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1793147024941 Token=1000002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P1 EventType=EXIT Arc=fork_1
+Time=1793147025337 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793147025538 Token=1000002 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793147025548 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1793147025552 Token=1000002 Place=P1_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P1 EventType=JOIN_CONSUMED
+Time=1793147025665 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1793147025665 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P1 EventType=EXIT Arc=fork_1
+Time=1793147025715 Token=1000002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1793147025721 Token=1000002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P1 EventType=EXIT Arc=fork_1
+Time=1793147026139 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793147026289 Token=1000002 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793147026298 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1793147026302 Token=1000002 Place=P1_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P1 EventType=JOIN_CONSUMED
+Time=1793147026395 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1793147026403 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P1 EventType=EXIT Arc=fork_1
+Time=1793147026441 Token=1000002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1793147026450 Token=1000002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P1 EventType=EXIT Arc=fork_1
+Time=1793147026805 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793147026989 Token=1000002 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793147026997 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1793147027001 Token=1000002 Place=P1_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P1 EventType=JOIN_CONSUMED
+Time=1793147027086 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1793147027092 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P1 EventType=EXIT Arc=fork_1
+Time=1793147027127 Token=1000002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1793147027131 Token=1000002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P1 EventType=EXIT Arc=fork_1
+Time=1793147027487 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793147027663 Token=1000002 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793147027667 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1793147027667 Token=1000002 Place=P1_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P1 EventType=JOIN_CONSUMED
+Time=1793147027763 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1793147027768 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P1 EventType=EXIT Arc=fork_1
+Time=1793147027807 Token=1000002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1793147027813 Token=1000002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P1 EventType=EXIT Arc=fork_1
+Time=1793147028167 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793147028334 Token=1000002 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793147028342 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1793147028346 Token=1000002 Place=P1_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P1 EventType=JOIN_CONSUMED
+Time=1793147028459 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1793147028467 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P1 EventType=EXIT Arc=fork_1
+Time=1793147028520 Token=1000002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1 TransitionId=T_out_P1 EventType=FORK
+Time=1793147028528 Token=1000002 Place=P1_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P1 EventType=EXIT Arc=fork_1
+Time=1793147019470 Token=1000001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793147019763 Token=1000003 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793147019792 Token=1000001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1793147019799 Token=1000003 Place=P2_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P2 EventType=JOIN_CONSUMED
+Time=1793147019940 Token=1000001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2 TransitionId=T_out_P2 EventType=FORK
+Time=1793147019964 Token=1000001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P2 EventType=EXIT Arc=fork_2
+Time=1793147020072 Token=1000003 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2 TransitionId=T_out_P2 EventType=FORK
+Time=1793147020098 Token=1000003 Place=P2_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P2 EventType=EXIT Arc=fork_2
+Time=1793147020598 Token=1000003 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793147020916 Token=1000001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793147020929 Token=1000001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1793147020932 Token=1000003 Place=P2_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P2 EventType=JOIN_CONSUMED
+Time=1793147021066 Token=1000001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2 TransitionId=T_out_P2 EventType=FORK
+Time=1793147021078 Token=1000001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P2 EventType=EXIT Arc=fork_2
+Time=1793147021138 Token=1000003 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2 TransitionId=T_out_P2 EventType=FORK
+Time=1793147021145 Token=1000003 Place=P2_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P2 EventType=EXIT Arc=fork_2
+Time=1793147021619 Token=1000003 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793147021762 Token=1000001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793147021768 Token=1000001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1793147021778 Token=1000003 Place=P2_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P2 EventType=JOIN_CONSUMED
+Time=1793147021933 Token=1000001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2 TransitionId=T_out_P2 EventType=FORK
+Time=1793147021933 Token=1000001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P2 EventType=EXIT Arc=fork_2
+Time=1793147022002 Token=1000003 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2 TransitionId=T_out_P2 EventType=FORK
+Time=1793147022009 Token=1000003 Place=P2_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P2 EventType=EXIT Arc=fork_2
+Time=1793147022454 Token=1000003 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793147022657 Token=1000001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793147022672 Token=1000001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1793147022676 Token=1000003 Place=P2_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P2 EventType=JOIN_CONSUMED
+Time=1793147022843 Token=1000001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2 TransitionId=T_out_P2 EventType=FORK
+Time=1793147022850 Token=1000001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P2 EventType=EXIT Arc=fork_2
+Time=1793147022906 Token=1000003 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2 TransitionId=T_out_P2 EventType=FORK
+Time=1793147022916 Token=1000003 Place=P2_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P2 EventType=EXIT Arc=fork_2
+Time=1793147023329 Token=1000003 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793147023459 Token=1000001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793147023479 Token=1000001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1793147023491 Token=1000003 Place=P2_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P2 EventType=JOIN_CONSUMED
+Time=1793147023645 Token=1000001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2 TransitionId=T_out_P2 EventType=FORK
+Time=1793147023650 Token=1000001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P2 EventType=EXIT Arc=fork_2
+Time=1793147023698 Token=1000003 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2 TransitionId=T_out_P2 EventType=FORK
+Time=1793147023710 Token=1000003 Place=P2_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P2 EventType=EXIT Arc=fork_2
+Time=1793147024109 Token=1000003 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793147024264 Token=1000001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793147024271 Token=1000001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1793147024276 Token=1000003 Place=P2_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P2 EventType=JOIN_CONSUMED
+Time=1793147024428 Token=1000001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2 TransitionId=T_out_P2 EventType=FORK
+Time=1793147024435 Token=1000001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P2 EventType=EXIT Arc=fork_2
+Time=1793147024485 Token=1000003 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2 TransitionId=T_out_P2 EventType=FORK
+Time=1793147024493 Token=1000003 Place=P2_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P2 EventType=EXIT Arc=fork_2
+Time=1793147024894 Token=1000003 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793147025052 Token=1000001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793147025062 Token=1000001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1793147025064 Token=1000003 Place=P2_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P2 EventType=JOIN_CONSUMED
+Time=1793147025204 Token=1000001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2 TransitionId=T_out_P2 EventType=FORK
+Time=1793147025204 Token=1000001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P2 EventType=EXIT Arc=fork_2
+Time=1793147025261 Token=1000003 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2 TransitionId=T_out_P2 EventType=FORK
+Time=1793147025267 Token=1000003 Place=P2_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P2 EventType=EXIT Arc=fork_2
+Time=1793147025690 Token=1000003 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793147025840 Token=1000001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793147025848 Token=1000001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1793147025854 Token=1000003 Place=P2_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P2 EventType=JOIN_CONSUMED
+Time=1793147026002 Token=1000001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2 TransitionId=T_out_P2 EventType=FORK
+Time=1793147026010 Token=1000001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P2 EventType=EXIT Arc=fork_2
+Time=1793147026062 Token=1000003 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2 TransitionId=T_out_P2 EventType=FORK
+Time=1793147026065 Token=1000003 Place=P2_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P2 EventType=EXIT Arc=fork_2
+Time=1793147026444 Token=1000003 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793147026547 Token=1000001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793147026554 Token=1000001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1793147026556 Token=1000003 Place=P2_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P2 EventType=JOIN_CONSUMED
+Time=1793147026682 Token=1000001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2 TransitionId=T_out_P2 EventType=FORK
+Time=1793147026693 Token=1000001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P2 EventType=EXIT Arc=fork_2
+Time=1793147026730 Token=1000003 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2 TransitionId=T_out_P2 EventType=FORK
+Time=1793147026744 Token=1000003 Place=P2_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P2 EventType=EXIT Arc=fork_2
+Time=1793147027092 Token=1000003 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793147027228 Token=1000001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793147027236 Token=1000001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1793147027238 Token=1000003 Place=P2_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P2 EventType=JOIN_CONSUMED
+Time=1793147027371 Token=1000001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2 TransitionId=T_out_P2 EventType=FORK
+Time=1793147027376 Token=1000001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P2 EventType=EXIT Arc=fork_2
+Time=1793147027424 Token=1000003 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2 TransitionId=T_out_P2 EventType=FORK
+Time=1793147027432 Token=1000003 Place=P2_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P2 EventType=EXIT Arc=fork_2
+Time=1793147027787 Token=1000003 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793147027912 Token=1000001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793147027916 Token=1000001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1793147027919 Token=1000003 Place=P2_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P2 EventType=JOIN_CONSUMED
+Time=1793147028042 Token=1000001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2 TransitionId=T_out_P2 EventType=FORK
+Time=1793147028046 Token=1000001 Place=P2_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P2 EventType=EXIT Arc=fork_2
+Time=1793147028097 Token=1000003 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2 TransitionId=T_out_P2 EventType=FORK
+Time=1793147028105 Token=1000003 Place=P2_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P2 EventType=EXIT Arc=fork_2
+Time=1793147028549 Token=1000003 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793147028697 Token=1000001 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793147028703 Token=1000003 Place=P2_Place Marking=0 Buffer=0 ToPlace=FAILED TransitionId=T_out_P2 EventType=FAILED
+Time=1793147028705 Token=1000001 Place=P2_Place Marking=0 Buffer=0 ToPlace=FAILED TransitionId=T_out_P2 EventType=FAILED
+Time=1793147018972 Token=1000003 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793147019162 Token=1000004 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793147019196 Token=1000003 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=ENTER
+Time=1793147019204 Token=1000004 Place=P3_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P3 EventType=JOIN_CONSUMED
+Time=1793147019441 Token=1000003 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793147019501 Token=1000003 Place=P3_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P3 EventType=EXIT Arc=fork_3
+Time=1793147019569 Token=1000004 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793147019582 Token=1000004 Place=P3_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P3 EventType=EXIT Arc=fork_3
+Time=1793147020080 Token=1000004 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793147020256 Token=1000003 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793147020265 Token=1000003 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=ENTER
+Time=1793147020268 Token=1000004 Place=P3_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P3 EventType=JOIN_CONSUMED
+Time=1793147020357 Token=1000003 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793147020365 Token=1000003 Place=P3_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P3 EventType=EXIT Arc=fork_3
+Time=1793147020410 Token=1000004 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793147020412 Token=1000004 Place=P3_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P3 EventType=EXIT Arc=fork_3
+Time=1793147020978 Token=1000004 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793147021296 Token=1000003 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793147021307 Token=1000003 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=ENTER
+Time=1793147021307 Token=1000004 Place=P3_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P3 EventType=JOIN_CONSUMED
+Time=1793147021415 Token=1000003 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793147021429 Token=1000003 Place=P3_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P3 EventType=EXIT Arc=fork_3
+Time=1793147021476 Token=1000004 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793147021493 Token=1000004 Place=P3_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P3 EventType=EXIT Arc=fork_3
+Time=1793147021911 Token=1000004 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793147022167 Token=1000003 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793147022177 Token=1000003 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=ENTER
+Time=1793147022179 Token=1000004 Place=P3_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P3 EventType=JOIN_CONSUMED
+Time=1793147022273 Token=1000003 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793147022276 Token=1000003 Place=P3_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P3 EventType=EXIT Arc=fork_3
+Time=1793147022326 Token=1000004 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793147022335 Token=1000004 Place=P3_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P3 EventType=EXIT Arc=fork_3
+Time=1793147022778 Token=1000004 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793147023046 Token=1000003 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793147023046 Token=1000003 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=ENTER
+Time=1793147023046 Token=1000004 Place=P3_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P3 EventType=JOIN_CONSUMED
+Time=1793147023143 Token=1000003 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793147023150 Token=1000003 Place=P3_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P3 EventType=EXIT Arc=fork_3
+Time=1793147023189 Token=1000004 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793147023199 Token=1000004 Place=P3_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P3 EventType=EXIT Arc=fork_3
+Time=1793147023618 Token=1000004 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793147023846 Token=1000003 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793147023852 Token=1000003 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=ENTER
+Time=1793147023856 Token=1000004 Place=P3_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P3 EventType=JOIN_CONSUMED
+Time=1793147023950 Token=1000003 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793147023957 Token=1000003 Place=P3_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P3 EventType=EXIT Arc=fork_3
+Time=1793147023996 Token=1000004 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793147024001 Token=1000004 Place=P3_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P3 EventType=EXIT Arc=fork_3
+Time=1793147024388 Token=1000004 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793147024611 Token=1000003 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793147024622 Token=1000003 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=ENTER
+Time=1793147024624 Token=1000004 Place=P3_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P3 EventType=JOIN_CONSUMED
+Time=1793147024715 Token=1000003 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793147024721 Token=1000003 Place=P3_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P3 EventType=EXIT Arc=fork_3
+Time=1793147024767 Token=1000004 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793147024781 Token=1000004 Place=P3_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P3 EventType=EXIT Arc=fork_3
+Time=1793147025173 Token=1000004 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793147025397 Token=1000003 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793147025404 Token=1000003 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=ENTER
+Time=1793147025408 Token=1000004 Place=P3_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P3 EventType=JOIN_CONSUMED
+Time=1793147025500 Token=1000003 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793147025506 Token=1000003 Place=P3_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P3 EventType=EXIT Arc=fork_3
+Time=1793147025552 Token=1000004 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793147025560 Token=1000004 Place=P3_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P3 EventType=EXIT Arc=fork_3
+Time=1793147025936 Token=1000004 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793147026191 Token=1000003 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793147026191 Token=1000003 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=ENTER
+Time=1793147026207 Token=1000004 Place=P3_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P3 EventType=JOIN_CONSUMED
+Time=1793147026289 Token=1000003 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793147026296 Token=1000003 Place=P3_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P3 EventType=EXIT Arc=fork_3
+Time=1793147026328 Token=1000004 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793147026338 Token=1000004 Place=P3_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P3 EventType=EXIT Arc=fork_3
+Time=1793147026667 Token=1000004 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793147026855 Token=1000003 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793147026857 Token=1000003 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=ENTER
+Time=1793147026859 Token=1000004 Place=P3_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P3 EventType=JOIN_CONSUMED
+Time=1793147026934 Token=1000003 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793147026936 Token=1000003 Place=P3_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P3 EventType=EXIT Arc=fork_3
+Time=1793147026976 Token=1000004 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793147026981 Token=1000004 Place=P3_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P3 EventType=EXIT Arc=fork_3
+Time=1793147027336 Token=1000004 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793147027556 Token=1000003 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793147027558 Token=1000003 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=ENTER
+Time=1793147027558 Token=1000004 Place=P3_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P3 EventType=JOIN_CONSUMED
+Time=1793147027640 Token=1000003 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793147027647 Token=1000003 Place=P3_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P3 EventType=EXIT Arc=fork_3
+Time=1793147027682 Token=1000004 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793147027689 Token=1000004 Place=P3_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P3 EventType=EXIT Arc=fork_3
+Time=1793147028007 Token=1000004 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793147028229 Token=1000003 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793147028229 Token=1000003 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=ENTER
+Time=1793147028229 Token=1000004 Place=P3_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P3 EventType=JOIN_CONSUMED
+Time=1793147028344 Token=1000003 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793147028352 Token=1000003 Place=P3_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P3 EventType=EXIT Arc=fork_3
+Time=1793147028396 Token=1000004 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793147028405 Token=1000004 Place=P3_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P3 EventType=EXIT Arc=fork_3
+Time=1793147028728 Token=1000004 Place=P3_Place Marking=0 Buffer=0 ToPlace=FAILED TransitionId=T_out_P3 EventType=FAILED
+Time=1793147019119 Token=1000005 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1793147019743 Token=1000004 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1793147019774 Token=1000004 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=ENTER
+Time=1793147019774 Token=1000005 Place=P4_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P4 EventType=JOIN_CONSUMED
+Time=1793147019890 Token=1000004 Place=P4_Place Marking=0 Buffer=0 ToPlace=P4 TransitionId=T_out_P4 EventType=FORK
+Time=1793147019919 Token=1000004 Place=P4_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P4 EventType=EXIT Arc=fork_4
+Time=1793147019972 Token=1000005 Place=P4_Place Marking=0 Buffer=0 ToPlace=P4 TransitionId=T_out_P4 EventType=FORK
+Time=1793147019980 Token=1000005 Place=P4_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P4 EventType=EXIT Arc=fork_4
+Time=1793147020612 Token=1000004 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1793147020699 Token=1000005 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1793147020719 Token=1000004 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=ENTER
+Time=1793147020724 Token=1000005 Place=P4_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P4 EventType=JOIN_CONSUMED
+Time=1793147020820 Token=1000004 Place=P4_Place Marking=0 Buffer=0 ToPlace=P4 TransitionId=T_out_P4 EventType=FORK
+Time=1793147020834 Token=1000004 Place=P4_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P4 EventType=EXIT Arc=fork_4
+Time=1793147020884 Token=1000005 Place=P4_Place Marking=0 Buffer=0 ToPlace=P4 TransitionId=T_out_P4 EventType=FORK
+Time=1793147020885 Token=1000005 Place=P4_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P4 EventType=EXIT Arc=fork_4
+Time=1793147021500 Token=1000005 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1793147021640 Token=1000004 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1793147021647 Token=1000004 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=ENTER
+Time=1793147021657 Token=1000005 Place=P4_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P4 EventType=JOIN_CONSUMED
+Time=1793147021780 Token=1000004 Place=P4_Place Marking=0 Buffer=0 ToPlace=P4 TransitionId=T_out_P4 EventType=FORK
+Time=1793147021788 Token=1000004 Place=P4_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P4 EventType=EXIT Arc=fork_4
+Time=1793147021828 Token=1000005 Place=P4_Place Marking=0 Buffer=0 ToPlace=P4 TransitionId=T_out_P4 EventType=FORK
+Time=1793147021837 Token=1000005 Place=P4_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P4 EventType=EXIT Arc=fork_4
+Time=1793147022413 Token=1000005 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1793147022503 Token=1000004 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1793147022511 Token=1000004 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=ENTER
+Time=1793147022518 Token=1000005 Place=P4_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P4 EventType=JOIN_CONSUMED
+Time=1793147022627 Token=1000004 Place=P4_Place Marking=0 Buffer=0 ToPlace=P4 TransitionId=T_out_P4 EventType=FORK
+Time=1793147022634 Token=1000004 Place=P4_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P4 EventType=EXIT Arc=fork_4
+Time=1793147022686 Token=1000005 Place=P4_Place Marking=0 Buffer=0 ToPlace=P4 TransitionId=T_out_P4 EventType=FORK
+Time=1793147022690 Token=1000005 Place=P4_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P4 EventType=EXIT Arc=fork_4
+Time=1793147023236 Token=1000005 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1793147023332 Token=1000004 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1793147023355 Token=1000004 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=ENTER
+Time=1793147023362 Token=1000005 Place=P4_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P4 EventType=JOIN_CONSUMED
+Time=1793147023459 Token=1000004 Place=P4_Place Marking=0 Buffer=0 ToPlace=P4 TransitionId=T_out_P4 EventType=FORK
+Time=1793147023479 Token=1000004 Place=P4_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P4 EventType=EXIT Arc=fork_4
+Time=1793147023527 Token=1000005 Place=P4_Place Marking=0 Buffer=0 ToPlace=P4 TransitionId=T_out_P4 EventType=FORK
+Time=1793147023539 Token=1000005 Place=P4_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P4 EventType=EXIT Arc=fork_4
+Time=1793147024065 Token=1000005 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1793147024147 Token=1000004 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1793147024155 Token=1000004 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=ENTER
+Time=1793147024160 Token=1000005 Place=P4_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P4 EventType=JOIN_CONSUMED
+Time=1793147024255 Token=1000004 Place=P4_Place Marking=0 Buffer=0 ToPlace=P4 TransitionId=T_out_P4 EventType=FORK
+Time=1793147024264 Token=1000004 Place=P4_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P4 EventType=EXIT Arc=fork_4
+Time=1793147024306 Token=1000005 Place=P4_Place Marking=0 Buffer=0 ToPlace=P4 TransitionId=T_out_P4 EventType=FORK
+Time=1793147024312 Token=1000005 Place=P4_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P4 EventType=EXIT Arc=fork_4
+Time=1793147024808 Token=1000005 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1793147024918 Token=1000004 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1793147024925 Token=1000004 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=ENTER
+Time=1793147024925 Token=1000005 Place=P4_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P4 EventType=JOIN_CONSUMED
+Time=1793147025036 Token=1000004 Place=P4_Place Marking=0 Buffer=0 ToPlace=P4 TransitionId=T_out_P4 EventType=FORK
+Time=1793147025046 Token=1000004 Place=P4_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P4 EventType=EXIT Arc=fork_4
+Time=1793147025092 Token=1000005 Place=P4_Place Marking=0 Buffer=0 ToPlace=P4 TransitionId=T_out_P4 EventType=FORK
+Time=1793147025099 Token=1000005 Place=P4_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P4 EventType=EXIT Arc=fork_4
+Time=1793147025608 Token=1000005 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1793147025692 Token=1000004 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1793147025697 Token=1000004 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=ENTER
+Time=1793147025697 Token=1000005 Place=P4_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P4 EventType=JOIN_CONSUMED
+Time=1793147025799 Token=1000004 Place=P4_Place Marking=0 Buffer=0 ToPlace=P4 TransitionId=T_out_P4 EventType=FORK
+Time=1793147025809 Token=1000004 Place=P4_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P4 EventType=EXIT Arc=fork_4
+Time=1793147025848 Token=1000005 Place=P4_Place Marking=0 Buffer=0 ToPlace=P4 TransitionId=T_out_P4 EventType=FORK
+Time=1793147025856 Token=1000005 Place=P4_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P4 EventType=EXIT Arc=fork_4
+Time=1793147026364 Token=1000005 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1793147026452 Token=1000004 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1793147026462 Token=1000004 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=ENTER
+Time=1793147026462 Token=1000005 Place=P4_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P4 EventType=JOIN_CONSUMED
+Time=1793147026554 Token=1000004 Place=P4_Place Marking=0 Buffer=0 ToPlace=P4 TransitionId=T_out_P4 EventType=FORK
+Time=1793147026556 Token=1000004 Place=P4_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P4 EventType=EXIT Arc=fork_4
+Time=1793147026595 Token=1000005 Place=P4_Place Marking=0 Buffer=0 ToPlace=P4 TransitionId=T_out_P4 EventType=FORK
+Time=1793147026600 Token=1000005 Place=P4_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P4 EventType=EXIT Arc=fork_4
+Time=1793147027062 Token=1000005 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1793147027129 Token=1000004 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1793147027133 Token=1000004 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=ENTER
+Time=1793147027135 Token=1000005 Place=P4_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P4 EventType=JOIN_CONSUMED
+Time=1793147027223 Token=1000004 Place=P4_Place Marking=0 Buffer=0 ToPlace=P4 TransitionId=T_out_P4 EventType=FORK
+Time=1793147027226 Token=1000004 Place=P4_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P4 EventType=EXIT Arc=fork_4
+Time=1793147027260 Token=1000005 Place=P4_Place Marking=0 Buffer=0 ToPlace=P4 TransitionId=T_out_P4 EventType=FORK
+Time=1793147027265 Token=1000005 Place=P4_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P4 EventType=EXIT Arc=fork_4
+Time=1793147027736 Token=1000005 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1793147027805 Token=1000004 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1793147027807 Token=1000004 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=ENTER
+Time=1793147027813 Token=1000005 Place=P4_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P4 EventType=JOIN_CONSUMED
+Time=1793147027898 Token=1000004 Place=P4_Place Marking=0 Buffer=0 ToPlace=P4 TransitionId=T_out_P4 EventType=FORK
+Time=1793147027903 Token=1000004 Place=P4_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P4 EventType=EXIT Arc=fork_4
+Time=1793147027937 Token=1000005 Place=P4_Place Marking=0 Buffer=0 ToPlace=P4 TransitionId=T_out_P4 EventType=FORK
+Time=1793147027943 Token=1000005 Place=P4_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P4 EventType=EXIT Arc=fork_4
+Time=1793147028399 Token=1000005 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1793147028549 Token=1000004 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+Time=1793147028563 Token=1000004 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=ENTER
+Time=1793147028569 Token=1000005 Place=P4_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P4 EventType=JOIN_CONSUMED
+Time=1793147028676 Token=1000004 Place=P4_Place Marking=0 Buffer=0 ToPlace=P4 TransitionId=T_out_P4 EventType=FORK
+Time=1793147028686 Token=1000004 Place=P4_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P4 EventType=EXIT Arc=fork_4
+Time=1793147028726 Token=1000005 Place=P4_Place Marking=0 Buffer=0 ToPlace=P4 TransitionId=T_out_P4 EventType=FORK
+Time=1793147028732 Token=1000005 Place=P4_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=T_out_P4 EventType=EXIT Arc=fork_4
+Time=1793147019556 Token=1000002 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1793147020188 Token=1000005 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1793147020209 Token=1000002 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=ENTER
+Time=1793147020217 Token=1000005 Place=P5_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P5 EventType=JOIN_CONSUMED
+Time=1793147020365 Token=1000002 Place=P5_Place Marking=0 Buffer=0 ToPlace=P5 TransitionId=T_out_P5 EventType=FORK
+Time=1793147020394 Token=1000002 Place=P5_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P5 EventType=EXIT Arc=fork_5
+Time=1793147020509 Token=1000005 Place=P5_Place Marking=0 Buffer=0 ToPlace=P5 TransitionId=T_out_P5 EventType=FORK
+Time=1793147020525 Token=1000005 Place=P5_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P5 EventType=EXIT Arc=fork_5
+Time=1793147020970 Token=1000002 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1793147021078 Token=1000005 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1793147021090 Token=1000002 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=ENTER
+Time=1793147021095 Token=1000005 Place=P5_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P5 EventType=JOIN_CONSUMED
+Time=1793147021258 Token=1000002 Place=P5_Place Marking=0 Buffer=0 ToPlace=P5 TransitionId=T_out_P5 EventType=FORK
+Time=1793147021266 Token=1000002 Place=P5_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P5 EventType=EXIT Arc=fork_5
+Time=1793147021329 Token=1000005 Place=P5_Place Marking=0 Buffer=0 ToPlace=P5 TransitionId=T_out_P5 EventType=FORK
+Time=1793147021343 Token=1000005 Place=P5_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P5 EventType=EXIT Arc=fork_5
+Time=1793147021805 Token=1000002 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1793147022019 Token=1000005 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1793147022028 Token=1000002 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=ENTER
+Time=1793147022036 Token=1000005 Place=P5_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P5 EventType=JOIN_CONSUMED
+Time=1793147022197 Token=1000002 Place=P5_Place Marking=0 Buffer=0 ToPlace=P5 TransitionId=T_out_P5 EventType=FORK
+Time=1793147022205 Token=1000002 Place=P5_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P5 EventType=EXIT Arc=fork_5
+Time=1793147022256 Token=1000005 Place=P5_Place Marking=0 Buffer=0 ToPlace=P5 TransitionId=T_out_P5 EventType=FORK
+Time=1793147022264 Token=1000005 Place=P5_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P5 EventType=EXIT Arc=fork_5
+Time=1793147022699 Token=1000002 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1793147022868 Token=1000005 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1793147022872 Token=1000002 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=ENTER
+Time=1793147022872 Token=1000005 Place=P5_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P5 EventType=JOIN_CONSUMED
+Time=1793147023015 Token=1000002 Place=P5_Place Marking=0 Buffer=0 ToPlace=P5 TransitionId=T_out_P5 EventType=FORK
+Time=1793147023030 Token=1000002 Place=P5_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P5 EventType=EXIT Arc=fork_5
+Time=1793147023078 Token=1000005 Place=P5_Place Marking=0 Buffer=0 ToPlace=P5 TransitionId=T_out_P5 EventType=FORK
+Time=1793147023078 Token=1000005 Place=P5_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P5 EventType=EXIT Arc=fork_5
+Time=1793147023527 Token=1000002 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1793147023690 Token=1000005 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1793147023698 Token=1000002 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=ENTER
+Time=1793147023698 Token=1000005 Place=P5_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P5 EventType=JOIN_CONSUMED
+Time=1793147023862 Token=1000002 Place=P5_Place Marking=0 Buffer=0 ToPlace=P5 TransitionId=T_out_P5 EventType=FORK
+Time=1793147023870 Token=1000002 Place=P5_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P5 EventType=EXIT Arc=fork_5
+Time=1793147023929 Token=1000005 Place=P5_Place Marking=0 Buffer=0 ToPlace=P5 TransitionId=T_out_P5 EventType=FORK
+Time=1793147023935 Token=1000005 Place=P5_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P5 EventType=EXIT Arc=fork_5
+Time=1793147024327 Token=1000002 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1793147024471 Token=1000005 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1793147024479 Token=1000002 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=ENTER
+Time=1793147024481 Token=1000005 Place=P5_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P5 EventType=JOIN_CONSUMED
+Time=1793147024617 Token=1000002 Place=P5_Place Marking=0 Buffer=0 ToPlace=P5 TransitionId=T_out_P5 EventType=FORK
+Time=1793147024622 Token=1000002 Place=P5_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P5 EventType=EXIT Arc=fork_5
+Time=1793147024670 Token=1000005 Place=P5_Place Marking=0 Buffer=0 ToPlace=P5 TransitionId=T_out_P5 EventType=FORK
+Time=1793147024678 Token=1000005 Place=P5_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P5 EventType=EXIT Arc=fork_5
+Time=1793147025106 Token=1000002 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1793147025251 Token=1000005 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1793147025255 Token=1000002 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=ENTER
+Time=1793147025258 Token=1000005 Place=P5_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P5 EventType=JOIN_CONSUMED
+Time=1793147025399 Token=1000002 Place=P5_Place Marking=0 Buffer=0 ToPlace=P5 TransitionId=T_out_P5 EventType=FORK
+Time=1793147025406 Token=1000002 Place=P5_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P5 EventType=EXIT Arc=fork_5
+Time=1793147025459 Token=1000005 Place=P5_Place Marking=0 Buffer=0 ToPlace=P5 TransitionId=T_out_P5 EventType=FORK
+Time=1793147025465 Token=1000005 Place=P5_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P5 EventType=EXIT Arc=fork_5
+Time=1793147025890 Token=1000002 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1793147026023 Token=1000005 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1793147026023 Token=1000002 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=ENTER
+Time=1793147026023 Token=1000005 Place=P5_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P5 EventType=JOIN_CONSUMED
+Time=1793147026154 Token=1000002 Place=P5_Place Marking=0 Buffer=0 ToPlace=P5 TransitionId=T_out_P5 EventType=FORK
+Time=1793147026163 Token=1000002 Place=P5_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P5 EventType=EXIT Arc=fork_5
+Time=1793147026215 Token=1000005 Place=P5_Place Marking=0 Buffer=0 ToPlace=P5 TransitionId=T_out_P5 EventType=FORK
+Time=1793147026222 Token=1000005 Place=P5_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P5 EventType=EXIT Arc=fork_5
+Time=1793147026600 Token=1000002 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1793147026730 Token=1000005 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1793147026730 Token=1000002 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=ENTER
+Time=1793147026742 Token=1000005 Place=P5_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P5 EventType=JOIN_CONSUMED
+Time=1793147026864 Token=1000002 Place=P5_Place Marking=0 Buffer=0 ToPlace=P5 TransitionId=T_out_P5 EventType=FORK
+Time=1793147026873 Token=1000002 Place=P5_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P5 EventType=EXIT Arc=fork_5
+Time=1793147026920 Token=1000005 Place=P5_Place Marking=0 Buffer=0 ToPlace=P5 TransitionId=T_out_P5 EventType=FORK
+Time=1793147026928 Token=1000005 Place=P5_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P5 EventType=EXIT Arc=fork_5
+Time=1793147027278 Token=1000002 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1793147027400 Token=1000005 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1793147027405 Token=1000002 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=ENTER
+Time=1793147027411 Token=1000005 Place=P5_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P5 EventType=JOIN_CONSUMED
+Time=1793147027546 Token=1000002 Place=P5_Place Marking=0 Buffer=0 ToPlace=P5 TransitionId=T_out_P5 EventType=FORK
+Time=1793147027549 Token=1000002 Place=P5_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P5 EventType=EXIT Arc=fork_5
+Time=1793147027597 Token=1000005 Place=P5_Place Marking=0 Buffer=0 ToPlace=P5 TransitionId=T_out_P5 EventType=FORK
+Time=1793147027603 Token=1000005 Place=P5_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P5 EventType=EXIT Arc=fork_5
+Time=1793147027945 Token=1000002 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1793147028061 Token=1000005 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1793147028067 Token=1000002 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=ENTER
+Time=1793147028071 Token=1000005 Place=P5_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P5 EventType=JOIN_CONSUMED
+Time=1793147028194 Token=1000002 Place=P5_Place Marking=0 Buffer=0 ToPlace=P5 TransitionId=T_out_P5 EventType=FORK
+Time=1793147028200 Token=1000002 Place=P5_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P5 EventType=EXIT Arc=fork_5
+Time=1793147028245 Token=1000005 Place=P5_Place Marking=0 Buffer=0 ToPlace=P5 TransitionId=T_out_P5 EventType=FORK
+Time=1793147028261 Token=1000005 Place=P5_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=T_out_P5 EventType=EXIT Arc=fork_5
+Time=1793147028707 Token=1000002 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+Time=1793147028711 Token=1000002 Place=P5_Place Marking=0 Buffer=0 ToPlace=FAILED TransitionId=T_out_P5 EventType=FAILED
+Time=1793147028773 Token=1000005 Place=P5_Place Marking=0 Buffer=0 ToPlace=FAILED TransitionId=T_out_P5 EventType=FAILED
+</script>
+<script>
+"use strict";
+/*
+ * Replay of a recorded RPSO run on its model: a port of the editor's token replay
+ * (btsn.workflowEditor TokenAnimator.java for the timeline, Canvas.java for drawing).
+ * The events come from the analysis file's MARKING EVOLUTION section; nothing here simulates the net.
+ */
+
+// ---------------- Timing (AnimationConstants.java) ----------------
+const VELOCITY = 0.5;                 // px per ms of replay
+const MIN_TRAVEL_DURATION = 50;
+const TIME_AT_EVENT_GEN = 300;
+const FALLBACK_EG_TO_TIN = 150, FALLBACK_TO_PLACE = 120, TRAVEL_TO_TOUT = 80, FALLBACK_TO_NEXT = 300;
+const MIN_VISIBLE_STEP = 250;         // shortest shown passage step (TokenAnimator.stretchShortSteps)
+
+const PH = { AT_EG: "AT_EVENT_GENERATOR", TO_TIN: "TRAVELING_TO_TIN", BUFFERED: "BUFFERED_AT_TIN",
+  TO_PLACE: "TRAVELING_TO_PLACE", AT_PLACE: "AT_PLACE", TO_TOUT: "TRAVELING_TO_TOUT", TO_NEXT: "TRAVELING_TO_NEXT_TIN",
+  TO_TERM: "TRAVELING_TO_TERMINATE", AT_TERM: "AT_TERMINATE", EXPIRED: "EXPIRED" };
+
+const VERSION_COLORS = { v001: "#e74c3c", v002: "#3498db", v003: "#2ecc71", v004: "#9b59b6",
+  v005: "#f39c12", v006: "#1abc9c", v007: "#f1c40f", v008: "#34495e" };
+const versionOf = id => { const n = Math.floor(Number(id) / 1000000); return isFinite(n) ? "v" + String(n).padStart(3, "0") : "v001"; };
+
+// ---------------- Model and topology (TokenAnimator.buildTopologyFromCanvas) ----------------
+function buildTopology(model, instanceNodes) {
+  const els = model.elements || [], byId = new Map();
+  for (const e of els) byId.set(e.id, e);
+  const isTIn = e => e && e.type === "TRANSITION" && (e.transition_type === "T_in" || (!e.transition_type && /^T_in/.test(e.label || e.id)));
+  const isTOut = e => e && e.type === "TRANSITION" && (e.transition_type === "T_out" || (!e.transition_type && /^T_out/.test(e.label || e.id)));
+  const isTerm = e => e && (e.node_value === "TERMINATE_NODE" || e.node_type === "TerminateNode" || /terminate/i.test(e.label || ""));
+  const T = { byId, places: [], placeToTIn: {}, placeToTOut: {}, tInToPlace: {}, tOutToTerminate: {}, alias: {}, arcs: new Map(),
+    isTIn, isTOut, eventGens: [] };
+  const serviceUse = {};
+  for (const e of els) if (e.type === "PLACE" && e.service) serviceUse[e.service] = (serviceUse[e.service] || 0) + 1;
+  for (const e of els) {
+    const names = [e.id, e.label];
+    if (e.type === "PLACE") {
+      T.places.push(e);
+      if (e.service && serviceUse[e.service] === 1) names.push(e.service);
+      // Instrumentation names a place after its deployment node (P1_Place) and a transition T_in_<node>/T_out_<node>.
+      const node = (instanceNodes && (instanceNodes[e.serviceInstance] || instanceNodes[e.service])) || "";
+      if (node) { names.push(node + "_Place", node); e._node = node; }
+    } else if (e.type === "EVENT_GENERATOR") T.eventGens.push(e);
+    for (const n of names) if (n && !(n in T.alias)) T.alias[n] = e.id;
+  }
+  for (const a of model.arrows || []) {
+    const s = byId.get(a.source), t = byId.get(a.target);
+    if (!s || !t) continue;
+    T.arcs.set(s.id + "->" + t.id, a);
+    if (isTIn(s) && t.type === "PLACE") { T.placeToTIn[t.id] = s.id; T.tInToPlace[s.id] = t.id; }
+    if (s.type === "PLACE" && isTOut(t)) T.placeToTOut[s.id] = t.id;
+    if (isTOut(s) && isTerm(t)) T.tOutToTerminate[s.id] = t.id;
+  }
+  for (const p of T.places) if (p._node) {
+    const tin = T.placeToTIn[p.id], tout = T.placeToTOut[p.id];
+    if (tin && !(("T_in_" + p._node) in T.alias)) T.alias["T_in_" + p._node] = tin;
+    if (tout && !(("T_out_" + p._node) in T.alias)) T.alias["T_out_" + p._node] = tout;
+  }
+  // Without a deployment: P1_Place -> the place P1 (by id or label).
+  T.resolve = name => {
+    if (name == null || name === "") return name;
+    if (name in T.alias) return T.alias[name];
+    const m = /^(.*)_Place$/.exec(name);
+    if (m && m[1] in T.alias) return T.alias[m[1]];
+    return name;
+  };
+  T.center = id => { const e = byId.get(id); return e ? { x: e.x + Math.floor(e.width / 2), y: e.y + Math.floor(e.height / 2) } : null; };
+  return T;
+}
+
+// ---------------- Parsing (TokenAnimator.parseEventsFromText) ----------------
+function lastAnalyzerRun(text) {
+  const re = /^[ \t]*(?:\[java\][ \t]*)?(?:Auto-detected|Analyzing ALL) \d+ workflow bases/gm;
+  let last = -1, runs = 0, m;
+  while ((m = re.exec(text))) { last = m.index; runs++; }
+  return runs < 2 ? text : text.slice(last);
+}
+const RANK = { GENERATED: 0, BUFFERED: 1, ENTER: 2, JOIN_SURVIVOR: 2, JOIN_CONSUMED: 3, FORK: 4, EXIT: 5, TERMINATE: 6, FAILED: 7 };
+function parseEvents(text, T) {
+  const seen = new Set(), events = [];
+  let order = 0;
+  for (let line of lastAnalyzerRun(text).split(/\r?\n/)) {
+    line = line.trim();
+    if (line.startsWith("[java]")) line = line.slice(6).trim();
+    if (!line.startsWith("Time=") || !line.includes("Marking=")) continue;
+    let arc = null;
+    const arcAt = line.indexOf(" Arc=");
+    if (arcAt >= 0) { arc = line.slice(arcAt + 5).trim() || null; line = line.slice(0, arcAt); }
+    const f = {};
+    for (const part of line.split(" ")) { const i = part.indexOf("="); if (i > 0) f[part.slice(0, i)] = part.slice(i + 1); }
+    const t = Number(f.Time), token = f.Token || "", marking = Number(f.Marking || 0);
+    let type = f.EventType || (marking === 1 ? "ENTER" : "EXIT");
+    if (!token || !isFinite(t) || marking < 0) continue;
+    const ev = { t, token, version: versionOf(token), place: T.resolve(f.Place || ""), toPlace: T.resolve(f.ToPlace || null),
+      transition: T.resolve(f.TransitionId || null), marking, type, arc, order: order++ };
+    if (!ev.place && type !== "GENERATED") continue;
+    const key = [t, token, ev.place, marking, type, ev.toPlace].join("|");
+    if (seen.has(key)) continue;
+    seen.add(key);
+    events.push(ev);
+  }
+  // By time; at the same time exits before enters (MarkingEvent.compareTo), then in causal order.
+  events.sort((a, b) => a.t - b.t || a.marking - b.marking || (RANK[a.type] ?? 9) - (RANK[b.type] ?? 9) || a.order - b.order);
+  return events;
+}
+// The last moment every host was still recording (TokenAnimator.recordingHorizon).
+function recordingHorizon(events) {
+  const last = {};
+  for (const e of events) if (e.place) last[e.place] = Math.max(last[e.place] ?? -Infinity, e.t);
+  let h = Infinity;
+  for (const e of events) {
+    if (e.type !== "EXIT" || !e.toPlace) continue;
+    const silent = last[e.toPlace];
+    if (silent != null && e.t > silent) h = Math.min(h, silent);
+  }
+  return h;
+}
+
+// ---------------- Segments (TokenAnimator.generateSegments and its helpers) ----------------
+function buildTimeline(events, T) {
+  const dist = (a, b) => {
+    const p = T.center(a), q = T.center(b);
+    if (!p || !q) return -1;
+    const arc = T.arcs.get(a + "->" + b), pts = [p, ...((arc && arc.waypoints) || []), q];
+    let d = 0;
+    for (let i = 1; i < pts.length; i++) d += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
+    return d;
+  };
+  const travel = (a, b, fallback) => { const d = dist(a, b); return d < 0 ? fallback : Math.max(Math.floor(d / VELOCITY), MIN_TRAVEL_DURATION); };
+
+  let cutoff = 0, lastTime = events.length ? events[events.length - 1].t : 0;
+  const horizon = recordingHorizon(events);
+  if (horizon !== Infinity && horizon < lastTime) { events = events.filter(e => e.t <= horizon); cutoff = horizon; lastTime = horizon; }
+  const END = lastTime + 10000;
+
+  const byToken = new Map();
+  for (const e of events) { if (!byToken.has(e.token)) byToken.set(e.token, []); byToken.get(e.token).push(e); }
+  const segs = [];
+  const seg = (tok, ver, phase, s, e, o = {}) => ({ tok, ver, phase, s, e, ...o });
+
+  for (const [tok, evs] of byToken) {
+    const ver = evs[0].version, path = [];
+    const add = s => { if (s.e > s.s) path.push(s); return s; };
+    const after = (i, pred) => { for (let j = i + 1; j < evs.length; j++) if (pred(evs[j])) return evs[j]; return null; };
+    for (let i = 0; i < evs.length; i++) {
+      const ev = evs[i];
+      if (ev.type === "GENERATED") {
+        // Appear at the generator, travel to the T_in; spare time is spent waiting there (generateRegularApproachSegments).
+        const dest = ev.toPlace || ev.place, tIn = T.placeToTIn[dest], eg = ev.transition;
+        const next = after(i, e => e.place === dest && (e.type === "BUFFERED" || e.type === "ENTER" || e.type === "JOIN_SURVIVOR"));
+        if (!tIn || !next) continue;
+        let g = ev.t, avail = next.t - g;
+        if (avail < MIN_TRAVEL_DURATION * 4) { avail = MIN_TRAVEL_DURATION * 4; g = next.t - avail; }
+        let atEg = TIME_AT_EVENT_GEN, toTIn = T.byId.has(eg) ? travel(eg, tIn, FALLBACK_EG_TO_TIN) : 0;
+        const need = atEg + toTIn + MIN_TRAVEL_DURATION;
+        if (avail <= need) { const k = avail / need; atEg = Math.max(MIN_TRAVEL_DURATION, Math.floor(atEg * k)); if (toTIn) toTIn = Math.max(MIN_TRAVEL_DURATION, Math.floor(toTIn * k)); }
+        if (T.byId.has(eg)) {
+          add(seg(tok, ver, PH.AT_EG, g, g + atEg, { eg, tIn }));
+          add(seg(tok, ver, PH.TO_TIN, g + atEg, Math.min(g + atEg + toTIn, next.t), { from: eg, to: tIn, tIn }));
+        }
+        add(seg(tok, ver, PH.BUFFERED, Math.min(g + atEg + toTIn, next.t), next.t, { place: dest, tIn }));
+      } else if (ev.type === "BUFFERED") {
+        const tIn = T.placeToTIn[ev.place];
+        const done = after(i, e => e.place === ev.place && (e.type === "ENTER" || e.type === "JOIN_CONSUMED" || e.type === "JOIN_SURVIVOR" || e.type === "FAILED"));
+        const prev = path[path.length - 1];
+        const end = done ? done.t : END;
+        if (prev && prev.phase === PH.BUFFERED && prev.tIn === tIn && prev.e === ev.t) prev.e = end;
+        else add(seg(tok, ver, PH.BUFFERED, ev.t, end, { place: ev.place, tIn }));
+      } else if (ev.type === "ENTER" || ev.type === "JOIN_SURVIVOR") {
+        const p = ev.place, tIn = T.placeToTIn[p], tOut = T.placeToTOut[p];
+        const exit = after(i, e => e.place === p && (e.type === "EXIT" || e.type === "TERMINATE" || e.type === "FAILED" || e.type === "JOIN_CONSUMED"));
+        let atStart = ev.t, atEnd, toTout = null;
+        if (exit && (exit.type === "EXIT" || exit.type === "TERMINATE")) {
+          // A visit shorter than the usual move to T_out is split in half, so a fast service is still seen.
+          atEnd = exit.t - TRAVEL_TO_TOUT;
+          if (atEnd <= ev.t && exit.t > ev.t) atEnd = ev.t + Math.floor((exit.t - ev.t) / 2);
+          if (tOut) toTout = seg(tok, ver, PH.TO_TOUT, Math.max(atEnd, ev.t), exit.t, { place: p, from: p, to: tOut, tOut });
+        } else atEnd = exit ? Math.max(exit.t, ev.t + 1) : END;
+        // Every visit moves the token from its T_in into the place (ensureTravelIntoPlaces): taken from the
+        // step before it when that step ends here, otherwise from the first half of the visit.
+        const prev = path[path.length - 1];
+        if (tIn) {
+          if (prev && prev.e === ev.t && prev.e - prev.s >= 2) {
+            const mid = prev.s + Math.floor((prev.e - prev.s) / 2);
+            prev.e = mid;
+            add(seg(tok, ver, PH.TO_PLACE, mid, ev.t, { place: p, from: tIn, to: p, tIn }));
+          } else if (atEnd - atStart >= 2) {
+            const mid = atStart + Math.floor((atEnd - atStart) / 2);
+            add(seg(tok, ver, PH.TO_PLACE, atStart, mid, { place: p, from: tIn, to: p, tIn }));
+            atStart = mid;
+          }
+        }
+        add(seg(tok, ver, PH.AT_PLACE, atStart, atEnd, { place: p, tIn, tOut }));
+        if (toTout) add(toTout);
+      } else if (ev.type === "EXIT") {
+        const tOut = T.placeToTOut[ev.place];
+        if (!tOut) continue;
+        const terminating = ev.toPlace === "TERMINATE" || /terminate/i.test(ev.toPlace || "");
+        if (terminating && !T.byId.has(ev.toPlace)) {
+          const term = T.tOutToTerminate[tOut] || tOut, d = term === tOut ? 0 : travel(tOut, term, FALLBACK_TO_NEXT);
+          if (d) add(seg(tok, ver, PH.TO_TERM, ev.t, ev.t + d, { from: tOut, to: term, term }));
+          add(seg(tok, ver, PH.AT_TERM, ev.t + d, END, { term }));
+          continue;
+        }
+        const dest = ev.toPlace, tIn = T.placeToTIn[dest];
+        if (!tIn) continue;
+        const arrival = after(i, e => ["ENTER", "BUFFERED", "JOIN_SURVIVOR", "JOIN_CONSUMED", "TERMINATE", "FAILED"].includes(e.type));
+        const travelEnd = ev.t + travel(tOut, tIn, FALLBACK_TO_NEXT);
+        const reach = arrival ? Math.min(travelEnd, arrival.t) : travelEnd;
+        add(seg(tok, ver, PH.TO_NEXT, ev.t, reach, { place: dest, from: tOut, to: tIn, tIn, tOut }));
+        // At a join (or any T_in) the token waits for the rest of its time there (generateExitSegments).
+        add(seg(tok, ver, PH.BUFFERED, reach, arrival ? arrival.t : END, { place: dest, tIn }));
+      } else if (ev.type === "TERMINATE") {
+        const tOut = T.placeToTOut[ev.place], term = (tOut && T.tOutToTerminate[tOut]) || tOut;
+        const prev = path[path.length - 1];
+        if (term && !(prev && (prev.phase === PH.AT_TERM || prev.phase === PH.TO_TERM))) add(seg(tok, ver, PH.AT_TERM, ev.t, END, { term }));
+      } else if (ev.type === "FAILED") {
+        // The token's lifetime ran out (or its call failed): it is gone from here on. Show where it went out.
+        let last = null;
+        for (let k = path.length - 1; k >= 0; k--) {
+          const s = path[k];
+          if (s.s >= ev.t) { path.splice(k, 1); continue; }
+          if (s.e > ev.t) s.e = ev.t;
+          if (!last) last = s;
+        }
+        // A fork that expired on arrival is shown at the T_in of the host that recorded it.
+        if (last && last.phase === PH.TO_NEXT && last.place === ev.place) last = { ...last, phase: PH.BUFFERED };
+        if (last) add({ ...last, phase: PH.EXPIRED, s: ev.t, e: ev.t + 600, frozen: progressOf(last, last.e), was: last.phase });
+      }
+      // FORK and JOIN_CONSUMED draw nothing themselves: a consumed fork is out of sight until it is sent on again.
+    }
+    segs.push(...path);
+  }
+  segs.sort((a, b) => a.s - b.s);
+
+  // Stretch steps too short to see (stretchShortSteps): the whole timeline together, only where needed.
+  const times = Array.from(new Set(segs.flatMap(s => [s.s, s.e]))).sort((a, b) => a - b);
+  const index = new Map(times.map((t, i) => [t, i]));
+  const startsByEnd = new Map();
+  for (const s of segs) {
+    const passage = s.phase === PH.TO_PLACE || s.phase === PH.AT_PLACE || s.phase === PH.TO_TOUT || s.phase === PH.TO_TERM;
+    if (!passage || s.e <= s.s) continue;
+    const k = index.get(s.e);
+    if (!startsByEnd.has(k)) startsByEnd.set(k, []);
+    startsByEnd.get(k).push(index.get(s.s));
+  }
+  const shown = new Array(times.length);
+  shown[0] = times[0];
+  for (let i = 1; i < times.length; i++) {
+    shown[i] = shown[i - 1] + (times[i] - times[i - 1]);
+    for (const from of startsByEnd.get(i) || []) shown[i] = Math.max(shown[i], shown[from] + MIN_VISIBLE_STEP);
+  }
+  for (const s of segs) { s.rs = s.s; s.re = s.e; s.s = shown[index.get(s.s)]; s.e = shown[index.get(s.e)]; }
+  const warp = (from, to) => x => {
+    const n = from.length;
+    if (!n) return x;
+    if (x <= from[0]) return to[0] - (from[0] - x);
+    if (x >= from[n - 1]) return to[n - 1] + (x - from[n - 1]);
+    let lo = 0, hi = n - 1;
+    while (hi - lo > 1) { const m = (lo + hi) >> 1; if (from[m] <= x) lo = m; else hi = m; }
+    if (from[lo] === x) return to[lo];
+    return to[lo] + Math.round((x - from[lo]) / (from[hi] - from[lo]) * (to[hi] - to[lo]));
+  };
+  const shownAt = warp(times, shown), realAt = warp(shown, times);
+
+  // Replay window (generateSegments): a little before the first token, a little after the last step.
+  const finite = segs.filter(s => s.re < END);
+  const first = segs.length ? segs[0].s : 0;
+  let end = finite.length ? Math.max(...finite.map(s => s.e)) : first;
+  end += TRAVEL_TO_TOUT + FALLBACK_TO_NEXT + 500;
+  if (cutoff) end = Math.min(end, shownAt(cutoff) + 500);
+  const start = first - (TIME_AT_EVENT_GEN + FALLBACK_EG_TO_TIN + 500);
+  return { segs, start, end, shownAt, realAt, cutoff, events };
+}
+function progressOf(s, t) { return s.e <= s.s ? 1 : Math.max(0, Math.min(1, (t - s.s) / (s.e - s.s))); }
+
+// ---------------- Drawing (Canvas.java, ProcessElement.java, Arrow.java) ----------------
+const SVGNS = "http://www.w3.org/2000/svg";
+function el(name, attrs = {}, parent) {
+  const n = document.createElementNS(SVGNS, name);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(n);
+  return n;
+}
+function text(parent, x, y, str, o = {}) {
+  const t = el("text", { x, y, "font-size": o.size || 12, "font-weight": o.bold ? 700 : 400, "font-style": o.italic ? "italic" : "normal",
+    "text-anchor": o.anchor || "start", fill: o.fill || "#000", "font-family": "Helvetica, Arial, sans-serif" }, parent);
+  if (o.baseline) t.setAttribute("dominant-baseline", o.baseline);
+  t.textContent = str;
+  return t;
+}
+function edgePoint(e, c, other) {
+  const ang = Math.atan2(other.y - c.y, other.x - c.x);
+  if (e.type === "PLACE") return { x: c.x + Math.trunc(e.width / 2 * Math.cos(ang)), y: c.y + Math.trunc(e.width / 2 * Math.sin(ang)) };
+  const rot = (e.rotation || 0) * Math.PI / 180, la = ang - rot, dx = Math.cos(la), dy = Math.sin(la);
+  const hw = Math.floor(e.width / 2), hh = Math.floor(e.height / 2);
+  const t = Math.abs(dx) < 0.001 ? hh / Math.abs(dy) : Math.abs(dy) < 0.001 ? hw / Math.abs(dx) : Math.min(hw / Math.abs(dx), hh / Math.abs(dy));
+  const lx = t * dx, ly = t * dy;
+  return { x: c.x + Math.trunc(lx * Math.cos(rot) - ly * Math.sin(rot)), y: c.y + Math.trunc(lx * Math.sin(rot) + ly * Math.cos(rot)) };
+}
+const argbToCss = c => (typeof c === "number") ? "#" + ((c >>> 0) & 0xffffff).toString(16).padStart(6, "0") : "#000";
+const NODE_LETTER = { EdgeNode: "E", XorNode: "X", JoinNode: "J", MergeNode: "M", XorMergeNode: "XM", ForkNode: "F", GatewayNode: "G", TerminateNode: "T" };
+
+function drawModel(svg, model, T) {
+  svg.textContent = "";
+  const els = model.elements || [], texts = model.textElements || [];
+  // Bounds of everything drawn, with room for labels and badges.
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  const grow = (x, y) => { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); };
+  for (const e of els) { grow(e.x - 30, e.y - 30); grow(e.x + e.width + 30, e.y + e.height + 30); }
+  for (const t of texts) { grow(t.x, t.y - (t.fontSize || 11)); grow(t.x + (t.text || "").length * (t.fontSize || 11) * 0.56, t.y + 4); }
+  x0 = Math.floor(x0 / 20) * 20 - 20; y0 = Math.floor(y0 / 20) * 20 - 20; x1 += 20; y1 += 20;
+  svg.setAttribute("viewBox", `${x0} ${y0} ${x1 - x0} ${y1 - y0}`);
+
+  const defs = el("defs", {}, svg);
+  const pat = el("pattern", { id: "grid", width: 20, height: 20, patternUnits: "userSpaceOnUse" }, defs);
+  el("path", { d: "M 20 0 L 0 0 0 20", fill: "none", stroke: "rgba(173,216,230,.55)", "stroke-width": 0.5 }, pat);
+  el("rect", { x: x0, y: y0, width: x1 - x0, height: y1 - y0, fill: "#fff" }, svg);
+  el("rect", { x: x0, y: y0, width: x1 - x0, height: y1 - y0, fill: "url(#grid)" }, svg);
+
+  const gArcs = el("g", { stroke: "#000", fill: "none", "stroke-width": 1 }, svg);
+  for (const a of model.arrows || []) {
+    const s = T.byId.get(a.source), t = T.byId.get(a.target);
+    if (!s || !t) continue;
+    const sc = T.center(s.id), tc = T.center(t.id), wps = a.waypoints || [];
+    const pts = [edgePoint(s, sc, wps[0] || tc), ...wps, edgePoint(t, tc, wps.length ? wps[wps.length - 1] : sc)];
+    el("polyline", { points: pts.map(p => p.x + "," + p.y).join(" ") }, gArcs);
+    const p = pts[pts.length - 2], q = pts[pts.length - 1], ang = Math.atan2(q.y - p.y, q.x - p.x);
+    for (const d of [-Math.PI / 6, Math.PI / 6])
+      el("line", { x1: q.x, y1: q.y, x2: q.x - 12 * Math.cos(ang + d), y2: q.y - 12 * Math.sin(ang + d) }, gArcs);
+  }
+
+  const gEls = el("g", {}, svg);
+  T.placeShapes = {};
+  for (const e of els) {
+    const cx = e.x + Math.floor(e.width / 2), cy = e.y + Math.floor(e.height / 2);
+    if (e.type === "PLACE") {
+      T.placeShapes[e.id] = el("ellipse", { cx: e.x + e.width / 2, cy: e.y + e.height / 2, rx: e.width / 2, ry: e.height / 2, fill: "#fff", stroke: "#000" }, gEls);
+      text(gEls, cx, e.y + e.height + 3 + 11, e.label || e.id, { anchor: "middle" });
+    } else if (e.type === "EVENT_GENERATOR") {
+      const g = el("g", { transform: `translate(${cx} ${cy}) rotate(${e.rotation || 0})` }, gEls);
+      el("rect", { x: -e.width / 2, y: -e.height / 2, width: e.width, height: e.height, fill: "#dcffdc", stroke: "#000" }, g);
+      el("path", { d: `M ${e.width / 2} 0 H ${e.width / 2 + 15} M ${e.width / 2 + 9} -3 L ${e.width / 2 + 15} 0 L ${e.width / 2 + 9} 3`, stroke: "#000", fill: "none", "stroke-width": 1.5 }, g);
+      text(gEls, cx, cy + 3, "EG", { size: 9, anchor: "middle" });
+      const label = (e.label || "").replace(/^EG_?/, "");
+      if (label) text(gEls, cx, e.y + e.height + 3 + 8, label, { size: 9, anchor: "middle" });
+    } else {
+      const g = el("g", { transform: `translate(${cx} ${cy}) rotate(${e.rotation || 0})` }, gEls);
+      el("rect", { x: -e.width / 2, y: -e.height / 2, width: e.width, height: e.height, rx: 3, fill: "#fff", stroke: "#000" }, g);
+      const rad = (e.rotation || 0) * Math.PI / 180, top = cy - (e.height / 2 * Math.abs(Math.cos(rad)) + e.width / 2 * Math.abs(Math.sin(rad)));
+      text(gEls, cx, top + 9 + 2, NODE_LETTER[e.node_type] || "E", { size: 9, bold: true, anchor: "middle" });
+      const m = /^(T_out|T_in|T)_(.+)$/.exec(e.label || "");
+      if (m) text(gEls, cx, cy + 3, m[1], { size: 9, anchor: "middle" });
+      else text(gEls, cx, cy + e.height / 2 + 3 + 11, e.label || e.id, { anchor: "middle" });
+    }
+  }
+  // Badges: the node each place runs on, and a generator's initial marking with each arc's share.
+  const badge = (x, y, str, fill, stroke, anchorCentre) => {
+    const w = str.length * 6.2 + 8, h = 13, bx = anchorCentre ? x - w / 2 : x;
+    el("rect", { x: bx, y, width: w, height: h, rx: 4, fill, stroke }, gEls);
+    text(gEls, bx + 4, y + 10, str, { size: 10, bold: true, fill: stroke });
+  };
+  for (const p of T.places) if (p._node) badge(p.x + p.width, p.y + p.height - 7, p._node, "#e1eeff", "#285096", true);
+  for (const g of T.eventGens) {
+    const marks = (model.arrows || []).filter(a => a.source === g.id && a.tokens != null);
+    if (!marks.length) continue;
+    const total = marks.reduce((n, a) => n + Number(a.tokens || 0), 0);
+    badge(g.x + g.width / 2, g.y - 13 - 3, "M₀ ×" + total, "#ede4ff", "#5a32a0", true);
+    for (const a of marks) {
+      const t = T.byId.get(a.target);
+      if (!t) continue;
+      const wps = a.waypoints || [], from = wps.length ? wps[wps.length - 1] : T.center(g.id), to = T.center(t.id);
+      badge((from.x + to.x) / 2, (from.y + to.y) / 2 - 13 - 2, "×" + a.tokens, "#ede4ff", "#5a32a0", true);
+    }
+  }
+  const gText = el("g", {}, svg);
+  for (const t of texts) text(gText, t.x, t.y, t.text, { size: t.fontSize || 11, bold: (t.fontStyle & 1) === 1, italic: (t.fontStyle & 2) === 2, fill: argbToCss(t.color) });
+
+  return el("g", { id: "tokens" }, svg);
+}
+
+// Position of a token on its step (Canvas.calculateTokenPosition): along the arc between the two elements.
+function along(T, from, to, p) {
+  const a = T.center(from), b = T.center(to);
+  if (!a || !b) return a || b;
+  const arc = T.arcs.get(from + "->" + to), pts = [a, ...((arc && arc.waypoints) || []), b];
+  const lens = []; let total = 0;
+  for (let i = 1; i < pts.length; i++) { const d = Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y); lens.push(d); total += d; }
+  let goal = p * total;
+  for (let i = 0; i < lens.length; i++) {
+    if (goal <= lens[i] || i === lens.length - 1) { const f = lens[i] ? Math.min(1, goal / lens[i]) : 0; return { x: pts[i].x + (pts[i + 1].x - pts[i].x) * f, y: pts[i].y + (pts[i + 1].y - pts[i].y) * f }; }
+    goal -= lens[i];
+  }
+  return b;
+}
+function positionOf(T, s, phase, p) {
+  switch (phase) {
+    case PH.AT_EG: return T.center(s.eg);
+    case PH.TO_TIN: case PH.TO_PLACE: case PH.TO_TOUT: case PH.TO_NEXT: case PH.TO_TERM: return along(T, s.from, s.to, p);
+    case PH.AT_PLACE: return T.center(s.place);
+    case PH.AT_TERM: return T.center(s.term);
+    case PH.BUFFERED: return T.center(s.tIn);
+  }
+  return null;
+}
+// Tokens within a few pixels of each other are spread 12 px apart, centred on where they were (Canvas.spreadOverlapping).
+function spreadOverlapping(pos) {
+  const out = pos.map(p => ({ ...p })), done = new Array(pos.length).fill(false);
+  for (let i = 0; i < pos.length; i++) {
+    if (done[i]) continue;
+    const group = [];
+    for (let j = i; j < pos.length; j++) if (!done[j] && Math.hypot(pos[i].x - pos[j].x, pos[i].y - pos[j].y) < 6) { group.push(j); done[j] = true; }
+    group.forEach((g, k) => { out[g].x += Math.round((k - (group.length - 1) / 2) * 12); });
+  }
+  return out;
+}
+
+// ---------------- Player ----------------
+const ui = { svg: document.getElementById("net"), play: document.getElementById("play"), reset: document.getElementById("reset"),
+  clock: document.getElementById("clock"), scrub: document.getElementById("scrub"), speed: document.getElementById("speed"),
+  speedOut: document.getElementById("speedOut"), meals: document.getElementById("meals"), status: document.getElementById("status"),
+  sources: document.getElementById("sources"), files: document.getElementById("files"), title: document.getElementById("title") };
+let R = null, now = 0, playing = false, speed = 0.2, lastFrame = 0, tokenLayer = null, T = null, model = null;
+
+function load(modelJson, runText, nodes, names) {
+  model = modelJson;
+  T = buildTopology(model, nodes);
+  const events = parseEvents(runText, T);
+  if (!events.length) throw new Error("No MARKING EVOLUTION events (Time=… Marking=…) found in the analysis file.");
+  R = buildTimeline(events, T);
+  tokenLayer = drawModel(ui.svg, model, T);
+  // Meals: each visit of a token to a place.
+  R.visits = events.filter(e => e.type === "ENTER" || e.type === "JOIN_SURVIVOR").map(e => ({ place: e.place, at: R.shownAt(e.t) }));
+  ui.sources.innerHTML = "";
+  for (const n of names) { const c = document.createElement("code"); c.textContent = n; ui.sources.appendChild(c); ui.sources.append(" "); }
+  ui.status.textContent = R.cutoff ? `Replay ends at ${((R.realAt(R.shownAt(R.cutoff)) - R.realAt(R.start)) / 1000).toFixed(1)} s, after which not every host was recording.` : "";
+  ui.status.className = "";
+  const name = (names[0] || "").split("/").pop().replace(/\.json$/, "").replace(/_/g, " ");
+  ui.title.firstChild.nodeValue = (name || "Token replay") + " ";
+  document.title = (name ? name + " · " : "") + "RPSO Token Replay";
+  R.philosophers = /philosoph/i.test(name);
+  if (!R.philosophers) document.getElementById("lede").textContent = "Every dot is a token recorded on the hosts during a real run, replayed on the model at its recorded times. "
+    + "A dot inside a T_in bar is a token waiting there. Steps of a few milliseconds are stretched so they can be seen; the clock shows the run's own time.";
+  setPlaying(false);
+  seek(R.start);
+}
+function setPlaying(p) {
+  playing = p;
+  ui.play.textContent = p ? "Pause" : "Play";
+  ui.play.setAttribute("aria-label", p ? "Pause" : "Play");
+  if (p) { if (now >= R.end) seek(R.start); lastFrame = performance.now(); requestAnimationFrame(tick); }
+}
+function tick(ts) {
+  if (!playing) return;
+  seek(now + (ts - lastFrame) * speed);
+  lastFrame = ts;
+  if (now >= R.end) { setPlaying(false); return; }
+  requestAnimationFrame(tick);
+}
+function seek(t) {
+  now = Math.max(R.start, Math.min(R.end, t));
+  render();
+  ui.scrub.value = Math.round((now - R.start) / Math.max(1, R.end - R.start) * 1000);
+  const run = Math.max(0, R.realAt(now) - R.realAt(R.start));
+  ui.clock.textContent = (run / 1000).toFixed(3) + " s";
+}
+function render() {
+  // One state per token: the active step that started last (TokenAnimator.getTokenStatesAt).
+  const state = new Map();
+  for (const s of R.segs) {
+    if (s.s > now) break;
+    if (now >= s.e) continue;
+    const cur = state.get(s.tok);
+    if (!cur || s.s > cur.s) state.set(s.tok, s);
+  }
+  tokenLayer.textContent = "";
+  const buffers = {}, moving = [], expired = [];
+  for (const s of state.values()) {
+    if (s.phase === PH.BUFFERED) (buffers[s.tIn] = buffers[s.tIn] || []).push(s);
+    else if (s.phase === PH.EXPIRED) expired.push(s);
+    else { const p = positionOf(T, s, s.phase, progressOf(s, now)); if (p) moving.push({ ...p, s }); }
+  }
+  // Places with a token in them: a philosopher eating.
+  for (const id in T.placeShapes) T.placeShapes[id].setAttribute("fill", "#fff");
+  for (const m of moving) if (m.s.phase === PH.AT_PLACE && T.placeShapes[m.s.place]) T.placeShapes[m.s.place].setAttribute("fill", "#fde3d6");
+  // Waiting tokens stacked inside their T_in bar (Canvas.drawBufferedTokensAtTIn).
+  for (const tIn in buffers) {
+    const e = T.byId.get(tIn), list = buffers[tIn].sort((a, b) => a.s - b.s);
+    if (!e) continue;
+    const c = T.center(tIn), vertical = e.height > e.width, size = 8, gap = 2;
+    const fit = Math.max(1, Math.floor(((vertical ? e.height : e.width) - 4) / (size + gap))), n = Math.min(list.length, fit);
+    const span = n * (size + gap) - gap;
+    for (let i = 0; i < n; i++) {
+      const off = -span / 2 + size / 2 + i * (size + gap), col = VERSION_COLORS[list[i].ver] || "#888";
+      drawDot(vertical ? c.x : c.x + off, vertical ? c.y + off : c.y, size, col, 0.12);
+    }
+    if (list.length > fit) {
+      el("rect", { x: vertical ? e.x - 24 : c.x - 11, y: vertical ? c.y - 7 : e.y - 16, width: 22, height: 14, rx: 2, fill: "rgba(50,50,50,.86)" }, tokenLayer);
+      text(tokenLayer, vertical ? e.x - 20 : c.x - 7, vertical ? c.y + 4 : e.y - 5, String(list.length), { size: 9, bold: true, fill: "#fff" });
+    }
+  }
+  const spread = spreadOverlapping(moving);
+  spread.forEach((p, i) => drawDot(p.x, p.y, 12, VERSION_COLORS[moving[i].s.ver] || "#888", 0.16));
+  // A fork whose lifetime ran out: a grey ring that fades where it went out.
+  for (const s of expired) {
+    const p = s.was === PH.BUFFERED ? T.center(s.tIn) : positionOf(T, s, s.was, s.frozen);
+    if (!p) continue;
+    const f = 1 - progressOf(s, now);
+    el("circle", { cx: p.x, cy: p.y, r: 6 + 6 * (1 - f), fill: "none", stroke: "#7f8c8d", "stroke-width": 1.5, opacity: f.toFixed(2) }, tokenLayer);
+  }
+  // Meals so far, per place.
+  const counts = {};
+  for (const v of R.visits) if (v.at <= now) counts[v.place] = (counts[v.place] || 0) + 1;
+  ui.meals.innerHTML = "";
+  const head = document.createElement("span"); head.textContent = R.philosophers ? "Meals so far:" : "Visits so far:"; ui.meals.appendChild(head);
+  for (const p of T.places) {
+    const s = document.createElement("span"), b = document.createElement("b");
+    b.textContent = counts[p.id] || 0;
+    s.append((p.label || p.id) + " ", b);
+    ui.meals.appendChild(s);
+  }
+}
+function drawDot(x, y, size, col, glow) {
+  el("circle", { cx: x, cy: y, r: size / 2 + 3, fill: col, opacity: glow }, tokenLayer);
+  el("circle", { cx: x, cy: y, r: size / 2, fill: col, stroke: "rgba(0,0,0,.3)", "stroke-width": 1.2 }, tokenLayer);
+}
+
+ui.play.addEventListener("click", () => setPlaying(!playing));
+ui.reset.addEventListener("click", () => { setPlaying(false); seek(R.start); });
+ui.scrub.addEventListener("input", () => seek(R.start + ui.scrub.value / 1000 * (R.end - R.start)));
+const showSpeed = () => { ui.speedOut.textContent = (speed < 1 ? speed.toFixed(2).replace(/0$/, "") : speed.toFixed(1)) + "×"; };
+ui.speed.addEventListener("input", () => { speed = Math.pow(10, (ui.speed.value - 50) / 50); showSpeed(); });
+document.addEventListener("keydown", e => {
+  if (e.code === "Space" && !/INPUT|BUTTON/.test(document.activeElement.tagName)) { e.preventDefault(); setPlaying(!playing); }
+});
+ui.files.addEventListener("change", async () => {
+  try {
+    const files = Array.from(ui.files.files);
+    const json = files.find(f => /\.json$/i.test(f.name)), txt = files.find(f => /\.txt$/i.test(f.name));
+    if (!json || !txt) throw new Error("Choose a model (.json) and its analysis (.txt) together.");
+    load(JSON.parse(await json.text()), await txt.text(), null, [json.name, txt.name]);
+  } catch (err) { ui.status.textContent = err.message; ui.status.className = "error"; }
+});
+
+(async function start() {
+  try {
+    // ?model=<url>&run=<url> replays any model/analysis pair; otherwise the embedded run.
+    const q = new URLSearchParams(location.search);
+    const get = async url => { const r = await fetch(url); if (!r.ok) throw new Error(`${r.status} for ${url}`); return r; };
+    if (q.get("model") && q.get("run")) {
+      const modelUrl = new URL(q.get("model"), location.href);
+      const m = await (await get(modelUrl)).json();
+      const run = await (await get(new URL(q.get("run"), location.href))).text();
+      let nodes = null;
+      if (m.serviceDeployment) {
+        try {   // the deployment sits beside ProcessDefinitionFolder, in btsn.common
+          const d = await (await get(new URL("../../../" + m.serviceDeployment, modelUrl))).json();
+          nodes = {};
+          for (const c of d.capabilities || []) { if (c.instance) nodes[c.instance] = c.node; if (c.service && !(c.service in nodes)) nodes[c.service] = c.node; }
+        } catch (_) { /* fall back to P1_Place -> P1 */ }
+      }
+      load(m, run, nodes, [q.get("model"), q.get("run")]);
+    } else {
+      const m = JSON.parse(document.getElementById("embedded-model").textContent);
+      const nodes = JSON.parse(document.getElementById("embedded-nodes").textContent);
+      load(m, document.getElementById("embedded-run").textContent, nodes,
+        ["btsn.common/ProcessDefinitionFolder/petrinet/Workflow/Dining_Philosophers.json", "btsn.common/AnalysisFolder/PetriNet/Analysis_Dining_Philosophers.txt"]);
+    }
+    showSpeed();
+  } catch (err) { ui.status.textContent = "Could not load the replay: " + err.message; ui.status.className = "error"; }
+})();
+</script>
+</body>
+</html>
