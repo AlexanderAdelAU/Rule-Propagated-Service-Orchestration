@@ -1008,6 +1008,14 @@ function load(modelJson, runText, nodes, names) {
   tokenLayer = drawModel(ui.svg, model, T);
   // Meals: each visit of a token to a place.
   R.visits = events.filter(e => e.type === "ENTER" || e.type === "JOIN_SURVIVOR").map(e => ({ place: e.place, at: R.shownAt(e.t) }));
+  // Each visit as recorded: from its ENTER until the place's service returns (the first FORK or EXIT at
+  // that place after it). Drawn on the replay's clock, so visits overlap exactly when they overlapped in the run.
+  R.spans = [];
+  events.forEach((e, i) => {
+    if (e.type !== "ENTER" && e.type !== "JOIN_SURVIVOR") return;
+    const end = events.slice(i + 1).find(f => f.place === e.place && (f.type === "FORK" || f.type === "EXIT" || f.type === "TERMINATE" || f.type === "FAILED"));
+    if (end) R.spans.push({ place: e.place, s: R.shownAt(e.t), e: R.shownAt(end.t) });
+  });
   ui.sources.innerHTML = "";
   for (const n of names) { const c = document.createElement("code"); c.textContent = n; ui.sources.appendChild(c); ui.sources.append(" "); }
   ui.status.textContent = R.cutoff ? `Replay ends at ${((R.realAt(R.shownAt(R.cutoff)) - R.realAt(R.start)) / 1000).toFixed(1)} s, after which not every host was recording.` : "";
@@ -1057,9 +1065,9 @@ function render() {
     else if (s.phase === PH.EXPIRED) expired.push(s);
     else { const p = positionOf(T, s, s.phase, progressOf(s, now)); if (p) moving.push({ ...p, s }); }
   }
-  // Places with a token in them: a philosopher eating.
+  // A place is tinted for the whole of each recorded visit: a philosopher eating.
   for (const id in T.placeShapes) T.placeShapes[id].setAttribute("fill", "#fff");
-  for (const m of moving) if (m.s.phase === PH.AT_PLACE && T.placeShapes[m.s.place]) T.placeShapes[m.s.place].setAttribute("fill", "#fde3d6");
+  for (const v of R.spans) if (v.s <= now && now < v.e && T.placeShapes[v.place]) T.placeShapes[v.place].setAttribute("fill", "#fde3d6");
   // Waiting tokens stacked inside their T_in bar (Canvas.drawBufferedTokensAtTIn).
   for (const tIn in buffers) {
     const e = T.byId.get(tIn), list = buffers[tIn].sort((a, b) => a.s - b.s);
