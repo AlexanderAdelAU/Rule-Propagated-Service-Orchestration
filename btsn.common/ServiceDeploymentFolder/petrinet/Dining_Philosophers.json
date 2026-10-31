@@ -4,7 +4,7 @@
   "capabilities": [
     {
       "node": "P1",
-      "service": "AlwaysTrueService",
+      "service": "TimedTrueService",
       "operation": "processToken",
       "returnAttribute": "fork_1",
       "arguments": [
@@ -27,7 +27,7 @@
     },
     {
       "node": "P2",
-      "service": "AlwaysTrueService",
+      "service": "TimedTrueService",
       "operation": "processToken",
       "returnAttribute": "fork_2",
       "arguments": [
@@ -50,7 +50,7 @@
     },
     {
       "node": "P3",
-      "service": "AlwaysTrueService",
+      "service": "TimedTrueService",
       "operation": "processToken",
       "returnAttribute": "fork_3",
       "arguments": [
@@ -73,7 +73,7 @@
     },
     {
       "node": "P4",
-      "service": "AlwaysTrueService",
+      "service": "TimedTrueService",
       "operation": "processToken",
       "returnAttribute": "fork_4",
       "arguments": [
@@ -96,7 +96,7 @@
     },
     {
       "node": "P5",
-      "service": "AlwaysTrueService",
+      "service": "TimedTrueService",
       "operation": "processToken",
       "returnAttribute": "fork_5",
       "arguments": [

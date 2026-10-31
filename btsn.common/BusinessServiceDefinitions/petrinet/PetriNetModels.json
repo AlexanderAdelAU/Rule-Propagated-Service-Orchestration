@@ -27,6 +27,19 @@
       "returnAttribute": "decision",
       "resultType": "boolean",
       "status": "active"
+    },
+    {
+      "service": "TimedTrueService",
+      "implementationClass": "org.btsn.services.TimedTrueService",
+      "operation": "processToken",
+      "description": "Takes a random 0.5 to 1.5 seconds, then returns true. Use it for a step that does real work and keeps its place busy, such as a philosopher eating.",
+      "returns": "true. Route on it from the T_out with the guard true.",
+      "inputs": [
+        "data"
+      ],
+      "returnAttribute": "decision",
+      "resultType": "boolean",
+      "status": "active"
     }
   ]
 }

@@ -24,7 +24,7 @@
       "width": 50,
       "height": 50,
       "label": "Plato",
-      "service": "AlwaysTrueService",
+      "service": "TimedTrueService",
       "operations": [
         {
           "name": "processToken",
@@ -83,7 +83,7 @@
       "width": 50,
       "height": 50,
       "label": "Socrates",
-      "service": "AlwaysTrueService",
+      "service": "TimedTrueService",
       "operations": [
         {
           "name": "processToken",
@@ -142,7 +142,7 @@
       "width": 50,
       "height": 50,
       "label": "Kant",
-      "service": "AlwaysTrueService",
+      "service": "TimedTrueService",
       "operations": [
         {
           "name": "processToken",
@@ -201,7 +201,7 @@
       "width": 50,
       "height": 50,
       "label": "Hume",
-      "service": "AlwaysTrueService",
+      "service": "TimedTrueService",
       "operations": [
         {
           "name": "processToken",
@@ -260,7 +260,7 @@
       "width": 50,
       "height": 50,
       "label": "Locke",
-      "service": "AlwaysTrueService",
+      "service": "TimedTrueService",
       "operations": [
         {
           "name": "processToken",
