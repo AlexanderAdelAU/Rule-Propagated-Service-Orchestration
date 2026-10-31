@@ -1561,6 +1561,12 @@ public class TokenAnimator {
         // In this case, treat the child token as if it came from the event generator.
         boolean forkBeforeFirstEnter = (forkEvent != null && firstEnterOrBuffered != null && 
                                         forkEvent.timestamp < firstEnterOrBuffered.timestamp);
+        // A fork a generator lays straight into a join (an initial marking) whose arrival there was recorded: it travels
+        // to the T_in and arrives at that time; the wait, the join and the visit then replay from the recorded events.
+        boolean approachToRecordedArrival = isChild && generatedEvent != null && !forkBeforeFirstEnter
+            && firstEnterOrBuffered != null && firstEnterOrBuffered.isBuffered()
+            && generatedEvent.transitionId != null && elementPositions.containsKey(generatedEvent.transitionId)
+            && placeToTIn.get(firstEnterOrBuffered.placeId) != null;
         
         if (isChild && forkEvent != null && forkBeforeFirstEnter) {
             // Child token with FORK that comes before first ENTER: animate from fork point to destination
@@ -1654,6 +1660,8 @@ public class TokenAnimator {
                     logger.debug("Reconstituted parent token " + tokenId + 
                                 " - no FORK found, using default processing");
                 }
+            } else if (approachToRecordedArrival) {
+                generateApproachToRecordedArrival(tokenId, version, firstEnterOrBuffered, generatedEvent);
             } else if (isChildAtJoin) {
                 // Child token with GENERATED event - it came from Event Generator
                 // but it's arriving at a JOIN. It should:
@@ -1709,7 +1717,10 @@ public class TokenAnimator {
         // For children with GENERATED events arriving at JOIN, mark their BUFFERED, ENTER,
         // and JOIN_CONSUMED as already processed (handled by generateChildApproachToJoin)
         // For JOIN_SURVIVOR, also mark EXIT and TERMINATE as processed
-        if (isChild && generatedEvent != null && firstEnterOrBuffered != null) {
+        if (approachToRecordedArrival) {
+            int genIndex = tokenEvents.indexOf(generatedEvent);
+            if (genIndex >= 0) processedIndices.add(genIndex);
+        } else if (isChild && generatedEvent != null && firstEnterOrBuffered != null) {
             // Mark the GENERATED event as processed
             int genIndex = tokenEvents.indexOf(generatedEvent);
             if (genIndex >= 0) {
@@ -2334,6 +2345,24 @@ public class TokenAnimator {
         ));
     }
     
+    /**
+     * A fork laid by a generator straight into a join: it shows at the generator, then travels to the T_in and arrives
+     * there at its recorded arrival (BUFFERED). It used to be drawn with set durations, arriving after the place had
+     * already been visited and the fork sent on, so the first visit was replayed late and twice.
+     */
+    private void generateApproachToRecordedArrival(String tokenId, String version, MarkingEvent arrival, MarkingEvent generatedEvent) {
+        String destPlace = arrival.placeId, destTIn = placeToTIn.get(destPlace), eventGen = generatedEvent.transitionId;
+        long arrive = arrival.timestamp;
+        long available = Math.max(arrive - generatedEvent.timestamp, 2 * MIN_TRAVEL_DURATION);
+        long generated = arrive - available;
+        long atEg = Math.min(TIME_AT_EVENT_GEN, available / 2);
+        long travel = Math.min(calculateTravelDuration(eventGen, destTIn, FALLBACK_TRAVEL_DURATION_EG_TO_TIN), available - atEg);
+        segments.add(new AnimationSegment(tokenId, version, Phase.AT_EVENT_GENERATOR, generated, arrive - travel,
+            null, destTIn, null, null, null, null, eventGen));
+        segments.add(new AnimationSegment(tokenId, version, Phase.TRAVELING_TO_TIN, arrive - travel, arrive,
+            destPlace, destTIn, null, eventGen, destTIn, null, eventGen));
+    }
+
     /**
      * Generate approach segments for regular token - backwards compatible version
      * without GENERATED event (falls back to reverse-engineering timestamps)
