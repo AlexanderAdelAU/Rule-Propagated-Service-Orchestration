@@ -23,7 +23,7 @@
     <property name="token.count" value="10"/>
     <!-- Each token's lifetime (ms). The run collects when the workflows have finished, or once every token's
          lifetime has run out: a closed net runs until then. -->
-    <property name="token.expire" value="10000"/>
+    <property name="token.expire" value="30000"/>
 
     <!-- Hosts used by the service deployment: nodes of the infrastructure, each running the host program -->
     <property name="hosts" value="P1,P2,P3,P4,P5"/>
