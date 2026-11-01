@@ -1,5 +1,7 @@
 package org.btsn.business.financial;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import org.btsn.business.BaseBusinessService;
 import org.json.simple.JSONObject;
 
@@ -8,13 +10,16 @@ import org.json.simple.JSONObject;
  */
 public class FraudCheckService extends BaseBusinessService {
 
+    /** The chance that the fraud bureau cannot be reached for an application: 1 in 5. */
+    static final double UNAVAILABLE_PROBABILITY = 0.2;
+
     /**
      * validationResults -> fraudCheckResults
      *
-     * For the compensation demonstration only: when the application carries fraud_outage=FROM-TO, the fraud check is
-     * unavailable for applications FROM to TO (numbered from 1 in the order they were submitted) and reports
-     * fraud_status "unavailable". Their credit check has already run; underwriting abandons them, and the loan process
-     * signals the compensation process to withdraw their enquiry.
+     * The fraud bureau is sometimes unavailable: for an application in a run (one with a workflow number), the check
+     * reports fraud_status "unavailable" with probability UNAVAILABLE_PROBABILITY. Its credit check has already
+     * recorded an enquiry; underwriting, without a fraud result, abandons the application, and the loan process's
+     * Signal node launches Loan Compensation to withdraw that enquiry.
      */
     @SuppressWarnings("unchecked")
     public String processToken(String validationResults) {
@@ -22,9 +27,8 @@ public class FraudCheckService extends BaseBusinessService {
         String fraudRisk = textValue(validationResults, "fraud_risk", "unknown");
         String fraudStatus = "high".equalsIgnoreCase(fraudRisk) ? "flagged" : "clear";
 
-        String outage = textValue(validationResults, "fraud_outage", null);
         String workflowId = textValue(validationResults, "workflow_id", null);
-        if (outage != null && workflowId != null && inOutage(outage, workflowId)) fraudStatus = "unavailable";
+        if (workflowId != null && ThreadLocalRandom.current().nextDouble() < UNAVAILABLE_PROBABILITY) fraudStatus = "unavailable";
 
         JSONObject result = new JSONObject();
         result.put("application_id", applicationId);
@@ -32,21 +36,5 @@ public class FraudCheckService extends BaseBusinessService {
         result.put("fraud_status", fraudStatus);
 
         return businessResult("fraudCheckResults", result);
-    }
-
-    /** An application's number in submission order, from 1: workflow 1000000 is 1, 1010000 is 2, ... */
-    static int applicationNumber(String workflowId) {
-        return (int)(Long.parseLong(workflowId) % 1_000_000 / 10_000) + 1;
-    }
-
-    static boolean inOutage(String outage, String workflowId) {
-        try {
-            String[] range = outage.split("-");
-            int from = Integer.parseInt(range[0].trim()), to = Integer.parseInt(range[range.length - 1].trim());
-            int number = applicationNumber(workflowId);
-            return number >= from && number <= to;
-        } catch (RuntimeException e) {
-            return false;
-        }
     }
 }

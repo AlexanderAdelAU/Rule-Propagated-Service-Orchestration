@@ -64,8 +64,8 @@ public final class SignalNodeCheck {
                 check(BuildAndRunGenerator.launcherXml(plan, clash).contains("name=\"query.version\" value=\"v002,v001\""), "Version clash not resolved");
                 clash.runs.get(0).version = "v001";
 
-                // The recorded run (that launcher, with fraud_outage=4-6 typed into Application Submitted's Token data):
-                // applications 4 to 6 end at Loan Abandoned; the others are approved.
+                // A recorded run of that launcher, in which the fraud bureau was unavailable for 3 applications: they end
+                // at Loan Abandoned; the others are approved.
                 Map<String, Integer> loanEnds = endings(canvas, run);
                 check(loanEnds.getOrDefault("Loan Abandoned", 0) == 3, "Three abandoned applications should end at Loan Abandoned: " + loanEnds);
 

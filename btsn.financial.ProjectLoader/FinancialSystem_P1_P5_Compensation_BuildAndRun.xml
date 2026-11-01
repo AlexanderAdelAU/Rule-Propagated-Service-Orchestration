@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Loan applications (v001) and a separate compensation process (v002) that the loan process starts itself, on the
      shared process runtime (btsn.services/process-runtime.xml).
-     Applications 4 to 6 meet a simulated fraud-check outage: their credit check has already recorded an enquiry, and
-     underwriting, without a fraud result, abandons them. The loan process's Signal node "Loan Abandoned" then ends the
+     The fraud bureau is unavailable for about 1 application in 5 (FraudCheckService): its credit check has already
+     recorded an enquiry, and underwriting, without a fraud result, abandons it. The loan process's Signal node "Loan Abandoned" then ends the
      application and launches the compensation process for it, which withdraws the enquiry where it was recorded (P2).
      Nothing audits the applications that went well: only an abandoned application starts compensation.
      Run:     ant -f FinancialSystem_P1_P5_Compensation_BuildAndRun.xml        (add -Dhost.address=127.0.0.1 to run every host on this machine)
@@ -15,13 +15,12 @@
     <property name="query.version" value="v001,v002"/>
     <property name="token.count" value="10"/>
 
-    <!-- The loan applications, one a second: each lives 20 s (eg1.expire), ample for one to be processed; the fraud
-         check is unavailable for applications 4 to 6. -->
+    <!-- The loan applications, one a second: each lives 20 s (eg1.expire), ample for one to be processed. -->
     <property name="eg1.id" value="EVENT_GENERATOR"/>
     <property name="eg1.version" value="v001"/>
     <property name="eg1.place" value="P1_Place"/>
     <property name="eg1.operation" value="processToken"/>
-    <property name="eg1.data" value="application_id=APP001,annual_income=85000,requested_amount=25000,credit_score=720,fraud_risk=low,fraud_outage=4-6"/>
+    <property name="eg1.data" value="application_id=APP001,annual_income=85000,requested_amount=25000,credit_score=720,fraud_risk=low"/>
     <property name="eg1.expire" value="20000"/>
     <property name="eg1.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/FinancialSystem_P1_P5_Compensation_BuildAndRun.csv"/>
 

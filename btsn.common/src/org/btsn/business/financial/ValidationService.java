@@ -35,15 +35,10 @@ public class ValidationService extends BaseBusinessService {
         result.put("fraud_risk", fraudRisk);
         result.put("validation_status", route);
         result.put("routing_decision", routingDecision(route));
-        // The application's workflow number and the end of its lifetime travel with it, so a later service can record
-        // what it did against the application and a clean-up process can tell when it is safe to undo that.
+        // The application's workflow number travels with it, so a later service can record what it did against the
+        // application, and the compensation process can undo it.
         String workflowId = textValue(token, "tokenId", null);
-        String notAfter = textValue(token, "notAfter", null);
         if (workflowId != null) result.put("workflow_id", workflowId);
-        if (notAfter != null) result.put("not_after", notAfter);
-        // Optional simulation setting for the compensation demonstration (see FraudCheckService).
-        String fraudOutage = textValue(token, "fraud_outage", null);
-        if (fraudOutage != null) result.put("fraud_outage", fraudOutage);
 
         return businessResult("validationResults", result);
     }
