@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Loan applications (v001) and a separate compensation process (v002) that cleans up the abandoned ones, on the
+     shared process runtime (btsn.services/process-runtime.xml).
+     Applications 4 to 6 meet a simulated fraud-check outage: their credit check has already recorded an enquiry, but
+     without the fraud result they never reach underwriting and expire at its join. Once every application's lifetime
+     has ended, the compensation process audits each application on the hosts that keep the records it needs: was it
+     settled by underwriting (P4)? If not, the credit enquiry is withdrawn where it was recorded (P2).
+     Run:     ant -f FinancialSystem_P1_P5_Compensation_BuildAndRun.xml        (add -Dhost.address=127.0.0.1 to run every host on this machine)
+     Analyse: ant -f FinancialSystem_P1_P5_Compensation_BuildAndRun.xml analyse   (the usual report, then the compensation balance) -->
+<project name="FinancialSystem_P1_P5_Compensation_BuildAndRun" default="run-complete-workflow" basedir=".">
+    <property name="process.title" value="Loan applications (v001) with a loan compensation process (v002)"/>
+    <property name="launcher.profile.file" location="../btsn.services/deployments/financial/Deployment.json"/>
+    <property name="workflow.process.name" value="financial/Workflow/FinancialSystem_P1_P5_Workflow"/>
+    <property name="rule.version" value="v001"/>
+    <property name="query.version" value="v001,v002"/>
+    <property name="token.count" value="10"/>
+
+    <!-- The loan applications, one a second: each lives 20 s (eg1.expire), ample for one to be processed; the fraud
+         check is unavailable for applications 4 to 6. -->
+    <property name="eg1.id" value="EVENT_GENERATOR"/>
+    <property name="eg1.version" value="v001"/>
+    <property name="eg1.place" value="P1_Place"/>
+    <property name="eg1.operation" value="processToken"/>
+    <property name="eg1.data" value="application_id=APP001,annual_income=85000,requested_amount=25000,credit_score=720,fraud_risk=low,fraud_outage=4-6"/>
+    <property name="eg1.expire" value="20000"/>
+    <property name="eg1.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/FinancialSystem_P1_P5_Compensation_BuildAndRun.csv"/>
+
+    <!-- The compensation process: one audit token per application, on the same schedule 30 s later, so each audit comes
+         after its application's lifetime (20 s) and the 5 s the withdrawal waits after it. -->
+    <property name="eg2.id" value="LOAN_AUDIT"/>
+    <property name="eg2.version" value="v002"/>
+    <property name="eg2.process" value="financial/Workflow/Loan_Compensation_Workflow"/>
+    <property name="eg2.place" value="P4_Place"/>
+    <property name="eg2.operation" value="checkSettled"/>
+    <property name="eg2.data" value="audited_version=v001"/>
+    <property name="eg2.expire" value="20000"/>
+    <property name="eg2.fire.after.seconds" value="30"/>
+    <property name="eg2.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/FinancialSystem_P1_P5_Compensation_BuildAndRun.csv"/>
+
+    <!-- Hosts used by the service deployment: nodes of the infrastructure, each running the host program -->
+    <property name="hosts" value="P1,P2,P3,P4,P5"/>
+
+    <import file="../btsn.services/process-runtime.xml"/>
+
+    <!-- The usual analysis, then the balance of credit enquiries across the two processes: each enquiry the loan
+         process's credit check opened (v001 T_out_P2) must be settled by its underwriting (v001 T_out_P4) or withdrawn
+         by the compensation process (v002 T_out_P2, arc withdrawn), exactly once. -->
+    <target name="analyse" depends="launcher-jar-runtime-support.analyse" description="Analyse the Monitor database, then check the compensation balance">
+        <java classname="org.btsn.derby.Analysis.CompensationBalance" fork="true" failonerror="true" dir="${monitor.project.dir}">
+            <classpath refid="monitor.classpath"/>
+            <arg value="resource=credit enquiry"/>
+            <arg value="opened=v001:T_out_P2"/>
+            <arg value="settled=v001:T_out_P4"/>
+            <arg value="undone=v002:T_out_P2:withdrawn"/>
+            <arg value="refused=v002:T_out_P2:too_early"/>
+        </java>
+    </target>
+</project>

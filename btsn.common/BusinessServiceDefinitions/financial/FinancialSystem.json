@@ -25,6 +25,17 @@
       "status": "active"
     },
     {
+      "service": "CreditCheckService",
+      "implementationClass": "org.btsn.business.financial.CreditCheckService",
+      "operation": "withdrawEnquiry",
+      "description": "Loan compensation: withdraws the credit enquiry an abandoned application's credit check recorded, once its lifetime has ended. Safe to repeat.",
+      "returns": "Withdrawal results. Routes on \"withdrawn\", \"nothing_to_withdraw\" (no enquiry, or already withdrawn) or \"too_early\" (the application may still complete).",
+      "inputs": ["settlementCheck"],
+      "returnAttribute": "withdrawalResults",
+      "canonicalBinding": "ServiceAttributeBindings/CreditCheckService/CreditCheckService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
       "service": "FraudCheckService",
       "implementationClass": "org.btsn.business.financial.FraudCheckService",
       "operation": "processToken",
@@ -43,6 +54,17 @@
       "returns": "Underwriting results. Routes on \"approved\" (score 700 or more and low fraud risk), \"declined\" (high fraud risk or score below 600) or \"conditional\" (anything else).",
       "inputs": ["creditCheckResults", "fraudCheckResults"],
       "returnAttribute": "underwritingResults",
+      "canonicalBinding": "ServiceAttributeBindings/UnderwritingService/UnderwritingService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "UnderwritingService",
+      "implementationClass": "org.btsn.business.financial.UnderwritingService",
+      "operation": "checkSettled",
+      "description": "Loan compensation: tells whether the audited application was settled by underwriting (approved, conditional or declined).",
+      "returns": "Settlement check with the audited application's workflow number. Routes on \"settled\" (nothing to undo) or \"abandoned\" (undo what its checks left behind).",
+      "inputs": ["token"],
+      "returnAttribute": "settlementCheck",
       "canonicalBinding": "ServiceAttributeBindings/UnderwritingService/UnderwritingService-CanonicalBindings.ruleml.xml",
       "status": "active"
     },

@@ -1,0 +1,297 @@
+{
+  "processType": "PetriNet",
+  "elements": [
+    {
+      "id": "LOAN_AUDIT",
+      "type": "EVENT_GENERATOR",
+      "x": 30,
+      "y": 200,
+      "width": 24,
+      "height": 60,
+      "label": "Loan Audit",
+      "rotation": 0,
+      "generator_rate": "1000",
+      "token_version": "v002",
+      "token_data": "audited_version=v001"
+    },
+    {
+      "id": "T_in_SettlementCheck",
+      "type": "TRANSITION",
+      "x": 110,
+      "y": 190,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_SettlementCheck",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "SettlementCheck",
+      "type": "PLACE",
+      "x": 175,
+      "y": 195,
+      "width": 50,
+      "height": 50,
+      "label": "SettlementCheck",
+      "service": "UnderwritingService",
+      "operations": [
+        {
+          "name": "checkSettled",
+          "returnAttribute": "settlementCheck",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_SettlementCheck",
+      "type": "TRANSITION",
+      "x": 270,
+      "y": 190,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_SettlementCheck",
+      "rotation": 0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "Terminate_Settled",
+      "type": "TRANSITION",
+      "x": 270,
+      "y": 350,
+      "width": 20,
+      "height": 60,
+      "label": "Settled",
+      "rotation": 0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    },
+    {
+      "id": "T_in_WithdrawEnquiry",
+      "type": "TRANSITION",
+      "x": 370,
+      "y": 190,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_WithdrawEnquiry",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "WithdrawEnquiry",
+      "type": "PLACE",
+      "x": 435,
+      "y": 195,
+      "width": 50,
+      "height": 50,
+      "label": "WithdrawEnquiry",
+      "service": "CreditCheckService",
+      "operations": [
+        {
+          "name": "withdrawEnquiry",
+          "returnAttribute": "withdrawalResults",
+          "arguments": [
+            {
+              "name": "settlementCheck",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_WithdrawEnquiry",
+      "type": "TRANSITION",
+      "x": 530,
+      "y": 190,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_WithdrawEnquiry",
+      "rotation": 0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "Terminate_Withdrawn",
+      "type": "TRANSITION",
+      "x": 650,
+      "y": 110,
+      "width": 20,
+      "height": 60,
+      "label": "Enquiry Withdrawn",
+      "rotation": 0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    },
+    {
+      "id": "Terminate_Nothing",
+      "type": "TRANSITION",
+      "x": 650,
+      "y": 230,
+      "width": 20,
+      "height": 60,
+      "label": "Nothing To Withdraw",
+      "rotation": 0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    },
+    {
+      "id": "Terminate_TooEarly",
+      "type": "TRANSITION",
+      "x": 650,
+      "y": 350,
+      "width": 20,
+      "height": 60,
+      "label": "Too Early",
+      "rotation": 0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "LOAN_AUDIT",
+      "target": "T_in_SettlementCheck",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_SettlementCheck",
+      "target": "SettlementCheck",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "SettlementCheck",
+      "target": "T_out_SettlementCheck",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_SettlementCheck",
+      "target": "Terminate_Settled",
+      "label": "settled",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "settled",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_SettlementCheck",
+      "target": "T_in_WithdrawEnquiry",
+      "label": "abandoned",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "abandoned",
+      "endpoint": "withdrawEnquiry"
+    },
+    {
+      "source": "T_in_WithdrawEnquiry",
+      "target": "WithdrawEnquiry",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "WithdrawEnquiry",
+      "target": "T_out_WithdrawEnquiry",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_WithdrawEnquiry",
+      "target": "Terminate_Withdrawn",
+      "label": "withdrawn",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "withdrawn",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_WithdrawEnquiry",
+      "target": "Terminate_Nothing",
+      "label": "nothing_to_withdraw",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "nothing_to_withdraw",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_WithdrawEnquiry",
+      "target": "Terminate_TooEarly",
+      "label": "too_early",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "too_early",
+      "endpoint": ""
+    }
+  ],
+  "textElements": [
+    {
+      "x": 30,
+      "y": 50,
+      "text": "Loan Compensation — a separate process that cleans up abandoned loan applications",
+      "fontSize": 16,
+      "fontStyle": 1,
+      "color": -16777216
+    },
+    {
+      "x": 30,
+      "y": 72,
+      "text": "One audit token per loan application, after the application's lifetime (notAfter) has ended: was it settled by underwriting?",
+      "fontSize": 11,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 30,
+      "y": 88,
+      "text": "If not, withdraw the credit enquiry its credit check recorded. Each step runs on the host that keeps the record it needs.",
+      "fontSize": 11,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 150,
+      "y": 290,
+      "text": "UnderwritingService.checkSettled (P4)",
+      "fontSize": 10,
+      "fontStyle": 2,
+      "color": -16777216
+    },
+    {
+      "x": 395,
+      "y": 290,
+      "text": "CreditCheckService.withdrawEnquiry (P2)",
+      "fontSize": 10,
+      "fontStyle": 2,
+      "color": -16777216
+    }
+  ],
+  "serviceDeployment": "ServiceDeploymentFolder/financial/FinancialSystem.json"
+}

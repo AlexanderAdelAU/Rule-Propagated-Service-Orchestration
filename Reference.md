@@ -1119,6 +1119,7 @@ Every launcher runs the same way:
 | Dining philosophers from a deadlocked start: every join holds one fork and waits | [Dining_Philosophers_Deadlock_BuildAndRun.xml](btsn.petrinet.ProjectLoader/Dining_Philosophers_Deadlock_BuildAndRun.xml) |
 | Emergency department | [Emergency_Department_BuildAndRun.xml](btsn.healthcare.ProjectLoader/Emergency_Department_BuildAndRun.xml) |
 | Full Financial application | [FinancialSystem_P1_P5_BuildAndRun.xml](btsn.financial.ProjectLoader/FinancialSystem_P1_P5_BuildAndRun.xml) |
+| Financial application with a compensation process: a simulated fraud-check outage abandons applications 4 to 6 after their credit check; once their lifetime has ended, a separate process (v002) withdraws the credit enquiries they left behind. `analyse` then checks that every enquiry was settled or withdrawn exactly once | [FinancialSystem_P1_P5_Compensation_BuildAndRun.xml](btsn.financial.ProjectLoader/FinancialSystem_P1_P5_Compensation_BuildAndRun.xml) |
 | Concurrent healthcare versions | [Triple_Workflow_Emergencey_Department_Concurrent.xml](btsn.healthcare.ProjectLoader/Triple_Workflow_Emergencey_Department_Concurrent.xml) |
 
 - **File name**: the concurrent launcher's name contains the typo `Emergencey`; use it as named.

@@ -17,3 +17,9 @@
 	<Ind>underwritingResults</Ind>
 	<Ind>fraudCheckResults</Ind>
 </Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>checkSettled</Ind>
+	<Ind>settlementCheck</Ind>
+	<Ind>token</Ind>
+</Atom>

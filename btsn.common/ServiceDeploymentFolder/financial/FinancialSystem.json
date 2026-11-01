@@ -33,6 +33,21 @@
       "portSlot": 0
     },
     {
+      "node": "P2",
+      "service": "CreditCheckService",
+      "operation": "withdrawEnquiry",
+      "returnAttribute": "withdrawalResults",
+      "arguments": [
+        {
+          "name": "settlementCheck",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 1
+    },
+    {
       "node": "P3",
       "service": "FraudCheckService",
       "operation": "processToken",
@@ -67,6 +82,21 @@
         }
       ],
       "portSlot": 0
+    },
+    {
+      "node": "P4",
+      "service": "UnderwritingService",
+      "operation": "checkSettled",
+      "returnAttribute": "settlementCheck",
+      "arguments": [
+        {
+          "name": "token",
+          "type": "String",
+          "value": "String",
+          "required": false
+        }
+      ],
+      "portSlot": 1
     },
     {
       "node": "P5",
