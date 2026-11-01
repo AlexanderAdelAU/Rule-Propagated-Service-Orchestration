@@ -364,7 +364,8 @@ public class TokenAnimator {
                     }
                 }
                 String nodeValue = elem.getNodeValue();
-                if ("TERMINATE_NODE".equals(nodeValue) || "TerminateNode".equals(elem.getNodeType()) ||
+                // A Signal node ends the token in its process too (and launches another): the replay ends it there.
+                if ("TERMINATE_NODE".equals(nodeValue) || "TerminateNode".equals(elem.getNodeType()) || elem.isSignalNode() ||
                     (label != null && label.toLowerCase().contains("terminate"))) {
                     terminateIds.add(label);
                     terminatePositions.put(label, new Point(elem.getX(), elem.getY()));

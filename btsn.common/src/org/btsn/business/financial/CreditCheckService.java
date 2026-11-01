@@ -8,9 +8,6 @@ import org.json.simple.JSONObject;
  */
 public class CreditCheckService extends BaseBusinessService {
 
-    /** After an application's lifetime (notAfter), how long to wait before its enquiry may be withdrawn. */
-    static final long WITHDRAWAL_MARGIN_MS = 5000;
-
     /**
      * validationResults -> creditCheckResults
      *
@@ -37,7 +34,7 @@ public class CreditCheckService extends BaseBusinessService {
 
         String workflowId = textValue(validationResults, "workflow_id", null);
         if (workflowId != null) {
-            CreditEnquiries.record(workflowId, (long)numberValue(validationResults, "not_after", 0.0));
+            CreditEnquiries.record(workflowId);
             result.put("workflow_id", workflowId);
             result.put("enquiry_recorded", true);
         }
@@ -46,19 +43,18 @@ public class CreditCheckService extends BaseBusinessService {
     }
 
     /**
-     * settlementCheck -> withdrawalResults
+     * token -> withdrawalResults
      *
-     * Compensation for an application that was abandoned after its credit check: withdraws the enquiry the check
-     * recorded. Safe to repeat. Routes on "withdrawn", "nothing_to_withdraw" (no enquiry, or already withdrawn) or
-     * "too_early" (the application's lifetime has not yet ended, so it may still complete).
+     * Compensation for an application the loan process abandoned after its credit check: withdraws the enquiry the
+     * check recorded. The token was launched by the loan process's Signal node; its signal header names the
+     * abandoned application's workflow (source_workflow). Safe to repeat. Routes on "withdrawn" or
+     * "nothing_to_withdraw" (no enquiry, or already withdrawn).
      */
     @SuppressWarnings("unchecked")
-    public String withdrawEnquiry(String settlementCheck) {
-        String workflowId = textValue(settlementCheck, "loan_workflow", "UNKNOWN");
-        CreditEnquiries.Withdrawal outcome = CreditEnquiries.withdraw(workflowId, System.currentTimeMillis(), WITHDRAWAL_MARGIN_MS);
-        String route = outcome == CreditEnquiries.Withdrawal.WITHDRAWN ? "withdrawn"
-                : outcome == CreditEnquiries.Withdrawal.TOO_EARLY ? "too_early"
-                : "nothing_to_withdraw";
+    public String withdrawEnquiry(String token) {
+        String workflowId = textValue(token, "source_workflow", "UNKNOWN");
+        CreditEnquiries.Withdrawal outcome = CreditEnquiries.withdraw(workflowId);
+        String route = outcome == CreditEnquiries.Withdrawal.WITHDRAWN ? "withdrawn" : "nothing_to_withdraw";
 
         JSONObject result = new JSONObject();
         result.put("loan_workflow", workflowId);

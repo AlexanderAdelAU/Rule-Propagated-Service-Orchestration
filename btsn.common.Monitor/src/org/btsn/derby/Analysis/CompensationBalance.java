@@ -17,35 +17,38 @@ import java.util.TreeMap;
  *
  * Think of the resource as a place R per workflow. A firing of the opening transition puts a token in R; a firing of the
  * settling transition, in the same workflow, takes it out; so does a firing of the undoing transition with the given
- * arc value in the compensation process, whose workflow k audits workflow k of the first process (token 2030000 of
- * v002 audits workflow 1030000 of v001). Once both processes have run, R must be empty for every workflow and never
- * have gone below empty: each resource opened is settled or undone exactly once.
+ * arc value in the compensation process, whose workflow k compensates workflow k of the first process (the loan
+ * process's Signal node launches workflow 1030000 of v001 as 2030000 of v002). Once both processes have run, R must be
+ * empty for every workflow and never have gone below empty: each resource opened is settled or undone exactly once.
  *
- * Arguments (name=value): resource="credit enquiry" opened=v001:T_out_P2 settled=v001:T_out_P4
+ * Arguments (name=value): resource="credit enquiry" opened=v001:T_out_P2 settled=v001:T_out_P4:!abandoned
  *   undone=v002:T_out_P2:withdrawn [refused=v002:T_out_P2:too_early]
- * The opened and settled transitions count when they fired normally (EXIT, FORK or TERMINATE), not when the token
- * failed there; the undoing and refused transitions count only with their arc value.
+ * A transition counts when it fired normally (EXIT, FORK or TERMINATE), not when the token failed there; with an arc
+ * value, only firings with that value count, and with !value only those without it (underwriting settles an
+ * application with any decision except abandoned, which instead signals compensation).
  */
 public final class CompensationBalance {
     private static final String DB_URL = "jdbc:derby:./ServiceAnalysisDataBase;create=false";
 
     /** A transition in one version, optionally restricted to one arc value. */
     static final class Firing {
-        final int base; final String transition; final String arc;
+        final int base; final String transition; final String arc; final boolean except;
         Firing(String spec) {
             String[] p = spec.split(":", 3);
             if (p.length < 2) throw new IllegalArgumentException("Expected version:transition[:arc], got " + spec);
             base = Integer.parseInt(p[0].replaceAll("\\D", "")) * 1_000_000;
             transition = p[1];
-            arc = p.length > 2 ? p[2] : null;
+            except = p.length > 2 && p[2].startsWith("!");
+            arc = p.length > 2 ? (except ? p[2].substring(1) : p[2]) : null;
         }
-        @Override public String toString() { return "v" + String.format("%03d", base / 1_000_000) + " " + transition + (arc == null ? "" : " [" + arc + "]"); }
+        boolean counts(String arcValue) { return arc == null || (except != arc.equals(arcValue)); }
+        @Override public String toString() { return "v" + String.format("%03d", base / 1_000_000) + " " + transition + (arc == null ? "" : " [" + (except ? "not " : "") + arc + "]"); }
     }
 
     /** The root of a token's workflow: 1030001 belongs to workflow 1030000. */
     static int workflowOf(int tokenId) { return tokenId - tokenId % 10_000; }
 
-    /** The workflow of the first process that a compensation workflow audits: the same number in the first version. */
+    /** The workflow of the first process that a compensation workflow compensates: the same number in the first version. */
     static int audited(int compensationWorkflow, int compensationBase, int auditedBase) {
         return auditedBase + (compensationWorkflow - compensationBase);
     }
@@ -85,7 +88,7 @@ public final class CompensationBalance {
                 while (rs.next()) {
                     String type = rs.getString("eventType");
                     if (!"EXIT".equals(type) && !"FORK".equals(type) && !"TERMINATE".equals(type)) continue;
-                    if (f.arc != null && !f.arc.equals(rs.getString("arcValue"))) continue;
+                    if (!f.counts(rs.getString("arcValue"))) continue;
                     int workflow = workflowOf(rs.getInt("tokenId"));
                     if (f.base != auditedBase) workflow = audited(workflow, f.base, auditedBase);
                     b.of(workflow)[column]++;

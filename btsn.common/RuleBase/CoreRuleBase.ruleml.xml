@@ -72,6 +72,35 @@ recognizes TERMINATE:TERMINATE and handles it specially without making any netwo
 </Implies>
 
 <!-- 
+Special rule for SIGNAL - a Signal node ends the token in its process and launches the process it names. The
+operation is the Signal node's id; ServiceThread recognizes SIGNAL and looks up signalLaunch for where to send the new
+token, so no activeService is needed here either.
+-->
+<Implies>
+	<then>
+		<Atom>
+			<Rel>publishes</Rel>
+			<Ind>SIGNAL</Ind>
+			<Var>condition</Var>
+			<Var>operation</Var>
+			<Ind>local</Ind>
+			<Ind>localhost</Ind>
+			<Ind>0</Ind>
+			<Var>decisionValue</Var>
+		</Atom>
+	</then>
+	<if>
+		<Atom>
+			<Rel>meetsCondition</Rel>
+			<Ind>SIGNAL</Ind>
+			<Var>operation</Var>
+			<Var>condition</Var>
+			<Var>decisionValue</Var>
+		</Atom>
+	</if>
+</Implies>
+
+<!-- 
 This is the rule that governs the service operation. The operation Var is specified twice so 
 that the name will is returned and thus avoids the need to parse a list of operations.
  -->

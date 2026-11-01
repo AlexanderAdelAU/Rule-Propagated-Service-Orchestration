@@ -9,6 +9,5 @@
 <Atom><Rel>activeService</Rel><Ind>P3_Place</Ind><Ind>processToken</Ind><Ind>ip0</Ind><Ind>4003</Ind></Atom>
 <Atom><Rel>localDefined</Rel><Ind>P4_Place</Ind></Atom>
 <Atom><Rel>activeService</Rel><Ind>P4_Place</Ind><Ind>processToken</Ind><Ind>ip0</Ind><Ind>4004</Ind></Atom>
-<Atom><Rel>activeService</Rel><Ind>P4_Place</Ind><Ind>checkSettled</Ind><Ind>ip0</Ind><Ind>4007</Ind></Atom>
 <Atom><Rel>localDefined</Rel><Ind>P5_Place</Ind></Atom>
 <Atom><Rel>activeService</Rel><Ind>P5_Place</Ind><Ind>processToken</Ind><Ind>ip0</Ind><Ind>4005</Ind></Atom>

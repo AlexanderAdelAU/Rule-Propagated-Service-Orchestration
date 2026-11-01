@@ -12,8 +12,9 @@ public class FraudCheckService extends BaseBusinessService {
      * validationResults -> fraudCheckResults
      *
      * For the compensation demonstration only: when the application carries fraud_outage=FROM-TO, the fraud check is
-     * unavailable for applications FROM to TO (numbered from 1 in the order they were submitted) and fails. Their
-     * credit check has already run, so their enquiry is left behind until a compensation process withdraws it.
+     * unavailable for applications FROM to TO (numbered from 1 in the order they were submitted) and reports
+     * fraud_status "unavailable". Their credit check has already run; underwriting abandons them, and the loan process
+     * signals the compensation process to withdraw their enquiry.
      */
     @SuppressWarnings("unchecked")
     public String processToken(String validationResults) {
@@ -23,9 +24,7 @@ public class FraudCheckService extends BaseBusinessService {
 
         String outage = textValue(validationResults, "fraud_outage", null);
         String workflowId = textValue(validationResults, "workflow_id", null);
-        if (outage != null && workflowId != null && inOutage(outage, workflowId))
-            throw new IllegalStateException("fraud check unavailable (simulated outage " + outage + ") for application "
-                + applicationNumber(workflowId));
+        if (outage != null && workflowId != null && inOutage(outage, workflowId)) fraudStatus = "unavailable";
 
         JSONObject result = new JSONObject();
         result.put("application_id", applicationId);

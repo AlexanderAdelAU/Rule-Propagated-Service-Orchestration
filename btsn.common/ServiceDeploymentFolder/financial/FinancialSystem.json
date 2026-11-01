@@ -39,7 +39,7 @@
       "returnAttribute": "withdrawalResults",
       "arguments": [
         {
-          "name": "settlementCheck",
+          "name": "token",
           "type": "String",
           "value": "String",
           "required": false
@@ -82,21 +82,6 @@
         }
       ],
       "portSlot": 0
-    },
-    {
-      "node": "P4",
-      "service": "UnderwritingService",
-      "operation": "checkSettled",
-      "returnAttribute": "settlementCheck",
-      "arguments": [
-        {
-          "name": "token",
-          "type": "String",
-          "value": "String",
-          "required": false
-        }
-      ],
-      "portSlot": 1
     },
     {
       "node": "P5",

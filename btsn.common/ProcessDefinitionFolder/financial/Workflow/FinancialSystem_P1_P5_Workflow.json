@@ -300,6 +300,20 @@
       "node_type": "TerminateNode",
       "node_value": "TERMINATE_NODE",
       "transition_type": "Other"
+    },
+    {
+      "id": "Signal_LoanAbandoned",
+      "type": "TRANSITION",
+      "x": 1000,
+      "y": 90,
+      "width": 20,
+      "height": 60,
+      "label": "Loan Abandoned",
+      "rotation": 0,
+      "node_type": "SignalNode",
+      "node_value": "SIGNAL_NODE",
+      "transition_type": "Other",
+      "launch_process": "financial/Workflow/Loan_Compensation_Workflow"
     }
   ],
   "arrows": [
@@ -440,6 +454,14 @@
       "endpoint": ""
     },
     {
+      "source": "T_out_Underwriting",
+      "target": "Signal_LoanAbandoned",
+      "label": "abandoned",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "abandoned",
+      "endpoint": ""
+    },
+    {
       "source": "T_in_Decision",
       "target": "Decision",
       "label": "",
@@ -517,6 +539,14 @@
       "x": 650,
       "y": 380,
       "text": "Declined applications terminated",
+      "fontSize": 10,
+      "fontStyle": 2,
+      "color": -16777216
+    },
+    {
+      "x": 935,
+      "y": 190,
+      "text": "Abandoned applications signal Loan Compensation",
       "fontSize": 10,
       "fontStyle": 2,
       "color": -16777216

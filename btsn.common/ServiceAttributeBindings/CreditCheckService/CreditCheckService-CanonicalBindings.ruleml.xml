@@ -15,5 +15,5 @@
 	<Rel>canonicalBinding</Rel>
 	<Ind>withdrawEnquiry</Ind>
 	<Ind>withdrawalResults</Ind>
-	<Ind>settlementCheck</Ind>
+	<Ind>token</Ind>
 </Atom>

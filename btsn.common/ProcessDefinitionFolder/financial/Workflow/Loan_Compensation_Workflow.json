@@ -2,86 +2,21 @@
   "processType": "PetriNet",
   "elements": [
     {
-      "id": "LOAN_AUDIT",
+      "id": "LOAN_ABANDONED",
       "type": "EVENT_GENERATOR",
       "x": 30,
       "y": 200,
       "width": 24,
       "height": 60,
-      "label": "Loan Audit",
+      "label": "Loan Abandoned",
       "rotation": 0,
       "generator_rate": "1000",
-      "token_version": "v002",
-      "token_data": "audited_version=v001"
-    },
-    {
-      "id": "T_in_SettlementCheck",
-      "type": "TRANSITION",
-      "x": 110,
-      "y": 190,
-      "width": 20,
-      "height": 60,
-      "label": "T_in_SettlementCheck",
-      "rotation": 0,
-      "node_type": "EdgeNode",
-      "node_value": "EDGE_NODE",
-      "transition_type": "T_in",
-      "buffer": "10"
-    },
-    {
-      "id": "SettlementCheck",
-      "type": "PLACE",
-      "x": 175,
-      "y": 195,
-      "width": 50,
-      "height": 50,
-      "label": "SettlementCheck",
-      "service": "UnderwritingService",
-      "operations": [
-        {
-          "name": "checkSettled",
-          "returnAttribute": "settlementCheck",
-          "arguments": [
-            {
-              "name": "token",
-              "type": "String",
-              "value": "String",
-              "required": false
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "T_out_SettlementCheck",
-      "type": "TRANSITION",
-      "x": 270,
-      "y": 190,
-      "width": 20,
-      "height": 60,
-      "label": "T_out_SettlementCheck",
-      "rotation": 0,
-      "node_type": "GatewayNode",
-      "node_value": "GATEWAY_NODE",
-      "transition_type": "T_out"
-    },
-    {
-      "id": "Terminate_Settled",
-      "type": "TRANSITION",
-      "x": 270,
-      "y": 350,
-      "width": 20,
-      "height": 60,
-      "label": "Settled",
-      "rotation": 0,
-      "node_type": "TerminateNode",
-      "node_value": "TERMINATE_NODE",
-      "transition_type": "Other"
+      "token_version": "v002"
     },
     {
       "id": "T_in_WithdrawEnquiry",
       "type": "TRANSITION",
-      "x": 370,
+      "x": 110,
       "y": 190,
       "width": 20,
       "height": 60,
@@ -95,7 +30,7 @@
     {
       "id": "WithdrawEnquiry",
       "type": "PLACE",
-      "x": 435,
+      "x": 175,
       "y": 195,
       "width": 50,
       "height": 50,
@@ -107,7 +42,7 @@
           "returnAttribute": "withdrawalResults",
           "arguments": [
             {
-              "name": "settlementCheck",
+              "name": "token",
               "type": "String",
               "value": "String",
               "required": false
@@ -119,7 +54,7 @@
     {
       "id": "T_out_WithdrawEnquiry",
       "type": "TRANSITION",
-      "x": 530,
+      "x": 270,
       "y": 190,
       "width": 20,
       "height": 60,
@@ -132,7 +67,7 @@
     {
       "id": "Terminate_Withdrawn",
       "type": "TRANSITION",
-      "x": 650,
+      "x": 420,
       "y": 110,
       "width": 20,
       "height": 60,
@@ -145,24 +80,11 @@
     {
       "id": "Terminate_Nothing",
       "type": "TRANSITION",
-      "x": 650,
-      "y": 230,
+      "x": 420,
+      "y": 290,
       "width": 20,
       "height": 60,
       "label": "Nothing To Withdraw",
-      "rotation": 0,
-      "node_type": "TerminateNode",
-      "node_value": "TERMINATE_NODE",
-      "transition_type": "Other"
-    },
-    {
-      "id": "Terminate_TooEarly",
-      "type": "TRANSITION",
-      "x": 650,
-      "y": 350,
-      "width": 20,
-      "height": 60,
-      "label": "Too Early",
       "rotation": 0,
       "node_type": "TerminateNode",
       "node_value": "TERMINATE_NODE",
@@ -171,44 +93,12 @@
   ],
   "arrows": [
     {
-      "source": "LOAN_AUDIT",
-      "target": "T_in_SettlementCheck",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
-    },
-    {
-      "source": "T_in_SettlementCheck",
-      "target": "SettlementCheck",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
-    },
-    {
-      "source": "SettlementCheck",
-      "target": "T_out_SettlementCheck",
-      "label": "",
-      "guardCondition": "",
-      "decision_value": "",
-      "endpoint": ""
-    },
-    {
-      "source": "T_out_SettlementCheck",
-      "target": "Terminate_Settled",
-      "label": "settled",
-      "guardCondition": "DECISION_EQUAL_TO",
-      "decision_value": "settled",
-      "endpoint": ""
-    },
-    {
-      "source": "T_out_SettlementCheck",
+      "source": "LOAN_ABANDONED",
       "target": "T_in_WithdrawEnquiry",
-      "label": "abandoned",
-      "guardCondition": "DECISION_EQUAL_TO",
-      "decision_value": "abandoned",
-      "endpoint": "withdrawEnquiry"
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
     },
     {
       "source": "T_in_WithdrawEnquiry",
@@ -241,21 +131,13 @@
       "guardCondition": "DECISION_EQUAL_TO",
       "decision_value": "nothing_to_withdraw",
       "endpoint": ""
-    },
-    {
-      "source": "T_out_WithdrawEnquiry",
-      "target": "Terminate_TooEarly",
-      "label": "too_early",
-      "guardCondition": "DECISION_EQUAL_TO",
-      "decision_value": "too_early",
-      "endpoint": ""
     }
   ],
   "textElements": [
     {
       "x": 30,
       "y": 50,
-      "text": "Loan Compensation — a separate process that cleans up abandoned loan applications",
+      "text": "Loan Compensation — started by the loan process when it abandons an application",
       "fontSize": 16,
       "fontStyle": 1,
       "color": -16777216
@@ -263,7 +145,7 @@
     {
       "x": 30,
       "y": 72,
-      "text": "One audit token per loan application, after the application's lifetime (notAfter) has ended: was it settled by underwriting?",
+      "text": "The loan process's Signal node \"Loan Abandoned\" launches one token here for each application it abandons.",
       "fontSize": 11,
       "fontStyle": 0,
       "color": -16777216
@@ -271,21 +153,13 @@
     {
       "x": 30,
       "y": 88,
-      "text": "If not, withdraw the credit enquiry its credit check recorded. Each step runs on the host that keeps the record it needs.",
+      "text": "It withdraws the credit enquiry that application's credit check recorded, on the host that keeps the record.",
       "fontSize": 11,
       "fontStyle": 0,
       "color": -16777216
     },
     {
       "x": 150,
-      "y": 290,
-      "text": "UnderwritingService.checkSettled (P4)",
-      "fontSize": 10,
-      "fontStyle": 2,
-      "color": -16777216
-    },
-    {
-      "x": 395,
       "y": 290,
       "text": "CreditCheckService.withdrawEnquiry (P2)",
       "fontSize": 10,
