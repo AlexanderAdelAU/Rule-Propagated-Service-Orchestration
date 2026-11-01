@@ -458,7 +458,9 @@ Use **Arrow (drag)**, or **Arrow (click waypoints)** to bend the return route.
   - starts at the launched process's start node and first place, in the version the run deploys that process as;
   - is the same workflow in that version (workflow 1030000 of v001 launches 2030000 of v002), so the two can be followed together;
   - carries a `signal` header the host fills in (signal, source version, source workflow and token, place, reason: the arc's value, time) and, as `data`, the business result the place returned.
-- **In the launcher:** give the launched process its own slot with `egN.started.by.signal=true`. It is deployed, but its generator fires nothing; `egN.place`, `egN.operation`, `egN.id` and `egN.expire` say where its tokens start, the start node they are recorded as coming from, and their lifetime.
+- **Create Build and Run includes the launched process:** the launcher deploys it under its own version (its start node's, or the next free one), started only by the Signal node; Build lists it as a `Signal` line, and its hosts join the run's.
+  - The launched process must be deployed (open it, **Deploy**, save the deployment).
+  - In a launcher written by hand, give it its own slot with `egN.started.by.signal=true`; `egN.place`, `egN.operation`, `egN.id` and `egN.expire` say where its tokens start, the start node they are recorded as coming from, and their lifetime.
   - A run that does not deploy the launched process warns when it deploys, and its tokens end at the Signal node, launching nothing.
 - **Validate reports** a Signal node that names no process, one that names a process that does not exist, and arcs leading on from a Signal node.
 - **Not yet:** a token that fails (a service error, or its lifetime running out at a join) does not reach a Signal node; it stops where it failed.

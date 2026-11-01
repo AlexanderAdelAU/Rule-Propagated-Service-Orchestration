@@ -42,6 +42,14 @@ public final class BuildAndRunGenerator {
         public List<Run> enabled() { List<Run> on = new ArrayList<>(); for (Run r : runs) if (r.enabled) on.add(r); return on; }
     }
 
+    /**
+     * A process that a Signal node launches. The run deploys it under its own version, as a slot whose generator fires
+     * nothing (egN.started.by.signal): its tokens come from the Signal node, at its start node and first place.
+     */
+    public static final class Launched {
+        public String signal = "", process = "", startNode = "", version = "", place = "", operation = "";
+    }
+
     /** What the launcher will use, worked out from the process, its deployment and the options. */
     public static final class Plan {
         public final List<String> problems = new ArrayList<>();
@@ -61,6 +69,8 @@ public final class BuildAndRunGenerator {
         public String serviceDeployment = "", catalogue = "";
         public final List<File> folders = new ArrayList<>();
         public Options defaults = new Options();
+        /** The processes this process's Signal nodes launch: deployed with the run, started only by those signals. */
+        public final List<Launched> launched = new ArrayList<>();
 
         public File launcher(Options o) { return new File(o.folder, o.launcherName.endsWith(".xml") ? o.launcherName : o.launcherName + ".xml"); }
         /** One schedule per generator; a single generator keeps the plain launcher name. */
@@ -172,6 +182,8 @@ public final class BuildAndRunGenerator {
         }
         plan.problems.addAll(canvas.joinsMarkedTwice());
         if (plan.targets.isEmpty()) plan.problems.add("Add an event generator connected through a T_in transition to a deployed place.");
+        planLaunched(plan, canvas, common, used);
+        plan.nodes.clear(); plan.nodes.addAll(used);
         if (!plan.problems.isEmpty()) return plan;
 
         // Deployment profile: reuse one that already selects this service deployment.
@@ -205,6 +217,61 @@ public final class BuildAndRunGenerator {
             o.runs.add(run);
         }
         return plan;
+    }
+
+    /**
+     * The processes the Signal nodes launch: each is loaded from ProcessDefinitionFolder with its own deployment, and
+     * starts where its start node (its event generator) leads, on the host that place is deployed to. Its hosts join
+     * the run's; its version is its start node's, or the first one no generator of this process uses.
+     */
+    static void planLaunched(Plan plan, Canvas canvas, File common, Set<String> hosts) {
+        for (ProcessElement signal : canvas.getElements()) {
+            if (!signal.isSignalNode()) continue;
+            String process = signal.getLaunchProcess();
+            if (process.isEmpty()) { plan.problems.add("Signal node " + signal.getLabel() + " does not name the process it launches: set its Launches process."); continue; }
+            boolean already = false;
+            for (Launched l : plan.launched) already |= l.process.equals(process);
+            if (already) continue;
+            File file = new File(common, "ProcessDefinitionFolder/" + process + ".json");
+            if (!file.isFile()) { plan.problems.add("Signal node " + signal.getLabel() + " launches " + process + ", which is not a process under ProcessDefinitionFolder."); continue; }
+            try {
+                Canvas launched = new Canvas(); launched.setDefinitionLocation(file); launched.loadFromJSON(read(file));
+                ServiceRegistry registry = launched.getServiceRegistry();
+                ProcessElement start = null;
+                for (ProcessElement e : launched.getElements()) if (e.getType() == ProcessElement.Type.EVENT_GENERATOR && start == null) start = e;
+                ProcessElement place = start == null ? null : firstPlaceAfter(launched, start);
+                if (start == null || place == null || place.getServiceOperations().isEmpty()) {
+                    plan.problems.add(process + " (launched by " + signal.getLabel() + ") needs a start node: an event generator leading through a T_in to a place.");
+                    continue;
+                }
+                if (!registry.hasDeployment() || registry.nodeFor(place).isEmpty()) {
+                    plan.problems.add(process + " (launched by " + signal.getLabel() + ") is not deployed: open it, use Deploy and save the deployment.");
+                    continue;
+                }
+                for (ProcessElement p : launched.getPlaces()) { String node = registry.nodeFor(p); if (isHost(node)) hosts.add(node); }
+                Launched l = new Launched();
+                l.signal = signal.getLabel(); l.process = process; l.startNode = start.getId();
+                l.place = registry.nodeFor(place) + "_Place"; l.operation = place.getServiceOperations().get(0).getName();
+                l.version = start.getTokenVersion();
+                plan.launched.add(l);
+            } catch (Exception unreadable) {
+                plan.problems.add("Cannot read " + process + ", launched by " + signal.getLabel() + ": " + unreadable.getMessage());
+            }
+        }
+    }
+
+    /** Each launched process's version: its start node's, unless a chosen generator or another launched process has it. */
+    static Map<Launched, String> launchedVersions(Plan plan, Options o) {
+        Set<String> taken = new HashSet<>();
+        for (Run run : o.enabled()) taken.add(run.version);
+        Map<Launched, String> versions = new LinkedHashMap<>();
+        for (Launched l : plan.launched) {
+            String v = VERSIONS.contains(l.version) && !taken.contains(l.version) ? l.version : null;
+            for (String candidate : VERSIONS) if (v == null && !taken.contains(candidate)) v = candidate;
+            if (v == null) continue;
+            taken.add(v); versions.put(l, v);
+        }
+        return versions;
     }
 
     /**
@@ -251,6 +318,9 @@ public final class BuildAndRunGenerator {
         List<String> problems = new ArrayList<>();
         List<Run> on = o.enabled();
         if (on.isEmpty()) problems.add("Choose at least one event generator to run.");
+        if (on.size() + plan.launched.size() > VERSIONS.size())
+            problems.add("A run has at most " + VERSIONS.size() + " versions: " + on.size() + " generator(s) and " + plan.launched.size()
+                + " process(es) launched by Signal nodes are too many; turn a generator off.");
         Map<String, String> byVersion = new LinkedHashMap<>();
         for (Run run : on) {
             String other = byVersion.put(run.version, run.generatorId);
@@ -281,6 +351,9 @@ public final class BuildAndRunGenerator {
         for (Run run : o.enabled())
             if (plan.data.containsKey(run.generatorId)) lines.add("Data     every token from " + run.generatorId + " carries " + plan.data.get(run.generatorId));
         if (o.enabled().size() > 1) lines.add("         The generators fire together; the analysis reports each version separately.");
+        for (Map.Entry<Launched, String> l : launchedVersions(plan, o).entrySet())
+            lines.add("Signal   " + l.getKey().signal + " launches " + l.getKey().process + ", version " + l.getValue() + ", at "
+                + l.getKey().place + "." + l.getKey().operation + ": deployed with this run, started only by the Signal node");
         for (String problem : problems(plan, o)) lines.add("Problem  " + problem);
         return lines;
     }
@@ -344,7 +417,9 @@ public final class BuildAndRunGenerator {
             x.append("    <property name=\"token.generator.class\" value=\"").append(xml(plan.tokenGenerator)).append("\"/>\n");
         x.append("    <property name=\"workflow.process.name\" value=\"").append(xml(plan.processName)).append("\"/>\n");
         List<Run> on = o.enabled();
+        Map<Launched, String> launched = launchedVersions(plan, o);
         List<String> versions = new ArrayList<>(); for (Run run : on) versions.add(run.version);
+        versions.addAll(launched.values());
         x.append("    <property name=\"rule.version\" value=\"").append(on.get(0).version).append("\"/>\n");
         x.append("    <property name=\"query.version\" value=\"").append(String.join(",", versions)).append("\"/>\n\n");
         x.append("    <!-- Tokens: one block per event generator, each with its own rule version, target place and schedule.\n");
@@ -370,6 +445,18 @@ public final class BuildAndRunGenerator {
                 x.append("    <property name=\"").append(slot).append(".tokens\" value=\"").append(join).append("\"/>\n");
                 x.append("    <property name=\"").append(slot).append(".join.inputs\" value=\"").append(join).append("\"/>\n");
             }
+        }
+        int slotNumber = on.size();
+        for (Map.Entry<Launched, String> entry : launched.entrySet()) {
+            Launched l = entry.getKey(); String slot = "eg" + (++slotNumber);
+            x.append("    <!-- ").append(xml(l.process)).append(": launched by the Signal node ").append(xml(l.signal))
+             .append(", not by a generator. Deployed with this run; each signal starts it at ").append(xml(l.startNode)).append(". -->\n");
+            x.append("    <property name=\"").append(slot).append(".id\" value=\"").append(xml(l.startNode)).append("\"/>\n");
+            x.append("    <property name=\"").append(slot).append(".version\" value=\"").append(entry.getValue()).append("\"/>\n");
+            x.append("    <property name=\"").append(slot).append(".process\" value=\"").append(xml(l.process)).append("\"/>\n");
+            x.append("    <property name=\"").append(slot).append(".place\" value=\"").append(xml(l.place)).append("\"/>\n");
+            x.append("    <property name=\"").append(slot).append(".operation\" value=\"").append(xml(l.operation)).append("\"/>\n");
+            x.append("    <property name=\"").append(slot).append(".started.by.signal\" value=\"true\"/>\n");
         }
         x.append("    <property name=\"token.count\" value=\"").append(o.tokens).append("\"/>\n");
         x.append("    <!-- Each token's lifetime (ms). The run collects when the workflows have finished, or once every token's\n");

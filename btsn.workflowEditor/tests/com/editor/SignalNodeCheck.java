@@ -46,7 +46,26 @@ public final class SignalNodeCheck {
                 check(!mentions(canvas.routingGaps(false), "not a process under ProcessDefinitionFolder").isEmpty(), "A missing process is not reported");
                 signal.setLaunchProcess(LAUNCHES);
 
-                // The recorded run: applications 4 to 6 end at Loan Abandoned; the others are approved or declined.
+                // Create Build and Run: the launcher also deploys the process the Signal node launches, under its own
+                // version, as a slot its generator does not fire; its hosts are among the run's.
+                BuildAndRunGenerator.Plan plan = BuildAndRunGenerator.plan(canvas, loan);
+                check(plan.problems.isEmpty(), "Loan process not ready for Build and Run: " + plan.problems);
+                check(plan.launched.size() == 1 && LAUNCHES.equals(plan.launched.get(0).process), "Launched process not planned: " + plan.launched.size());
+                String xml = BuildAndRunGenerator.launcherXml(plan, plan.defaults);
+                for (String expected : new String[] {"name=\"query.version\" value=\"v001,v002\"", "name=\"eg2.process\" value=\"" + LAUNCHES + "\"",
+                        "name=\"eg2.version\" value=\"v002\"", "name=\"eg2.place\" value=\"P2_Place\"", "name=\"eg2.operation\" value=\"withdrawEnquiry\"",
+                        "name=\"eg2.started.by.signal\" value=\"true\"", "name=\"hosts\" value=\"P1,P2,P3,P4,P5\""})
+                    check(xml.contains(expected), "Launcher lacks " + expected + "\n" + xml);
+                check(!xml.contains("eg2.trigger.file"), "The launched process should fire nothing itself\n" + xml);
+                check(BuildAndRunGenerator.summary(plan, plan.defaults).stream().anyMatch(l -> l.startsWith("Signal   Loan Abandoned launches " + LAUNCHES)),
+                    "Build does not say what the Signal node launches: " + BuildAndRunGenerator.summary(plan, plan.defaults));
+                // A launched process with the generator's version moves to the next free one.
+                BuildAndRunGenerator.Options clash = plan.defaults; clash.runs.get(0).version = "v002";
+                check(BuildAndRunGenerator.launcherXml(plan, clash).contains("name=\"query.version\" value=\"v002,v001\""), "Version clash not resolved");
+                clash.runs.get(0).version = "v001";
+
+                // The recorded run (that launcher, with fraud_outage=4-6 typed into Application Submitted's Token data):
+                // applications 4 to 6 end at Loan Abandoned; the others are approved.
                 Map<String, Integer> loanEnds = endings(canvas, run);
                 check(loanEnds.getOrDefault("Loan Abandoned", 0) == 3, "Three abandoned applications should end at Loan Abandoned: " + loanEnds);
 
@@ -57,7 +76,8 @@ public final class SignalNodeCheck {
         });
         if (failure[0] != null) throw new AssertionError("Signal node", failure[0]);
         System.out.println("PASS: the loan process's Signal node Loan Abandoned (drawn S) launches Loan_Compensation_Workflow, keeps it through "
-            + "save and reload, counts as an end, is reported without a process or with a missing one; in the recorded run the 3 abandoned "
+            + "save and reload, counts as an end, is reported without a process or with a missing one; Create Build and Run deploys "
+            + "Loan_Compensation_Workflow as v002, fired only by the signal; in the run that launcher made, the 3 abandoned "
             + "applications end there and their 3 compensations end at Enquiry Withdrawn");
     }
 
