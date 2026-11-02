@@ -107,8 +107,9 @@ flowchart TB
   next service and operation, its channel and port, and the guard value each route needs.
   `EventPublisher` sends the token on, compressed, and split into chunks if it is large.
 - **Recording.** `PetriNetInstrumentationHelper` writes every event (GENERATED, BUFFERED,
-  ENTER, EXIT, FORK, JOIN_CONSUMED, TERMINATE, FAILED) to the host's own Derby database,
-  on the host's own clock.
+  ENTER, EXIT, FORK, FORK_CONSUMED, JOIN_CONSUMED, TERMINATE, FAILED) to the host's own
+  Derby database, on the host's own clock. A Signal node records TERMINATE; the process
+  it launches starts with GENERATED.
 - **Rules.** `RuleHandler` listens on the operation's rule socket; see below.
 
 The rule engine is OO jDREW, evaluating RuleML: facts and Horn rules, queried by the host
