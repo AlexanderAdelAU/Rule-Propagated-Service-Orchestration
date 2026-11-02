@@ -31,20 +31,20 @@ central engine: once the rules are installed, the orchestration hosts pass token
 to each other.
 
 ```mermaid
-flowchart LR
-    ED["ProcessEditor<br/>draws the process, writes the launcher,<br/>replays recorded runs"]
-    L["Launcher (Ant)<br/>runs the phases"]
-    G["Event generator<br/>deploys a version's rules,<br/>then fires its tokens"]
+flowchart TB
+    ED["ProcessEditor: draws the process, writes the launcher, replays the report"]
+    L["Launcher (Ant): runs the phases"]
+    G["Event generator: deploys a version's rules, then fires its tokens"]
     subgraph Hosts["Orchestration hosts: one per node, on any machine"]
+        direction LR
         P1["P1"] --> P2["P2"] & P3["P3"]
         P2 & P3 --> P4["P4"]
     end
-    M["Monitor<br/>collects records, analysis and charts"]
+    M["Monitor: collects the records; analysis and charts"]
     ED -- "writes" --> L -- "starts" --> G
     G -. "rule messages (control plane)" .-> Hosts
     G -- "tokens" --> P1
     Hosts -. "records, collected after the run" .-> M
-    M -- "analysis report" --> ED
 ```
 
 | Program | Where the code is | What it does |
