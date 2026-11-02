@@ -42,8 +42,7 @@ flowchart TB
     end
     M["Monitor: collects the records; analysis and charts"]
     ED -- "writes" --> L -- "starts" --> G
-    G -. "rule messages (control plane)" .-> Hosts
-    G -- "tokens" --> P1
+    G -- "rule messages to every host (control plane),<br/>then tokens to the first place" --> Hosts
     Hosts -. "records, collected after the run" .-> M
 ```
 
