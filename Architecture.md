@@ -47,11 +47,11 @@ operation of each service gets its own pair of UDP sockets and its own thread.
 
 ```mermaid
 flowchart TB
-    subgraph Host["Host Pn (one Java program)"]
+    subgraph Host["HOST Pn: one Java program"]
         direction TB
-        RH["RuleHandler<br/>rule socket"]
+        RH["RuleHandler<br/>rule socket: receives rules"]
         RF[("RuleFolder.vNNN/operation/<br/>Service.ruleml")]
-        ER["EventReactor<br/>token socket: unzip,<br/>reassemble chunks"]
+        ER["EventReactor<br/>token socket: receives tokens,<br/>unzips, reassembles chunks"]
         SC["Scheduler<br/>drop expired tokens,<br/>order the queue"]
         ST["ServiceThread (one per operation)<br/>T_in: buffer, join inputs<br/>P: invoke the service<br/>T_out: route by the rules"]
         SH["ServiceHelper"]
@@ -59,9 +59,9 @@ flowchart TB
         EP["EventPublisher<br/>zip, split, send"]
         DB[("Derby database<br/>ServiceAnalysisDataBase")]
     end
-    RULES["rule message"] --> RH --> RF
+    RH --> RF
     RH -. "acknowledgement" .-> ACK["deployment tooling"]
-    TOK["token message"] --> ER --> SC --> ST
+    ER --> SC --> ST
     ST <--> SH
     SH -- "reflection" --> JS
     SH -- "REST (HTTP POST)" --> RS["Business service<br/>REST endpoint, any language,<br/>any machine"]
