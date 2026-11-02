@@ -2902,6 +2902,8 @@ class ServiceThread implements Runnable {
 	 */
 	@SuppressWarnings("unchecked")
 	void launchSignal(String signalNodeId, String businessResult) {
+		// The rule engine quotes a name with spaces ("Loan Abandoned", as the editor names a node after its label).
+		signalNodeId = unquote(signalNodeId);
 		String[] launch = querySignalLaunch(signalNodeId);
 		int sourceToken = phaseSequenceID;
 		if (launch == null || "NONE".equals(launch[1])) {
