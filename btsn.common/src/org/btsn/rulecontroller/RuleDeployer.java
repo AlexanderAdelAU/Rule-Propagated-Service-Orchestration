@@ -76,7 +76,7 @@ public class RuleDeployer {
 		static final String RULE_PAYLOAD_FOLDER = COMMON_FOLDER + "/RulePayLoad";
 		static final String SERVICE_ATTRIBUTE_BINDINGS_FOLDER = COMMON_FOLDER + "/ServiceAttributeBindings";
 		
-		static final Set<String> VALID_NODE_TYPES = Set.of("DecisionNode", "TerminateNode", "JoinNode", "XorNode",
+		static final Set<String> VALID_NODE_TYPES = Set.of("DecisionNode", "TerminateNode", "SignalNode", "JoinNode", "XorNode",
 				"MergeNode", "EdgeNode", "MonitorNode", "FeedFwdNode", "GatewayNode", "ForkNode", "EventGenerator");
 		
 		/**
@@ -595,6 +595,11 @@ public class RuleDeployer {
 	                    attributes.put("node_type", nodeType);
 	                    if (nodeValue != null) {
 	                        attributes.put("node_value", nodeValue);
+	                    }
+	                    // A Signal node names the process it launches.
+	                    String launchProcess = extractJsonValue(block, "launch_process");
+	                    if (launchProcess != null && !launchProcess.isEmpty()) {
+	                        attributes.put("launch_process", launchProcess);
 	                    }
 	                    
 	                    // CRITICAL: Only capture buffer for T_in and Other transition types
@@ -2002,6 +2007,7 @@ public class RuleDeployer {
 	 * - Use OUTGOING transition's NodeType for the service's routing behavior
 	 */
 	private String generateServiceRules(ServiceNode serviceNode) throws RuleDeployerException {
+	    signalLaunchesWritten.clear();
 	    StringWriter stringWriter = new StringWriter();
 		PrintWriter writer = new PrintWriter(stringWriter);
 
@@ -2261,6 +2267,9 @@ public class RuleDeployer {
 								decisionValue != null ? decisionValue : "");
 						logger.info("GatewayNode: Added TERMINATE meetsCondition with decision_value='" + 
 								   decisionValue + "' (via TerminateNode " + nextTransition.nodeId + ")");
+					} else if ("SignalNode".equals(nextTransition.nodeType)) {
+						addSignalRoute(writer, nextTransition, new String[] { transition.nodeType, transition.nodeValue },
+								decisionValue != null ? decisionValue : "");
 					} else {
 						// Regular transition - find service after it
 						ServiceNode nextService = findServiceAfterTransition(nextTransition);
@@ -2343,6 +2352,12 @@ public class RuleDeployer {
 		logger.info("Found " + destinationServices.size() + " destination services");
 
 		for (ServiceNode destService : destinationServices) {
+			// A Signal node reached directly: end the token here and launch the process it names.
+			if ("SIGNAL".equals(destService.service)) {
+				addSignalRoute(writer, workflowModel.getTransitionNodes().get(destService.operation),
+						new String[] { transition.nodeType, transition.nodeValue }, "");
+				continue;
+			}
 			// Find the operation to use (check for endpoint attribute)
 			String operationToUse = findOperationForDestination(transition, destService);
 			
@@ -2522,6 +2537,10 @@ public class RuleDeployer {
 		// FIXED: Check if target is a TerminateNode transition (like T14)
 		// This mirrors the GatewayNode logic for handling TERMINATE paths
 		TransitionNode targetTransition = workflowModel.getTransitionNodes().get(edge.toNode);
+		if (targetTransition != null && "SignalNode".equals(targetTransition.nodeType)) {
+			addSignalRoute(writer, targetTransition, new String[] { decisionNode.nodeType, condition }, decisionValue);
+			return true;
+		}
 		if (targetTransition != null && "TerminateNode".equals(targetTransition.nodeType)) {
 			// Add meetsCondition for TERMINATE with decision_value for XOR matching
 			AddmeetsCondition(writer, new String[] { "TERMINATE", "TERMINATE" },
@@ -3444,6 +3463,70 @@ public class RuleDeployer {
 		return true;
 	}
 	
+
+	// ========================================================================
+	// SIGNAL NODES
+	// ========================================================================
+
+	/** The run property naming each process deployed in this run: process=version|place|operation|generator|expire;... */
+	public static final String RUN_PROCESSES_PROPERTY = "btsn.run.processes";
+
+	/** Where a process deployed in this run starts: its version, entry place and operation, start node and token lifetime. */
+	static final class ProcessStart {
+		final String version, place, operation, generator, expire;
+		ProcessStart(String version, String place, String operation, String generator, String expire) {
+			this.version = version; this.place = place; this.operation = operation; this.generator = generator; this.expire = expire;
+		}
+	}
+
+	/** The processes this run deploys, from {@link #RUN_PROCESSES_PROPERTY}; slots the run leaves unset are skipped. */
+	static Map<String, ProcessStart> runProcesses(String property) {
+		Map<String, ProcessStart> starts = new LinkedHashMap<>();
+		if (property == null) return starts;
+		for (String entry : property.split(";")) {
+			int eq = entry.indexOf('=');
+			if (eq <= 0 || entry.contains("${")) continue;
+			String[] p = entry.substring(eq + 1).split("\\|", -1);
+			if (p.length < 5 || p[0].isEmpty() || p[1].isEmpty() || p[2].isEmpty()) continue;
+			starts.put(entry.substring(0, eq).trim(), new ProcessStart(p[0].trim(), p[1].trim(), p[2].trim(), p[3].trim(), p[4].trim()));
+		}
+		return starts;
+	}
+
+	private final Set<String> signalLaunchesWritten = new HashSet<>();
+
+	/**
+	 * A route to a Signal node: the token ends in this process and the host launches a new token into the process the
+	 * Signal node names, at that process's start. The route is a meetsCondition to the SIGNAL pseudo-service (the Signal
+	 * node's id as its operation), and signalLaunch says where the launched process starts in this run:
+	 * signalLaunch(signal node, signal name, version, place, operation, start node, lifetime ms, process).
+	 * A process this run does not deploy is written with version NONE: the token still ends at the Signal node, and the
+	 * host reports that nothing was launched.
+	 */
+	private void addSignalRoute(PrintWriter writer, TransitionNode signalNode, String[] condition, String decisionValue) {
+		if (signalNode == null) return;
+		AddmeetsCondition(writer, new String[] { "SIGNAL", signalNode.nodeId }, condition, decisionValue);
+		if (!signalLaunchesWritten.add(signalNode.nodeId)) return;
+		String process = signalNode.attributes.get("launch_process");
+		String name = signalNode.attributes.getOrDefault("label", signalNode.nodeId);
+		ProcessStart start = process == null ? null : runProcesses(System.getProperty(RUN_PROCESSES_PROPERTY)).get(process);
+		if (start == null) {
+			logger.warn("Signal node " + signalNode.nodeId + " launches " + process + ", which this run does not deploy: "
+				+ "its tokens will end there and launch nothing");
+			System.out.println("WARNING: Signal node '" + name + "' launches " + process + ", which this run does not deploy");
+		}
+		writer.print(String.format("<Atom><Rel>signalLaunch</Rel><Ind>%s</Ind><Ind>%s</Ind><Ind>%s</Ind><Ind>%s</Ind>"
+				+ "<Ind>%s</Ind><Ind>%s</Ind><Ind>%s</Ind><Ind>%s</Ind></Atom>",
+				xmlText(signalNode.nodeId), xmlText(name), start == null ? "NONE" : start.version,
+				start == null ? "NONE" : start.place, start == null ? "NONE" : start.operation,
+				start == null ? "NONE" : xmlText(start.generator), start == null ? "0" : start.expire, xmlText(String.valueOf(process))));
+		logger.info("Signal node " + signalNode.nodeId + " (" + name + ") launches " + process
+			+ (start == null ? " (not deployed in this run)" : " " + start.version + " at " + start.place + "." + start.operation));
+	}
+
+	private static String xmlText(String s) {
+		return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+	}
 
 	/**
 	 * Write terminationCondition atom to rule file

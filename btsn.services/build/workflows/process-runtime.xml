@@ -29,6 +29,10 @@
                                that version's first workflow); eg1.tokens is then the marking's token count
     eg1.format.service         optional: the token format (TokenFormats) the generator fills its tokens from,
                                for a token generator that has formats (e.g. TriageService)
+    eg1.started.by.signal      optional: the slot's process is deployed but its generator fires nothing; its tokens
+                               come from Signal nodes of the other processes, which name it (launch_process).
+                               egN.place and egN.operation are where those tokens start, egN.id the start node
+                               they are recorded as coming from, and egN.expire their lifetime.
     token.generator.class      optional: the token generator; default GenericPetriNetTokenGenerator
                                (healthcare launchers use GenericHealthcareTokenGenerator)
     Optional: -Dp7.mode=local|remote starts or skips one host (default auto: by its channel's address).
@@ -108,6 +112,9 @@
     <property name="eg1.tokens" value="${token.count}"/>
     <property name="eg2.tokens" value="${token.count}"/>
     <property name="eg3.tokens" value="${token.count}"/>
+    <!-- Where each process of the run starts, for the Signal nodes that launch one: process=version|place|operation|
+         start node|lifetime, per slot (an unused slot's entry keeps its ${...} and is ignored). -->
+    <property name="run.processes" value="${eg1.process}=${eg1.version}|${eg1.place}|${eg1.operation}|${eg1.id}|${eg1.expire};${eg2.process}=${eg2.version}|${eg2.place}|${eg2.operation}|${eg2.id}|${eg2.expire};${eg3.process}=${eg3.version}|${eg3.place}|${eg3.operation}|${eg3.id}|${eg3.expire}"/>
 
     <!-- The run's hosts: run.pN properties (older launchers) and -Dpn.mode reach the planner as system properties. -->
     <macrodef name="host-launch">
@@ -155,6 +162,7 @@
             <echo message="Deploying ${@{slot}.process} (${@{slot}.version}) for ${@{slot}.id}..." if:set="@{slot}.id"/>
             <java classname="${token.generator.class}" fork="true" dir="${generator.project.dir}" failonerror="true" if:set="@{slot}.id">
                 <classpath refid="generator.classpath"/>
+                <sysproperty key="btsn.run.processes" value="${run.processes}"/>
                 <arg value="-version"/><arg value="${@{slot}.version}"/>
                 <arg value="-process"/><arg value="${@{slot}.process}"/>
                 <arg value="-infrastructure"/><arg value="${infrastructure.definition.name}"/>
@@ -163,6 +171,7 @@
                 <arg value="-tokens"/><arg value="0"/>
                 <arg value="-expire"/><arg value="${@{slot}.expire}"/>
                 <arg value="-generator"/><arg value="${@{slot}.id}"/>
+                <arg value="-startedbysignal" if:set="@{slot}.started.by.signal"/>
                 <arg value="-format-service" if:set="@{slot}.format.service"/><arg value="${@{slot}.format.service}" if:set="@{slot}.format.service"/>
             </java>
         </sequential>
@@ -228,7 +237,8 @@
                 <echo message="[LIVE] ${@{slot}.version} first token at ${@{slot}.fire.time}"/>
             </sequential>
             <sleep seconds="${@{slot}.fire.after.seconds}" if:set="@{slot}.fire.after.seconds" unless:set="@{slot}.publish.at.seconds"/>
-            <fire-generator slot="@{slot}"/>
+            <fire-generator slot="@{slot}" unless:set="@{slot}.started.by.signal"/>
+            <echo message="${@{slot}.process} (${@{slot}.version}) fires nothing itself: Signal nodes start it" if:set="@{slot}.started.by.signal"/>
         </sequential>
     </macrodef>
 

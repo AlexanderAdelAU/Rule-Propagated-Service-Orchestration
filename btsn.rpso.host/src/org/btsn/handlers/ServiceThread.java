@@ -2741,6 +2741,11 @@ class ServiceThread implements Runnable {
 
 		String nextServiceName = nextServiceCollection.get(solutionIndex);
 		String nextOperationName = nextOperationCollection.get(solutionIndex);
+		if ("SIGNAL".equals(nextServiceName)) {
+			// A Signal node: the token has ended here (recorded when it left the place); launch the process it names.
+			launchSignal(nextOperationName, val);
+			return;
+		}
 		String nextChannelName = nextChannelCollection.get(solutionIndex);
 		String nextPortNumber = nextPortCollection.get(solutionIndex);
 
@@ -2881,6 +2886,146 @@ class ServiceThread implements Runnable {
 		} catch (Exception e) {
 			logger.error("ORCHESTRATOR: Failed to publish to " + nextServiceName + " via EventPublisher", e);
 		}
+	}
+
+	// ========================================================================
+	// SIGNAL NODES
+	// ========================================================================
+
+	/**
+	 * A token has reached a Signal node: it ends in this process, and a new token starts the process the Signal node
+	 * names, at that process's start (its first place), in the version this run deploys it as. The new token is the
+	 * same workflow in that version (workflow 1030000 of v001 launches 2030000 of v002), so the two can be followed
+	 * together. It carries a signal header the host fills in (signal, source process and version, workflow, token,
+	 * place, reason, time) and the business result as it left this place. The receiving host records it as generated
+	 * by the target process's start node.
+	 */
+	@SuppressWarnings("unchecked")
+	void launchSignal(String signalNodeId, String businessResult) {
+		// The rule engine quotes a name with spaces ("Loan Abandoned", as the editor names a node after its label).
+		signalNodeId = unquote(signalNodeId);
+		String[] launch = querySignalLaunch(signalNodeId);
+		int sourceToken = phaseSequenceID;
+		if (launch == null || "NONE".equals(launch[1])) {
+			logger.warn("SIGNAL: " + signalNodeId + " reached by token " + sourceToken + " at " + serviceName
+				+ ", but the process it launches (" + (launch == null ? "unknown" : launch[6]) + ") is not deployed in this run: nothing launched");
+			return;
+		}
+		String signalName = launch[0], version = launch[1], place = launch[2], operation = launch[3],
+			startNode = launch[4], process = launch[6];
+		long lifetime;
+		try { lifetime = Long.parseLong(launch[5]); } catch (NumberFormatException e) { lifetime = 120000; }
+
+		int sourceWorkflow = VersionConstants.getParentTokenId(sourceToken);
+		int launchedToken = VersionConstants.getWorkflowBase(version)
+			+ (sourceWorkflow - VersionConstants.getWorkflowBaseFromSequenceId(sourceToken));
+		long now = System.currentTimeMillis();
+
+		JSONObject signal = new JSONObject();
+		signal.put("signal", signalName);
+		signal.put("signal_node", signalNodeId);
+		signal.put("source_version", VersionConstants.getVersionFromSequenceId(sourceToken));
+		signal.put("source_workflow", Integer.toString(sourceWorkflow));
+		signal.put("source_token", Integer.toString(sourceToken));
+		signal.put("from_place", serviceName);
+		signal.put("reason", lastSignalArc == null ? "" : lastSignalArc);
+		signal.put("raised_at", now);
+
+		JSONObject token = new JSONObject();
+		token.put("tokenId", Integer.toString(launchedToken));
+		token.put("version", version);
+		token.put("notAfter", now + lifetime);
+		token.put("currentPlace", place);
+		token.put("workflow_start_time", now);
+		token.put("signal", signal);
+		Object body = businessResult;
+		try { body = new JSONParser().parse(businessResult); } catch (Exception notJson) { /* kept as text */ }
+		token.put("data", body);
+
+		String[] target = resolveSignalTarget(place, operation);
+		if (target == null) {
+			logger.error("SIGNAL: " + signalName + " from token " + sourceToken + ": no host is deployed for "
+				+ place + "." + operation + " (" + process + " " + version + "): nothing launched");
+			return;
+		}
+		String payload = signalPayload(token.toJSONString(), launchedToken, version, place, operation, now + lifetime, now, startNode);
+		boolean published = eventPublisher.publishServiceEvent(place, operation, payload, target[0], target[1], version, target[2]);
+		logger.info("SIGNAL: " + signalName + " from token " + sourceToken + " at " + serviceName + " launched " + process
+			+ " " + version + " as token " + launchedToken + " at " + place + "." + operation + (published ? "" : " (publish FAILED)"));
+	}
+
+	/** The decision value of the arc that led to the Signal node, kept from the exit record for the signal header. */
+	private volatile String lastSignalArc;
+
+	/** signalLaunch(node, name, version, place, operation, start node, lifetime, process), from this service's rules. */
+	private String[] querySignalLaunch(String signalNodeId) {
+		try {
+			oojdrew.issueRuleMLQuery("<Query><Atom><Rel>signalLaunch</Rel><Ind>" + signalNodeId + "</Ind><Var>name</Var>"
+				+ "<Var>version</Var><Var>place</Var><Var>operation</Var><Var>start</Var><Var>lifetime</Var><Var>process</Var></Atom></Query>");
+			if (oojdrew.rowsReturned == 0) return null;
+			String[] r = new String[7];
+			String[] names = { "?name", "?version", "?place", "?operation", "?start", "?lifetime", "?process" };
+			for (int i = 0; i < oojdrew.rowsReturned; i++) {
+				String key = String.valueOf(oojdrew.rowData[i][0]);
+				for (int k = 0; k < names.length; k++) if (names[k].equals(key)) r[k] = unquote(String.valueOf(oojdrew.rowData[i][1]));
+			}
+			return r;
+		} catch (Exception e) {
+			logger.error("SIGNAL: could not read signalLaunch for " + signalNodeId, e);
+			return null;
+		}
+	}
+
+	/** A rule value as written: the rule engine quotes values with spaces or slashes ("Loan Abandoned"). */
+	private static String unquote(String value) {
+		return value.length() > 1 && value.startsWith("\"") && value.endsWith("\"") ? value.substring(1, value.length() - 1) : value;
+	}
+
+	/** The channel (resolved to an address), port and channel id of the host running service.operation. */
+	private String[] resolveSignalTarget(String service, String operation) {
+		try {
+			oojdrew.issueRuleMLQuery(String.format("<Query><Atom><Rel>activeService</Rel><Ind>%s</Ind><Ind>%s</Ind>"
+				+ "<Var>channelId</Var><Var>port</Var></Atom></Query>", service, operation));
+			String channelId = null, port = null;
+			for (int i = 0; i < oojdrew.rowsReturned; i++) {
+				String key = String.valueOf(oojdrew.rowData[i][0]);
+				if ("?channelId".equals(key)) channelId = String.valueOf(oojdrew.rowData[i][1]);
+				else if ("?port".equals(key)) port = String.valueOf(oojdrew.rowData[i][1]);
+			}
+			if (channelId == null || port == null) return null;
+			String channel = channelId;
+			if (channelId.startsWith("ip")) {
+				oojdrew.issueRuleMLQuery(String.format(
+					"<Query><Atom><Rel>boundChannel</Rel><Ind>%s</Ind><Var>address</Var></Atom></Query>", channelId));
+				for (int i = 0; i < oojdrew.rowsReturned; i++)
+					if ("?address".equals(String.valueOf(oojdrew.rowData[i][0]))) channel = String.valueOf(oojdrew.rowData[i][1]);
+			}
+			return new String[] { channel, port, channelId };
+		} catch (Exception e) {
+			logger.error("SIGNAL: could not resolve the host of " + service + "." + operation, e);
+			return null;
+		}
+	}
+
+	/** The event for the launched token, as an event generator would send it to a process's first place. */
+	static String signalPayload(String tokenJson, int tokenId, String version, String place, String operation,
+	                            long notAfter, long now, String startNode) {
+		return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<payload>\n  <header>\n"
+			+ "    <sequenceId>" + tokenId + "</sequenceId>\n"
+			+ "    <ruleBaseVersion>" + version + "</ruleBaseVersion>\n"
+			+ "    <priortiseSID>true</priortiseSID>\n    <monitorIncomingEvents>true</monitorIncomingEvents>\n  </header>\n"
+			+ "  <service>\n    <serviceName>" + place + "</serviceName>\n    <operation>" + operation + "</operation>\n  </service>\n"
+			+ "  <joinAttribute>\n    <attributeName>token</attributeName>\n"
+			+ "    <attributeValue>" + xmlEscape(tokenJson) + "</attributeValue>\n"
+			+ "    <notAfter>" + notAfter + "</notAfter>\n    <status>active</status>\n  </joinAttribute>\n"
+			+ "  <monitorData>\n    <processStartTime>" + now + "</processStartTime>\n    <processElapsedTime>0</processElapsedTime>\n"
+			+ "    <eventGeneratorTimestamp>" + now + "</eventGeneratorTimestamp>\n"
+			+ "    <sourceEventGenerator>" + xmlEscape(startNode) + "</sourceEventGenerator>\n  </monitorData>\n</payload>";
+	}
+
+	private static String xmlEscape(String text) {
+		if (text == null) return "";
+		return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&apos;");
 	}
 
 	public void putServicePerformanceData(int sequenceID) {
@@ -3228,8 +3373,14 @@ class ServiceThread implements Runnable {
 	 */
 	void instrumentTokenExit(int tokenId, String fromPlace, String toService, 
 	                         String toOperation, String nodeType, String arcValue) {
+		if ("SIGNAL".equals(toService)) {
+			// A Signal node ends the token in this process, as a Terminate node does; the launch follows.
+			lastSignalArc = arcValue;
+			instrumentTokenTerminate(tokenId, fromPlace, nodeType, arcValue);
+			return;
+		}
 		if (petriNetHelper == null) return;
-		
+
 		petriNetHelper.recordTokenExitingWithArc(tokenId, fromPlace, toService, toOperation,
 		                                         nodeType, decisionValueCollection, arcValue);
 		logger.debug("PETRI-NET: Token " + tokenId + " EXIT from " + fromPlace + 

@@ -215,6 +215,11 @@ public class WorkflowModel {
                 logger.info("Found TerminateNode: " + startNode + " - returning synthetic TERMINATE service");
                 return new ServiceNode("TERMINATE", "TERMINATE", "TERMINATE", new HashMap<>());
             }
+            // A Signal node ends the token here and launches another process: a synthetic SIGNAL service whose
+            // operation is the Signal node's id.
+            if ("SignalNode".equals(intermediateTransition.nodeType)) {
+                return new ServiceNode("SIGNAL", "SIGNAL", startNode, new HashMap<>());
+            }
             
             for (WorkflowEdge edge : workflowEdges) {
                 if (edge.fromNode.equals(startNode)) {

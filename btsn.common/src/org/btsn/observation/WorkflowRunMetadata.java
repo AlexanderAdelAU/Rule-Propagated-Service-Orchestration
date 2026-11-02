@@ -54,6 +54,28 @@ public final class WorkflowRunMetadata {
         } finally { Files.deleteIfExists(temporary); }
     }
 
+    /**
+     * A process started by Signal nodes rather than by its generator: from deployedAt on, the tokens generated at its
+     * start node in this version belong to it. Written where the run deploys it, so it is found wherever the hosts run.
+     */
+    @SuppressWarnings("unchecked")
+    public static void recordSignalStart(String process, String version, String startNode, long deployedAt) {
+        try {
+            if (process == null || process.isBlank() || version == null || startNode == null || deployedAt <= 0) return;
+            JSONObject data = new JSONObject();
+            data.put("process", process); data.put("version", version);
+            data.put("startNode", startNode); data.put("deployedAt", deployedAt);
+            Path directory = directory();
+            Files.createDirectories(directory);
+            Files.writeString(directory.resolve(SIGNAL_START + deployedAt + "-" + version + "-" + UUID.randomUUID() + ".json"), data.toJSONString() + "\n");
+        } catch (Exception e) {
+            System.err.println("Could not record the signal-started process: " + e.getMessage());
+        }
+    }
+
+    /** File name prefix of a {@link #recordSignalStart} record. */
+    public static final String SIGNAL_START = "signal-";
+
     private static String element(String payload, String name) {
         String open = "<" + name + ">", close = "</" + name + ">";
         int start = payload.indexOf(open);

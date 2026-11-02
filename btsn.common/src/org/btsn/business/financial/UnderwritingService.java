@@ -13,6 +13,9 @@ public class UnderwritingService extends BaseBusinessService {
 
     /**
      * creditCheckResults + fraudCheckResults -> underwritingResults
+     *
+     * When the fraud check could not be done (fraud_status "unavailable"), no lending decision can be made: the
+     * application is abandoned, and the loan process signals for the work already done for it to be undone.
      */
     @SuppressWarnings("unchecked")
     public String processToken(String creditCheckResults, String fraudCheckResults) {
@@ -23,7 +26,9 @@ public class UnderwritingService extends BaseBusinessService {
         String fraudRisk = textValue(fraudCheckResults, "fraud_risk", "unknown");
 
         String decision;
-        if ("high".equalsIgnoreCase(fraudRisk) || creditScore < 600.0) {
+        if ("unavailable".equalsIgnoreCase(textValue(fraudCheckResults, "fraud_status", ""))) {
+            decision = "abandoned";
+        } else if ("high".equalsIgnoreCase(fraudRisk) || creditScore < 600.0) {
             decision = "declined";
         } else if (creditScore >= 700.0 && "low".equalsIgnoreCase(fraudRisk)) {
             decision = "approved";
@@ -39,6 +44,9 @@ public class UnderwritingService extends BaseBusinessService {
         result.put("fraud_risk", fraudRisk);
         result.put("underwriting_decision", decision);
         result.put("routing_decision", routingDecision(decision));
+
+        String workflowId = textValue(creditCheckResults, "workflow_id", null);
+        if (workflowId != null) result.put("workflow_id", workflowId);
 
         return businessResult("underwritingResults", result);
     }

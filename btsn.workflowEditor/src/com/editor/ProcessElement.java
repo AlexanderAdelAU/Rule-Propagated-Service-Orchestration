@@ -41,6 +41,7 @@ public class ProcessElement {
     private String generatorRate = "1000";  // Token generation rate in ms
     private String tokenVersion = "v001";   // Version prefix for generated tokens
     private String tokenData = "";          // name=value,... put in every token the generator sends (e.g. application_id=LOAN-1)
+    private String launchProcess = "";      // a Signal node: the process it launches (e.g. financial/Workflow/Loan_Compensation_Workflow)
     
     // Fork behavior for Event Generators (implicit fork to join)
     private boolean forkEnabled = false;
@@ -531,6 +532,7 @@ public class ProcessElement {
             case "ForkNode":     return "F";
             case "GatewayNode":  return "G";
             case "TerminateNode": return "T";
+            case "SignalNode":   return "S";
             default:             return "E";
         }
     }
@@ -679,6 +681,10 @@ public class ProcessElement {
     }
 
     public String getTokenData() { return tokenData; }
+    public String getLaunchProcess() { return launchProcess; }
+    public void setLaunchProcess(String process) { this.launchProcess = process == null ? "" : process.trim(); }
+    /** A Signal node: ends the token in this process, as a Terminate node does, and launches the process it names. */
+    public boolean isSignalNode() { return "SignalNode".equals(nodeType) || "SIGNAL_NODE".equals(getNodeValue()); }
     public void setTokenData(String data) { this.tokenData = data == null ? "" : data.trim(); }
     
     // Fork behavior setters

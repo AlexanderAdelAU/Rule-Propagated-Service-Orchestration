@@ -40,6 +40,7 @@ public class EditorFrame extends JPanel {
         {"ForkNode", "FORK_NODE"},
         {"GatewayNode", "GATEWAY_NODE"},
         {"TerminateNode", "TERMINATE_NODE"},
+        {"SignalNode", "SIGNAL_NODE"},
         {"DecisionNode", "DECISION_NODE"},
         {"FeedFwdNode", "FEEDFWD_NODE"},
         {"MonitorNode", "MONITOR_NODE"}
@@ -422,7 +423,30 @@ public class EditorFrame extends JPanel {
                 }
                 addLabel("Node Value:", currentNodeValue);
             }
-            
+
+            // A Signal node ends the token here and launches another process: the business process names which.
+            if (element.isSignalNode()) {
+                JComboBox<String> processCombo = new JComboBox<>();
+                processCombo.setEditable(true);
+                processCombo.addItem("");
+                for (String process : canvas.processDefinitions()) processCombo.addItem(process);
+                if (!element.getLaunchProcess().isEmpty() && ((DefaultComboBoxModel<String>) processCombo.getModel()).getIndexOf(element.getLaunchProcess()) < 0)
+                    processCombo.addItem(element.getLaunchProcess());
+                addComboField("Launches process:", processCombo, element.getLaunchProcess());
+                processCombo.setToolTipText("<html>The process this Signal node starts, once for each token that reaches it.<br>"
+                    + "The token ends here; the launched process gets the same workflow number in its own version,<br>"
+                    + "with a signal header (signal, source workflow, place, reason) and this process's business result.<br>"
+                    + "The run must deploy that process (a launcher slot with egN.started.by.signal).</html>");
+                processCombo.addActionListener(e -> {
+                    Object selected = processCombo.getSelectedItem();
+                    String process = selected == null ? "" : selected.toString().trim();
+                    if (process.equals(element.getLaunchProcess())) return;
+                    element.setLaunchProcess(process);
+                    canvas.saveUndoState();
+                    canvas.repaint();
+                });
+            }
+
             // Colors section for Transitions
             addColorField("Fill Color:", element.getFillColor(), Color.WHITE, 
                 color -> {

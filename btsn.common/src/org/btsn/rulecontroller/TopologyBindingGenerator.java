@@ -1179,6 +1179,11 @@ public class TopologyBindingGenerator {
         
         boolean hasExplicitArgs = argumentNames != null && !argumentNames.isEmpty();
         
+        // Several processes of one run may use different operations of one service (each prepared in turn, the
+        // service's binding file shared): keep the other operations' bindings, or the last process prepared would
+        // leave the others' operations with no binding on the host.
+        List<String> otherOperations = otherOperationBindings(new File(fullPath), operationName);
+        
         logger.info("Writing canonical binding file: " + fullPath);
         
         try (PrintWriter pw = new PrintWriter(new FileWriter(fullPath))) {
@@ -1225,9 +1230,24 @@ public class TopologyBindingGenerator {
                     pw.println("</Atom>");
                 }
             }
+            for (String atom : otherOperations) pw.println(atom);
         }
         
         logger.debug("Successfully wrote canonical binding file: " + fullPath);
+    }
+
+    /** The canonicalBinding atoms an existing binding file holds for operations other than this one, as written. */
+    static List<String> otherOperationBindings(File bindingFile, String operationName) throws IOException {
+        List<String> atoms = new ArrayList<>();
+        if (!bindingFile.isFile()) return atoms;
+        String text = new String(Files.readAllBytes(bindingFile.toPath()), java.nio.charset.StandardCharsets.UTF_8);
+        java.util.regex.Matcher atom = java.util.regex.Pattern.compile("<Atom>.*?</Atom>", java.util.regex.Pattern.DOTALL).matcher(text);
+        java.util.regex.Pattern binding = java.util.regex.Pattern.compile("<Rel>\\s*canonicalBinding\\s*</Rel>\\s*<Ind>\\s*([^<\\s]+)\\s*</Ind>");
+        while (atom.find()) {
+            java.util.regex.Matcher m = binding.matcher(atom.group());
+            if (m.find() && !m.group(1).equals(operationName)) atoms.add(atom.group());
+        }
+        return atoms;
     }
 
     private void appendCanonicalOperationBinding(String basePath, String serviceName,

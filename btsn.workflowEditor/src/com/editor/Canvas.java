@@ -2278,7 +2278,8 @@ public class Canvas extends JPanel {
             String nodeValue = element.getNodeValue();
             boolean isTermination = (nodeType != null && nodeType.toUpperCase().contains("TERMINATE")) ||
                                    (nodeValue != null && nodeValue.toUpperCase().contains("TERMINATE")) ||
-                                   (element.getLabel() != null && element.getLabel().toLowerCase().contains("terminate"));
+                                   (element.getLabel() != null && element.getLabel().toLowerCase().contains("terminate")) ||
+                                   element.isSignalNode();   // a Signal node ends the token here too
             
             if (isTermination && label.equals(element.getLabel())) {
                 return element;
@@ -2918,8 +2919,15 @@ public class Canvas extends JPanel {
             String kind = (element.getNodeType() + " " + element.getNodeValue()).toUpperCase();
             boolean in = false, out = false;
             for (Arrow a : arrows) { in |= a.getTarget() == element; out |= a.getSource() == element; }
-            if (in && !out && !kind.contains("TERMINATE"))
+            if (in && !out && !kind.contains("TERMINATE") && !element.isSignalNode())
                 gaps.add("Transition '" + element.getLabel() + "' leads nowhere: tokens reaching it stop there. Make it a Terminate node if the process ends there, or connect it to the next place.");
+            if (element.isSignalNode() && element.getLaunchProcess().isEmpty())
+                gaps.add("Signal node '" + element.getLabel() + "' does not name the process it launches: set its Launches process.");
+            else if (element.isSignalNode() && !processDefinitionExists(element.getLaunchProcess()))
+                gaps.add("Signal node '" + element.getLabel() + "' launches " + element.getLaunchProcess()
+                    + ", which is not a process under ProcessDefinitionFolder.");
+            if (element.isSignalNode() && out)
+                gaps.add("Signal node '" + element.getLabel() + "' has arcs leading on from it: a Signal node ends the token in this process, so they are never taken.");
             // A gateway follows only the arcs whose guard matches what its place returned; an arc without a guard is
             // never taken. (A picture of a combined run draws several versions' arcs, so it is not checked.)
             if ("GatewayNode".equals(element.getNodeType()) && BuildAndRunGenerator.combinedLauncher(definitionLocation) == null)
@@ -2963,6 +2971,35 @@ public class Canvas extends JPanel {
         return names;
     }
     public ServiceRegistry getServiceRegistry() { return serviceRegistry; }
+    /** Whether a process (as a Signal node names it, e.g. financial/Workflow/X) is defined; unknown when there is no btsn.common to look in. */
+    boolean processDefinitionExists(String process) {
+        java.io.File common = ServiceRegistry.findCommon(definitionLocation);
+        if (common == null) return true;
+        return new java.io.File(common, "ProcessDefinitionFolder/" + process + ".json").isFile();
+    }
+
+    /** The processes a Signal node can launch: every process under ProcessDefinitionFolder, as domain/Folder/Name. */
+    List<String> processDefinitions() {
+        List<String> names = new ArrayList<>();
+        java.io.File common = ServiceRegistry.findCommon(definitionLocation);
+        if (common == null) return names;
+        java.io.File root = new java.io.File(common, "ProcessDefinitionFolder");
+        java.util.ArrayDeque<java.io.File> pending = new java.util.ArrayDeque<>(java.util.List.of(root));
+        while (!pending.isEmpty()) {
+            java.io.File[] files = pending.pop().listFiles();
+            if (files == null) continue;
+            for (java.io.File f : files) {
+                if (f.isDirectory()) pending.push(f);
+                else if (f.getName().endsWith(".json")) {
+                    String relative = root.toPath().relativize(f.toPath()).toString().replace('\\', '/');
+                    names.add(relative.substring(0, relative.length() - ".json".length()));
+                }
+            }
+        }
+        java.util.Collections.sort(names);
+        return names;
+    }
+
     public void setDefinitionLocation(java.io.File file) { definitionLocation = file; }
     public java.io.File getDefinitionLocation() { return definitionLocation; }
     public String getServiceDeploymentReference() { return serviceDeploymentReference; }
@@ -3500,6 +3537,8 @@ public class Canvas extends JPanel {
                     if ("JoinNode".equals(element.getNodeType()) && element.getJoinInputCount().matches("\\d+"))
                         json.append(",\n      \"joinInputCount\": ").append(element.getJoinInputCount());
                 }
+                if (element.isSignalNode() && !element.getLaunchProcess().isEmpty())
+                    json.append(",\n      \"launch_process\": \"").append(escapeJSON(element.getLaunchProcess())).append("\"");
             }
             
             // Save colors if custom (applies to all element types)
@@ -3812,6 +3851,7 @@ public class Canvas extends JPanel {
                     element.setBuffer(buffer);
                 }
                 element.setJoinInputCount(extractValue(block, "joinInputCount"));   // kept as written, so saving does not drop it
+                element.setLaunchProcess(extractValue(block, "launch_process"));
             }
             
             // Load colors if present (applies to all element types)

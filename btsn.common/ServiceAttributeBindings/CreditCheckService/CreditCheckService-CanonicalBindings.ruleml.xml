@@ -11,3 +11,9 @@
 	<Ind>creditCheckResults</Ind>
 	<Ind>validationResults</Ind>
 </Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>withdrawEnquiry</Ind>
+	<Ind>withdrawalResults</Ind>
+	<Ind>token</Ind>
+</Atom>

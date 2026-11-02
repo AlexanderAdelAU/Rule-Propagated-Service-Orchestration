@@ -449,6 +449,22 @@ Use **Arrow (drag)**, or **Arrow (click waypoints)** to bend the return route.
   - A service from your own catalogue declares its inputs and return name there: use **Edit Service in** *your catalogue*. **Create New Service** on a join place suggests one input per arc.
 - After changing a fork or join, **Deploy** again so the deployment carries the new inputs.
 
+### Signal nodes: one process starting another
+
+- **A Signal node ends the token in its process, like a Terminate node, and launches the process it names.** The business process owns both the decision (the arc into the Signal node) and the process launched.
+  - Set a transition's **Node Type** to `SignalNode` (drawn **S**), then choose **Launches process** in its Attributes, e.g. `financial/Workflow/Loan_Compensation_Workflow`.
+  - Its label is the signal's name (e.g. `Loan Abandoned`).
+- **The launched token:**
+  - starts at the launched process's start node and first place, in the version the run deploys that process as;
+  - is the same workflow in that version (workflow 1030000 of v001 launches 2030000 of v002), so the two can be followed together;
+  - carries a `signal` header the host fills in (signal, source version, source workflow and token, place, reason: the arc's value, time) and, as `data`, the business result the place returned.
+- **Create Build and Run includes the launched process:** the launcher deploys it under its own version (its start node's, or the next free one), started only by the Signal node; Build lists it as a `Signal` line, and its hosts join the run's.
+  - The launched process must be deployed (open it, **Deploy**, save the deployment).
+  - In a launcher written by hand, give it its own slot with `egN.started.by.signal=true`; `egN.place`, `egN.operation`, `egN.id` and `egN.expire` say where its tokens start, the start node they are recorded as coming from, and their lifetime.
+  - A run that does not deploy the launched process warns when it deploys, and its tokens end at the Signal node, launching nothing.
+- **Validate reports** a Signal node that names no process, one that names a process that does not exist, and arcs leading on from a Signal node.
+- **Not yet:** a token that fails (a service error, or its lifetime running out at a join) does not reach a Signal node; it stops where it failed.
+
 ### Validate and save
 
 1. Click **Validate**. Fix any missing labels, incomplete operations or invalid connections.
@@ -1119,6 +1135,7 @@ Every launcher runs the same way:
 | Dining philosophers from a deadlocked start: every join holds one fork and waits | [Dining_Philosophers_Deadlock_BuildAndRun.xml](btsn.petrinet.ProjectLoader/Dining_Philosophers_Deadlock_BuildAndRun.xml) |
 | Emergency department | [Emergency_Department_BuildAndRun.xml](btsn.healthcare.ProjectLoader/Emergency_Department_BuildAndRun.xml) |
 | Full Financial application | [FinancialSystem_P1_P5_BuildAndRun.xml](btsn.financial.ProjectLoader/FinancialSystem_P1_P5_BuildAndRun.xml) |
+| Financial application with a compensation process: the fraud bureau is unavailable for about 1 application in 5, leaving underwriting without a fraud result, so it abandons that application; the loan process's Signal node `Loan Abandoned` then launches a separate process (v002) for each, which withdraws the credit enquiry left behind. `analyse` then checks that every enquiry was settled or withdrawn exactly once | [FinancialSystem_P1_P5_Compensation_BuildAndRun.xml](btsn.financial.ProjectLoader/FinancialSystem_P1_P5_Compensation_BuildAndRun.xml) |
 | Concurrent healthcare versions | [Triple_Workflow_Emergencey_Department_Concurrent.xml](btsn.healthcare.ProjectLoader/Triple_Workflow_Emergencey_Department_Concurrent.xml) |
 
 - **File name**: the concurrent launcher's name contains the typo `Emergencey`; use it as named.

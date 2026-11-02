@@ -1,0 +1,171 @@
+{
+  "processType": "PetriNet",
+  "elements": [
+    {
+      "id": "LOAN_ABANDONED",
+      "type": "EVENT_GENERATOR",
+      "x": 30,
+      "y": 200,
+      "width": 24,
+      "height": 60,
+      "label": "Loan Abandoned",
+      "rotation": 0,
+      "generator_rate": "1000",
+      "token_version": "v002"
+    },
+    {
+      "id": "T_in_WithdrawEnquiry",
+      "type": "TRANSITION",
+      "x": 110,
+      "y": 190,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_WithdrawEnquiry",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "WithdrawEnquiry",
+      "type": "PLACE",
+      "x": 175,
+      "y": 195,
+      "width": 50,
+      "height": 50,
+      "label": "WithdrawEnquiry",
+      "service": "CreditCheckService",
+      "operations": [
+        {
+          "name": "withdrawEnquiry",
+          "returnAttribute": "withdrawalResults",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_WithdrawEnquiry",
+      "type": "TRANSITION",
+      "x": 270,
+      "y": 190,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_WithdrawEnquiry",
+      "rotation": 0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "Terminate_Withdrawn",
+      "type": "TRANSITION",
+      "x": 420,
+      "y": 110,
+      "width": 20,
+      "height": 60,
+      "label": "Enquiry Withdrawn",
+      "rotation": 0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    },
+    {
+      "id": "Terminate_Nothing",
+      "type": "TRANSITION",
+      "x": 420,
+      "y": 290,
+      "width": 20,
+      "height": 60,
+      "label": "Nothing To Withdraw",
+      "rotation": 0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "LOAN_ABANDONED",
+      "target": "T_in_WithdrawEnquiry",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_in_WithdrawEnquiry",
+      "target": "WithdrawEnquiry",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "WithdrawEnquiry",
+      "target": "T_out_WithdrawEnquiry",
+      "label": "",
+      "guardCondition": "",
+      "decision_value": "",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_WithdrawEnquiry",
+      "target": "Terminate_Withdrawn",
+      "label": "withdrawn",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "withdrawn",
+      "endpoint": ""
+    },
+    {
+      "source": "T_out_WithdrawEnquiry",
+      "target": "Terminate_Nothing",
+      "label": "nothing_to_withdraw",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "nothing_to_withdraw",
+      "endpoint": ""
+    }
+  ],
+  "textElements": [
+    {
+      "x": 30,
+      "y": 50,
+      "text": "Loan Compensation — started by the loan process when it abandons an application",
+      "fontSize": 16,
+      "fontStyle": 1,
+      "color": -16777216
+    },
+    {
+      "x": 30,
+      "y": 72,
+      "text": "The loan process's Signal node \"Loan Abandoned\" launches one token here for each application it abandons.",
+      "fontSize": 11,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 30,
+      "y": 88,
+      "text": "It withdraws the credit enquiry that application's credit check recorded, on the host that keeps the record.",
+      "fontSize": 11,
+      "fontStyle": 0,
+      "color": -16777216
+    },
+    {
+      "x": 150,
+      "y": 290,
+      "text": "CreditCheckService.withdrawEnquiry (P2)",
+      "fontSize": 10,
+      "fontStyle": 2,
+      "color": -16777216
+    }
+  ],
+  "serviceDeployment": "ServiceDeploymentFolder/financial/FinancialSystem.json"
+}

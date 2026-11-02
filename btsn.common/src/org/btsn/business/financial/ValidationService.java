@@ -35,6 +35,10 @@ public class ValidationService extends BaseBusinessService {
         result.put("fraud_risk", fraudRisk);
         result.put("validation_status", route);
         result.put("routing_decision", routingDecision(route));
+        // The application's workflow number travels with it, so a later service can record what it did against the
+        // application, and the compensation process can undo it.
+        String workflowId = textValue(token, "tokenId", null);
+        if (workflowId != null) result.put("workflow_id", workflowId);
 
         return businessResult("validationResults", result);
     }

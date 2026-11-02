@@ -202,6 +202,7 @@ public class GenericPetriNetTokenGenerator {
 	private static boolean exitOnCompletion = true;
 	private static boolean skipPriming = true;  // Skip priming by default
 	private static boolean skipDeploy = false;  // Skip deployment if already done
+	private static boolean startedBySignal = false;  // -startedbysignal: the process is started by Signal nodes, not by this generator
 	
 	// Event Generator identity - REQUIRED for instrumentation tracking
 	// Event Generator identity - for instrumentation tracking
@@ -304,6 +305,10 @@ public class GenericPetriNetTokenGenerator {
 					throw t;
 				}
 				
+				// A process started by Signal nodes: record which process its start node begins, so the analysis can name
+				// the tokens the signals launch (this generator sends none of them).
+				if (startedBySignal)
+					org.btsn.observation.WorkflowRunMetadata.recordSignalStart(processName, ruleBaseVersion, eventGeneratorId, startTime);
 				if (!RuleDeployer.deployed) {
 					System.err.println("WARNING: Could not deploy process: " + processName);
 					System.err.println("WARNING: Continuing anyway...");
@@ -461,6 +466,12 @@ public class GenericPetriNetTokenGenerator {
 				case "--skipdeploy":
 					skipDeploy = true;
 					System.out.println("  Parsed -skipdeploy");
+					break;
+
+				case "-startedbysignal":
+				case "--startedbysignal":
+					startedBySignal = true;
+					System.out.println("  Parsed -startedbysignal");
 					break;
 					
 				// Fork mode arguments
