@@ -41,9 +41,12 @@ only the rules it holds and the service class (or REST endpoint) its deployment 
 
 ## Inside a host
 
-A host started as node `Pn` runs three services: `Pn_Place` (the business place) and two
-administration services, `Pn_InitializationService` and `Pn_CollectorService`. Each
-operation of each service gets its own pair of UDP sockets and its own thread.
+A host is one Java program, started as node `Pn`. It serves three places: `Pn_Place`, the
+node's place in the business process, and `Pn_InitializationService` and
+`Pn_CollectorService`, its places in the initialisation and collection processes. For each
+operation of each place it starts a `ServiceThread` on a token socket and a `RuleHandler` on a
+rule socket. The business service is not a separate program: its package is loaded into the
+host and the `ServiceThread` calls it, or calls its REST endpoint.
 
 ```mermaid
 flowchart TB
