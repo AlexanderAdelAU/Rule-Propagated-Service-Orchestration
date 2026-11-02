@@ -33,6 +33,7 @@ public final class WorkflowProcessNames {
             if (!tables.next()) return result;
         }
         Map<String, String> versions = new HashMap<>();
+        Map<String, Long> times = new HashMap<>();
         try (Statement s = c.createStatement(); ResultSet r = s.executeQuery(
                 "SELECT DISTINCT tokenId,timestamp,transitionId FROM CONSOLIDATED_TRANSITION_FIRINGS WHERE eventType='GENERATED'")) {
             while (r.next()) {
@@ -42,11 +43,18 @@ public final class WorkflowProcessNames {
                 Set<String> values = result.sources.computeIfAbsent(key, k -> new TreeSet<>());
                 if (source != null && !source.isBlank()) values.add(source);
                 versions.put(key, VersionConstants.getVersionFromSequenceId((int)token));
+                times.put(key, timestamp);
             }
         }
         Path directory = WorkflowRunMetadata.directory();
+        List<JSONObject> signalStarts = new ArrayList<>();
         if (Files.isDirectory(directory)) try (Stream<Path> files = Files.list(directory)) {
             for (Path file : (Iterable<Path>) files.filter(p -> p.getFileName().toString().endsWith(".json"))::iterator) {
+                if (file.getFileName().toString().startsWith(WorkflowRunMetadata.SIGNAL_START)) {
+                    try { signalStarts.add((JSONObject)new JSONParser().parse(Files.readString(file))); }
+                    catch (Exception e) { System.err.println("Ignoring unreadable process metadata: " + file.getFileName()); }
+                    continue;
+                }
                 // Skip provenance from other generations, including previous runs reusing token IDs.
                 String[] parts = file.getFileName().toString().split("-", 3);
                 if (parts.length < 3 || !versions.containsKey(parts[0] + "-" + parts[1])) continue;
@@ -61,6 +69,22 @@ public final class WorkflowProcessNames {
             }
         } catch (java.io.IOException e) {
             System.err.println("Could not read diagram process metadata: " + e.getMessage());
+        }
+        // Tokens launched by Signal nodes: generated at a signal-started process's start node, in its version, after
+        // that process was deployed. The latest such deployment before the token names it.
+        for (Map.Entry<String, String> entry : versions.entrySet()) {
+            String key = entry.getKey();
+            if (result.processes.containsKey(key)) continue;
+            Set<String> generators = result.sources.getOrDefault(key, Set.of());
+            JSONObject latest = null;
+            for (JSONObject start : signalStarts) {
+                Object deployed = start.get("deployedAt");
+                if (!entry.getValue().equals(start.get("version")) || !generators.contains(start.get("startNode"))
+                        || !(deployed instanceof Number) || ((Number)deployed).longValue() > times.get(key)) continue;
+                if (latest == null || ((Number)deployed).longValue() > ((Number)latest.get("deployedAt")).longValue()) latest = start;
+            }
+            if (latest != null && latest.get("process") instanceof String)
+                result.processes.computeIfAbsent(key, k -> new TreeSet<>()).add((String)latest.get("process"));
         }
         for (Map.Entry<String,String> entry : versions.entrySet())
             result.byVersion.computeIfAbsent(entry.getValue(), k -> new TreeSet<>()).add(result.description(entry.getKey()));

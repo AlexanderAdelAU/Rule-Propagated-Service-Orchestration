@@ -171,6 +171,7 @@
                 <arg value="-tokens"/><arg value="0"/>
                 <arg value="-expire"/><arg value="${@{slot}.expire}"/>
                 <arg value="-generator"/><arg value="${@{slot}.id}"/>
+                <arg value="-startedbysignal" if:set="@{slot}.started.by.signal"/>
                 <arg value="-format-service" if:set="@{slot}.format.service"/><arg value="${@{slot}.format.service}" if:set="@{slot}.format.service"/>
             </java>
         </sequential>

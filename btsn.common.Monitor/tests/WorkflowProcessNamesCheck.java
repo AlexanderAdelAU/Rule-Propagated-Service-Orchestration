@@ -83,6 +83,20 @@ public final class WorkflowProcessNamesCheck {
             check(queues.processNames.caption(-1).contains(EMERGENCY),"Queue view lost recorded workflow context");
             WorkflowSpatialView spatial = new WorkflowSpatialView();
             check(spatial.processDescription().contains(EMERGENCY),"Spatial view omitted recorded process");
+            // A process started by Signal nodes: its tokens come from a host, not a generator, so its deployment names
+            // the tokens generated at its start node in its version afterwards; the latest deployment wins, and a
+            // token generated before any deployment, or at another start node, is not named by it.
+            WorkflowRunMetadata.recordSignalStart("old/Earlier_Compensation", "v006", "Loan Abandoned", 1000);
+            WorkflowRunMetadata.recordSignalStart("financial/Workflow/Loan_Compensation_Workflow", "v006", "Loan Abandoned", 2000);
+            event(c,6020000,2500,"GENERATED","Loan Abandoned");
+            event(c,6030000,1500,"GENERATED","Loan Abandoned");
+            event(c,6040000,2600,"GENERATED","OTHER_START");
+            event(c,6050000,500,"GENERATED","Loan Abandoned");
+            WorkflowProcessNames signalled = WorkflowProcessNames.load(c);
+            check(signalled.forRoot(6020000,2500).equals("financial/Workflow/Loan_Compensation_Workflow"), "Signal-started process not named: " + signalled.forRoot(6020000,2500));
+            check(signalled.forRoot(6030000,1500).equals("old/Earlier_Compensation"), "Earlier deployment not used for an earlier token");
+            check(signalled.forRoot(6040000,2600).startsWith(WorkflowProcessNames.UNKNOWN) && signalled.forRoot(6050000,500).startsWith(WorkflowProcessNames.UNKNOWN),
+                    "A token from another start node, or before the deployment, was named");
             WorkflowRunMetadata.record("different/Conflicting_Process", "v001", 1000000, radiology);
             check(WorkflowProcessNames.load(c).forRoot(1000000,radiology).startsWith("Conflicting process metadata:"),"Conflicting provenance silently selected a name");
         }
@@ -90,7 +104,7 @@ public final class WorkflowProcessNamesCheck {
         Path blocked = Path.of("blocked-metadata").toAbsolutePath(); Files.writeString(blocked,"file");
         System.setProperty("btsn.workflow.metadata.dir",blocked.toString());
         submit("healthcare",EMERGENCY,"v003",3001000,false);
-        System.out.println("PASS: real UDP generator submissions; exact token/timestamp/process matches; concurrent versions; joins; reused IDs; legacy source fallback; invalid/conflicting metadata; labelled exports and views; unchanged measured durations; nonfatal metadata failure");
+        System.out.println("PASS: real UDP generator submissions; exact token/timestamp/process matches; concurrent versions; joins; reused IDs; legacy source fallback; processes started by Signal nodes; invalid/conflicting metadata; labelled exports and views; unchanged measured durations; nonfatal metadata failure");
     }
     private static long submit(String family,String process,String version,int token,boolean join) throws Exception {
         String name=family.equals("healthcare") ? "GenericHealthcareTokenGenerator" : "GenericPetriNetTokenGenerator";
