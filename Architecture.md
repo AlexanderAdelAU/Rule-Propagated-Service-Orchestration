@@ -5,65 +5,90 @@ architecture's ideas: places bound to services, transitions as rules, tokens as 
 This page shows the machinery underneath: which programs run, what they send each other,
 where the rules live, and what happens, step by step, when you run a process.
 
+## Terms
+
+| Term | Meaning |
+|---|---|
+| **Place** | A place of the Petri net, with its T_in and T_out. P1 and so on in the examples |
+| **Place service** | The business code bound to a place: a Java class, or a service behind a REST endpoint in any language |
+| **Node** | What a place is assigned to by the deployment (P1, P2, …). The infrastructure definition gives each node a network address |
+| **Machine** | A computer. One machine can run several nodes |
+| **Orchestration host** (host, for short) | The program a node runs on its machine. Every orchestration host is the same program, and holds no business code of its own |
+| **Orchestration thread** | The thread inside an orchestration host that carries out T_in → P → T_out for one operation of a place (`ServiceThread`) |
+| **Control role** | What a transition does: edge, gateway, fork, join, terminate or signal. The editor calls it the transition's Node Type |
+
+They fit together like this:
+
+> place → node → orchestration host → machine.
+>
+> The orchestration thread calls the place service: in-process when it is a Java class
+> loaded into the orchestration host, or over REST on whatever machine serves its endpoint.
+
 ## The programs in a run
 
 A run is a handful of ordinary Java programs exchanging UDP messages. Nothing in it is a
-central engine: once the rules are installed, the hosts pass tokens directly to each other.
+central engine: once the rules are installed, the orchestration hosts pass tokens directly
+to each other.
 
 ```mermaid
-flowchart LR
-    ED["ProcessEditor<br/>draws the process, writes the launcher,<br/>replays recorded runs"]
-    L["Launcher (Ant)<br/>runs the phases"]
-    G["Event generator<br/>deploys a version's rules,<br/>then fires its tokens"]
-    subgraph Hosts["Hosts: the same program on every node, on any machine"]
+flowchart TB
+    ED["ProcessEditor: draws the process, writes the launcher, replays the report"]
+    L["Launcher (Ant): runs the phases"]
+    G["Event generator: deploys a version's rules, then fires its tokens"]
+    subgraph Hosts["Orchestration hosts: one per node, on any machine"]
+        direction LR
         P1["P1"] --> P2["P2"] & P3["P3"]
         P2 & P3 --> P4["P4"]
     end
-    M["Monitor<br/>collects records, analysis and charts"]
+    M["Monitor: collects the records; analysis and charts"]
     ED -- "writes" --> L -- "starts" --> G
-    G -. "rule messages (control plane)" .-> Hosts
-    G -- "tokens" --> P1
+    G -- "rule messages to every host (control plane),<br/>then tokens to the first place" --> Hosts
     Hosts -. "records, collected after the run" .-> M
-    M -- "analysis report" --> ED
 ```
 
 | Program | Where the code is | What it does |
 |---|---|---|
-| Host | `btsn.rpso.host` (`ServiceLoader -node Pn`) | One per node. Receives rules and tokens, runs its place's service, routes the result, records what happened |
+| Orchestration host | `btsn.rpso.host` (`ServiceLoader -node Pn`) | One per node. Receives rules and tokens, calls its place service, routes the result, records what happened |
 | Deployment tooling | `btsn.common/src/org/btsn/rulecontroller` | `TopologyBindingGenerator` writes each operation's inputs and result; `RuleDeployer` compiles the process into a rule fragment for each place and sends each host its fragment |
 | Event generator | `btsn.common.eventgenerators` (`GenericPetriNetTokenGenerator`) | Deploys a version (through `RuleDeployer`), then fires that version's tokens on a schedule |
 | Monitor | `btsn.common.Monitor` (`MonitorService`, `derby/Analysis`) | Gathers every host's records after the run; the analysis and charts read them |
 | Launcher | `btsn.services/build/workflows/process-runtime.xml` | Starts the hosts and Monitor, then runs the phases below; `HostLaunch` does the per-host steps |
 | Editor | `btsn.workflowEditor` | Saves the process as JSON, writes the launcher (Create Build and Run), runs it (Run on hosts) and replays the report |
 
-Every host is the same program. What makes P2 a credit check and P4 an underwriting join is
-only the rules it holds and the service class (or REST endpoint) its deployment names.
+Every orchestration host is the same program. What makes P2 a credit check and P4 an
+underwriting join is only the rules it holds and the place service its deployment names.
 
-## Inside a host
+## Inside an orchestration host
 
-A host started as node `Pn` runs three services: `Pn_Place` (the business place) and two
-administration services, `Pn_InitializationService` and `Pn_CollectorService`. Each
-operation of each service gets its own pair of UDP sockets and its own thread.
+The orchestration host for node `Pn` serves three places: `Pn_Place`, the node's place in
+the business process, and `Pn_InitializationService` and `Pn_CollectorService`, its places
+in the initialisation and collection processes. For each operation of each place it starts
+an orchestration thread (`ServiceThread`) on a token socket, and a `RuleHandler` on a rule
+socket. A Java place service is loaded into the orchestration host and called in-process; a
+REST place service runs on whatever machine serves its endpoint.
 
 ```mermaid
 flowchart TB
-    subgraph Host["Host Pn (one Java program)"]
+    subgraph Host["ORCHESTRATION HOST for node Pn"]
         direction TB
-        RH["RuleHandler<br/>rule socket"]
+        RH["RuleHandler<br/>rule socket: receives rules"]
         RF[("RuleFolder.vNNN/operation/<br/>Service.ruleml")]
-        ER["EventReactor<br/>token socket: unzip,<br/>reassemble chunks"]
+        ER["EventReactor<br/>token socket: receives tokens,<br/>unzips, reassembles chunks"]
         SC["Scheduler<br/>drop expired tokens,<br/>order the queue"]
-        ST["ServiceThread (one per operation)<br/>T_in: buffer, join inputs<br/>P: invoke the service<br/>T_out: route by the rules"]
-        SH["ServiceHelper<br/>Java class by reflection,<br/>or RestAdapter over HTTP"]
+        ST["Orchestration thread: ServiceThread<br/>(one per operation)<br/>T_in: buffer, join inputs<br/>P: call the place service<br/>T_out: route by the rules"]
+        SH["ServiceHelper"]
+        JS["Place service<br/>Java class"]
         EP["EventPublisher<br/>zip, split, send"]
         DB[("Derby database<br/>ServiceAnalysisDataBase")]
     end
-    RULES["rule message"] --> RH --> RF
+    RH --> RF
     RH -. "acknowledgement" .-> ACK["deployment tooling"]
-    TOK["token message"] --> ER --> SC --> ST
+    ER --> SC --> ST
     ST <--> SH
+    SH -- "reflection" --> JS
+    SH -- "REST (HTTP POST)" --> RS["Place service<br/>REST endpoint, any language,<br/>any machine"]
     ST -- "queries" --> RF
-    ST --> EP --> NEXT["next host"]
+    ST --> EP --> NEXT["next orchestration host"]
     ST -- "records events" --> DB
 ```
 
@@ -72,13 +97,13 @@ flowchart TB
 - **Queueing.** `Scheduler` drops a token whose lifetime (`notAfter`) has passed, or that
   arrives at a full queue, and reports it. Otherwise it orders the queue by token number,
   so lower versions are served first: the static priority between versions.
-- **T_in.** `ServiceThread` buffers the token. At a join it holds the inputs, keyed by
+- **T_in.** The orchestration thread buffers the token. At a join it holds the inputs, keyed by
   workflow and version, until every input named by the operation's canonical binding has
   arrived.
-- **P.** `ServiceHelper` calls the service: the class the catalogue names, by Java
+- **P.** `ServiceHelper` calls the place service: the class the catalogue names, by Java
   reflection, or the deployment's REST endpoint through `RestAdapter`.
-- **T_out.** `TransitionHandler` takes the node type from the rules (edge, gateway, fork,
-  join, terminate) and asks the rule engine where the result goes. The answer names the
+- **T_out.** `TransitionHandler` takes the transition's control role from the rules (edge,
+  gateway, fork, join, terminate, signal) and asks the rule engine where the result goes. The answer names the
   next service and operation, its channel and port, and the guard value each route needs.
   `EventPublisher` sends the token on, compressed, and split into chunks if it is large.
 - **Recording.** `PetriNetInstrumentationHelper` writes every event (GENERATED, BUFFERED,
@@ -97,13 +122,13 @@ sequenceDiagram
     participant ED as Editor
     participant L as Launcher
     participant D as Event generator<br/>(RuleDeployer)
-    participant H as Host Pn
+    participant H as Orchestration host Pn
     ED->>ED: Save process (JSON) and deployment
     ED->>L: Create Build and Run writes the launcher
     L->>L: GenerateDeploymentRules: where each service runs<br/>(activeService, boundChannel facts)
     L->>L: TopologyBindingGenerator: each operation's inputs and result<br/>(canonical bindings)
     L->>D: deploy version vNNN
-    D->>D: compile one fragment per place:<br/>node type, routes, guards, signals
+    D->>D: compile one fragment per place:<br/>control role, routes, guards, signals
     D->>H: rule message (fragment for Pn's operation)
     H->>H: write the fragment, rebuild Service.ruleml<br/>for that version and operation
     H-->>D: commitment (version, count)
@@ -150,7 +175,7 @@ fact per line):
       <Ind>financial/Workflow/Loan_Compensation_Workflow</Ind></Atom>
 ```
 
-Read it as: P4's T_out is a gateway. "approved" and "conditional" go to P5's
+Read it as: P4's T_out has the control role gateway (`NodeType` in the rules). "approved" and "conditional" go to P5's
 `processToken`, "declined" ends the workflow, and "abandoned" ends it at the Signal node
 "Loan Abandoned", which launches Loan Compensation (v002) at P2's `withdrawEnquiry`.
 
@@ -195,10 +220,10 @@ fork. A join waits for the children of one workflow in one version.
 |---|---|
 | Prepare | Copy the definitions into the launcher's own folder (`btsn.services/target/launchers/<launcher>/btsn.common`), generate the deployment facts and bindings, build the host and service packages |
 | Start | Start each host listed in `hosts=` in its own folder (`…/<launcher>/Pn`, with its own rules and database) and Monitor. Hosts for other machines are started there from their packages |
-| Phase 1: initialise | Each host's initialisation service clears its database. This is itself a small process, version v999 |
+| Phase 1: initialise | Each host's initialisation place (`Pn_InitializationService`) clears its database. This is itself a small process, version v999 |
 | Phase 2: run | Deploy each generator's version behind the commitment barrier, then fire all generators together. A process started by Signal nodes is deployed but fires nothing itself |
 | Drain | Wait until nothing has moved for a few seconds, or until every token's lifetime has run out |
-| Phase 3: collect | Each host's collector service sends its records to Monitor (again a v999 process). The run waits until Monitor has a receipt from every host for every version |
+| Phase 3: collect | Each host's collection place (`Pn_CollectorService`) sends its records to Monitor (again a v999 process). The run waits until Monitor has a receipt from every host for every version |
 | Analyse | `ant -f <launcher> analyse` runs `PetriNetAnalyzer`, which reconstructs each workflow from the records; the editor replays the same report |
 
 Initialisation and collection are processes like any other: they are drawn, deployed and
