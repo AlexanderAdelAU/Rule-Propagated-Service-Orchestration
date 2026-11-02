@@ -54,7 +54,8 @@ flowchart TB
         ER["EventReactor<br/>token socket: unzip,<br/>reassemble chunks"]
         SC["Scheduler<br/>drop expired tokens,<br/>order the queue"]
         ST["ServiceThread (one per operation)<br/>T_in: buffer, join inputs<br/>P: invoke the service<br/>T_out: route by the rules"]
-        SH["ServiceHelper<br/>Java class by reflection,<br/>or RestAdapter over HTTP"]
+        SH["ServiceHelper"]
+        JS["Business service<br/>Java class"]
         EP["EventPublisher<br/>zip, split, send"]
         DB[("Derby database<br/>ServiceAnalysisDataBase")]
     end
@@ -62,6 +63,8 @@ flowchart TB
     RH -. "acknowledgement" .-> ACK["deployment tooling"]
     TOK["token message"] --> ER --> SC --> ST
     ST <--> SH
+    SH -- "reflection" --> JS
+    SH -- "REST (HTTP POST)" --> RS["Business service<br/>REST endpoint, any language,<br/>any machine"]
     ST -- "queries" --> RF
     ST --> EP --> NEXT["next host"]
     ST -- "records events" --> DB
