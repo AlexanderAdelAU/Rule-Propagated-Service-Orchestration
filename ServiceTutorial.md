@@ -238,7 +238,7 @@ Click **Validate**, then save to
 
 ## 5. Deploy
 
-Click **Deploy**, set `Credit`'s **Node** to `P1`, and click **Save deployment...**.
+Click **Deploy**, set `Credit`'s **Host node** to `P1`, and click **Save deployment...**.
 Accept the suggested `btsn.common/ServiceDeploymentFolder/credit/Credit_Check_Workflow.json`, then save the
 process again. **Runs on** now reads `P1 — 192.168.1.82:4001`.
 
@@ -315,7 +315,7 @@ service receives in its constructor.
 [`Credit_Check_Rest_Workflow.json`](btsn.common/ProcessDefinitionFolder/credit/Workflow/Credit_Check_Rest_Workflow.json)
 is the same process, deployed this way. Its supplied deployment calls this project's own
 copy of the service on Vercel, `https://rule-propagated-service-orchestrati.vercel.app/api/credit/assess`
-(see [Host it on the internet](#host-it-on-the-internet)), so it runs with nothing to start;
+(see [Serve it from the internet](#serve-it-from-the-internet)), so it runs with nothing to start;
 the hosts need outbound internet access. To run the service on your own machine instead:
 
 1. Start the service: `node examples/rest/credit-service.js`. It listens on `http://127.0.0.1:8080/credit/assess`.
@@ -323,7 +323,7 @@ the hosts need outbound internet access. To run the service on your own machine 
    - **Invocation Adapter**: `rest`;
    - **Service endpoint**: `http://127.0.0.1:8080/credit/assess`.
 
-   The place's host still runs on its **Host node** (P1); only the service runs at the endpoint.
+   The place's orchestration host still runs on its **Host node** (P1); only the place service runs at the endpoint.
 
    Save the deployment (the editor suggests `ServiceDeploymentFolder/credit/Credit_Check_Rest_Workflow.json`), then the process. Selecting the place now shows **Runs on** `P1 — ...`, calling the endpoint (REST).
 3. Click **Build**, then **Run on hosts**.
@@ -358,9 +358,9 @@ run gives the same result as before: ten workflows completed, five approved and 
   to package.
 - **Boolean services** keep the `boolean-token` adapter.
 
-### Host it on the internet
+### Serve it from the internet
 
-To call the service across a real network, host it on a public platform and use its
+To call the service across a real network, deploy it to a public platform and use its
 `https://` address as the Service endpoint. You need your own account; the hosts need outbound
 internet access. Both of these have free plans:
 

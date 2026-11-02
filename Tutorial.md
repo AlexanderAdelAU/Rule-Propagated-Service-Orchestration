@@ -4,7 +4,7 @@ We will walk you through three examples. All are built graphically in the editor
 
 - **Example 1** runs a standard service that returns true or false.
 - **Example 2** builds a simple claims process that calls a remote service over REST.
-- **Example 3** adds a seventh host, P7, and moves Example 1 onto it.
+- **Example 3** adds a seventh node, P7, and moves Example 1 onto it.
 
 **Before you start:** you need a JDK (15 or later), Apache Ant (it comes with Eclipse), and
 the repository's projects imported into Eclipse.
@@ -110,9 +110,9 @@ The run was real: P1 was a host process of its own, which recorded what it did.
 
 An insurer pays small claims at once and assesses the larger ones. The process has two places:
 
-- **Triage** runs on host P1. Its service, supplied with the repository, finds a claim of up
+- **Triage** runs on node P1. Its service, supplied with the repository, finds a claim of up
   to 2,500 simple and a larger one complex.
-- **Assess** runs on host P2, but its service does not: the host calls it on the internet,
+- **Assess** runs on node P2, but its service does not: P2's orchestration host calls it on the internet,
   over REST. It accepts a claim of up to 4,000 and rejects the rest.
 
 Claim *n* is for *n* × 500, so of the ten claims, 1–5 are paid, 6–8 accepted and 9–10 rejected.
@@ -204,12 +204,13 @@ code is `examples/rest/claims.js`, and any service that answers the same way wil
 - The finished copy: `btsn.common/ProcessDefinitionFolder/claims/Workflow/Claims_Workflow.json`
 - The ready-made examples, from Petri-net models to the financial and healthcare workflows: [Run an example](Reference.md#run-an-example)
 
-## Example 3: add a host
+## Example 3: add a node
 
-Every host runs the same program. How many there are is up to the infrastructure definition, so a new host is a
-new row there: nothing is copied or registered. Here you add P7 and move Example 1's place onto it.
+Every node runs the same orchestration host program. How many nodes there are is up to the infrastructure
+definition, so a new node is a new row there: nothing is copied or registered. Here you add P7 and move
+Example 1's place onto it.
 
-### Add the host
+### Add the node
 
 1. Choose **File → Open → Infrastructure Definition...** and open
    `btsn.common/InfrastructureDefinitionFolder/SingleHost.json`.
@@ -227,7 +228,7 @@ new row there: nothing is copied or registered. Here you add P7 and move Example
 6. Click **Deploy**. P1's row now shows **Host node** `P7`. Click **Save deployment...** and keep the name it suggests.
 7. Choose **File → Save Process Definition**.
 
-The place keeps its label, P1; only the host it runs on has changed.
+The place keeps its label, P1; only the node it runs on has changed.
 
 ### Run it
 
@@ -257,7 +258,7 @@ The place keeps its label, P1; only the host it runs on has changed.
 
 ### Learn more
 
-- [Add a host](Reference.md#add-a-host): host names (P1 to P99) and the ports kept for each host's own services
+- [Add a node](Reference.md#add-a-host): node names (P1 to P99) and the ports kept for each node's initialisation and collection places
 - [Choose the machines](Reference.md#choose-the-machines)
 
 ## Author

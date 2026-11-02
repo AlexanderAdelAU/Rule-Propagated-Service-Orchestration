@@ -1432,7 +1432,7 @@ with `rest`, the host POSTs each call to the placement's endpoint, so the servic
 be written in any language and run anywhere it can be reached over HTTP. It returns
 the same result a Java service would, and the transitions, rules and tokens do not
 change. [ServiceTutorial.md](ServiceTutorial.md#8-call-it-over-rest) serves the credit
-check from Node.js this way, on the same machine or [hosted on the internet](ServiceTutorial.md#host-it-on-the-internet)
+check from Node.js this way, on the same machine or [served from the internet](ServiceTutorial.md#serve-it-from-the-internet)
 (the code is in [`examples/rest`](examples/rest)).
 
 | Layer | Responsibility | Repository artefacts |

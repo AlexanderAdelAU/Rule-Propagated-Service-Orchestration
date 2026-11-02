@@ -1,8 +1,9 @@
 # Rule-Propagated Service Orchestration (RPSO)
 
-**RPSO runs Petri nets as live distributed systems.** Each place is a real
-service on a host, each transition is coordination logic installed as local
-rules on that host, and tokens are messages that travel between hosts. The model
+**RPSO runs Petri nets as live distributed systems.** Each place runs in an
+[orchestration host](Architecture.md#terms) and calls a real service, each transition
+is coordination logic installed as local rules on that host, and tokens are messages
+that travel between hosts. The model
 you draw in the editor is the process that executes, not a simulation of it.
 
 Because the places are generic, the same orchestration runs any process you can
