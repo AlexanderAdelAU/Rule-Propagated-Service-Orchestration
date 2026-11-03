@@ -9,6 +9,8 @@ steps show only what every service needs.
 
 *The finished process. The **What it does** box and the contract come from the catalogue you write in step 2.*
 
+[▶ Watch a recorded run of this process](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/credit/Workflow/Credit_Check_Workflow.json&run=../../btsn.common/AnalysisFolder/Credit/Analysis_Credit_Check_Workflow.txt)
+
 The finished files are supplied, so you can compare yours with them. To build
 your own alongside them, use another name throughout, for example `loan`
 instead of `credit`.

@@ -1,0 +1,11 @@
+# The runs the documentation links to (name, process, recorded run), for the replay page's agreement check.
+p1_tutorial          btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json                       btsn.common/AnalysisFolder/PetriNet/Analysis_P1_Tutorial_Workflow.txt
+p2_tutorial          btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P2_Tutorial_Workflow.json                       btsn.common/AnalysisFolder/PetriNet/Analysis_P2_Tutorial_Workflow.txt
+fork_join            btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_P2_P3_P4_Fork_Join_Workflow.json             btsn.common/AnalysisFolder/PetriNet/Analysis_P1_P2_P3_P4_Fork_Join_Workflow.txt
+double_join          btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_to_P6_Double_Join_Workflow.json              btsn.common/AnalysisFolder/PetriNet/P1_to_P6_Double_Join_Workflow.txt
+claims               btsn.common/ProcessDefinitionFolder/claims/Workflow/Claims_Workflow.json                              btsn.common/AnalysisFolder/Claims/Analysis_Claims_Workflow.txt
+inventory            btsn.common/ProcessDefinitionFolder/inventory/Workflow/Inventory_Workflow.json                        btsn.common/AnalysisFolder/Inventory/Analysis_Inventory_Workflow.txt
+credit_check         btsn.common/ProcessDefinitionFolder/credit/Workflow/Credit_Check_Workflow.json                        btsn.common/AnalysisFolder/Credit/Analysis_Credit_Check_Workflow.txt
+loan                 btsn.common/ProcessDefinitionFolder/financial/Workflow/FinancialSystem_P1_P5_Workflow.json            btsn.common/AnalysisFolder/Financial/Analysis_FinancialSystem_P1_P5_Compensation.txt
+emergency_patient    btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Emergency_Department_Patient_Workflow.json    btsn.common/AnalysisFolder/Healthcare/Emergency_Department_Patient_Workflow.txt
+emergency_concurrent btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Emergency_Department_With_Federated_Radiology.json btsn.common/AnalysisFolder/Healthcare/Emergency_Department_With_Federated_Radiology.txt

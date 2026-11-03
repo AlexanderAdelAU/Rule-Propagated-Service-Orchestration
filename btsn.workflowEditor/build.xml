@@ -204,6 +204,17 @@
             <classpath><pathelement location="${build.dir}/contract-tests"/><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
             <arg file=".."/>
         </java>
+        <!-- The web replay page (docs/replay) shows the documented runs as the editor does: Node runs the page's code. -->
+        <java classname="com.editor.ReplayPageStates" fork="true" failonerror="true">
+            <classpath><pathelement location="${build.dir}/contract-tests"/><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
+            <arg file=".."/>
+            <arg file="${build.dir}/replay-page-states"/>
+        </java>
+        <exec executable="node" failonerror="true" failifexecutionfails="true">
+            <arg file="tests/replay-page-agreement.js"/>
+            <arg file=".."/>
+            <arg file="${build.dir}/replay-page-states"/>
+        </exec>
         <java classname="com.editor.SignalNodeCheck" fork="true" failonerror="true">
             <classpath><pathelement location="${build.dir}/contract-tests"/><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
             <arg file=".."/>

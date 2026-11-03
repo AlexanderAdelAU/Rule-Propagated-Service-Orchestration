@@ -281,6 +281,8 @@ packages the new class.
 
 *The replay of the recorded run: claims 1–5 have been paid and claim 7 is at Assess.*
 
+[▶ Watch a recorded run of this process](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/claims/Workflow/Claims_Workflow.json&run=../../btsn.common/AnalysisFolder/Claims/Analysis_Claims_Workflow.txt)
+
 ### Where next
 
 - **Assess** still runs its starting code. Write it the same way, or let a service written in
@@ -309,6 +311,8 @@ from ProcessEditor, explaining each step:
 
 *The P2 tutorial process. P2 is selected. The badge on the place and the **Runs
 on** box show the node it is deployed to.*
+
+[▶ Watch a recorded run of this process](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P2_Tutorial_Workflow.json&run=../../btsn.common/AnalysisFolder/PetriNet/Analysis_P2_Tutorial_Workflow.txt)
 
 | Step | What you do | Where |
 |---|---|---|
@@ -845,6 +849,8 @@ StochasticService only tosses a coin. Any Java class can be a place's service, a
 
 *The inventory example. Inventory runs on P1 and Supplier on P2. The **What it does** box comes from the new catalogue.*
 
+[▶ Watch a recorded run of this process](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/inventory/Workflow/Inventory_Workflow.json&run=../../btsn.common/AnalysisFolder/Inventory/Analysis_Inventory_Workflow.txt)
+
 ### What it shows
 
 | | Inventory (P1) `InventoryService.reserve` | Supplier (P2) `SupplierService.restock` |
@@ -1244,6 +1250,8 @@ receipt, function invocation and output routing visible in one small model.
 
 ![A circular P1 place between input and output transition bars. Its function returns true or false; the output transition terminates on true and loops on false.](images/p1-tutorial.svg)
 
+[▶ Watch a recorded run of this process](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json&run=../../btsn.common/AnalysisFolder/PetriNet/Analysis_P1_Tutorial_Workflow.txt)
+
 In the [single-place tutorial](Tutorial.md)
 ([process definition](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json)),
 **P1 performs a function whose result is `true` or `false`**. The function produces
@@ -1270,6 +1278,8 @@ deliver work to two functions and bring their results together before the next
 function can run.
 
 ![P1–P4 shown as circular places between input and output transition bars. P1 true forks to P2 and P3, their arrivals join before P4, and each place produces its own Boolean result.](images/petrinet-fork-join.svg)
+
+[▶ Watch a recorded run of this process](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_P2_P3_P4_Fork_Join_Workflow.json&run=../../btsn.common/AnalysisFolder/PetriNet/Analysis_P1_P2_P3_P4_Fork_Join_Workflow.txt)
 
 The P1–P4 model ([process definition](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_P2_P3_P4_Fork_Join_Workflow.json))
 uses the same simple Boolean-returning functionality at **all four places**.
@@ -1338,6 +1348,8 @@ underwriting needs both results to decide how processing should continue.
 
 ![Validation forks to Credit Check and Fraud Check; Underwriting joins both inputs and routes to Decision or early termination. A top-right legend expands a rounded Credit Check activity into T_in, its service function at P, and T_out.](images/financial-workflow.svg)
 
+[▶ Watch a recorded run of this process](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/financial/Workflow/FinancialSystem_P1_P5_Workflow.json&run=../../btsn.common/AnalysisFolder/Financial/Analysis_FinancialSystem_P1_P5_Compensation.txt)
+
 Validation rejects invalid applications or forks into Credit Check and Fraud
 Check. Underwriting joins their named results. `approved` and `conditional`
 proceed to Decision; `declined` terminates early. See
@@ -1352,6 +1364,8 @@ runs.
 
 ![Triage forks to Laboratory, Cardiology and Radiology, which join at Diagnosis; Treatment also accepts direct triage.](images/healthcare-workflow.svg)
 
+[▶ Watch a recorded run of this process](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Emergency_Department_Patient_Workflow.json&run=../../btsn.common/AnalysisFolder/Healthcare/Emergency_Department_Patient_Workflow.txt)
+
 Triage either publishes directly to Treatment or forks to Laboratory, Cardiology
 and Radiology. Diagnosis waits for all three named results. Treatment accepts the
 diagnosis path or the direct triage path through distinct operations, then ends
@@ -1365,6 +1379,8 @@ coordination structure itself: this six-place model connects two joins, so the
 result of one synchronized activity becomes an input to another.
 
 ![Six explicit transition–place–transition units. P1 forks to P2, P3 and P5; P4 joins P2/P3, P6 joins P4/P5 and terminates.](images/petrinet-double-join.svg)
+
+[▶ Watch a recorded run of this process](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_to_P6_Double_Join_Workflow.json&run=../../btsn.common/AnalysisFolder/PetriNet/P1_to_P6_Double_Join_Workflow.txt)
 
 The six-place double-join model
 ([process definition](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_to_P6_Double_Join_Workflow.json))

@@ -22,6 +22,8 @@ The event generator sends 10 tokens, one a second.
 
 *What you will build.*
 
+[▶ Watch a recorded run of this process](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json&run=../../btsn.common/AnalysisFolder/PetriNet/Analysis_P1_Tutorial_Workflow.txt)
+
 ### Create the process
 
 1. Start the editor: in Eclipse, run `com.editor.ProcessEditor` (project `btsn.workflowEditor`) as a Java application.
@@ -121,6 +123,8 @@ Your computer needs internet access for this example.
 ![The finished Example 2 in the editor: CLAIMS feeds Triage on P1, whose T_out sends simple to Paid and complex to Assess on P2, whose T_out sends accept to Accepted and reject to Rejected. Assess is selected: its service is AssessService, called over REST.](images/ex2-model.png)
 
 *What you will build.*
+
+[▶ Watch a recorded run of this process](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/claims/Workflow/Claims_Workflow.json&run=../../btsn.common/AnalysisFolder/Claims/Analysis_Claims_Workflow.txt)
 
 ### Create the process
 
