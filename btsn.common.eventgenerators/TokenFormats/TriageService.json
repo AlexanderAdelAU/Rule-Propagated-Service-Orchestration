@@ -40,14 +40,29 @@
 		"priority": "LOW",
 		"symptoms": "tension-type, no red flags"
 	  },
+	  "heart_attack": {
+		"condition": "heart attack",
+		"priority": "CRITICAL",
+		"symptoms": "crushing chest pain, ST elevation on the ambulance ECG"
+	  },
+	  "stroke": {
+		"condition": "stroke",
+		"priority": "CRITICAL",
+		"symptoms": "facial droop, arm weakness, onset under 2 hours"
+	  },
 	  "random": {
 		"_comment": "Randomly select from above variants"
 	  }
 	},
 	
+	"caseMix": ["chest_pain", "abdominal_pain", "heart_attack", "chest_pain", "shortness_of_breath",
+	            "chest_pain", "stroke", "abdominal_pain", "chest_pain", "headache"],
+	
 	"notes": [
 	  "tokenId, version, notAfter, currentPlace, workflow_start_time are auto-populated",
 	  "data fields can be overridden via -data command line argument",
-	  "Use dataVariants with -variant argument to select specific patient scenarios"
+	  "Use dataVariants with -variant argument to select specific patient scenarios",
+	  "Without -variant, patient n presents with caseMix[(n - 1) mod its length]: a fixed emergency case mix, so a run",
+	  "of ten patients brings two (a heart attack and a stroke) that triage sends straight to treatment"
 	]
   }

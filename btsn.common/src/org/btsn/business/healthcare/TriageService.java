@@ -459,23 +459,13 @@ public class TriageService extends BaseHealthcareService {
                 break;
         }
         
-        // CRITICAL priority with severe vitals - consider direct treatment
-        // This adds ~10% bypass for critical presentations
+        // CRITICAL priority with severe pain (9 or 10 out of 10): treat first, investigate after
         if ("CRITICAL".equals(priority) && painScore >= 9) {
-            // 50% of critical+severe pain cases bypass (contributes ~10% overall)
-            if (ThreadLocalRandom.current().nextDouble() < 0.5) {
-                System.out.printf("[%s] CRITICAL priority with pain %d/10 - bypassing diagnostics\n", 
-                    getPlaceId(), painScore);
-                return true;
-            }
-        }
-        
-        // TEST MODE: 15% random bypass for testing Gateway routing
-        // Remove or comment out for production
-        if (ThreadLocalRandom.current().nextDouble() < 0.15) {
-            System.out.printf("[%s] TEST MODE: 15%% random bypass - DIRECT_TO_TREATMENT\n", getPlaceId());
+            System.out.printf("[%s] CRITICAL priority with pain %d/10 - bypassing diagnostics\n", 
+                getPlaceId(), painScore);
             return true;
         }
+        
         
         // STANDARD WORKFLOW - Symptoms needing workup
         switch (conditionLower) {

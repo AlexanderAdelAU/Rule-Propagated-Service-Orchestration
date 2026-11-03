@@ -799,11 +799,18 @@ public class GenericHealthcareTokenGenerator {
 				}
 			}
 			
-			// Step 2: Apply variant if specified
-			if (dataVariant != null && !dataVariant.isEmpty()) {
+			// Step 2: Apply variant if specified; without one, the format's case mix (if it has one) chooses the
+			// variant by the token's number, so each run brings the same mix of cases.
+			String variant = dataVariant;
+			org.json.simple.JSONArray caseMix = (org.json.simple.JSONArray) loadedTokenFormat.get("caseMix");
+			if ((variant == null || variant.isEmpty()) && caseMix != null && !caseMix.isEmpty()) {
+				int n = (seqID % 1_000_000) / 10_000 + 1;
+				variant = String.valueOf(caseMix.get((n - 1) % caseMix.size()));
+			}
+			if (variant != null && !variant.isEmpty()) {
 				JSONObject variants = (JSONObject) loadedTokenFormat.get("dataVariants");
 				if (variants != null) {
-					JSONObject variantData = (JSONObject) variants.get(dataVariant);
+					JSONObject variantData = (JSONObject) variants.get(variant);
 					if (variantData != null) {
 						// Overlay variant data
 						for (Object key : variantData.keySet()) {
@@ -814,9 +821,9 @@ public class GenericHealthcareTokenGenerator {
 								data.put(key, value);
 							}
 						}
-						System.out.println("  Applied variant: " + dataVariant);
+						System.out.println("  Applied variant: " + variant);
 					} else {
-						System.out.println("  WARNING: Variant '" + dataVariant + "' not found in format file");
+						System.out.println("  WARNING: Variant '" + variant + "' not found in format file");
 					}
 				}
 			}
