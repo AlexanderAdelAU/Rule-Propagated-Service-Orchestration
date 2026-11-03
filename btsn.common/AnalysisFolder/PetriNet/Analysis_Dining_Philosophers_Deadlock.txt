@@ -1,0 +1,190 @@
+ INFO [main] (?:?) - Derby Embedded Driver registered successfully.
+ INFO [main] (?:?) - Found 1 distinct workflowBases: [1000000]
+Analyzing ALL 1 workflow bases: [1000000]
+
+================================================================================
+WORKFLOW BASE: 1000000 (v001)
+================================================================================
+ INFO [main] (?:?) - Canonical reconstruction: generated=5, completed=0, monitorAck=0, forks=0, joins=0, orphanChildren=0
+ INFO [main] (?:?) - Fork/Join analysis: 1 forks, 0 joined fork families
+ INFO [main] (?:?) - Place ENTER/EXIT pairing check: all ENTER events paired
+ INFO [main] (?:?) - Place P1_Place statistics: 0 paired logical visits, avg=0.0ms
+ INFO [main] (?:?) - Place P2_Place statistics: 0 paired logical visits, avg=0.0ms
+ INFO [main] (?:?) - Place P3_Place statistics: 0 paired logical visits, avg=0.0ms
+ INFO [main] (?:?) - Place P4_Place statistics: 0 paired logical visits, avg=0.0ms
+ INFO [main] (?:?) - Place P5_Place statistics: 0 paired logical visits, avg=0.0ms
+ INFO [main] (?:?) - Capacity verification for P1_Place: max marking=1, capacity=50 - PASS
+ INFO [main] (?:?) - Capacity verification for P2_Place: max marking=1, capacity=50 - PASS
+ INFO [main] (?:?) - Capacity verification for P3_Place: max marking=1, capacity=50 - PASS
+ INFO [main] (?:?) - Capacity verification for P4_Place: max marking=1, capacity=50 - PASS
+ INFO [main] (?:?) - Capacity verification for P5_Place: max marking=1, capacity=50 - PASS
+ INFO [main] (?:?) - Retrieved 0 logical place paths for workflowBase=1000000
+=== PETRI NET ANALYSIS REPORT ===
+Workflow Base: 1000000
+
+1. CLOSED NET (initial marking)
+   Marked tokens:             5
+   A closed net circulates its tokens until they expire: no workflow completes, and that is expected.
+   Rounds per place:
+   Ended:                     no token expired before collection
+   Ran at the same time:      none
+   Observed join sites:        0
+   Join-family violations:    0
+   Structural result:         [OK]
+
+2. LOGICAL PLACE EXECUTIONS
+   No ENTER events recorded
+
+3. FORK/JOIN DETAIL
+   Forks detected (legacy cross-check): 1
+   Joined fork families (legacy cross-check): 0
+   Fork from 1000000 -> [1000005, 1000004, 1000003, 1000002, 1000001] [INCOMPLETE]
+
+4. INSTRUMENTATION CONSISTENCY
+   Unpaired place ENTER events: 0
+
+5. PLACE RESIDENCE SAMPLES
+   Service/place: P1_Place
+     Logical executions: 0
+     Paired timing samples: 0
+   Service/place: P2_Place
+     Logical executions: 0
+     Paired timing samples: 0
+   Service/place: P3_Place
+     Logical executions: 0
+     Paired timing samples: 0
+   Service/place: P4_Place
+     Logical executions: 0
+     Paired timing samples: 0
+   Service/place: P5_Place
+     Logical executions: 0
+     Paired timing samples: 0
+
+6. CAPACITY VERIFICATION
+   P1_Place: [OK] BOUNDED
+   P2_Place: [OK] BOUNDED
+   P3_Place: [OK] BOUNDED
+   P4_Place: [OK] BOUNDED
+   P5_Place: [OK] BOUNDED
+
+7. DATA QUALITY
+   Reconstructed place paths: 0
+   [OK] All paired residence times are non-negative
+   NOTE: temporal distributions and canonical throughput are reported in Stage 2.
+
+=== END REPORT ===
+
+ INFO [main] (?:?) - Generated workflow report for workflowBase=1000000
+ INFO [main] (?:?) - GENEALOGY: Found 5 tokens for workflow 1000000
+ INFO [main] (?:?) - GENEALOGY: 0 root tokens, 5 forked tokens, 0 max generation depth
+
+=== TOKEN GENEALOGY REPORT ===
+Workflow Base: 1000000
+Total Tokens: 5
+Root Tokens: 0
+Forked Tokens: 5
+Max Generation Depth: 0
+Total Families: 0
+
+--- Generation Distribution ---
+
+--- Family Trees ---
+ INFO [main] (?:?) - Canonical reconstruction: generated=5, completed=0, monitorAck=0, forks=0, joins=0, orphanChildren=0
+ INFO [main] (?:?) - Retrieved 0 logical place paths for workflowBase=1000000
+ INFO [main] (?:?) - Place correlation: 0 matched, 0 unmatched out of 0
+
+=== STAGE 2 TEMPORAL ANALYSIS ===
+Workflow Base: 1000000
+
+1. END-TO-END WORKFLOW LATENCY
+   Closed net: its tokens circulate until they expire, so there is no end-to-end latency (see rounds per place).
+   Canonical completed workflows: 0
+   Timed completion samples:      0
+
+2. WORKLOAD GENERATION
+   Root inter-arrival: n=4, avg=137.3ms, p50=120ms, p95=194ms, min/max=69/194ms
+
+3. PLACE RESIDENCE DISTRIBUTIONS
+
+4. SERVICE EXECUTION TIMING
+   Unmatched service timing samples: 0
+   Service timing/place-count mismatches: 0
+
+5. JOIN SYNCHRONIZATION
+   No completed joins observed
+
+6. TEMPORAL DATA QUALITY
+   Negative/invalid timing samples: 0
+   Temporal result: [OK]
+
+=== END STAGE 2 REPORT ===
+
+
+=== TOKEN PATHS ===
+ INFO [main] (?:?) - Retrieved 0 logical place paths for workflowBase=1000000
+
+=== MARKING EVOLUTION ===
+ INFO [main] (?:?) - Retrieved 5 GENERATED events for workflowBase 1000000
+Time=1793691776444 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=TABLE EventType=GENERATED
+Time=1793691776610 Token=1000002 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=TABLE EventType=GENERATED
+Time=1793691776679 Token=1000003 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=TABLE EventType=GENERATED
+Time=1793691776799 Token=1000004 Place=P4_Place Marking=0 Buffer=0 ToPlace=P4_Place TransitionId=TABLE EventType=GENERATED
+Time=1793691776993 Token=1000005 Place=P5_Place Marking=0 Buffer=0 ToPlace=P5_Place TransitionId=TABLE EventType=GENERATED
+ INFO [main] (?:?) - Retrieved 1 marking snapshots for P1_Place
+Time=1793691777001 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+ INFO [main] (?:?) - Retrieved 1 marking snapshots for P2_Place
+Time=1793691777550 Token=1000002 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+ INFO [main] (?:?) - Retrieved 1 marking snapshots for P3_Place
+Time=1793691777443 Token=1000003 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+ INFO [main] (?:?) - Retrieved 1 marking snapshots for P4_Place
+Time=1793691777751 Token=1000004 Place=P4_Place Marking=1 Buffer=0 ToPlace=P4_Place TransitionId=T_in_P4 EventType=BUFFERED
+ INFO [main] (?:?) - Retrieved 1 marking snapshots for P5_Place
+Time=1793691777819 Token=1000005 Place=P5_Place Marking=1 Buffer=0 ToPlace=P5_Place TransitionId=T_in_P5 EventType=BUFFERED
+
+================================================================================
+CROSS-VERSION PRIORITY ANALYSIS
+================================================================================
+ INFO [main] (?:?) - Place correlation: 0 matched, 0 unmatched out of 0
+ INFO [main] (?:?) - Shared services (cross-version): []
+ INFO [main] (?:?) - Priority analysis complete: 0 samples (0 root, 0 forked), 0 shared services, 0 shared-service contention points, 0 shared-service inversions
+
+=== STAGE 3 SHARED-SERVICE CONCURRENCY ANALYSIS ===
+
+1. SERVICE EXECUTION SAMPLE BREAKDOWN
+   Total logical service executions: 0
+   Root-token executions:            0
+   Fork-derived executions:          0
+   Shared-service executions:        0
+   NOTE: fork-derived executions are included when they consume a shared service.
+
+2. SHARED SERVICES (Cross-Version Traffic)
+   [INFO] No shared services detected - each version uses exclusive services
+   Priority contention cannot be measured without shared services
+
+3. VERSION STATISTICS (All Logical Service Executions)
+   Version  Tokens     Avg Queue    Min Queue    Max Queue    Avg Service 
+   ----------------------------------------------------------------------
+
+4. SHARED SERVICE CONTENTION CANDIDATES (Both Arrived Before Invocation)
+   Total candidate comparisons: 0
+
+5. SHARED SERVICE PRIORITY INVERSION CANDIDATES
+   [NOTE] Arrival is recorded before queue insertion; invocation is recorded after dequeue and rule processing.
+   A lower-priority token can be dequeued before the higher-priority token enters the queue, yet be invoked after its arrival.
+   Queue insertion/dequeue timestamps are not recorded here; these candidates do not prove a scheduling violation.
+   [OK] No invocation-order inversion candidates at shared services
+
+6. LEGACY ROOT TOKEN ANALYSIS (Global - Includes Cross-Service Comparisons)
+   Contention points: 0
+   Inversions: 0
+
+7. FORK-DERIVED SERVICE EXECUTIONS
+   Fork-derived execution samples: 0
+
+8. STAGE 3 EVIDENCE SUMMARY
+   Shared-service concurrency: [NOT OBSERVED] no physical service saw multiple versions
+
+=== END STAGE 3 REPORT ===
+
+ INFO [main] (?:?) - Generated priority analysis report
+

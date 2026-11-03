@@ -175,6 +175,16 @@ function buildTimeline(events, T) {
         const dest = ev.toPlace || ev.place, tIn = T.placeToTIn[dest], eg = ev.transition;
         const next = after(i, e => e.place === dest && (e.type === "BUFFERED" || e.type === "ENTER" || e.type === "JOIN_SURVIVOR"));
         if (!tIn || !next) continue;
+        // A fork a generator lays straight into a place (an initial marking: a child token, numbered 1-99) shows at the
+        // generator and travels to the T_in to arrive at its recorded time (generateApproachToRecordedArrival).
+        const k = Number(tok) % 100;
+        if (k >= 1 && k <= 99 && next.type === "BUFFERED" && T.byId.has(eg)) {
+          const avail = Math.max(next.t - ev.t, 2 * MIN_TRAVEL_DURATION), from = next.t - avail;
+          const atEg = Math.min(TIME_AT_EVENT_GEN, Math.floor(avail / 2)), toTIn = Math.min(travel(eg, tIn, FALLBACK_EG_TO_TIN), avail - atEg);
+          add(seg(tok, ver, PH.AT_EG, from, next.t - toTIn, { eg, tIn }));
+          add(seg(tok, ver, PH.TO_TIN, next.t - toTIn, next.t, { from: eg, to: tIn, tIn }));
+          continue;
+        }
         let g = ev.t, avail = next.t - g;
         if (avail < MIN_TRAVEL_DURATION * 4) { avail = MIN_TRAVEL_DURATION * 4; g = next.t - avail; }
         let atEg = TIME_AT_EVENT_GEN, toTIn = T.byId.has(eg) ? travel(eg, tIn, FALLBACK_EG_TO_TIN) : 0;
@@ -235,7 +245,12 @@ function buildTimeline(events, T) {
         const dest = ev.toPlace, tIn = T.placeToTIn[dest];
         if (!tIn) continue;
         const arrival = after(i, e => ["ENTER", "BUFFERED", "JOIN_SURVIVOR", "JOIN_CONSUMED", "TERMINATE", "FAILED"].includes(e.type));
-        const travelEnd = ev.t + travel(tOut, tIn, FALLBACK_TO_NEXT);
+        // A fork consumed at a join and sent on again by its place travels until it is recorded arriving
+        // (the editor's rebirth after JOIN_CONSUMED); any other token at the pace its arc's length gives.
+        const reborn = evs.slice(0, i).reverse().find(e => e.type === "JOIN_CONSUMED" || e.type === "EXIT" || e.type === "ENTER" || e.type === "JOIN_SURVIVOR");
+        const recorded = reborn && reborn.type === "JOIN_CONSUMED"
+          ? after(i, e => (e.type === "BUFFERED" || e.type === "ENTER") && e.place === dest) : null;
+        const travelEnd = recorded ? recorded.t : ev.t + travel(tOut, tIn, FALLBACK_TO_NEXT);
         const reach = arrival ? Math.min(travelEnd, arrival.t) : travelEnd;
         add(seg(tok, ver, PH.TO_NEXT, ev.t, reach, { place: dest, from: tOut, to: tIn, tIn, tOut }));
         // At a join (or any T_in) the token waits for the rest of its time there (generateExitSegments).

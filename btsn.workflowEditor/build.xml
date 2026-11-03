@@ -204,7 +204,7 @@
             <classpath><pathelement location="${build.dir}/contract-tests"/><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
             <arg file=".."/>
         </java>
-        <!-- The web replay page (docs/replay) shows the documented runs as the editor does: Node runs the page's code. -->
+        <!-- The web replay page (docs/replay) shows every example's run as the editor does: Node runs the page's code. -->
         <java classname="com.editor.ReplayPageStates" fork="true" failonerror="true">
             <classpath><pathelement location="${build.dir}/contract-tests"/><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
             <arg file=".."/>

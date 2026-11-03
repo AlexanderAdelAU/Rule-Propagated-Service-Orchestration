@@ -17,6 +17,7 @@
   body { background: var(--bg); color: var(--ink); font: 15px/1.45 "IBM Plex Sans", system-ui, sans-serif; }
   main { max-width: 1180px; margin: 0 auto; padding: 24px 16px 40px; }
   .eyebrow { font: 600 12px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: .14em; color: var(--accent); text-transform: uppercase; }
+  .eyebrow a { color: inherit; }
   h1 { font-size: 28px; line-height: 1.15; margin: 8px 0 6px; }
   .lede { margin: 0 0 14px; color: var(--muted); max-width: 70ch; }
   .tag { display: inline-block; font: 600 12px/1 "IBM Plex Mono", monospace; letter-spacing: .04em; padding: 6px 10px;
@@ -50,7 +51,7 @@
 </head>
 <body>
 <main>
-  <div class="eyebrow">RPSO · Token replay</div>
+  <div class="eyebrow">RPSO · Token replay · <a href="examples.html">All examples</a></div>
   <h1 id="title">Dining Philosophers <span class="tag">A recorded run, not a simulation</span></h1>
   <p class="lede" id="lede">Every dot is a message recorded on the hosts during a real run, replayed on the model at its recorded times.
     Red dots are forks travelling between hosts; a dot inside a T_in bar is a fork waiting there for its partner.

@@ -1,56 +1,207 @@
 {
   "categories": [
-    { "id": "start", "title": "Getting started",
-      "intro": "One or two places, one service each: the processes the tutorials build, step by step." },
-    { "id": "petrinet", "title": "Petri net patterns",
-      "intro": "Forks, joins and loops: classic nets, each place a host of its own and every transition rules installed on it." },
-    { "id": "business", "title": "Claims and inventory",
-      "intro": "Small business processes whose services decide the route: pay or assess a claim, ship or restock an order." },
-    { "id": "financial", "title": "Credit and lending",
-      "intro": "Credit and fraud checks that run side by side and join at underwriting, and a loan process that launches its own compensation." },
-    { "id": "healthcare", "title": "Healthcare",
-      "intro": "An emergency department in which patients fork to three departments and join at diagnosis, alongside a triage canary and requests from another hospital." }
+    {
+      "id": "start",
+      "title": "Getting started",
+      "intro": "One or two places, one service each: the processes the tutorials build, step by step."
+    },
+    {
+      "id": "petrinet",
+      "title": "Petri net patterns",
+      "intro": "Forks, joins and loops: classic nets, each place a host of its own and every transition rules installed on it."
+    },
+    {
+      "id": "business",
+      "title": "Claims and inventory",
+      "intro": "Small business processes whose services decide the route: pay or assess a claim, ship or restock an order."
+    },
+    {
+      "id": "financial",
+      "title": "Credit and lending",
+      "intro": "Credit and fraud checks that run side by side and join at underwriting, and a loan process that launches its own compensation."
+    },
+    {
+      "id": "healthcare",
+      "title": "Healthcare",
+      "intro": "An emergency department in which patients fork to three departments and join at diagnosis, alongside a triage canary and requests from another hospital."
+    }
   ],
   "examples": [
-    { "id": "p1_tutorial", "category": "start", "title": "Example 1: one place",
+    {
+      "id": "p1_tutorial",
+      "category": "start",
+      "title": "Example 1: one place",
       "description": "A service that returns true or false: true ends the token, false sends it round again.",
       "model": "btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json",
-      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_P1_Tutorial_Workflow.txt" },
-    { "id": "p2_tutorial", "category": "start", "title": "The P2 tutorial",
+      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_P1_Tutorial_Workflow.txt"
+    },
+    {
+      "id": "p2_tutorial",
+      "category": "start",
+      "title": "The P2 tutorial",
       "description": "A stochastic service on node P2: true ends the token, false sends it back to try again.",
       "model": "btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P2_Tutorial_Workflow.json",
-      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_P2_Tutorial_Workflow.txt" },
-    { "id": "credit_check", "category": "start", "title": "A credit check",
+      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_P2_Tutorial_Workflow.txt"
+    },
+    {
+      "id": "p1_p2",
+      "category": "start",
+      "title": "Two places in a row",
+      "description": "P1 passes each token on to P2; each place decides true or false.",
+      "model": "btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_P2_Deterministic_Workflow.json",
+      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_P1_P2_Deterministic_Workflow.txt"
+    },
+    {
+      "id": "credit_check",
+      "category": "start",
+      "title": "A credit check",
       "description": "The service tutorial's process: a credit limit service approves or refers each application.",
       "model": "btsn.common/ProcessDefinitionFolder/credit/Workflow/Credit_Check_Workflow.json",
-      "run": "btsn.common/AnalysisFolder/Credit/Analysis_Credit_Check_Workflow.txt" },
-    { "id": "fork_join", "category": "petrinet", "title": "Fork and join",
+      "run": "btsn.common/AnalysisFolder/Credit/Analysis_Credit_Check_Workflow.txt"
+    },
+    {
+      "id": "fork_join",
+      "category": "petrinet",
+      "title": "Fork and join",
       "description": "P1 forks to P2 and P3, on separate hosts; both must arrive before P4 runs.",
       "model": "btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_P2_P3_P4_Fork_Join_Workflow.json",
-      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_P1_P2_P3_P4_Fork_Join_Workflow.txt" },
-    { "id": "double_join", "category": "petrinet", "title": "Double join",
+      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_P1_P2_P3_P4_Fork_Join_Workflow.txt"
+    },
+    {
+      "id": "double_join",
+      "category": "petrinet",
+      "title": "Double join",
       "description": "Three branches, two joins: P4 waits for P2 and P3, then P6 waits for P4 and P5.",
       "model": "btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_to_P6_Double_Join_Workflow.json",
-      "run": "btsn.common/AnalysisFolder/PetriNet/P1_to_P6_Double_Join_Workflow.txt" },
-    { "id": "claims", "category": "business", "title": "Insurance claims",
+      "run": "btsn.common/AnalysisFolder/PetriNet/P1_to_P6_Double_Join_Workflow.txt"
+    },
+    {
+      "id": "rendezvous",
+      "category": "petrinet",
+      "title": "Rendezvous",
+      "description": "Two tokens, one in each place, meet at a join and go round again.",
+      "model": "btsn.common/ProcessDefinitionFolder/petrinet/Workflow/Rendezvous_Workflow.json",
+      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_Rendezvous_Workflow.txt"
+    },
+    {
+      "id": "extra_fork_child",
+      "category": "petrinet",
+      "title": "Extra fork child",
+      "description": "A place forks more branches than it holds token numbers for, and the hosts still tell the branches apart.",
+      "model": "btsn.common/ProcessDefinitionFolder/petrinet/Workflow/Extra_Fork_Child_Workflow.json",
+      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_Extra_Fork_Child_Workflow.txt"
+    },
+    {
+      "id": "traffic_light",
+      "category": "petrinet",
+      "title": "Traffic lights",
+      "description": "An intersection: north-south and east-west lights hand over through forks, joins and feedback.",
+      "model": "btsn.common/ProcessDefinitionFolder/petrinet/Workflow/TrafficLight_Workflow.json",
+      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_TrafficLight_Workflow.txt"
+    },
+    {
+      "id": "philosophers",
+      "category": "petrinet",
+      "title": "Dining philosophers",
+      "description": "Five philosophers on five hosts share five forks; each eats only when its join holds both.",
+      "model": "btsn.common/ProcessDefinitionFolder/petrinet/Workflow/Dining_Philosophers.json",
+      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_Dining_Philosophers.txt"
+    },
+    {
+      "id": "philosophers_deadlock",
+      "category": "petrinet",
+      "title": "Dining philosophers, deadlocked",
+      "description": "Every philosopher starts holding one fork: each join waits for a fork that never comes.",
+      "model": "btsn.common/ProcessDefinitionFolder/petrinet/Workflow/Dining_Philosophers_Deadlock.json",
+      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_Dining_Philosophers_Deadlock.txt"
+    },
+    {
+      "id": "claims",
+      "category": "business",
+      "title": "Insurance claims",
       "description": "Triage pays a small claim at once and sends a larger one to Assess, a service called over the internet.",
       "model": "btsn.common/ProcessDefinitionFolder/claims/Workflow/Claims_Workflow.json",
-      "run": "btsn.common/AnalysisFolder/Claims/Analysis_Claims_Workflow.txt" },
-    { "id": "inventory", "category": "business", "title": "Inventory and supplier",
+      "run": "btsn.common/AnalysisFolder/Claims/Analysis_Claims_Workflow.txt"
+    },
+    {
+      "id": "inventory",
+      "category": "business",
+      "title": "Inventory and supplier",
       "description": "A stateful inventory ships what it holds; when stock runs out, the supplier restocks it or the order is cancelled.",
       "model": "btsn.common/ProcessDefinitionFolder/inventory/Workflow/Inventory_Workflow.json",
-      "run": "btsn.common/AnalysisFolder/Inventory/Analysis_Inventory_Workflow.txt" },
-    { "id": "loan", "category": "financial", "title": "Loan application, with compensation",
+      "run": "btsn.common/AnalysisFolder/Inventory/Analysis_Inventory_Workflow.txt"
+    },
+    {
+      "id": "financial_simple",
+      "category": "financial",
+      "title": "Validation on its own",
+      "description": "The first step of the loan process, on one host: validate each application.",
+      "model": "btsn.common/ProcessDefinitionFolder/financial/Workflow/FinancialSystem_P1_Simple.json",
+      "run": "btsn.common/AnalysisFolder/Financial/Analysis_FinancialSystem_P1_Simple.txt"
+    },
+    {
+      "id": "credit_rest",
+      "category": "financial",
+      "title": "Credit check over REST",
+      "description": "The credit check, with its service answered over the internet instead of on the host.",
+      "model": "btsn.common/ProcessDefinitionFolder/credit/Workflow/Credit_Check_Rest_Workflow.json",
+      "run": "btsn.common/AnalysisFolder/Credit/Analysis_Credit_Check_Rest_Workflow.txt"
+    },
+    {
+      "id": "credit_fraud_rest",
+      "category": "financial",
+      "title": "Fraud screen, then credit",
+      "description": "A fraud screen clears an application to a credit check called over REST, or sends it for review.",
+      "model": "btsn.common/ProcessDefinitionFolder/credit/Workflow/Credit_Fraud_Rest_Workflow.json",
+      "run": "btsn.common/AnalysisFolder/Credit/Analysis_Credit_Fraud_Rest_Workflow.txt"
+    },
+    {
+      "id": "loan",
+      "category": "financial",
+      "title": "Loan application, with compensation",
       "description": "Credit and fraud checks join at underwriting; an abandoned loan signals a second process to withdraw its credit enquiry.",
       "model": "btsn.common/ProcessDefinitionFolder/financial/Workflow/FinancialSystem_P1_P5_Workflow.json",
-      "run": "btsn.common/AnalysisFolder/Financial/Analysis_FinancialSystem_P1_P5_Compensation.txt" },
-    { "id": "emergency_patient", "category": "healthcare", "title": "Emergency department",
+      "run": "btsn.common/AnalysisFolder/Financial/Analysis_FinancialSystem_P1_P5_Compensation.txt"
+    },
+    {
+      "id": "financial_stage3",
+      "category": "financial",
+      "title": "Two processes, shared services",
+      "description": "The loan process (v001) and a pre-screen (v002) run at once on the same validation and credit hosts.",
+      "model": "btsn.common/ProcessDefinitionFolder/financial/Workflow/FinancialSystem_P1_P5_Workflow.json",
+      "run": "btsn.common/AnalysisFolder/Financial/Analysis_FinancialSystem_Stage3_Concurrent.txt"
+    },
+    {
+      "id": "financial_stage5",
+      "category": "financial",
+      "title": "Priority: an urgent burst",
+      "description": "Forty background pre-screens (v002) are under way when fifteen urgent loans (v001) arrive and go first.",
+      "model": "btsn.common/ProcessDefinitionFolder/financial/Workflow/FinancialSystem_P1_P5_Workflow.json",
+      "run": "btsn.common/AnalysisFolder/Financial/Analysis_FinancialSystem_Stage5_PriorityPreemption.txt"
+    },
+    {
+      "id": "emergency_patient",
+      "category": "healthcare",
+      "title": "Emergency department",
       "description": "Triage sends a patient straight to treatment, or to laboratory, cardiology and radiology, which join at diagnosis.",
       "model": "btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Emergency_Department_Patient_Workflow.json",
-      "run": "btsn.common/AnalysisFolder/Healthcare/Emergency_Department_Patient_Workflow.txt" },
-    { "id": "emergency_concurrent", "category": "healthcare", "title": "Three versions at once",
+      "run": "btsn.common/AnalysisFolder/Healthcare/Emergency_Department_Patient_Workflow.txt"
+    },
+    {
+      "id": "federated_radiology",
+      "category": "healthcare",
+      "title": "Federated radiology",
+      "description": "Radiology requests from another hospital, served by this hospital's radiology host.",
+      "model": "btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Federated_Radiology_Workflow.json",
+      "run": "btsn.common/AnalysisFolder/Healthcare/Analysis_Federated_Radiology_Workflow.txt"
+    },
+    {
+      "id": "emergency_concurrent",
+      "category": "healthcare",
+      "title": "Three versions at once",
       "description": "The emergency department, a triage canary and federated radiology requests, running together on six hosts.",
       "model": "btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Emergency_Department_With_Federated_Radiology.json",
-      "run": "btsn.common/AnalysisFolder/Healthcare/Emergency_Department_With_Federated_Radiology.txt" }
+      "run": "btsn.common/AnalysisFolder/Healthcare/Emergency_Department_With_Federated_Radiology.txt"
+    }
   ]
 }
