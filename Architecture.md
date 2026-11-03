@@ -185,6 +185,51 @@ deployment facts. For each route, it gives the next service and operation, the c
 and port to send to, and the guard value. The host asks that one question after each
 service call, and compares the guard values with the routing value the service returned.
 
+## A token through an orchestration host
+
+Once a version's rules are installed, every token takes the same path through each orchestration host
+it reaches, whatever the place service does:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant PREV as Previous orchestration host(s)<br/>or event generator
+    box Orchestration host for node Pn
+        participant Q as EventReactor + Scheduler
+        participant T as Orchestration thread<br/>(ServiceThread)
+        participant R as Rules<br/>(local Service.ruleml)
+        participant DB as Derby database
+    end
+    participant S as Place service<br/>(Java class in the host,<br/>or REST endpoint)
+    participant NEXT as Next orchestration host(s)
+    PREV->>Q: token (UDP, compressed)
+    Q->>Q: drop if its lifetime has passed,<br/>else queue by token number (version priority)
+    Q->>T: next token
+    Note over T: T_in
+    T->>T: buffer it. At a join, hold the inputs<br/>until every one named by the binding has arrived
+    T-->>DB: record BUFFERED, ENTER
+    Note over T,S: P
+    T->>S: call the operation with its bound inputs
+    S-->>T: result (returned attribute and decision value)
+    Note over T,R: T_out
+    T->>R: control role and routes for this decision value
+    R-->>T: next service, operation, channel and port
+    T-->>DB: record EXIT, FORK or TERMINATE
+    T->>NEXT: token(s): one per route, none at a terminate
+    Note over NEXT: the next node repeats T_in → P → T_out
+```
+
+- **Queue (1–3).** Tokens arrive over UDP. The scheduler drops a token whose lifetime has passed and
+  serves the rest lowest token number first, so an earlier version has priority over a later one.
+- **T_in (4–5).** The orchestration thread buffers the token. At a join it holds the inputs until every
+  input named by the operation's canonical binding has arrived for that workflow and version.
+- **P (6–7).** The place service is called with the bound inputs and returns its result: the attribute it
+  owns and, at a gateway, the decision value.
+- **T_out (8–11).** The thread asks the host's own rule base, not a central engine, what the control role
+  and routes are for that decision value, and sends the token on: one token per route at a fork, none at
+  a terminate. Each step is recorded in the host's own database, on its own clock; the replay and the
+  analysis are built from those records.
+
 ## A token on the wire
 
 A token is an XML message. The business data travels as JSON inside it:

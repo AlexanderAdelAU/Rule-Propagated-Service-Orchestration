@@ -1226,7 +1226,7 @@ Every host runs the same pattern, whatever service its place is bound to: **T_in
 
 ![RPSO execution sequence with light blue activation bars: T_in receives and buffers a token, synchronizes required inputs and invokes P; P returns its result; T_in hands it to T_out, which routes or terminates the workflow.](images/rpso-execution-sequence.svg)
 
-*The execution pattern within a generic host. Shaded activation bars show responsibility for one invocation; their lengths do not represent measured time. More under [Architecture](#architecture-coordination-and-business-meaning).*
+*The execution pattern within a generic host. Shaded activation bars show responsibility for one invocation; their lengths do not represent measured time. More under [Architecture](#architecture-coordination-and-business-meaning); every step a token takes through a host, with its queue, local rules and recording, is in [A token through an orchestration host](Architecture.md#a-token-through-an-orchestration-host).*
 
 ## From the architecture pattern to a running service
 
