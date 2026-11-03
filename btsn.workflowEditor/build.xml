@@ -200,6 +200,10 @@
             <classpath><pathelement location="${build.dir}/contract-tests"/><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
             <arg file=".."/>
         </java>
+        <java classname="com.editor.ConcurrentVisitsReplayCheck" fork="true" failonerror="true">
+            <classpath><pathelement location="${build.dir}/contract-tests"/><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
+            <arg file=".."/>
+        </java>
         <java classname="com.editor.SignalNodeCheck" fork="true" failonerror="true">
             <classpath><pathelement location="${build.dir}/contract-tests"/><pathelement location="${build.dir}"/><path refid="compile.classpath"/></classpath>
             <arg file=".."/>
