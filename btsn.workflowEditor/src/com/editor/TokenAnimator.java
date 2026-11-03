@@ -807,9 +807,9 @@ public class TokenAnimator {
         // This catches any code path that generates TRAVELING_TO_NEXT_TIN without proper JOIN handling
         ensureJoinBufferSegments();
         
-        // POST-PROCESSING: Resolve overlapping occupancy at places
-        // This ensures only one token occupies a place at a time visually
-        resolveOverlappingPlaceOccupancy();
+        // Visits to a place are shown when they were recorded, overlapping when they overlapped: a host serves a
+        // place's tokens concurrently. (They used to be queued one at a time, so a visit that never ended, such as
+        // a patient still in Treatment when the run stopped, held every later visitor at the T_in until the end.)
 
         // Every visit moves the token from its T_in into the place, and every step lasts long enough to be seen.
         ensureTravelIntoPlaces();
@@ -824,6 +824,16 @@ public class TokenAnimator {
             endTime = Math.max(endTime, segments.get(segments.size() - 1).endTime) + postWindow;
             // Cut short (see recordingHorizon): stop where the records stop, not after tokens left resting at places.
             if (recordingCutoff != 0) endTime = Math.min(endTime, recordingCutoff + 500);
+            // A token left where it was when the records stop (ended, or still in a place) stays shown there until the
+            // replay's last moment: stretching steps had moved that moment past it, so those tokens vanished just
+            // before the end.
+            long untilEnd = Long.MIN_VALUE;
+            for (AnimationSegment s : segments) untilEnd = Math.max(untilEnd, s.endTime);
+            if (untilEnd < endTime)
+                for (int i = 0; i < segments.size(); i++) {
+                    AnimationSegment s = segments.get(i);
+                    if (s.endTime == untilEnd && s.phase != Phase.CONSUMED) segments.set(i, retimed(s, s.startTime, endTime + 1));
+                }
         }
         
         logger.info("=== Segment generation complete ===");
@@ -1254,106 +1264,6 @@ public class TokenAnimator {
         }
     }
     
-    /**
-     * Post-processing: Resolve overlapping place occupancy.
-     * 
-     * Petri net semantics require that only one token occupies a place at a time
-     * (unless it's a multi-capacity place, which we don't model here).
-     * 
-     * When two tokens would visually occupy the same place simultaneously:
-     * 1. The earlier token (by AT_PLACE start time) keeps its timing
-     * 2. The later token's BUFFERED_AT_TIN is extended to wait
-     * 3. The later token's TRAVELING_TO_PLACE is shifted accordingly
-     * 
-     * This creates a visual "queue" at T_in, which accurately represents
-     * tokens waiting for admission to an occupied place.
-     */
-    private void resolveOverlappingPlaceOccupancy() {
-        // Group AT_PLACE segments by place
-        Map<String, List<AnimationSegment>> atPlaceByPlace = new HashMap<>();
-        for (AnimationSegment seg : segments) {
-            if (seg.phase == Phase.AT_PLACE && seg.placeId != null) {
-                atPlaceByPlace.computeIfAbsent(seg.placeId, k -> new ArrayList<>()).add(seg);
-            }
-        }
-        
-        // Track segments to replace: old -> new
-        Map<AnimationSegment, AnimationSegment> replacements = new HashMap<>();
-        int overlapsResolved = 0;
-        
-        // For each place, detect and resolve overlaps
-        for (Map.Entry<String, List<AnimationSegment>> entry : atPlaceByPlace.entrySet()) {
-            String placeId = entry.getKey();
-            List<AnimationSegment> placeSegments = entry.getValue();
-            
-            if (placeSegments.size() < 2) continue;
-            
-            // Sort by start time
-            placeSegments.sort(Comparator.comparingLong(s -> s.startTime));
-            
-            // Check each pair for overlaps
-            for (int i = 0; i < placeSegments.size() - 1; i++) {
-                AnimationSegment current = placeSegments.get(i);
-                
-                // Skip if already being replaced
-                while (replacements.containsKey(current)) {
-                    current = replacements.get(current);
-                }
-                
-                for (int j = i + 1; j < placeSegments.size(); j++) {
-                    AnimationSegment next = placeSegments.get(j);
-                    
-                    // Skip if already being replaced
-                    while (replacements.containsKey(next)) {
-                        next = replacements.get(next);
-                    }
-                    
-                    // Skip same-token comparisons - a token can't block itself
-                    // This happens in cyclic workflows where the same token visits a place multiple times
-                    if (current.tokenId.equals(next.tokenId)) {
-                        continue;
-                    }
-                    
-                    // Check for overlap: next starts before current ends
-                    if (next.startTime < current.endTime) {
-                        // Overlap detected! Delay the later token
-                        long requiredDelay = current.endTime - next.startTime;
-                        
-                        logger.debug("Overlap at " + placeId + ": token " + current.tokenId + 
-                                    " [" + current.startTime + "-" + current.endTime + "] overlaps with " +
-                                    next.tokenId + " [" + next.startTime + "-" + next.endTime + 
-                                    "], delay=" + requiredDelay + "ms");
-                        
-                        // Find and adjust the overlapping token's approach segments
-                        adjustTokenApproachForDelay(next, requiredDelay, replacements);
-                        overlapsResolved++;
-                        
-                        // Update placeSegments with the replacement for further overlap checks
-                        AnimationSegment replacement = replacements.get(next);
-                        if (replacement != null) {
-                            placeSegments.set(j, replacement);
-                        }
-                    }
-                }
-            }
-        }
-        
-        // Apply all replacements to the segments list
-        if (!replacements.isEmpty()) {
-            List<AnimationSegment> newSegments = new ArrayList<>();
-            for (AnimationSegment seg : segments) {
-                AnimationSegment replacement = replacements.get(seg);
-                newSegments.add(replacement != null ? replacement : seg);
-            }
-            segments.clear();
-            segments.addAll(newSegments);
-            
-            // Re-sort after modifications
-            segments.sort(Comparator.comparingLong(s -> s.startTime));
-            
-            logger.info("Resolved " + overlapsResolved + " place occupancy overlaps (cross-token)");
-        }
-    }
     
     /**
      * POST-PROCESSING: Ensure all arrivals at JOIN T_ins have buffer segments.
@@ -1448,84 +1358,6 @@ public class TokenAnimator {
         }
     }
     
-    /**
-     * Adjust a token's approach segments to add delay before entering a place.
-     * 
-     * For cyclic workflows, we need to find the SPECIFIC segments that precede
-     * the overlapping AT_PLACE segment (by matching time ranges), not just any
-     * segments with the same tokenId/placeId.
-     * 
-     * @param overlappingAtPlace The specific AT_PLACE segment that needs to be delayed
-     * @param delay How much to delay the segments
-     * @param replacements Map to track segment replacements
-     */
-    private void adjustTokenApproachForDelay(AnimationSegment overlappingAtPlace, long delay,
-                                              Map<AnimationSegment, AnimationSegment> replacements) {
-        String tokenId = overlappingAtPlace.tokenId;
-        String placeId = overlappingAtPlace.placeId;
-        long atPlaceStart = overlappingAtPlace.startTime;
-        
-        // Find the segments that immediately precede this AT_PLACE segment
-        // They should end at or just before atPlaceStart
-        AnimationSegment bufferSeg = null;
-        AnimationSegment travelToPlaceSeg = null;
-        
-        // Time window to find related segments (within 500ms of AT_PLACE start)
-        long searchWindow = 500;
-        
-        for (AnimationSegment seg : segments) {
-            if (!seg.tokenId.equals(tokenId)) continue;
-            if (seg.placeId == null || !seg.placeId.equals(placeId)) continue;
-            if (replacements.containsKey(seg)) continue;
-            
-            // Find segments that end near the AT_PLACE start time
-            long timeDiff = Math.abs(seg.endTime - atPlaceStart);
-            
-            if (seg.phase == Phase.BUFFERED_AT_TIN && timeDiff < searchWindow) {
-                // Prefer the closest match
-                if (bufferSeg == null || timeDiff < Math.abs(bufferSeg.endTime - atPlaceStart)) {
-                    bufferSeg = seg;
-                }
-            } else if (seg.phase == Phase.TRAVELING_TO_PLACE && timeDiff < searchWindow) {
-                if (travelToPlaceSeg == null || timeDiff < Math.abs(travelToPlaceSeg.endTime - atPlaceStart)) {
-                    travelToPlaceSeg = seg;
-                }
-            }
-        }
-        
-        // Create replacement segments with delay applied
-        if (bufferSeg != null) {
-            AnimationSegment newBuffer = new AnimationSegment(
-                bufferSeg.tokenId, bufferSeg.version, bufferSeg.phase,
-                bufferSeg.startTime, bufferSeg.endTime + delay,
-                bufferSeg.placeId, bufferSeg.tInId, bufferSeg.tOutId,
-                bufferSeg.fromElement, bufferSeg.toElement,
-                bufferSeg.terminateId, bufferSeg.eventGenId
-            );
-            replacements.put(bufferSeg, newBuffer);
-        }
-        
-        if (travelToPlaceSeg != null) {
-            AnimationSegment newTravel = new AnimationSegment(
-                travelToPlaceSeg.tokenId, travelToPlaceSeg.version, travelToPlaceSeg.phase,
-                travelToPlaceSeg.startTime + delay, travelToPlaceSeg.endTime + delay,
-                travelToPlaceSeg.placeId, travelToPlaceSeg.tInId, travelToPlaceSeg.tOutId,
-                travelToPlaceSeg.fromElement, travelToPlaceSeg.toElement,
-                travelToPlaceSeg.terminateId, travelToPlaceSeg.eventGenId
-            );
-            replacements.put(travelToPlaceSeg, newTravel);
-        }
-        
-        // Shift the AT_PLACE segment itself
-        AnimationSegment newAtPlace = new AnimationSegment(
-            overlappingAtPlace.tokenId, overlappingAtPlace.version, overlappingAtPlace.phase,
-            overlappingAtPlace.startTime + delay, overlappingAtPlace.endTime + delay,
-            overlappingAtPlace.placeId, overlappingAtPlace.tInId, overlappingAtPlace.tOutId,
-            overlappingAtPlace.fromElement, overlappingAtPlace.toElement,
-            overlappingAtPlace.terminateId, overlappingAtPlace.eventGenId
-        );
-        replacements.put(overlappingAtPlace, newAtPlace);
-    }
     
     /**
      * Generate segments for a single token based on its events
