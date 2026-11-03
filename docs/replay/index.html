@@ -64,7 +64,7 @@
     <button id="reset" aria-label="Reset to the start">Reset</button>
     <div class="clock" aria-live="off"><span id="clock">0.000 s</span><small>run time</small></div>
     <div class="scrub"><input id="scrub" type="range" min="0" max="1000" value="0" step="1" aria-label="Position in the replay"></div>
-    <div class="speed"><label for="speed">Speed</label><input id="speed" type="range" min="0" max="100" value="15" step="1"><output id="speedOut">0.2×</output></div>
+    <div class="speed"><label for="speed">Speed</label><input id="speed" type="range" min="0" max="100" value="39" step="1"><output id="speedOut">0.6×</output></div>
   </div>
   <div class="meals" id="meals"></div>
 
@@ -565,7 +565,7 @@ const ui = { svg: document.getElementById("net"), play: document.getElementById(
   clock: document.getElementById("clock"), scrub: document.getElementById("scrub"), speed: document.getElementById("speed"),
   speedOut: document.getElementById("speedOut"), meals: document.getElementById("meals"), status: document.getElementById("status"),
   sources: document.getElementById("sources"), files: document.getElementById("files"), title: document.getElementById("title") };
-let R = null, now = 0, playing = false, speed = 0.2, lastFrame = 0, tokenLayer = null, T = null, model = null;
+let R = null, now = 0, playing = false, speed = 0.6, lastFrame = 0, tokenLayer = null, T = null, model = null;
 
 function load(modelJson, runText, nodes, names) {
   model = modelJson;
@@ -586,7 +586,7 @@ function load(modelJson, runText, nodes, names) {
   });
   ui.sources.innerHTML = "";
   for (const n of names) { const c = document.createElement("code"); c.textContent = n; ui.sources.appendChild(c); ui.sources.append(" "); }
-  ui.status.textContent = R.cutoff ? `Replay ends at ${((R.realAt(R.shownAt(R.cutoff)) - R.realAt(R.start)) / 1000).toFixed(1)} s, after which not every host was recording.` : "";
+  ui.status.textContent = R.cutoff ? `Replay ends at ${((R.realAt(R.shownAt(R.cutoff)) - R.realAt(R.start)) / 1000).toFixed(1)} s, the last moment the collected records cover every host. This happens when the process was still running as its records were collected, host by host.` : "";
   ui.status.className = "";
   const name = (names[0] || "").split("/").pop().replace(/\.json$/, "").replace(/_/g, " ");
   ui.title.firstChild.nodeValue = (name || "Token replay") + " ";
