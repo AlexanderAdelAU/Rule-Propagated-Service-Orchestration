@@ -25,8 +25,8 @@ flowchart TB
         OH["Orchestration host<br/>started as node P1"] -- "one per operation" --> OT["Orchestration thread<br/>T_in → P → T_out"]
         OT -- "in-process (Java)<br/>or REST" --> PS["Place service<br/>TriageService"]
     end
-    PL -- "deployment: the place,<br/>with its T_in and T_out" --> N
-    MC -- "runs" --> OH
+    MODEL -- "deployment: each place, with its T_in and T_out, is assigned to a node" --> DEPLOY
+    DEPLOY -- "each machine runs the orchestration hosts of its nodes" --> EXEC
 ```
 
 | Layer | Term | Meaning |
