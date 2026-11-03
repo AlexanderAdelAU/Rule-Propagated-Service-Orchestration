@@ -95,7 +95,7 @@
       "id": "traffic_light",
       "category": "petrinet",
       "title": "Traffic lights",
-      "description": "An intersection: north-south and east-west lights hand over through forks, joins and feedback.",
+      "description": "An intersection: north-south and east-west lights hand over through forks, joins and feedback. An open process: the lights never stop, so the replay ends where the records were collected.",
       "model": "btsn.common/ProcessDefinitionFolder/petrinet/Workflow/TrafficLight_Workflow.json",
       "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_TrafficLight_Workflow.txt"
     },
