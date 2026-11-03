@@ -10,10 +10,8 @@ const fs = require("fs"), path = require("path"), vm = require("vm");
 const [root, statesDir] = process.argv.slice(2);
 const MIN_AGREEMENT = 0.95;
 
-// The page's replay logic: its script up to the player, which is the part that touches the page.
-const html = fs.readFileSync(path.join(root, "docs/replay/index.html"), "utf8");
-const script = html.slice(html.lastIndexOf("<script>") + 8);
-const logic = script.slice(0, script.indexOf("// ---------------- Player"));
+// The page's replay logic (replay.js, shared by the replay page and the examples page).
+const logic = fs.readFileSync(path.join(root, "docs/replay/replay.js"), "utf8");
 const page = vm.createContext({ Math, Number, String, Array, Map, Set, Object, isFinite, Infinity });
 vm.runInContext(logic + "\nthis.api = { buildTopology, parseEvents, buildTimeline, PH };", page);
 const { buildTopology, parseEvents, buildTimeline, PH } = page.api;

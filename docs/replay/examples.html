@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RPSO Examples</title>
+<meta name="description" content="Every RPSO example, by category: each a recorded run of a process on separate hosts, ready to replay.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+  :root {
+    --bg: #f5f2eb; --ink: #182238; --muted: #5b6478; --accent: #c2521f; --accent-soft: #f3dccd;
+    --card: #ffffff; --line: #d9d3c6;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--ink); font: 15px/1.5 "IBM Plex Sans", system-ui, sans-serif; }
+  main { max-width: 1180px; margin: 0 auto; padding: 28px 16px 48px; }
+  a { color: inherit; }
+  .eyebrow { font: 600 12px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: .14em; color: var(--accent); text-transform: uppercase; }
+  h1 { font-size: 32px; line-height: 1.15; margin: 8px 0 8px; }
+  .tag { display: inline-block; font: 600 12px/1 "IBM Plex Mono", monospace; letter-spacing: .04em; padding: 6px 10px;
+         border-radius: 999px; background: var(--ink); color: #f5f2eb; vertical-align: middle; }
+  .lede { margin: 0 0 10px; color: var(--muted); max-width: 72ch; font-size: 16px; }
+  .links { font-size: 14px; color: var(--muted); margin: 0 0 20px; }
+  .links a { color: var(--ink); }
+  nav.cats { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 8px; position: sticky; top: 0; padding: 10px 0; background: var(--bg); z-index: 2; }
+  nav.cats a { text-decoration: none; font: 600 13px/1 "IBM Plex Sans", sans-serif; padding: 8px 12px; border-radius: 999px;
+               border: 1px solid var(--line); background: var(--card); }
+  nav.cats a:hover { border-color: var(--accent); }
+  nav.cats a span { font: 600 12px "IBM Plex Mono", monospace; color: var(--accent); margin-left: 4px; }
+  section { margin-top: 26px; scroll-margin-top: 60px; }
+  h2 { font-size: 21px; margin: 0 0 4px; }
+  .intro { color: var(--muted); margin: 0 0 14px; max-width: 80ch; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  a.card { display: flex; flex-direction: column; text-decoration: none; background: var(--card); border: 1px solid var(--line);
+           border-radius: 10px; overflow: hidden; transition: border-color .15s, box-shadow .15s, transform .15s; }
+  a.card:hover, a.card:focus-visible { border-color: var(--accent); box-shadow: 0 6px 18px rgba(24,34,56,.10); transform: translateY(-2px); outline: none; }
+  .thumb { height: 190px; border-bottom: 1px solid var(--line); background: #fff; position: relative; }
+  .thumb svg { width: 100%; height: 100%; display: block; }
+  .play { position: absolute; right: 10px; bottom: 10px; font: 600 12px/1 "IBM Plex Sans", sans-serif; padding: 7px 10px; border-radius: 999px;
+          background: var(--ink); color: #f5f2eb; opacity: .92; }
+  a.card:hover .play { background: var(--accent); }
+  .body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+  .body h3 { font-size: 16px; margin: 0; }
+  .body p { margin: 0; color: var(--muted); font-size: 14px; }
+  .meta { margin-top: auto; padding-top: 6px; font: 12px "IBM Plex Mono", monospace; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 12px; }
+  .meta b { color: var(--ink); font-weight: 600; }
+  .error { color: #a12a1a; font-weight: 600; }
+  @media (max-width: 640px) { h1 { font-size: 25px; } .thumb { height: 160px; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">RPSO · Examples</div>
+  <h1>Recorded runs <span class="tag">Not simulations</span></h1>
+  <p class="lede">Each example was drawn in the editor, deployed as rules to separate hosts and run: every place on a host of its own,
+    every token a message between them, every host recording what it did. Choose one to replay its run on the model,
+    at the times the hosts recorded.</p>
+  <p class="links"><a href="https://github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration#readme">The project</a> ·
+    <a href="https://github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration/blob/main/Architecture.md">How it is implemented</a> ·
+    <a href="https://github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration/blob/main/Tutorial.md">Build your own</a></p>
+  <nav class="cats" id="cats" aria-label="Categories"></nav>
+  <div id="sections"><p id="status">Loading the examples…</p></div>
+</main>
+<script src="replay.js"></script>
+<script>
+"use strict";
+// Every example in examples.json, by category: its model drawn as it is on the replay page, and the run's size.
+const ROOT = "../../";
+const get = async url => { const r = await fetch(url); if (!r.ok) throw new Error(`${r.status} for ${url}`); return r; };
+const node = (tag, attrs = {}, parent) => {
+  const n = document.createElement(tag);
+  for (const k in attrs) if (k === "text") n.textContent = attrs[k]; else n.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(n);
+  return n;
+};
+
+async function nodesOf(model) {
+  // The node each place is deployed to: the deployment sits in btsn.common, beside ProcessDefinitionFolder.
+  if (!model.serviceDeployment) return null;
+  try {
+    const d = await (await get(ROOT + "btsn.common/" + model.serviceDeployment)).json(), nodes = {};
+    for (const c of d.capabilities || []) { if (c.instance) nodes[c.instance] = c.node; if (c.service && !(c.service in nodes)) nodes[c.service] = c.node; }
+    return nodes;
+  } catch (_) { return null; }
+}
+
+async function fillCard(card, ex) {
+  const model = await (await get(ROOT + ex.model)).json();
+  const T = buildTopology(model, await nodesOf(model));
+  const svg = card.querySelector("svg");
+  drawModel(svg, model, T);
+  svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+  const events = parseEvents(await (await get(ROOT + ex.run)).text(), T);
+  const hosts = new Set(), versions = new Set();
+  let tokens = 0, first = Infinity;
+  for (const e of events) {
+    if (/^P\d+_Place$/.test(e.place) || T.places.some(p => p.id === e.place && p._node)) hosts.add(T.byId.get(e.place)?._node || e.place);
+    if (e.type === "GENERATED") { tokens++; versions.add(e.version); }
+    first = Math.min(first, e.t);
+  }
+  const meta = card.querySelector(".meta");
+  const item = (n, label) => { const s = node("span", {}, meta); node("b", { text: n }, s); s.append(" " + label); };
+  item(hosts.size, hosts.size === 1 ? "host" : "hosts");
+  item(tokens, tokens === 1 ? "token" : "tokens");
+  if (versions.size > 1) item(versions.size, "versions");
+  if (isFinite(first)) node("span", { text: "recorded " + new Date(first).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" }) }, meta);
+}
+
+(async function start() {
+  const status = document.getElementById("status");
+  try {
+    const cat = await (await get("examples.json")).json();
+    const sections = document.getElementById("sections"), nav = document.getElementById("cats");
+    sections.textContent = "";
+    const jobs = [];
+    for (const c of cat.categories) {
+      const list = cat.examples.filter(e => e.category === c.id);
+      if (!list.length) continue;
+      const a = node("a", { href: "#" + c.id, text: c.title }, nav);
+      node("span", { text: list.length }, a);
+      const sec = node("section", { id: c.id }, sections);
+      node("h2", { text: c.title }, sec);
+      node("p", { class: "intro", text: c.intro }, sec);
+      const grid = node("div", { class: "grid" }, sec);
+      for (const ex of list) {
+        const card = node("a", { class: "card", href: `index.html?model=${ROOT}${ex.model}&run=${ROOT}${ex.run}` }, grid);
+        const thumb = node("div", { class: "thumb" }, card);
+        const svg = document.createElementNS(SVGNS, "svg");
+        svg.setAttribute("role", "img"); svg.setAttribute("aria-label", "The " + ex.title + " process");
+        thumb.appendChild(svg);
+        node("span", { class: "play", text: "▶ Replay" }, thumb);
+        const body = node("div", { class: "body" }, card);
+        node("h3", { text: ex.title }, body);
+        node("p", { text: ex.description }, body);
+        node("div", { class: "meta" }, body);
+        jobs.push(fillCard(card, ex).catch(err => { body.appendChild(node("p", { class: "error", text: "Could not load: " + err.message })); }));
+      }
+    }
+    await Promise.all(jobs);
+  } catch (err) { status.textContent = "Could not load the examples: " + err.message; status.className = "error"; }
+})();
+</script>
+</body>
+</html>
