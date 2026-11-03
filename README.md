@@ -19,11 +19,15 @@ tokens; each host follows its own installed rules.
 
 *For example, three versions of an emergency-department process running at once on six hosts: the full patient workflow (v003), a triage canary (v002) and federated radiology requests from another hospital (v001), each deployed and measured separately.*
 
+[▶ Watch a recorded run of this process](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Emergency_Department_With_Federated_Radiology.json&run=../../btsn.common/AnalysisFolder/Healthcare/Emergency_Department_With_Federated_Radiology.txt)
+
 How does a drawing like this become a running system? Each place runs on a host of its own:
 
 ![The Petri net you draw is the system that runs: a four-place model on the left, where P1 forks to P2 and P3 and they join before P4, is deployed as local rules to four separate hosts on the right. Each host runs its own T_in, place function and T_out; tokens travel between hosts as messages with no central engine, and Monitor observes every host for complete Petri-net analysis.](images/rpso-overview.svg)
 
 *Draw the net, deploy its rules, run it as separate hosts. A place can be any service: a Boolean function, a credit check or a clinical diagnosis.*
+
+[▶ Watch a recorded run of this process](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_P2_P3_P4_Fork_Join_Workflow.json&run=../../btsn.common/AnalysisFolder/PetriNet/Analysis_P1_P2_P3_P4_Fork_Join_Workflow.txt)
 
 Every run is measured as it happens (queue waits, service times, join waits and
 end-to-end workflow time) and can be replayed on the model. These are
