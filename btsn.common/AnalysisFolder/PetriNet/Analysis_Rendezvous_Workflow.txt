@@ -1,0 +1,339 @@
+ INFO [main] (?:?) - Derby Embedded Driver registered successfully.
+ INFO [main] (?:?) - Found 1 distinct workflowBases: [1000000]
+Analyzing ALL 1 workflow bases: [1000000]
+
+================================================================================
+WORKFLOW BASE: 1000000 (v001)
+================================================================================
+ INFO [main] (?:?) - Canonical reconstruction: generated=2, completed=0, monitorAck=0, forks=1, joins=1, orphanChildren=2
+ INFO [main] (?:?) - Fork/Join analysis: 1 forks, 1 joined fork families
+ INFO [main] (?:?) - Place ENTER/EXIT pairing check: all ENTER events paired
+ INFO [main] (?:?) - Place P1_Place statistics: 11 paired logical visits, avg=158.0ms
+ INFO [main] (?:?) - Place P2_Place statistics: 8 paired logical visits, avg=181.0ms
+ INFO [main] (?:?) - Place P3_Place statistics: 6 paired logical visits, avg=147.0ms
+ INFO [main] (?:?) - Capacity verification for P1_Place: max marking=1, capacity=50 - PASS
+ INFO [main] (?:?) - Capacity verification for P2_Place: max marking=1, capacity=50 - PASS
+ INFO [main] (?:?) - Capacity verification for P3_Place: max marking=1, capacity=50 - PASS
+ INFO [main] (?:?) - Retrieved 25 logical place paths for workflowBase=1000000
+=== PETRI NET ANALYSIS REPORT ===
+Workflow Base: 1000000
+
+1. CLOSED NET (initial marking)
+   Marked tokens:             2
+   A closed net circulates its tokens until they expire: no workflow completes, and that is expected.
+   Rounds per place:
+     StochasticService (P1_Place): 11
+     StochasticService (P2_Place): 8
+     StochasticService (P3_Place): 6
+   Fairness:                  6 to 11 rounds per place
+   Ended:                     2 token(s) expired when their lifetime ran out
+   Ran at the same time:      P1+P2 (7x)
+   Observed join sites:        1
+   Join-family violations:    0
+   Structural result:         [OK]
+
+2. LOGICAL PLACE EXECUTIONS
+   StochasticService (P1_Place): 11 executions
+   StochasticService (P2_Place): 8 executions
+   StochasticService (P3_Place): 6 executions
+
+3. FORK/JOIN DETAIL
+   Forks detected (legacy cross-check): 1
+   Joined fork families (legacy cross-check): 1
+   Fork from 1000000 -> [1000002, 1000001] [JOINED]
+
+4. INSTRUMENTATION CONSISTENCY
+   Unpaired place ENTER events: 0
+
+5. PLACE RESIDENCE SAMPLES
+   Service/place: StochasticService (P1_Place)
+     Logical executions: 11
+     Paired timing samples: 11
+     Avg residence: 158.0ms
+     Min/Max: 97/217ms
+   Service/place: StochasticService (P2_Place)
+     Logical executions: 8
+     Paired timing samples: 8
+     Avg residence: 181.0ms
+     Min/Max: 127/265ms
+   Service/place: StochasticService (P3_Place)
+     Logical executions: 6
+     Paired timing samples: 6
+     Avg residence: 147.0ms
+     Min/Max: 115/209ms
+
+6. CAPACITY VERIFICATION
+   StochasticService (P1_Place): [OK] BOUNDED
+   StochasticService (P2_Place): [OK] BOUNDED
+   StochasticService (P3_Place): [OK] BOUNDED
+
+7. DATA QUALITY
+   Reconstructed place paths: 25
+   [OK] All paired residence times are non-negative
+   NOTE: temporal distributions and canonical throughput are reported in Stage 2.
+
+=== END REPORT ===
+
+ INFO [main] (?:?) - Generated workflow report for workflowBase=1000000
+ INFO [main] (?:?) - GENEALOGY: Found 2 tokens for workflow 1000000
+ INFO [main] (?:?) - GENEALOGY: 0 root tokens, 2 forked tokens, 0 max generation depth
+
+=== TOKEN GENEALOGY REPORT ===
+Workflow Base: 1000000
+Total Tokens: 2
+Root Tokens: 0
+Forked Tokens: 2
+Max Generation Depth: 0
+Total Families: 0
+
+--- Generation Distribution ---
+
+--- Family Trees ---
+ INFO [main] (?:?) - Canonical reconstruction: generated=2, completed=0, monitorAck=0, forks=1, joins=1, orphanChildren=2
+ INFO [main] (?:?) - Retrieved 25 logical place paths for workflowBase=1000000
+ INFO [main] (?:?) - Place correlation: 25 matched, 0 unmatched out of 25
+
+=== STAGE 2 TEMPORAL ANALYSIS ===
+Workflow Base: 1000000
+
+1. END-TO-END WORKFLOW LATENCY
+   Closed net: its tokens circulate until they expire, so there is no end-to-end latency (see rounds per place).
+   Canonical completed workflows: 0
+   Timed completion samples:      0
+
+2. WORKLOAD GENERATION
+   Root inter-arrival: n=1, avg=144.0ms, p50=144ms, p95=144ms, min/max=144/144ms
+
+3. PLACE RESIDENCE DISTRIBUTIONS
+   StochasticService (P1_Place): n=11, avg=158.0ms, p50=158ms, p95=217ms, min/max=97/217ms
+   StochasticService (P2_Place): n=8, avg=181.0ms, p50=181ms, p95=265ms, min/max=127/265ms
+   StochasticService (P3_Place): n=6, avg=147.8ms, p50=128ms, p95=209ms, min/max=115/209ms
+
+4. SERVICE EXECUTION TIMING
+   Service: StochasticService
+     Orchestration place: P1_Place
+     Queue: n=11, avg=371.5ms, p50=353ms, p95=643ms, min/max=270/643ms
+     Service: n=11, avg=268.4ms, p50=258ms, p95=469ms, min/max=146/469ms
+     Total: n=11, avg=639.8ms, p50=628ms, p95=1112ms, min/max=479/1112ms
+   Service: StochasticService
+     Orchestration place: P2_Place
+     Queue: n=8, avg=346.1ms, p50=336ms, p95=483ms, min/max=208/483ms
+     Service: n=8, avg=304.5ms, p50=285ms, p95=375ms, min/max=242/375ms
+     Total: n=8, avg=650.6ms, p50=621ms, p95=858ms, min/max=527/858ms
+   Service: StochasticService
+     Orchestration place: P3_Place
+     Queue: n=6, avg=182.0ms, p50=163ms, p95=254ms, min/max=115/254ms
+     Service: n=6, avg=313.2ms, p50=312ms, p95=406ms, min/max=229/406ms
+     Total: n=6, avg=495.2ms, p50=475ms, p95=660ms, min/max=344/660ms
+   Unmatched service timing samples: 0
+   Service timing/place-count mismatches: 0
+
+5. JOIN SYNCHRONIZATION
+   T_in_P3 -> StochasticService (P3_Place)
+     First-arrival to ENTER: n=6, avg=266.8ms, p50=140ms, p95=530ms, min/max=101/530ms
+     Branch arrival skew: n=6, avg=251.7ms, p50=128ms, p95=492ms, min/max=94/492ms
+
+6. TEMPORAL DATA QUALITY
+   Negative/invalid timing samples: 0
+   Clock offsets between places' hosts (a token cannot arrive before it was sent):
+     clock(P3_Place) - clock(P1_Place) between 399 and 61 ms (6 hops P1_Place->P3_Place, 6 back) [CHECK] no single offset fits these timestamps
+     clock(P3_Place) - clock(P2_Place) between -93 and 277 ms (6 hops P2_Place->P3_Place, 5 back)
+   Temporal result: [CHECK]
+
+=== END STAGE 2 REPORT ===
+
+
+=== TOKEN PATHS ===
+ INFO [main] (?:?) - Retrieved 25 logical place paths for workflowBase=1000000
+Token 1000001 at StochasticService (P1_Place): residence=217ms
+Token 1000001 at StochasticService (P1_Place): residence=106ms
+Token 1000001 at StochasticService (P3_Place): residence=209ms
+Token 1000001 at StochasticService (P1_Place): residence=184ms
+Token 1000001 at StochasticService (P1_Place): residence=112ms
+Token 1000001 at StochasticService (P3_Place): residence=167ms
+Token 1000001 at StochasticService (P1_Place): residence=196ms
+Token 1000001 at StochasticService (P3_Place): residence=128ms
+Token 1000001 at StochasticService (P1_Place): residence=201ms
+Token 1000001 at StochasticService (P1_Place): residence=158ms
+Token 1000001 at StochasticService (P3_Place): residence=153ms
+Token 1000001 at StochasticService (P1_Place): residence=174ms
+Token 1000001 at StochasticService (P3_Place): residence=115ms
+Token 1000001 at StochasticService (P1_Place): residence=151ms
+Token 1000001 at StochasticService (P1_Place): residence=142ms
+Token 1000001 at StochasticService (P1_Place): residence=97ms
+Token 1000001 at StochasticService (P3_Place): residence=115ms
+Token 1000002 at StochasticService (P2_Place): residence=265ms
+Token 1000002 at StochasticService (P2_Place): residence=187ms
+Token 1000002 at StochasticService (P2_Place): residence=181ms
+Token 1000002 at StochasticService (P2_Place): residence=127ms
+Token 1000002 at StochasticService (P2_Place): residence=171ms
+Token 1000002 at StochasticService (P2_Place): residence=192ms
+Token 1000002 at StochasticService (P2_Place): residence=127ms
+Token 1000002 at StochasticService (P2_Place): residence=198ms
+
+=== MARKING EVOLUTION ===
+ INFO [main] (?:?) - Retrieved 2 GENERATED events for workflowBase 1000000
+Time=1793691395136 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=START EventType=GENERATED
+Time=1793691395280 Token=1000002 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=START EventType=GENERATED
+ INFO [main] (?:?) - Retrieved 34 marking snapshots for P1_Place
+Time=1793691395810 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793691395829 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1793691396046 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P1 EventType=EXIT Arc=false
+Time=1793691396612 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793691396624 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1793691396730 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P1 EventType=EXIT Arc=true
+Time=1793691397746 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793691397766 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1793691397950 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P1 EventType=EXIT Arc=false
+Time=1793691398422 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793691398430 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1793691398542 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P1 EventType=EXIT Arc=true
+Time=1793691399409 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793691399425 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1793691399621 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P1 EventType=EXIT Arc=true
+Time=1793691400486 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793691400493 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1793691400694 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P1 EventType=EXIT Arc=false
+Time=1793691401122 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793691401133 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1793691401291 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P1 EventType=EXIT Arc=true
+Time=1793691402332 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793691402343 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1793691402517 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P1 EventType=EXIT Arc=true
+Time=1793691403549 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793691403561 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1793691403712 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P1 EventType=EXIT Arc=false
+Time=1793691404152 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793691404158 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1793691404300 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P1 EventType=EXIT Arc=false
+Time=1793691404776 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=BUFFERED
+Time=1793691404792 Token=1000001 Place=P1_Place Marking=1 Buffer=0 ToPlace=P1_Place TransitionId=T_in_P1 EventType=ENTER
+Time=1793691404889 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P1 EventType=EXIT Arc=true
+Time=1793691405226 Token=1000001 Place=P1_Place Marking=0 Buffer=0 ToPlace=FAILED TransitionId=T_out_P1 EventType=FAILED
+ INFO [main] (?:?) - Retrieved 25 marking snapshots for P2_Place
+Time=1793691395770 Token=1000002 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793691395787 Token=1000002 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1793691396052 Token=1000002 Place=P2_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P2 EventType=EXIT Arc=true
+Time=1793691397875 Token=1000002 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793691397897 Token=1000002 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1793691398084 Token=1000002 Place=P2_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P2 EventType=EXIT Arc=true
+Time=1793691399550 Token=1000002 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793691399564 Token=1000002 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1793691399745 Token=1000002 Place=P2_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P2 EventType=EXIT Arc=true
+Time=1793691400571 Token=1000002 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793691400580 Token=1000002 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1793691400707 Token=1000002 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P2 EventType=EXIT Arc=false
+Time=1793691401156 Token=1000002 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793691401176 Token=1000002 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1793691401347 Token=1000002 Place=P2_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P2 EventType=EXIT Arc=true
+Time=1793691402392 Token=1000002 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793691402411 Token=1000002 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1793691402603 Token=1000002 Place=P2_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P2 EventType=EXIT Arc=true
+Time=1793691403717 Token=1000002 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793691403727 Token=1000002 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1793691403854 Token=1000002 Place=P2_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P2 EventType=EXIT Arc=false
+Time=1793691404171 Token=1000002 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=BUFFERED
+Time=1793691404191 Token=1000002 Place=P2_Place Marking=1 Buffer=0 ToPlace=P2_Place TransitionId=T_in_P2 EventType=ENTER
+Time=1793691404389 Token=1000002 Place=P2_Place Marking=0 Buffer=0 ToPlace=P3_Place TransitionId=T_out_P2 EventType=EXIT Arc=true
+Time=1793691405303 Token=1000002 Place=P2_Place Marking=0 Buffer=0 ToPlace=FAILED TransitionId=T_out_P2 EventType=FAILED
+ INFO [main] (?:?) - Retrieved 48 marking snapshots for P3_Place
+Time=1793691396533 Token=1000002 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793691397025 Token=1000001 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793691397063 Token=1000001 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=ENTER
+Time=1793691397072 Token=1000002 Place=P3_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P3 EventType=JOIN_CONSUMED
+Time=1793691397253 Token=1000001 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793691397272 Token=1000001 Place=P3_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P3 EventType=EXIT Arc=token
+Time=1793691397349 Token=1000002 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793691397361 Token=1000002 Place=P3_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P3 EventType=EXIT Arc=token
+Time=1793691398447 Token=1000002 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793691398834 Token=1000001 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793691398850 Token=1000001 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=ENTER
+Time=1793691398859 Token=1000002 Place=P3_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P3 EventType=JOIN_CONSUMED
+Time=1793691399010 Token=1000001 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793691399017 Token=1000001 Place=P3_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P3 EventType=EXIT Arc=token
+Time=1793691399073 Token=1000002 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793691399090 Token=1000002 Place=P3_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P3 EventType=EXIT Arc=token
+Time=1793691399894 Token=1000001 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793691400022 Token=1000002 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793691400031 Token=1000001 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=ENTER
+Time=1793691400035 Token=1000002 Place=P3_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P3 EventType=JOIN_CONSUMED
+Time=1793691400151 Token=1000001 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793691400159 Token=1000001 Place=P3_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P3 EventType=EXIT Arc=token
+Time=1793691400209 Token=1000002 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793691400217 Token=1000002 Place=P3_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P3 EventType=EXIT Arc=token
+Time=1793691401613 Token=1000001 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793691401738 Token=1000002 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793691401753 Token=1000001 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=ENTER
+Time=1793691401757 Token=1000002 Place=P3_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P3 EventType=JOIN_CONSUMED
+Time=1793691401899 Token=1000001 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793691401906 Token=1000001 Place=P3_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P3 EventType=EXIT Arc=token
+Time=1793691401969 Token=1000002 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793691401982 Token=1000002 Place=P3_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P3 EventType=EXIT Arc=token
+Time=1793691402905 Token=1000001 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793691402999 Token=1000002 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793691403006 Token=1000001 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=ENTER
+Time=1793691403010 Token=1000002 Place=P3_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P3 EventType=JOIN_CONSUMED
+Time=1793691403115 Token=1000001 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793691403121 Token=1000001 Place=P3_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P3 EventType=EXIT Arc=token
+Time=1793691403186 Token=1000002 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793691403194 Token=1000002 Place=P3_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P3 EventType=EXIT Arc=token
+Time=1793691404770 Token=1000002 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793691405054 Token=1000001 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=BUFFERED
+Time=1793691405060 Token=1000001 Place=P3_Place Marking=1 Buffer=0 ToPlace=P3_Place TransitionId=T_in_P3 EventType=ENTER
+Time=1793691405063 Token=1000002 Place=P3_Place Marking=1 Buffer=0 ToPlace=JOIN_CONSUMED TransitionId=T_in_P3 EventType=JOIN_CONSUMED
+Time=1793691405166 Token=1000001 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793691405175 Token=1000001 Place=P3_Place Marking=0 Buffer=0 ToPlace=P1_Place TransitionId=T_out_P3 EventType=EXIT Arc=token
+Time=1793691405228 Token=1000002 Place=P3_Place Marking=0 Buffer=0 ToPlace=P3 TransitionId=T_out_P3 EventType=FORK
+Time=1793691405236 Token=1000002 Place=P3_Place Marking=0 Buffer=0 ToPlace=P2_Place TransitionId=T_out_P3 EventType=EXIT Arc=token
+
+================================================================================
+CROSS-VERSION PRIORITY ANALYSIS
+================================================================================
+ INFO [main] (?:?) - Place correlation: 25 matched, 0 unmatched out of 25
+ INFO [main] (?:?) - Shared services (cross-version): []
+ INFO [main] (?:?) - Priority analysis complete: 25 samples (0 root, 25 forked), 0 shared services, 0 shared-service contention points, 0 shared-service inversions
+
+=== STAGE 3 SHARED-SERVICE CONCURRENCY ANALYSIS ===
+
+1. SERVICE EXECUTION SAMPLE BREAKDOWN
+   Total logical service executions: 25
+   Root-token executions:            0
+   Fork-derived executions:          25
+   Shared-service executions:        0
+   NOTE: fork-derived executions are included when they consume a shared service.
+
+2. SHARED SERVICES (Cross-Version Traffic)
+   [INFO] No shared services detected - each version uses exclusive services
+   Priority contention cannot be measured without shared services
+
+3. VERSION STATISTICS (All Logical Service Executions)
+   Version  Tokens     Avg Queue    Min Queue    Max Queue    Avg Service 
+   ----------------------------------------------------------------------
+   v001     25         317.9        115          643          290.7       
+
+4. SHARED SERVICE CONTENTION CANDIDATES (Both Arrived Before Invocation)
+   Total candidate comparisons: 0
+
+5. SHARED SERVICE PRIORITY INVERSION CANDIDATES
+   [NOTE] Arrival is recorded before queue insertion; invocation is recorded after dequeue and rule processing.
+   A lower-priority token can be dequeued before the higher-priority token enters the queue, yet be invoked after its arrival.
+   Queue insertion/dequeue timestamps are not recorded here; these candidates do not prove a scheduling violation.
+   [OK] No invocation-order inversion candidates at shared services
+
+6. LEGACY ROOT TOKEN ANALYSIS (Global - Includes Cross-Service Comparisons)
+   Contention points: 0
+   Inversions: 0
+
+7. FORK-DERIVED SERVICE EXECUTIONS
+   Fork-derived execution samples: 25
+   These are real business-service executions by descendant tokens.
+   They remain eligible for same-queue Stage-3 contention analysis.
+   By version: v001=25 
+
+8. STAGE 3 EVIDENCE SUMMARY
+   Shared-service concurrency: [NOT OBSERVED] no physical service saw multiple versions
+
+=== END STAGE 3 REPORT ===
+
+ INFO [main] (?:?) - Generated priority analysis report
+

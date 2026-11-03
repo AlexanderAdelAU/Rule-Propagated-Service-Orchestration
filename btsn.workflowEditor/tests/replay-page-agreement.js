@@ -1,5 +1,5 @@
-// The web replay page (docs/replay/index.html) shows each documented run as the editor does.
-// Replays every run in docs/replay/runs.txt with the page's own code (its timeline, not its drawing), finds where each
+// The web replay page (docs/replay/index.html) shows each example's run as the editor does.
+// Replays every example in docs/replay/examples.json with the page's own code (its timeline, not its drawing), finds where each
 // token is at the same 49 recorded moments the editor's states were written for (ReplayPageStates), and requires the
 // two to agree on at least 95% of token positions in every run. The few that differ are tokens caught a few
 // milliseconds apart as they leave a generator or enter a place.
@@ -10,16 +10,13 @@ const fs = require("fs"), path = require("path"), vm = require("vm");
 const [root, statesDir] = process.argv.slice(2);
 const MIN_AGREEMENT = 0.95;
 
-// The page's replay logic: its script up to the player, which is the part that touches the page.
-const html = fs.readFileSync(path.join(root, "docs/replay/index.html"), "utf8");
-const script = html.slice(html.lastIndexOf("<script>") + 8);
-const logic = script.slice(0, script.indexOf("// ---------------- Player"));
+// The page's replay logic (replay.js, shared by the replay page and the examples page).
+const logic = fs.readFileSync(path.join(root, "docs/replay/replay.js"), "utf8");
 const page = vm.createContext({ Math, Number, String, Array, Map, Set, Object, isFinite, Infinity });
 vm.runInContext(logic + "\nthis.api = { buildTopology, parseEvents, buildTimeline, PH };", page);
 const { buildTopology, parseEvents, buildTimeline, PH } = page.api;
 
-const runs = fs.readFileSync(path.join(root, "docs/replay/runs.txt"), "utf8").split("\n")
-  .map(l => l.trim()).filter(l => l && !l.startsWith("#")).map(l => l.split(/\s+/));
+const runs = JSON.parse(fs.readFileSync(path.join(root, "docs/replay/examples.json"), "utf8")).examples.map(e => [e.id, e.model, e.run]);
 let failed = 0;
 const report = [];
 for (const [name, modelPath, runPath] of runs) {
@@ -38,7 +35,8 @@ for (const [name, modelPath, runPath] of runs) {
   const where = s => s.phase === PH.AT_TERM ? "end " + label(s.term) : s.phase === PH.BUFFERED ? "wait " + label(s.tIn)
     : s.phase === PH.AT_PLACE ? "at " + label(s.place) : s.phase === PH.AT_EG ? "eg " + label(s.eg) : s.phase === PH.EXPIRED ? "expired"
     : "move " + label(s.from) + ">" + label(s.to);
-  const first = Math.min(...events.map(e => e.t)), last = Math.max(...events.map(e => e.t));
+  // The recorded span the replay shows: up to where every host was still recording, as the editor does.
+  const first = Math.min(...R.events.map(e => e.t)), last = Math.max(...R.events.map(e => e.t));
   const pageAt = {};
   for (let k = 1; k < 50; k++) {
     const real = first + (last - first) * k / 50;
@@ -65,4 +63,4 @@ for (const [name, modelPath, runPath] of runs) {
 }
 console.log(report.join("\n"));
 if (failed) { console.error(`FAIL: the web replay page and the editor disagree on ${failed} run(s)`); process.exit(1); }
-console.log(`PASS: the web replay page shows each of the ${runs.length} documented runs as the editor's replay does (at least ${100 * MIN_AGREEMENT}% of token positions agree at 49 moments in each run)`);
+console.log(`PASS: the web replay page shows each of the ${runs.length} examples' runs as the editor's replay does (at least ${100 * MIN_AGREEMENT}% of token positions agree at 49 moments in each run)`);

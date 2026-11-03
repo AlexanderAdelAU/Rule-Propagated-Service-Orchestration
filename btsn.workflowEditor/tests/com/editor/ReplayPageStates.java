@@ -7,7 +7,7 @@ import java.util.*;
 import javax.swing.SwingUtilities;
 
 /**
- * Where the editor's replay shows each token, for the runs the documentation links to (docs/replay/runs.txt): at 49
+ * Where the editor's replay shows each token, for every example on the examples page (docs/replay/examples.json): at 49
  * moments spread over each run's recorded time, one line per token, "moment, token, where". replay-page-agreement.js
  * replays the same runs with the web page's own code and compares.
  *
@@ -18,9 +18,11 @@ public final class ReplayPageStates {
         Path root = Path.of(args[0]).toAbsolutePath(), out = Path.of(args[1]);
         Files.createDirectories(out);
         List<String[]> runs = new ArrayList<>();
-        for (String line : Files.readAllLines(root.resolve("docs/replay/runs.txt"))) {
-            line = line.trim();
-            if (!line.isEmpty() && !line.startsWith("#")) runs.add(line.split("\\s+"));
+        org.json.simple.JSONObject catalogue = (org.json.simple.JSONObject) new org.json.simple.parser.JSONParser()
+            .parse(Files.readString(root.resolve("docs/replay/examples.json")));
+        for (Object o : (org.json.simple.JSONArray) catalogue.get("examples")) {
+            org.json.simple.JSONObject ex = (org.json.simple.JSONObject) o;
+            runs.add(new String[] { (String) ex.get("id"), (String) ex.get("model"), (String) ex.get("run") });
         }
         Throwable[] failure = new Throwable[1];
         SwingUtilities.invokeAndWait(() -> {
