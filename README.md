@@ -73,7 +73,7 @@ The detail is in [Reference.md](Reference.md).
 
 **How RPSO works**
 
-- [How RPSO is implemented](Architecture.md): the terms, the programs in a run, inside an orchestration host, from the drawing to installed rules, a token on the wire, the phases of a run, and ports
+- [How RPSO is implemented](Architecture.md): the terms, the programs in a run, inside an orchestration host, from the drawing to installed rules, a token through an orchestration host, a token on the wire, the phases of a run, and ports
 - [Inside each host](Reference.md#inside-each-host)
 - [From the architecture pattern to a running service](Reference.md#from-the-architecture-pattern-to-a-running-service): from one place to six, and the financial and healthcare workflows
 - [Architecture: coordination and business meaning](Reference.md#architecture-coordination-and-business-meaning)
