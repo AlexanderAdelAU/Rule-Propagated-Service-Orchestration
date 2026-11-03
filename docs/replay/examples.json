@@ -23,7 +23,7 @@
     {
       "id": "healthcare",
       "title": "Healthcare",
-      "intro": "An emergency department in which patients fork to three departments and join at diagnosis, alongside a triage canary and requests from another hospital."
+      "intro": "Real services, not stubs: each department is a Java service applying clinical rules to every patient. Triage sets a priority from the presenting condition, heart rate, oxygen saturation and pain score, and sends a confirmed heart attack or stroke straight to treatment. The laboratory checks troponin, BNP, creatinine and electrolytes against reference ranges and critical limits; cardiology reads the ECG and grades the cardiac risk; diagnosis combines the three results into a diagnosis and a disposition, from ICU admission to outpatient follow-up; treatment records the medications given in its own database. The patients are synthetic; every decision is made by the services as the run goes."
     }
   ],
   "examples": [
@@ -183,7 +183,7 @@
       "id": "emergency_patient",
       "category": "healthcare",
       "title": "Emergency department",
-      "description": "Triage sends a patient straight to treatment, or to laboratory, cardiology and radiology, which join at diagnosis.",
+      "description": "Triage sends a confirmed heart attack or stroke straight to treatment; other patients are worked up by laboratory, cardiology and radiology, whose results join at diagnosis.",
       "model": "btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Emergency_Department_Patient_Workflow.json",
       "run": "btsn.common/AnalysisFolder/Healthcare/Emergency_Department_Patient_Workflow.txt"
     },
@@ -191,7 +191,7 @@
       "id": "federated_radiology",
       "category": "healthcare",
       "title": "Federated radiology",
-      "description": "Radiology requests from another hospital, served by this hospital's radiology host.",
+      "description": "Imaging requests from another hospital: this hospital's radiology service chooses the imaging protocol for each and returns its findings, marked for the hospital that asked.",
       "model": "btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Federated_Radiology_Workflow.json",
       "run": "btsn.common/AnalysisFolder/Healthcare/Analysis_Federated_Radiology_Workflow.txt"
     },
@@ -199,7 +199,7 @@
       "id": "emergency_concurrent",
       "category": "healthcare",
       "title": "Three versions at once",
-      "description": "The emergency department, a triage canary and federated radiology requests, running together on six hosts.",
+      "description": "The emergency department, a triage canary and federated radiology requests, run together on six hosts: the same clinical services serve all three.",
       "model": "btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Emergency_Department_With_Federated_Radiology.json",
       "run": "btsn.common/AnalysisFolder/Healthcare/Emergency_Department_With_Federated_Radiology.txt"
     }
