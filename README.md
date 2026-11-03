@@ -17,6 +17,15 @@ tokens; each host follows its own installed rules.
 
 ![An emergency-department process in the editor: patient arrivals pass Triage, whose gateway sends them to Laboratory, Cardiology and Radiology, which join before Diagnosis, then Treatment; a triage canary and federated radiology requests from another hospital enter beside them. Each place runs on its own host, P1 to P6; dashed lines are network connections.](images/emergency-department-concurrent.png)
 
+**Reading the diagram**
+- **Circles** are places: the steps of the process, each bound to a service (Triage, Laboratory, …).
+- The **badge** on a place (P1–P6) is the node it is deployed to; each node runs its own orchestration host.
+- The **bars** either side of a place are its transitions, installed as rules on the place's own host: T_in (grey) gathers its inputs, T_out (yellow) sends the result on.
+- The **letter** on a bar is the transition's control role: **E** edge, **G** gateway (routes by the service's decision), **J** join (waits for every input), **M** merge (takes either input), **T** terminate.
+- **EG** is an event generator, starting the tokens of one version.
+- **Arc labels** name a gateway's routes (Laboratory, Direct_to_Treatment, …) or the version that uses the arc (v001–v003).
+- **Dashed** arcs cross the network between hosts; a **2** on an arc marks a place with two operations.
+
 *For example, three versions of an emergency-department process running at once on six hosts: the full patient workflow (v003), a triage canary (v002) and federated radiology requests from another hospital (v001), each deployed and measured separately. To see additional examples, [browse them by category](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/examples.html).*
 
 [▶ Watch a recorded run of this process](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Emergency_Department_With_Federated_Radiology.json&run=../../btsn.common/AnalysisFolder/Healthcare/Emergency_Department_With_Federated_Radiology.txt)
