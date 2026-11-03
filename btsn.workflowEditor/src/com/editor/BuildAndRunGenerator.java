@@ -210,8 +210,9 @@ public final class BuildAndRunGenerator {
         Options o = plan.defaults;
         o.folder = preferred.isDirectory() ? preferred : models.isDirectory() ? models : plan.folders.isEmpty() ? plan.root : plan.folders.get(0);
         o.launcherName = base + "_BuildAndRun.xml";
-        // A closed net (one with an initial marking) never finishes: its tokens' lifetime is how long it runs.
-        if (!plan.joins.isEmpty()) o.lifetimeSeconds = 10;
+        // A closed net (one with an initial marking) never finishes: its tokens' lifetime is how long it runs, long
+        // enough for every place to be visited several times (the dining philosophers eat three or four times each in 10 s).
+        if (!plan.joins.isEmpty()) o.lifetimeSeconds = 20;
         for (String id : plan.targets.keySet()) {
             Run run = new Run(); run.generatorId = id; run.intervalMs = plan.rates.get(id); run.version = plan.versions.get(id);
             o.runs.add(run);
