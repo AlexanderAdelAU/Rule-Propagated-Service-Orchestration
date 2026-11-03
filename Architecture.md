@@ -7,22 +7,50 @@ where the rules live, and what happens, step by step, when you run a process.
 
 ## Terms
 
-| Term | Meaning |
-|---|---|
-| **Place** | A place of the Petri net, with its T_in and T_out. P1 and so on in the examples |
-| **Place service** | The business code bound to a place: a Java class, or a service behind a REST endpoint in any language |
-| **Node** | What a place is assigned to by the deployment (P1, P2, …). The infrastructure definition gives each node a network address |
-| **Machine** | A computer. One machine can run several nodes |
-| **Orchestration host** (host, for short) | The program a node runs on its machine. Every orchestration host is the same program, and holds no business code of its own |
-| **Orchestration thread** | The thread inside an orchestration host that carries out T_in → P → T_out for one operation of a place (`ServiceThread`) |
-| **Control role** | What a transition does: edge, gateway, fork, join, terminate or signal. The editor calls it the transition's Node Type |
+The terms belong to three layers, and the layers are different kinds of thing: a place is part of the
+process model, a node is a network binding in the deployment, and an orchestration host is a program
+running on a machine.
 
-They fit together like this:
+```mermaid
+flowchart TB
+    subgraph MODEL["1 · PROCESS MODEL"]
+        direction LR
+        TIN["T_in<br/>control role: edge"] --> PL(("Place<br/>Triage")) --> TOUT["T_out<br/>control role: gateway"]
+    end
+    subgraph DEPLOY["2 · DEPLOYMENT"]
+        N["Node P1<br/>network binding"]
+    end
+    subgraph MACHINE["3 · EXECUTION: machine 192.168.1.82"]
+        direction LR
+        subgraph HOST["Orchestration host P1 (generic program)"]
+            OT["Orchestration thread<br/>T_in → P → T_out"]
+        end
+        H2["Orchestration host P2 (another node)"]
+    end
+    PS["Place service: business code<br/>Java in-process, or REST,<br/>possibly on another machine"]
+    MODEL -- "assigned to: the place, with its T_in and T_out" --> DEPLOY
+    DEPLOY -- "runs as" --> MACHINE
+    MACHINE -- "the orchestration thread calls" --> PS
+    style H2 stroke-dasharray: 5 4
+```
 
-> place → node → orchestration host → machine.
->
-> The orchestration thread calls the place service: in-process when it is a Java class
-> loaded into the orchestration host, or over REST on whatever machine serves its endpoint.
+| Layer | Term | Meaning |
+|---|---|---|
+| **Process model** | **Place** | A place of the Petri net: one step of the process, bound to a place service operation. P1 and so on in the examples |
+| | **Transition** | A place's T_in (gathers its inputs) or T_out (sends its result on). Transitions are not deployed separately: they go wherever their place goes |
+| | **Control role** | What a transition does: for example edge, gateway, fork, join, merge, terminate or signal. The editor calls it the transition's Node Type |
+| **Deployment** | **Node** | A network binding: the name a place is assigned to (P1, P2, …), with the address and ports the infrastructure definition gives it. It is not a program: an orchestration host runs as it |
+| **Execution** | **Machine** | A computer, where orchestration hosts run. One machine can run the hosts of several nodes |
+| | **Orchestration host** (host, for short) | The program that runs as a node on its machine. Every orchestration host is the same generic program, and holds no business code of its own |
+| | **Orchestration thread** | The thread inside an orchestration host that carries out T_in → P → T_out for one operation of a place (`ServiceThread`), using the rules installed on that host |
+| | **Place service** | The business code bound to a place: a Java class called in-process, or a service behind a REST endpoint in any language, on any machine |
+
+Read down the layers: **a place, with its T_in and T_out, is assigned to a node; the node, a network
+binding, runs as an orchestration host on its machine; and the host's orchestration thread calls the place
+service.** None of these is one-to-one. A node can serve places from several processes and versions at
+once (in the concurrent healthcare run, node P4 serves Radiology for the patient workflow and for
+federated requests, told apart by version and operation); a machine can run the hosts of several nodes
+(in the tutorials all six run on one); and a REST place service need not run on the host's machine at all.
 
 ## The programs in a run
 
