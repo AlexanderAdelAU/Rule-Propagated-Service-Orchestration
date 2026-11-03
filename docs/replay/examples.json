@@ -23,7 +23,7 @@
     {
       "id": "healthcare",
       "title": "Healthcare",
-      "intro": "Real services, not stubs: each department is a Java service applying clinical rules to every patient. Triage sets a priority from the presenting condition, heart rate, oxygen saturation and pain score, and sends a confirmed heart attack or stroke straight to treatment. The laboratory checks troponin, BNP, creatinine and electrolytes against reference ranges and critical limits; cardiology reads the ECG and grades the cardiac risk; diagnosis combines the three results into a diagnosis and a disposition, from ICU admission to outpatient follow-up; treatment records the medications given in its own database. The patients are synthetic; every decision is made by the services as the run goes."
+      "intro": "Real services, not stubs: each department is a Java service applying clinical rules to every patient. Triage sets a priority from the presenting condition, heart rate, oxygen saturation and pain score, and sends a confirmed heart attack or stroke straight to treatment. The laboratory checks troponin, BNP, creatinine and electrolytes against reference ranges and critical limits; cardiology reads the ECG and grades the cardiac risk; diagnosis combines the three results into a diagnosis and a disposition, from ICU admission to outpatient follow-up; treatment records the medications given in its own database. The patients are synthetic, a fixed mix of emergency cases from chest pain to heart attack and stroke; every decision is made by the services as the run goes."
     }
   ],
   "examples": [
