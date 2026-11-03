@@ -1250,6 +1250,26 @@ public class TopologyBindingGenerator {
         return atoms;
     }
 
+    /** Remove from a binding file the canonicalBinding atoms of one operation, and the note that introduced them. */
+    static void withoutOperationBindings(File bindingFile, String operationName) throws IOException {
+        if (!bindingFile.isFile()) return;
+        String text = new String(Files.readAllBytes(bindingFile.toPath()), java.nio.charset.StandardCharsets.UTF_8);
+        java.util.regex.Pattern binding = java.util.regex.Pattern.compile("<Rel>\\s*canonicalBinding\\s*</Rel>\\s*<Ind>\\s*([^<\\s]+)\\s*</Ind>");
+        java.util.regex.Matcher atom = java.util.regex.Pattern.compile("<Atom>.*?</Atom>[ \\t]*\\r?\\n?", java.util.regex.Pattern.DOTALL).matcher(text);
+        StringBuilder kept = new StringBuilder();
+        int from = 0;
+        while (atom.find()) {
+            java.util.regex.Matcher m = binding.matcher(atom.group());
+            if (m.find() && m.group(1).equals(operationName)) {
+                kept.append(text, from, atom.start());
+                from = atom.end();
+            }
+        }
+        kept.append(text.substring(from));
+        String result = kept.toString().replaceAll("(\\r?\\n)*[ \\t]*<!-- Additional operation: " + java.util.regex.Pattern.quote(operationName) + " -->[ \\t]*", "");
+        if (!result.equals(text)) Files.write(bindingFile.toPath(), result.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    }
+
     private void appendCanonicalOperationBinding(String basePath, String serviceName,
             String operationName, int inputCount, List<String> argumentNames,
             String returnAttribute) throws IOException {
@@ -1259,6 +1279,10 @@ public class TopologyBindingGenerator {
             serviceName + "-CanonicalBindings.ruleml.xml");
         boolean hasExplicitArgs = argumentNames != null && !argumentNames.isEmpty();
         
+        // The file may already bind this operation (kept from an earlier process or version of the run, or written by
+        // hand): replace those atoms, never add to them. Each binding is an input the host waits for, so a second copy
+        // makes the operation wait for an input that never comes, and its tokens are dropped.
+        withoutOperationBindings(bindingFile, operationName);
         logger.info("Appending canonical binding for " + serviceName + "." + operationName);
         try (PrintWriter pw = new PrintWriter(new FileWriter(bindingFile, true))) {
             pw.println();

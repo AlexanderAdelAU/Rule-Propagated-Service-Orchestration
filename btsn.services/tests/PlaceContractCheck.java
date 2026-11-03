@@ -15,7 +15,8 @@ import org.btsn.rulecontroller.TopologyBindingGenerator;
 /**
  * What a place must declare, and what a routing-only place does:
  * - a place on the token path with no service is rejected by both compilers; an unconnected place (a label) is ignored;
- * - a place may expose several operations, and the canonical bindings generated for its service instance keep every one;
+ * - a place may expose several operations, and the canonical bindings generated for its service instance keep every one,
+ *   each bound once however many times the bindings are prepared (a run prepares them once per process and version);
  * - a place bound to AlwaysTrueService only routes: the token's data passes through unchanged, under the name the
  *   deployment gives each hop, however many such places it crosses.
  * Run with a scratch working directory: the binding generator writes to ../btsn.common/ServiceAttributeBindings.
@@ -65,6 +66,10 @@ public final class PlaceContractCheck {
         Method generate = TopologyBindingGenerator.class.getDeclaredMethod("generatePetriNetCanonicalBindings");
         generate.setAccessible(true);
         generate.invoke(generator);
+        // A run prepares the bindings once per process and version: preparing them again must not add a second
+        // binding for either operation (a second binding is a second input the host waits for).
+        generate.invoke(generator);
+        generate.invoke(generator);
         Path binding = scratch.resolve("btsn.common/ServiceAttributeBindings/TreatmentServiceInstance/TreatmentServiceInstance-CanonicalBindings.ruleml.xml");
         check(Files.isRegularFile(binding), "No binding file written at " + binding);
         String text = Files.readString(binding).replaceAll("<!--.*?-->", "").replaceAll("\\s+", "");
@@ -72,6 +77,10 @@ public final class PlaceContractCheck {
             "Binding lost executeTreatmentPlan:\n" + text);
         check(text.contains("<Rel>canonicalBinding</Rel><Ind>executeDirectTreatment</Ind><Ind>treatmentResults</Ind><Ind>triageResults</Ind>"),
             "Binding lost executeDirectTreatment:\n" + text);
+        for (String operation : new String[] { "executeTreatmentPlan", "executeDirectTreatment" }) {
+            int count = text.split("<Rel>canonicalBinding</Rel><Ind>" + operation + "</Ind>", -1).length - 1;
+            check(count == 1, operation + " bound " + count + " times after preparing the bindings three times:\n" + text);
+        }
 
         // 3. A chain of routing-only places carries the token's data through unchanged.
         String data = "{\"triageResults\":{\"patient\":\"A-17\",\"priority\":2,\"notes\":[\"chest pain\",\"ECG ordered\"]}}";
@@ -87,7 +96,7 @@ public final class PlaceContractCheck {
             "Data changed or nested across three routing-only places: " + token);
 
         System.out.println("Place contract check passed: connected places need a service, labels are ignored, "
-            + "both Treatment operations bound, data unchanged across three routing-only places");
+            + "both Treatment operations bound once however often prepared, data unchanged across three routing-only places");
     }
 
     private static List<Object> compilers() {
