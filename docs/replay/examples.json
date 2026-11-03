@@ -13,12 +13,12 @@
     {
       "id": "business",
       "title": "Claims and inventory",
-      "intro": "Small business processes whose services decide the route: pay or assess a claim, ship or restock an order."
+      "intro": "Real services deciding the route. Claims triage pays a claim of up to 2,500 at once and sends a larger one to Assess, a Node.js service on the internet that accepts claims up to 4,000 and rejects the rest. The inventory service keeps its own stock on its host and reserves one unit per order; when it runs out, the supplier on another host delivers more after a lead time, and the delivered stock travels back inside the order, because hosts share no memory."
     },
     {
       "id": "financial",
       "title": "Credit and lending",
-      "intro": "Credit and fraud checks that run side by side and join at underwriting, and a loan process that launches its own compensation."
+      "intro": "Real services making lending decisions. Validation checks that each application has an identifier, an income and an amount. The credit check grades the credit score (700 and over strong, 620 to 699 review, below that weak) and records an enquiry against the application; the fraud check reports the application's fraud risk, and the fraud bureau cannot be reached for one application in five. Underwriting joins the two: high fraud risk or a score under 600 is declined, 700 and over with low risk is approved, the rest is conditional. With no fraud result the loan is abandoned, and a Signal node launches a compensation process that withdraws the credit enquiry. The applications are synthetic; every decision is the services' own."
     },
     {
       "id": "healthcare",
@@ -55,7 +55,7 @@
       "id": "credit_check",
       "category": "start",
       "title": "A credit check",
-      "description": "The service tutorial's process: a credit limit service approves or refers each application.",
+      "description": "The service tutorial's process: a credit limit service approves an application of up to 5,000 and refers the rest.",
       "model": "btsn.common/ProcessDefinitionFolder/credit/Workflow/Credit_Check_Workflow.json",
       "run": "btsn.common/AnalysisFolder/Credit/Analysis_Credit_Check_Workflow.txt"
     },
@@ -119,7 +119,7 @@
       "id": "claims",
       "category": "business",
       "title": "Insurance claims",
-      "description": "Triage pays a small claim at once and sends a larger one to Assess, a service called over the internet.",
+      "description": "Triage pays a claim of up to 2,500 at once; a larger one goes to Assess, a service on the internet that accepts up to 4,000.",
       "model": "btsn.common/ProcessDefinitionFolder/claims/Workflow/Claims_Workflow.json",
       "run": "btsn.common/AnalysisFolder/Claims/Analysis_Claims_Workflow.txt"
     },
@@ -127,7 +127,7 @@
       "id": "inventory",
       "category": "business",
       "title": "Inventory and supplier",
-      "description": "A stateful inventory ships what it holds; when stock runs out, the supplier restocks it or the order is cancelled.",
+      "description": "The inventory starts with five units on its host; when they run out, the supplier delivers three more after a lead time, once, and later orders are cancelled.",
       "model": "btsn.common/ProcessDefinitionFolder/inventory/Workflow/Inventory_Workflow.json",
       "run": "btsn.common/AnalysisFolder/Inventory/Analysis_Inventory_Workflow.txt"
     },
@@ -143,7 +143,7 @@
       "id": "credit_rest",
       "category": "financial",
       "title": "Credit check over REST",
-      "description": "The credit check, with its service answered over the internet instead of on the host.",
+      "description": "The same credit check, its rule (approve up to 5,000) answered by a Node.js service over the internet instead of on the host.",
       "model": "btsn.common/ProcessDefinitionFolder/credit/Workflow/Credit_Check_Rest_Workflow.json",
       "run": "btsn.common/AnalysisFolder/Credit/Analysis_Credit_Check_Rest_Workflow.txt"
     },
@@ -151,7 +151,7 @@
       "id": "credit_fraud_rest",
       "category": "financial",
       "title": "Fraud screen, then credit",
-      "description": "A fraud screen clears an application to a credit check called over REST, or sends it for review.",
+      "description": "A fraud screen, then the credit check over REST. The fraud screen still runs the starting code the editor wrote for it, which takes clear and review in turn until the real rule is written.",
       "model": "btsn.common/ProcessDefinitionFolder/credit/Workflow/Credit_Fraud_Rest_Workflow.json",
       "run": "btsn.common/AnalysisFolder/Credit/Analysis_Credit_Fraud_Rest_Workflow.txt"
     },
