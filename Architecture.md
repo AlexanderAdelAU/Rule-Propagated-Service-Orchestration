@@ -13,21 +13,21 @@ running on a machine.
 
 ```mermaid
 flowchart TB
-    subgraph MODEL["1 · PROCESS MODEL: what you draw"]
+    subgraph MODEL["1 · PROCESS MODEL"]
         direction LR
         TIN["T_in<br/>control role: edge"] --> PL(("Place<br/>Triage")) --> TOUT["T_out<br/>control role: gateway"]
     end
-    subgraph DEPLOY["2 · DEPLOYMENT: where each place runs"]
-        N["Node P1<br/>network binding: address and ports"]
+    subgraph DEPLOY["2 · DEPLOYMENT"]
+        N["Node P1<br/>network binding"]
     end
     subgraph MACHINE["3 · EXECUTION: machine 192.168.1.82"]
-        direction TB
-        subgraph HOST["Orchestration host P1 (the same generic program on every node)"]
-            OT["Orchestration thread (ServiceThread)<br/>T_in → P → T_out, one per operation"]
+        direction LR
+        subgraph HOST["Orchestration host P1 (generic program)"]
+            OT["Orchestration thread<br/>T_in → P → T_out"]
         end
         H2["Orchestration host P2 (another node)"]
     end
-    PS["Place service (business code)<br/>Java class in-process, or a REST endpoint<br/>that may run on another machine"]
+    PS["Place service: business code<br/>Java in-process, or REST,<br/>possibly on another machine"]
     MODEL -- "assigned to: the place, with its T_in and T_out" --> DEPLOY
     DEPLOY -- "runs as" --> MACHINE
     MACHINE -- "the orchestration thread calls" --> PS
