@@ -207,36 +207,36 @@
       "id": "loan",
       "category": "financial",
       "title": "Loan application, with compensation",
-      "description": "Credit and fraud checks join at underwriting; an abandoned loan (v001, red) signals the compensation process (v002, blue), whose Withdraw Enquiry runs on the credit check's host, so its tokens appear there.",
+      "description": "v001, the initial loan application process (red): credit and fraud checks join at underwriting. When it abandons a loan, it signals v002, the compensation process (blue), whose Withdraw Enquiry runs on the credit check's host, so its tokens appear there.",
       "model": "btsn.common/ProcessDefinitionFolder/financial/Workflow/FinancialSystem_P1_P5_Workflow.json",
       "run": "btsn.common/AnalysisFolder/Financial/Analysis_FinancialSystem_P1_P5_Compensation.txt",
       "versions": {
-        "v001": "Loan application",
-        "v002": "Loan compensation, launched by Loan Abandoned"
+        "v001": "Initial loan application process",
+        "v002": "Compensation process, launched when a loan is abandoned"
       }
     },
     {
       "id": "financial_stage3",
       "category": "financial",
       "title": "Two processes, shared services",
-      "description": "The loan process (v001, red) and a pre-screen (v002, blue) run at once on the same validation and credit hosts.",
+      "description": "v001, the loan application process (red), and v002, a pre-screen process (blue), run at once on the same validation and credit hosts.",
       "model": "btsn.common/ProcessDefinitionFolder/financial/Workflow/FinancialSystem_P1_P5_Workflow.json",
       "run": "btsn.common/AnalysisFolder/Financial/Analysis_FinancialSystem_Stage3_Concurrent.txt",
       "versions": {
-        "v001": "Loan application",
-        "v002": "Pre-screen"
+        "v001": "Loan application process",
+        "v002": "Pre-screen process"
       }
     },
     {
       "id": "financial_stage5",
       "category": "financial",
       "title": "Priority: an urgent burst",
-      "description": "Forty background pre-screens (v002, blue) are under way when fifteen urgent loans (v001, red) arrive and go first.",
+      "description": "Forty requests of v002, the background pre-screen process (blue), are under way when fifteen of v001, the urgent loan application process (red), arrive and go first.",
       "model": "btsn.common/ProcessDefinitionFolder/financial/Workflow/FinancialSystem_P1_P5_Workflow.json",
       "run": "btsn.common/AnalysisFolder/Financial/Analysis_FinancialSystem_Stage5_PriorityPreemption.txt",
       "versions": {
-        "v001": "Urgent loan applications",
-        "v002": "Background pre-screens"
+        "v001": "Urgent loan application process",
+        "v002": "Background pre-screen process"
       }
     },
     {
@@ -258,20 +258,20 @@
       "model": "btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Federated_Radiology_Workflow.json",
       "run": "btsn.common/AnalysisFolder/Healthcare/Analysis_Federated_Radiology_Workflow.txt",
       "versions": {
-        "v002": "Federated radiology requests"
+        "v002": "Federated radiology process"
       }
     },
     {
       "id": "emergency_concurrent",
       "category": "healthcare",
       "title": "Three versions at once",
-      "description": "The emergency department, a triage canary and federated radiology requests, run together on six hosts: the same clinical services serve all three.",
+      "description": "Three processes on six hosts, served in priority order: v001 federated radiology requests from another hospital, v002 a triage canary, and v003 the emergency department patient process. The same clinical services serve all three.",
       "model": "btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Emergency_Department_With_Federated_Radiology.json",
       "run": "btsn.common/AnalysisFolder/Healthcare/Emergency_Department_With_Federated_Radiology.txt",
       "versions": {
-        "v001": "Federated radiology requests",
-        "v002": "Triage canary",
-        "v003": "Emergency department patients"
+        "v001": "Federated radiology process",
+        "v002": "Triage canary process",
+        "v003": "Emergency department patient process"
       }
     }
   ]
