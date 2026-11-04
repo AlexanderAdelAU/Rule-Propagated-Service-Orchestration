@@ -307,7 +307,7 @@ from ProcessEditor, explaining each step:
   back to P2.
 - **Observation**: Monitor records every step from outside the token path.
 
-![ProcessEditor with the P2 tutorial: EG11 feeds T_in_P2, place P2 runs StochasticService.processToken on host target P2, T_out_P2 routes true to Terminate and false back to T_in_P2. The Attributes panel shows the catalogue, service, operation, a description of what the service does, the deployment instance, the node P2 runs on and the contract processToken(token) → token.](images/p2-tutorial-design.png)
+![ProcessEditor with the P2 tutorial: EG11 feeds T_in_P2, place P2 runs StochasticService.processToken on host target P2, T_out_P2 routes true to Terminate and false back to T_in_P2. The Attributes panel shows the catalogue, service, operation, a description of what the service does, the deployment instance, the host target P2 runs on and the contract processToken(token) → token.](images/p2-tutorial-design.png)
 
 *The P2 tutorial process. P2 is selected. The badge on the place and the **Runs
 on** box show the host target it is deployed to.*
@@ -832,7 +832,7 @@ ant -f btsn.petrinet.ProjectLoader/P1_Tutorial_Local_BuildAndRun.xml export-tuto
 
 | Observation | Check |
 |---|---|
-| Build and Run lists problems | Save the process and the deployment; deploy every place on a host target (P1, P2, ...), each on its own target; connect the generator to a `T_in` |
+| Build and Run lists problems | Save the process and deployment; ensure every Place has a valid host target and operation assignment; connect the generator to a `T_in` |
 | The Deploy panel's host table is empty | Start ProcessEditor with `btsn.workflowEditor` as its working directory |
 | A host or Monitor was skipped at startup | Add `-Dhost.address=127.0.0.1`, or start that host on its configured machine |
 | Derby reports another active instance | Stop the previous run, and any viewer holding the database, before analysing |
@@ -1334,7 +1334,7 @@ the same **T_in → P → T_out** unit.
 | Financial application | Validate, check credit/fraud, underwrite and decide | Fork checks, synchronize their results and route declared outcomes |
 | Emergency department | Triage, perform diagnostic operations, diagnose and treat | Select direct/diagnostic paths, fork diagnostics and synchronize results |
 | Inventory example | Reserve stock (stateful), restock with a lead time | Route on string results, loop between two hosts, carry state changes as messages |
-| Credit check | Approve or refer an application, in Java or as a Node.js service over REST | Route one decision to one of two terminate nodes; the same process whether the service is in-process, local or on the internet |
+| Credit check | Approve or refer an application, in Java or as a Node.js service over REST | Route one decision to one of two terminate transitions; the same process whether the service is in-process, local or on the internet |
 
 To write your own service, start with [ServiceTutorial.md](ServiceTutorial.md), then see the inventory example in [Tutorial.md](#6-add-your-own-service).
 
