@@ -1,0 +1,18 @@
+<!-- Canonical Binding for ThrombectomyService -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>ThrombectomyService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>retrieveClot</Ind>
+	<Ind>thrombectomyResults</Ind>
+	<Ind>strokePlan</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>retrieveClotAfterLysis</Ind>
+	<Ind>thrombectomyResults</Ind>
+	<Ind>thrombolysisResults</Ind>
+</Atom>

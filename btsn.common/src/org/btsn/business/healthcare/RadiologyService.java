@@ -67,6 +67,9 @@ public class RadiologyService extends BaseHealthcareService {
      * - Infrastructure (tokens, timing) handled by ServiceHelper
      */
     public String processImagingRequest(String cleanBusinessData) {
+        // A stroke code from a receiving hospital: the stroke protocol (StrokeImaging).
+        StrokeImaging stroke = new StrokeImaging();
+        if (stroke.isStrokeCode(cleanBusinessData)) return stroke.ctStrokeProtocol(cleanBusinessData);
         System.out.printf("[%s] Processing imaging request for sequenceID: %s\n", getPlaceId(), getSequenceID());
         
         // Process the core radiology assessment - returns pure business results

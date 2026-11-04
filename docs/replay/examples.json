@@ -273,6 +273,19 @@
         "v002": "Triage canary process",
         "v003": "Emergency department patient process"
       }
+    },
+    {
+      "id": "stroke_code",
+      "category": "healthcare",
+      "title": "Stroke code across four organisations",
+      "description": "A suspected stroke from the ambulance to clot retrieval, on twelve hosts in four organisations with no central engine. The ambulance's alert holds the stroke centre's angiography suite; every route that will not retrieve a clot starts a stand-down process that releases the hold (all nine holds settled or released, exactly once). Stroke codes share the regional pathology and imaging providers with a metro hospital's routine patients, and are served first.",
+      "model": "btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Stroke_Code_With_Emergency_Department.json",
+      "run": "btsn.common/AnalysisFolder/Healthcare/Stroke_Code_With_Emergency_Department.txt",
+      "versions": {
+        "v001": "Stroke code process",
+        "v002": "Stand-down (compensation) process, releasing the held suite",
+        "v003": "Routine emergency department patient process"
+      }
     }
   ]
 }

@@ -1,0 +1,12 @@
+<!-- Canonical Binding for StrokeTriageService -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>StrokeTriageService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>assessStroke</Ind>
+	<Ind>triageResults</Ind>
+	<Ind>suiteHold</Ind>
+</Atom>

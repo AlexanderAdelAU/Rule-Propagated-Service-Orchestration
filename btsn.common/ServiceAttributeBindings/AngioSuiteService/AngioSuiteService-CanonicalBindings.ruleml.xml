@@ -1,0 +1,18 @@
+<!-- Canonical Binding for AngioSuiteService -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>AngioSuiteService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>holdSuite</Ind>
+	<Ind>suiteHold</Ind>
+	<Ind>screenResults</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>releaseSuite</Ind>
+	<Ind>releaseResults</Ind>
+	<Ind>token</Ind>
+</Atom>

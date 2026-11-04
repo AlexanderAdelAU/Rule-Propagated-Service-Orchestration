@@ -13,3 +13,15 @@
 <Atom><Rel>activeService</Rel><Ind>P5_CollectorService</Ind><Ind>collectAllData</Ind><Ind>ip0</Ind><Ind>4104</Ind></Atom>
 <Atom><Rel>activeService</Rel><Ind>P6_InitializationService</Ind><Ind>purgeAndInitialize</Ind><Ind>ip0</Ind><Ind>4305</Ind></Atom>
 <Atom><Rel>activeService</Rel><Ind>P6_CollectorService</Ind><Ind>collectAllData</Ind><Ind>ip0</Ind><Ind>4105</Ind></Atom>
+<Atom><Rel>activeService</Rel><Ind>P7_InitializationService</Ind><Ind>purgeAndInitialize</Ind><Ind>ip0</Ind><Ind>4306</Ind></Atom>
+<Atom><Rel>activeService</Rel><Ind>P7_CollectorService</Ind><Ind>collectAllData</Ind><Ind>ip0</Ind><Ind>4106</Ind></Atom>
+<Atom><Rel>activeService</Rel><Ind>P8_InitializationService</Ind><Ind>purgeAndInitialize</Ind><Ind>ip0</Ind><Ind>4307</Ind></Atom>
+<Atom><Rel>activeService</Rel><Ind>P8_CollectorService</Ind><Ind>collectAllData</Ind><Ind>ip0</Ind><Ind>4107</Ind></Atom>
+<Atom><Rel>activeService</Rel><Ind>P9_InitializationService</Ind><Ind>purgeAndInitialize</Ind><Ind>ip0</Ind><Ind>4308</Ind></Atom>
+<Atom><Rel>activeService</Rel><Ind>P9_CollectorService</Ind><Ind>collectAllData</Ind><Ind>ip0</Ind><Ind>4108</Ind></Atom>
+<Atom><Rel>activeService</Rel><Ind>P10_InitializationService</Ind><Ind>purgeAndInitialize</Ind><Ind>ip0</Ind><Ind>4309</Ind></Atom>
+<Atom><Rel>activeService</Rel><Ind>P10_CollectorService</Ind><Ind>collectAllData</Ind><Ind>ip0</Ind><Ind>4109</Ind></Atom>
+<Atom><Rel>activeService</Rel><Ind>P11_InitializationService</Ind><Ind>purgeAndInitialize</Ind><Ind>ip0</Ind><Ind>4310</Ind></Atom>
+<Atom><Rel>activeService</Rel><Ind>P11_CollectorService</Ind><Ind>collectAllData</Ind><Ind>ip0</Ind><Ind>4110</Ind></Atom>
+<Atom><Rel>activeService</Rel><Ind>P12_InitializationService</Ind><Ind>purgeAndInitialize</Ind><Ind>ip0</Ind><Ind>4311</Ind></Atom>
+<Atom><Rel>activeService</Rel><Ind>P12_CollectorService</Ind><Ind>collectAllData</Ind><Ind>ip0</Ind><Ind>4111</Ind></Atom>

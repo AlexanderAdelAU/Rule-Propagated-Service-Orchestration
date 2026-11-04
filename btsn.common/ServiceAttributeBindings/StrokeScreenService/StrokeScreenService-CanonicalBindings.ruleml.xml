@@ -1,0 +1,12 @@
+<!-- Canonical Binding for StrokeScreenService -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>StrokeScreenService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>screenPatient</Ind>
+	<Ind>screenResults</Ind>
+	<Ind>token</Ind>
+</Atom>

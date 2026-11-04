@@ -70,7 +70,8 @@ public final class DeployFlowCheck {
                 Method addDeployMenu = Canvas.class.getDeclaredMethod("addDeployMenu", JPopupMenu.class, ProcessElement.class); addDeployMenu.setAccessible(true);
                 addDeployMenu.invoke(canvas, popup, green);
                 JMenu deployTo = (JMenu)popup.getComponent(0);
-                check("Deploy to".equals(deployTo.getText()) && deployTo.getItemCount() == 6, "Deploy to menu does not list six nodes");
+                // SingleHost.json supplies P1-P12 (P7-P12 for the stroke code example).
+                check("Deploy to".equals(deployTo.getText()) && deployTo.getItemCount() == 12, "Deploy to menu does not list the twelve nodes: " + deployTo.getItemCount());
                 check(deployTo.getItem(5).getText().startsWith("P6"), "Nodes out of order: " + deployTo.getItem(5).getText());
                 deployTo.getItem(5).doClick();
                 check("P6".equals(canvas.nodeFor(green)) && canvas.hasPendingNode(green), "Right-click choice not recorded");

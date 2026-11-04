@@ -1,0 +1,15 @@
+<!-- Canonical Binding for P10_CollectorService -->
+<!-- Generated for the host node by HostAdministration - DO NOT EDIT -->
+<!-- Input count: 1 -->
+<!-- Return attribute from topology: token -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>P10_CollectorService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>collectAllData</Ind>
+	<Ind>token</Ind>
+	<Ind>token</Ind>
+</Atom>

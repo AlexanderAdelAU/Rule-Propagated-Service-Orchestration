@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Stroke code (v001) across four organisations, its stand-down compensation (v002), and a metro hospital's routine
+     emergency department patients (v003), sharing the regional pathology (P2) and imaging (P4) providers.
+     The ambulance service (P7) screens each suspected stroke and alerts the comprehensive stroke centre, which holds
+     its angiography suite (P8). The receiving hospital (P9) orders CT and bloods together; the telestroke neurologist
+     at the stroke centre (P10) decides; the receiving hospital thrombolyses (P11) and the stroke centre retrieves
+     clots (P12). Every route that will not retrieve a clot reaches the Signal node "Stand Down Suite", which starts
+     the stand-down process: it releases the hold where it was made (P8). On the shared hosts a stroke code is served
+     before the routine patients queued there, because its process has the higher priority.
+     The case mix (TokenFormats/StrokeScreenService.json): ten suspected strokes, nine stroke codes, three clot
+     retrievals, six stand-downs.
+     Run:     ant -f Stroke_Code_With_Emergency_Department.xml        (add -Dhost.address=127.0.0.1 to run every host on this machine)
+     Analyse: ant -f Stroke_Code_With_Emergency_Department.xml analyse   (the usual report, then the suite-hold balance) -->
+<project name="Stroke_Code_With_Emergency_Department" default="run-complete-workflow" basedir=".">
+    <property name="process.title" value="Stroke code (v001) with its stand-down (v002) and routine emergency department patients (v003)"/>
+    <property name="launcher.profile.file" location="../btsn.services/deployments/healthcare/StrokeCodeDeployment.json"/>
+    <property name="token.generator.class" value="org.btsn.healthcare.eventgenerators.GenericHealthcareTokenGenerator"/>
+    <property name="workflow.process.name" value="healthcare/Workflow/Stroke_Code_Workflow"/>
+    <property name="rule.version" value="v001"/>
+    <property name="query.version" value="v001,v002,v003"/>
+
+    <!-- Ten suspected strokes, one every 2.5 s, each living 120 s. -->
+    <property name="eg1.id" value="AMBULANCE_CALL"/>
+    <property name="eg1.version" value="v001"/>
+    <property name="eg1.process" value="healthcare/Workflow/Stroke_Code_Workflow"/>
+    <property name="eg1.place" value="P7_Place"/>
+    <property name="eg1.operation" value="screenPatient"/>
+    <property name="eg1.format.service" value="StrokeScreenService"/>
+    <property name="eg1.tokens" value="10"/>
+    <property name="eg1.expire" value="120000"/>
+    <property name="eg1.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/Stroke_Code_V001.csv"/>
+
+    <!-- The stand-down process: deployed as v002 but fired by nothing here. The stroke code's Signal node starts it at
+         its start node (STAND_DOWN), one token per stroke code that will not retrieve a clot. -->
+    <property name="eg2.id" value="STAND_DOWN"/>
+    <property name="eg2.version" value="v002"/>
+    <property name="eg2.process" value="healthcare/Workflow/Stroke_StandDown_Workflow"/>
+    <property name="eg2.place" value="P8_Place"/>
+    <property name="eg2.operation" value="releaseSuite"/>
+    <property name="eg2.expire" value="60000"/>
+    <property name="eg2.started.by.signal" value="true"/>
+
+    <!-- The metro hospital's routine patients, twenty in bursts of four every 5 s. -->
+    <property name="eg3.id" value="PATIENT_ARRIVAL"/>
+    <property name="eg3.version" value="v003"/>
+    <property name="eg3.process" value="healthcare/Workflow/Emergency_Department_Patient_Workflow"/>
+    <property name="eg3.place" value="P1_Place"/>
+    <property name="eg3.operation" value="processTriageAssessment"/>
+    <property name="eg3.format.service" value="TriageService"/>
+    <property name="eg3.tokens" value="20"/>
+    <property name="eg3.expire" value="120000"/>
+    <property name="eg3.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/Stroke_Code_V003_Routine.csv"/>
+    <property name="token.count" value="10"/>
+
+    <!-- Hosts used by the service deployment: nodes of the infrastructure, each running the host program -->
+    <property name="hosts" value="P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12"/>
+
+    <import file="../btsn.services/process-runtime.xml"/>
+
+    <!-- The usual analysis, then the balance of suite holds across the two processes: each hold the stroke code made
+         (v001 T_out_P8) must be used by a clot retrieval (v001 T_out_P12) or released by the stand-down process
+         (v002 T_out_P8, arc released), exactly once. -->
+    <target name="analyse" depends="launcher-jar-runtime-support.analyse" description="Analyse the Monitor database, then check the suite-hold balance">
+        <java classname="org.btsn.derby.Analysis.CompensationBalance" fork="true" failonerror="true" dir="${monitor.project.dir}">
+            <classpath refid="monitor.classpath"/>
+            <arg value="resource=suite hold"/>
+            <arg value="opened=v001:T_out_P8"/>
+            <arg value="settled=v001:T_out_P12"/>
+            <arg value="undone=v002:T_out_P8:released"/>
+        </java>
+    </target>
+</project>
