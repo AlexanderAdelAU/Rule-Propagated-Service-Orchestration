@@ -315,7 +315,7 @@ fork. A join waits for the children of one workflow in one version.
 | Prepare | Copy the definitions into the launcher's own folder (`btsn.services/target/launchers/<launcher>/btsn.common`), generate the deployment facts and bindings, build the host and service packages |
 | Start | Start each host listed in `hosts=` in its own folder (`…/<launcher>/Pn`, with its own rules and database) and Monitor. Hosts for other machines are started there from their packages |
 | Phase 1: initialise | Each host's initialisation place (`Pn_InitializationService`) clears its database. This is itself a small process, version v999 |
-| Phase 2: run | Deploy each generator's version behind the commitment barrier, then fire all generators together. A process started by Signal nodes is deployed but fires nothing itself |
+| Phase 2: run | Deploy each generator's version behind the commitment barrier, then fire all generators together. A process started by a signal transition is deployed but fires nothing itself |
 | Drain | Wait until nothing has moved for a few seconds, or until every token's lifetime has run out |
 | Phase 3: collect | Each host's collection place (`Pn_CollectorService`) sends its records to Monitor (again a v999 process). The run waits until Monitor has a receipt from every host for every version |
 | Analyse | `ant -f <launcher> analyse` runs `PetriNetAnalyzer`, which reconstructs each workflow from the records; the editor replays the same report |
