@@ -16,6 +16,17 @@ const page = vm.createContext({ Math, Number, String, Array, Map, Set, Object, i
 vm.runInContext(logic + "\nthis.api = { buildTopology, parseEvents, buildTimeline, PH };", page);
 const { buildTopology, parseEvents, buildTimeline, PH } = page.api;
 
+// Both pages load replay.js?v=<the first 8 hex digits of its SHA-256>, so a browser holding an older replay.js
+// fetches the new one whenever it changes, rather than running a new page with an old script.
+const version = require("crypto").createHash("sha256").update(fs.readFileSync(path.join(root, "docs/replay/replay.js"))).digest("hex").slice(0, 8);
+for (const pageName of ["index.html", "examples.html"]) {
+  const html = fs.readFileSync(path.join(root, "docs/replay", pageName), "utf8");
+  if (!html.includes(`<script src="replay.js?v=${version}"></script>`)) {
+    console.error(`FAIL: docs/replay/${pageName} must load replay.js?v=${version} (replay.js has changed; update the version in both pages)`);
+    process.exit(1);
+  }
+}
+
 const runs = JSON.parse(fs.readFileSync(path.join(root, "docs/replay/examples.json"), "utf8")).examples.map(e => [e.id, e.model, e.run]);
 let failed = 0;
 const report = [];
