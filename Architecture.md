@@ -7,50 +7,68 @@ where the rules live, and what happens, step by step, when you run a process.
 
 ## Terms
 
-The terms belong to three layers, and the layers are different kinds of thing: a place is part of the
-process model, a node is a network binding in the deployment, and an orchestration host is a program
-running on a machine.
+The architecture separates **what is modelled**, **where it is deployed**, and
+**what executes it**. In the process model, a **Node** is the logical orchestration
+unit **T_in → Place → T_out**. A Node is not a program or a network address.
+Deployment assigns that logical unit's service operation to a **host target**
+(`P1`, `P2`, …), where a generic orchestration host executes its behaviour.
+
+The current editor, configuration and Java launcher also use the word *node*
+for a host target (for example, `ServiceLoader -node P1`). That is an existing
+implementation name, **not** a second definition of the logical Node. A host
+target may execute logical Nodes belonging to multiple processes or versions.
 
 ```mermaid
 flowchart TB
     subgraph MODEL["1 · PROCESS MODEL"]
-        direction LR
-        TIN["T_in<br/>control role: edge"] --> PL(("Place<br/>Triage")) --> TOUT["T_out<br/>control role: gateway"]
+        direction TB
+        subgraph LOGICAL["Logical Node: Triage"]
+            direction LR
+            TIN["T_in<br/>control role: edge"] --> PL(("Place<br/>Triage")) --> TOUT["T_out<br/>control role: gateway"]
+        end
     end
     subgraph DEPLOY["2 · DEPLOYMENT"]
-        N["Node P1<br/>network binding"]
+        TARGET["Host target P1<br/>channel, address and ports"]
     end
     subgraph MACHINE["3 · EXECUTION: machine 192.168.1.82"]
-        direction LR
+        direction TB
         subgraph HOST["Orchestration host P1 (generic program)"]
             OT["Orchestration thread<br/>T_in → P → T_out"]
         end
-        H2["Orchestration host P2 (another node)"]
+        H2["Orchestration host P2 (another host target)"]
     end
-    PS["Place service: business code<br/>Java in-process, or REST,<br/>possibly on another machine"]
-    MODEL -- "assigned to: the place, with its T_in and T_out" --> DEPLOY
-    DEPLOY -- "runs as" --> MACHINE
-    MACHINE -- "the orchestration thread calls" --> PS
+    PS["Place service: business code<br/>Java in-process or REST,<br/>possibly on another machine"]
+    LOGICAL -- "assigned to (Deploy)" --> TARGET
+    TARGET -- "runs as (Build and Run)" --> HOST
+    OT -- "invokes" --> PS
     style H2 stroke-dasharray: 5 4
 ```
 
 | Layer | Term | Meaning |
 |---|---|---|
-| **Process model** | **Place** | A place of the Petri net: one step of the process, bound to a place service operation. P1 and so on in the examples |
-| | **Transition** | A place's T_in (gathers its inputs) or T_out (sends its result on). Transitions are not deployed separately: they go wherever their place goes |
-| | **Control role** | What a transition does: for example edge, gateway, fork, join, merge, terminate or signal. The editor calls it the transition's Node Type |
-| **Deployment** | **Node** | A network binding: the name a place is assigned to (P1, P2, …), with the address and ports the infrastructure definition gives it. It is not a program: an orchestration host runs as it |
-| **Execution** | **Machine** | A computer, where orchestration hosts run. One machine can run the hosts of several nodes |
-| | **Orchestration host** (host, for short) | The program that runs as a node on its machine. Every orchestration host is the same generic program, and holds no business code of its own |
-| | **Orchestration thread** | The thread inside an orchestration host that carries out T_in → P → T_out for one operation of a place (`ServiceThread`), using the rules installed on that host |
-| | **Place service** | The business code bound to a place: a Java class called in-process, or a service behind a REST endpoint in any language, on any machine |
+| **Process model** | **Node (logical)** | The orchestration unit **T_in → Place → T_out**: the Place and its associated incoming and outgoing transition behaviour. It is a conceptual grouping within the process model, not a separate running program |
+| | **Place** | A Petri-net place, representing a processing step bound to a Place Service operation; for example Triage |
+| | **Transition** | The T_in behaviour collects inputs; T_out determines propagation. These are Petri-net transitions, not separately deployed services; grouping them with a Place does not require exclusive ownership of a transition |
+| | **Control role** | What a transition does: edge, gateway, fork, join, merge, terminate or signal. The editor currently calls this the transition's **Node Type**, a legacy UI name distinct from the logical Node |
+| **Deployment** | **Host target** (also called *node* in existing configuration) | The runtime destination `P1`, `P2`, … to which a logical Node's service operation is assigned. The infrastructure definition supplies its channel, network address and ports |
+| **Execution** | **Machine** | A physical or virtual computer. One machine can run several orchestration hosts |
+| | **Orchestration host** | A running instance of the same generic program, identified by its host target. It executes installed rules, handles tokens and invokes Place Services; it contains no process-specific business logic of its own |
+| | **Orchestration thread** | A `ServiceThread` within the host that performs T_in → P → T_out for one operation, using the rules installed on that host |
+| | **Place Service** | The actual business implementation, called as a Java class in-process or through a REST endpoint in any language, potentially on another machine |
 
-Read down the layers: **a place, with its T_in and T_out, is assigned to a node; the node, a network
-binding, runs as an orchestration host on its machine; and the host's orchestration thread calls the place
-service.** None of these is one-to-one. A node can serve places from several processes and versions at
-once (in the concurrent healthcare run, node P4 serves Radiology for the patient workflow and for
-federated requests, told apart by version and operation); a machine can run the hosts of several nodes
-(in the tutorials all six run on one); and a REST place service need not run on the host's machine at all.
+Read the diagram from top to bottom: **the logical Node** defines what must happen;
+**Deploy** assigns its service operation to a host target; **Build and Run**
+starts the generic orchestration host on the selected machine. The orchestration
+thread implements the Node's T_in → P → T_out behaviour and invokes the bound
+Place Service. The operation's **canonical binding** defines its named inputs
+and returned attribute at the Place/Place Service interface.
+
+This is not necessarily a one-to-one mapping. In the concurrent healthcare run,
+host target `P4` handles Radiology for both the patient workflow and federated
+requests, distinguished by version and operation. A machine can run hosts for
+multiple targets (the tutorials run all six on one), and a REST Place Service can
+run on a different machine. The logical Node remains a process-model concept
+regardless of where it executes.
 
 ## The programs in a run
 
@@ -63,7 +81,7 @@ flowchart TB
     ED["ProcessEditor: draws the process, writes the launcher, replays the report"]
     L["Launcher (Ant): runs the phases"]
     G["Event generator: deploys a version's rules, then fires its tokens"]
-    subgraph Hosts["Orchestration hosts: one per node, on any machine"]
+    subgraph Hosts["Orchestration hosts: one per host target, on any machine"]
         direction LR
         P1["P1"] --> P2["P2"] & P3["P3"]
         P2 & P3 --> P4["P4"]
@@ -76,28 +94,30 @@ flowchart TB
 
 | Program | Where the code is | What it does |
 |---|---|---|
-| Orchestration host | `btsn.rpso.host` (`ServiceLoader -node Pn`) | One per node. Receives rules and tokens, calls its place service, routes the result, records what happened |
+| Orchestration host | `btsn.rpso.host` (`ServiceLoader -node Pn`) | One per host target (`-node` is the existing launcher argument). Receives rules and tokens, invokes bound Place Services, routes results and records events |
 | Deployment tooling | `btsn.common/src/org/btsn/rulecontroller` | `TopologyBindingGenerator` writes each operation's inputs and result; `RuleDeployer` compiles the process into a rule fragment for each place and sends each host its fragment |
 | Event generator | `btsn.common.eventgenerators` (`GenericPetriNetTokenGenerator`) | Deploys a version (through `RuleDeployer`), then fires that version's tokens on a schedule |
 | Monitor | `btsn.common.Monitor` (`MonitorService`, `derby/Analysis`) | Gathers every host's records after the run; the analysis and charts read them |
 | Launcher | `btsn.services/build/workflows/process-runtime.xml` | Starts the hosts and Monitor, then runs the phases below; `HostLaunch` does the per-host steps |
 | Editor | `btsn.workflowEditor` | Saves the process as JSON, writes the launcher (Create Build and Run), runs it (Run on hosts) and replays the report |
 
-Every orchestration host is the same program. What makes P2 a credit check and P4 an
-underwriting join is only the rules it holds and the place service its deployment names.
+Every orchestration host runs the same program. Its deployed rules, operation bindings
+and Place Services determine whether it executes a credit check, an underwriting
+join, or some other logical Node's behaviour.
 
 ## Inside an orchestration host
 
-The orchestration host for node `Pn` serves three places: `Pn_Place`, the node's place in
-the business process, and `Pn_InitializationService` and `Pn_CollectorService`, its places
-in the initialisation and collection processes. For each operation of each place it starts
-an orchestration thread (`ServiceThread`) on a token socket, and a `RuleHandler` on a rule
-socket. A Java place service is loaded into the orchestration host and called in-process; a
-REST place service runs on whatever machine serves its endpoint.
+The orchestration host identified by host target `Pn` serves the business-operation
+identity `Pn_Place` and two operational places: `Pn_InitializationService`
+and `Pn_CollectorService`, used in the initialisation and collection processes.
+It can also serve process versions that use the same target. For each operation,
+the host starts an orchestration thread (`ServiceThread`) on a token socket and a
+`RuleHandler` on a rule socket. A Java Place Service is loaded into the host
+and called in-process; a REST Place Service runs wherever its endpoint is served.
 
 ```mermaid
 flowchart TB
-    subgraph Host["ORCHESTRATION HOST for node Pn"]
+    subgraph Host["ORCHESTRATION HOST for target Pn"]
         direction TB
         RH["RuleHandler<br/>rule socket: receives rules"]
         RF[("RuleFolder.vNNN/operation/<br/>Service.ruleml")]
@@ -136,8 +156,8 @@ flowchart TB
   `EventPublisher` sends the token on, compressed, and split into chunks if it is large.
 - **Recording.** `PetriNetInstrumentationHelper` writes every event (GENERATED, BUFFERED,
   ENTER, EXIT, FORK, FORK_CONSUMED, JOIN_CONSUMED, TERMINATE, FAILED) to the host's own
-  Derby database, on the host's own clock. A Signal node records TERMINATE; the process
-  it launches starts with GENERATED.
+  Derby database, on the host's own clock. A signal transition records TERMINATE; the
+  process it launches starts with GENERATED.
 - **Rules.** `RuleHandler` listens on the operation's rule socket; see below.
 
 The rule engine is OO jDREW, evaluating RuleML: facts and Horn rules, queried by the host
@@ -167,8 +187,9 @@ sequenceDiagram
 
 1. **Definitions.** The editor saves three things: the process
    (`ProcessDefinitionFolder/…/X.json`: places, transitions, arcs, guards), the deployment
-   (`ServiceDeploymentFolder`: which node runs each service operation) and, once, the
-   machines (`InfrastructureDefinitionFolder`: each node's channel, address and base ports).
+   (`ServiceDeploymentFolder`: which host target runs each service operation) and,
+   separately, the infrastructure (`InfrastructureDefinitionFolder`: each host target's
+   channel, address and base ports).
 2. **Deployment facts.** `GenerateDeploymentRules` turns the deployment and machines into
    `RuleBase/Generated/InfrastructureDeployment.ruleml.xml`: facts such as
    `activeService(P2_Place, processToken, ip0, 4002)` and `boundChannel(ip0, 192.168.1.82)`.
@@ -205,7 +226,7 @@ fact per line):
 ```
 
 Read it as: P4's T_out has the control role gateway (`NodeType` in the rules). "approved" and "conditional" go to P5's
-`processToken`, "declined" ends the workflow, and "abandoned" ends it at the Signal node
+`processToken`, "declined" ends the workflow, and "abandoned" ends it at the signal transition
 "Loan Abandoned", which launches Loan Compensation (v002) at P2's `withdrawEnquiry`.
 
 One rule in `CoreRuleBase.ruleml.xml` joins a fragment's `meetsCondition` facts to the
@@ -222,14 +243,13 @@ it reaches, whatever the place service does:
 sequenceDiagram
     autonumber
     participant PREV as Previous orchestration host(s)<br/>or event generator
-    box Orchestration host for node Pn
-        participant Q as EventReactor + Scheduler
-        participant T as Orchestration thread<br/>(ServiceThread)
-        participant R as Rules<br/>(local Service.ruleml)
-        participant DB as Derby database
-    end
-    participant S as Place service<br/>(Java class in the host,<br/>or REST endpoint)
+    participant Q as EventReactor + Scheduler<br/>(host Pn)
+    participant T as Orchestration thread<br/>(ServiceThread)
+    participant S as Place Service<br/>(Java class in host,<br/>or REST endpoint)
+    participant R as Local rules<br/>(Service.ruleml)
+    participant DB as Local Derby database
     participant NEXT as Next orchestration host(s)
+    Note over T,S: Logical Node: T_in → Place → T_out
     PREV->>Q: token (UDP, compressed)
     Q->>Q: drop if its lifetime has passed,<br/>else queue by token number (version priority)
     Q->>T: next token
@@ -244,7 +264,7 @@ sequenceDiagram
     R-->>T: next service, operation, channel and port
     T-->>DB: record EXIT, FORK or TERMINATE
     T->>NEXT: token(s): one per route, none at a terminate
-    Note over NEXT: the next node repeats T_in → P → T_out
+    Note over NEXT: the next logical Node repeats T_in → P → T_out
 ```
 
 - **Queue (1–3).** Tokens arrive over UDP. The scheduler drops a token whose lifetime has passed and
@@ -320,8 +340,9 @@ passes through it.
 
 ## Ports
 
-Each node has a channel (`ip0`, `ip1`, …, each bound to a machine's address) and base
-ports, one per operation slot, in the infrastructure definition. From these:
+Each **host target** (`Pn`, called *node* in the infrastructure configuration) has
+a channel (`ip0`, `ip1`, …, each bound to a machine's address) and base ports,
+one per operation slot. From these:
 
 | Socket | Port | Example: P2 on `ip0`, base port 4002 |
 |---|---|---|
