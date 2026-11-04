@@ -1,12 +1,12 @@
 # Rule-Propagated Service Orchestration (RPSO)
 
-**RPSO uses Petri-net theory to transform ordinary callable services into a logically defined, distributed orchestration system.**
+**RPSO uses Petri nets to transform ordinary callable services into a logically defined, distributed orchestration system.**
 
 A service, whether a Java method or a REST endpoint, is represented as a Place within a logical **Node (T_in → Place → T_out)**. This gives each service an explicit orchestration context: how its inputs are collected, when it can execute, and how its results are propagated to other services.
 
 The Petri-net representation provides a formal foundation for sequencing, conditional routing, concurrency, forks, joins and synchronisation, without requiring these behaviours to be implemented within the business services themselves.
 
-**RPSO turns this logical representation into a live distributed system.** Nodes are deployed to generic [Orchestration Hosts](Architecture.md#terms), where transitions become locally evaluated rules and tokens become messages exchanged directly between hosts. There is no central orchestration engine directing their execution.
+**RPSO turns this logical representation into a live distributed system.** Nodes are deployed to host targets, each run by a generic [orchestration host](Architecture.md#terms), where transitions become locally evaluated rules and tokens become messages exchanged directly between hosts. Because a Petri-net transition depends only on its own input and output Places, each Node's rules can be evaluated on its own host: there is no central orchestration engine directing their execution.
 
 The process drawn in the editor is therefore more than a visual model: **it is the definition of the system that executes.** Its behaviour can be observed, measured, analysed and replayed against the original Petri-net representation.
 
@@ -18,11 +18,11 @@ different machines. A Java service can run in-process inside its orchestration
 host, while a REST service can run anywhere its endpoint is reachable, in any
 language.
 
-![An emergency-department process in the editor: patient arrivals pass Triage, whose gateway sends them to Laboratory, Cardiology and Radiology, which join before Diagnosis and Treatment. A triage canary and federated radiology requests from another hospital also enter the process. Places are mapped to orchestration hosts P1 to P6; dashed lines show network connections.](images/emergency-department-concurrent.png)
+![An emergency-department process in the editor: patient arrivals pass Triage, whose gateway sends them to Laboratory, Cardiology and Radiology, which join at Diagnosis before Treatment. A triage canary and federated radiology requests from another hospital also enter the process. Places are deployed to host targets P1 to P6; dashed lines show network connections.](images/emergency-department-concurrent.png)
 
 **Reading the diagram**
 - **Circles** represent Places: the logical processing steps, each bound to a service (Triage, Laboratory, …).
-- **P1–P6 badges** show where each logical Node (T_in → Place → T_out) is deployed. A generic orchestration host executes its behaviour.
+- **P1–P6 badges** are host targets: where each logical Node (T_in → Place → T_out) is deployed. A generic orchestration host runs as each one and executes the Node's behaviour.
 - **Bars** on either side of a Place represent its T_in and T_out transition behaviour. T_in (grey) gathers inputs; T_out (yellow) propagates results. The deployed host carries out both using installed rules.
 - **Letters** on the bars identify their control roles: **E** edge, **G** gateway (routes by the service's decision), **J** join (waits for every input), **M** merge (takes either input), **T** terminate.
 - **EG** is an event generator, which starts the tokens for one process version.
@@ -33,7 +33,7 @@ language.
 
 [▶ Watch a recorded run of this process](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Emergency_Department_With_Federated_Radiology.json&run=../../btsn.common/AnalysisFolder/Healthcare/Emergency_Department_With_Federated_Radiology.txt)
 
-How does a drawing become a running system? In this four-Node example, each Node is deployed to a separate orchestration host:
+How does a drawing become a running system? In this four-Node example, each Node is deployed to its own host target, run by a separate orchestration host:
 
 ![A four-place Petri-net model on the left, where P1 forks to P2 and P3 before joining at P4, is deployed as local rules to four separate hosts on the right. Each host carries out T_in, invokes the bound Place Service and handles T_out. Tokens travel directly between hosts; Monitor collects their records afterward for Petri-net analysis.](images/rpso-overview.svg)
 
@@ -52,7 +52,7 @@ Start by drawing a process in the editor, running it on orchestration hosts and
 replaying the recorded execution on the same model. [Tutorial.md](Tutorial.md)
 walks through two examples:
 
-1. **A standard service** that returns true or false: one place, a loop and ten tokens.
+1. **A standard service** that returns true or false: one Place, a loop and ten tokens.
 2. **A claims process** that calls a remote service over REST.
 
 The business services do not have to exist before you start modelling. Name them
@@ -90,7 +90,7 @@ For detailed instructions and technical background, see [Reference.md](Reference
 
 - [How RPSO is implemented](Architecture.md): terminology, runtime programs, hosts, rule deployment, token execution, run phases and network ports
 - [Inside each host](Reference.md#inside-each-host)
-- [From the architecture pattern to a running service](Reference.md#from-the-architecture-pattern-to-a-running-service): from one place to six, and the financial and healthcare workflows
+- [From the architecture pattern to a running service](Reference.md#from-the-architecture-pattern-to-a-running-service): from one Place to six, and the financial and healthcare workflows
 - [Architecture: coordination and business meaning](Reference.md#architecture-coordination-and-business-meaning)
 - [Rule deployment and token execution](Reference.md#rule-deployment-and-token-execution)
 - [Execution examples](Reference.md#execution-examples), including the [concurrent healthcare run](Reference.md#concurrent-healthcare-execution) pictured above

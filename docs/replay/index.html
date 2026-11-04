@@ -758,7 +758,7 @@ function render() {
       text(tokenLayer, vertical ? e.x - 20 : c.x - 7, vertical ? c.y + 4 : e.y - 5, String(list.length), { size: 9, bold: true, fill: "#fff" });
     }
   }
-  // Ended tokens: one marker per version under the terminate node, with how many ended there (Canvas.drawTerminatedTokens).
+  // Ended tokens: one marker per version under the terminate transition, with how many ended there (Canvas.drawTerminatedTokens).
   for (const term in ended) {
     const e = T.byId.get(term), c = T.center(term);
     if (!e || !c) continue;

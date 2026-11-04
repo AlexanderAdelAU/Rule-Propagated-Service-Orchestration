@@ -4,7 +4,7 @@ We will walk you through three examples. All are built graphically in the editor
 
 - **Example 1** runs a standard service that returns true or false.
 - **Example 2** builds a simple claims process that calls a remote service over REST.
-- **Example 3** adds a seventh node, P7, and moves Example 1 onto it.
+- **Example 3** adds a seventh host target, P7, and moves Example 1 onto it.
 
 **Before you start:** you need a JDK (15 or later), Apache Ant (it comes with Eclipse), and
 the repository's projects imported into Eclipse.
@@ -18,7 +18,7 @@ The process has one place, **P1**. Its service returns `true` or `false` at rand
 
 The event generator sends 10 tokens, one a second.
 
-![The finished Example 1 in the editor: P1_EVENTGENERATOR feeds T_in_P1, place P1 runs StochasticService on node P1, and T_out_P1 sends true to Terminate and false back to T_in_P1.](images/ex1-model.png)
+![The finished Example 1 in the editor: P1_EVENTGENERATOR feeds T_in_P1, place P1 runs StochasticService on host target P1, and T_out_P1 sends true to Terminate and false back to T_in_P1.](images/ex1-model.png)
 
 *What you will build.*
 
@@ -71,11 +71,11 @@ Select each element or arrow, then change it in the Attributes panel.
 
 ### Deploy it
 
-21. Click **Deploy**. In P1's row, choose **Host node** `P1`.
+21. Click **Deploy**. In P1's row, choose **Host node** (its host target) `P1`.
 22. Click **Save deployment...** and accept the name it suggests.
 23. Choose **File → Save Process Definition**.
 
-![The Deploy panel: one row for place P1, on host node P1 at 192.168.1.82:4001, running StochasticService.processToken.](images/ex1-deploy.png)
+![The Deploy panel: one row for place P1, on host target P1 at 192.168.1.82:4001, running StochasticService.processToken.](images/ex1-deploy.png)
 
 ### Run it
 
@@ -112,9 +112,9 @@ The run was real: P1 was a host process of its own, which recorded what it did.
 
 An insurer pays small claims at once and assesses the larger ones. The process has two places:
 
-- **Triage** runs on node P1. Its service, supplied with the repository, finds a claim of up
+- **Triage** runs on host target P1. Its service, supplied with the repository, finds a claim of up
   to 2,500 simple and a larger one complex.
-- **Assess** runs on node P2, but its service does not: P2's orchestration host calls it on the internet,
+- **Assess** runs on host target P2, but its service does not: P2's orchestration host calls it on the internet,
   over REST. It accepts a claim of up to 4,000 and rejects the rest.
 
 Claim *n* is for *n* × 500, so of the ten claims, 1–5 are paid, 6–8 accepted and 9–10 rejected.
@@ -179,7 +179,7 @@ Use **Arrow (drag)** for each arrow.
 22. Click **Save deployment...** and accept the name it suggests.
 23. Choose **File → Save Process Definition**.
 
-![The Deploy panel: Triage on host node P1 runs ClaimsTriageService.triage; Assess on host node P2 runs AssessService.assess with the rest adapter and the service endpoint on Vercel.](images/ex2-deploy.png)
+![The Deploy panel: Triage on host target P1 runs ClaimsTriageService.triage; Assess on host target P2 runs AssessService.assess with the rest adapter and the service endpoint on Vercel.](images/ex2-deploy.png)
 
 *The address in step 21 is a public copy of the service. You are free to use your own: its
 code is `examples/rest/claims.js`, and any service that answers the same way will do.*
@@ -208,13 +208,13 @@ code is `examples/rest/claims.js`, and any service that answers the same way wil
 - The finished copy: `btsn.common/ProcessDefinitionFolder/claims/Workflow/Claims_Workflow.json`
 - The ready-made examples, from Petri-net models to the financial and healthcare workflows: [Run an example](Reference.md#run-an-example)
 
-## Example 3: add a node
+## Example 3: add a host target
 
-Every node runs the same orchestration host program. How many nodes there are is up to the infrastructure
-definition, so a new node is a new row there: nothing is copied or registered. Here you add P7 and move
+Every host target runs as the same orchestration host program. How many host targets there are is up to the
+infrastructure definition, so a new one is a new row there: nothing is copied or registered. Here you add P7 and move
 Example 1's place onto it.
 
-### Add the node
+### Add the host target
 
 1. Choose **File → Open → Infrastructure Definition...** and open
    `btsn.common/InfrastructureDefinitionFolder/SingleHost.json`.
@@ -232,7 +232,7 @@ Example 1's place onto it.
 6. Click **Deploy**. P1's row now shows **Host node** `P7`. Click **Save deployment...** and keep the name it suggests.
 7. Choose **File → Save Process Definition**.
 
-The place keeps its label, P1; only the node it runs on has changed.
+The place keeps its label, P1; only the host target it runs on has changed.
 
 ### Run it
 
@@ -262,7 +262,7 @@ The place keeps its label, P1; only the node it runs on has changed.
 
 ### Learn more
 
-- [Add a node](Reference.md#add-a-host): node names (P1 to P99) and the ports kept for each node's initialisation and collection places
+- [Add a host target](Reference.md#add-a-host): host target names (P1 to P99) and the ports kept for each one's initialisation and collection places
 - [Choose the machines](Reference.md#choose-the-machines)
 
 ## Author

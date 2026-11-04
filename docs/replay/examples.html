@@ -77,7 +77,7 @@ const node = (tag, attrs = {}, parent) => {
 };
 
 async function nodesOf(model) {
-  // The node each place is deployed to: the deployment sits in btsn.common, beside ProcessDefinitionFolder.
+  // The host target each place is deployed to: the deployment sits in btsn.common, beside ProcessDefinitionFolder.
   if (!model.serviceDeployment) return null;
   try {
     const d = await (await get(ROOT + "btsn.common/" + model.serviceDeployment)).json(), nodes = {};
