@@ -391,9 +391,13 @@ function drawModel(svg, model, T) {
     for (const d of [-Math.PI / 6, Math.PI / 6])
       el("line", { x1: q.x, y1: q.y, x2: q.x - 12 * Math.cos(ang + d), y2: q.y - 12 * Math.sin(ang + d), ...style, "stroke-dasharray": null }, gArcs);
     if (t.type === "PLACE" && (t.operations || []).length > 1) {
-      const mx = q.x - 20 * Math.cos(ang), my = q.y - 20 * Math.sin(ang), ob = ang + Math.PI / 3;
-      el("line", { x1: mx - 6 * Math.cos(ob), y1: my - 6 * Math.sin(ob), x2: mx + 6 * Math.cos(ob), y2: my + 6 * Math.sin(ob), stroke: "#000", "stroke-width": 2 }, gLabels);
-      text(gLabels, mx + 8 * Math.cos(ob + Math.PI / 2), my + 8 * Math.sin(ob + Math.PI / 2), String(t.operations.length), { size: 11, bold: true });
+      // "/ n" across the arc, clear of the arrowhead (Arrow.drawOperationCountMarker): the slash leans the same way
+      // whatever the arc's direction, and the count sits beside it, above a level arc or left of an upright one.
+      const len = Math.hypot(q.x - p.x, q.y - p.y), back = Math.min(Math.max(24, len * 0.45), Math.max(len - 6, 0));
+      const mx = q.x - back * Math.cos(ang), my = q.y - back * Math.sin(ang);
+      const level = Math.abs(Math.cos(ang)) >= Math.abs(Math.sin(ang));
+      el("line", { x1: mx - 4, y1: my + 7, x2: mx + 4, y2: my - 7, stroke: "#000", "stroke-width": 2 }, gLabels);
+      text(gLabels, level ? mx + 7 : mx - 15, level ? my - 6 : my - 1, String(t.operations.length), { size: 11, bold: true });
     }
     if (a.label) {
       // At the middle of a straight arc, or the middle point of a bent one; moved by the label's own offset.
