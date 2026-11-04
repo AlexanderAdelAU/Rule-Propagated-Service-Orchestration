@@ -323,6 +323,48 @@ function buildTimeline(events, T) {
 }
 function progressOf(s, t) { return s.e <= s.s ? 1 : Math.max(0, Math.min(1, (t - s.s) / (s.e - s.s))); }
 
+// ---------------- Each workflow's recorded timing, for the timeline under the replay ----------------
+// A workflow is a token and the forks it made (numbered 1-99 above it). For each, in recorded time: when it was
+// generated and when it ended, each wait at a T_in (from BUFFERED until the place took it in, or a join consumed it)
+// and each service visit (from ENTER until the place's service returned). A run with fewer than three workflows
+// (the philosophers' one table) is shown token by token instead.
+const familyOf = tok => { const n = Number(tok), k = n % 100; return k >= 1 && k <= 99 ? String(n - k) : String(tok); };
+function workflowTimings(events, T) {
+  const families = new Set(events.map(e => familyOf(e.token)));
+  const keyOf = families.size >= 3 ? familyOf : tok => String(tok);
+  const rows = new Map(), last = events.length ? events[events.length - 1].t : 0;
+  const row = e => {
+    const k = keyOf(e.token);
+    if (!rows.has(k)) rows.set(k, { key: k, ver: e.version, start: e.t, end: null, waits: [], visits: [] });
+    return rows.get(k);
+  };
+  const name = id => { const x = T && T.byId.get(id); return x ? (x.label || x.id) : id; };
+  events.forEach((e, i) => {
+    const r = row(e);
+    r.start = Math.min(r.start, e.t);
+    if (e.type === "TERMINATE" || e.type === "FAILED") r.end = Math.max(r.end ?? -Infinity, e.t);
+    if (e.type === "BUFFERED") {
+      const done = events.slice(i + 1).find(f => f.token === e.token && f.place === e.place
+        && (f.type === "ENTER" || f.type === "JOIN_SURVIVOR" || f.type === "JOIN_CONSUMED" || f.type === "FAILED"));
+      r.waits.push({ s: e.t, e: done ? done.t : last, at: name(e.place) });
+    } else if (e.type === "ENTER" || e.type === "JOIN_SURVIVOR") {
+      const done = events.slice(i + 1).find(f => f.place === e.place && keyOf(f.token) === r.key
+        && (f.type === "FORK" || f.type === "EXIT" || f.type === "TERMINATE" || f.type === "FAILED"));
+      r.visits.push({ s: e.t, e: done ? done.t : last, at: name(e.place) });
+    }
+  });
+  const list = [...rows.values()].sort((a, b) => a.start - b.start || a.key.localeCompare(b.key));
+  for (const r of list) {
+    r.finished = r.end != null;
+    if (!r.finished) r.end = last;
+    r.elapsed = r.end - r.start;
+    const longest = r.waits.reduce((m, w) => (w.e - w.s > (m ? m.e - m.s : -1) ? w : m), null);
+    r.longestWait = longest ? longest.e - longest.s : 0;
+    r.longestAt = longest ? longest.at : null;
+  }
+  return { rows: list, byToken: keyOf, perWorkflow: families.size >= 3 };
+}
+
 // ---------------- Drawing (Canvas.java, ProcessElement.java, Arrow.java) ----------------
 const SVGNS = "http://www.w3.org/2000/svg";
 function el(name, attrs = {}, parent) {
