@@ -524,46 +524,32 @@ public class Arrow {
      * Draw an oblique line with a number near the arrowhead to indicate operation count
      */
     private void drawOperationCountMarker(Graphics2D g2, int x1, int y1, int x2, int y2, int count) {
-        // Calculate the angle of the arrow
+        // "/ n" across the arc: a slash that leans the same way whatever the arc's direction, clear of the
+        // arrowhead, with the count beside it (above a level arc, left of an upright one).
         double angle = Math.atan2(y2 - y1, x2 - x1);
-        
-        // Position the oblique line back from the arrowhead (about 20 pixels back)
-        int distanceFromHead = 20;
-        int markerX = (int) (x2 - distanceFromHead * Math.cos(angle));
-        int markerY = (int) (y2 - distanceFromHead * Math.sin(angle));
-        
-        // Draw oblique line perpendicular to the arrow (at 60 degrees)
-        int lineLength = 12;
-        double obliqueAngle = angle + Math.PI / 3; // 60 degrees offset
-        
-        int x1Line = (int) (markerX - (lineLength / 2) * Math.cos(obliqueAngle));
-        int y1Line = (int) (markerY - (lineLength / 2) * Math.sin(obliqueAngle));
-        int x2Line = (int) (markerX + (lineLength / 2) * Math.cos(obliqueAngle));
-        int y2Line = (int) (markerY + (lineLength / 2) * Math.sin(obliqueAngle));
-        
+        double length = Math.hypot(x2 - x1, y2 - y1);
+        double back = Math.min(Math.max(24, length * 0.45), Math.max(length - 6, 0));
+        int markerX = (int) Math.round(x2 - back * Math.cos(angle));
+        int markerY = (int) Math.round(y2 - back * Math.sin(angle));
+        boolean level = Math.abs(Math.cos(angle)) >= Math.abs(Math.sin(angle));
+
         g2.setColor(Color.BLACK);
         g2.setStroke(new BasicStroke(2));
-        g2.drawLine(x1Line, y1Line, x2Line, y2Line);
-        
-        // Draw the count number next to the oblique line
+        g2.drawLine(markerX - 4, markerY + 7, markerX + 4, markerY - 7);
+
         g2.setFont(new Font("SansSerif", Font.BOLD, 11));
         FontMetrics fm = g2.getFontMetrics();
         String countStr = String.valueOf(count);
         int textWidth = fm.stringWidth(countStr);
-        
-        // Position text slightly offset from the oblique line
-        int textOffsetDist = 8;
-        int textX = (int) (markerX + textOffsetDist * Math.cos(obliqueAngle + Math.PI / 2));
-        int textY = (int) (markerY + textOffsetDist * Math.sin(obliqueAngle + Math.PI / 2));
-        
-        // Draw white background for number
+        int textX = level ? markerX + 7 : markerX - 15;
+        int textY = level ? markerY - 6 : markerY - 1;
+
+        // White background so the count reads over the grid and the line
         g2.setColor(Color.WHITE);
-        g2.fillRect(textX - 2, textY - fm.getAscent(), textWidth + 4, fm.getHeight());
-        
-        // Draw the number
+        g2.fillRect(textX - 1, textY - fm.getAscent() + 1, textWidth + 2, fm.getAscent());
         g2.setColor(Color.BLACK);
         g2.drawString(countStr, textX, textY);
-        
+
         g2.setStroke(new BasicStroke(1));
     }
     
