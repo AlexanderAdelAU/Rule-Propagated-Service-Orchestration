@@ -6,7 +6,7 @@ A service, whether a Java method or a REST endpoint, is represented as a Place w
 
 The Petri-net representation provides a formal foundation for sequencing, conditional routing, concurrency, forks, joins and synchronisation, without requiring these behaviours to be implemented within the business services themselves.
 
-**RPSO turns this logical representation into a live distributed system.** Nodes are deployed to host targets, each run by a generic [orchestration host](Architecture.md#terms), where transitions become locally evaluated rules and tokens become messages exchanged directly between hosts. Because a Petri-net transition depends only on its own input and output Places, each Node's rules can be evaluated on its own host: there is no central orchestration engine directing their execution.
+**RPSO turns this logical representation into a live distributed system.** Each logical Node is assigned to a host target, where a generic [orchestration host](Architecture.md#terms) executes its behaviour. Using installed coordination rules and canonical bindings, the host determines when the required inputs are available, invokes the bound Place Service and propagates the result. Tokens carry information directly between hosts, so no central orchestration engine directs their execution.
 
 The process drawn in the editor is therefore more than a visual model: **it is the definition of the system that executes.** Its behaviour can be observed, measured, analysed and replayed against the original Petri-net representation.
 
