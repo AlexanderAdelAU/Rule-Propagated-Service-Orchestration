@@ -23,7 +23,7 @@ tokens; each host follows its own installed rules.
 - The **bars** either side of a place are its transitions, installed as rules on the place's own host: T_in (grey) gathers its inputs, T_out (yellow) sends the result on.
 - The **letter** on a bar is the transition's control role: **E** edge, **G** gateway (routes by the service's decision), **J** join (waits for every input), **M** merge (takes either input), **T** terminate.
 - **EG** is an event generator, starting the tokens of one version.
-- **Arc labels** name a gateway's routes (Laboratory, Direct_to_Treatment, …) or the version that uses the arc (v001–v003).
+- **Guarded arcs** leave a gateway: a token takes one only when the service's decision matches the arc's guard. Laboratory, Cardiology and Radiology share the guard STANDARD_WORKFLOW, so a patient sent for work-up goes to all three. Direct_to_Treatment is taken on DIRECT_TO_TREATMENT. Labels v001–v003 only note which version uses an arc.
 - **Dashed** arcs cross the network between hosts; a **2** on an arc marks a place with two operations.
 
 *For example, three versions of an emergency-department process running at once on six hosts: the full patient workflow (v003), a triage canary (v002) and federated radiology requests from another hospital (v001), each deployed and measured separately. To see additional examples, [browse them by category](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/examples.html).*
