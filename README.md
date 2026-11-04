@@ -1,10 +1,14 @@
 # Rule-Propagated Service Orchestration (RPSO)
 
-**RPSO runs Petri nets as live distributed systems.** Each place runs in an
-[orchestration host](Architecture.md#terms) and calls a real service, each transition
-is coordination logic installed as local rules on that host, and tokens are messages
-that travel between hosts. The model
-you draw in the editor is the process that executes, not a simulation of it.
+**RPSO uses Petri-net theory to transform ordinary callable services into a logically defined, distributed orchestration system.**
+
+A service, whether a Java method or a REST endpoint, is represented as a Place within a logical **Node (T_in → Place → T_out)**. This gives each service an explicit orchestration context: how its inputs are collected, when it can execute, and how its results are propagated to other services.
+
+The Petri-net representation provides a formal foundation for sequencing, conditional routing, concurrency, forks, joins and synchronisation, without requiring these behaviours to be implemented within the business services themselves.
+
+**RPSO turns this logical representation into a live distributed system.** Nodes are deployed to generic [Orchestration Hosts](Architecture.md#terms), where transitions become locally evaluated rules and tokens become messages exchanged directly between hosts. There is no central orchestration engine directing their execution.
+
+The process drawn in the editor is therefore more than a visual model: **it is the definition of the system that executes.** Its behaviour can be observed, measured, analysed and replayed against the original Petri-net representation.
 
 Because the places are generic, the same orchestration runs any process you can
 express as places, transitions, forks and joins: a Boolean Petri-net model, a
