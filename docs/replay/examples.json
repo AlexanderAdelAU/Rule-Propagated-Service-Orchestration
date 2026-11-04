@@ -33,7 +33,10 @@
       "title": "Example 1: one place",
       "description": "A service that returns true or false: true ends the token, false sends it round again.",
       "model": "btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json",
-      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_P1_Tutorial_Workflow.txt"
+      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_P1_Tutorial_Workflow.txt",
+      "versions": {
+        "v001": "P1 tutorial"
+      }
     },
     {
       "id": "p2_tutorial",
@@ -41,7 +44,10 @@
       "title": "The P2 tutorial",
       "description": "A stochastic service on host target P2: true ends the token, false sends it back to try again.",
       "model": "btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P2_Tutorial_Workflow.json",
-      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_P2_Tutorial_Workflow.txt"
+      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_P2_Tutorial_Workflow.txt",
+      "versions": {
+        "v001": "P2 tutorial"
+      }
     },
     {
       "id": "p1_p2",
@@ -49,7 +55,10 @@
       "title": "Two places in a row",
       "description": "P1 passes each token on to P2; each place decides true or false.",
       "model": "btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_P2_Deterministic_Workflow.json",
-      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_P1_P2_Deterministic_Workflow.txt"
+      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_P1_P2_Deterministic_Workflow.txt",
+      "versions": {
+        "v001": "Two places in a row"
+      }
     },
     {
       "id": "credit_check",
@@ -57,7 +66,10 @@
       "title": "A credit check",
       "description": "The service tutorial's process: a credit limit service approves an application of up to 5,000 and refers the rest.",
       "model": "btsn.common/ProcessDefinitionFolder/credit/Workflow/Credit_Check_Workflow.json",
-      "run": "btsn.common/AnalysisFolder/Credit/Analysis_Credit_Check_Workflow.txt"
+      "run": "btsn.common/AnalysisFolder/Credit/Analysis_Credit_Check_Workflow.txt",
+      "versions": {
+        "v001": "Credit check"
+      }
     },
     {
       "id": "fork_join",
@@ -65,7 +77,10 @@
       "title": "Fork and join",
       "description": "P1 forks to P2 and P3, on separate hosts; both must arrive before P4 runs.",
       "model": "btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_P2_P3_P4_Fork_Join_Workflow.json",
-      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_P1_P2_P3_P4_Fork_Join_Workflow.txt"
+      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_P1_P2_P3_P4_Fork_Join_Workflow.txt",
+      "versions": {
+        "v001": "Fork and join"
+      }
     },
     {
       "id": "double_join",
@@ -73,7 +88,10 @@
       "title": "Double join",
       "description": "Three branches, two joins: P4 waits for P2 and P3, then P6 waits for P4 and P5.",
       "model": "btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_to_P6_Double_Join_Workflow.json",
-      "run": "btsn.common/AnalysisFolder/PetriNet/P1_to_P6_Double_Join_Workflow.txt"
+      "run": "btsn.common/AnalysisFolder/PetriNet/P1_to_P6_Double_Join_Workflow.txt",
+      "versions": {
+        "v001": "Double join"
+      }
     },
     {
       "id": "rendezvous",
@@ -81,7 +99,10 @@
       "title": "Rendezvous",
       "description": "Two tokens, one in each place, meet at a join and go round again.",
       "model": "btsn.common/ProcessDefinitionFolder/petrinet/Workflow/Rendezvous_Workflow.json",
-      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_Rendezvous_Workflow.txt"
+      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_Rendezvous_Workflow.txt",
+      "versions": {
+        "v001": "Rendezvous"
+      }
     },
     {
       "id": "extra_fork_child",
@@ -89,7 +110,10 @@
       "title": "Extra fork child",
       "description": "A place forks more branches than it holds token numbers for, and the hosts still tell the branches apart.",
       "model": "btsn.common/ProcessDefinitionFolder/petrinet/Workflow/Extra_Fork_Child_Workflow.json",
-      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_Extra_Fork_Child_Workflow.txt"
+      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_Extra_Fork_Child_Workflow.txt",
+      "versions": {
+        "v001": "Extra fork child"
+      }
     },
     {
       "id": "traffic_light",
@@ -97,7 +121,10 @@
       "title": "Traffic lights",
       "description": "An intersection: north-south and east-west lights hand over through forks, joins and feedback. An open process: the lights never stop, so the replay ends where the records were collected.",
       "model": "btsn.common/ProcessDefinitionFolder/petrinet/Workflow/TrafficLight_Workflow.json",
-      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_TrafficLight_Workflow.txt"
+      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_TrafficLight_Workflow.txt",
+      "versions": {
+        "v001": "Traffic lights"
+      }
     },
     {
       "id": "philosophers",
@@ -105,7 +132,10 @@
       "title": "Dining philosophers",
       "description": "Five philosophers on five hosts share five forks; each eats only when its join holds both.",
       "model": "btsn.common/ProcessDefinitionFolder/petrinet/Workflow/Dining_Philosophers.json",
-      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_Dining_Philosophers.txt"
+      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_Dining_Philosophers.txt",
+      "versions": {
+        "v001": "Dining philosophers"
+      }
     },
     {
       "id": "philosophers_deadlock",
@@ -113,7 +143,10 @@
       "title": "Dining philosophers, deadlocked",
       "description": "Every philosopher starts holding one fork: each join waits for a fork that never comes.",
       "model": "btsn.common/ProcessDefinitionFolder/petrinet/Workflow/Dining_Philosophers_Deadlock.json",
-      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_Dining_Philosophers_Deadlock.txt"
+      "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_Dining_Philosophers_Deadlock.txt",
+      "versions": {
+        "v001": "Dining philosophers, deadlocked"
+      }
     },
     {
       "id": "claims",
@@ -121,7 +154,10 @@
       "title": "Insurance claims",
       "description": "Triage pays a claim of up to 2,500 at once; a larger one goes to Assess, a service on the internet that accepts up to 4,000.",
       "model": "btsn.common/ProcessDefinitionFolder/claims/Workflow/Claims_Workflow.json",
-      "run": "btsn.common/AnalysisFolder/Claims/Analysis_Claims_Workflow.txt"
+      "run": "btsn.common/AnalysisFolder/Claims/Analysis_Claims_Workflow.txt",
+      "versions": {
+        "v001": "Insurance claims"
+      }
     },
     {
       "id": "inventory",
@@ -129,7 +165,10 @@
       "title": "Inventory and supplier",
       "description": "The inventory starts with five units on its host; when they run out, the supplier delivers three more after a lead time, once, and later orders are cancelled.",
       "model": "btsn.common/ProcessDefinitionFolder/inventory/Workflow/Inventory_Workflow.json",
-      "run": "btsn.common/AnalysisFolder/Inventory/Analysis_Inventory_Workflow.txt"
+      "run": "btsn.common/AnalysisFolder/Inventory/Analysis_Inventory_Workflow.txt",
+      "versions": {
+        "v001": "Inventory and supplier"
+      }
     },
     {
       "id": "financial_simple",
@@ -137,7 +176,10 @@
       "title": "Validation on its own",
       "description": "The first step of the loan process, on one host: validate each application.",
       "model": "btsn.common/ProcessDefinitionFolder/financial/Workflow/FinancialSystem_P1_Simple.json",
-      "run": "btsn.common/AnalysisFolder/Financial/Analysis_FinancialSystem_P1_Simple.txt"
+      "run": "btsn.common/AnalysisFolder/Financial/Analysis_FinancialSystem_P1_Simple.txt",
+      "versions": {
+        "v001": "Validation"
+      }
     },
     {
       "id": "credit_rest",
@@ -145,7 +187,10 @@
       "title": "Credit check over REST",
       "description": "The same credit check, its rule (approve up to 5,000) answered by a Node.js service over the internet instead of on the host.",
       "model": "btsn.common/ProcessDefinitionFolder/credit/Workflow/Credit_Check_Rest_Workflow.json",
-      "run": "btsn.common/AnalysisFolder/Credit/Analysis_Credit_Check_Rest_Workflow.txt"
+      "run": "btsn.common/AnalysisFolder/Credit/Analysis_Credit_Check_Rest_Workflow.txt",
+      "versions": {
+        "v001": "Credit check over REST"
+      }
     },
     {
       "id": "credit_fraud_rest",
@@ -153,31 +198,46 @@
       "title": "Fraud screen, then credit",
       "description": "A fraud screen, then the credit check over REST. The fraud screen still runs the starting code the editor wrote for it, which takes clear and review in turn until the real rule is written.",
       "model": "btsn.common/ProcessDefinitionFolder/credit/Workflow/Credit_Fraud_Rest_Workflow.json",
-      "run": "btsn.common/AnalysisFolder/Credit/Analysis_Credit_Fraud_Rest_Workflow.txt"
+      "run": "btsn.common/AnalysisFolder/Credit/Analysis_Credit_Fraud_Rest_Workflow.txt",
+      "versions": {
+        "v001": "Fraud screen, then credit"
+      }
     },
     {
       "id": "loan",
       "category": "financial",
       "title": "Loan application, with compensation",
-      "description": "Credit and fraud checks join at underwriting; an abandoned loan signals a second process to withdraw its credit enquiry.",
+      "description": "Credit and fraud checks join at underwriting; an abandoned loan (v001, red) signals the compensation process (v002, blue), whose Withdraw Enquiry runs on the credit check's host, so its tokens appear there.",
       "model": "btsn.common/ProcessDefinitionFolder/financial/Workflow/FinancialSystem_P1_P5_Workflow.json",
-      "run": "btsn.common/AnalysisFolder/Financial/Analysis_FinancialSystem_P1_P5_Compensation.txt"
+      "run": "btsn.common/AnalysisFolder/Financial/Analysis_FinancialSystem_P1_P5_Compensation.txt",
+      "versions": {
+        "v001": "Loan application",
+        "v002": "Loan compensation, launched by Loan Abandoned"
+      }
     },
     {
       "id": "financial_stage3",
       "category": "financial",
       "title": "Two processes, shared services",
-      "description": "The loan process (v001) and a pre-screen (v002) run at once on the same validation and credit hosts.",
+      "description": "The loan process (v001, red) and a pre-screen (v002, blue) run at once on the same validation and credit hosts.",
       "model": "btsn.common/ProcessDefinitionFolder/financial/Workflow/FinancialSystem_P1_P5_Workflow.json",
-      "run": "btsn.common/AnalysisFolder/Financial/Analysis_FinancialSystem_Stage3_Concurrent.txt"
+      "run": "btsn.common/AnalysisFolder/Financial/Analysis_FinancialSystem_Stage3_Concurrent.txt",
+      "versions": {
+        "v001": "Loan application",
+        "v002": "Pre-screen"
+      }
     },
     {
       "id": "financial_stage5",
       "category": "financial",
       "title": "Priority: an urgent burst",
-      "description": "Forty background pre-screens (v002) are under way when fifteen urgent loans (v001) arrive and go first.",
+      "description": "Forty background pre-screens (v002, blue) are under way when fifteen urgent loans (v001, red) arrive and go first.",
       "model": "btsn.common/ProcessDefinitionFolder/financial/Workflow/FinancialSystem_P1_P5_Workflow.json",
-      "run": "btsn.common/AnalysisFolder/Financial/Analysis_FinancialSystem_Stage5_PriorityPreemption.txt"
+      "run": "btsn.common/AnalysisFolder/Financial/Analysis_FinancialSystem_Stage5_PriorityPreemption.txt",
+      "versions": {
+        "v001": "Urgent loan applications",
+        "v002": "Background pre-screens"
+      }
     },
     {
       "id": "emergency_patient",
@@ -185,7 +245,10 @@
       "title": "Emergency department",
       "description": "Triage sends a confirmed heart attack or stroke straight to treatment; other patients are worked up by laboratory, cardiology and radiology, whose results join at diagnosis.",
       "model": "btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Emergency_Department_Patient_Workflow.json",
-      "run": "btsn.common/AnalysisFolder/Healthcare/Emergency_Department_Patient_Workflow.txt"
+      "run": "btsn.common/AnalysisFolder/Healthcare/Emergency_Department_Patient_Workflow.txt",
+      "versions": {
+        "v001": "Emergency department patients"
+      }
     },
     {
       "id": "federated_radiology",
@@ -193,7 +256,10 @@
       "title": "Federated radiology",
       "description": "Imaging requests from another hospital: this hospital's radiology service chooses the imaging protocol for each and returns its findings, marked for the hospital that asked.",
       "model": "btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Federated_Radiology_Workflow.json",
-      "run": "btsn.common/AnalysisFolder/Healthcare/Analysis_Federated_Radiology_Workflow.txt"
+      "run": "btsn.common/AnalysisFolder/Healthcare/Analysis_Federated_Radiology_Workflow.txt",
+      "versions": {
+        "v002": "Federated radiology requests"
+      }
     },
     {
       "id": "emergency_concurrent",
@@ -201,7 +267,12 @@
       "title": "Three versions at once",
       "description": "The emergency department, a triage canary and federated radiology requests, run together on six hosts: the same clinical services serve all three.",
       "model": "btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Emergency_Department_With_Federated_Radiology.json",
-      "run": "btsn.common/AnalysisFolder/Healthcare/Emergency_Department_With_Federated_Radiology.txt"
+      "run": "btsn.common/AnalysisFolder/Healthcare/Emergency_Department_With_Federated_Radiology.txt",
+      "versions": {
+        "v001": "Federated radiology requests",
+        "v002": "Triage canary",
+        "v003": "Emergency department patients"
+      }
     }
   ]
 }
