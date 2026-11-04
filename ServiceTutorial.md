@@ -181,7 +181,7 @@ in the form, and only its description and routes can change.
 Validate also checks that each place takes, as its input, the name the place before it publishes.
 If the names differ, the token would stop at that place when the process runs. It checks the routes too:
 a guard testing a value the service never returns, a value the service returns that no arc tests, and a
-transition that leads nowhere because it is not a Terminate node. Each of these stops Deploy, Build and Run on hosts.
+transition that leads nowhere because it is not a terminate transition. Each of these stops Deploy, Build and Run on hosts.
 
 **An example.** [`Credit_Fraud_Rest_Workflow.json`](btsn.common/ProcessDefinitionFolder/credit/Workflow/Credit_Fraud_Rest_Workflow.json)
 puts a fraud screen in front of the credit check. `FraudService` was added this way and still runs its
@@ -240,7 +240,7 @@ Click **Validate**, then save to
 
 ## 5. Deploy
 
-Click **Deploy**, set `Credit`'s **Host node** to `P1`, and click **Save deployment...**.
+Click **Deploy**, set `Credit`'s **Host node** (its host target) to `P1`, and click **Save deployment...**.
 Accept the suggested `btsn.common/ServiceDeploymentFolder/credit/Credit_Check_Workflow.json`, then save the
 process again. **Runs on** now reads `P1 — 192.168.1.82:4001`.
 
@@ -325,7 +325,7 @@ the hosts need outbound internet access. To run the service on your own machine 
    - **Invocation Adapter**: `rest`;
    - **Service endpoint**: `http://127.0.0.1:8080/credit/assess`.
 
-   The place's orchestration host still runs on its **Host node** (P1); only the place service runs at the endpoint.
+   The place's orchestration host still runs on its host target (P1); only the place service runs at the endpoint.
 
    Save the deployment (the editor suggests `ServiceDeploymentFolder/credit/Credit_Check_Rest_Workflow.json`), then the process. Selecting the place now shows **Runs on** `P1 — ...`, calling the endpoint (REST).
 3. Click **Build**, then **Run on hosts**.

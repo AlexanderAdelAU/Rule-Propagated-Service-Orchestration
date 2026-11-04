@@ -18,7 +18,7 @@
     {
       "id": "financial",
       "title": "Credit and lending",
-      "intro": "Real services making lending decisions. Validation checks that each application has an identifier, an income and an amount. The credit check grades the credit score (700 and over strong, 620 to 699 review, below that weak) and records an enquiry against the application; the fraud check reports the application's fraud risk, and the fraud bureau cannot be reached for one application in five. Underwriting joins the two: high fraud risk or a score under 600 is declined, 700 and over with low risk is approved, the rest is conditional. With no fraud result the loan is abandoned, and a Signal node launches a compensation process that withdraws the credit enquiry. The applications are synthetic; every decision is the services' own."
+      "intro": "Real services making lending decisions. Validation checks that each application has an identifier, an income and an amount. The credit check grades the credit score (700 and over strong, 620 to 699 review, below that weak) and records an enquiry against the application; the fraud check reports the application's fraud risk, and the fraud bureau cannot be reached for one application in five. Underwriting joins the two: high fraud risk or a score under 600 is declined, 700 and over with low risk is approved, the rest is conditional. With no fraud result the loan is abandoned, and a signal transition launches a compensation process that withdraws the credit enquiry. The applications are synthetic; every decision is the services' own."
     },
     {
       "id": "healthcare",
@@ -39,7 +39,7 @@
       "id": "p2_tutorial",
       "category": "start",
       "title": "The P2 tutorial",
-      "description": "A stochastic service on node P2: true ends the token, false sends it back to try again.",
+      "description": "A stochastic service on host target P2: true ends the token, false sends it back to try again.",
       "model": "btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P2_Tutorial_Workflow.json",
       "run": "btsn.common/AnalysisFolder/PetriNet/Analysis_P2_Tutorial_Workflow.txt"
     },

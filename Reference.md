@@ -40,7 +40,7 @@ explains each step on a single place.
 | **1 · Sketch** | Draw the places, transitions and arcs. Transitions become T_in or T_out from their arcs; labels are free | [Sketch the process](#step-1-sketch-the-process) |
 | **2 · Add services as you go** | Choose or create the catalogue of the process's domain, then right-click a place and add its service to it. Give a name, an operation and the values it routes on; the editor writes starting code that keeps the contract and returns those values in turn, or leaves a draft to finish later. A finished service is chosen from the catalogue instead | [Add the first service](#step-2-add-the-first-service), [Choose the service](#choose-the-service-and-operation) |
 | **3 · Validate** | Before anything runs, Validate checks the guards against the values each service returns, the names passed from place to place, drafts, and transitions that lead nowhere | [Validate and save](#step-5-validate-and-save) |
-| **4 · Deploy** | Choose the node (host) each place runs on and save the service deployment | [Deploy the process](#2-deploy-the-process) |
+| **4 · Deploy** | Choose the host target each place runs on and save the service deployment | [Deploy the process](#2-deploy-the-process) |
 | **5 · Build and Run** | The editor writes an Ant launcher: the hosts, the event generators with their versions, and the token schedule | [Create Build and Run](#3-create-build-and-run) |
 | **6 · Run on hosts** | The editor first checks that every REST service it calls answers. The launcher starts each place as its own host process, plus Monitor. It installs each host's rules and waits for every host to commit to them, then fires the tokens and collects the observations | [Run it](#4-run-it), [Rule deployment](#rule-deployment-and-token-execution) |
 | **7 · Results** | The editor analyses the run and replays the recorded tokens on the design; Monitor's charts show timing and activity. A token that fails at a place is reported with the reason | [Show the results](#5-show-the-results), [Observe a run](#observe-and-interpret-a-run) |
@@ -211,7 +211,7 @@ before anything runs, and these do stop Deploy, Build and **Run on hosts**:
 |---|---|
 | A guard tests a value the service never returns (e.g. `false` when it returns `true`) | No token would take that arc |
 | The service returns a value no arc from its T_out tests | Those tokens would be dropped |
-| A transition leads nowhere and is not a Terminate node | Tokens reaching it would stop there |
+| A transition leads nowhere and is not a terminate transition | Tokens reaching it would stop there |
 | A place takes an input the place before it does not publish | The token would stop at that place |
 | A service is still a draft | It has no code to run |
 | A transition both feeds a place and is fed by one | It cannot be both a T_in and a T_out |
@@ -224,7 +224,7 @@ Save with **File → Save Process Definition As...**. The editor offers
 
 These are the same steps as for any process; [Each step in detail](#2-deploy-the-process) explains each one.
 
-1. **Deploy**: click **Deploy** and choose a Host node for each place: **Triage** on `P1`,
+1. **Deploy**: click **Deploy** and choose a **Host node** (host target) for each place: **Triage** on `P1`,
    **Assess** on `P2`. Click **Save deployment...** (it suggests
    `ServiceDeploymentFolder/claims/Claims_Workflow.json`), then save the process.
 2. **Build**: keep the defaults (ten tokens from `CLAIMS`, one a second) and click
@@ -277,7 +277,7 @@ packages the new class.
 | 1–5 | 500–2,500 | `simple` | **Paid** |
 | 6–10 | 3,000–5,000 | `complex` | Assess (still starting code): 3 **Accepted**, 2 **Rejected** |
 
-![The finished claims design during the replay of its recorded run: Triage is selected and runs ClaimsTriageService.triage on node P1 (badge P1), Assess on P2; tokens are at the CLAIMS generator, at Assess, and five have ended at Paid.](images/claims-design.png)
+![The finished claims design during the replay of its recorded run: Triage is selected and runs ClaimsTriageService.triage on host target P1 (badge P1), Assess on P2; tokens are at the CLAIMS generator, at Assess, and five have ended at Paid.](images/claims-design.png)
 
 *The replay of the recorded run: claims 1–5 have been paid and claim 7 is at Assess.*
 
@@ -307,17 +307,17 @@ from ProcessEditor, explaining each step:
   back to P2.
 - **Observation**: Monitor records every step from outside the token path.
 
-![ProcessEditor with the P2 tutorial: EG11 feeds T_in_P2, place P2 runs StochasticService.processToken on node P2, T_out_P2 routes true to Terminate and false back to T_in_P2. The Attributes panel shows the catalogue, service, operation, a description of what the service does, the deployment instance, the node P2 runs on and the contract processToken(token) → token.](images/p2-tutorial-design.png)
+![ProcessEditor with the P2 tutorial: EG11 feeds T_in_P2, place P2 runs StochasticService.processToken on host target P2, T_out_P2 routes true to Terminate and false back to T_in_P2. The Attributes panel shows the catalogue, service, operation, a description of what the service does, the deployment instance, the host target P2 runs on and the contract processToken(token) → token.](images/p2-tutorial-design.png)
 
 *The P2 tutorial process. P2 is selected. The badge on the place and the **Runs
-on** box show the node it is deployed to.*
+on** box show the host target it is deployed to.*
 
 [▶ Watch a recorded run of this process](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P2_Tutorial_Workflow.json&run=../../btsn.common/AnalysisFolder/PetriNet/Analysis_P2_Tutorial_Workflow.txt)
 
 | Step | What you do | Where |
 |---|---|---|
 | **1. Design the process** | Draw the net, choose the service and operation for P2, set the guards, then save | [Design](#1-design-the-process) |
-| **2. Deploy the process** | Choose the node P2 runs on, then save the service deployment | [Deploy](#2-deploy-the-process) |
+| **2. Deploy the process** | Choose the host target P2 runs on, then save the service deployment | [Deploy](#2-deploy-the-process) |
 | **3. Create Build and Run** | Choose the event generators and the number of tokens; the editor writes the Ant launcher | [Build and Run](#3-create-build-and-run) |
 | **4. Run it** | Click **Run on hosts**: the editor runs the launcher on real hosts, analyses the run and loads the replay | [Run](#4-run-it) |
 | **5. Show the results** | Analyse the run, view the charts and replay the tokens on the design | [Results](#5-show-the-results) |
@@ -353,7 +353,7 @@ place has an arc into it.
 
 - Labels must be unique. Otherwise a label is just a name: `T1` works as well as `T_in_P2`.
 - If you do name a transition `T_in_<name>` or `T_out_<name>`, Validate checks that `<name>` is
-  its place's label or the node the place is deployed to, the same on the T_in and the T_out.
+  its place's label or the host target the place is deployed to, the same on the T_in and the T_out.
   Here both are `P2`; business models use the label, for example `T_in_Validation`.
 - The generator's **Rate** and **Version** become the defaults in
   [Build and Run](#3-create-build-and-run).
@@ -391,7 +391,7 @@ route, for example to compare timings on different machines.
 
 Choosing a service does not create one. `StochasticService` is already packaged
 ([source](btsn.common/src/org/btsn/services/StochasticService.java)) and runs
-inside the generic host on whichever node you deploy P2 to.
+inside the generic host on whichever host target you deploy P2 to.
 
 The descriptions come from the catalogue, where each service has a
 `description` and a `returns` entry. The Deploy panel shows the same text when you hover over a Service or Operation cell. When you add a service to a catalogue, describe it there as well; the editor checks require both entries.
@@ -446,28 +446,28 @@ Use **Arrow (drag)**, or **Arrow (click waypoints)** to bend the return route.
   - Each token's children are numbered N01, N02, ..., one per branch.
 - **A join is the T_in of a place.** Set the T_in's **Node Type** to `JoinNode`; the place's host waits for one child from each arc.
   - A join with no place after it has nothing to host it, and Validate says so.
-  - To end after a join, give it a place, then lead that place's T_out to a terminate node.
+  - To end after a join, give it a place, then lead that place's T_out to a terminate transition.
 - **The join's place takes one input per arc.** Validate tells you what is missing; the editor changes nothing itself.
   - For a standard service, type them in the place's **Inputs** field, e.g. `token_branch1, token_branch2`.
   - Each place feeding the join returns the input its arc fills (first arc drawn, first input). Type it in that place's **Returns** field, e.g. `token_branch1`.
   - A service from your own catalogue declares its inputs and return name there: use **Edit Service in** *your catalogue*. **Create New Service** on a join place suggests one input per arc.
 - After changing a fork or join, **Deploy** again so the deployment carries the new inputs.
 
-### Signal nodes: one process starting another
+### Signal transitions: one process starting another
 
-- **A Signal node ends the token in its process, like a Terminate node, and launches the process it names.** The business process owns both the decision (the arc into the Signal node) and the process launched.
+- **A signal transition ends the token in its process, like a terminate transition, and launches the process it names.** The business process owns both the decision (the arc into the signal transition) and the process launched.
   - Set a transition's **Node Type** to `SignalNode` (drawn **S**), then choose **Launches process** in its Attributes, e.g. `financial/Workflow/Loan_Compensation_Workflow`.
   - Its label is the signal's name (e.g. `Loan Abandoned`).
 - **The launched token:**
-  - starts at the launched process's start node and first place, in the version the run deploys that process as;
+  - starts at the launched process's event generator and first place, in the version the run deploys that process as;
   - is the same workflow in that version (workflow 1030000 of v001 launches 2030000 of v002), so the two can be followed together;
   - carries a `signal` header the host fills in (signal, source version, source workflow and token, place, reason: the arc's value, time) and, as `data`, the business result the place returned.
-- **Create Build and Run includes the launched process:** the launcher deploys it under its own version (its start node's, or the next free one), started only by the Signal node; Build lists it as a `Signal` line, and its hosts join the run's.
+- **Create Build and Run includes the launched process:** the launcher deploys it under its own version (its event generator's, or the next free one), started only by the signal transition; Build lists it as a `Signal` line, and its hosts join the run's.
   - The launched process must be deployed (open it, **Deploy**, save the deployment).
-  - In a launcher written by hand, give it its own slot with `egN.started.by.signal=true`; `egN.place`, `egN.operation`, `egN.id` and `egN.expire` say where its tokens start, the start node they are recorded as coming from, and their lifetime.
-  - A run that does not deploy the launched process warns when it deploys, and its tokens end at the Signal node, launching nothing.
-- **Validate reports** a Signal node that names no process, one that names a process that does not exist, and arcs leading on from a Signal node.
-- **Not yet:** a token that fails (a service error, or its lifetime running out at a join) does not reach a Signal node; it stops where it failed.
+  - In a launcher written by hand, give it its own slot with `egN.started.by.signal=true`; `egN.place`, `egN.operation`, `egN.id` and `egN.expire` say where its tokens start, the event generator they are recorded as coming from, and their lifetime.
+  - A run that does not deploy the launched process warns when it deploys, and its tokens end at the signal transition, launching nothing.
+- **Validate reports** a signal transition that names no process, one that names a process that does not exist, and arcs leading on from a signal transition.
+- **Not yet:** a token that fails (a service error, or its lifetime running out at a join) does not reach a signal transition; it stops where it failed.
 
 ### Validate and save
 
@@ -485,13 +485,14 @@ The process must be saved under `ProcessDefinitionFolder/<domain>/`:
 
 ## 2. Deploy the process
 
-Deploying decides which **node** (physical host) each place runs on. A node is one of the hosts the infrastructure
-definition names (P1, P2, ...). Every node runs the same host program, `btsn.rpso.host`, started as that node.
+Deploying decides which **host target** each place, with its T_in and T_out, runs on: one of the targets the
+infrastructure definition names (P1, P2, ...). Every host target runs as the same orchestration host program,
+`btsn.rpso.host`, started with `-node` and the target's name. (The editor and the configuration call a host target a *node*.)
 
 Save the process first: its folder decides its catalogue and where the deployment is saved.
 If it is unsaved or has changes, **Deploy** asks you to save it before the panel opens.
 
-### Choose the node
+### Choose the host target
 
 Use either route:
 
@@ -502,24 +503,24 @@ Use either route:
 
 ![The Deploy panel for the P2 tutorial, titled Places in P2_Tutorial_Workflow: one row with Place P2, Host node P2, Address 192.168.1.82:4002, Service StochasticService, Operation processToken, Return Attribute token, Port Slot 0, Instance StochasticInstance1 and Invocation Adapter boolean-token, and below it the row's argument token.](images/p2-tutorial-deploy.png)
 
-*The Deploy panel. It lists the places of your process, one row each, and you choose each place's Host node. The other columns are filled for you.*
+*The Deploy panel. It lists the places of your process, one row each, and you choose each place's **Host node** (its host target). The other columns are filled for you.*
 
 | Column | Filled with | You change it when |
 |---|---|---|
 | **Place** | The place label on the canvas | Never; it ties the row to the canvas. Add or remove places in the diagram, not here. |
-| **Host node** | Your right-click choice, or the first free node | You want the place on another host. Pick from the list, which gives each node's address and ports and marks nodes other places use; the canvas badge follows. |
-| **Address** | The host node's address and the port of the row's slot | Never; it follows the Host node |
+| **Host node** | Your right-click choice, or the first free host target | You want the place on another host. Pick from the list, which gives each host target's address and ports and marks those other places use; the canvas badge follows. |
+| **Address** | The host target's address and the port of the row's slot | Never; it follows the Host node |
 | **Service / Operation / Return Attribute** | The place's contract from the catalogue | Never; change the design instead |
-| **Port Slot** | `0`, the node's first fixed port | A node has a second port (P4, P6) and you need it |
+| **Port Slot** | `0`, the host target's first fixed port | A host target has a second port (P4, P6) and you need it |
 | **Instance** | The place label (`P2`) | You want another name. The supplied file uses `StochasticInstance1`. |
 | **Invocation Adapter** | `boolean-token` for a Boolean service | Never for this tutorial |
-| **Service endpoint** | Blank | You set the adapter to `rest`, so the host calls the service over HTTP ([Call it over REST](ServiceTutorial.md#8-call-it-over-rest)). The place's host still runs on its Host node; only the service runs at the endpoint. |
+| **Service endpoint** | Blank | You set the adapter to `rest`, so the host calls the service over HTTP ([Call it over REST](ServiceTutorial.md#8-call-it-over-rest)). The place's host still runs on its host target; only the service runs at the endpoint. |
 
-The nodes you can choose come from
+The host targets you can choose come from
 [`SingleHost.json`](btsn.common/InfrastructureDefinitionFolder/SingleHost.json)
 (**Choose infrastructure...** picks another):
 
-| Node | Channel | Address | Fixed Base Ports |
+| Host target (the window's Node) | Channel | Address | Fixed Base Ports |
 |---|---|---|---|
 | `P1` | `ip0` | `192.168.1.82` | `4001` |
 | `P2` | `ip0` | `192.168.1.82` | `4002` |
@@ -528,24 +529,24 @@ The nodes you can choose come from
 | `P5` | `ip0` | `192.168.1.82` | `4005` |
 | `P6` | `ip0` | `192.168.1.82` | `4006, 4008` |
 
-- To change the nodes themselves, choose **File → Open → Infrastructure Definition...**.
+- To change the host targets themselves, choose **File → Open → Infrastructure Definition...**.
 - For a run on one computer you do not need to edit the address; [step 4](#4-run-it) overrides it.
 
 ### Add a host
 
-More places do not need more hosts: a node runs one place operation for each of its fixed base ports, so give a
-node another port (P4 and P6 have two) and deploy the extra place to it. A new host is for a process that needs more nodes, or
+More places do not need more hosts: a host target runs one place operation for each of its fixed base ports, so give a
+host target another port (P4 and P6 have two) and deploy the extra place to it. A new host is for a process that needs more host targets, or
 another machine.
 
 1. Choose **File → Open → Infrastructure Definition...**, open the definition (`SingleHost.json`) and click **Add host**.
-   It adds the next node, `P7`, on the first machine with the first free port (`4009` here, as P4 and P6 use 4007 and 4008).
+   It adds the next host target, `P7`, on the first machine with the first free port (`4009` here, as P4 and P6 use 4007 and 4008).
    Change its channel and address if it runs on another machine, then save.
-2. Deploy places to `P7` as to any node, and save the deployment and the process.
+2. Deploy places to `P7` as to any host target, and save the deployment and the process.
 3. **Build** writes `hosts` with P7 in it (`<property name="hosts" value="P1,P7"/>`). The run starts the
    host program as P7 in its own folder, initialises its database, and collects its records into Monitor.
 
 Nothing is copied or registered: P7's initialisation and collector services (ports `4106` and `4306`) and the run's
-initialiser and collector processes are generated from the node's name. Hosts are named `P1` to `P99`, and ports
+initialiser and collector processes are generated from the host target's name. Hosts are named `P1` to `P99`, and ports
 4100–4198 and 4300–4398 are kept for those services.
 
 ### Save the deployment, then the process
@@ -571,7 +572,7 @@ to generate here.
 Click **Build and Run** in the toolbar. The editor first checks that:
 
 - the process and its deployment are both saved;
-- every place is deployed on a host node (P1, P2, ...);
+- every place is deployed on a host target (P1, P2, ...);
 - an event generator feeds a deployed place through a `T_in` transition.
 
 It lists anything missing. When the deployment profile names a token generator
@@ -814,7 +815,7 @@ You can also run them as Java applications from `btsn.common.Monitor`, with that
 
 ![Workflow elapsed-time chart for the captured ten-token P1 reference run.](docs/tutorials/p1/results/workflow-timing.png)
 
-*Elapsed time per workflow from the [captured P1 reference run](docs/tutorials/p1/results/README.md), the same loop on node P1:*
+*Elapsed time per workflow from the [captured P1 reference run](docs/tutorials/p1/results/README.md), the same loop on host target P1:*
 
 - *Bars run from generation to completion.*
 - *Black diamonds mark the longest queue wait on a single service visit, not the total across the loop.*
@@ -831,8 +832,8 @@ ant -f btsn.petrinet.ProjectLoader/P1_Tutorial_Local_BuildAndRun.xml export-tuto
 
 | Observation | Check |
 |---|---|
-| Build and Run lists problems | Save the process and the deployment; deploy every place on a host node (P1, P2, ...), each on its own node; connect the generator to a `T_in` |
-| The Deploy panel's node table is empty | Start ProcessEditor with `btsn.workflowEditor` as its working directory |
+| Build and Run lists problems | Save the process and deployment; ensure every Place has a valid host target and operation assignment; connect the generator to a `T_in` |
+| The Deploy panel's host table is empty | Start ProcessEditor with `btsn.workflowEditor` as its working directory |
 | A host or Monitor was skipped at startup | Add `-Dhost.address=127.0.0.1`, or start that host on its configured machine |
 | Derby reports another active instance | Stop the previous run, and any viewer holding the database, before analysing |
 | Fewer completed workflows than generated | If the analysis says a workflow `failed ... expired`, its tokens outlived their lifetime, often while queued behind other work: raise `-Dtoken.expire` (or one generator's `-Deg2.expire`). If the run printed `WORKFLOWS STILL RUNNING`, raise or remove `workflow.completion.seconds`. If it printed `WORKFLOWS FINISHED` but a slow service was still working, raise `-Dworkflow.quiet.seconds`. |
@@ -879,7 +880,7 @@ StochasticService only tosses a coin. Any Java class can be a place's service, a
 | [`InventoryService.java`](btsn.common/src/org/btsn/business/inventory/InventoryService.java), [`SupplierService.java`](btsn.common/src/org/btsn/business/inventory/SupplierService.java) | The services, in a package under `org.btsn.business` |
 | [`BusinessServiceDefinitions/inventory/Inventory.json`](btsn.common/BusinessServiceDefinitions/inventory/Inventory.json) | The catalogue: class, operation, inputs, result, `description` and `returns` |
 | [`btsn.services/packaging.json`](btsn.services/packaging.json) | Add the catalogue to `catalogues`, and its domain to `catalogueDomains` |
-| [`ServiceDeploymentFolder/inventory/Inventory.json`](btsn.common/ServiceDeploymentFolder/inventory/Inventory.json) | Written by **Deploy**: the node each service runs on |
+| [`ServiceDeploymentFolder/inventory/Inventory.json`](btsn.common/ServiceDeploymentFolder/inventory/Inventory.json) | Written by **Deploy**: the host target each service runs on |
 | [`ProcessDefinitionFolder/inventory/Workflow/Inventory_Workflow.json`](btsn.common/ProcessDefinitionFolder/inventory/Workflow/Inventory_Workflow.json) | The process, drawn in the editor |
 | [`Inventory_Workflow_BuildAndRun.xml`](btsn.petrinet.ProjectLoader/Inventory_Workflow_BuildAndRun.xml) | Written by **Build and Run** |
 
@@ -912,17 +913,17 @@ The worked example spreads the four-place fork/join over three machines. P1 fork
 
 ### Choose the machines
 
-An infrastructure definition gives each node its machine. Three are supplied:
+An infrastructure definition gives each host target its machine. Three are supplied:
 
 | Definition | Machines |
 |---|---|
 | [`TwoHost.json`](btsn.common/InfrastructureDefinitionFolder/TwoHost.json) | P1, P3, P5 on 192.168.1.82; P2, P4, P6 on 192.168.1.152. Use it for the inventory example (Supplier on the second machine). |
 | [`ThreeHost.json`](btsn.common/InfrastructureDefinitionFolder/ThreeHost.json) | P1, P4 on 192.168.1.82; P2, P5 on 192.168.1.152; P3, P6 on 192.168.1.90. Use it for the fork/join. |
-| [`MultiHost.json`](btsn.common/InfrastructureDefinitionFolder/MultiHost.json) | A template for three machines, two nodes on each. |
+| [`MultiHost.json`](btsn.common/InfrastructureDefinitionFolder/MultiHost.json) | A template for three machines, two host targets on each. |
 
 1. Choose **File → Open → Infrastructure Definition** and open `ThreeHost.json`. Opening it makes it the editor's **Machines** (shown on the toolbar).
 2. Change the addresses to your machines and save. The rules:
-   - **One channel per machine**, each with that machine's address. Nodes on the same machine share its channel.
+   - **One channel per machine**, each with that machine's address. Host targets on the same machine share its channel.
    - **`ip0` is the machine you run the launcher on.** Monitor runs there.
    - **Use `ip0` to `ip4`.** The channel number also shifts the ports (`ip1` adds 1000).
 3. Open [`P1_P2_P3_P4_Fork_Join_Workflow.json`](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_P2_P3_P4_Fork_Join_Workflow.json) and select P2. **Runs on** shows `P2 — 192.168.1.152:4002 (ThreeHost)`.
@@ -1014,7 +1015,7 @@ One launch runs both, [`P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml`](btsn
 
 The `[LIVE]` lines give the times the publish started, every host had committed, and the first `v002` token was fired.
 
-A standby node's contract comes from the service deployment: the first build writes a canonical binding for every node the deployment lists, so P6's package carries its contract before `v002` exists.
+A standby host target's contract comes from the service deployment: the first build writes a canonical binding for every target the deployment lists, so P6's package carries its contract before `v002` exists.
 
 On `ThreeHost`:
 - **192.168.1.152**: unzip `…_LiveChange_P2.zip` and run `launch-to-file.bat` (P2).
@@ -1067,7 +1068,7 @@ The editor finds Apache Ant by itself (`ANT_HOME`, the PATH, or the Ant inside E
 
 ### From the command line
 
-**1. Run a distributed workflow on one computer.** All launchers read node
+**1. Run a distributed workflow on one computer.** All launchers read host-target
 addresses from
 [`SingleHost.json`](btsn.common/InfrastructureDefinitionFolder/README.md), which
 defaults to `192.168.1.82`. On any other machine, every place resolves as remote
@@ -1141,7 +1142,7 @@ Every launcher runs the same way:
 | Dining philosophers from a deadlocked start: every join holds one fork and waits | [Dining_Philosophers_Deadlock_BuildAndRun.xml](btsn.petrinet.ProjectLoader/Dining_Philosophers_Deadlock_BuildAndRun.xml) |
 | Emergency department | [Emergency_Department_BuildAndRun.xml](btsn.healthcare.ProjectLoader/Emergency_Department_BuildAndRun.xml) |
 | Full Financial application | [FinancialSystem_P1_P5_BuildAndRun.xml](btsn.financial.ProjectLoader/FinancialSystem_P1_P5_BuildAndRun.xml) |
-| Financial application with a compensation process: the fraud bureau is unavailable for about 1 application in 5, leaving underwriting without a fraud result, so it abandons that application; the loan process's Signal node `Loan Abandoned` then launches a separate process (v002) for each, which withdraws the credit enquiry left behind. `analyse` then checks that every enquiry was settled or withdrawn exactly once | [FinancialSystem_P1_P5_Compensation_BuildAndRun.xml](btsn.financial.ProjectLoader/FinancialSystem_P1_P5_Compensation_BuildAndRun.xml) |
+| Financial application with a compensation process: the fraud bureau is unavailable for about 1 application in 5, leaving underwriting without a fraud result, so it abandons that application; the loan process's signal transition `Loan Abandoned` then launches a separate process (v002) for each, which withdraws the credit enquiry left behind. `analyse` then checks that every enquiry was settled or withdrawn exactly once | [FinancialSystem_P1_P5_Compensation_BuildAndRun.xml](btsn.financial.ProjectLoader/FinancialSystem_P1_P5_Compensation_BuildAndRun.xml) |
 | Concurrent healthcare versions | [Triple_Workflow_Emergencey_Department_Concurrent.xml](btsn.healthcare.ProjectLoader/Triple_Workflow_Emergencey_Department_Concurrent.xml) |
 
 - **File name**: the concurrent launcher's name contains the typo `Emergencey`; use it as named.
@@ -1171,7 +1172,7 @@ The tools in `btsn.common.Monitor/src/org/btsn/derby/Analysis` include:
 |---|---|
 | `PetriNetAnalyzer` | Generated roots, fork genealogy, join consumption, canonical place visits, completion and structural/temporal checks |
 | `SwingGanttChart_WithLatency` | Workflow elapsed/queue figure, measured timeline, service queue comparisons, and publication exports |
-| `WorkflowSpatialView` | Each token's visits over time, one lane per place, labelled with its service and node |
+| `WorkflowSpatialView` | Each token's visits over time, one lane per place, labelled with its service and host target |
 
 The combined chart offers **Diamonds** and **Lower Queue Shading** from
 **View → Queue Display**. The bar shows measured workflow elapsed time; the marker
@@ -1217,8 +1218,8 @@ its hosts are collected one after another, so their records end at different tim
 the replay stops where the first host stopped recording and says so.
 Open the workflow from its place under `btsn.common/ProcessDefinitionFolder` so
 that its service deployment loads. The analyzer names places and transitions
-after their hosting node (`P1_Place`, `T_in_P1`), and the deployment maps those
-nodes to the labels on the canvas, such as `NS_Green` in the traffic-light model.
+after their host target (`P1_Place`, `T_in_P1`), and the deployment maps those
+targets to the labels on the canvas, such as `NS_Green` in the traffic-light model.
 
 ## Inside each host
 
@@ -1333,7 +1334,7 @@ the same **T_in → P → T_out** unit.
 | Financial application | Validate, check credit/fraud, underwrite and decide | Fork checks, synchronize their results and route declared outcomes |
 | Emergency department | Triage, perform diagnostic operations, diagnose and treat | Select direct/diagnostic paths, fork diagnostics and synchronize results |
 | Inventory example | Reserve stock (stateful), restock with a lead time | Route on string results, loop between two hosts, carry state changes as messages |
-| Credit check | Approve or refer an application, in Java or as a Node.js service over REST | Route one decision to one of two terminate nodes; the same process whether the service is in-process, local or on the internet |
+| Credit check | Approve or refer an application, in Java or as a Node.js service over REST | Route one decision to one of two terminate transitions; the same process whether the service is in-process, local or on the internet |
 
 To write your own service, start with [ServiceTutorial.md](ServiceTutorial.md), then see the inventory example in [Tutorial.md](#6-add-your-own-service).
 
@@ -1456,7 +1457,7 @@ check from Node.js this way, on the same machine or [served from the internet](S
 | Process model | Places, transitions, fork/join structure, guards and termination | `btsn.common/ProcessDefinitionFolder` |
 | Service contract | Logical service identity, operations, named inputs and returned attribute; each domain's catalogue plus the standard services every process may use | `BusinessServiceDefinitions`, `ServiceAttributeBindings` in `btsn.common` |
 | Deployment | Map capabilities to implementation classes or REST endpoints, hosts and channels | [Physical infrastructure](btsn.common/InfrastructureDefinitionFolder/README.md), [service deployments](btsn.common/ServiceDeploymentFolder/README.md) and `btsn.services/deployments/{healthcare,financial,models}` |
-| Generic execution fabric | Transport, buffering, synchronization, version selection, invocation and publication | `btsn.rpso.host` (run once per node), shared infrastructure |
+| Generic execution fabric | Transport, buffering, synchronization, version selection, invocation and publication | `btsn.rpso.host` (run once per host target), shared infrastructure |
 | Business computation | Domain objects, calculations and routing values | Here `btsn.common/src/org/btsn/business`, packaged as independent service JARs and called by reflection; any implementation that honours the binding would do |
 | Observation | Collect records, reconstruct workflow families and display measurements | `btsn.common.Monitor` |
 
@@ -1485,7 +1486,7 @@ The execution pattern, shown in the [sequence diagram](#inside-each-host) at the
 
 These are semantic roles within the local execution machinery. The business
 activity boxes abbreviate a complete **T_in → P → T_out** execution unit; the
-Petri-net examples above expand their transition and place nodes explicitly.
+Petri-net examples above expand their transitions and places explicitly.
 The host implements the whole unit, with its bound operation giving P its
 computational meaning.
 
@@ -1609,7 +1610,7 @@ provide entry points for preparing the packaged runtime.
 |---|---|
 | `btsn.common` | Shared source, business implementations, contracts, physical infrastructure, service deployments, process definitions and rules |
 | `btsn.services` | Service packaging, shared Ant builds, deployment profiles and checks |
-| `btsn.rpso.host` | The orchestration host: one program that each node (P1, P2, ...) runs, started with `-node Pn` |
+| `btsn.rpso.host` | The orchestration host: one program that runs as each host target (P1, P2, ...), started with `-node Pn` |
 | `btsn.common.Monitor` | Collection, reconstruction and visualization |
 | `btsn.common.eventgenerators` | Shared workflow and administration generators |
 | `btsn.healthcare.ProjectLoader` | Healthcare launchers and process tests |
@@ -1633,7 +1634,7 @@ Each domain describes its services in a catalogue under
 [`BusinessServiceDefinitions`](btsn.common/BusinessServiceDefinitions).
 All domains share the physical network and fixed ports in
 [`InfrastructureDefinitionFolder`](btsn.common/InfrastructureDefinitionFolder/README.md).
-Business operations are assigned to those nodes in
+Business operations are assigned to those host targets in
 [`ServiceDeploymentFolder`](btsn.common/ServiceDeploymentFolder/README.md).
 Their routing and guards belong in
 [`ProcessDefinitionFolder`](btsn.common/ProcessDefinitionFolder); the analysis
@@ -1653,7 +1654,7 @@ For packaging/checks without starting a workflow:
 ant -f btsn.services/build.xml check
 ```
 
-For a portable host JAR and ZIP (start it as a node: `launch.bat P3`):
+For a portable host JAR and ZIP (start it as a host target: `launch.bat P3`):
 
 ```sh
 ant -f btsn.rpso.host/build.xml
@@ -1676,7 +1677,7 @@ The supplied claims process of [Tutorial.md, Example 2](Tutorial.md#example-2-a-
 | [Claims.json](btsn.common/BusinessServiceDefinitions/claims/Claims.json) | The claims catalogue the editor created, with `ClaimsTriageService` and `AssessService` |
 | [ClaimsTriageService.java](btsn.common/src/org/btsn/business/claims/ClaimsTriageService.java) | Triage, with the real logic of step 7 |
 | [claims.js](examples/rest/claims.js) | Assess, called over REST: the Node server (`credit-service.js`) and the Vercel function (`api/claims/assess.js`) share it |
-| [Claims_Workflow.json](btsn.common/ServiceDeploymentFolder/claims/Claims_Workflow.json) (deployment) | Triage on node P1; Assess on P2, calling `https://rule-propagated-service-orchestrati.vercel.app/api/claims/assess` |
+| [Claims_Workflow.json](btsn.common/ServiceDeploymentFolder/claims/Claims_Workflow.json) (deployment) | Triage on host target P1; Assess on P2, calling `https://rule-propagated-service-orchestrati.vercel.app/api/claims/assess` |
 | [Claims_WorkflowDeployment.json](btsn.services/deployments/claims/Claims_WorkflowDeployment.json) | Deployment profile written by Build and Run |
 | [Claims_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/Claims_Workflow_BuildAndRun.xml) | Launcher written by Build and Run |
 | [Analysis_Claims_Workflow.txt](btsn.common/AnalysisFolder/Claims/Analysis_Claims_Workflow.txt) | Analysis of a run of Example 2, ready to replay |
@@ -1687,9 +1688,9 @@ The supplied P2 example of [Each step in detail](#each-step-in-detail), built wi
 | Artefact | Role |
 |---|---|
 | [P2_Tutorial_Workflow.json](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P2_Tutorial_Workflow.json) | Process design, linked to its deployment |
-| [P2_Tutorial.json](btsn.common/ServiceDeploymentFolder/petrinet/P2_Tutorial.json) | Service deployment: P2 on node P2, linked to its catalogue |
+| [P2_Tutorial.json](btsn.common/ServiceDeploymentFolder/petrinet/P2_Tutorial.json) | Service deployment: P2 on host target P2, linked to its catalogue |
 | [PetriNetModels.json](btsn.common/BusinessServiceDefinitions/petrinet/PetriNetModels.json) | Petri-net service catalogue (`StochasticService`) |
-| [SingleHost.json](btsn.common/InfrastructureDefinitionFolder/SingleHost.json) | Shared nodes (P1–P6 as supplied), addresses and fixed ports |
+| [SingleHost.json](btsn.common/InfrastructureDefinitionFolder/SingleHost.json) | Shared host targets (P1–P6 as supplied), addresses and fixed ports |
 | [P2_Tutorial_WorkflowDeployment.json](btsn.services/deployments/models/P2_Tutorial_WorkflowDeployment.json) | Deployment profile written by Build and Run |
 | [P2_Tutorial_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P2_Tutorial_Workflow_BuildAndRun.xml) | Launcher written by Build and Run |
 | [`P2_Tutorial_Workflow_BuildAndRun*.csv`](btsn.common.eventgenerators/EventTriggeringFile) | Token schedules, one per event generator |
@@ -1701,7 +1702,7 @@ The P1 reference run:
 
 | Artefact | Role |
 |---|---|
-| [P1_Tutorial_Workflow.json](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json) | The same loop on node P1 |
+| [P1_Tutorial_Workflow.json](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json) | The same loop on host target P1 |
 | [P1_Tutorial_Local_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_Tutorial_Local_BuildAndRun.xml) | Local launcher with the `export-tutorial-results` target |
 | [P1_Tutorial_Generated_BuildAndRun.xml](btsn.services/tests/launchers/P1_Tutorial_Generated_BuildAndRun.xml) | The same process as Build and Run writes it (used by the launcher checks) |
 | [Captured results](docs/tutorials/p1/results/README.md) | Analyzer output, per-workflow CSV, charts and capture details |
