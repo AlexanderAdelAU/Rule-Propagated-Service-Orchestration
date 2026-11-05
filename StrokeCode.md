@@ -131,11 +131,21 @@ Nine holds: three used, six released. Twenty routine patients arrive alongside, 
   - Point at a row to ring that patient's tokens on the model, and click to jump there.
   - The blue rows are the short stand-down processes, each starting where a red row ended.
 
-In the recorded run, all ten stroke codes, six stand-downs and twenty routine patients completed in 27 seconds: a median of 4.5 seconds per stroke code and 6.4 seconds per routine patient.
+The run on the site was recorded across two machines. The stroke centre's host, P8, ran on a machine of its own (192.168.1.152), and the other eleven hosts on the main machine. All ten stroke codes, six stand-downs and twenty routine patients completed in 33 seconds: a median of 7.0 seconds per stroke code and 8.0 seconds per routine patient.
 
-The run on the site came from a fast machine, with little queueing at the providers. There, stroke codes waited a little less than routine patients: 0.65 s against 0.95 s for imaging, and 0.57 s against 0.63 s for pathology. On a slower machine, where queues formed, they waited about 3 seconds against 10 to 12.
+- **Between machines:** a hop between the machines, ambulance to stroke centre or stroke centre to receiving hospital, took 150–200 ms on average. That's about the same as a hop on one machine (about 145 ms).
+- **Compensation:** the nine holds were made and settled on the stroke centre's machine: three used, six released. Balance OK.
+- **Priority:** in 13 places a stroke code and a routine patient waited in the same queue, and the stroke code was taken first all 13 times.
 
-Hosts record a token's arrival at a T_in when it joins the operation's queue, and its entry into the place when the host takes it from the queue. So in a run recorded this way, the timeline shows a queue wait as waiting at the T_in. The analysis also checks the queue's order directly. Wherever a stroke code and a routine patient waited in the same queue, it reports whether the stroke code was taken first. The run on the site was recorded before hosts did this, so its timeline shows queue waits as time between hosts.
+| Mean wait in the queue (longest) | Stroke code | Routine patient |
+|---|---|---|
+| Pathology (P2, shared) | 0.71 s (1.5 s) | 1.24 s (3.6 s) |
+| Imaging (P4, shared) | 0.55 s (1.2 s) | 0.98 s (3.4 s) |
+| Cardiology (P3, routine only) | — | 0.04 s |
+
+Routine patients only queue at the providers they share with stroke codes, and stroke codes wait about half as long there.
+
+Hosts record a token's arrival at a T_in when it joins the operation's queue, and its entry into the place when the host takes it from the queue. So the timeline shows a queue wait as waiting at the T_in. The analysis also checks the queue's order directly.
 
 ## Run it yourself
 
