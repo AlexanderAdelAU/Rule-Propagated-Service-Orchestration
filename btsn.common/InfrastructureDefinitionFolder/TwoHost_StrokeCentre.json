@@ -1,0 +1,106 @@
+{
+  "definitionType": "Infrastructure",
+  "nodes": [
+    {
+      "node": "P1",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "basePorts": [
+        4001
+      ]
+    },
+    {
+      "node": "P2",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "basePorts": [
+        4002,
+        4010
+      ]
+    },
+    {
+      "node": "P3",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "basePorts": [
+        4003
+      ]
+    },
+    {
+      "node": "P4",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "basePorts": [
+        4004,
+        4007
+      ]
+    },
+    {
+      "node": "P5",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "basePorts": [
+        4005
+      ]
+    },
+    {
+      "node": "P6",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "basePorts": [
+        4006,
+        4008
+      ]
+    },
+    {
+      "node": "P7",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "basePorts": [
+        4009
+      ]
+    },
+    {
+      "node": "P8",
+      "channel": "ip1",
+      "address": "192.168.1.152",
+      "basePorts": [
+        4011,
+        4012
+      ]
+    },
+    {
+      "node": "P9",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "basePorts": [
+        4013
+      ]
+    },
+    {
+      "node": "P10",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "basePorts": [
+        4014
+      ]
+    },
+    {
+      "node": "P11",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "basePorts": [
+        4015
+      ]
+    },
+    {
+      "node": "P12",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "basePorts": [
+        4016,
+        4017
+      ]
+    }
+  ]
+}

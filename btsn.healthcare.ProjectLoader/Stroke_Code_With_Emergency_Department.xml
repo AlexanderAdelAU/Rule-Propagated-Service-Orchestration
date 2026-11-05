@@ -15,10 +15,21 @@
      system (RestServiceServer) if nothing answers on 8090, and stops it at the end; or start it yourself first:
               ant -f Stroke_Code_With_Emergency_Department.xml stroke-centre
      Run:     ant -f Stroke_Code_With_Emergency_Department.xml        (add -Dhost.address=127.0.0.1 to run every host on this machine)
+     The stroke centre on its own machine (192.168.1.152), with tokens reaching it over UDP like any other host:
+              ant -f Stroke_Code_With_Emergency_Department.xml host-packages -Dstroke.centre=remote   (copy the zip there, run launch.bat)
+              ant -f Stroke_Code_With_Emergency_Department.xml -Dstroke.centre=remote
      Analyse: ant -f Stroke_Code_With_Emergency_Department.xml analyse   (the usual report, then the suite-hold balance) -->
 <project name="Stroke_Code_With_Emergency_Department" default="run-complete-workflow" basedir=".">
     <property name="process.title" value="Stroke code (v001) with its stand-down (v002) and routine emergency department patients (v003)"/>
-    <property name="launcher.profile.file" location="../btsn.services/deployments/healthcare/StrokeCodeDeployment.json"/>
+    <!-- Where the stroke centre runs. Left out: on this machine, its booking system called over REST (started below).
+         -Dstroke.centre=remote: the stroke centre's host P8 on 192.168.1.152 (InfrastructureDefinitionFolder/TwoHost_StrokeCentre.json),
+         its booking inside that host. Build its package once with host-packages -Dstroke.centre=remote, run launch.bat
+         there, then run this launcher here with -Dstroke.centre=remote. -->
+    <property name="stroke.centre" value="local"/>
+    <condition property="stroke.centre.remote"><equals arg1="${stroke.centre}" arg2="remote"/></condition>
+    <condition property="infrastructure" value="TwoHost_StrokeCentre"><isset property="stroke.centre.remote"/></condition>
+    <condition property="launcher.profile.file" value="${basedir}/../btsn.services/deployments/healthcare/StrokeCodeInProcessDeployment.json"
+               else="${basedir}/../btsn.services/deployments/healthcare/StrokeCodeDeployment.json"><isset property="stroke.centre.remote"/></condition>
     <property name="token.generator.class" value="org.btsn.healthcare.eventgenerators.GenericHealthcareTokenGenerator"/>
     <property name="workflow.process.name" value="healthcare/Workflow/Stroke_Code_Workflow"/>
     <property name="rule.version" value="v001"/>
@@ -79,7 +90,7 @@
         <echo message="The stroke centre's booking system: ${stroke.centre.url} (log: StrokeCentre.out.txt). Stop it with Ctrl+C, or ${stroke.centre.url}/stop"/>
         <stroke-centre-server/>
     </target>
-    <target name="start-stroke-centre" depends="prepare-runtime">
+    <target name="start-stroke-centre" depends="prepare-runtime" unless="stroke.centre.remote">
         <condition property="stroke.centre.running"><http url="${stroke.centre.url}"/></condition>
         <echo message="The stroke centre's booking system is already answering at ${stroke.centre.url}" if:set="stroke.centre.running" xmlns:if="ant:if"/>
         <antcall target="spawn-stroke-centre"/>
@@ -89,16 +100,16 @@
         <stroke-centre-server spawn="true"/>
         <waitfor maxwait="30" maxwaitunit="second" checkevery="500" timeoutproperty="stroke.centre.silent"><http url="${stroke.centre.url}"/></waitfor>
         <fail if="stroke.centre.silent" message="The stroke centre's booking system did not start on port ${stroke.centre.port}"/>
-        <touch file="${output.dir}/StrokeCentre.started"/>
+        <touch file="${launcher.runtime.dir}/StrokeCentre.started"/>
     </target>
     <target name="stop-stroke-centre">
-        <available file="${output.dir}/StrokeCentre.started" property="stroke.centre.ours"/>
+        <available file="${launcher.runtime.dir}/StrokeCentre.started" property="stroke.centre.ours"/>
         <antcall target="stop-our-stroke-centre"/>
     </target>
     <target name="stop-our-stroke-centre" if="stroke.centre.ours">
-        <get src="${stroke.centre.url}/stop" dest="${output.dir}/StrokeCentre.stopped" ignoreerrors="true" quiet="true"/>
-        <delete file="${output.dir}/StrokeCentre.started"/>
-        <delete file="${output.dir}/StrokeCentre.stopped" quiet="true"/>
+        <get src="${stroke.centre.url}/stop" dest="${launcher.runtime.dir}/StrokeCentre.stopped" ignoreerrors="true" quiet="true"/>
+        <delete file="${launcher.runtime.dir}/StrokeCentre.started"/>
+        <delete file="${launcher.runtime.dir}/StrokeCentre.stopped" quiet="true"/>
     </target>
     <!-- The run: the booking system first (unless it is already answering), then the usual run, then stop what this started. -->
     <target name="run-complete-workflow" depends="start-stroke-centre,process-runtime.run-complete-workflow,stop-stroke-centre"
