@@ -162,6 +162,13 @@ The run starts the stroke centre's booking system on port 8090 if nothing answer
 ant -f Stroke_Code_With_Emergency_Department.xml stroke-centre   # until Ctrl+C
 ```
 
+To run the stroke centre on a machine of its own (192.168.1.152 in [TwoHost_StrokeCentre.json](btsn.common/InfrastructureDefinitionFolder/TwoHost_StrokeCentre.json)), with tokens reaching its host P8 over UDP like any other host and its booking inside that host:
+
+```sh
+ant -f Stroke_Code_With_Emergency_Department.xml host-packages -Dstroke.centre=remote   # copy the P8 zip there and run launch.bat
+ant -f Stroke_Code_With_Emergency_Department.xml -Dstroke.centre=remote                 # then the run, here
+```
+
 To replay your own run, open the replay page, choose **Replay another model and analysis**, and select the combined model below with your analysis file.
 
 ## Files
