@@ -5,6 +5,7 @@ import java.awt.Point;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
+import java.lang.reflect.Field;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
@@ -20,12 +21,13 @@ public final class CanvasTextGroupAndWheelCheck {
                 checkTextGrouping();
                 checkWheelScrolling();
                 checkPointerAnchoredZoom();
+                checkEdgeAnchoredZoom();
             } catch (Throwable error) {
                 failure[0] = error;
             }
         });
         if (failure[0] != null) throw new AssertionError("Canvas text group / wheel", failure[0]);
-        System.out.println("PASS: text groups, wheel scrolling, and cursor-anchored Ctrl+wheel zoom");
+        System.out.println("PASS: text groups, wheel scrolling, and Ctrl+wheel zoom at canvas centre and edges");
     }
 
     private static void checkTextGrouping() {
@@ -100,44 +102,92 @@ public final class CanvasTextGroupAndWheelCheck {
      * from the origin. Repeated wheel events must not accumulate anchor drift.
      */
     private static void checkPointerAnchoredZoom() {
-        Canvas canvas = new Canvas();
-        canvas.getTextElements().add(new TextElement(3000, 2400, "Far corner"));
-        // Recalculate the preferred size from the content before attaching it.
-        canvas.setZoomScale(1.1);
-        canvas.setZoomScale(1.0);
-
-        JScrollPane pane = new JScrollPane(canvas);
-        pane.setSize(520, 360);
-        pane.doLayout();
+        Canvas canvas = largeCanvas();
+        JScrollPane pane = scrollPane(canvas);
         pane.getViewport().setViewPosition(new Point(1200, 900));
 
-        Point offset = new Point(350, 215); // deliberately not the viewport centre
-        checkAnchoredWheel(canvas, pane, offset, -1); // zoom in
-        checkAnchoredWheel(canvas, pane, offset, -1); // consecutive wheel events
-        checkAnchoredWheel(canvas, pane, offset, 1);  // zoom out
-        checkAnchoredWheel(canvas, pane, offset, 1);  // restore original scale
+        Point offset = new Point(350, 215); // deliberately not viewport centre
+        checkAnchoredWheel(canvas, pane, offset, -1);
+        checkAnchoredWheel(canvas, pane, offset, -1);
+        checkAnchoredWheel(canvas, pane, offset, 1);
+        checkAnchoredWheel(canvas, pane, offset, 1);
         check(Math.abs(canvas.getZoomScale() - 1.0) < 1e-8,
               "Zoom in/out should return to 100%");
     }
 
+    private static void checkEdgeAnchoredZoom() {
+        Canvas canvas = largeCanvas();
+        JScrollPane pane = scrollPane(canvas);
+        Point offset = new Point(350, 215);
+
+        // At the far right/bottom, the old canvas-size calculation ran out
+        // of scroll range when zooming out, moving content to the right.
+        Dimension canvasSize = canvas.getPreferredSize();
+        Dimension extent = pane.getViewport().getExtentSize();
+        pane.getViewport().setViewPosition(new Point(
+            Math.max(0, canvasSize.width - extent.width - 20),
+            Math.max(0, canvasSize.height - extent.height - 20)));
+        checkAnchoredWheel(canvas, pane, offset, 1);
+        checkAnchoredWheel(canvas, pane, offset, 1);
+        checkAnchoredWheel(canvas, pane, offset, -1);
+        checkAnchoredWheel(canvas, pane, offset, -1);
+
+        // At the left/top edge, panning into negative viewport coordinates
+        // is impossible. View-only origin space must preserve the anchor.
+        pane.getViewport().setViewPosition(new Point(0, 0));
+        checkAnchoredWheel(canvas, pane, offset, 1);
+        checkAnchoredWheel(canvas, pane, offset, 1);
+        checkAnchoredWheel(canvas, pane, offset, -1);
+        checkAnchoredWheel(canvas, pane, offset, -1);
+    }
+
+    private static Canvas largeCanvas() {
+        Canvas canvas = new Canvas();
+        canvas.getTextElements().add(new TextElement(3000, 2400, "Far corner"));
+        return canvas;
+    }
+
+    private static JScrollPane scrollPane(Canvas canvas) {
+        JScrollPane pane = new JScrollPane(canvas);
+        pane.setSize(520, 360);
+        pane.doLayout();
+        canvas.setZoomScale(1.1);
+        canvas.setZoomScale(1.0);
+        pane.doLayout();
+        return pane;
+    }
+
     private static void checkAnchoredWheel(Canvas canvas, JScrollPane pane,
                                             Point pointerOffset, int rotation) {
-        Point before = pane.getViewport().getViewPosition();
-        double scaleBefore = canvas.getZoomScale();
-        double modelX = (before.x + pointerOffset.x) / scaleBefore;
-        double modelY = (before.y + pointerOffset.y) / scaleBefore;
-
+        double[] before = modelPointAtCursor(canvas, pane, pointerOffset);
+        Point view = pane.getViewport().getViewPosition();
         wheel(canvas, InputEvent.CTRL_DOWN_MASK, rotation,
-              before.x + pointerOffset.x, before.y + pointerOffset.y);
+              view.x + pointerOffset.x, view.y + pointerOffset.y);
+        pane.doLayout();
+        pane.getViewport().doLayout();
+        double[] after = modelPointAtCursor(canvas, pane, pointerOffset);
+        check(Math.abs(before[0] - after[0]) <= 1.1 &&
+              Math.abs(before[1] - after[1]) <= 1.1,
+              "Ctrl+wheel moved the model point under the cursor: before ("
+                  + before[0] + ", " + before[1] + "), after ("
+                  + after[0] + ", " + after[1] + ")");
+    }
 
-        Point after = pane.getViewport().getViewPosition();
-        double scaleAfter = canvas.getZoomScale();
-        double anchoredX = (after.x + pointerOffset.x) / scaleAfter;
-        double anchoredY = (after.y + pointerOffset.y) / scaleAfter;
-        check(Math.abs(modelX - anchoredX) <= 1.1 &&
-              Math.abs(modelY - anchoredY) <= 1.1,
-              "Ctrl+wheel moved the point under the cursor: before (" + modelX + ", " + modelY
-                  + "), after (" + anchoredX + ", " + anchoredY + ")");
+    private static double[] modelPointAtCursor(Canvas canvas, JScrollPane pane, Point offset) {
+        try {
+            Field originX = Canvas.class.getDeclaredField("viewOriginX");
+            Field originY = Canvas.class.getDeclaredField("viewOriginY");
+            originX.setAccessible(true);
+            originY.setAccessible(true);
+            Point view = pane.getViewport().getViewPosition();
+            double zoom = canvas.getZoomScale();
+            return new double[] {
+                (view.x + offset.x - originX.getInt(canvas)) / zoom,
+                (view.y + offset.y - originY.getInt(canvas)) / zoom
+            };
+        } catch (ReflectiveOperationException error) {
+            throw new AssertionError("Could not inspect canvas view origin", error);
+        }
     }
 
     private static void ctrlClick(Canvas canvas, int x, int y) {
