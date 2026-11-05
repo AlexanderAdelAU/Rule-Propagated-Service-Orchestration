@@ -1,0 +1,139 @@
+{
+  "processType": "SOA",
+  "serviceDeployment": "ServiceDeploymentFolder/healthcare/StrokeCode.json",
+  "elements": [
+    {
+      "id": "STAND_DOWN",
+      "type": "EVENT_GENERATOR",
+      "x": 20,
+      "y": 170,
+      "width": 24,
+      "height": 60,
+      "label": "STAND_DOWN",
+      "rotation": 0,
+      "generator_rate": "1000",
+      "token_version": "v002"
+    },
+    {
+      "id": "T_in_AngioSuite",
+      "type": "TRANSITION",
+      "x": 105,
+      "y": 170,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_AngioSuite",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "AngioSuite",
+      "type": "PLACE",
+      "x": 155,
+      "y": 175,
+      "width": 50,
+      "height": 50,
+      "label": "AngioSuite",
+      "service": "AngioSuiteService",
+      "operations": [
+        {
+          "name": "releaseSuite",
+          "returnAttribute": "releaseResults",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_AngioSuite",
+      "type": "TRANSITION",
+      "x": 235,
+      "y": 170,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_AngioSuite",
+      "rotation": 0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "Terminate_Released",
+      "type": "TRANSITION",
+      "x": 330,
+      "y": 120,
+      "width": 20,
+      "height": 60,
+      "label": "Suite Released",
+      "rotation": 0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    },
+    {
+      "id": "Terminate_NothingToRelease",
+      "type": "TRANSITION",
+      "x": 330,
+      "y": 260,
+      "width": 20,
+      "height": 60,
+      "label": "Nothing To Release",
+      "rotation": 0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "T_in_AngioSuite",
+      "target": "AngioSuite"
+    },
+    {
+      "source": "AngioSuite",
+      "target": "T_out_AngioSuite"
+    },
+    {
+      "source": "STAND_DOWN",
+      "target": "T_in_AngioSuite",
+      "connection_type": "NETWORK",
+      "availability": 1
+    },
+    {
+      "source": "T_out_AngioSuite",
+      "target": "Terminate_Released",
+      "label": "released",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "released",
+      "connection_type": "NETWORK",
+      "availability": 1
+    },
+    {
+      "source": "T_out_AngioSuite",
+      "target": "Terminate_NothingToRelease",
+      "label": "nothing_to_release",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "nothing_to_release",
+      "connection_type": "NETWORK",
+      "availability": 1
+    }
+  ],
+  "textElements": [
+    {
+      "x": 20,
+      "y": 360,
+      "text": "Stand-down: started by the stroke code's Signal node; releases the angiography suite hold the ambulance's alert made.",
+      "fontSize": 12,
+      "fontStyle": 1,
+      "color": -16777216
+    }
+  ]
+}

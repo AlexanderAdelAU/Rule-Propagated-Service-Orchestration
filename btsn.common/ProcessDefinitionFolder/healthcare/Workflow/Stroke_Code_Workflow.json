@@ -1,0 +1,703 @@
+{
+  "processType": "SOA",
+  "serviceDeployment": "ServiceDeploymentFolder/healthcare/StrokeCode.json",
+  "documentation": {
+    "title": "Stroke code",
+    "summary": "A suspected stroke across four organisations: the ambulance service screens and alerts; the comprehensive stroke centre holds its angiography suite; the receiving hospital orders CT and bloods together from the regional imaging and pathology providers; the telestroke neurologist at the stroke centre decides on clot-dissolving treatment at the receiving hospital and clot retrieval at the stroke centre. Every route that will not retrieve a clot signals the stand-down process, which releases the suite hold."
+  },
+  "elements": [
+    {
+      "id": "AMBULANCE_CALL",
+      "type": "EVENT_GENERATOR",
+      "x": 20,
+      "y": 170,
+      "width": 24,
+      "height": 60,
+      "label": "AMBULANCE_CALL",
+      "rotation": 0,
+      "generator_rate": "1000",
+      "token_version": "v001"
+    },
+    {
+      "id": "T_in_StrokeScreen",
+      "type": "TRANSITION",
+      "x": 105,
+      "y": 170,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_StrokeScreen",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "StrokeScreen",
+      "type": "PLACE",
+      "x": 155,
+      "y": 175,
+      "width": 50,
+      "height": 50,
+      "label": "StrokeScreen",
+      "service": "StrokeScreenService",
+      "operations": [
+        {
+          "name": "screenPatient",
+          "returnAttribute": "screenResults",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_StrokeScreen",
+      "type": "TRANSITION",
+      "x": 235,
+      "y": 170,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_StrokeScreen",
+      "rotation": 0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_AngioSuite",
+      "type": "TRANSITION",
+      "x": 325,
+      "y": 170,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_AngioSuite",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "AngioSuite",
+      "type": "PLACE",
+      "x": 375,
+      "y": 175,
+      "width": 50,
+      "height": 50,
+      "label": "AngioSuite",
+      "service": "AngioSuiteService",
+      "operations": [
+        {
+          "name": "holdSuite",
+          "returnAttribute": "suiteHold",
+          "arguments": [
+            {
+              "name": "screenResults",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_AngioSuite",
+      "type": "TRANSITION",
+      "x": 455,
+      "y": 170,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_AngioSuite",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_StrokeTriage",
+      "type": "TRANSITION",
+      "x": 545,
+      "y": 170,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_StrokeTriage",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "StrokeTriage",
+      "type": "PLACE",
+      "x": 595,
+      "y": 175,
+      "width": 50,
+      "height": 50,
+      "label": "StrokeTriage",
+      "service": "StrokeTriageService",
+      "operations": [
+        {
+          "name": "assessStroke",
+          "returnAttribute": "triageResults",
+          "arguments": [
+            {
+              "name": "suiteHold",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_StrokeTriage",
+      "type": "TRANSITION",
+      "x": 675,
+      "y": 170,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_StrokeTriage",
+      "rotation": 0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_Telestroke",
+      "type": "TRANSITION",
+      "x": 985,
+      "y": 170,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Telestroke",
+      "rotation": 0,
+      "node_type": "JoinNode",
+      "node_value": "JOIN_NODE",
+      "transition_type": "T_in",
+      "buffer": "20"
+    },
+    {
+      "id": "Telestroke",
+      "type": "PLACE",
+      "x": 1035,
+      "y": 175,
+      "width": 50,
+      "height": 50,
+      "label": "Telestroke",
+      "service": "TelestrokeService",
+      "operations": [
+        {
+          "name": "decide",
+          "returnAttribute": "strokePlan",
+          "arguments": [
+            {
+              "name": "radiologyResults",
+              "type": "String",
+              "value": "String",
+              "required": false
+            },
+            {
+              "name": "laboratoryResults",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_Telestroke",
+      "type": "TRANSITION",
+      "x": 1115,
+      "y": 170,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Telestroke",
+      "rotation": 0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_Thrombolysis",
+      "type": "TRANSITION",
+      "x": 1205,
+      "y": 80,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Thrombolysis",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "Thrombolysis",
+      "type": "PLACE",
+      "x": 1255,
+      "y": 85,
+      "width": 50,
+      "height": 50,
+      "label": "Thrombolysis",
+      "service": "ThrombolysisService",
+      "operations": [
+        {
+          "name": "thrombolyse",
+          "returnAttribute": "thrombolysisResults",
+          "arguments": [
+            {
+              "name": "strokePlan",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_Thrombolysis",
+      "type": "TRANSITION",
+      "x": 1335,
+      "y": 80,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Thrombolysis",
+      "rotation": 0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_Thrombectomy",
+      "type": "TRANSITION",
+      "x": 1205,
+      "y": 270,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Thrombectomy",
+      "rotation": 0,
+      "node_type": "MergeNode",
+      "node_value": "MERGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "Thrombectomy",
+      "type": "PLACE",
+      "x": 1255,
+      "y": 275,
+      "width": 50,
+      "height": 50,
+      "label": "Thrombectomy",
+      "service": "ThrombectomyService",
+      "operations": [
+        {
+          "name": "retrieveClot",
+          "returnAttribute": "thrombectomyResults",
+          "arguments": [
+            {
+              "name": "strokePlan",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "retrieveClotAfterLysis",
+          "returnAttribute": "thrombectomyResults",
+          "arguments": [
+            {
+              "name": "thrombolysisResults",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_Thrombectomy",
+      "type": "TRANSITION",
+      "x": 1335,
+      "y": 270,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Thrombectomy",
+      "rotation": 0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "Terminate_StandardED",
+      "type": "TRANSITION",
+      "x": 225,
+      "y": 330,
+      "width": 20,
+      "height": 60,
+      "label": "Standard ED",
+      "rotation": 0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    },
+    {
+      "id": "Signal_StandDown",
+      "type": "TRANSITION",
+      "x": 1430,
+      "y": 0,
+      "width": 20,
+      "height": 60,
+      "label": "Stand Down Suite",
+      "rotation": 0,
+      "node_type": "SignalNode",
+      "node_value": "SIGNAL_NODE",
+      "transition_type": "Other",
+      "launch_process": "healthcare/Workflow/Stroke_StandDown_Workflow"
+    },
+    {
+      "id": "T_in_Laboratory",
+      "type": "TRANSITION",
+      "x": 765,
+      "y": 80,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Laboratory",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "Laboratory",
+      "type": "PLACE",
+      "x": 815,
+      "y": 85,
+      "width": 50,
+      "height": 50,
+      "label": "Laboratory",
+      "service": "LaboratoryService",
+      "operations": [
+        {
+          "name": "processLabRequest",
+          "returnAttribute": "laboratoryResults",
+          "arguments": [
+            {
+              "name": "triageResults",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_Laboratory",
+      "type": "TRANSITION",
+      "x": 895,
+      "y": 80,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Laboratory",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_Radiology",
+      "type": "TRANSITION",
+      "x": 765,
+      "y": 270,
+      "width": 20,
+      "height": 60,
+      "label": "T_in_Radiology",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "10"
+    },
+    {
+      "id": "Radiology",
+      "type": "PLACE",
+      "x": 815,
+      "y": 275,
+      "width": 50,
+      "height": 50,
+      "label": "Radiology",
+      "service": "RadiologyService",
+      "operations": [
+        {
+          "name": "processImagingRequest",
+          "returnAttribute": "radiologyResults",
+          "arguments": [
+            {
+              "name": "triageResults",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_Radiology",
+      "type": "TRANSITION",
+      "x": 895,
+      "y": 270,
+      "width": 20,
+      "height": 60,
+      "label": "T_out_Radiology",
+      "rotation": 0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_out"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "T_in_StrokeScreen",
+      "target": "StrokeScreen"
+    },
+    {
+      "source": "StrokeScreen",
+      "target": "T_out_StrokeScreen"
+    },
+    {
+      "source": "T_in_AngioSuite",
+      "target": "AngioSuite"
+    },
+    {
+      "source": "AngioSuite",
+      "target": "T_out_AngioSuite"
+    },
+    {
+      "source": "T_in_StrokeTriage",
+      "target": "StrokeTriage"
+    },
+    {
+      "source": "StrokeTriage",
+      "target": "T_out_StrokeTriage"
+    },
+    {
+      "source": "T_in_Telestroke",
+      "target": "Telestroke"
+    },
+    {
+      "source": "Telestroke",
+      "target": "T_out_Telestroke"
+    },
+    {
+      "source": "T_in_Thrombolysis",
+      "target": "Thrombolysis"
+    },
+    {
+      "source": "Thrombolysis",
+      "target": "T_out_Thrombolysis"
+    },
+    {
+      "source": "T_in_Thrombectomy",
+      "target": "Thrombectomy"
+    },
+    {
+      "source": "Thrombectomy",
+      "target": "T_out_Thrombectomy"
+    },
+    {
+      "source": "AMBULANCE_CALL",
+      "target": "T_in_StrokeScreen",
+      "connection_type": "NETWORK",
+      "availability": 1
+    },
+    {
+      "source": "T_out_StrokeScreen",
+      "target": "T_in_AngioSuite",
+      "label": "stroke_alert",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "stroke_alert",
+      "connection_type": "NETWORK",
+      "availability": 1
+    },
+    {
+      "source": "T_out_StrokeScreen",
+      "target": "Terminate_StandardED",
+      "label": "standard_ed",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "standard_ed",
+      "connection_type": "NETWORK",
+      "availability": 1
+    },
+    {
+      "source": "T_out_AngioSuite",
+      "target": "T_in_StrokeTriage",
+      "connection_type": "NETWORK",
+      "availability": 1
+    },
+    {
+      "source": "T_out_StrokeTriage",
+      "target": "T_in_Laboratory",
+      "label": "stroke_code",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "stroke_code",
+      "connection_type": "NETWORK",
+      "availability": 1
+    },
+    {
+      "source": "T_out_StrokeTriage",
+      "target": "T_in_Radiology",
+      "label": "stroke_code",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "stroke_code",
+      "connection_type": "NETWORK",
+      "availability": 1
+    },
+    {
+      "source": "T_out_StrokeTriage",
+      "target": "Signal_StandDown",
+      "label": "stroke_excluded",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "stroke_excluded",
+      "waypoints": [
+        {
+          "x": 685,
+          "y": 30
+        },
+        {
+          "x": 1420,
+          "y": 30
+        }
+      ],
+      "labelOffsetX": -330,
+      "labelOffsetY": -4,
+      "connection_type": "NETWORK",
+      "availability": 1
+    },
+    {
+      "source": "T_out_Radiology",
+      "target": "T_in_Telestroke",
+      "connection_type": "NETWORK",
+      "availability": 1
+    },
+    {
+      "source": "T_out_Laboratory",
+      "target": "T_in_Telestroke",
+      "connection_type": "NETWORK",
+      "availability": 1
+    },
+    {
+      "source": "T_out_Telestroke",
+      "target": "T_in_Thrombolysis",
+      "label": "thrombolyse",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "thrombolyse",
+      "connection_type": "NETWORK",
+      "availability": 1
+    },
+    {
+      "source": "T_out_Telestroke",
+      "target": "T_in_Thrombectomy",
+      "label": "thrombectomy",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "thrombectomy",
+      "endpoint": "retrieveClot",
+      "connection_type": "NETWORK",
+      "availability": 1
+    },
+    {
+      "source": "T_out_Telestroke",
+      "target": "Signal_StandDown",
+      "label": "no_reperfusion",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "no_reperfusion",
+      "waypoints": [
+        {
+          "x": 1135,
+          "y": 30
+        }
+      ],
+      "labelOffsetX": 30,
+      "labelOffsetY": 30,
+      "connection_type": "NETWORK",
+      "availability": 1
+    },
+    {
+      "source": "T_out_Thrombolysis",
+      "target": "T_in_Thrombectomy",
+      "label": "transfer",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "transfer",
+      "endpoint": "retrieveClotAfterLysis",
+      "waypoints": [
+        {
+          "x": 1360,
+          "y": 200
+        },
+        {
+          "x": 1195,
+          "y": 200
+        }
+      ],
+      "connection_type": "NETWORK",
+      "availability": 1
+    },
+    {
+      "source": "T_out_Thrombolysis",
+      "target": "Signal_StandDown",
+      "label": "lysis_only",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "lysis_only",
+      "waypoints": [
+        {
+          "x": 1355,
+          "y": 50
+        }
+      ],
+      "connection_type": "NETWORK",
+      "availability": 1
+    },
+    {
+      "source": "T_in_Laboratory",
+      "target": "Laboratory"
+    },
+    {
+      "source": "Laboratory",
+      "target": "T_out_Laboratory"
+    },
+    {
+      "source": "T_in_Radiology",
+      "target": "Radiology"
+    },
+    {
+      "source": "Radiology",
+      "target": "T_out_Radiology"
+    }
+  ],
+  "textElements": [
+    {
+      "x": 20,
+      "y": 400,
+      "text": "Stroke code: an ambulance alert holds the stroke centre's angiography suite; any route that will not retrieve a clot stands the suite down (Stroke_StandDown_Workflow, v002).",
+      "fontSize": 12,
+      "fontStyle": 1,
+      "color": -16777216
+    }
+  ]
+}

@@ -19,7 +19,7 @@
       "service": "LaboratoryService",
       "implementationClass": "org.btsn.business.healthcare.LaboratoryService",
       "operation": "processLabRequest",
-      "description": "Runs the ordered lab tests (simulated) and flags abnormal or critical values.",
+      "description": "Runs the ordered lab tests (simulated) and flags abnormal or critical values. A stroke code gets the stroke bloods instead: INR, platelets and glucose (StrokeBloods).",
       "returns": "Laboratory results and a clinical summary. No routing value.",
       "inputs": [
         "triageResults"
@@ -45,7 +45,7 @@
       "service": "RadiologyService",
       "implementationClass": "org.btsn.business.healthcare.RadiologyService",
       "operation": "processImagingRequest",
-      "description": "Chooses the imaging study for the presenting complaint and writes a simulated report.",
+      "description": "Chooses the imaging study for the presenting complaint and writes a simulated report. A stroke code is imaged by the stroke protocol instead: CT brain and CT angiography (StrokeImaging).",
       "returns": "Radiology findings, impression and recommendations. No routing value.",
       "inputs": [
         "triageResults"
@@ -106,6 +106,111 @@
       ],
       "returnAttribute": "treatmentResults",
       "canonicalBinding": "ServiceAttributeBindings/TreatmentService/TreatmentService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "StrokeScreenService",
+      "implementationClass": "org.btsn.business.healthcare.StrokeScreenService",
+      "operation": "screenPatient",
+      "description": "The ambulance service's stroke screen on the road: FAST, blood glucose and time of onset decide whether to alert the stroke centre and the receiving hospital.",
+      "returns": "Screen results carrying the patient's case. Routes on \"stroke_alert\" or \"standard_ed\" (FAST negative, glucose under 4.0 mmol/L, or onset over 24 hours).",
+      "inputs": [
+        "token"
+      ],
+      "returnAttribute": "screenResults",
+      "canonicalBinding": "ServiceAttributeBindings/StrokeScreenService/StrokeScreenService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "AngioSuiteService",
+      "implementationClass": "org.btsn.business.healthcare.AngioSuiteService",
+      "operation": "holdSuite",
+      "description": "The stroke centre holds its angiography suite and team for the stroke code, before the patient reaches hospital. Recorded against the stroke code.",
+      "returns": "The hold. Routes on \"held\".",
+      "inputs": [
+        "screenResults"
+      ],
+      "returnAttribute": "suiteHold",
+      "canonicalBinding": "ServiceAttributeBindings/AngioSuiteService/AngioSuiteService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "AngioSuiteService",
+      "implementationClass": "org.btsn.business.healthcare.AngioSuiteService",
+      "operation": "releaseSuite",
+      "description": "Compensation: releases the suite hold of a stroke code that will not need clot retrieval. Started by the stroke code's Signal node \"Stand Down Suite\". Safe to repeat.",
+      "returns": "Routes on \"released\" or \"nothing_to_release\" (no hold, or already released).",
+      "inputs": [
+        "token"
+      ],
+      "returnAttribute": "releaseResults",
+      "canonicalBinding": "ServiceAttributeBindings/AngioSuiteService/AngioSuiteService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "StrokeTriageService",
+      "implementationClass": "org.btsn.business.healthcare.StrokeTriageService",
+      "operation": "assessStroke",
+      "description": "The receiving hospital's emergency department meets the ambulance: a stroke code orders CT and bloods together; resolved symptoms exclude it.",
+      "returns": "Triage results marked as a stroke code. Routes on \"stroke_code\" (to imaging and pathology in parallel) or \"stroke_excluded\".",
+      "inputs": [
+        "suiteHold"
+      ],
+      "returnAttribute": "triageResults",
+      "canonicalBinding": "ServiceAttributeBindings/StrokeTriageService/StrokeTriageService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "TelestrokeService",
+      "implementationClass": "org.btsn.business.healthcare.TelestrokeService",
+      "operation": "decide",
+      "description": "The telestroke neurologist at the stroke centre, once CT and bloods are both in: thrombolysis within 4.5 hours unless contraindicated (haemorrhage, blood pressure over 185/110 after treatment, INR over 1.7, platelets under 100); clot retrieval for a large-vessel occlusion within 24 hours.",
+      "returns": "The plan. Routes on \"thrombolyse\", \"thrombectomy\" or \"no_reperfusion\".",
+      "inputs": [
+        "radiologyResults",
+        "laboratoryResults"
+      ],
+      "returnAttribute": "strokePlan",
+      "canonicalBinding": "ServiceAttributeBindings/TelestrokeService/TelestrokeService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "ThrombolysisService",
+      "implementationClass": "org.btsn.business.healthcare.ThrombolysisService",
+      "operation": "thrombolyse",
+      "description": "Tenecteplase 0.25 mg/kg (at most 25 mg) at the receiving hospital.",
+      "returns": "Routes on \"transfer\" (a large-vessel occlusion: on for clot retrieval) or \"lysis_only\".",
+      "inputs": [
+        "strokePlan"
+      ],
+      "returnAttribute": "thrombolysisResults",
+      "canonicalBinding": "ServiceAttributeBindings/ThrombolysisService/ThrombolysisService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "ThrombectomyService",
+      "implementationClass": "org.btsn.business.healthcare.ThrombectomyService",
+      "operation": "retrieveClot",
+      "description": "Clot retrieval at the stroke centre, in the held suite, straight from the neurologist's decision.",
+      "returns": "Reperfusion graded on the eTICI scale. Routes on \"retrieved\".",
+      "inputs": [
+        "strokePlan"
+      ],
+      "returnAttribute": "thrombectomyResults",
+      "canonicalBinding": "ServiceAttributeBindings/ThrombectomyService/ThrombectomyService-CanonicalBindings.ruleml.xml",
+      "status": "active"
+    },
+    {
+      "service": "ThrombectomyService",
+      "implementationClass": "org.btsn.business.healthcare.ThrombectomyService",
+      "operation": "retrieveClotAfterLysis",
+      "description": "Clot retrieval at the stroke centre after thrombolysis at the receiving hospital (drip and ship).",
+      "returns": "Reperfusion graded on the eTICI scale. Routes on \"retrieved\".",
+      "inputs": [
+        "thrombolysisResults"
+      ],
+      "returnAttribute": "thrombectomyResults",
+      "canonicalBinding": "ServiceAttributeBindings/ThrombectomyService/ThrombectomyService-CanonicalBindings.ruleml.xml",
       "status": "active"
     }
   ]

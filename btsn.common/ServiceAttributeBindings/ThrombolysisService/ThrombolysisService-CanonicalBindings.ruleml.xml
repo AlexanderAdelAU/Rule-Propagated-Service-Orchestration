@@ -1,0 +1,12 @@
+<!-- Canonical Binding for ThrombolysisService -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>ThrombolysisService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>thrombolyse</Ind>
+	<Ind>thrombolysisResults</Ind>
+	<Ind>strokePlan</Ind>
+</Atom>

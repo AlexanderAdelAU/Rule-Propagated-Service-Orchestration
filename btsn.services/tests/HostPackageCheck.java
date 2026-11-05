@@ -46,7 +46,7 @@ public final class HostPackageCheck {
         System.out.println("PASS: " + checks + " host package checks");
     }
 
-    /** Each node's initialisation and collector services are generated on that node's channel, for every node the infrastructure has (P7 too). */
+    /** Each node's initialisation and collector services are generated on that node's channel, for every node the infrastructure has (one added beyond the supplied ones too). */
     static void placement(Path root) throws Exception {
         Path common = Files.createTempDirectory("placement");
         try {
@@ -68,11 +68,14 @@ public final class HostPackageCheck {
                 JSONObject node = (JSONObject)item;
                 if ("P2".equals(node.get("node"))) { node.put("channel", "ip1"); node.put("address", "192.0.2.10"); }
             }
-            // A seventh node, added as the infrastructure editor adds one: it gets its own administrative services.
-            JSONObject p7 = new JSONObject();
-            p7.put("node", "P7"); p7.put("channel", "ip1"); p7.put("address", "192.0.2.10");
-            JSONArray p7Ports = new JSONArray(); p7Ports.add(4009L); p7.put("basePorts", p7Ports);
-            ((JSONArray)infrastructure.get("nodes")).add(p7);
+            // One node beyond the supplied ones, added as the infrastructure editor adds one: it gets its own administrative services.
+            int last = 0;
+            for (Object item : (JSONArray)infrastructure.get("nodes")) last = Math.max(last, Integer.parseInt(((JSONObject)item).get("node").toString().substring(1)));
+            String added = "P" + (last + 1);
+            JSONObject extra = new JSONObject();
+            extra.put("node", added); extra.put("channel", "ip1"); extra.put("address", "192.0.2.10");
+            JSONArray extraPorts = new JSONArray(); extraPorts.add(4090L); extra.put("basePorts", extraPorts);
+            ((JSONArray)infrastructure.get("nodes")).add(extra);
             Files.writeString(common.resolve("InfrastructureDefinitionFolder/TwoHost.json"), infrastructure.toJSONString());
             GenerateDeploymentRules.main(new String[] {common.toString(), "", "TwoHost"});
             check(DeploymentConfiguration.read(common.resolve("BusinessServiceDefinitions/Deployment.json")).get("infrastructure")
@@ -83,9 +86,9 @@ public final class HostPackageCheck {
             check(channelOf(common.resolve(init), "P2_InitializationService").equals("ip1"), "P2's initialiser must follow P2 to ip1");
             check(channelOf(common.resolve(collect), "P2_CollectorService").equals("ip1"), "P2's collector must follow P2 to ip1");
             check(channelOf(common.resolve(init), "P1_InitializationService").equals("ip0"), "P1's initialiser stays on ip0");
-            check(channelOf(common.resolve(init), "P7_InitializationService").equals("ip1"), "P7 must get an initialiser on its channel");
-            check(Files.readString(common.resolve(init)).contains("<Ind>P7_CollectorService</Ind><Ind>collectAllData</Ind><Ind>ip1</Ind><Ind>4106</Ind>"),
-                "P7's collector must use base port 4106");
+            check(channelOf(common.resolve(init), added + "_InitializationService").equals("ip1"), added + " must get an initialiser on its channel");
+            check(Files.readString(common.resolve(init)).contains("<Ind>" + added + "_CollectorService</Ind><Ind>collectAllData</Ind><Ind>ip1</Ind><Ind>" + (4100 + last) + "</Ind>"),
+                added + "'s collector must use base port " + (4100 + last));
             check(channelOf(common.resolve(monitor), "MonitorService").equals("ip0"), "Monitor stays on ip0");
 
             for (Object item : (JSONArray)infrastructure.get("nodes")) {

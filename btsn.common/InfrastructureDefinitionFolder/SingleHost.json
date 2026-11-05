@@ -51,6 +51,56 @@
         4006,
         4008
       ]
+    },
+    {
+      "node": "P7",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "basePorts": [
+        4009
+      ]
+    },
+    {
+      "node": "P8",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "basePorts": [
+        4011,
+        4012
+      ]
+    },
+    {
+      "node": "P9",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "basePorts": [
+        4013
+      ]
+    },
+    {
+      "node": "P10",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "basePorts": [
+        4014
+      ]
+    },
+    {
+      "node": "P11",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "basePorts": [
+        4015
+      ]
+    },
+    {
+      "node": "P12",
+      "channel": "ip0",
+      "address": "192.168.1.82",
+      "basePorts": [
+        4016,
+        4017
+      ]
     }
   ]
 }

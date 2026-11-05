@@ -1,0 +1,74 @@
+{
+  "service": "StrokeScreenService",
+  "operation": "screenPatient",
+  "description": "Token format for the stroke code: a suspected stroke patient as the paramedics find them, and what the hospital's tests will find",
+
+  "tokenStructure": {
+    "tokenId": "${sequenceId}",
+    "version": "${version}",
+    "notAfter": "${notAfter}",
+    "currentPlace": "${targetPlace}",
+    "workflow_start_time": "${workflowStartTime}",
+
+    "data": {
+      "patientId": "P_Stroke_${sequenceId}",
+      "fast_positive": "true",
+      "onset_minutes": "90",
+      "glucose_mmol": "6.2",
+      "nihss": "8",
+      "systolic": "160",
+      "diastolic": "90",
+      "weight_kg": "80",
+      "inr": "1.0",
+      "platelets": "240",
+      "haemorrhage": "false",
+      "lvo": "false"
+    }
+  },
+
+  "dataVariants": {
+    "lvo_early": {
+      "_comment": "Thrombolysis, then transfer for clot retrieval (drip and ship)",
+      "onset_minutes": "70", "nihss": "18", "lvo": "true", "occlusion_site": "left M1 middle cerebral artery", "weight_kg": "92", "etici": "2c"
+    },
+    "lysis_only": {
+      "_comment": "Thrombolysis; no occlusion: the suite is stood down",
+      "onset_minutes": "95", "nihss": "7", "weight_kg": "68"
+    },
+    "mimic": {
+      "_comment": "Low glucose: treated on the road, no stroke code, no suite hold",
+      "glucose_mmol": "2.6", "nihss": "6"
+    },
+    "haemorrhage": {
+      "_comment": "Bleed on CT: no reperfusion, the suite is stood down",
+      "onset_minutes": "60", "nihss": "14", "systolic": "205", "diastolic": "115", "haemorrhage": "true"
+    },
+    "lysis_bp_treated": {
+      "_comment": "Blood pressure 200/105 lowered to 175/95, then thrombolysis; no occlusion",
+      "onset_minutes": "130", "nihss": "9", "systolic": "200", "diastolic": "105", "weight_kg": "104"
+    },
+    "late_lvo": {
+      "_comment": "Woke with symptoms 7 hours ago: no thrombolysis, clot retrieval only",
+      "onset_minutes": "420", "nihss": "16", "lvo": "true", "occlusion_site": "right internal carotid terminus", "etici": "2b67"
+    },
+    "anticoagulated": {
+      "_comment": "On warfarin, INR 2.6, no occlusion: no reperfusion, the suite is stood down",
+      "onset_minutes": "100", "nihss": "10", "inr": "2.6"
+    },
+    "tia": {
+      "_comment": "Symptoms resolved by arrival: stroke excluded at the door, the suite is stood down",
+      "onset_minutes": "50", "nihss": "4", "symptoms_resolved": "true"
+    }
+  },
+
+  "caseMix": ["lvo_early", "lysis_only", "mimic", "haemorrhage", "lysis_bp_treated",
+              "late_lvo", "anticoagulated", "lvo_early", "tia", "lysis_only"],
+
+  "notes": [
+    "tokenId, version, notAfter, currentPlace, workflow_start_time are auto-populated",
+    "Without -variant, patient n presents with caseMix[(n - 1) mod its length]: ten suspected strokes, of which",
+    "the ambulance alerts nine (the mimic is not a stroke code). Of those nine, three go on to clot retrieval and six",
+    "stand the held angiography suite down: the stand-down process (v002) releases each of those six holds.",
+    "The clinical values are simplified for the demonstration; they are not clinical guidance."
+  ]
+}

@@ -1,0 +1,18 @@
+<!-- Canonical Binding for TelestrokeService -->
+
+<Atom>
+	<Rel>localDefined</Rel>
+	<Ind>TelestrokeService</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>decide</Ind>
+	<Ind>strokePlan</Ind>
+	<Ind>radiologyResults</Ind>
+</Atom>
+<Atom>
+	<Rel>canonicalBinding</Rel>
+	<Ind>decide</Ind>
+	<Ind>strokePlan</Ind>
+	<Ind>laboratoryResults</Ind>
+</Atom>

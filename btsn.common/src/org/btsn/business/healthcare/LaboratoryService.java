@@ -65,6 +65,9 @@ public class LaboratoryService extends BaseHealthcareService {
      * - Infrastructure (tokens, timing) handled by ServiceHelper
      */
     public String processLabRequest(String cleanBusinessData) {
+        // A stroke code from a receiving hospital: the stroke bloods (StrokeBloods).
+        StrokeBloods stroke = new StrokeBloods();
+        if (stroke.isStrokeCode(cleanBusinessData)) return stroke.strokeBloods(cleanBusinessData);
         System.out.printf("[%s] ========== LABORATORY SERVICE EXECUTION START ==========\n", getPlaceId());
         System.out.printf("[%s] Processing laboratory analysis for sequenceID: %s\n", getPlaceId(), getSequenceID());
         System.out.printf("[%s] Received clean business data length: %d\n", getPlaceId(), 

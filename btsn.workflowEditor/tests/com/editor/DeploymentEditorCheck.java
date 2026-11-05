@@ -39,7 +39,8 @@ public final class DeploymentEditorCheck {
             finally { frame.dispose(); }
         });
         if (failure[0] != null) throw new AssertionError("Deployment window regression", failure[0]);
-        // Add host on the supplied infrastructure gives P7 a port no node uses (4009: P4 and P6 hold 4007 and 4008), not 4007.
+        // Add host on the supplied infrastructure (P1-P12) gives P13 the first port no node uses from 4013: 4018, as P9 to
+        // P12 hold 4013 to 4017 (just as P7 got 4009, P4 and P6 holding 4007 and 4008).
         SwingUtilities.invokeAndWait(() -> {
             InfrastructureDefinitionFrame frame = new InfrastructureDefinitionFrame();
             try {
@@ -50,9 +51,9 @@ public final class DeploymentEditorCheck {
                 add.doClick();
                 Method json = InfrastructureDefinitionFrame.class.getDeclaredMethod("toJson"); json.setAccessible(true);
                 String written = ((String)json.invoke(frame)).replaceAll("\\s+", "");
-                check(written.contains("\"node\":\"P7\"") && written.contains("\"basePorts\":[4009]"), "Add host did not give P7 port 4009: " + written);
+                check(written.contains("\"node\":\"P13\"") && written.contains("\"basePorts\":[4018]"), "Add host did not give P13 port 4018: " + written);
                 Method validate = InfrastructureDefinitionFrame.class.getDeclaredMethod("validateDefinition"); validate.setAccessible(true);
-                check(((List<?>)validate.invoke(frame)).isEmpty(), "Infrastructure with P7 invalid: " + validate.invoke(frame));
+                check(((List<?>)validate.invoke(frame)).isEmpty(), "Infrastructure with P13 invalid: " + validate.invoke(frame));
                 check(InfrastructureDefinitionFrame.reservedPort(4106) && InfrastructureDefinitionFrame.reservedPort(4300) && !InfrastructureDefinitionFrame.reservedPort(4009),
                     "Administrative ports not kept");
             } catch (Throwable ex) { failure[0] = ex; }
@@ -67,7 +68,7 @@ public final class DeploymentEditorCheck {
         check(!InfrastructureDefinitionFrame.wrongRepositoryFolder(infrastructure, infrastructure), "The right folder was replaced");
         check(!InfrastructureDefinitionFrame.wrongRepositoryFolder(new File(deployments, "inventory"), deployments), "A deployment subfolder was replaced");
         check(!InfrastructureDefinitionFrame.wrongRepositoryFolder(new File(System.getProperty("java.io.tmpdir")), infrastructure), "A folder outside btsn.common was replaced");
-        System.out.println("PASS: real deployment Open loads dropdowns immediately; six rows preserve aliases/adapters/ports; switching definitions replaces the catalogue; Open starts in the right definition folder; Add host gives P7 a free port");
+        System.out.println("PASS: real deployment Open loads dropdowns immediately; six rows preserve aliases/adapters/ports; switching definitions replaces the catalogue; Open starts in the right definition folder; Add host gives P13 a free port");
     }
     private static void selectCurrent(JTable table,int row,int column,String value) {
         check(table.editCellAt(row,column), "Cell not editable: "+row+"/"+column);

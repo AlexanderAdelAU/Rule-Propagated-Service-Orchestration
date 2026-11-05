@@ -2,8 +2,9 @@
 
 All Petri-net, healthcare and financial examples share
 [SingleHost.json](SingleHost.json); [MultiHost.json](MultiHost.json) spreads the
-same nodes over three machines. Each defines the physical nodes (P1–P6 as
-supplied; **Add host** in the editor adds P7 and so on), their channels, address
+same nodes over three machines. Each defines the physical nodes (P1–P12 in
+SingleHost.json: P1–P6 for most examples, and P7–P12 for the stroke code example; **Add host** in the
+editor adds P13 and so on), their channels, address
 and fixed base ports. Every node runs the same host program. Service functions and workflow topology
 are selected separately, so changing a service function leaves its network
 endpoint unchanged.
@@ -14,13 +15,21 @@ deployment) names one. The editor shows them as **Host**.
 | Node | Port slot 0 | Port slot 1 |
 |---|---|---|
 | P1 | 4001 | — |
-| P2 | 4002 | — |
+| P2 | 4002 | 4010 |
 | P3 | 4003 | — |
 | P4 | 4004 | 4007 |
 | P5 | 4005 | — |
 | P6 | 4006 | 4008 |
+| P7 | 4009 | — |
+| P8 | 4011 | 4012 |
+| P9 | 4013 | — |
+| P10 | 4014 | — |
+| P11 | 4015 | — |
+| P12 | 4016 | 4017 |
 
-The additional slots preserve the existing healthcare operations on P4 and P6.
+The additional slots preserve the existing healthcare operations on P4 and P6, and the stroke code's second
+operations on P8 (releasing the angiography suite) and P12 (clot retrieval after thrombolysis). A launcher
+starts only the hosts it lists, so the others cost nothing. MultiHost, TwoHost and ThreeHost spread P1–P6.
 These are base ports; the runtime applies its existing channel offsets to obtain
 transport, rule and synchronization ports. Initialization, collection and Monitor
 retain their existing infrastructure operations.
