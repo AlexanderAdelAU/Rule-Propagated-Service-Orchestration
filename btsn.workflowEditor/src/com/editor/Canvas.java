@@ -220,6 +220,44 @@ public class Canvas extends JPanel {
     }
     
     /**
+     * Zoom around the mouse pointer rather than the top-left of the canvas.
+     * The model point under the pointer stays at the same viewport location,
+     * except when the scroll position reaches an edge of the canvas.
+     */
+    private void zoomAtPointer(Point pointer, double requestedScale) {
+        JViewport viewport = (JViewport) SwingUtilities.getAncestorOfClass(JViewport.class, this);
+        if (viewport == null) {
+            setZoomScale(requestedScale);
+            return;
+        }
+
+        double oldScale = zoomScale;
+        double newScale = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, requestedScale));
+        if (oldScale == newScale) return;
+
+        Point oldPosition = viewport.getViewPosition();
+        int pointerOffsetX = pointer.x - oldPosition.x;
+        int pointerOffsetY = pointer.y - oldPosition.y;
+        double ratio = newScale / oldScale;
+
+        setZoomScale(newScale);
+
+        // updateCanvasSize() changes the preferred size. Lay out now so rapid
+        // wheel events always use the resized canvas, not a pending revalidate.
+        viewport.doLayout();
+        Dimension extent = viewport.getExtentSize();
+        Dimension canvasSize = viewport.getViewSize();
+
+        int targetX = (int) Math.round(pointer.x * ratio) - pointerOffsetX;
+        int targetY = (int) Math.round(pointer.y * ratio) - pointerOffsetY;
+        int maxX = Math.max(0, canvasSize.width - extent.width);
+        int maxY = Math.max(0, canvasSize.height - extent.height);
+        viewport.setViewPosition(new Point(
+            Math.max(0, Math.min(targetX, maxX)),
+            Math.max(0, Math.min(targetY, maxY))));
+    }
+
+    /**
      * Zoom in by one step
      */
     public void zoomIn() {
@@ -393,13 +431,12 @@ public class Canvas extends JPanel {
             }
         });
         
-        // Wheel moves the viewport; Ctrl+wheel keeps zoom, Shift+wheel scrolls sideways.
+        // Wheel scrolls; Ctrl+wheel zooms about the pointer; Shift+wheel scrolls sideways.
         addMouseWheelListener(e -> {
             if (e.isControlDown()) {
-                if (e.getPreciseWheelRotation() < 0) {
-                    zoomIn();
-                } else if (e.getPreciseWheelRotation() > 0) {
-                    zoomOut();
+                double rotation = e.getPreciseWheelRotation();
+                if (rotation != 0) {
+                    zoomAtPointer(e.getPoint(), zoomScale + (rotation < 0 ? ZOOM_STEP : -ZOOM_STEP));
                 }
                 e.consume();
                 return;
