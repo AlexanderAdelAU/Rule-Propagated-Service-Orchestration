@@ -22,7 +22,7 @@ form for healthcare processes, taking the token generator from
 | `Emergency_Department_BuildAndRun.xml` | Initialize P1–P6 and Monitor, run ten patients, collect observations |
 | `Federated_Radiology_BuildAndRun.xml` | Initialize P4 and Monitor, run federated requests, collect observations |
 | `Triple_Workflow_Emergencey_Department_Concurrent.xml` | Run the patient, canary and federated workflows concurrently and collect all three versions |
-| `Stroke_Code_With_Emergency_Department.xml` | Run the stroke code (P7–P12, with pathology on P2 and imaging on P4), its stand-down compensation and routine patients concurrently; `analyse` checks every angiography suite hold was used or released exactly once |
+| `Stroke_Code_With_Emergency_Department.xml` | Run the stroke code (P7–P12, with pathology on P2 and imaging on P4), its stand-down compensation and routine patients concurrently; `analyse` checks every angiography suite hold was used or released exactly once. See [the stroke code guide](../StrokeCode.md) |
 | `Queue_Priority_BuildAndRun.xml` | Run three isolated, controlled queue-priority experiments and write evidence and timelines |
 | `ProcessTests/Triage_Initializer.xml` | Start configured P1 and Monitor components and initialize their databases |
 | `ProcessTests/Triage_Workflow.xml` | Start configured P1 and Monitor components, execute ten triage requests and collect observations; initialization is optional |

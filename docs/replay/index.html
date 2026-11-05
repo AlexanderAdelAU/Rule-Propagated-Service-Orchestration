@@ -39,6 +39,8 @@
   .speed { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
   .speed input { width: 120px; accent-color: var(--accent); }
   .speed output { font: 600 13px "IBM Plex Mono", monospace; color: var(--ink); min-width: 4.5ch; }
+  .guide { margin: -4px 0 12px; font-size: 14px; }
+  .guide a { color: var(--accent); font-weight: 600; }
   .versions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 0 0 12px; font-size: 13px; color: var(--muted); }
   .versions .v { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); color: var(--ink); }
   .versions .v i { width: 11px; height: 11px; border-radius: 50%; display: inline-block; border: 1px solid rgba(0,0,0,.3); }
@@ -76,6 +78,7 @@
     Steps of a few milliseconds are stretched so they can be seen; the clock shows the run's own time.</p>
 
   <div class="versions" id="versions" aria-label="Processes in this run"></div>
+  <p class="guide" id="guide" hidden></p>
   <div class="stage"><svg id="net" role="img" aria-label="Petri net model with tokens replayed"></svg></div>
 
   <div class="controls">
@@ -998,6 +1001,12 @@ ui.files.addEventListener("change", async () => {
     try {
       const ex = (await (await get("examples.json")).json()).examples.find(e => e.run === runPath && (!q.get("model") || q.get("model").replace(/^(\.\.\/)+/, "") === e.model));
       versionNames = ex ? ex.versions : null;
+      // An example with a written guide links to it: what it shows and how it works.
+      if (ex && ex.guide) {
+        const g = document.getElementById("guide"), a = document.createElement("a");
+        a.href = ex.guide; a.textContent = "How this example works, and what to look for →";
+        g.appendChild(a); g.hidden = false;
+      }
     } catch (_) { versionNames = null; }
     if (q.get("model") && q.get("run")) {
       const modelUrl = new URL(q.get("model"), location.href);

@@ -285,7 +285,8 @@
         "v001": "Stroke code process",
         "v002": "Stand-down (compensation) process, releasing the held suite",
         "v003": "Routine emergency department patient process"
-      }
+      },
+      "guide": "https://github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration/blob/main/StrokeCode.md"
     }
   ]
 }
