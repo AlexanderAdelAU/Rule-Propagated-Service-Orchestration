@@ -19,12 +19,13 @@ public final class CanvasTextGroupAndWheelCheck {
             try {
                 checkTextGrouping();
                 checkWheelScrolling();
+                checkPointerAnchoredZoom();
             } catch (Throwable error) {
                 failure[0] = error;
             }
         });
         if (failure[0] != null) throw new AssertionError("Canvas text group / wheel", failure[0]);
-        System.out.println("PASS: Ctrl+click and rubber-band text groups, copy/paste, and wheel scrolling");
+        System.out.println("PASS: text groups, wheel scrolling, and cursor-anchored Ctrl+wheel zoom");
     }
 
     private static void checkTextGrouping() {
@@ -94,6 +95,51 @@ public final class CanvasTextGroupAndWheelCheck {
         check(canvas.getZoomScale() > oldZoom, "Ctrl+wheel should still zoom in");
     }
 
+    /**
+     * Large diagrams must zoom around the pointer, even after scrolling far
+     * from the origin. Repeated wheel events must not accumulate anchor drift.
+     */
+    private static void checkPointerAnchoredZoom() {
+        Canvas canvas = new Canvas();
+        canvas.getTextElements().add(new TextElement(3000, 2400, "Far corner"));
+        // Recalculate the preferred size from the content before attaching it.
+        canvas.setZoomScale(1.1);
+        canvas.setZoomScale(1.0);
+
+        JScrollPane pane = new JScrollPane(canvas);
+        pane.setSize(520, 360);
+        pane.doLayout();
+        pane.getViewport().setViewPosition(new Point(1200, 900));
+
+        Point offset = new Point(350, 215); // deliberately not the viewport centre
+        checkAnchoredWheel(canvas, pane, offset, -1); // zoom in
+        checkAnchoredWheel(canvas, pane, offset, -1); // consecutive wheel events
+        checkAnchoredWheel(canvas, pane, offset, 1);  // zoom out
+        checkAnchoredWheel(canvas, pane, offset, 1);  // restore original scale
+        check(Math.abs(canvas.getZoomScale() - 1.0) < 1e-8,
+              "Zoom in/out should return to 100%");
+    }
+
+    private static void checkAnchoredWheel(Canvas canvas, JScrollPane pane,
+                                            Point pointerOffset, int rotation) {
+        Point before = pane.getViewport().getViewPosition();
+        double scaleBefore = canvas.getZoomScale();
+        double modelX = (before.x + pointerOffset.x) / scaleBefore;
+        double modelY = (before.y + pointerOffset.y) / scaleBefore;
+
+        wheel(canvas, InputEvent.CTRL_DOWN_MASK, rotation,
+              before.x + pointerOffset.x, before.y + pointerOffset.y);
+
+        Point after = pane.getViewport().getViewPosition();
+        double scaleAfter = canvas.getZoomScale();
+        double anchoredX = (after.x + pointerOffset.x) / scaleAfter;
+        double anchoredY = (after.y + pointerOffset.y) / scaleAfter;
+        check(Math.abs(modelX - anchoredX) <= 1.1 &&
+              Math.abs(modelY - anchoredY) <= 1.1,
+              "Ctrl+wheel moved the point under the cursor: before (" + modelX + ", " + modelY
+                  + "), after (" + anchoredX + ", " + anchoredY + ")");
+    }
+
     private static void ctrlClick(Canvas canvas, int x, int y) {
         mouse(canvas, MouseEvent.MOUSE_PRESSED, x, y, InputEvent.CTRL_DOWN_MASK);
         mouse(canvas, MouseEvent.MOUSE_RELEASED, x, y, InputEvent.CTRL_DOWN_MASK);
@@ -112,8 +158,12 @@ public final class CanvasTextGroupAndWheelCheck {
     }
 
     private static void wheel(Canvas canvas, int modifiers, int rotation) {
+        wheel(canvas, modifiers, rotation, 150, 120);
+    }
+
+    private static void wheel(Canvas canvas, int modifiers, int rotation, int x, int y) {
         canvas.dispatchEvent(new MouseWheelEvent(canvas, MouseEvent.MOUSE_WHEEL,
-            System.currentTimeMillis(), modifiers, 150, 120, 0, false,
+            System.currentTimeMillis(), modifiers, x, y, 0, false,
             MouseWheelEvent.WHEEL_UNIT_SCROLL, 3, rotation));
     }
 
