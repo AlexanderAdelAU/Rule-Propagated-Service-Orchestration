@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.Point;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -16,6 +17,7 @@ import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 /**
@@ -89,13 +91,52 @@ final class CatalogueStatusOverlay extends JComponent {
         this.canvas = canvas;
         setOpaque(false);
         setFocusable(true);
-        setToolTipText("Click the heading to collapse or expand. Scroll here to see more places.");
+        setToolTipText("Drag the heading to move; click it to collapse or expand.");
         setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-        addMouseListener(new MouseAdapter() {
-            @Override public void mouseClicked(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON1 && e.getY() < HEADER) toggle();
+        MouseAdapter headerDrag = new MouseAdapter() {
+            private Point pressOffset;
+            private Point pressOnCanvas;
+            private boolean moved;
+
+            @Override public void mousePressed(MouseEvent e) {
+                if (!SwingUtilities.isLeftMouseButton(e) || e.getY() < 0 || e.getY() >= HEADER)
+                    return;
+                pressOffset = e.getPoint();
+                pressOnCanvas = SwingUtilities.convertPoint(CatalogueStatusOverlay.this,
+                    e.getPoint(), canvas);
+                moved = false;
+                requestFocusInWindow();
             }
-        });
+
+            @Override public void mouseDragged(MouseEvent e) {
+                if (pressOffset == null) return;
+                Point pointer = SwingUtilities.convertPoint(CatalogueStatusOverlay.this,
+                    e.getPoint(), canvas);
+                if (!moved && pressOnCanvas.distance(pointer) > 4) moved = true;
+                if (moved) {
+                    canvas.moveCatalogueStatusTo(pointer.x - pressOffset.x,
+                        pointer.y - pressOffset.y);
+                }
+                e.consume();
+            }
+
+            @Override public void mouseReleased(MouseEvent e) {
+                if (pressOffset == null) return;
+                if (!moved && e.getButton() == MouseEvent.BUTTON1
+                    && e.getY() >= 0 && e.getY() < HEADER) toggle();
+                pressOffset = null;
+                pressOnCanvas = null;
+                moved = false;
+                e.consume();
+            }
+
+            @Override public void mouseMoved(MouseEvent e) {
+                setCursor(Cursor.getPredefinedCursor(e.getY() >= 0 && e.getY() < HEADER
+                    ? Cursor.MOVE_CURSOR : Cursor.DEFAULT_CURSOR));
+            }
+        };
+        addMouseListener(headerDrag);
+        addMouseMotionListener(headerDrag);
         addMouseWheelListener(this::scroll);
         getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "toggle");
         getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), "toggle");
@@ -137,7 +178,7 @@ final class CatalogueStatusOverlay extends JComponent {
     }
 
     @Override public String getToolTipText(MouseEvent event) {
-        if (event.getY() < HEADER) return "Click to " + (collapsed ? "expand" : "collapse") + " catalogue status";
+        if (event.getY() < HEADER) return "Drag to move; click to " + (collapsed ? "expand" : "collapse") + " catalogue status";
         if (collapsed || event.getY() < HEADER + SUBTITLE) return null;
         int index = firstRow + (event.getY() - HEADER - SUBTITLE) / ROW_HEIGHT;
         List<Entry> rows = entries(canvas);
