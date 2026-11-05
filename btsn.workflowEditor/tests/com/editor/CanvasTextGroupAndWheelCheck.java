@@ -2,6 +2,7 @@ package com.editor;
 
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -22,12 +23,13 @@ public final class CanvasTextGroupAndWheelCheck {
                 checkWheelScrolling();
                 checkPointerAnchoredZoom();
                 checkEdgeAnchoredZoom();
+                checkZoomToFit();
             } catch (Throwable error) {
                 failure[0] = error;
             }
         });
         if (failure[0] != null) throw new AssertionError("Canvas text group / wheel", failure[0]);
-        System.out.println("PASS: text groups, wheel scrolling, and Ctrl+wheel zoom at canvas centre and edges");
+        System.out.println("PASS: text groups, wheel scrolling, cursor zoom and centred Fit");
     }
 
     private static void checkTextGrouping() {
@@ -139,6 +141,89 @@ public final class CanvasTextGroupAndWheelCheck {
         checkAnchoredWheel(canvas, pane, offset, 1);
         checkAnchoredWheel(canvas, pane, offset, -1);
         checkAnchoredWheel(canvas, pane, offset, -1);
+    }
+
+    /**
+     * Fit must centre content far away from (0,0), not just change the zoom
+     * scale. Annotations, arc waypoints and repeated Fit calls all matter.
+     */
+    private static void checkZoomToFit() {
+        Canvas canvas = new Canvas();
+        ProcessElement first = new ProcessElement(ProcessElement.Type.PLACE, 1500, 1100);
+        ProcessElement last = new ProcessElement(ProcessElement.Type.PLACE, 3200, 2450);
+        canvas.getElements().add(first);
+        canvas.getElements().add(last);
+        TextElement heading = new TextElement(1420, 1060, "Large healthcare workflow");
+        canvas.getTextElements().add(heading);
+        Arrow arrow = new Arrow(first, last);
+        arrow.getWaypoints().add(new Point(3900, 2650));
+        canvas.getArrows().add(arrow);
+
+        JScrollPane pane = scrollPane(canvas);
+        canvas.setZoomScale(1.7);
+        pane.getViewport().setViewPosition(new Point(1800, 1200));
+        Rectangle title = heading.getBounds();
+        int minX = Math.min(first.getX(), title.x);
+        int minY = Math.min(first.getY(), title.y);
+        int maxX = 3900;
+        int maxY = 2650;
+
+        canvas.zoomToFit();
+        pane.doLayout();
+        pane.getViewport().doLayout();
+        checkCentredFit(canvas, pane, minX, minY, maxX, maxY);
+
+        // Fit should give exactly the same result after scrolling elsewhere.
+        pane.getViewport().setViewPosition(new Point(0, 0));
+        canvas.zoomToFit();
+        pane.doLayout();
+        pane.getViewport().doLayout();
+        checkCentredFit(canvas, pane, minX, minY, maxX, maxY);
+
+        // A model made solely of annotations must fit too.
+        Canvas textOnly = new Canvas();
+        TextElement a = new TextElement(2000, 1800, "First annotation");
+        TextElement b = new TextElement(3800, 2700, "Second annotation");
+        textOnly.getTextElements().add(a);
+        textOnly.getTextElements().add(b);
+        JScrollPane textPane = scrollPane(textOnly);
+        textOnly.zoomToFit();
+        textPane.doLayout();
+        textPane.getViewport().doLayout();
+        Rectangle ra = a.getBounds(), rb = b.getBounds();
+        checkCentredFit(textOnly, textPane,
+            Math.min(ra.x, rb.x), Math.min(ra.y, rb.y),
+            Math.max(ra.x + ra.width, rb.x + rb.width),
+            Math.max(ra.y + ra.height, rb.y + rb.height));
+    }
+
+    private static void checkCentredFit(Canvas canvas, JScrollPane pane,
+                                         int minX, int minY, int maxX, int maxY) {
+        Dimension extent = pane.getViewport().getExtentSize();
+        Point scroll = pane.getViewport().getViewPosition();
+        double zoom = canvas.getZoomScale();
+        int originX = readOrigin(canvas, "viewOriginX");
+        int originY = readOrigin(canvas, "viewOriginY");
+        double left = originX + minX * zoom - scroll.x;
+        double right = extent.width - (originX + maxX * zoom - scroll.x);
+        double top = originY + minY * zoom - scroll.y;
+        double bottom = extent.height - (originY + maxY * zoom - scroll.y);
+        check(left >= 0 && right >= 0 && top >= 0 && bottom >= 0,
+              "Fit must keep all content visible: " + left + "/" + right
+                  + " horizontal, " + top + "/" + bottom + " vertical");
+        check(Math.abs(left - right) <= 2.5 && Math.abs(top - bottom) <= 2.5,
+              "Fit did not centre the schematic: " + left + "/" + right
+                  + " horizontal, " + top + "/" + bottom + " vertical");
+    }
+
+    private static int readOrigin(Canvas canvas, String fieldName) {
+        try {
+            Field field = Canvas.class.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return field.getInt(canvas);
+        } catch (ReflectiveOperationException error) {
+            throw new AssertionError("Could not read " + fieldName, error);
+        }
     }
 
     private static Canvas largeCanvas() {
