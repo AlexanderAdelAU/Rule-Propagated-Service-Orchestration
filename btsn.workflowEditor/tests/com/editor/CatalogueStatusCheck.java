@@ -128,8 +128,8 @@ public final class CatalogueStatusCheck {
                 check(overlay.getX() == visible.x + 8 && overlay.getY() == visible.y + 8,
                     "Legend should stay within top-left viewport boundary");
                 canvas.moveCatalogueStatusTo(visible.x + 5000, visible.y + 5000);
-                check(overlay.getMaxX() <= visible.getMaxX() - 7
-                    && overlay.getMaxY() <= visible.getMaxY() - 7,
+                check(overlay.getBounds().getMaxX() <= visible.getMaxX() - 7
+                    && overlay.getBounds().getMaxY() <= visible.getMaxY() - 7,
                     "Legend should stay within right/bottom viewport boundaries");
             } catch (Throwable error) {
                 failure[0] = error;

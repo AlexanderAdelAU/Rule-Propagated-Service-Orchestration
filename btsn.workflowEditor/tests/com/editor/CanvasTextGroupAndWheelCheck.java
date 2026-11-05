@@ -257,8 +257,11 @@ public final class CanvasTextGroupAndWheelCheck {
         pane.doLayout();
         pane.getViewport().doLayout();
         double[] after = modelPointAtCursor(canvas, pane, pointerOffset);
-        check(Math.abs(before[0] - after[0]) <= 1.1 &&
-              Math.abs(before[1] - after[1]) <= 1.1,
+        // Within about a screen pixel: scrolling is in whole pixels, so at a low zoom (Fit on a large model) half a
+        // pixel of rounding is several model units.
+        double zoom = canvas.getZoomScale();
+        check(Math.abs(before[0] - after[0]) * zoom <= 1.1 &&
+              Math.abs(before[1] - after[1]) * zoom <= 1.1,
               "Ctrl+wheel moved the model point under the cursor: before ("
                   + before[0] + ", " + before[1] + "), after ("
                   + after[0] + ", " + after[1] + ")");
