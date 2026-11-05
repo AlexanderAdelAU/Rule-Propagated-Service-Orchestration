@@ -234,6 +234,10 @@ public final class CanvasTextGroupAndWheelCheck {
 
     private static JScrollPane scrollPane(Canvas canvas) {
         JScrollPane pane = new JScrollPane(canvas);
+        // Match ProcessEditor: both bars stay visible, so the viewport extent
+        // doesn't change while fitting or zooming the drawing.
+        pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        pane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         pane.setSize(520, 360);
         pane.doLayout();
         canvas.setZoomScale(1.1);
