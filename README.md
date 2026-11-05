@@ -94,6 +94,7 @@ For detailed instructions and technical background, see [Reference.md](Reference
 - [Architecture: coordination and business meaning](Reference.md#architecture-coordination-and-business-meaning)
 - [Rule deployment and token execution](Reference.md#rule-deployment-and-token-execution)
 - [Execution examples](Reference.md#execution-examples), including the [concurrent healthcare run](Reference.md#concurrent-healthcare-execution) pictured above
+- [Stroke code](StrokeCode.md): a federated process across four organisations, with a compensation process and priority at shared providers
 
 **The repository**
 

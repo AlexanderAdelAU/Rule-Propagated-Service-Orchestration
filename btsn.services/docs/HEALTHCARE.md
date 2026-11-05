@@ -20,9 +20,18 @@ federated requests, then collects all three versions with v999 admin tokens.
 | P4 | RadiologyService | processImagingRequest; federatedRadiologyRequest | radiologyResults |
 | P5 | DiagnosisService | processClinicalDecision | diagnosisResults |
 | P6 | TreatmentService | executeTreatmentPlan; executeDirectTreatment | treatmentResults |
+| P7 | StrokeScreenService | screenPatient | screenResults |
+| P8 | AngioSuiteService | holdSuite; releaseSuite | suiteHold; releaseResults |
+| P9 | StrokeTriageService | assessStroke | triageResults |
+| P10 | TelestrokeService | decide | strokePlan |
+| P11 | ThrombolysisService | thrombolyse | thrombolysisResults |
+| P12 | ThrombectomyService | retrieveClot; retrieveClotAfterLysis | thrombectomyResults |
+
+P7 to P12 serve the stroke code example (`Stroke_Code_With_Emergency_Department.xml`), which also uses P2 and
+P4 for a stroke code's bloods and imaging. See [the stroke code guide](../../StrokeCode.md).
 
 Business implementations are in `btsn.common/src/org/btsn/business/healthcare`,
-packaged exclusively into the six corresponding JARs under
+packaged exclusively into one JAR per service under
 `btsn.services/target/deployment/services/healthcare`. A service with several operations
 still produces one JAR. The shared service support and Derby library accompany
 those JARs in `target/deployment/lib`. The infrastructure JAR excludes these
