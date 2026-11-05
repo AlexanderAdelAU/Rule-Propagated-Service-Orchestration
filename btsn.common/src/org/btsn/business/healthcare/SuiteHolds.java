@@ -4,9 +4,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * The stroke centre's angiography suite bookings: the side effect a stroke alert leaves behind. Kept by the host that
- * runs AngioSuiteService, for that host's lifetime: both AngioSuiteService.holdSuite, which holds the suite for a
- * stroke code, and AngioSuiteService.releaseSuite, which releases it when the code no longer needs it, run there.
+ * The stroke centre's angiography suite bookings: the side effect a stroke alert leaves behind. Kept by whatever runs
+ * AngioSuiteService, for its lifetime: the stroke centre's own booking system when the service is served over REST
+ * (RestServiceServer), or the orchestration host when it runs in-process. Both AngioSuiteService.holdSuite, which holds
+ * the suite for a stroke code, and AngioSuiteService.releaseSuite, which releases it when the code no longer needs it,
+ * run there.
  */
 public final class SuiteHolds {
     /** The outcome of a request to release a hold. */
@@ -20,9 +22,13 @@ public final class SuiteHolds {
 
     private SuiteHolds() { }
 
-    /** Holds the suite for the stroke code; a repeated alert for the same code keeps the first hold. */
-    public static void hold(String workflowId) {
-        HOLDS.putIfAbsent(workflowId, new Hold());
+    /**
+     * Holds the suite for the stroke code. A repeated alert for a code still held keeps that hold; a code whose hold
+     * was released is held again (a later run of the same numbers, when the booking system outlives the run).
+     */
+    public static synchronized void hold(String workflowId) {
+        Hold existing = HOLDS.get(workflowId);
+        if (existing == null || existing.released) HOLDS.put(workflowId, new Hold());
     }
 
     /** The stroke codes holding the suite now. */

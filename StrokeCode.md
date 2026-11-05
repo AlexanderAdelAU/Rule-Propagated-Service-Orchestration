@@ -9,7 +9,7 @@ The clinical rules are simplified from the hyper-acute stroke pathway for this d
 ## Key messages
 
 - **No central orchestrator.** Twelve hosts in four organisations pass each patient from one to the next as a token. No server holds every patient's state or calls into every organisation's systems.
-- **Each organisation owns its part.** The ambulance service, the receiving hospital, the stroke centre and the regional providers each run the services they are responsible for, on their own hosts, and see only the tokens that reach them.
+- **Each organisation owns its part.** The ambulance service, the receiving hospital, the stroke centre and the regional providers each run the services they are responsible for, on their own hosts, and see only the tokens that reach them. The stroke centre's angiography suite is booked in its own system, which the process calls over REST.
 - **Compensation across organisations.** The ambulance's alert makes the stroke centre hold its angiography suite. Every route that ends without clot retrieval starts a stand-down process that releases the hold, at the stroke centre, where it was made. A check after the run proves every hold was used or released exactly once.
 - **Priority where the queue is.** The regional imaging and pathology providers serve routine patients from another hospital too. Stroke codes are a higher-priority process, so the providers' own hosts serve them first. A central engine in one hospital could not reorder another organisation's queue.
 - **A recorded run, not a simulation.** Every host records what it did. The replay shows each patient on the model at the times the hosts recorded, so the model doubles as the audit trail.
@@ -40,7 +40,7 @@ flowchart LR
 | Place | Organisation and host | What it decides |
 |---|---|---|
 | StrokeScreen | Ambulance service, P7 | FAST positive, blood glucose at least 4.0 mmol/L (low glucose mimics a stroke) and onset within 24 hours: a stroke alert. Otherwise the patient goes to the nearest emergency department as usual. |
-| AngioSuite | Stroke centre, P8 | Holds the angiography suite and its team for the stroke code, before the patient reaches hospital. The hold is recorded against the stroke code. |
+| AngioSuite | Stroke centre, P8, calling the stroke centre's booking system over REST | Holds the angiography suite and its team for the stroke code, before the patient reaches hospital. The hold is recorded in the booking system, against the stroke code. |
 | StrokeTriage | Receiving hospital, P9 | Symptoms resolved on arrival (a transient ischaemic attack): the stroke code is excluded. Otherwise CT and bloods are ordered together. |
 | Radiology | Regional imaging provider, P4 | CT brain and CT angiography: haemorrhage, and whether a large vessel is blocked. |
 | Laboratory | Regional pathology provider, P2 | INR (clotting), platelets and glucose. |
@@ -64,10 +64,25 @@ Where processes share a host, the lower version is served first.
    - `no_reperfusion`: the neurologist decides on no treatment, for example a haemorrhage.
    - `lysis_only`: thrombolysis is given and no large vessel is blocked.
 3. **The compensation process.** Reaching the Signal ends the stroke code there and starts the stand-down process (v002) for the same patient (workflow 1030000 starts 2030000). Its token carries the stroke code's workflow number.
-4. **Undoing it where it was made.** `AngioSuiteService.releaseSuite` runs on P8, the host that holds the record, and releases the hold. Releasing is safe to repeat: a second request finds nothing to release.
+4. **Undoing it where it was made.** P8's host calls the stroke centre's booking system again, now `AngioSuiteService.releaseSuite`, which releases the hold in the system that recorded it. Releasing is safe to repeat: a second request finds nothing to release.
 5. **Proving it.** After the run, `analyse` checks the balance across both processes: every hold opened (v001 leaving P8) must be used by a clot retrieval (v001 leaving P12) or released (v002 leaving P8 on `released`), exactly once.
 
 No component coordinates this centrally. The stroke code's own rules decide when to signal, and the stroke centre's own host undoes its own record.
+
+## A REST call into the stroke centre's own system
+
+The angiography suite is booked in the stroke centre's own system, not on an orchestration host. Its place, AngioSuite, still has its orchestration host (P8), which receives the token, applies the rules and passes the token on. To hold or release the suite, though, the host makes a REST call to the booking system.
+
+- **The placement, not the process, says so.** The [service deployment](btsn.common/ServiceDeploymentFolder/healthcare/StrokeCode.json) places both operations with the `rest` adapter:
+  - `holdSuite` at `http://127.0.0.1:8090/stroke-centre/suite/hold`;
+  - `releaseSuite` at `.../release`.
+
+  The process, its rules and the catalogue contract are the same as when the service runs in-process.
+- **The call.** P8's host POSTs the operation's inputs as JSON and gets back the result the Java service returns, including its route (`held`, `released`, `nothing_to_release`). The contract is the one in [Call it over REST](ServiceTutorial.md#8-call-it-over-rest).
+- **The booking system.** [`RestServiceServer`](btsn.common/src/org/btsn/invocation/RestServiceServer.java) serves the same `AngioSuiteService` class over HTTP, using the JDK's own HTTP server. The holds live in that server's memory, the stroke centre's system, so the compensation has to reach into it to undo one. In a real deployment the stroke centre would run it on its own machine, and P8's endpoint would name that machine.
+- **What it shows.** The process coordinates a side effect in another organisation's system, and undoes it there, through that organisation's own API, still with no central engine.
+
+The booking system writes each call to `StrokeCentre.out.txt` beside the launcher. Nine holds and six releases appear there in a run of the case mix.
 
 ## Priority at the shared providers
 
@@ -124,7 +139,7 @@ The run on the site came from a fast machine, with little queueing at the provid
 
 ```sh
 cd btsn.healthcare.ProjectLoader
-ant -f Stroke_Code_With_Emergency_Department.xml -Dhost.address=127.0.0.1   # every host on this machine
+ant -f Stroke_Code_With_Emergency_Department.xml -Dhost.address=127.0.0.1   # every host on this machine, and the booking system
 ant -f Stroke_Code_With_Emergency_Department.xml analyse                     # the report, then the suite-hold balance
 ```
 
@@ -139,6 +154,12 @@ The analysis ends with the balance:
    Balance:                          [OK] every suite hold opened was settled or undone, exactly once
 ```
 
+The run starts the stroke centre's booking system on port 8090 if nothing answers there, and stops it at the end. To run from the editor, start the booking system first in a terminal of its own, because the editor checks each REST endpoint before a run:
+
+```sh
+ant -f Stroke_Code_With_Emergency_Department.xml stroke-centre   # until Ctrl+C
+```
+
 To replay your own run, open the replay page, choose **Replay another model and analysis**, and select the combined model below with your analysis file.
 
 ## Files
@@ -151,5 +172,6 @@ To replay your own run, open the replay page, choose **Replay another model and 
 | [Stroke_Code_With_Emergency_Department.json](btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Stroke_Code_With_Emergency_Department.json) | The combined drawing of all three, for the editor and the replay |
 | [StrokeCode.json](btsn.common/ServiceDeploymentFolder/healthcare/StrokeCode.json) | The service deployment: which operation runs on which host |
 | [SingleHost.json](btsn.common/InfrastructureDefinitionFolder/SingleHost.json) | The hosts' addresses and ports, P1 to P12 |
+| [RestServiceServer.java](btsn.common/src/org/btsn/invocation/RestServiceServer.java) | Serves Java place services over REST: here, the stroke centre's booking system |
 | [healthcare services](btsn.common/src/org/btsn/business/healthcare) | `StrokeScreenService`, `AngioSuiteService` and `SuiteHolds`, `StrokeTriageService`, `StrokeImaging`, `StrokeBloods`, `TelestrokeService`, `ThrombolysisService`, `ThrombectomyService` |
 | [Recorded run](btsn.common/AnalysisFolder/Healthcare/Stroke_Code_With_Emergency_Department.txt) | The analysis of the run the site replays |

@@ -9,6 +9,11 @@
      before the routine patients queued there, because its process has the higher priority.
      The case mix (TokenFormats/StrokeScreenService.json): ten suspected strokes, nine stroke codes, three clot
      retrievals, six stand-downs.
+     The angiography suite (AngioSuiteService) is the stroke centre's own booking system, called over REST: P8's host
+     calls http://127.0.0.1:8090/stroke-centre/suite/hold and .../release (ServiceDeploymentFolder/healthcare/StrokeCode.json),
+     so the hold is recorded in the stroke centre's system and the stand-down undoes it there. The run starts that
+     system (RestServiceServer) if nothing answers on 8090, and stops it at the end; or start it yourself first:
+              ant -f Stroke_Code_With_Emergency_Department.xml stroke-centre
      Run:     ant -f Stroke_Code_With_Emergency_Department.xml        (add -Dhost.address=127.0.0.1 to run every host on this machine)
      Analyse: ant -f Stroke_Code_With_Emergency_Department.xml analyse   (the usual report, then the suite-hold balance) -->
 <project name="Stroke_Code_With_Emergency_Department" default="run-complete-workflow" basedir=".">
@@ -56,6 +61,48 @@
     <property name="hosts" value="P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12"/>
 
     <import file="../btsn.services/process-runtime.xml"/>
+
+    <!-- The stroke centre's booking system, serving AngioSuiteService over REST on this machine. -->
+    <property name="stroke.centre.port" value="8090"/>
+    <property name="stroke.centre.url" value="http://127.0.0.1:${stroke.centre.port}/stroke-centre/suite"/>
+    <property name="stroke.centre.catalogue" location="../btsn.common/BusinessServiceDefinitions/healthcare/Healthcare.json"/>
+    <macrodef name="stroke-centre-server">
+        <attribute name="spawn" default="false"/>
+        <sequential>
+            <java classname="org.btsn.invocation.RestServiceServer" fork="true" spawn="@{spawn}" classpathref="common.classpath">
+                <arg value="port=${stroke.centre.port}"/><arg value="catalogue=${stroke.centre.catalogue}"/>
+                <arg value="services=AngioSuiteService"/><arg value="log=${output.dir}/StrokeCentre.out.txt"/>
+            </java>
+        </sequential>
+    </macrodef>
+    <target name="stroke-centre" depends="prepare-runtime" description="Run the stroke centre's booking system (REST, port 8090) until stopped">
+        <echo message="The stroke centre's booking system: ${stroke.centre.url} (log: StrokeCentre.out.txt). Stop it with Ctrl+C, or ${stroke.centre.url}/stop"/>
+        <stroke-centre-server/>
+    </target>
+    <target name="start-stroke-centre" depends="prepare-runtime">
+        <condition property="stroke.centre.running"><http url="${stroke.centre.url}"/></condition>
+        <echo message="The stroke centre's booking system is already answering at ${stroke.centre.url}" if:set="stroke.centre.running" xmlns:if="ant:if"/>
+        <antcall target="spawn-stroke-centre"/>
+    </target>
+    <target name="spawn-stroke-centre" unless="stroke.centre.running">
+        <echo message="Starting the stroke centre's booking system at ${stroke.centre.url}"/>
+        <stroke-centre-server spawn="true"/>
+        <waitfor maxwait="30" maxwaitunit="second" checkevery="500" timeoutproperty="stroke.centre.silent"><http url="${stroke.centre.url}"/></waitfor>
+        <fail if="stroke.centre.silent" message="The stroke centre's booking system did not start on port ${stroke.centre.port}"/>
+        <touch file="${output.dir}/StrokeCentre.started"/>
+    </target>
+    <target name="stop-stroke-centre">
+        <available file="${output.dir}/StrokeCentre.started" property="stroke.centre.ours"/>
+        <antcall target="stop-our-stroke-centre"/>
+    </target>
+    <target name="stop-our-stroke-centre" if="stroke.centre.ours">
+        <get src="${stroke.centre.url}/stop" dest="${output.dir}/StrokeCentre.stopped" ignoreerrors="true" quiet="true"/>
+        <delete file="${output.dir}/StrokeCentre.started"/>
+        <delete file="${output.dir}/StrokeCentre.stopped" quiet="true"/>
+    </target>
+    <!-- The run: the booking system first (unless it is already answering), then the usual run, then stop what this started. -->
+    <target name="run-complete-workflow" depends="start-stroke-centre,process-runtime.run-complete-workflow,stop-stroke-centre"
+            description="Start the stroke centre's booking system if needed, initialise, run the processes and collect their records (default)"/>
 
     <!-- The usual analysis, then the balance of suite holds across the two processes: each hold the stroke code made
          (v001 T_out_P8) must be used by a clot retrieval (v001 T_out_P12) or released by the stand-down process

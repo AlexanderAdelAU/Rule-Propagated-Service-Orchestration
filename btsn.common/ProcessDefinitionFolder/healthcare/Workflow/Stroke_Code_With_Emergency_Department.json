@@ -1184,9 +1184,9 @@
       "color": -12566464
     },
     {
-      "x": 340,
+      "x": 310,
       "y": 150,
-      "text": "Stroke centre",
+      "text": "Stroke centre (over REST)",
       "fontSize": 11,
       "fontStyle": 2,
       "color": -12566464
@@ -1267,6 +1267,14 @@
       "x": 20,
       "y": 760,
       "text": "Every route that will not retrieve a clot reaches Stand Down Suite, which starts the stand-down process (v002): it releases the suite the ambulance's alert held",
+      "fontSize": 11,
+      "fontStyle": 2,
+      "color": -12566464
+    },
+    {
+      "x": 20,
+      "y": 792,
+      "text": "Angio Suite is the stroke centre's own booking system, called over REST: it holds the suite, and the stand-down releases it there",
       "fontSize": 11,
       "fontStyle": 2,
       "color": -12566464

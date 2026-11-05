@@ -360,6 +360,24 @@ run gives the same result as before: ten workflows completed, five approved and 
   to package.
 - **Boolean services** keep the `boolean-token` adapter.
 
+### A Java service over REST
+
+A Java service can also be served over REST, for example by another organisation that runs it in its own system.
+[`RestServiceServer`](btsn.common/src/org/btsn/invocation/RestServiceServer.java) serves any catalogue service with
+an `implementationClass`, under the same contract, using the JDK's HTTP server:
+
+```sh
+java -cp <the service's JAR, btsn-infrastructure.jar and btsn.common/lib/*> org.btsn.invocation.RestServiceServer \
+     port=8090 catalogue=btsn.common/BusinessServiceDefinitions/healthcare/Healthcare.json services=AngioSuiteService
+```
+
+- **Which service and operation.** It finds them in the catalogue from the call, and calls the operation with the inputs in the catalogue's order.
+- **A plain GET** answers what it serves, which is what the editor's check before a run asks for.
+- **GET `.../stop`** from the same machine stops it.
+
+The [stroke code example](StrokeCode.md#a-rest-call-into-the-stroke-centres-own-system) uses it as the stroke
+centre's booking system, and its launcher starts it.
+
 ### Serve it from the internet
 
 To call the service across a real network, deploy it to a public platform and use its

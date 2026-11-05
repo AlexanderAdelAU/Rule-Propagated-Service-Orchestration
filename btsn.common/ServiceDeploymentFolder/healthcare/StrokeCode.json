@@ -162,7 +162,9 @@
           "required": false
         }
       ],
-      "portSlot": 0
+      "portSlot": 0,
+      "invocationAdapter": "rest",
+      "endpoint": "http://127.0.0.1:8090/stroke-centre/suite/hold"
     },
     {
       "node": "P8",
@@ -177,7 +179,9 @@
           "required": false
         }
       ],
-      "portSlot": 1
+      "portSlot": 1,
+      "invocationAdapter": "rest",
+      "endpoint": "http://127.0.0.1:8090/stroke-centre/suite/release"
     },
     {
       "node": "P9",
