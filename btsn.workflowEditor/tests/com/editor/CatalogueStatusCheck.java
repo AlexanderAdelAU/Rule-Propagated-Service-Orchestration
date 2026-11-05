@@ -1,6 +1,9 @@
 package com.editor;
 
 import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseEvent;
 import java.awt.Rectangle;
 import java.io.File;
 import java.nio.file.Files;
@@ -81,12 +84,71 @@ public final class CatalogueStatusCheck {
                 canvas.positionCatalogueStatus();
                 check(overlay.getX() == expanded.x + 50 && overlay.getY() == expanded.y + 40,
                     "Legend did not follow viewport scroll: " + overlay.getBounds());
+
+                // Drag the header to a clear area. The panel must move but not
+                // collapse, and a subsequent scroll must preserve its location
+                // relative to the visible viewport.
+                Rectangle beforeDrag = overlay.getBounds();
+                mouse(overlay, MouseEvent.MOUSE_PRESSED, 40, 14,
+                    InputEvent.BUTTON1_DOWN_MASK, MouseEvent.BUTTON1);
+                mouse(overlay, MouseEvent.MOUSE_DRAGGED, -60, 64,
+                    InputEvent.BUTTON1_DOWN_MASK, MouseEvent.NOBUTTON);
+                mouse(overlay, MouseEvent.MOUSE_RELEASED, 40, 14, 0, MouseEvent.BUTTON1);
+                Rectangle moved = overlay.getBounds();
+                check(moved.x == beforeDrag.x - 100 && moved.y == beforeDrag.y + 50,
+                    "Header drag did not move legend: " + beforeDrag + " -> " + moved);
+                check(!overlay.isCollapsed(), "Drag should not collapse legend");
+
+                viewport.setViewPosition(new Point(85, 100));
+                canvas.positionCatalogueStatus();
+                check(overlay.getX() == moved.x + 35 && overlay.getY() == moved.y + 60,
+                    "Dragged legend did not follow viewport scroll: " + overlay.getBounds());
+
+                // Zoom changes the model size, not the user's chosen legend
+                // position in screen pixels.
+                Point viewBeforeZoom = viewport.getViewPosition();
+                Rectangle beforeZoom = overlay.getBounds();
+                canvas.setZoomScale(1.5);
+                viewport.doLayout();
+                canvas.positionCatalogueStatus();
+                Point viewAfterZoom = viewport.getViewPosition();
+                check(overlay.getX() - viewAfterZoom.x == beforeZoom.x - viewBeforeZoom.x
+                    && overlay.getY() - viewAfterZoom.y == beforeZoom.y - viewBeforeZoom.y,
+                    "Dragged legend moved relative to viewport during zoom");
+
+                // A short header click should still collapse and expand.
+                clickHeader(overlay);
+                check(overlay.isCollapsed(), "Header click did not collapse");
+                clickHeader(overlay);
+                check(!overlay.isCollapsed(), "Header click did not expand");
+
+                // Dragging out of bounds should clamp the panel to the screen.
+                Rectangle visible = canvas.getVisibleRect();
+                canvas.moveCatalogueStatusTo(visible.x - 500, visible.y - 500);
+                check(overlay.getX() == visible.x + 8 && overlay.getY() == visible.y + 8,
+                    "Legend should stay within top-left viewport boundary");
+                canvas.moveCatalogueStatusTo(visible.x + 5000, visible.y + 5000);
+                check(overlay.getMaxX() <= visible.getMaxX() - 7
+                    && overlay.getMaxY() <= visible.getMaxY() - 7,
+                    "Legend should stay within right/bottom viewport boundaries");
             } catch (Throwable error) {
                 failure[0] = error;
             }
         });
         if (failure[0] != null) throw new AssertionError("Catalogue status", failure[0]);
-        System.out.println("PASS: live standard/domain/unresolved ownership, place rename, and anchored collapsible legend");
+        System.out.println("PASS: catalogue status ownership, draggable viewport positioning, and click-to-collapse");
+    }
+
+    private static void clickHeader(CatalogueStatusOverlay overlay) {
+        mouse(overlay, MouseEvent.MOUSE_PRESSED, 40, 14,
+            InputEvent.BUTTON1_DOWN_MASK, MouseEvent.BUTTON1);
+        mouse(overlay, MouseEvent.MOUSE_RELEASED, 40, 14, 0, MouseEvent.BUTTON1);
+    }
+
+    private static void mouse(CatalogueStatusOverlay overlay, int id,
+                              int x, int y, int modifiers, int button) {
+        overlay.dispatchEvent(new MouseEvent(overlay, id, System.currentTimeMillis(),
+            modifiers, x, y, 1, false, button));
     }
 
     private static void check(boolean condition, String message) {

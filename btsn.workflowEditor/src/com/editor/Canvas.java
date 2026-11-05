@@ -20,6 +20,8 @@ import java.util.Set;
 public class Canvas extends JPanel {
     private static final int GRID_SIZE = 20; // Grid spacing in pixels
     private final CatalogueStatusOverlay catalogueStatus = new CatalogueStatusOverlay(this);
+    // Null = initial upper-right placement; otherwise viewport-relative screen pixels.
+    private Point catalogueStatusOffset;
     private JViewport catalogueStatusViewport;
     private final javax.swing.event.ChangeListener catalogueScrollListener = e -> positionCatalogueStatus();
 
@@ -115,7 +117,11 @@ public class Canvas extends JPanel {
     
     // Zoom support
     private double zoomScale = 1.0;
-    private static final double ZOOM_MIN = 0.25;
+    // View-only space to allow zooming out at the top/left boundaries.
+    // These offsets do not change the positions stored in the process model.
+    private int viewOriginX = 0;
+    private int viewOriginY = 0;
+    private static final double ZOOM_MIN = 0.05;
     private static final double ZOOM_MAX = 3.0;
     private static final double ZOOM_STEP = 0.1;
     
@@ -175,11 +181,11 @@ public class Canvas extends JPanel {
      * Convert screen coordinates to canvas (model) coordinates
      */
     private int toCanvasX(int screenX) {
-        return (int) (screenX / zoomScale);
+        return (int) Math.floor((screenX - viewOriginX) / zoomScale);
     }
     
     private int toCanvasY(int screenY) {
-        return (int) (screenY / zoomScale);
+        return (int) Math.floor((screenY - viewOriginY) / zoomScale);
     }
     
     private Point toCanvasPoint(Point screenPoint) {
@@ -190,11 +196,11 @@ public class Canvas extends JPanel {
      * Convert canvas coordinates to screen coordinates
      */
     private int toScreenX(int canvasX) {
-        return (int) (canvasX * zoomScale);
+        return (int) (viewOriginX + canvasX * zoomScale);
     }
     
     private int toScreenY(int canvasY) {
-        return (int) (canvasY * zoomScale);
+        return (int) (viewOriginY + canvasY * zoomScale);
     }
     
     /**
@@ -220,6 +226,57 @@ public class Canvas extends JPanel {
     }
     
     /**
+     * Zoom around the mouse pointer rather than the top-left of the canvas.
+     * The model point under the pointer stays at the same viewport location,
+     * including when the model is close to the scrollable canvas edges.
+     */
+    private void zoomAtPointer(Point pointer, double requestedScale) {
+        JViewport viewport = (JViewport) SwingUtilities.getAncestorOfClass(JViewport.class, this);
+        if (viewport == null) {
+            setZoomScale(requestedScale);
+            return;
+        }
+        double oldScale = zoomScale;
+        double newScale = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, requestedScale));
+        if (oldScale == newScale) return;
+
+        // Capture the exact model point beneath the cursor before resizing.
+        Point oldPosition = viewport.getViewPosition();
+        double modelX = (pointer.x - viewOriginX) / oldScale;
+        double modelY = (pointer.y - viewOriginY) / oldScale;
+        int mouseOffsetX = pointer.x - oldPosition.x;
+        int mouseOffsetY = pointer.y - oldPosition.y;
+
+        setZoomScale(newScale);
+        double targetX = viewOriginX + modelX * newScale - mouseOffsetX;
+        double targetY = viewOriginY + modelY * newScale - mouseOffsetY;
+
+        // Swing's scrollbars cannot move before zero. Create view-only
+        // whitespace there rather than moving the model away from the pointer.
+        if (targetX < 0) {
+            int extra = (int) Math.ceil(-targetX);
+            viewOriginX += extra;
+            targetX += extra;
+        }
+        if (targetY < 0) {
+            int extra = (int) Math.ceil(-targetY);
+            viewOriginY += extra;
+            targetY += extra;
+        }
+        updateCanvasSize();
+
+        // Make the new scrollable dimensions take effect before reanchoring.
+        viewport.doLayout();
+        Dimension extent = viewport.getExtentSize();
+        Dimension size = viewport.getViewSize();
+        int maxX = Math.max(0, size.width - extent.width);
+        int maxY = Math.max(0, size.height - extent.height);
+        viewport.setViewPosition(new Point(
+            Math.max(0, Math.min((int) Math.round(targetX), maxX)),
+            Math.max(0, Math.min((int) Math.round(targetY), maxY))));
+    }
+
+    /**
      * Zoom in by one step
      */
     public void zoomIn() {
@@ -241,37 +298,78 @@ public class Canvas extends JPanel {
     }
     
     /**
-     * Zoom to fit all content in the visible area
+     * Fit and CENTRE the entire schematic in the visible viewport.
+     * Unlike a scale-only change, this uses the model's minimum as well as
+     * maximum coordinates to position the drawing after zooming.
      */
     public void zoomToFit() {
-        if (elements.isEmpty()) {
+        JViewport viewport = (JViewport) SwingUtilities.getAncestorOfClass(JViewport.class, this);
+        if (viewport == null) {
             resetZoom();
             return;
         }
-        
-        // Find bounds of all elements
+
+        // Include drawing elements, annotations and routed arrow waypoints.
+        // The model need not begin at (0,0), especially after moving groups.
         int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE;
-        int maxX = 0, maxY = 0;
-        
+        int maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE;
         for (ProcessElement element : elements) {
             minX = Math.min(minX, element.getX());
             minY = Math.min(minY, element.getY());
             maxX = Math.max(maxX, element.getX() + element.getWidth());
             maxY = Math.max(maxY, element.getY() + element.getHeight());
         }
-        
-        // Add margin
-        int contentWidth = maxX - minX + 100;
-        int contentHeight = maxY - minY + 100;
-        
-        // Get visible area from parent scroll pane
-        Container parent = getParent();
-        if (parent instanceof JViewport) {
-            Dimension viewSize = ((JViewport) parent).getExtentSize();
-            double scaleX = viewSize.getWidth() / contentWidth;
-            double scaleY = viewSize.getHeight() / contentHeight;
-            setZoomScale(Math.min(scaleX, scaleY));
+        for (TextElement text : textElements) {
+            Rectangle bounds = text.getBounds();
+            minX = Math.min(minX, bounds.x);
+            minY = Math.min(minY, bounds.y);
+            maxX = Math.max(maxX, bounds.x + bounds.width);
+            maxY = Math.max(maxY, bounds.y + bounds.height);
         }
+        for (Arrow arrow : arrows) {
+            for (Point waypoint : arrow.getWaypoints()) {
+                minX = Math.min(minX, waypoint.x);
+                minY = Math.min(minY, waypoint.y);
+                maxX = Math.max(maxX, waypoint.x);
+                maxY = Math.max(maxY, waypoint.y);
+            }
+        }
+        if (minX == Integer.MAX_VALUE) {
+            viewOriginX = 0;
+            viewOriginY = 0;
+            resetZoom();
+            updateCanvasSize();
+            viewport.setViewPosition(new Point(0, 0));
+            return;
+        }
+
+        Dimension extent = viewport.getExtentSize();
+        if (extent.width <= 0 || extent.height <= 0) return;
+        int margin = 40; // screen pixels of breathing room around the fitted model
+        double contentWidth = Math.max(1.0, (double) maxX - minX);
+        double contentHeight = Math.max(1.0, (double) maxY - minY);
+        double requested = Math.min(
+            Math.max(1.0, extent.width - 2.0 * margin) / contentWidth,
+            Math.max(1.0, extent.height - 2.0 * margin) / contentHeight);
+        double scale = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, requested));
+
+        // Centre the bounds, not the model's coordinate origin. Reset any
+        // view-only whitespace accumulated by earlier cursor zoom operations.
+        double blankLeft = (extent.width - contentWidth * scale) / 2.0;
+        double blankTop = (extent.height - contentHeight * scale) / 2.0;
+        viewOriginX = Math.max(0, (int) Math.ceil(blankLeft - minX * scale));
+        viewOriginY = Math.max(0, (int) Math.ceil(blankTop - minY * scale));
+        setZoomScale(scale);
+        updateCanvasSize(); // needed even if the fitted scale was unchanged
+        viewport.doLayout();
+        Dimension size = viewport.getViewSize();
+        int maxScrollX = Math.max(0, size.width - extent.width);
+        int maxScrollY = Math.max(0, size.height - extent.height);
+        int scrollX = (int) Math.round(viewOriginX + minX * scale - blankLeft);
+        int scrollY = (int) Math.round(viewOriginY + minY * scale - blankTop);
+        viewport.setViewPosition(new Point(
+            Math.max(0, Math.min(scrollX, maxScrollX)),
+            Math.max(0, Math.min(scrollY, maxScrollY))));
     }
     
     private void notifySelectionChanged(Object selection) {
@@ -393,13 +491,12 @@ public class Canvas extends JPanel {
             }
         });
         
-        // Wheel moves the viewport; Ctrl+wheel keeps zoom, Shift+wheel scrolls sideways.
+        // Wheel scrolls; Ctrl+wheel zooms about the pointer; Shift+wheel scrolls sideways.
         addMouseWheelListener(e -> {
             if (e.isControlDown()) {
-                if (e.getPreciseWheelRotation() < 0) {
-                    zoomIn();
-                } else if (e.getPreciseWheelRotation() > 0) {
-                    zoomOut();
+                double rotation = e.getPreciseWheelRotation();
+                if (rotation != 0) {
+                    zoomAtPointer(e.getPoint(), zoomScale + (rotation < 0 ? ZOOM_STEP : -ZOOM_STEP));
                 }
                 e.consume();
                 return;
@@ -421,7 +518,17 @@ public class Canvas extends JPanel {
         });
     }
     
-    /** Keep the legend in the visible upper-right corner, even when the diagram scrolls or zooms. */
+    /** Move the legend in canvas pixels; retain a viewport-relative position. */
+    void moveCatalogueStatusTo(int canvasX, int canvasY) {
+        Rectangle visible = getVisibleRect();
+        catalogueStatusOffset = new Point(canvasX - visible.x, canvasY - visible.y);
+        positionCatalogueStatus();
+        // Persist the clamped position so edge dragging does not cause a jump.
+        catalogueStatusOffset.setLocation(
+            catalogueStatus.getX() - visible.x, catalogueStatus.getY() - visible.y);
+    }
+
+    /** Keep the legend at its chosen screen position as the diagram moves or zooms. */
     void positionCatalogueStatus() {
         Rectangle visible = getVisibleRect();
         if (visible.width <= 0 || visible.height <= 0) return;
@@ -436,7 +543,15 @@ public class Canvas extends JPanel {
                 + Math.max(1, getPlaces().size()) * CatalogueStatusOverlay.ROW_HEIGHT
                 + CatalogueStatusOverlay.FOOTER;
         int height = Math.min(wanted, Math.min(320, Math.max(CatalogueStatusOverlay.HEADER, visible.height - 16)));
-        Rectangle target = new Rectangle(visible.x + visible.width - width - 8, visible.y + 8, width, height);
+        int minX = visible.x + 8, minY = visible.y + 8;
+        int maxX = Math.max(minX, visible.x + visible.width - width - 8);
+        int maxY = Math.max(minY, visible.y + visible.height - height - 8);
+        int x = catalogueStatusOffset == null ? maxX : visible.x + catalogueStatusOffset.x;
+        int y = catalogueStatusOffset == null ? minY : visible.y + catalogueStatusOffset.y;
+        Rectangle target = new Rectangle(
+            Math.max(minX, Math.min(x, maxX)),
+            Math.max(minY, Math.min(y, maxY)),
+            width, height);
         if (!target.equals(catalogueStatus.getBounds())) catalogueStatus.setBounds(target);
     }
 
@@ -1722,27 +1837,28 @@ public class Canvas extends JPanel {
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         
-        // Apply zoom transformation
+        // The model is positioned within an extensible scrollable view.
+        // Its stored coordinates remain unchanged by panning and zooming.
+        g2.translate(viewOriginX, viewOriginY);
         g2.scale(zoomScale, zoomScale);
-        
-        // Calculate visible area in canvas coordinates for grid drawing
-        int visibleWidth = (int) (getWidth() / zoomScale) + GRID_SIZE;
-        int visibleHeight = (int) (getHeight() / zoomScale) + GRID_SIZE;
-        
-        // Draw grid lines
-        g2.setColor(new Color(173, 216, 230, 100)); // Light blue, semi-transparent
-        g2.setStroke(new BasicStroke((float)(0.5f / zoomScale)));  // Keep grid lines thin regardless of zoom
-        
-        // Vertical lines
-        for (int x = 0; x < visibleWidth; x += GRID_SIZE) {
-            g2.drawLine(x, 0, x, visibleHeight);
+
+        int left = (int) Math.floor(-viewOriginX / zoomScale);
+        int top = (int) Math.floor(-viewOriginY / zoomScale);
+        int right = (int) Math.ceil((getWidth() - viewOriginX) / zoomScale) + GRID_SIZE;
+        int bottom = (int) Math.ceil((getHeight() - viewOriginY) / zoomScale) + GRID_SIZE;
+        int gridLeft = Math.floorDiv(left, GRID_SIZE) * GRID_SIZE;
+        int gridTop = Math.floorDiv(top, GRID_SIZE) * GRID_SIZE;
+
+        // Show the grid in the view-only margins as well as the model area.
+        g2.setColor(new Color(173, 216, 230, 100));
+        g2.setStroke(new BasicStroke((float) (0.5f / zoomScale)));
+        for (int x = gridLeft; x < right; x += GRID_SIZE) {
+            g2.drawLine(x, gridTop, x, bottom);
         }
-        
-        // Horizontal lines
-        for (int y = 0; y < visibleHeight; y += GRID_SIZE) {
-            g2.drawLine(0, y, visibleWidth, y);
+        for (int y = gridTop; y < bottom; y += GRID_SIZE) {
+            g2.drawLine(gridLeft, y, right, y);
         }
-        
+
         g2.setStroke(new BasicStroke(1));
         
         // Draw arrows first (behind elements)
@@ -4019,10 +4135,22 @@ public class Canvas extends JPanel {
             baseHeight = Math.max(baseHeight, bounds.y + bounds.height + 100);
         }
 
-        // Apply zoom to the preferred size
-        int scaledWidth = (int) (baseWidth * zoomScale);
-        int scaledHeight = (int) (baseHeight * zoomScale);
-        
+        // Waypoints can lie beyond their end Places and must remain scrollable.
+        for (Arrow arrow : arrows) {
+            for (Point waypoint : arrow.getWaypoints()) {
+                baseWidth = Math.max(baseWidth, waypoint.x + 100);
+                baseHeight = Math.max(baseHeight, waypoint.y + 100);
+            }
+        }
+
+        // Leave a viewport's width/height beyond the last element. Otherwise
+        // zoom-out close to the right/bottom edge hits the scrollbar limit.
+        JViewport viewport = (JViewport) SwingUtilities.getAncestorOfClass(JViewport.class, this);
+        int paddingX = viewport == null ? 0 : viewport.getExtentSize().width;
+        int paddingY = viewport == null ? 0 : viewport.getExtentSize().height;
+        int scaledWidth = (int) Math.ceil(viewOriginX + baseWidth * zoomScale) + paddingX;
+        int scaledHeight = (int) Math.ceil(viewOriginY + baseHeight * zoomScale) + paddingY;
+
         setPreferredSize(new Dimension(scaledWidth, scaledHeight));
         revalidate();
     }
