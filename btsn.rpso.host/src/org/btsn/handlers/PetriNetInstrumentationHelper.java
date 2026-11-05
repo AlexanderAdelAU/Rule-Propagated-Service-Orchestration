@@ -127,6 +127,17 @@ public class PetriNetInstrumentationHelper {
     public void recordTokenEntering(String xmlPayload, int tokenId, String placeName, 
                                    String nodeType, long workflowStartTime, int bufferSize,
                                    String eventGeneratorTimestamp, String sourceEventGenerator) {
+        recordTokenEntering(xmlPayload, tokenId, placeName, nodeType, workflowStartTime, bufferSize,
+                            eventGeneratorTimestamp, sourceEventGenerator, 0);
+    }
+
+    /**
+     * As above, recorded at the given time (0: now): when the place took the token from its queue, so the visit
+     * starts where the token stopped waiting, before the host read its rules for it.
+     */
+    public void recordTokenEntering(String xmlPayload, int tokenId, String placeName, 
+                                   String nodeType, long workflowStartTime, int bufferSize,
+                                   String eventGeneratorTimestamp, String sourceEventGenerator, long at) {
         // Skip instrumentation for admin/collection workflows (v999)
         if (shouldSkipInstrumentation(tokenId)) {
             logger.debug("Skipping instrumentation for admin token " + tokenId + " (v999)");
@@ -192,7 +203,10 @@ public class PetriNetInstrumentationHelper {
                     null,  // Join state determined below
                     workflowStartTime,
                     bufferSize,  // Now passed from ServiceThread
-                    VersionConstants.getVersionFromSequenceId(tokenId)  // ruleVersion derived from tokenId
+                    VersionConstants.getVersionFromSequenceId(tokenId),  // ruleVersion derived from tokenId
+                    // The event type as recordTransitionFiringWithArc names a T_in firing
+                    enteringTransition != null && enteringTransition.startsWith("T_in_") ? "ENTER" : "",
+                    null, null, at
                 );
             }
             
@@ -344,7 +358,18 @@ public class PetriNetInstrumentationHelper {
      */
     public void recordTokenBuffered(String xmlPayload, int tokenId, String placeName, 
             String nodeType, long workflowStartTime, int bufferSize,
-            String eventGeneratorTimestamp, String sourceEventGenerator) {     // Skip instrumentation for admin/collection workflows (v999)
+            String eventGeneratorTimestamp, String sourceEventGenerator) {
+        recordTokenBuffered(xmlPayload, tokenId, placeName, nodeType, workflowStartTime, bufferSize,
+                            eventGeneratorTimestamp, sourceEventGenerator, 0);
+    }
+
+    /**
+     * As above, recorded at the given time (0: now): when the token joined the place's queue. A token waiting in the
+     * queue is waiting at the place's T_in, so its arrival there is when it was queued, not when it was taken out.
+     */
+    public void recordTokenBuffered(String xmlPayload, int tokenId, String placeName, 
+            String nodeType, long workflowStartTime, int bufferSize,
+            String eventGeneratorTimestamp, String sourceEventGenerator, long at) {     // Skip instrumentation for admin/collection workflows (v999)
         if (shouldSkipInstrumentation(tokenId)) {
             logger.debug("Skipping instrumentation for admin token " + tokenId + " (v999)");
             return;
@@ -412,7 +437,8 @@ public class PetriNetInstrumentationHelper {
                     workflowStartTime,
                     bufferSize,
                     VersionConstants.getVersionFromSequenceId(tokenId),
-                    "BUFFERED"  // Explicit event type: arrived at buffer, not yet in place
+                    "BUFFERED",  // Explicit event type: arrived at buffer, not yet in place
+                    null, null, at
                 );
             }
             
@@ -935,9 +961,19 @@ public class PetriNetInstrumentationHelper {
                                        String forkDecision, String joinState,
                                        long workflowStartTime, int bufferSize, String ruleVersion,
                                        String eventType, String arcValue, String detail) {
+        recordTransitionFiring(transitionId, transitionType, tokenId, fromPlace, toPlace, forkDecision, joinState,
+                               workflowStartTime, bufferSize, ruleVersion, eventType, arcValue, detail, 0);
+    }
+
+    /** As above, recorded at the given time (0: now). */
+    private void recordTransitionFiring(String transitionId, String transitionType,
+                                       int tokenId, String fromPlace, String toPlace,
+                                       String forkDecision, String joinState,
+                                       long workflowStartTime, int bufferSize, String ruleVersion,
+                                       String eventType, String arcValue, String detail, long at) {
         try {
             TreeMap<String, String> record = new TreeMap<>();
-            record.put("timestamp", Long.toString(System.currentTimeMillis()));
+            record.put("timestamp", Long.toString(at > 0 ? at : System.currentTimeMillis()));
             record.put("transitionId", transitionId);
             record.put("transitionType", transitionType != null ? transitionType : "EdgeNode");
             record.put("tokenId", Integer.toString(tokenId));

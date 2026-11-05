@@ -2814,21 +2814,25 @@ public class TokenAnimator {
             for (int i = 0; i < path.size(); i++) {
                 AnimationSegment at = path.get(i);
                 AnimationSegment before = i > 0 ? path.get(i - 1) : null;
-                // Into the place, back to wait at its T_in, then into the place again: one move into the place.
+                // Into the place, back to wait at its T_in, then into the place again: one wait at the T_in (the
+                // token was queued there), then one move in, below, when the place takes it.
                 if (at.phase == Phase.AT_PLACE && before != null && before.phase == Phase.BUFFERED_AT_TIN && i > 1
                         && path.get(i - 2).phase == Phase.TRAVELING_TO_PLACE && Objects.equals(path.get(i - 2).placeId, at.placeId)
                         && Objects.equals(before.tInId, at.tInId)) {
                     AnimationSegment travel = path.get(i - 2);
-                    path.set(i - 2, retimed(travel, travel.startTime, before.endTime));
+                    path.set(i - 2, retimed(before, travel.startTime, before.endTime));
                     path.remove(i - 1);
                     i--;
-                    continue;
+                    before = path.get(i - 1);
                 }
                 boolean moved = before != null && before.phase == Phase.TRAVELING_TO_PLACE;
                 if (at.phase != Phase.AT_PLACE || moved || at.tInId == null || at.placeId == null) continue;
                 long start = at.startTime;
                 if (before != null && before.endTime == start && before.endTime - before.startTime >= 2) {
-                    long mid = before.startTime + (before.endTime - before.startTime) / 2;
+                    // The move takes its travel time at the end of the step before (at most half of it): a token
+                    // that waited in the place's queue moves in when it is taken, not across half its wait.
+                    long mid = before.endTime - Math.min((before.endTime - before.startTime) / 2,
+                        calculateTravelDuration(at.tInId, at.placeId, FALLBACK_TRAVEL_DURATION_TO_PLACE));
                     path.set(i - 1, retimed(before, before.startTime, mid));
                     path.add(i, new AnimationSegment(at.tokenId, at.version, Phase.TRAVELING_TO_PLACE, mid, start,
                         at.placeId, at.tInId, at.tOutId, at.tInId, at.placeId, null, null));

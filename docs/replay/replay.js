@@ -214,13 +214,15 @@ function buildTimeline(events, T) {
           if (atEnd <= ev.t && exit.t > ev.t) atEnd = ev.t + Math.floor((exit.t - ev.t) / 2);
           if (tOut) toTout = seg(tok, ver, PH.TO_TOUT, Math.max(atEnd, ev.t), exit.t, { place: p, from: p, to: tOut, tOut });
         } else atEnd = exit ? Math.max(exit.t, ev.t + 1) : END;
-        // Every visit moves the token from its T_in into the place (ensureTravelIntoPlaces): taken from the
-        // step before it when that step ends here, otherwise from the first half of the visit.
+        // Every visit moves the token from its T_in into the place (ensureTravelIntoPlaces): taken from the end
+        // of the step before it when that step ends here (its travel time, at most half the step: a token that
+        // waited in the queue moves in when it is taken), otherwise from the first half of the visit.
         // At a join the move starts when the join fires, never before its last fork has arrived.
         const prev = path[path.length - 1], fire = isJoin(p) ? fireFor(p, ev.t) : null;
         if (tIn) {
           if (prev && prev.e === ev.t && prev.e - prev.s >= 2 && (fire == null || fire < ev.t)) {
-            const start = fire != null ? Math.max(prev.s, fire) : prev.s + Math.floor((prev.e - prev.s) / 2);
+            const start = fire != null ? Math.max(prev.s, fire)
+              : prev.e - Math.min(Math.floor((prev.e - prev.s) / 2), travel(tIn, p, FALLBACK_TO_PLACE));
             prev.e = start;
             add(seg(tok, ver, PH.TO_PLACE, start, ev.t, { place: p, from: tIn, to: p, tIn }));
           } else if (atEnd - atStart >= 2) {
