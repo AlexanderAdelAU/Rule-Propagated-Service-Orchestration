@@ -118,7 +118,9 @@ Nine holds: three used, six released. Twenty routine patients arrive alongside, 
 
 In the recorded run, all ten stroke codes, six stand-downs and twenty routine patients completed in 27 seconds: a median of 4.5 seconds per stroke code and 6.4 seconds per routine patient.
 
-The run on the site came from a fast machine, with little queueing at the providers. There, stroke codes waited a little less than routine patients: 0.65 s against 0.95 s for imaging, and 0.57 s against 0.63 s for pathology. On a slower machine, where queues formed, they waited about 3 seconds against 10 to 12. A host records a token's arrival at its T_in only when the token leaves the queue, so the replay shows time spent in a provider's queue as time between hosts. The analysis report gives the queue times.
+The run on the site came from a fast machine, with little queueing at the providers. There, stroke codes waited a little less than routine patients: 0.65 s against 0.95 s for imaging, and 0.57 s against 0.63 s for pathology. On a slower machine, where queues formed, they waited about 3 seconds against 10 to 12.
+
+Hosts record a token's arrival at a T_in when it joins the operation's queue, and its entry into the place when the host takes it from the queue. So in a run recorded this way, the timeline shows a queue wait as waiting at the T_in. The analysis also checks the queue's order directly. Wherever a stroke code and a routine patient waited in the same queue, it reports whether the stroke code was taken first. The run on the site was recorded before hosts did this, so its timeline shows queue waits as time between hosts.
 
 ## Run it yourself
 

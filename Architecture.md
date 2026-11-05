@@ -157,7 +157,9 @@ flowchart TB
 - **Recording.** `PetriNetInstrumentationHelper` writes every event (GENERATED, BUFFERED,
   ENTER, EXIT, FORK, FORK_CONSUMED, JOIN_CONSUMED, TERMINATE, FAILED) to the host's own
   Derby database, on the host's own clock. A signal transition records TERMINATE; the
-  process it launches starts with GENERATED.
+  process it launches starts with GENERATED. BUFFERED is timed when the token joined the operation's queue,
+  and ENTER when the orchestration thread took it from the queue, so a token waiting in the queue is
+  recorded as waiting at the T_in, and the analysis can check the queue's order.
 - **Rules.** `RuleHandler` listens on the operation's rule socket; see below.
 
 The rule engine is OO jDREW, evaluating RuleML: facts and Horn rules, queried by the host
@@ -255,7 +257,7 @@ sequenceDiagram
     Q->>T: next token
     Note over T: T_in
     T->>T: buffer it. At a join, hold the inputs<br/>until every one named by the binding has arrived
-    T-->>DB: record BUFFERED, ENTER
+    T-->>DB: record BUFFERED (timed at queueing), ENTER (timed at dequeue)
     Note over T,S: P
     T->>S: call the operation with its bound inputs
     S-->>T: result (returned attribute and decision value)

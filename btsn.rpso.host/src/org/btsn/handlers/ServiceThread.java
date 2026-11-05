@@ -3323,25 +3323,37 @@ class ServiceThread implements Runnable {
 	    // needsInputSynchronization = true means T_in expects multiple inputs (join behavior)
 	    // tokenId % 100 != 0 means this is a child token (forked)
 	    boolean isChildAtJoin = needsInputSynchronization && (tokenId % 100) != 0;
+
+	    // The token arrived at the T_in when it joined this place's queue (EventReactor stamps eventArrivalTime then),
+	    // and entered the place when this thread took it from the queue (taskArrivalTime), before reading its rules.
+	    // So a token waiting in the queue is recorded as waiting at the T_in, and queue order can be checked.
+	    long dequeuedAt = taskArrivalTime > 0 ? taskArrivalTime : System.currentTimeMillis();
+	    long queuedAt = dequeuedAt;
+	    try {
+	        String stamped = monitorDataMap.get("eventArrivalTime");
+	        if (stamped != null) queuedAt = Math.min(dequeuedAt, Long.parseLong(stamped.trim()));
+	    } catch (NumberFormatException e) {
+	        queuedAt = dequeuedAt;
+	    }
 	    
 	    if (isChildAtJoin) {
 	        // JoinNode: Record BUFFERED only - ENTER recorded later when join completes
 	        petriNetHelper.recordTokenBuffered(incomingXMLPayLoad, tokenId, 
 	                                           placeName, nodeType, workflowStartTime, bufferSize,
-	                                           eventGenTimestamp, sourceEventGenerator);
+	                                           eventGenTimestamp, sourceEventGenerator, queuedAt);
 	        logger.debug("PETRI-NET: Token " + tokenId + " BUFFERED at " + placeName + " (waiting for join)");
 	    } else {
 	        // EdgeNode: Record BUFFERED first (arrival at T_in), then ENTER (passes through immediately)
 	        // This gives the animator visibility of the token at the T_in transition
 	        petriNetHelper.recordTokenBuffered(incomingXMLPayLoad, tokenId, 
 	                                           placeName, nodeType, workflowStartTime, bufferSize,
-	                                           eventGenTimestamp, sourceEventGenerator);
+	                                           eventGenTimestamp, sourceEventGenerator, queuedAt);
 	        logger.debug("PETRI-NET: Token " + tokenId + " BUFFERED at " + placeName + " (T_in arrival)");
 	        
 	        // Immediately record ENTER since EdgeNode has no synchronization wait
 	        petriNetHelper.recordTokenEntering(incomingXMLPayLoad, tokenId, 
 	                                           placeName, nodeType, workflowStartTime, bufferSize,
-	                                           null, null);  // No eventGen - already recorded in BUFFERED
+	                                           null, null, dequeuedAt);  // No eventGen - already recorded in BUFFERED
 	        logger.debug("PETRI-NET: Token " + tokenId + " ENTER at " + placeName);
 	    }
 	}
