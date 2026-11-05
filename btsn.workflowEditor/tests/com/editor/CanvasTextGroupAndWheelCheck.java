@@ -173,8 +173,10 @@ public final class CanvasTextGroupAndWheelCheck {
         pane.getViewport().doLayout();
         checkCentredFit(canvas, pane, minX, minY, maxX, maxY);
 
-        // Fit should give exactly the same result after scrolling elsewhere.
+        // Fit should recover from both scrolling and a cursor zoom that has
+        // introduced left/top view-only margins.
         pane.getViewport().setViewPosition(new Point(0, 0));
+        checkAnchoredWheel(canvas, pane, new Point(350, 215), 1);
         canvas.zoomToFit();
         pane.doLayout();
         pane.getViewport().doLayout();
