@@ -226,7 +226,7 @@ public class Canvas extends JPanel {
     /**
      * Zoom around the mouse pointer rather than the top-left of the canvas.
      * The model point under the pointer stays at the same viewport location,
-     * except when the scroll position reaches an edge of the canvas.
+     * including when the model is close to the scrollable canvas edges.
      */
     private void zoomAtPointer(Point pointer, double requestedScale) {
         JViewport viewport = (JViewport) SwingUtilities.getAncestorOfClass(JViewport.class, this);
