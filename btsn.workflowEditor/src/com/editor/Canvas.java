@@ -20,6 +20,8 @@ import java.util.Set;
 public class Canvas extends JPanel {
     private static final int GRID_SIZE = 20; // Grid spacing in pixels
     private final CatalogueStatusOverlay catalogueStatus = new CatalogueStatusOverlay(this);
+    // Null = initial upper-right placement; otherwise viewport-relative screen pixels.
+    private Point catalogueStatusOffset;
     private JViewport catalogueStatusViewport;
     private final javax.swing.event.ChangeListener catalogueScrollListener = e -> positionCatalogueStatus();
 
@@ -516,7 +518,17 @@ public class Canvas extends JPanel {
         });
     }
     
-    /** Keep the legend in the visible upper-right corner, even when the diagram scrolls or zooms. */
+    /** Move the legend in canvas pixels; retain a viewport-relative position. */
+    void moveCatalogueStatusTo(int canvasX, int canvasY) {
+        Rectangle visible = getVisibleRect();
+        catalogueStatusOffset = new Point(canvasX - visible.x, canvasY - visible.y);
+        positionCatalogueStatus();
+        // Persist the clamped position so edge dragging does not cause a jump.
+        catalogueStatusOffset.setLocation(
+            catalogueStatus.getX() - visible.x, catalogueStatus.getY() - visible.y);
+    }
+
+    /** Keep the legend at its chosen screen position as the diagram moves or zooms. */
     void positionCatalogueStatus() {
         Rectangle visible = getVisibleRect();
         if (visible.width <= 0 || visible.height <= 0) return;
@@ -531,7 +543,15 @@ public class Canvas extends JPanel {
                 + Math.max(1, getPlaces().size()) * CatalogueStatusOverlay.ROW_HEIGHT
                 + CatalogueStatusOverlay.FOOTER;
         int height = Math.min(wanted, Math.min(320, Math.max(CatalogueStatusOverlay.HEADER, visible.height - 16)));
-        Rectangle target = new Rectangle(visible.x + visible.width - width - 8, visible.y + 8, width, height);
+        int minX = visible.x + 8, minY = visible.y + 8;
+        int maxX = Math.max(minX, visible.x + visible.width - width - 8);
+        int maxY = Math.max(minY, visible.y + visible.height - height - 8);
+        int x = catalogueStatusOffset == null ? maxX : visible.x + catalogueStatusOffset.x;
+        int y = catalogueStatusOffset == null ? minY : visible.y + catalogueStatusOffset.y;
+        Rectangle target = new Rectangle(
+            Math.max(minX, Math.min(x, maxX)),
+            Math.max(minY, Math.min(y, maxY)),
+            width, height);
         if (!target.equals(catalogueStatus.getBounds())) catalogueStatus.setBounds(target);
     }
 
