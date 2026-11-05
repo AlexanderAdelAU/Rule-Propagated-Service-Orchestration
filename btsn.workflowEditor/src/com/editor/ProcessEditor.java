@@ -649,7 +649,7 @@ public class ProcessEditor extends JFrame {
         toolbar.add(Box.createHorizontalStrut(5));
         
         JButton zoomFitBtn = new JButton("Fit");
-        zoomFitBtn.setToolTipText("Zoom to Fit (Ctrl+Shift+F)");
+        zoomFitBtn.setToolTipText("Fit and centre the schematic (Ctrl+Shift+F)");
         zoomFitBtn.setFocusPainted(false);
         zoomFitBtn.addActionListener(e -> canvas.zoomToFit());
         toolbar.add(zoomFitBtn);
