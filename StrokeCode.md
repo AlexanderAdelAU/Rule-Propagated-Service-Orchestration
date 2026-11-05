@@ -169,6 +169,8 @@ ant -f Stroke_Code_With_Emergency_Department.xml host-packages -Dstroke.centre=r
 ant -f Stroke_Code_With_Emergency_Department.xml -Dstroke.centre=remote                 # then the run, here
 ```
 
+In the editor, open the combined model and choose **Machines: TwoHost_StrokeCentre** in the toolbar. **Build** then makes the P8 zip, and **Run on hosts** runs it the same way.
+
 To replay your own run, open the replay page, choose **Replay another model and analysis**, and select the combined model below with your analysis file.
 
 ## Files

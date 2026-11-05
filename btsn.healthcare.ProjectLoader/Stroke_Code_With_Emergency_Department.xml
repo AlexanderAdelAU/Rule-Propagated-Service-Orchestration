@@ -26,7 +26,11 @@
          its booking inside that host. Build its package once with host-packages -Dstroke.centre=remote, run launch.bat
          there, then run this launcher here with -Dstroke.centre=remote. -->
     <property name="stroke.centre" value="local"/>
-    <condition property="stroke.centre.remote"><equals arg1="${stroke.centre}" arg2="remote"/></condition>
+    <!-- Choosing those machines (the editor's Machines: TwoHost_StrokeCentre, or -Dinfrastructure) means the same. -->
+    <condition property="stroke.centre.remote"><or>
+        <equals arg1="${stroke.centre}" arg2="remote"/>
+        <equals arg1="${infrastructure}" arg2="TwoHost_StrokeCentre"/>
+    </or></condition>
     <condition property="infrastructure" value="TwoHost_StrokeCentre"><isset property="stroke.centre.remote"/></condition>
     <condition property="launcher.profile.file" value="${basedir}/../btsn.services/deployments/healthcare/StrokeCodeInProcessDeployment.json"
                else="${basedir}/../btsn.services/deployments/healthcare/StrokeCodeDeployment.json"><isset property="stroke.centre.remote"/></condition>
