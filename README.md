@@ -14,21 +14,22 @@ A minimal experiment needs only an event generator, a Place bound to the remote 
 
 ```mermaid
 flowchart LR
-    subgraph RPSO["RPSO Test Workflow"]
+    subgraph RPSO["RPSO Test Workflow · Logical Model"]
         EG["Event Generator"] --> TI["T_in"]
-        TI --> P["Place: Payment Service"]
+        TI --> P(("Payment<br/>Logical Place"))
         P --> TO["T_out"]
         TO --> OK["Success"]
         TO --> FAIL["Failure"]
     end
 
-    P -. "calls existing REST endpoint" .-> REST["Remote Payment Service"]
-    TO -. "records execution" .-> OBS["Timing, queue waits,<br/>routing, replay data"]
+    P -. "executed by" .-> HOST["Generic RPSO<br/>Orchestration Host"]
+    HOST -. "invokes via REST" .-> REST["Existing Remote<br/>Payment Service"]
+    HOST -. "execution records" .-> OBS["Monitor / Analysis<br/>timings, queue waits, replay"]
 ```
 
-*A simple first use of RPSO: an existing remote Payment Service is bound to a Place in an executable Petri-net workflow so it can be exercised, observed and replayed without changing its business logic.*
+*The Payment Place represents a service operation in the logical model. The generic RPSO orchestration host invokes the existing remote Payment Service and records the execution for analysis and replay.*
 
-The **RPSO host can run locally**, calling the Payment Service over REST, **or on the remote machine** alongside that service. The editor generates an Ant launcher; running it builds the RPSO JARs. For remote deployment, **Build host packages** produces a ZIP with the host JARs, rules and `launch.bat` startup script. Copy and extract the ZIP on that machine, start the host, then run the workflow from your local machine.
+The **Payment Place is logical**, not the Payment Service itself. An RPSO orchestration host executes the logical Node (`T_in → Place → T_out`) and invokes the unchanged Payment Service over REST. The host can run locally or alongside the service on the remote machine. **Build and Run** generates an Ant launcher; running it builds the runtime JARs. For remote deployment, **Build host packages** creates a ZIP with the JARs, rules and `launch.bat`. Copy and extract it on the remote machine and start the host before running the workflow launcher locally.
 
 1. **Bind the service.** Describe the existing REST operation and its inputs and result; no change to the service's business logic is required.
 2. **Exercise it.** Generate tokens at a chosen rate, then vary the workload or introduce controlled delays and failures in the test environment.
@@ -38,7 +39,7 @@ From one remote service, the model can grow into a complete checkout process wit
 
 ## How RPSO works
 
-RPSO uses Petri-net concepts to organise ordinary callable services. A service operation, whether a Java method or a REST endpoint, is bound to a **Place** within a logical **Node (T_in → Place → T_out)**. T_in collects the required inputs; the Place invokes the bound service; T_out propagates its result.
+RPSO uses Petri-net concepts to organise ordinary callable services. A service operation, whether a Java method or a REST endpoint, is bound to a **Place** within a logical **Node (T_in → Place → T_out)**. T_in collects the required inputs; the assigned orchestration host invokes the service bound to the Place; T_out propagates its result.
 
 The Petri-net representation provides a formal foundation for sequencing, conditional routing, concurrency, forks, joins and synchronisation, without requiring those behaviours to be implemented inside the business services.
 
