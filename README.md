@@ -13,20 +13,40 @@ With **RPSO**, you can leave the Payment Service where it is and bind its existi
 A minimal experiment needs only an event generator, a Place bound to the remote service, its incoming and outgoing transitions, and an outcome:
 
 ```mermaid
-flowchart LR
-    subgraph RPSO["RPSO Test Workflow"]
+flowchart TB
+    subgraph PROCESS["1 · Define a test workflow in Process Editor"]
+        direction LR
         EG["Event Generator"] --> TI["T_in"]
-        TI --> P["Place: Payment Service"]
+        TI --> P["Payment Place"]
         P --> TO["T_out"]
         TO --> OK["Success"]
         TO --> FAIL["Failure"]
     end
 
-    P -. "calls existing REST endpoint" .-> REST["Remote Payment Service"]
-    TO -. "records execution" .-> OBS["Timing, queue waits,<br/>routing, replay data"]
+    PROCESS --> LAUNCH["2 · Build and Run: generate Ant launcher and token schedule"]
+    LAUNCH --> PACKAGE["3 · Run or build host packages: build RPSO JARs and rules"]
+    PACKAGE --> WHERE{"Where should the RPSO host run?"}
+
+    subgraph LOCAL["Option A · Local machine"]
+        LH["Generic RPSO host (JAR)<br/>started by Run on hosts / Ant"]
+    end
+
+    subgraph REMOTE["Option B · Machine hosting the Payment Service"]
+        RH["Generic RPSO host (JAR)<br/>started by launch.bat"]
+        SERVICE["Existing Payment Service<br/>REST endpoint (unchanged)"]
+        RH -. "REST on same machine" .-> SERVICE
+    end
+
+    WHERE -->|"Local"| LH
+    WHERE -->|"Remote: copy host-package ZIP"| RH
+    LH -. "REST over network" .-> SERVICE
+    LH -. "execution records" .-> OBS["Monitor / analysis<br/>timings, queue waits, replay"]
+    RH -. "execution records" .-> OBS
 ```
 
-*A simple first use of RPSO: an existing remote Payment Service is bound to a Place in an executable Petri-net workflow so it can be exercised, observed and replayed without changing its business logic.*
+*One process definition, two deployment choices. The existing Payment Service is unchanged: the generic RPSO host can call it across the network or run alongside it on the remote machine.*
+
+**How it is built and started.** The editor's **Build and Run** action generates an Ant launcher, deployment profile and token schedule. Running the launcher builds the runtime JARs and starts local hosts automatically. For a host on another machine, **Build host packages** creates a ZIP containing the host JAR, required libraries, rules and startup scripts. Copy and extract that ZIP on the remote machine, run `launch.bat` (or `launch.sh`), then start the launcher on the local machine. The remote host does not need the source repository or Ant—just Java.
 
 1. **Bind the service.** Describe the existing REST operation and its inputs and result; no change to the service's business logic is required.
 2. **Exercise it.** Generate tokens at a chosen rate, then vary the workload or introduce controlled delays and failures in the test environment.
