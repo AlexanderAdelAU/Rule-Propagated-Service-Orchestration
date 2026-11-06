@@ -12,7 +12,21 @@ With **RPSO**, you can leave the Payment Service where it is and bind its existi
 
 A minimal experiment needs only an event generator, a Place bound to the remote service, its incoming and outgoing transitions, and an outcome:
 
-`Event generator → T_in → Payment (REST) → T_out → Result`
+```mermaid
+flowchart LR
+    subgraph RPSO["RPSO Test Workflow"]
+        EG["Event Generator"] --> TI["T_in"]
+        TI --> P["Place: Payment Service"]
+        P --> TO["T_out"]
+        TO --> OK["Success"]
+        TO --> FAIL["Failure"]
+    end
+
+    P -. "calls existing REST endpoint" .-> REST["Remote Payment Service"]
+    TO -. "records execution" .-> OBS["Timing, queue waits,<br/>routing, replay data"]
+```
+
+*A simple first use of RPSO: an existing remote Payment Service is bound to a Place in an executable Petri-net workflow so it can be exercised, observed and replayed without changing its business logic.*
 
 1. **Bind the service.** Describe the existing REST operation and its inputs and result; no change to the service's business logic is required.
 2. **Exercise it.** Generate tokens at a chosen rate, then vary the workload or introduce controlled delays and failures in the test environment.
