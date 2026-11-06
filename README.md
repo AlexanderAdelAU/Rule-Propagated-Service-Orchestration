@@ -1,6 +1,6 @@
 # Rule-Propagated Service Orchestration (RPSO)
 
-**RPSO uses Petri net concepts to transform ordinary callable services into a logically defined, distributed orchestration system.**
+**RPSO uses Petri net concepts to transform ordinary callable services into a logically defined, distributed orchestration system.  It can for example embed an existing service into petri-net test harness for stress test, etc**
 
 A service, whether a Java method or a REST endpoint, is represented as a Place within a logical **Node (T_in → Place → T_out)**. This gives each service an explicit orchestration context: how its inputs are collected, when it can execute, and how its results are propagated to other services.
 
