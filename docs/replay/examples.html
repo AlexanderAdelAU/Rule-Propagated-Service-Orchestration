@@ -18,6 +18,7 @@
   main { max-width: 1180px; margin: 0 auto; padding: 28px 16px 48px; }
   a { color: inherit; }
   .eyebrow { font: 600 12px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: .14em; color: var(--accent); text-transform: uppercase; }
+  .eyebrow a { color: inherit; }
   h1 { font-size: 32px; line-height: 1.15; margin: 8px 0 8px; }
   .tag { display: inline-block; font: 600 12px/1 "IBM Plex Mono", monospace; letter-spacing: .04em; padding: 6px 10px;
          border-radius: 999px; background: var(--ink); color: #f5f2eb; vertical-align: middle; }
@@ -56,12 +57,12 @@
 </head>
 <body>
 <main>
-  <div class="eyebrow">RPSO · Examples</div>
+  <nav class="eyebrow" aria-label="Where you are"><a href="https://github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration#readme" title="Back to the RPSO project">RPSO</a> · Examples</nav>
   <h1>Recorded runs <span class="tag">Not simulations</span></h1>
   <p class="lede">Each example was drawn in the editor, deployed as rules to separate hosts and run: every place on a host of its own,
     every token a message between them, every host recording what it did. Choose one to replay its run on the model,
     at the times the hosts recorded.</p>
-  <p class="links"><a href="https://github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration#readme">The project</a> ·
+  <p class="links"><a href="https://github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration#readme">RPSO</a> ·
     <a href="https://github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration/blob/main/Architecture.md">How it is implemented</a> ·
     <a href="https://github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration/blob/main/Tutorial.md">Build your own</a></p>
   <nav class="cats" id="cats" aria-label="Categories"></nav>
