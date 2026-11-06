@@ -1,10 +1,10 @@
 # Rule-Propagated Service Orchestration (RPSO)
 
-**What if you could take an existing service, place it in an executable Petri-net process, and test and observe its behaviour without rewriting its business logic?**
+**RPSO uses Petri net concepts to transform ordinary callable services into a logically defined, distributed orchestration system.**
 
-Imagine an online store with a remote Payment Service. It already accepts payments, but what happens when requests arrive faster than it can process them? Where do delays accumulate? What happens to the surrounding workflow when a payment call is slow or fails?
+For example, say you have an online store that relies on a remote Payment Service. It works well under normal conditions, but what happens when order volumes rise, calls become slow, or the service fails? How do those problems affect the rest of the checkout process?
 
-With **RPSO**, the Payment Service can stay where it is. Bind its REST endpoint to a **Place** in a Petri-net model, define the operation's inputs and result, and connect it to the transitions that control when it runs and what happens next. RPSO executes that model, records what happens and lets you replay the observed execution.
+With **RPSO**, you can leave the Payment Service where it is and bind its existing REST endpoint to a **Place** in a Petri-net model. Define the operation's inputs and result, connect the transitions that govern its execution, then generate test requests through the process. RPSO records the execution so you can measure, analyse and replay what actually happened.
 
 **A simple first use: turn an existing service into part of an executable, observable test workflow.**
 
