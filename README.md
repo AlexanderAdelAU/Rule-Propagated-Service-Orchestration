@@ -14,22 +14,25 @@ A minimal experiment needs only an event generator, a Place bound to the remote 
 
 ```mermaid
 flowchart LR
-    subgraph RPSO["RPSO Test Workflow · Logical Model"]
-        EG["Event Generator"] --> TI["T_in"]
-        TI --> P(("Payment<br/>Logical Place"))
-        P --> TO["T_out"]
+    subgraph RPSO["RPSO Test Workflow"]
+        direction LR
+        EG["Event Generator"]
+        subgraph NODE["Logical Node · executed by a generic RPSO orchestration host"]
+            direction LR
+            TI["T_in"] --> P(("Payment<br/>Place")) --> TO["T_out"]
+        end
+        EG --> TI
         TO --> OK["Success"]
         TO --> FAIL["Failure"]
     end
 
-    P -. "executed by" .-> HOST["Generic RPSO<br/>Orchestration Host"]
-    HOST -. "invokes via REST" .-> REST["Existing Remote<br/>Payment Service"]
-    HOST -. "execution records" .-> OBS["Monitor / Analysis<br/>timings, queue waits, replay"]
+    P -. "bound to; host invokes via REST" .-> REST["Existing Remote<br/>Payment Service"]
+    NODE -. "host records execution" .-> OBS["Monitor / Analysis<br/>timings, queue waits, replay"]
 ```
 
-*The Payment Place represents a service operation in the logical model. The generic RPSO orchestration host invokes the existing remote Payment Service and records the execution for analysis and replay.*
+*The logical Node is the complete **T_in → Payment Place → T_out** group. Its assigned generic RPSO orchestration host executes that behaviour, invokes the existing remote Payment Service and records the run for analysis and replay.*
 
-The **Payment Place is logical**, not the Payment Service itself. An RPSO orchestration host executes the logical Node (`T_in → Place → T_out`) and invokes the unchanged Payment Service over REST. The host can run locally or alongside the service on the remote machine. **Build and Run** generates an Ant launcher; running it builds the runtime JARs. For remote deployment, **Build host packages** creates a ZIP with the JARs, rules and `launch.bat`. Copy and extract it on the remote machine and start the host before running the workflow launcher locally.
+The **Payment Place is logical**, not the Payment Service itself. The generic orchestration host executes the whole logical Node (`T_in → Place → T_out`), using the Place's REST binding to invoke the unchanged Payment Service. The host can run locally or alongside the service on the remote machine. **Build and Run** generates an Ant launcher; running it builds the runtime JARs. For remote deployment, **Build host packages** creates a ZIP with the JARs, rules and `launch.bat`. Copy and extract it on the remote machine and start the host before running the workflow launcher locally.
 
 1. **Bind the service.** Describe the existing REST operation and its inputs and result; no change to the service's business logic is required.
 2. **Exercise it.** Generate tokens at a chosen rate, then vary the workload or introduce controlled delays and failures in the test environment.
