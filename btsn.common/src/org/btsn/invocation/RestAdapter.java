@@ -70,8 +70,13 @@ public final class RestAdapter {
                         StandardCharsets.UTF_8))
                 .build();
         HttpResponse<String> response;
+        int waited = timeoutMs > 0 ? timeoutMs : DEFAULT_TIMEOUT_MS;
         try {
             response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        } catch (java.net.http.HttpTimeoutException e) {
+            // Reached, but too slow: say so, rather than that it could not be reached.
+            throw new IllegalStateException("REST service " + service + "." + operation + " at " + endpoint
+                    + " did not answer within " + waited + " ms (timeoutMs)", e);
         } catch (Exception e) {
             throw new IllegalStateException("REST service " + service + "." + operation + " at " + endpoint
                     + " could not be reached: " + e, e);

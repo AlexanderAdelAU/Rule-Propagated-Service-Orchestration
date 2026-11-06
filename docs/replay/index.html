@@ -60,6 +60,7 @@
   .timeline .note { min-height: 1.45em; margin-top: 4px; font-size: 13px; color: var(--muted); }
   .timeline .note b { color: var(--ink); font-family: "IBM Plex Mono", monospace; font-weight: 600; }
   .meals { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 12px 2px 0; font-size: 13px; color: var(--muted); }
+  .meals .failed, .meals .failed b { color: #a12a1a; }
   .meals b { color: var(--ink); font: 600 13px "IBM Plex Mono", monospace; }
   .foot { margin-top: 18px; font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
   .foot code { font: 12px "IBM Plex Mono", monospace; background: #ece7dc; padding: 2px 5px; border-radius: 4px; word-break: break-all; }
@@ -735,6 +736,8 @@ function load(modelJson, runText, nodes, names) {
   tokenLayer = drawModel(ui.svg, model, T);
   // Meals: each visit of a token to a place.
   R.visits = events.filter(e => e.type === "ENTER" || e.type === "JOIN_SURVIVOR").map(e => ({ place: e.place, at: R.shownAt(e.t) }));
+  // Tokens that failed at a place (a service that failed or timed out, or a lifetime that ran out), when they failed.
+  R.failures = R.events.filter(e => e.type === "FAILED").map(e => R.shownAt(e.t));
   // Each visit as recorded: from its ENTER until the place's service returns (the first FORK or EXIT at
   // that place after it). Drawn on the replay's clock, so visits overlap exactly when they overlapped in the run.
   R.spans = [];
@@ -963,6 +966,13 @@ function render() {
     const s = document.createElement("span"), b = document.createElement("b");
     b.textContent = counts[p.id] || 0;
     s.append((p.label || p.id) + " ", b);
+    ui.meals.appendChild(s);
+  }
+  // Failed so far, in a run where tokens failed.
+  if (R.failures.length) {
+    const s = document.createElement("span"), b = document.createElement("b");
+    s.className = "failed"; b.textContent = R.failures.filter(t => t <= now).length;
+    s.append("Failed so far: ", b);
     ui.meals.appendChild(s);
   }
 }

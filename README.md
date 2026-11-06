@@ -36,6 +36,12 @@ language.
 **A federated example.** [A stroke code across four organisations](StrokeCode.md): an ambulance, a receiving hospital, a stroke centre and shared imaging and pathology providers, on twelve hosts with no central engine. It was recorded across two machines, with the stroke centre's host on its own machine. A compensation process undoes the stroke centre's booking when it isn't needed, and stroke codes overtake routine patients at the shared providers.
 [▶ Watch it](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Stroke_Code_With_Emergency_Department.json&run=../../btsn.common/AnalysisFolder/Healthcare/Stroke_Code_With_Emergency_Department.txt)
 
+**What if you only have one remote service to test?** You don't need a whole process. One event generator and one place are enough to call the service over REST, unchanged, with steady traffic and bursts. Every call is measured from the caller's side, and a failed call is recorded with its reason. When you're ready, grow the same model into the whole process. [Test a remote service in context](ServiceTutorial.md#test-a-remote-service-in-context)
+
+![A remote payment service tested in context: an event generator sends steady payments, then a burst of twelve. They queue at the place's T_in, and paid, declined and failed calls are counted as the run replays.](images/remote-payment-test.gif)
+
+[▶ Watch the recorded run](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json&run=../../btsn.common/AnalysisFolder/Payments/Analysis_Remote_Payment_Test.txt)
+
 How does a drawing become a running system? In this four-Node example, each Node is deployed to its own host target, run by a separate orchestration host:
 
 ![A four-place Petri-net model on the left, where P1 forks to P2 and P3 before joining at P4, is deployed as local rules to four separate hosts on the right. Each host carries out T_in, invokes the bound Place Service and handles T_out. Tokens travel directly between hosts; Monitor collects their records afterward for Petri-net analysis.](images/rpso-overview.svg)

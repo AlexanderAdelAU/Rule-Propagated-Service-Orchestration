@@ -407,6 +407,54 @@ is `node` or `vercel` in each credit decision.
 - **Network time counts.** Monitor measures the call from the host, so service times
   now include the round trip to the platform.
 
+### Test a remote service in context
+
+You may have a remote service to try out, such as a payment gateway, before you build a whole process around it.
+One event generator and one place are enough. RPSO calls the service as the process will, supplies the traffic and
+measures each call from the caller's side. The service itself doesn't change.
+
+![A remote payment service tested in context: steady payments, then a burst of twelve that queues at the T_in; paid, declined and failed calls are counted as the run replays.](images/remote-payment-test.gif)
+
+The supplied example tests a mock payment gateway,
+[`payment.js`](examples/rest/payment.js), on this project's Vercel deployment at
+`https://rule-propagated-service-orchestrati.vercel.app/api/payment/authorise`. It behaves the same way every run:
+
+- each call takes 120 to 520 ms;
+- every 8th payment is declined and routes `declined`; the rest route `paid`;
+- every 13th finds the gateway unavailable: HTTP 503;
+- every 17th takes 4 seconds, longer than the place waits.
+
+| What | File |
+|---|---|
+| The process: `PAYMENTS` → Payment (P1) → Paid or Declined | [`payments/Workflow/Remote_Payment_Test.json`](btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json) |
+| The placement: `rest` adapter, the endpoint, `"timeoutMs": 2500` | [`ServiceDeploymentFolder/payments/Remote_Payment_Test.json`](btsn.common/ServiceDeploymentFolder/payments/Remote_Payment_Test.json) |
+| The catalogue: `PaymentService.authorise`, with no Java class | [`payments/Payments.json`](btsn.common/BusinessServiceDefinitions/payments/Payments.json) |
+| The traffic: one a second for 10 s, a burst of 12 at once, then one a second again | [`Remote_Payment_Test_BuildAndRun.csv`](btsn.common.eventgenerators/EventTriggeringFile/Remote_Payment_Test_BuildAndRun.csv) |
+| The launcher | [`Remote_Payment_Test_BuildAndRun.xml`](btsn.petrinet.ProjectLoader/Remote_Payment_Test_BuildAndRun.xml) |
+
+**What one run told us** ([watch it](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json&run=../../btsn.common/AnalysisFolder/Payments/Analysis_Remote_Payment_Test.txt)):
+
+- 30 payments: 24 paid and 3 declined, each routed on the service's own answer.
+- 3 failed at the place, and the analysis says why:
+
+  ```
+  Failed workflows:          3
+    1 failed at PaymentService (P1_Place): REST service PaymentService.authorise at ... answered HTTP 503: Payment gateway unavailable, payment PAY-13
+    1 failed at PaymentService (P1_Place): REST service PaymentService.authorise at ... answered HTTP 503: Payment gateway unavailable, payment PAY-26
+    1 failed at PaymentService (P1_Place): REST service PaymentService.authorise at ... did not answer within 2500 ms (timeoutMs)
+  ```
+
+- The burst queued at the T_in for up to 8.8 s; steady traffic hardly queued.
+
+**Test your own service.** Its answer needs the shape described in [What the host sends and expects](#8-call-it-over-rest).
+
+1. Put its address in the placement's `endpoint`, or in the editor's Deploy panel.
+2. Set `timeoutMs` to the longest wait you will accept.
+3. Shape the traffic in the CSV: each row gives a token number and when to send it, in ms.
+4. Run the launcher, then its `analyse` target, and replay the run.
+
+When the service behaves as you need, add the places around it. Each new place is another Node in the same model.
+
 ## Going further
 
 - **State, several hosts and loops:** the inventory example in

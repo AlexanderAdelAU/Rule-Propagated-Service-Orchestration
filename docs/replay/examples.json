@@ -72,6 +72,17 @@
       }
     },
     {
+      "id": "remote_payment",
+      "category": "start",
+      "title": "Test a remote service in context",
+      "description": "One event generator and one place whose service is a remote payment gateway, called over REST and left unchanged. Steady traffic, then a burst: the queue builds and drains, declines go their own way, and the calls the gateway fails or answers too slowly stop at the place, with the reason recorded.",
+      "model": "btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json",
+      "run": "btsn.common/AnalysisFolder/Payments/Analysis_Remote_Payment_Test.txt",
+      "versions": {
+        "v001": "Payments from the online store"
+      }
+    },
+    {
       "id": "fork_join",
       "category": "petrinet",
       "title": "Fork and join",
