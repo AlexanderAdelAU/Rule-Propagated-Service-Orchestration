@@ -20,7 +20,7 @@ public final class ReplayNamesCheck {
         Path common = Files.createTempDirectory("replay-names-").resolve("btsn.common");
         Path process = common.resolve("ProcessDefinitionFolder/test/test.json");
         copy(fixtures.resolve("test.json"), process);
-        copy(fixtures.resolve("Test.json"), common.resolve("BusinessServiceDefinitions/test/Test.json"));
+        copy(fixtures.resolve("Test_catalogue.json"), common.resolve("BusinessServiceDefinitions/test/Test.json"));   // not Test.json: Windows cannot keep it beside test.json
         copy(fixtures.resolve("test_deployment.json"), common.resolve("ServiceDeploymentFolder/test/test.json"));
         copy(root.toPath().resolve("btsn.common").resolve(ServiceRegistry.STANDARD_CATALOGUE), common.resolve(ServiceRegistry.STANDARD_CATALOGUE));
         String run = Files.readString(fixtures.resolve("Analysis_test.txt"));
