@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Testing a remote payment service in context: one event generator and one place, whose service is a payment
+     gateway called over REST (ServiceDeploymentFolder/payments/Remote_Payment_Test.json). Nothing about the service
+     changes; RPSO supplies the traffic, the measurements and the replay.
+     The service is examples/rest/payment.js, on this project's Vercel deployment: each call takes 120-520 ms,
+     every 8th payment is declined, every 13th finds the gateway unavailable (HTTP 503) and every 17th takes 4 s, longer
+     than the 2.5 s the place waits (timeoutMs), so those calls fail at the place and the analysis says why.
+     Traffic: 30 payments, one a second for 10 s, a burst of 12 at once, then one a second again
+     (EventTriggeringFile/Remote_Payment_Test_BuildAndRun.csv). The hosts need outbound internet access.
+     To test your own service instead, put its address in the deployment's endpoint (or the editor's Deploy panel).
+     Run:     ant -f Remote_Payment_Test_BuildAndRun.xml        (add -Dhost.address=127.0.0.1 to run every host on this machine)
+     Analyse: ant -f Remote_Payment_Test_BuildAndRun.xml analyse -->
+<project name="Remote_Payment_Test_BuildAndRun" default="run-complete-workflow" basedir=".">
+    <property name="process.title" value="payments/Workflow/Remote_Payment_Test"/>
+    <property name="launcher.profile.file" location="../btsn.services/deployments/payments/Remote_Payment_TestDeployment.json"/>
+    <property name="workflow.process.name" value="payments/Workflow/Remote_Payment_Test"/>
+    <property name="rule.version" value="v001"/>
+    <property name="query.version" value="v001"/>
+
+    <property name="eg1.id" value="PAYMENTS"/>
+    <property name="eg1.version" value="v001"/>
+    <property name="eg1.place" value="P1_Place"/>
+    <property name="eg1.operation" value="authorise"/>
+    <property name="eg1.expire" value="60000"/>
+    <property name="eg1.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/Remote_Payment_Test_BuildAndRun.csv"/>
+    <property name="token.count" value="30"/>
+
+    <!-- Hosts used by the service deployment: nodes of the infrastructure, each running the host program -->
+    <property name="hosts" value="P1"/>
+
+    <import file="../btsn.services/process-runtime.xml"/>
+</project>

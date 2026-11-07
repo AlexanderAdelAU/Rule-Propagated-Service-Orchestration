@@ -1,0 +1,17 @@
+{
+  "domain": "Payments",
+  "purpose": "A remote payment service tested in context: RPSO calls it over REST, as an online store would. Its implementation lives behind its endpoint (examples/rest/payment.js), so there is no Java class to package.",
+  "services": [
+    {
+      "service": "PaymentService",
+      "operation": "authorise",
+      "description": "Authorises a card payment at a remote payment gateway. Payment n is for an amount derived from n unless the token carries one.",
+      "returns": "A payment result with the payment, amount and status. Routes on \"paid\" or \"declined\". A gateway that is unavailable, or slower than the caller waits, fails the call.",
+      "inputs": [
+        "token"
+      ],
+      "returnAttribute": "paymentResult",
+      "status": "active"
+    }
+  ]
+}
