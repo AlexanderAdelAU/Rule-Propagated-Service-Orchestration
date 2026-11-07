@@ -454,10 +454,36 @@ The supplied example tests a mock payment gateway,
 
 1. Put its address in the placement's `endpoint`, or in the editor's Deploy panel.
 2. Set **Wait up to** (`timeoutMs`) to the longest wait you will accept.
-3. Shape the traffic in the CSV: each row gives a token number and when to send it, in ms.
+3. Shape the traffic in the CSV: one row per payment, `time_ms,0,1`, where `time_ms` is when to send it.
+   Run the launcher itself (or **Run on hosts**), not **Build → Create**, which would replace the schedule with a steady one.
 4. Run the launcher, then its `analyse` target, and replay the run.
 
 When the service behaves as you need, add the places around it. Each new place is another Node in the same model.
+
+### Priority at a shared service
+
+A service is often shared: in-store payments and online checkout may call the same gateway. When it slows down or a
+sale brings a burst, which payments wait? In RPSO each kind of traffic is its own process version, and a place serves
+the lower version first from its queue. Give the work that must not wait the lower version.
+
+| What | File |
+|---|---|
+| The process: `INSTORE` (v001) and `ONLINE` (v002) → Payment (P1) → Paid or Declined | [`payments/Workflow/Payment_Priority_Test.json`](btsn.common/ProcessDefinitionFolder/payments/Workflow/Payment_Priority_Test.json) |
+| The traffic: in-store, one payment every 2 s; online, the steady traffic and burst above | [`Payment_Priority_Test_BuildAndRun_INSTORE.csv`](btsn.common.eventgenerators/EventTriggeringFile/Payment_Priority_Test_BuildAndRun_INSTORE.csv), [`..._ONLINE.csv`](btsn.common.eventgenerators/EventTriggeringFile/Payment_Priority_Test_BuildAndRun_ONLINE.csv) |
+| The launcher | [`Payment_Priority_Test_BuildAndRun.xml`](btsn.petrinet.ProjectLoader/Payment_Priority_Test_BuildAndRun.xml) |
+
+The service and its placement are the same as above. **What one run told us** ([watch it](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Payment_Priority_Test.json&run=../../btsn.common/AnalysisFolder/Payments/Analysis_Payment_Priority_Test.txt)):
+
+- In-store payments waited 0.6 s on average, at most 2.6 s; online payments waited 7.3 s on average, up to 15.2 s.
+- The analysis checked every moment both kinds were queued together, 81 of them: the in-store payment was taken first each time.
+
+  ```
+  Priority respected: 81/81 (100.0%)
+  [OK] No inversions: wherever two versions waited in the same queue, the higher priority was taken first
+  ```
+
+The same holds across machines and organisations: the [stroke code](StrokeCode.md) gives stroke patients priority at
+shared imaging and pathology providers in the same way.
 
 ## Going further
 

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Priority at a shared payment service: in-store payments (INSTORE, v001) and online checkout (ONLINE, v002) share
+     one place, whose service is the payment gateway called over REST (ServiceDeploymentFolder/payments/Remote_Payment_Test.json).
+     The place serves one call at a time and, of the tokens queued at its T_in, the lower version first. So when online
+     checkout sends its burst, in-store payments pass the queued online ones instead of waiting behind them.
+     The service is examples/rest/payment.js on this project's Vercel deployment (see Remote_Payment_Test_BuildAndRun.xml):
+     every 8th payment of each version is declined, every 13th finds the gateway unavailable and every 17th answers too slowly.
+     Traffic: in-store, one payment every 2 s for 30 s (..._INSTORE.csv); online, one a second for 10 s, a burst of 12 at
+     once, then one a second again (..._ONLINE.csv). The hosts need outbound internet access.
+     The schedules are written by hand: Build > Create in the editor would replace them with steady ones.
+     Run:     ant -f Payment_Priority_Test_BuildAndRun.xml        (add -Dhost.address=127.0.0.1 to run every host on this machine)
+     Analyse: ant -f Payment_Priority_Test_BuildAndRun.xml analyse   (each version's queue waits, and Stage 3's priority check) -->
+<project name="Payment_Priority_Test_BuildAndRun" default="run-complete-workflow" basedir=".">
+    <property name="process.title" value="payments/Workflow/Payment_Priority_Test"/>
+    <property name="launcher.profile.file" location="../btsn.services/deployments/payments/Payment_Priority_TestDeployment.json"/>
+    <property name="workflow.process.name" value="payments/Workflow/Payment_Priority_Test"/>
+    <property name="rule.version" value="v001"/>
+    <property name="query.version" value="v001,v002"/>
+
+    <!-- Tokens: one block per event generator, each with its own rule version and schedule. The generators fire together. -->
+    <property name="eg1.id" value="INSTORE"/>
+    <property name="eg1.version" value="v001"/>
+    <property name="eg1.place" value="P1_Place"/>
+    <property name="eg1.operation" value="authorise"/>
+    <property name="eg1.tokens" value="15"/>
+    <property name="eg1.expire" value="60000"/>
+    <property name="eg1.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/Payment_Priority_Test_BuildAndRun_INSTORE.csv"/>
+    <property name="eg2.id" value="ONLINE"/>
+    <property name="eg2.version" value="v002"/>
+    <property name="eg2.place" value="P1_Place"/>
+    <property name="eg2.operation" value="authorise"/>
+    <property name="eg2.tokens" value="30"/>
+    <property name="eg2.expire" value="60000"/>
+    <property name="eg2.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/Payment_Priority_Test_BuildAndRun_ONLINE.csv"/>
+    <property name="token.count" value="30"/>
+
+    <!-- Hosts used by the service deployment: nodes of the infrastructure, each running the host program -->
+    <property name="hosts" value="P1"/>
+
+    <import file="../btsn.services/process-runtime.xml"/>
+</project>
