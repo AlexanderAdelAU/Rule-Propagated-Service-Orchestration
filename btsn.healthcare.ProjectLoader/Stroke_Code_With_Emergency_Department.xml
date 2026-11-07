@@ -78,6 +78,8 @@
     <import file="../btsn.services/process-runtime.xml"/>
 
     <!-- The stroke centre's booking system, serving AngioSuiteService over REST on this machine. -->
+    <!-- The run starts it (start-stroke-centre), so the editor's check before Run on hosts need not find it answering. -->
+    <property name="launcher.starts.services" value="http://127.0.0.1:8090/stroke-centre/"/>
     <property name="stroke.centre.port" value="8090"/>
     <property name="stroke.centre.url" value="http://127.0.0.1:${stroke.centre.port}/stroke-centre/suite"/>
     <property name="stroke.centre.catalogue" location="../btsn.common/BusinessServiceDefinitions/healthcare/Healthcare.json"/>

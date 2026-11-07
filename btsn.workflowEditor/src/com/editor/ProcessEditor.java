@@ -1415,7 +1415,9 @@ public class ProcessEditor extends JFrame {
         setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.WAIT_CURSOR));
         java.util.List<String> silent;
         try {
-            silent = EndpointCheck.notAnswering(canvas, ServiceRegistry.DEFAULT_INFRASTRUCTURE.equals(ServiceRegistry.selectedInfrastructure()), EndpointCheck.TIMEOUT_MS);
+            // A service the launcher starts itself (the stroke centre's booking system) is not expected to answer yet.
+            silent = EndpointCheck.notAnswering(canvas, ServiceRegistry.DEFAULT_INFRASTRUCTURE.equals(ServiceRegistry.selectedInfrastructure()),
+                EndpointCheck.TIMEOUT_MS, EndpointCheck.startedBy(launchers));
         } finally {
             setCursor(java.awt.Cursor.getDefaultCursor());
         }
