@@ -22,8 +22,7 @@ flowchart LR
             TI["T_in"] --> P(("Payment<br/>Place")) --> TO["T_out"]
         end
         EG --> TI
-        TO --> OK["Success"]
-        TO --> FAIL["Failure"]
+        TO --> END["Terminate"]
     end
 
     P <-. "REST request / response" .-> REST["Existing Remote<br/>Payment Service"]
@@ -32,7 +31,7 @@ flowchart LR
 
 *The logical Node is the complete **T_in → Payment Place → T_out** group. Its assigned generic RPSO orchestration host executes that behaviour, performs a REST request/response with the existing remote Payment Service, and records the run for analysis and replay.*
 
-The **Payment Place is logical**, not the Payment Service itself. The generic orchestration host executes the whole logical Node (`T_in → Place → T_out`), using the Place's REST binding to send a request to the unchanged Payment Service and receive its response. The returned values are then available to `T_out` for routing. The host can run locally or alongside the service on the remote machine. **Build and Run** generates an Ant launcher; running it builds the runtime JARs. For remote deployment, **Build host packages** creates a ZIP with the JARs, rules and `launch.bat`. Copy and extract it on the remote machine and start the host before running the workflow launcher locally.
+The **Payment Place is logical**, not the Payment Service itself. The generic orchestration host executes the whole logical Node (`T_in → Place → T_out`), using the Place's REST binding to send a request to the unchanged Payment Service and receive its response. The returned values are available to `T_out`, while the execution is recorded for analysis and replay. The host can run locally or alongside the service on the remote machine. **Build and Run** generates an Ant launcher; running it builds the runtime JARs. For remote deployment, **Build host packages** creates a ZIP with the JARs, rules and `launch.bat`. Copy and extract it on the remote machine and start the host before running the workflow launcher locally.
 
 1. **Bind the service.** Describe the existing REST operation and its inputs and result; no change to the service's business logic is required.
 2. **Exercise it.** Generate tokens at a chosen rate, then vary the workload or introduce controlled delays and failures in the test environment.
