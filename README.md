@@ -6,8 +6,6 @@ For example, say you have an online store that relies on a remote Payment Servic
 
 With **RPSO**, you can leave the Payment Service where it is and bind its existing REST endpoint to a **Place** in a Petri-net model. Define the operation's inputs and result, connect the transitions that govern its execution, then generate test requests through the process. RPSO records the execution so you can measure, analyse and replay what actually happened.
 
-**A simple first use: turn an existing service into part of an executable, observable test workflow.**
-
 ## Start with one service
 
 A minimal experiment needs only an event generator, a Place bound to the remote service, its incoming and outgoing transitions, and an outcome:
@@ -29,19 +27,17 @@ flowchart LR
     NODE -. "host records execution" .-> OBS["Monitor / Analysis<br/>timings, queue waits, replay"]
 ```
 
-*The logical Node is the complete **T_in → Payment Place → T_out** group. Its assigned generic RPSO orchestration host executes that behaviour, performs a REST request/response with the existing remote Payment Service, and records the run for analysis and replay.*
-
-The **Payment Place is logical**, not the Payment Service itself. The generic orchestration host executes the whole logical Node (`T_in → Place → T_out`), using the Place's REST binding to send a request to the unchanged Payment Service and receive its response. The returned values are available to `T_out`, while the execution is recorded for analysis and replay. The host can run locally or alongside the service on the remote machine. **Build and Run** generates an Ant launcher; running it builds the runtime JARs. For remote deployment, **Build host packages** creates a ZIP with the JARs, rules and `launch.bat`. Copy and extract it on the remote machine and start the host before running the workflow launcher locally.
+*The **Payment Place is logical**, not the Payment Service itself. A generic RPSO orchestration host executes the whole Node (**T_in → Place → T_out**): it calls the unchanged service over REST, hands the response to T_out and records the run for analysis and replay. The host can run on your machine or next to the service on another one ([Run on several machines](Reference.md#7-run-on-several-machines)).*
 
 1. **Bind the service.** Describe the existing REST operation and its inputs and result; no change to the service's business logic is required.
-2. **Exercise it.** Generate tokens at a chosen rate, then vary the workload or introduce controlled delays and failures in the test environment.
+2. **Exercise it.** Generate tokens at a chosen rate and timing: steady traffic, bursts or a long soak. To see failures, point the Place at a test copy of the service that you can slow down or make fail, and set how long the Place waits for an answer.
 3. **Observe it.** Inspect service times, queue waits, routing and token flow; replay the recorded run against the same model.
 
 From one remote service, the model can grow into a complete checkout process with inventory, payment and order handling. Load, stress, soak and failure scenarios can then be studied *in the context of that workflow*. RPSO provides orchestration, token generation, execution records and analysis; realistic workloads and fault-injection conditions still need to be configured as part of the test.
 
 ## How RPSO works
 
-RPSO uses Petri-net concepts to organise ordinary callable services. A service operation, whether a Java method or a REST endpoint, is bound to a **Place** within a logical **Node (T_in → Place → T_out)**. T_in collects the required inputs; the assigned orchestration host invokes the service bound to the Place; T_out propagates its result.
+A service operation, whether a Java method or a REST endpoint, is bound to a **Place** within a logical **Node (T_in → Place → T_out)**. T_in collects the required inputs; the assigned orchestration host invokes the service bound to the Place; T_out propagates its result.
 
 The Petri-net representation provides a formal foundation for sequencing, conditional routing, concurrency, forks, joins and synchronisation, without requiring those behaviours to be implemented inside the business services.
 
@@ -57,7 +53,7 @@ The same generic machinery supports very different processes: from a Boolean tes
 - **Circles** represent Places: the logical processing steps, each bound to a service (Triage, Laboratory, …).
 - **P1–P6 badges** are host targets: where each logical Node (T_in → Place → T_out) is deployed. A generic orchestration host runs as each one and executes the Node's behaviour.
 - **Bars** on either side of a Place represent its T_in and T_out transition behaviour. T_in (grey) gathers inputs; T_out (yellow) propagates results. The deployed host carries out both using installed rules.
-- **Letters** on the bars identify their control roles: **E** edge, **G** gateway (routes by the service's decision), **J** join (waits for every input), **M** merge (takes either input), **T** terminate, and ***S*** Signal (e.g kick off a Compensation process).
+- **Letters** on the bars identify their control roles: **E** edge, **G** gateway (routes by the service's decision), **J** join (waits for every input), **M** merge (takes either input), **T** terminate, and ***S*** Signal (e.g. kick off a Compensation process).
 - **EG** is an event generator, which starts the tokens for one process version.
 - **Guarded arcs** leave a gateway. A route is taken when the service's decision matches the arc's guard. Laboratory, Cardiology and Radiology share the guard STANDARD_WORKFLOW, so all three receive the work-up request; DIRECT_TO_TREATMENT selects the direct route. Labels v001–v003 show which versions use an arc.
 - **Dashed arcs** indicate network connections between hosts; a **2** on an arc marks a Place with two operations.
@@ -145,7 +141,7 @@ The licensing terms for the software and accompanying documentation follow.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to use, copy, modify, merge, and distribute the Software for non-commercial purposes, subject to the following conditions: the above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-**Commons Clause Restriction:** The grant of rights under this license does not include the right to Sell the Software. "Sell" means providing the Software, or any derivative work, to third parties for a fee or other consideration, or offering a product or service whose value derives substantially from the Software's functionality. For commercial licensing enquiries, contact [your email].
+**Commons Clause Restriction:** The grant of rights under this license does not include the right to Sell the Software. "Sell" means providing the Software, or any derivative work, to third parties for a fee or other consideration, or offering a product or service whose value derives substantially from the Software's functionality. For commercial licensing enquiries, contact the author through [GitHub](https://github.com/AlexanderAdelAU).
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED.
 
