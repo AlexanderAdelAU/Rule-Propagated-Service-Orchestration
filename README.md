@@ -2,21 +2,50 @@
 
 **RPSO uses Petri net concepts to transform ordinary callable services into a logically defined, distributed orchestration system.**
 
-A service, whether a Java method or a REST endpoint, is represented as a Place within a logical **Node (T_in → Place → T_out)**. This gives each service an explicit orchestration context: how its inputs are collected, when it can execute, and how its results are propagated to other services.
+For example, say you have an online store that relies on a remote Payment Service. It works well under normal conditions, but what happens when order volumes rise, calls become slow, or the service fails? How do those problems affect the rest of the checkout process?
 
-The Petri-net representation provides a formal foundation for sequencing, conditional routing, concurrency, forks, joins and synchronisation, without requiring these behaviours to be implemented within the business services themselves.
+With **RPSO**, you can leave the Payment Service where it is and bind its existing REST endpoint to a **Place** in a Petri-net model. Define the operation's inputs and result, connect the transitions that govern its execution, then generate test requests through the process. RPSO records the execution so you can measure, analyse and replay what actually happened.
+
+## Start with one service
+
+A minimal experiment needs only an event generator, a Place bound to the remote service, its incoming and outgoing transitions, and an outcome:
+
+```mermaid
+flowchart LR
+    subgraph RPSO["RPSO Test Workflow"]
+        direction LR
+        EG["Event Generator"]
+        subgraph NODE["Logical Node · executed by a generic RPSO orchestration host"]
+            direction LR
+            TI["T_in"] --> P(("Payment<br/>Place")) --> TO["T_out"]
+        end
+        EG --> TI
+        TO --> END["Terminate"]
+    end
+
+    P <-. "REST request / response" .-> REST["Existing Remote<br/>Payment Service"]
+    NODE -. "host records execution" .-> OBS["Monitor / Analysis<br/>timings, queue waits, replay"]
+```
+
+*The **Payment Place is logical**, not the Payment Service itself. A generic RPSO orchestration host executes the whole Node (**T_in → Place → T_out**): it calls the unchanged service over REST, hands the response to T_out and records the run for analysis and replay. The host can run on your machine or next to the service on another one ([Run on several machines](Reference.md#7-run-on-several-machines)).*
+
+1. **Bind the service.** Describe the existing REST operation and its inputs and result; no change to the service's business logic is required.
+2. **Exercise it.** Generate tokens at a chosen rate and timing: steady traffic, bursts or a long soak. To see failures, point the Place at a test copy of the service that you can slow down or make fail, and set how long the Place waits for an answer.
+3. **Observe it.** Inspect service times, queue waits, routing and token flow; replay the recorded run against the same model.
+
+From one remote service, the model can grow into a complete checkout process with inventory, payment and order handling. Load, stress, soak and failure scenarios can then be studied *in the context of that workflow*. RPSO provides orchestration, token generation, execution records and analysis; realistic workloads and fault-injection conditions still need to be configured as part of the test.
+
+## How RPSO works
+
+A service operation, whether a Java method or a REST endpoint, is bound to a **Place** within a logical **Node (T_in → Place → T_out)**. T_in collects the required inputs; the assigned orchestration host invokes the service bound to the Place; T_out propagates its result.
+
+The Petri-net representation provides a formal foundation for sequencing, conditional routing, concurrency, forks, joins and synchronisation, without requiring those behaviours to be implemented inside the business services.
 
 **RPSO turns this logical representation into a live distributed system.** Each logical Node is assigned to a host target, where a generic [orchestration host](Architecture.md#terms) executes its behaviour. Using installed coordination rules and canonical bindings, the host determines when the required inputs are available, invokes the bound Place Service and propagates the result. Tokens carry information directly between hosts, so no central orchestration engine directs their execution.
 
 The process drawn in the editor is therefore more than a visual model: **it is the definition of the system that executes.** Its behaviour can be observed, measured, analysed and replayed against the original Petri-net representation.
 
-Because the orchestration machinery is generic, it can execute very different
-Petri-net processes: from a Boolean test to a loan application or an
-emergency-department workflow. Bind different services to the Places to change
-the work performed; change the deployment to run the same process across
-different machines. A Java service can run in-process inside its orchestration
-host, while a REST service can run anywhere its endpoint is reachable, in any
-language.
+The same generic machinery supports very different processes: from a Boolean test or a remote payment check to a loan application or an emergency-department workflow. Bind different services to the Places to change the work performed; change the deployment to run the same process across different machines. A Java service can run in-process inside its orchestration host, while a REST service can run anywhere its endpoint is reachable, in any language.
 
 ![An emergency-department process in the editor: patient arrivals pass Triage, whose gateway sends them to Laboratory, Cardiology and Radiology, which join at Diagnosis before Treatment. A triage canary and federated radiology requests from another hospital also enter the process. Places are deployed to host targets P1 to P6; dashed lines show network connections.](images/emergency-department-concurrent.png)
 
@@ -24,7 +53,7 @@ language.
 - **Circles** represent Places: the logical processing steps, each bound to a service (Triage, Laboratory, …).
 - **P1–P6 badges** are host targets: where each logical Node (T_in → Place → T_out) is deployed. A generic orchestration host runs as each one and executes the Node's behaviour.
 - **Bars** on either side of a Place represent its T_in and T_out transition behaviour. T_in (grey) gathers inputs; T_out (yellow) propagates results. The deployed host carries out both using installed rules.
-- **Letters** on the bars identify their control roles: **E** edge, **G** gateway (routes by the service's decision), **J** join (waits for every input), **M** merge (takes either input), **T** terminate, and ***S*** Signal (e.g kick off a Compensation process).
+- **Letters** on the bars identify their control roles: **E** edge, **G** gateway (routes by the service's decision), **J** join (waits for every input), **M** merge (takes either input), **T** terminate, and ***S*** Signal (e.g. kick off a Compensation process).
 - **EG** is an event generator, which starts the tokens for one process version.
 - **Guarded arcs** leave a gateway. A route is taken when the service's decision matches the arc's guard. Laboratory, Cardiology and Radiology share the guard STANDARD_WORKFLOW, so all three receive the work-up request; DIRECT_TO_TREATMENT selects the direct route. Labels v001–v003 show which versions use an arc.
 - **Dashed arcs** indicate network connections between hosts; a **2** on an arc marks a Place with two operations.
@@ -55,11 +84,30 @@ waits, service times, join waits and end-to-end workflow time. The recorded run
 can then be replayed against the model. These are measurements, not guarantees
 of meeting hard real-time deadlines.
 
+## Where RPSO fits
+
+RPSO is a research and design platform. It does not replace production workflow engines, service meshes or load-testing tools; it sits beside them and answers a different question: *what does this process do when it runs, step by step, across the machines and organisations that take part?*
+
+| Tools | What they do | How RPSO differs |
+|---|---|---|
+| **Workflow engines** (Temporal, AWS Step Functions, Camunda) | Run long-lived processes reliably; a central engine or cluster keeps each process's state | No central engine: each Node's host decides locally from its installed rules, and tokens travel directly between hosts. Each organisation can run its own hosts without sharing an engine, as in the [stroke code](StrokeCode.md) |
+| **Service meshes** (Istio, Linkerd, Envoy) | Manage traffic between services: routing, retries, encryption, telemetry | Works at the level of the process, not the network: forks, joins, priorities and routing on a service's own decision |
+| **Load and chaos tools** (k6, Locust, JMeter, Chaos Mesh) | Generate heavy traffic and inject faults | Sends scheduled traffic *through the process*, so a slow or failing service is seen in its effect on the rest of the workflow |
+| **Tracing** (OpenTelemetry, APM tools) | Record each call as it crosses services | Records each token against the Petri-net model, so a run can be replayed on the diagram and analysed for queue order, join waits and capacity |
+
+They work together: the same service can sit behind a mesh, take raw load from k6, and be tested in the context of its process with RPSO.
+
+RPSO already works with current practice:
+
+- **Services in any language, hosted anywhere**, called over REST; the supplied examples include functions hosted on Vercel.
+- **Regression suites** run in GitHub Actions on every change.
+- **Recorded runs replay in the browser**, on [the examples page](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/examples.html).
+
 ## From an idea to a measured run
 
-Start by drawing a process in the editor, running it on orchestration hosts and
-replaying the recorded execution on the same model. [Tutorial.md](Tutorial.md)
-walks through two examples:
+Start by drawing a process in the editor, binding services to its Places,
+running it on orchestration hosts and replaying the recorded execution on the
+same model. [Tutorial.md](Tutorial.md) walks through two examples:
 
 1. **A standard service** that returns true or false: one Place, a loop and ten tokens.
 2. **A claims process** that calls a remote service over REST.
@@ -118,7 +166,7 @@ The licensing terms for the software and accompanying documentation follow.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to use, copy, modify, merge, and distribute the Software for non-commercial purposes, subject to the following conditions: the above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-**Commons Clause Restriction:** The grant of rights under this license does not include the right to Sell the Software. "Sell" means providing the Software, or any derivative work, to third parties for a fee or other consideration, or offering a product or service whose value derives substantially from the Software's functionality. For commercial licensing enquiries, contact [your email].
+**Commons Clause Restriction:** The grant of rights under this license does not include the right to Sell the Software. "Sell" means providing the Software, or any derivative work, to third parties for a fee or other consideration, or offering a product or service whose value derives substantially from the Software's functionality. For commercial licensing enquiries, contact the author through [GitHub](https://github.com/AlexanderAdelAU).
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED.
 
