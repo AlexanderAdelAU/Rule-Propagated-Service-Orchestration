@@ -6,6 +6,8 @@ For example, say you have an online store that relies on a remote Payment Servic
 
 With **RPSO**, you can leave the Payment Service where it is and bind its existing REST endpoint to a **Place** in a Petri-net model. Define the operation's inputs and result, connect the transitions that govern its execution, then generate test requests through the process. RPSO records the execution so you can measure, analyse and replay what actually happened.
 
+This example is deliberately simple, but the architectural pattern behind it goes much further. Each Place is one step of a process: add more, and RPSO handles the sequencing, forks, joins, priorities and compensation between them, with no central engine. The steps can run on different machines, or in different organisations that each run their own hosts, as in the [stroke code](StrokeCode.md), which spans an ambulance service, two hospitals and shared imaging and pathology providers. However large the process grows, every run can be measured and replayed against the same model. [Where RPSO fits](#where-rpso-fits) compares it with workflow engines, service meshes and load-testing tools.
+
 ## Start with one service
 
 A minimal experiment needs only an event generator, a Place bound to the remote service, its incoming and outgoing transitions, and an outcome:
