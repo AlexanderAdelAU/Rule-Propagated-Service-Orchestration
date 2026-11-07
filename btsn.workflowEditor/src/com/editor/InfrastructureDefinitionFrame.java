@@ -49,10 +49,20 @@ public class InfrastructureDefinitionFrame extends JFrame {
     private JPanel capButtons;
     private JButton addCapabilityButton;
     private JButton removeCapabilityButton;
-    private final TitledBorder argumentsBorder = BorderFactory.createTitledBorder("Arguments - select a capability");
+    private final TitledBorder argumentsBorder = BorderFactory.createTitledBorder("Inputs - select a capability");
+    private final JLabel inputsNote = new JLabel(" ");
+    private JButton addInputButton;
+    private JButton removeInputButton;
     private static final String PREF_DEFINITION_DIR = "infrastructureDefinitionDir";
     private final Preferences preferences = Preferences.userNodeForPackage(InfrastructureDefinitionFrame.class);
     private final JLabel statusLabel = new JLabel(" ");
+    // The selected row's service endpoint and wait, in a full-width box below the table: a long address is hard to edit in a cell.
+    private final JLabel endpointLabel = new JLabel("Service endpoint:");
+    private final JTextField endpointField = new JTextField();
+    private final JTextField timeoutField = new JTextField(6);
+    private final JLabel endpointNote = new JLabel(" ");
+    /** True while the endpoint box is filled from the selected row or writes to it, so neither echoes the other. */
+    private boolean endpointSync;
     private File currentFile;
     private String catalogueReference = "";
     private final ServiceRegistry serviceRegistry = new ServiceRegistry();
@@ -142,17 +152,26 @@ public class InfrastructureDefinitionFrame extends JFrame {
             catch (Exception ex) { JOptionPane.showMessageDialog(this, ex.getMessage(), "Invalid catalogue", JOptionPane.ERROR_MESSAGE); }
         });
         capButtons.add(chooseCatalogue);
-        capabilitiesPanel.add(capButtons, BorderLayout.SOUTH);
+        JPanel capabilitiesSouth = new JPanel(new BorderLayout(4, 2));
+        capabilitiesSouth.add(endpointPanel(), BorderLayout.NORTH);
+        capabilitiesSouth.add(capButtons, BorderLayout.SOUTH);
+        capabilitiesPanel.add(capabilitiesSouth, BorderLayout.SOUTH);
 
         JPanel argsPanel = new JPanel(new BorderLayout(4, 4));
         argsPanel.setBorder(argumentsBorder);
         argsPanel.add(new JScrollPane(argumentTable), BorderLayout.CENTER);
         JPanel argButtons = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton addArgument = new JButton("Add argument");
-        JButton removeArgument = new JButton("Remove argument");
+        JButton addArgument = new JButton("Add input");
+        JButton removeArgument = new JButton("Remove input");
+        addInputButton = addArgument;
+        removeInputButton = removeArgument;
         argButtons.add(addArgument);
         argButtons.add(removeArgument);
-        argsPanel.add(argButtons, BorderLayout.SOUTH);
+        JPanel argsSouth = new JPanel(new BorderLayout(4, 2));
+        inputsNote.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 4));
+        argsSouth.add(inputsNote, BorderLayout.NORTH);
+        argsSouth.add(argButtons, BorderLayout.SOUTH);
+        argsPanel.add(argsSouth, BorderLayout.SOUTH);
 
         lowerSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, capabilitiesPanel, argsPanel);
         lowerSplit.setResizeWeight(0.58);
@@ -187,7 +206,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
                 List<String> errors = serviceRegistry.validateEndpoint(cap.service, cap.operation, cap.returnAttribute, names, cap.adapter, cap.endpoint);
                 String described = column == 1 ? serviceRegistry.describe(cap.service) : column == 2 ? serviceRegistry.describe(cap.service, cap.operation)
                     : column == 6 ? "Blank: the host calls the service's Java class. rest: the host calls the Endpoint over HTTP instead. boolean-token: a Boolean service as a token."
-                    : column == 7 ? "For the rest adapter: the http(s) address the host POSTs each call to, e.g. http://127.0.0.1:8080/credit/assess. The service runs there; the place's host stays on its host node."
+                    : column == 7 ? "For the rest adapter: the http(s) address the host POSTs each call to, e.g. http://127.0.0.1:8080/credit/assess. The service runs there; the place's host stays on its host node. Edit it in the Service endpoint box below the table."
                     : column == 0 && processCanvas != null ? "The node whose host runs this place: its queue, rules and routing. With the rest adapter the service itself runs at the Service endpoint."
                     : column == 9 ? "Where this place's host listens: the node's address and the port of the row's slot." : "";
                 setToolTipText(!errors.isEmpty() ? String.join("; ", errors) : ServiceRegistry.tooltip(described));
@@ -203,8 +222,13 @@ public class InfrastructureDefinitionFrame extends JFrame {
                 Capability selected = row >= 0 ? rows().get(row) : null;
                 argumentModel.setCapability(selected);
                 updateArgumentsTitle(selected);
+                showSelectedEndpoint();
             }
         });
+        capabilityModel.addTableModelListener(e -> SwingUtilities.invokeLater(this::showSelectedEndpoint));
+        // A cell being edited is kept when the endpoint box (or anything else) is clicked.
+        capabilityTable.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
+        sizeCapabilityColumns();
 
         addNode.addActionListener(e -> {
             NodeNetwork n = createNextNode();
@@ -373,15 +397,21 @@ public class InfrastructureDefinitionFrame extends JFrame {
 
     private void updateArgumentsTitle(Capability c) {
         if (c == null) {
-            argumentsBorder.setTitle(processCanvas != null ? "Arguments - select a place" : "Arguments - select a capability");
+            argumentsBorder.setTitle(processCanvas != null ? "Inputs - select a place" : "Inputs - select a capability");
         } else if (placeRows.containsKey(c)) {
-            argumentsBorder.setTitle("Arguments for " + placeLabel(c) + " (" + c.service + "." + c.operation + ")");
+            argumentsBorder.setTitle("Inputs of " + placeLabel(c) + " (" + c.service + "." + c.operation + ")");
         } else {
             String node = blank(c.node) ? "<node>" : c.node;
             String service = blank(c.service) ? "<service>" : c.service;
             String operation = blank(c.operation) ? "<operation>" : c.operation;
-            argumentsBorder.setTitle("Arguments for " + node + " / " + service + " / " + operation);
+            argumentsBorder.setTitle("Inputs of " + node + " / " + service + " / " + operation);
         }
+        // Only a boolean-token placement names its own inputs; any other takes them from the catalogue, unchanged.
+        boolean own = c != null && aliasing(c);
+        inputsNote.setText(c == null ? " "
+            : own ? "boolean-token: the names the Boolean service's data arrives under. Add, remove or rename them here."
+            : "Set by the catalogue: the service receives each input by name from the arriving token. Change them in the catalogue, not here.");
+        if (addInputButton != null) { addInputButton.setEnabled(own); removeInputButton.setEnabled(own); }
         repaint();
     }
 
@@ -567,8 +597,11 @@ public class InfrastructureDefinitionFrame extends JFrame {
         capabilityModel.fireTableStructureChanged();
         capabilityTable.moveColumn(8, 0);   // Place first
         capabilityTable.moveColumn(9, 2);   // Address beside Host node
+        sizeCapabilityColumns();
         usePlaceFirstLayout(processFile);
         refreshFromProcess();
+        // Start on the first place, so its endpoint and arguments show without a click.
+        if (capabilityTable.getRowCount() > 0 && capabilityTable.getSelectedRow() < 0) capabilityTable.setRowSelectionInterval(0, 0);
         markSaved();
         // Rows filled from the process are new work until saved.
         if (rowsAddedForProcess.size() > 0 || processHasPendingNodes()) savedSnapshot = "";
@@ -600,7 +633,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
         root.remove(split);
         split.setBottomComponent(null);
         root.add(lowerSplit, BorderLayout.CENTER);
-        lowerSplit.setDividerLocation(300);
+        lowerSplit.setDividerLocation(430);   // the places get the room; a place's inputs are a line or two
         updateArgumentsTitle(null);
         root.revalidate();
     }
@@ -776,6 +809,121 @@ public class InfrastructureDefinitionFrame extends JFrame {
         return nodes.isEmpty() ? "" : nodes.get(0).node;
     }
 
+    /** The Service endpoint box: the selected row's address across the panel's width, and how long the host waits for it. */
+    private JPanel endpointPanel() {
+        JPanel p = new JPanel(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.insets = new Insets(2, 4, 2, 4); c.anchor = GridBagConstraints.WEST;
+        c.gridy = 0; c.gridx = 0; p.add(endpointLabel, c);
+        c.gridx = 1; c.weightx = 1; c.fill = GridBagConstraints.HORIZONTAL; p.add(endpointField, c);
+        c.gridx = 2; c.weightx = 0; c.fill = GridBagConstraints.NONE; p.add(new JLabel("Wait up to"), c);
+        c.gridx = 3; p.add(timeoutField, c);
+        c.gridx = 4; p.add(new JLabel("ms"), c);
+        c.gridy = 1; c.gridx = 1; c.gridwidth = 4; c.fill = GridBagConstraints.HORIZONTAL; p.add(endpointNote, c);
+        endpointField.setToolTipText("The http(s) address the host POSTs each call to, e.g. https://example.org/payment/authorise");
+        timeoutField.setToolTipText("How long the host waits for an answer before the call fails (timeoutMs). Blank: 10 seconds.");
+        endpointField.getDocument().addDocumentListener(onChange(this::endpointEdited));
+        // The wait is milliseconds: anything but digits is dropped as it is typed or pasted.
+        ((javax.swing.text.AbstractDocument)timeoutField.getDocument()).setDocumentFilter(new javax.swing.text.DocumentFilter() {
+            @Override public void insertString(FilterBypass fb, int offset, String text, javax.swing.text.AttributeSet attributes) throws javax.swing.text.BadLocationException {
+                replace(fb, offset, 0, text, attributes);
+            }
+            @Override public void replace(FilterBypass fb, int offset, int length, String text, javax.swing.text.AttributeSet attributes) throws javax.swing.text.BadLocationException {
+                String digits = text == null ? "" : text.replaceAll("[^0-9]", "");
+                if (fb.getDocument().getLength() - length + digits.length() <= 7) super.replace(fb, offset, length, digits, attributes);
+            }
+        });
+        timeoutField.getDocument().addDocumentListener(onChange(this::timeoutEdited));
+        showSelectedEndpoint();
+        return p;
+    }
+
+    private static javax.swing.event.DocumentListener onChange(Runnable action) {
+        return new javax.swing.event.DocumentListener() {
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { action.run(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { action.run(); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { action.run(); }
+        };
+    }
+
+    private Capability selectedCapability() {
+        int row = capabilityTable.getSelectedRow();
+        if (row < 0) return null;
+        int model = capabilityTable.convertRowIndexToModel(row);
+        List<Capability> shown = rows();
+        return model < shown.size() ? shown.get(model) : null;
+    }
+
+    /** Fill the endpoint box from the selected row. */
+    private void showSelectedEndpoint() {
+        if (endpointSync) return;
+        Capability cap = selectedCapability();
+        boolean rest = cap != null && ServiceRegistry.REST.equals(cap.adapter);
+        endpointSync = true;
+        try {
+            String name = cap == null ? "" : processCanvas != null && !placeLabel(cap).isEmpty() ? placeLabel(cap) : cap.service + "." + cap.operation;
+            endpointLabel.setText(name.isEmpty() ? "Service endpoint:" : "Service endpoint of " + name + ":");
+            String endpoint = rest ? cap.endpoint : "";
+            if (!endpointField.getText().trim().equals(endpoint)) { endpointField.setText(endpoint); endpointField.setCaretPosition(0); }
+            String timeout = rest && cap.timeoutMs > 0 ? String.valueOf(cap.timeoutMs) : "";
+            if (!timeoutField.getText().trim().equals(timeout)) timeoutField.setText(timeout);
+            endpointField.setEnabled(rest);
+            timeoutField.setEnabled(rest);
+        } finally { endpointSync = false; }
+        updateEndpointNote(cap);
+    }
+
+    private void endpointEdited() {
+        if (endpointSync) return;
+        Capability cap = selectedCapability();
+        if (cap == null || !ServiceRegistry.REST.equals(cap.adapter)) return;
+        cap.endpoint = endpointField.getText().trim();
+        rowChanged(cap);
+    }
+
+    private void timeoutEdited() {
+        if (endpointSync) return;
+        Capability cap = selectedCapability();
+        if (cap == null || !ServiceRegistry.REST.equals(cap.adapter)) return;
+        String text = timeoutField.getText().trim();
+        cap.timeoutMs = text.isEmpty() ? 0 : Integer.parseInt(text);
+        rowChanged(cap);
+    }
+
+    /** A row changed from the endpoint box: redraw it and mark the deployment changed, without refilling the box. */
+    private void rowChanged(Capability cap) {
+        int row = rows().indexOf(cap);
+        endpointSync = true;
+        try { if (row >= 0) capabilityModel.fireTableRowsUpdated(row, row); } finally { endpointSync = false; }
+        updateEndpointNote(cap);
+        updateTitle();
+    }
+
+    private void updateEndpointNote(Capability cap) {
+        String note; boolean problem = false;
+        if (cap == null) note = "Select a row to see or change its service endpoint.";
+        else if (!ServiceRegistry.REST.equals(cap.adapter)) note = "Set Invocation Adapter to rest to call this service at an endpoint.";
+        else {
+            List<String> names = new ArrayList<>(); for (Argument argument : cap.arguments) names.add(argument.name);
+            List<String> errors = serviceRegistry.validateEndpoint(cap.service, cap.operation, cap.returnAttribute, names, cap.adapter, cap.endpoint);
+            if (!errors.isEmpty()) { note = String.join("; ", errors); problem = true; }
+            else note = "The host POSTs each call here and waits up to " + (cap.timeoutMs > 0 ? cap.timeoutMs + " ms" : "10 seconds (leave the wait blank)")
+                + "; a later answer fails the call.";
+        }
+        endpointNote.setText(note);
+        endpointNote.setForeground(problem ? Color.RED : Color.DARK_GRAY);
+    }
+
+    /** Give the Service endpoint column room for an address; narrow the columns that hold a word or a number. */
+    private void sizeCapabilityColumns() {
+        int[] widths = {70, 130, 90, 110, 55, 90, 105, 320, 100, 140};
+        javax.swing.table.TableColumnModel columns = capabilityTable.getColumnModel();
+        for (int i = 0; i < columns.getColumnCount(); i++) {
+            int model = columns.getColumn(i).getModelIndex();
+            if (model < widths.length) columns.getColumn(i).setPreferredWidth(widths[model]);
+        }
+    }
+
     private String placeLabel(Capability c) {
         ProcessElement place = placeRows.get(c);
         return place == null ? "" : place.getLabel();
@@ -879,6 +1027,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
             if (!blank(c.instance)) field(b, "instance", c.instance, true);
             if (!blank(c.adapter)) field(b, "invocationAdapter", c.adapter, true);
             if (ServiceRegistry.REST.equals(c.adapter)) field(b, "endpoint", c.endpoint, true);
+            if (ServiceRegistry.REST.equals(c.adapter) && c.timeoutMs > 0) b.append("      \"timeoutMs\": ").append(c.timeoutMs).append(",\n");
             field(b, "operation", c.operation, true);
             field(b, "returnAttribute", c.returnAttribute, true);
             b.append("      \"portSlot\": ").append(c.portSlot).append(",\n");
@@ -931,6 +1080,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
             c.instance = stringValue(block, "instance");
             c.adapter = stringValue(block, "invocationAdapter");
             c.endpoint = stringValue(block, "endpoint");
+            c.timeoutMs = intValue(block, "timeoutMs");
             c.operation = stringValue(block, "operation");
             c.returnAttribute = stringValue(block, "returnAttribute");
             c.portSlot = intValue(block, "portSlot");
@@ -1351,7 +1501,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
             else if (c == 6) {
                 if (s.equals(x.adapter)) return;
                 x.adapter = s;
-                if (!ServiceRegistry.REST.equals(s)) x.endpoint = "";
+                if (!ServiceRegistry.REST.equals(s)) { x.endpoint = ""; x.timeoutMs = 0; }
                 useCatalogueContract(x); fireTableRowsUpdated(r, r); return;
             }
             else if (c == 7) x.endpoint = s;
@@ -1369,14 +1519,15 @@ public class InfrastructureDefinitionFrame extends JFrame {
     }
 
     private final class ArgumentModel extends AbstractTableModel {
-        private final String[] columns = {"Name", "Type", "Value", "Required"};
+        // The file also keeps each input's value and required flag; nothing reads them, so they are not shown.
+        private final String[] columns = {"Input", "Type"};
         private Capability capability;
         void setCapability(Capability c) { capability = c; fireTableDataChanged(); }
         public int getRowCount() { return capability == null ? 0 : capability.arguments.size(); }
         public int getColumnCount() { return columns.length; }
         public String getColumnName(int c) { return columns[c]; }
-        public Class<?> getColumnClass(int c) { return c == 3 ? Boolean.class : String.class; }
-        public boolean isCellEditable(int r, int c) { return c == 2 || capability != null && aliasing(capability); }
+        public Class<?> getColumnClass(int c) { return String.class; }
+        public boolean isCellEditable(int r, int c) { return c == 0 && capability != null && aliasing(capability); }
         public Object getValueAt(int r, int c) {
             Argument a = capability.arguments.get(r);
             switch (c) {
@@ -1410,6 +1561,8 @@ public class InfrastructureDefinitionFrame extends JFrame {
         String instance = "";
         String adapter = "";
         String endpoint = "";
+        /** How long the host waits for a rest call, in ms; 0 for the adapter's default. */
+        int timeoutMs;
         String operation = "";
         String returnAttribute = "";
         int portSlot;

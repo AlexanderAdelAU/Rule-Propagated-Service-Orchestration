@@ -251,6 +251,33 @@ public final class DeployFlowCheck {
                     if (b.getText().endsWith("capability")) check(!b.isVisible(), b.getText() + " offered when deploying a process");
                 panel.dispose(); panel = null;
 
+                // The selected place's endpoint and wait are edited in a full-width box below the table, and the wait
+                // (timeoutMs) survives a save. A place's inputs come from the catalogue and cannot be changed here.
+                File payment = new File(common, "ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json");
+                canvas = new Canvas(); canvas.setDefinitionLocation(payment); canvas.loadFromJSON(read(payment.toPath()));
+                panel = InfrastructureDefinitionFrame.openForProcess(null, canvas, payment);
+                table = (JTable)field(panel, "capabilityTable");
+                JTextField endpoint = (JTextField)field(panel, "endpointField"), waitBox = (JTextField)field(panel, "timeoutField");
+                check(table.getSelectedRow() == 0, "Deploy does not start on the first place");
+                check("https://rule-propagated-service-orchestrati.vercel.app/api/payment/authorise".equals(endpoint.getText()) && "2500".equals(waitBox.getText()),
+                    "Endpoint box shows: " + endpoint.getText() + ", wait " + waitBox.getText());
+                Method paymentJson = InfrastructureDefinitionFrame.class.getDeclaredMethod("toJson"); paymentJson.setAccessible(true);
+                check(((String)paymentJson.invoke(panel)).contains("\"timeoutMs\": 2500"), "Saving the deployment drops timeoutMs");
+                endpoint.setText("http://127.0.0.1:8080/payment/authorise");
+                int endpointAt = -1;
+                for (int c = 0; c < table.getColumnCount(); c++) if ("Service endpoint".equals(table.getColumnName(c))) endpointAt = c;
+                check("http://127.0.0.1:8080/payment/authorise".equals(table.getValueAt(0, endpointAt)), "Endpoint box did not change the row: " + table.getValueAt(0, endpointAt));
+                waitBox.setText("5000");
+                check(((String)paymentJson.invoke(panel)).contains("\"timeoutMs\": 5000"), "Wait box did not change timeoutMs");
+                waitBox.setText("3s00");
+                check("300".equals(waitBox.getText()) && ((String)paymentJson.invoke(panel)).contains("\"timeoutMs\": 300"), "The wait box accepted more than digits: " + waitBox.getText());
+                waitBox.setText("");
+                check(!((String)paymentJson.invoke(panel)).contains("timeoutMs"), "A blank wait should leave the default");
+                JTable inputs = (JTable)field(panel, "argumentTable");
+                check(inputs.getColumnCount() == 2 && "token".equals(inputs.getValueAt(0, 0)) && !inputs.isCellEditable(0, 0),
+                    "Payment's inputs should show token, from the catalogue, read-only");
+                panel.dispose(); panel = null;
+
                 File triage = new File(common, "ProcessDefinitionFolder/healthcare/Workflow/Triage_Workflow.json");
                 File shared = new File(common, "ServiceDeploymentFolder/healthcare/Healthcare.json");
                 int sharedRows = read(shared.toPath()).split("\"node\"", -1).length - 1;
