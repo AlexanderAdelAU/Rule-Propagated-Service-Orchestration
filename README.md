@@ -1,22 +1,56 @@
 # Rule-Propagated Service Orchestration (RPSO)
 
-**RPSO uses Petri net concepts to transform ordinary callable services into a logically defined, distributed orchestration system.  It can for example embed an existing service into petri-net test harness for stress test, etc**
+**RPSO uses Petri net concepts to transform ordinary callable services into a logically defined, distributed orchestration system.**
 
-A service, whether a Java method or a REST endpoint, is represented as a Place within a logical **Node (T_in → Place → T_out)**. This gives each service an explicit orchestration context: how its inputs are collected, when it can execute, and how its results are propagated to other services.
+For example, say you have an online store that relies on a remote Payment Service. It works well under normal conditions, but what happens when order volumes rise, calls become slow, or the service fails? How do those problems affect the rest of the checkout process?
 
-The Petri-net representation provides a formal foundation for sequencing, conditional routing, concurrency, forks, joins and synchronisation, without requiring these behaviours to be implemented within the business services themselves.
+With **RPSO**, you can leave the Payment Service where it is and bind its existing REST endpoint to a **Place** in a Petri-net model. Define the operation's inputs and result, connect the transitions that govern its execution, then generate test requests through the process. RPSO records the execution so you can measure, analyse and replay what actually happened.
+
+**A simple first use: turn an existing service into part of an executable, observable test workflow.**
+
+## Start with one service
+
+A minimal experiment needs only an event generator, a Place bound to the remote service, its incoming and outgoing transitions, and an outcome:
+
+```mermaid
+flowchart LR
+    subgraph RPSO["RPSO Test Workflow"]
+        direction LR
+        EG["Event Generator"]
+        subgraph NODE["Logical Node · executed by a generic RPSO orchestration host"]
+            direction LR
+            TI["T_in"] --> P(("Payment<br/>Place")) --> TO["T_out"]
+        end
+        EG --> TI
+        TO --> OK["Success"]
+        TO --> FAIL["Failure"]
+    end
+
+    P <-. "REST request / response" .-> REST["Existing Remote<br/>Payment Service"]
+    NODE -. "host records execution" .-> OBS["Monitor / Analysis<br/>timings, queue waits, replay"]
+```
+
+*The logical Node is the complete **T_in → Payment Place → T_out** group. Its assigned generic RPSO orchestration host executes that behaviour, performs a REST request/response with the existing remote Payment Service, and records the run for analysis and replay.*
+
+The **Payment Place is logical**, not the Payment Service itself. The generic orchestration host executes the whole logical Node (`T_in → Place → T_out`), using the Place's REST binding to send a request to the unchanged Payment Service and receive its response. The returned values are then available to `T_out` for routing. The host can run locally or alongside the service on the remote machine. **Build and Run** generates an Ant launcher; running it builds the runtime JARs. For remote deployment, **Build host packages** creates a ZIP with the JARs, rules and `launch.bat`. Copy and extract it on the remote machine and start the host before running the workflow launcher locally.
+
+1. **Bind the service.** Describe the existing REST operation and its inputs and result; no change to the service's business logic is required.
+2. **Exercise it.** Generate tokens at a chosen rate, then vary the workload or introduce controlled delays and failures in the test environment.
+3. **Observe it.** Inspect service times, queue waits, routing and token flow; replay the recorded run against the same model.
+
+From one remote service, the model can grow into a complete checkout process with inventory, payment and order handling. Load, stress, soak and failure scenarios can then be studied *in the context of that workflow*. RPSO provides orchestration, token generation, execution records and analysis; realistic workloads and fault-injection conditions still need to be configured as part of the test.
+
+## How RPSO works
+
+RPSO uses Petri-net concepts to organise ordinary callable services. A service operation, whether a Java method or a REST endpoint, is bound to a **Place** within a logical **Node (T_in → Place → T_out)**. T_in collects the required inputs; the assigned orchestration host invokes the service bound to the Place; T_out propagates its result.
+
+The Petri-net representation provides a formal foundation for sequencing, conditional routing, concurrency, forks, joins and synchronisation, without requiring those behaviours to be implemented inside the business services.
 
 **RPSO turns this logical representation into a live distributed system.** Each logical Node is assigned to a host target, where a generic [orchestration host](Architecture.md#terms) executes its behaviour. Using installed coordination rules and canonical bindings, the host determines when the required inputs are available, invokes the bound Place Service and propagates the result. Tokens carry information directly between hosts, so no central orchestration engine directs their execution.
 
 The process drawn in the editor is therefore more than a visual model: **it is the definition of the system that executes.** Its behaviour can be observed, measured, analysed and replayed against the original Petri-net representation.
 
-Because the orchestration machinery is generic, it can execute very different
-Petri-net processes: from a Boolean test to a loan application or an
-emergency-department workflow. Bind different services to the Places to change
-the work performed; change the deployment to run the same process across
-different machines. A Java service can run in-process inside its orchestration
-host, while a REST service can run anywhere its endpoint is reachable, in any
-language.
+The same generic machinery supports very different processes: from a Boolean test or a remote payment check to a loan application or an emergency-department workflow. Bind different services to the Places to change the work performed; change the deployment to run the same process across different machines. A Java service can run in-process inside its orchestration host, while a REST service can run anywhere its endpoint is reachable, in any language.
 
 ![An emergency-department process in the editor: patient arrivals pass Triage, whose gateway sends them to Laboratory, Cardiology and Radiology, which join at Diagnosis before Treatment. A triage canary and federated radiology requests from another hospital also enter the process. Places are deployed to host targets P1 to P6; dashed lines show network connections.](images/emergency-department-concurrent.png)
 
@@ -51,9 +85,9 @@ of meeting hard real-time deadlines.
 
 ## From an idea to a measured run
 
-Start by drawing a process in the editor, running it on orchestration hosts and
-replaying the recorded execution on the same model. [Tutorial.md](Tutorial.md)
-walks through two examples:
+Start by drawing a process in the editor, binding services to its Places,
+running it on orchestration hosts and replaying the recorded execution on the
+same model. [Tutorial.md](Tutorial.md) walks through two examples:
 
 1. **A standard service** that returns true or false: one Place, a loop and ten tokens.
 2. **A claims process** that calls a remote service over REST.
