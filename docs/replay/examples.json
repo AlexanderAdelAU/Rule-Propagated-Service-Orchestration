@@ -86,7 +86,7 @@
       "id": "payment_priority",
       "category": "start",
       "title": "Priority at a shared service",
-      "description": "In-store payments and online checkout share the same remote payment gateway. Online checkout sends its burst; the place serves the lower version first, so in-store payments pass the queued online ones. In-store payments waited 0.6 s on average, online ones 7.3 s, and the analysis found the in-store payment taken first at all 81 moments both were queued.",
+      "description": "In-store payments and online checkout share the same remote payment gateway. Online checkout sends its burst; the place serves the lower version first, so in-store payments pass the queued online ones. In-store payments waited 0.6 s on average, online ones 13.7 s, and the analysis found the in-store payment taken first at all 135 moments both were queued.",
       "model": "btsn.common/ProcessDefinitionFolder/payments/Workflow/Payment_Priority_Test.json",
       "run": "btsn.common/AnalysisFolder/Payments/Analysis_Payment_Priority_Test.txt",
       "versions": {

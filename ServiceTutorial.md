@@ -474,13 +474,18 @@ the lower version first from its queue. Give the work that must not wait the low
 
 The service and its placement are the same as above. **What one run told us** ([watch it](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Payment_Priority_Test.json&run=../../btsn.common/AnalysisFolder/Payments/Analysis_Payment_Priority_Test.txt)):
 
-- In-store payments waited 0.6 s on average, at most 2.6 s; online payments waited 7.3 s on average, up to 15.2 s.
-- The analysis checked every moment both kinds were queued together, 81 of them: the in-store payment was taken first each time.
+- In-store payments waited 0.6 s on average, at most 2.1 s; online payments waited 13.7 s on average, up to 24.6 s.
+  Each call took about 0.8 s, so the place could clear about 1.25 payments a second, and the online queue took all the shortfall.
+- The analysis checked every moment both kinds were queued together, 135 of them: the in-store payment was taken first each time.
 
   ```
-  Priority respected: 81/81 (100.0%)
+  Priority respected: 135/135 (100.0%)
   [OK] No inversions: wherever two versions waited in the same queue, the higher priority was taken first
   ```
+
+Priority decides which payment goes next; it does not interrupt a call already in progress. The longest in-store wait,
+2.1 s, was behind an online call that took until its 2.5 s timeout. A slow service holds up even priority traffic for as
+long as **Wait up to** allows.
 
 The same holds across machines and organisations: the [stroke code](StrokeCode.md) gives stroke patients priority at
 shared imaging and pathology providers in the same way.
