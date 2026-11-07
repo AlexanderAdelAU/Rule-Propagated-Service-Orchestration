@@ -352,8 +352,8 @@ run gives the same result as before: ten workflows completed, five approved and 
   The same report lists a token whose service returned a value that no arc from its
   T_out tests ("no arc from its T_out tests 'review'"). The run summary in the editor
   repeats these lines, and the replay removes each failed token at its place.
-- **Timeout.** A call waits up to 10 seconds. To change it, add `"timeoutMs": 5000` to
-  the placement in the service deployment file.
+- **Timeout.** A call waits up to 10 seconds. To change it, enter the milliseconds in **Wait up to**,
+  beside the Service endpoint box in the Deploy panel. It is saved as `"timeoutMs"` in the placement.
 - **No Java class at all.** A service that only exists behind an endpoint can leave
   `implementationClass` out of its catalogue entry. It must then be deployed with the
   `rest` adapter, and its catalogue left out of `packaging.json`, since there is nothing
@@ -403,7 +403,7 @@ is `node` or `vercel` in each credit decision.
   plan. Vercel's free Hobby plan does not.
 - **Cold starts.** A free Render service sleeps after 15 minutes without calls, and
   its first call can take longer than the 10-second timeout. Open the check address
-  just before a run, or add `"timeoutMs": 60000` to the placement.
+  just before a run, or set **Wait up to** to `60000` in the Deploy panel.
 - **Network time counts.** Monitor measures the call from the host, so service times
   now include the round trip to the platform.
 
@@ -453,7 +453,7 @@ The supplied example tests a mock payment gateway,
 **Test your own service.** Its answer needs the shape described in [What the host sends and expects](#8-call-it-over-rest).
 
 1. Put its address in the placement's `endpoint`, or in the editor's Deploy panel.
-2. Set `timeoutMs` to the longest wait you will accept.
+2. Set **Wait up to** (`timeoutMs`) to the longest wait you will accept.
 3. Shape the traffic in the CSV: each row gives a token number and when to send it, in ms.
 4. Run the launcher, then its `analyse` target, and replay the run.
 

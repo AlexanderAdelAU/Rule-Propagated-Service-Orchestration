@@ -174,7 +174,7 @@ Use **Arrow (drag)** for each arrow.
 ### Deploy it
 
 20. Click **Deploy**. Choose **Host node** `P1` for Triage and `P2` for Assess.
-21. In Assess's row, set **Invocation Adapter** to `rest` and **Service endpoint** to
+21. In Assess's row, set **Invocation Adapter** to `rest`. Then, in the **Service endpoint** box below the table, enter
     `https://rule-propagated-service-orchestrati.vercel.app/api/claims/assess`
 22. Click **Save deployment...** and accept the name it suggests.
 23. Choose **File → Save Process Definition**.
