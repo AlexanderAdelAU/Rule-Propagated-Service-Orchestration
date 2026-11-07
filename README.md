@@ -78,6 +78,25 @@ waits, service times, join waits and end-to-end workflow time. The recorded run
 can then be replayed against the model. These are measurements, not guarantees
 of meeting hard real-time deadlines.
 
+## Where RPSO fits
+
+RPSO is a research and design platform. It does not replace production workflow engines, service meshes or load-testing tools; it sits beside them and answers a different question: *what does this process do when it runs, step by step, across the machines and organisations that take part?*
+
+| Tools | What they do | How RPSO differs |
+|---|---|---|
+| **Workflow engines** (Temporal, AWS Step Functions, Camunda) | Run long-lived processes reliably; a central engine or cluster keeps each process's state | No central engine: each Node's host decides locally from its installed rules, and tokens travel directly between hosts. Each organisation can run its own hosts without sharing an engine, as in the [stroke code](StrokeCode.md) |
+| **Service meshes** (Istio, Linkerd, Envoy) | Manage traffic between services: routing, retries, encryption, telemetry | Works at the level of the process, not the network: forks, joins, priorities and routing on a service's own decision |
+| **Load and chaos tools** (k6, Locust, JMeter, Chaos Mesh) | Generate heavy traffic and inject faults | Sends scheduled traffic *through the process*, so a slow or failing service is seen in its effect on the rest of the workflow |
+| **Tracing** (OpenTelemetry, APM tools) | Record each call as it crosses services | Records each token against the Petri-net model, so a run can be replayed on the diagram and analysed for queue order, join waits and capacity |
+
+They work together: the same service can sit behind a mesh, take raw load from k6, and be tested in the context of its process with RPSO.
+
+RPSO already works with current practice:
+
+- **Services in any language, hosted anywhere**, called over REST; the supplied examples include functions hosted on Vercel.
+- **Regression suites** run in GitHub Actions on every change.
+- **Recorded runs replay in the browser**, on [the examples page](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/examples.html).
+
 ## From an idea to a measured run
 
 Start by drawing a process in the editor, binding services to its Places,
