@@ -448,7 +448,7 @@ The supplied example tests a mock payment gateway,
     1 failed at PaymentService (P1_Place): REST service PaymentService.authorise at ... did not answer within 2500 ms (timeoutMs)
   ```
 
-- The burst queued at the T_in for up to 9.5 s; steady traffic hardly queued.
+- The burst queued at the T_in for up to 10.8 s; steady traffic hardly queued.
 
 **Test your own service.** Its answer needs the shape described in [What the host sends and expects](#8-call-it-over-rest).
 
