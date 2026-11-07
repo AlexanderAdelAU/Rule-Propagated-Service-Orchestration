@@ -436,7 +436,7 @@ The supplied example tests a mock payment gateway,
 | The traffic: one a second for 10 s, a burst of 12 at once, then one a second again | [`Remote_Payment_Test_BuildAndRun.csv`](btsn.common.eventgenerators/EventTriggeringFile/Remote_Payment_Test_BuildAndRun.csv) |
 | The launcher | [`Remote_Payment_Test_BuildAndRun.xml`](btsn.petrinet.ProjectLoader/Remote_Payment_Test_BuildAndRun.xml) |
 
-**What one run told us** ([watch it](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json&run=../../btsn.common/AnalysisFolder/Payments/Analysis_Remote_Payment_Test.txt)):
+**What one run against Vercel told us** ([watch it](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json&run=../../btsn.common/AnalysisFolder/Payments/Analysis_Remote_Payment_Test.txt)):
 
 - 30 payments: 24 paid and 3 declined, each routed on the service's own answer.
 - 3 failed at the place, and the analysis says why:
@@ -448,7 +448,7 @@ The supplied example tests a mock payment gateway,
     1 failed at PaymentService (P1_Place): REST service PaymentService.authorise at ... did not answer within 2500 ms (timeoutMs)
   ```
 
-- The burst queued at the T_in for up to 8.8 s; steady traffic hardly queued.
+- The burst queued at the T_in for up to 8.7 s; steady traffic hardly queued.
 
 **Test your own service.** Its answer needs the shape described in [What the host sends and expects](#8-call-it-over-rest).
 
