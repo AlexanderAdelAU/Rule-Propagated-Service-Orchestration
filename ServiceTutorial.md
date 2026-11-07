@@ -413,6 +413,10 @@ You may have a remote service to try out, such as a payment gateway, before you 
 One event generator and one place are enough. RPSO calls the service as the process will, supplies the traffic and
 measures each call from the caller's side. The service itself doesn't change.
 
+This is not a load test: tools such as k6 send far more traffic. What RPSO shows is the service's effect on the
+process: where work queues, which route each answer takes, and where a failure or a slow answer stops a token. As
+the model grows into the whole process, the same measurements cover every step around the service.
+
 ![A remote payment service tested in context: steady payments, then a burst of twelve that queues at the T_in; paid, declined and failed calls are counted as the run replays.](images/remote-payment-test.gif)
 
 The supplied example tests a mock payment gateway,

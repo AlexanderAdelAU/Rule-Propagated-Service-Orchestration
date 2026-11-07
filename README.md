@@ -33,6 +33,12 @@ flowchart LR
 2. **Exercise it.** Generate tokens at a chosen rate and timing: steady traffic, bursts or a long soak. To see failures, point the Place at a test copy of the service that you can slow down or make fail, and set how long the Place waits for an answer.
 3. **Observe it.** Inspect service times, queue waits, routing and token flow; replay the recorded run against the same model.
 
+**See it run.** In the supplied example, a mock payment service receives steady payments, then a burst of twelve. The replay shows what the service's behaviour does to the process, not just its response times: the queue builds at T_in, declined payments take their own route, and calls that fail or answer too slowly stop at the Place, with the reason recorded.
+
+![The payment example replayed: an event generator sends steady payments, then a burst of twelve that queues at the Place's T_in. Paid, declined and failed calls are counted as the run replays, and a timeline shows each payment's wait and service time.](images/remote-payment-test.gif)
+
+[▶ Watch the recorded run](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json&run=../../btsn.common/AnalysisFolder/Payments/Analysis_Remote_Payment_Test.txt) · [Test your own service this way](ServiceTutorial.md#test-a-remote-service-in-context)
+
 From one remote service, the model can grow into a complete checkout process with inventory, payment and order handling. Load, stress, soak and failure scenarios can then be studied *in the context of that workflow*. RPSO provides orchestration, token generation, execution records and analysis; realistic workloads and fault-injection conditions still need to be configured as part of the test.
 
 ## How RPSO works
@@ -64,12 +70,6 @@ The same generic machinery supports very different processes: from a Boolean tes
 
 **A federated example.** [A stroke code across four organisations](StrokeCode.md): an ambulance, a receiving hospital, a stroke centre and shared imaging and pathology providers, on twelve hosts with no central engine. It was recorded across two machines, with the stroke centre's host on its own machine. A compensation process undoes the stroke centre's booking when it isn't needed, and stroke codes overtake routine patients at the shared providers.
 [▶ Watch it](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Stroke_Code_With_Emergency_Department.json&run=../../btsn.common/AnalysisFolder/Healthcare/Stroke_Code_With_Emergency_Department.txt)
-
-**What if you only have one remote service to test?** You don't need a whole process. One event generator and one place are enough to call the service over REST, unchanged, with steady traffic and bursts. Every call is measured from the caller's side, and a failed call is recorded with its reason. When you're ready, grow the same model into the whole process. [Test a remote service in context](ServiceTutorial.md#test-a-remote-service-in-context)
-
-![A remote payment service tested in context: an event generator sends steady payments, then a burst of twelve. They queue at the place's T_in, and paid, declined and failed calls are counted as the run replays.](images/remote-payment-test.gif)
-
-[▶ Watch the recorded run](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json&run=../../btsn.common/AnalysisFolder/Payments/Analysis_Remote_Payment_Test.txt)
 
 How does a drawing become a running system? In this four-Node example, each Node is deployed to its own host target, run by a separate orchestration host:
 
