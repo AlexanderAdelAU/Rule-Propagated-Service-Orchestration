@@ -579,6 +579,14 @@ public class PetriNetAnalyzer {
      * Queue/service timing comes from SERVICECONTRIBUTION.
      * Join synchronization is measured separately from place residence.
      */
+    /** Calls that failed at each place (FAILED events), whatever the reason. */
+    private static Map<String, Integer> failedCalls(CanonicalWorkflowAnalysis canonical) {
+        Map<String, Integer> failed = new TreeMap<>();
+        for (Map.Entry<String, Map<String, Integer>> place : canonical.failures.entrySet())
+            for (int count : place.getValue().values()) failed.merge(place.getKey(), count, Integer::sum);
+        return failed;
+    }
+
     public TemporalAnalysis analyzeTemporal(int workflowBase) {
         TemporalAnalysis analysis = new TemporalAnalysis();
         analysis.workflowBase = workflowBase;
@@ -586,6 +594,7 @@ public class PetriNetAnalyzer {
         CanonicalWorkflowAnalysis canonical = analyzeCanonicalWorkflows(workflowBase);
         analysis.expectedCompletedWorkflows = canonical.completedWorkflows;
         analysis.expectedPlaceExecutions.putAll(canonical.placeExecutions);
+        analysis.failedPlaceExecutions.putAll(failedCalls(canonical));
 
         ArrayList<Long> workflowLatencies = new ArrayList<>();
         ArrayList<Long> generatedTimes = new ArrayList<>();
@@ -689,10 +698,12 @@ public class PetriNetAnalyzer {
 
             // Every logical ENTER should contribute exactly one service timing row.
             // Treat any per-place count mismatch as a Stage-2 data-quality failure.
+            // A call that failed at the place (FAILED) has no result, so it may have no timing row.
             for (Map.Entry<String, Integer> expected : canonical.placeExecutions.entrySet()) {
                 ServiceTimingSummary summary = analysis.serviceTiming.get(expected.getKey());
                 int actual = summary == null ? 0 : summary.totalTime.samples;
-                if (actual != expected.getValue()) {
+                int failed = analysis.failedPlaceExecutions.getOrDefault(expected.getKey(), 0);
+                if (actual > expected.getValue() || actual < expected.getValue() - failed) {
                     analysis.serviceTimingCountMismatches++;
                 }
             }
@@ -921,7 +932,10 @@ public class PetriNetAnalyzer {
             appendDistribution(report, "     Service", timing.serviceTime);
             appendDistribution(report, "     Total", timing.totalTime);
             int expectedExecutions = temporal.expectedPlaceExecutions.getOrDefault(entry.getKey(), 0);
-            if (timing.totalTime.samples != expectedExecutions) {
+            int failedCalls = temporal.failedPlaceExecutions.getOrDefault(entry.getKey(), 0);
+            if (failedCalls > 0)
+                report.append("     Failed calls: ").append(failedCalls).append(" (no service time; see Failed workflows in the first report)\n");
+            if (timing.totalTime.samples > expectedExecutions || timing.totalTime.samples < expectedExecutions - failedCalls) {
                 report.append("     [WARN] timing samples=")
                       .append(timing.totalTime.samples)
                       .append(", logical executions=").append(expectedExecutions).append("\n");
@@ -2661,7 +2675,11 @@ public class PetriNetAnalyzer {
                 report.append("     Min/Max: ").append(stats.minResidenceTime)
                       .append("/").append(stats.maxResidenceTime).append("ms\n");
             }
-            if (stats.tokenCount != logicalExecutions) {
+            // A call that failed at the place has no residence time: it is listed under Failed workflows above.
+            int failedCalls = failedCalls(canonical).getOrDefault(place, 0);
+            if (failedCalls > 0)
+                report.append("     Failed calls: ").append(failedCalls).append(" (no residence time; see Failed workflows above)\n");
+            if (stats.tokenCount > logicalExecutions || stats.tokenCount < logicalExecutions - failedCalls) {
                 report.append("     [WARN] execution/timing-sample mismatch - inspect token identity\n");
             }
         }
@@ -3169,6 +3187,8 @@ public class PetriNetAnalyzer {
         public TimingDistribution workflowLatency = new TimingDistribution();
         public TimingDistribution generationInterArrival = new TimingDistribution();
         public Map<String, Integer> expectedPlaceExecutions = new TreeMap<>();
+        /** Calls that failed at each place: entered, but with no result to time. */
+        public Map<String, Integer> failedPlaceExecutions = new TreeMap<>();
         public Map<String, TimingDistribution> placeResidence = new TreeMap<>();
         public Map<String, ServiceTimingSummary> serviceTiming = new TreeMap<>();
         public Map<String, JoinTimingSummary> joinTiming = new TreeMap<>();
