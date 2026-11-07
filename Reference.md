@@ -1123,7 +1123,21 @@ The sections below explain what you have just run, starting from a single place
 
 ## Run an example
 
-Every launcher runs the same way:
+Every example runs either from the editor or from its launcher.
+
+**From the editor**
+
+1. Open the example's process with **File → Open** (the process files are in `btsn.common/ProcessDefinitionFolder`).
+2. Check **Machines:** in the toolbar: `SingleHost` runs every host on this computer.
+3. Click **Run on hosts**. The Run window picks the launcher that runs this process; keep **Run every host on this computer** ticked and click **Run**.
+4. When the run completes, the window has analysed it: click **▶ Replay the recorded run** to replay it on the diagram, or **Open analysis report**.
+
+Skip **Build → Create** for a supplied example: it would rewrite the launcher and its token schedule from the diagram,
+replacing any schedule written by hand, such as a burst. The editor saves the analysis as
+`btsn.common/AnalysisFolder/<Domain>/Analysis_<process>.txt`; where that is a supplied recording, your run replaces your
+copy (`git checkout` the file to get the supplied one back).
+
+**From the launcher**
 
 - right-click it, then choose **Run As → Ant Build** (default target `run-complete-workflow`);
 - add `-Dhost.address=127.0.0.1` to run on one computer;

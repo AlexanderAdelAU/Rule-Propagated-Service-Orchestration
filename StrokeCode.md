@@ -149,6 +149,23 @@ Hosts record a token's arrival at a T_in when it joins the operation's queue, an
 
 ## Run it yourself
 
+**From the editor**
+
+1. Start the stroke centre's booking system in a terminal of its own, because the editor checks each REST endpoint before a run:
+
+   ```sh
+   cd btsn.healthcare.ProjectLoader
+   ant -f Stroke_Code_With_Emergency_Department.xml stroke-centre   # until Ctrl+C
+   ```
+
+2. Open the combined model, `btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Stroke_Code_With_Emergency_Department.json`, with **File → Open**. Leave **Machines:** on `SingleHost`.
+3. Click **Run on hosts**. The Run window picks `Stroke_Code_With_Emergency_Department.xml`; keep **Run every host on this computer** ticked and click **Run**.
+4. When the run completes, click **▶ Replay the recorded run**, or **Open analysis report** for the report and the suite-hold balance below.
+
+Don't use **Build → Create** for this example: it would rewrite the launcher from the diagram.
+
+**From the command line**
+
 ```sh
 cd btsn.healthcare.ProjectLoader
 ant -f Stroke_Code_With_Emergency_Department.xml -Dhost.address=127.0.0.1   # every host on this machine, and the booking system
@@ -166,11 +183,7 @@ The analysis ends with the balance:
    Balance:                          [OK] every suite hold opened was settled or undone, exactly once
 ```
 
-The run starts the stroke centre's booking system on port 8090 if nothing answers there, and stops it at the end. To run from the editor, start the booking system first in a terminal of its own, because the editor checks each REST endpoint before a run:
-
-```sh
-ant -f Stroke_Code_With_Emergency_Department.xml stroke-centre   # until Ctrl+C
-```
+From the command line, the run starts the stroke centre's booking system on port 8090 if nothing answers there, and stops it at the end.
 
 To run the stroke centre on a machine of its own (192.168.1.152 in [TwoHost_StrokeCentre.json](btsn.common/InfrastructureDefinitionFolder/TwoHost_StrokeCentre.json)), with tokens reaching its host P8 over UDP like any other host and its booking inside that host:
 

@@ -456,7 +456,8 @@ The supplied example tests a mock payment gateway,
 2. Set **Wait up to** (`timeoutMs`) to the longest wait you will accept.
 3. Shape the traffic in the CSV: one row per payment, `time_ms,0,1`, where `time_ms` is when to send it.
    Run the launcher itself (or **Run on hosts**), not **Build → Create**, which would replace the schedule with a steady one.
-4. Run the launcher, then its `analyse` target, and replay the run.
+4. Run it: open the process in the editor and click **Run on hosts**, then **Run**; the Run window analyses the run and
+   offers **▶ Replay the recorded run**. Or run the launcher, then its `analyse` target.
 
 When the service behaves as you need, add the places around it. Each new place is another Node in the same model.
 
@@ -472,7 +473,8 @@ the lower version first from its queue. Give the work that must not wait the low
 | The traffic: in-store, one payment every 2 s; online, the steady traffic and burst above | [`Payment_Priority_Test_BuildAndRun_INSTORE.csv`](btsn.common.eventgenerators/EventTriggeringFile/Payment_Priority_Test_BuildAndRun_INSTORE.csv), [`..._ONLINE.csv`](btsn.common.eventgenerators/EventTriggeringFile/Payment_Priority_Test_BuildAndRun_ONLINE.csv) |
 | The launcher | [`Payment_Priority_Test_BuildAndRun.xml`](btsn.petrinet.ProjectLoader/Payment_Priority_Test_BuildAndRun.xml) |
 
-The service and its placement are the same as above. **What one run told us** ([watch it](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Payment_Priority_Test.json&run=../../btsn.common/AnalysisFolder/Payments/Analysis_Payment_Priority_Test.txt)):
+The service and its placement are the same as above. To run it, open `Payment_Priority_Test.json` in the editor and
+click **Run on hosts**, then **Run** (not **Build → Create**, which would replace both schedules). **What one run told us** ([watch it](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Payment_Priority_Test.json&run=../../btsn.common/AnalysisFolder/Payments/Analysis_Payment_Priority_Test.txt)):
 
 - In-store payments waited 0.6 s on average, at most 2.1 s; online payments waited 13.7 s on average, up to 24.6 s.
   Each call took about 0.8 s, so the place could clear about 1.25 payments a second, and the online queue took all the shortfall.
