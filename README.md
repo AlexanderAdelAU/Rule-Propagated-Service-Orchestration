@@ -33,7 +33,7 @@ flowchart LR
 2. **Exercise it.** Generate tokens at a chosen rate and timing: steady traffic, bursts or a long soak. To see failures, point the Place at a test copy of the service that you can slow down or make fail, and set how long the Place waits for an answer.
 3. **Observe it.** Inspect service times, queue waits, routing and token flow; replay the recorded run against the same model.
 
-**See it run.** In the supplied example, a mock payment service receives steady payments, then a burst of twelve. The replay shows what the service's behaviour does to the process, not just its response times: the queue builds at T_in, declined payments take their own route, and calls that fail or answer too slowly stop at the Place, with the reason recorded.
+**See it run.** In the supplied example, a mock payment service on Vercel receives steady payments, then a burst of twelve. The replay shows what the service's behaviour does to the process, not just its response times: the queue builds at T_in, declined payments take their own route, and calls that fail or answer too slowly stop at the Place, with the reason recorded.
 
 ![The payment example replayed: an event generator sends steady payments, then a burst of twelve that queues at the Place's T_in. Paid, declined and failed calls are counted as the run replays, and a timeline shows each payment's wait and service time.](images/remote-payment-test.gif)
 
