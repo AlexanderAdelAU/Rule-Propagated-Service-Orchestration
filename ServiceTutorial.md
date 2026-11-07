@@ -339,7 +339,9 @@ run gives the same result as before: ten workflows completed, five approved and 
 - **Before a run.** **Run on hosts** first asks each REST endpoint for an answer. If one
   does not answer, it names the service and the reason (for example *connection refused*)
   and lets you cancel. An address on `127.0.0.1` is checked only when the hosts run on this
-  computer, since from another machine it would name that machine.
+  computer, since from another machine it would name that machine. A launcher that starts a
+  service itself names it in `launcher.starts.services` (address prefixes, separated by commas),
+  and that service is not checked; the stroke code's launcher does this for the stroke centre.
 - **When it fails.** If the endpoint cannot be reached, answers an error, or returns a
   body without the return attribute, the call fails as a Java service that throws
   would. The token stops at that place, and the analysis says why:

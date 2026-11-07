@@ -51,11 +51,17 @@ public final class EndpointCheck {
      * the hosts run on this machine (singleMachine); from another machine they would name the wrong computer.
      */
     public static List<String> notAnswering(Canvas canvas, boolean singleMachine, int timeoutMs) {
+        return notAnswering(canvas, singleMachine, timeoutMs, Collections.emptyList());
+    }
+
+    /** As above, leaving out the addresses under startedByLauncher: services the run starts itself (see startedBy). */
+    public static List<String> notAnswering(Canvas canvas, boolean singleMachine, int timeoutMs, Collection<String> startedByLauncher) {
         List<String> problems = new ArrayList<>();
         Map<String, String> checked = new HashMap<>();
         for (ProcessElement place : canvas.getPlaces()) {
             String address = canvas.getServiceRegistry().restEndpointFor(place);
             if (address == null || address.isEmpty() || (!singleMachine && isLoopback(address))) continue;
+            if (startedByLauncher.stream().anyMatch(address::startsWith)) continue;
             String reason = checked.containsKey(address) ? checked.get(address) : probe(address, timeoutMs);
             checked.put(address, reason);
             if (reason != null)
@@ -63,5 +69,21 @@ public final class EndpointCheck {
                     + "). Start the service, or change its endpoint in Deploy.");
         }
         return problems;
+    }
+
+    /**
+     * The services these launchers start themselves before their hosts call them: the address prefixes in each one's
+     * launcher.starts.services property, separated by commas. Not answering before the run is then expected.
+     */
+    public static List<String> startedBy(Collection<java.io.File> launchers) {
+        List<String> prefixes = new ArrayList<>();
+        java.util.regex.Pattern property = java.util.regex.Pattern.compile("name=\"launcher\\.starts\\.services\"\\s+value=\"([^\"]*)\"");
+        for (java.io.File launcher : launchers) {
+            try {
+                java.util.regex.Matcher m = property.matcher(new String(java.nio.file.Files.readAllBytes(launcher.toPath()), java.nio.charset.StandardCharsets.UTF_8));
+                while (m.find()) for (String prefix : m.group(1).split(",")) if (!prefix.trim().isEmpty()) prefixes.add(prefix.trim());
+            } catch (IOException ignored) { }
+        }
+        return prefixes;
     }
 }

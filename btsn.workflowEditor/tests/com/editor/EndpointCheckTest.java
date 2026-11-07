@@ -46,11 +46,20 @@ public final class EndpointCheckTest {
                     + " is not answering (connection refused). Start the service, or change its endpoint in Deploy.")), "Silent service not reported: " + silent);
                 // From another machine, 127.0.0.1 names the host's own computer: not checked from here.
                 check(EndpointCheck.notAnswering(canvas, false, 2000).isEmpty(), "Loopback endpoint checked for a multi-machine run");
+                // A service the launcher starts itself is not expected to answer before the run.
+                check(EndpointCheck.notAnswering(canvas, true, 2000, Arrays.asList("http://127.0.0.1:" + closed + "/")).isEmpty(),
+                    "A service the launcher starts was reported as not answering");
             }
+            // The stroke code's launcher starts the stroke centre's booking system, and says so.
+            File stroke = new File(root, "btsn.healthcare.ProjectLoader/Stroke_Code_With_Emergency_Department.xml");
+            check(EndpointCheck.startedBy(Arrays.asList(stroke)).equals(Arrays.asList("http://127.0.0.1:8090/stroke-centre/")),
+                "Stroke launcher's started services: " + EndpointCheck.startedBy(Arrays.asList(stroke)));
+            String suite = new String(Files.readAllBytes(root.toPath().resolve("btsn.common/ServiceDeploymentFolder/healthcare/StrokeCode.json")));
+            check(suite.contains("\"http://127.0.0.1:8090/stroke-centre/"), "The stroke centre's endpoint no longer matches the launcher's started services");
         } finally {
             server.stop(0);
         }
-        System.out.println("PASS: REST services checked before a run: any HTTP answer counts, a closed port is named with its reason, loopback addresses only when the hosts run here");
+        System.out.println("PASS: REST services checked before a run: any HTTP answer counts, a closed port is named with its reason, loopback addresses only when the hosts run here, services the launcher starts left out");
     }
 
     private static void check(boolean condition, String message) { if (!condition) throw new AssertionError(message); }
