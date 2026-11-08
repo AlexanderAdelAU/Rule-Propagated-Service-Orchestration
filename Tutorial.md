@@ -298,7 +298,9 @@ Your design should now look like this. The red dot on `Payment` means it has no 
 
 ### Describe the service
 
-The process needs a catalogue to hold your service: one per domain, shared by its processes.
+The process needs a catalogue to hold your service: one per domain, shared by its processes. You don't choose any
+folders: the domain name you give here decides where the editor puts every file
+([Where your files go](#where-your-files-go)).
 
 5. Right-click `Payment` and choose **Choose/Create catalogue...**. Choose **Create a catalogue for a new domain**,
    type `mypayments` and click **OK**.
@@ -341,6 +343,21 @@ the service receives under `token` and what it must send back under `paymentResu
       `did not answer within 2500 ms (timeoutMs)` for payment 17.
 15. Click **▶ Replay the recorded run**, then **Elapsed time and queue wait chart**: how long each payment waited,
     and how long the service took.
+
+### Where your files go
+
+The editor creates each file in its place, named after the domain (`mypayments`) and the process (`My_Payment_Test`):
+
+| File | Created by | Where |
+|---|---|---|
+| The catalogue | Step 5 | `btsn.common/BusinessServiceDefinitions/mypayments/Mypayments.json`, and listed in `btsn.services/packaging.json` |
+| The process | Step 8 | `btsn.common/ProcessDefinitionFolder/mypayments/Workflow/My_Payment_Test.json` |
+| The deployment | Step 11 | `btsn.common/ServiceDeploymentFolder/mypayments/My_Payment_Test.json` |
+| The launcher, its schedule and its deployment profile | Step 12 | `btsn.petrinet.ProjectLoader/My_Payment_Test_BuildAndRun.xml`, `btsn.common.eventgenerators/EventTriggeringFile/My_Payment_Test_BuildAndRun.csv` and `btsn.services/deployments/mypayments/My_Payment_TestDeployment.json` |
+| The run's analysis | Step 14 | `btsn.common/AnalysisFolder/Mypayments/Analysis_My_Payment_Test.txt` |
+
+To start again, delete these files; the catalogue's line in `packaging.json` goes with it (the editor offers to remove it
+the next time you run).
 
 ### Now test your own service
 
