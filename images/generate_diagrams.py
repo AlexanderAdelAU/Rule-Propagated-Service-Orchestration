@@ -487,121 +487,115 @@ GLANCE_THEMES = {
     'rpso-at-a-glance-dark.svg': dict(bg='#0f141c', ink='#e9edf3', muted='#a3adbd', line='#2c3646', card='#161d28', chip='#1d2633',
                                       design='#4cc38a', run='#b28cf0', analyse='#f08a4b', services='#5aa9e6', token='#f08a4b', host='#0f141c'),
 }
-GLANCE_DESC = ('RPSO at a glance. Three columns. Design, in the editor: draw the process, describe each service in a '
-    'catalogue, deploy each place to a host, and build its rules and launcher. Run, with no central engine: each Node, '
-    'an input transition, a place and an output transition, runs on its own host, and tokens travel directly from host '
-    'to host while Monitor gathers records afterwards. Analyse, recorded not simulated: every host records what it did, '
-    'Monitor gathers the records, the analysis reports queue waits, service times and failures with reasons, checks '
-    'priority at shared services, and the run replays on the model. Below: services are Java classes inside their host '
-    'or REST services in any language, unchanged; control flow is BPMN-style, with gateways, forks and joins, merges, '
-    'and signals that start compensation; beyond one process, several versions run at once with priority, processes '
-    'change on the fly, and runs span machines and organisations, and everything is a process with no glue code; it '
-    'deploys on one computer, as host packages, or across machines.')
+GLANCE_DESC = ('RPSO at a glance, as a hierarchy. RPSO, Rule-Propagated Service Orchestration: executable Petri nets for '
+    'live, distributed service orchestration. Three branches. Process design: the process editor, deploy, which chooses each '
+    'place\'s host, and build, which makes the rules and a launcher. Runtime orchestration: the Node, an input transition, a '
+    'place and an output transition, executed by an RPSO host, one per host, with no central engine; with BPMN-style '
+    'control, several versions with priority, changes on the fly, and everything a process. Analysis and insights: '
+    'execution records, timings and queue waits, and replay of a recorded run, not a simulation. Below the runtime, '
+    'service integration at the places: Java classes inside their host, REST in any language, existing services '
+    'unchanged, and business functions such as payment or triage. Then the data: process definitions, catalogues, '
+    'rules installed on each host, and execution records gathered by Monitor. Then deployment: a local run on one '
+    'computer, host packages, and hosts on other machines or in other organisations.')
 
 def glance(name, t):
-    W, H = 1200, 940
+    W, H = 1200, 970
     out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" role="img" aria-labelledby="title desc">',
            f'<title id="title">RPSO at a glance</title><desc id="desc">{escape(GLANCE_DESC)}</desc>',
            '<defs>']
-    for key in ('run', 'muted', 'analyse'):
-        out.append(f'<marker id="g-{key}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="{t[key]}"/></marker>')
+    out.append(f'<marker id="g-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="{t["ink"]}"/></marker>')
+    out.append(f'<marker id="g-run" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="{t["run"]}"/></marker>')
     out.append(f'</defs><rect width="100%" height="100%" fill="{t["bg"]}"/>')
     font = 'font-family="Arial, Helvetica, sans-serif"'
-    def text(x, y, s, size=16, colour=t['ink'], bold=False, anchor='start', italic=False):
+    def text(x, y, s, size=16, colour=t['ink'], bold=False, anchor='middle', italic=False):
         out.append(f'<text x="{x:g}" y="{y:g}" {font} font-size="{size}" font-weight="{"600" if bold else "400"}"'
                    f'{" font-style=\"italic\"" if italic else ""} text-anchor="{anchor}" fill="{colour}">{escape(s)}</text>')
-    def rect(x, y, w, h, fill, stroke, rx=10, width=1.5, dash=''):
-        out.append(f'<rect x="{x:g}" y="{y:g}" width="{w:g}" height="{h:g}" rx="{rx}" fill="{fill}" stroke="{stroke}" stroke-width="{width}"{dash}/>')
+    def rect(x, y, w, h, fill, stroke, rx=10, width=1.5):
+        out.append(f'<rect x="{x:g}" y="{y:g}" width="{w:g}" height="{h:g}" rx="{rx}" fill="{fill}" stroke="{stroke}" stroke-width="{width}"/>')
+    def line(d, colour=t['line'], width=2):
+        out.append(f'<path d="{d}" fill="none" stroke="{colour}" stroke-width="{width}"/>')
+    def tree(x0, y_from, y_bar, xs, y_to):
+        """A parent at (x0, y_from) branching to children at xs, whose tops are at y_to."""
+        line(f'M {x0} {y_from} L {x0} {y_bar}')
+        line(f'M {min(xs)} {y_bar} L {max(xs)} {y_bar}')
+        for x in xs: line(f'M {x} {y_bar} L {x} {y_to}')
+    def heading(x, y, label, colour):
+        text(x, y, label, 19, colour, bold=True)
+    def leaf(x, y, title, sub, colour, w=200):
+        rect(x - w / 2, y, w, 58, t['card'], t['line'])
+        out.append(f'<rect x="{x - w / 2:g}" y="{y}" width="{w}" height="4" rx="2" fill="{colour}"/>')
+        text(x, y + 26, title, 15, bold=True)
+        text(x, y + 45, sub, 13, t['muted'])
     def width_of(s, size, bold=False):
         return len(s) * size * (0.56 if bold else 0.52)
 
-    text(W / 2, 48, 'RPSO at a glance', 32, bold=True, anchor='middle')
-    text(W / 2, 78, 'Executable Petri nets for live, distributed service orchestration', 18, t['muted'], anchor='middle')
+    # The root.
+    text(W / 2, 46, 'RPSO', 36, bold=True)
+    text(W / 2, 74, 'RULE-PROPAGATED SERVICE ORCHESTRATION', 15, t['muted'], bold=True)
+    line(f'M {W / 2} 84 L {W / 2} 100')
+    rect(W / 2 - 250, 100, 500, 58, t['card'], t['services'], rx=12, width=2)
+    text(W / 2, 125, 'Executable Petri nets for', 17)
+    text(W / 2, 147, 'live, distributed service orchestration', 17)
 
-    # Three columns: design, run, analyse.
-    cols = [(30, 'DESIGN', 'in the editor', t['design']), (420, 'RUN', 'no central engine', t['run']), (810, 'ANALYSE', 'recorded, not simulated', t['analyse'])]
-    top, ch = 104, 372
-    for x, label, sub, colour in cols:
-        rect(x, top, 360, ch, t['card'], t['line'])
-        out.append(f'<rect x="{x}" y="{top}" width="360" height="6" rx="3" fill="{colour}"/>')
-        text(x + 22, top + 40, label, 20, colour, bold=True)
-        text(x + 22 + len(label) * 20 * 0.70 + 10, top + 40, sub, 15, t['muted'])   # capitals run wider
-    def items(x, y, lines, colour, numbered):
-        for i, (head, rest) in enumerate(lines):
-            cy = y + i * 64
-            if numbered:
-                out.append(f'<circle cx="{x + 34}" cy="{cy - 6}" r="13" fill="{colour}"/>')
-                text(x + 34, cy - 1, str(i + 1), 14, t['bg'], bold=True, anchor='middle')
-            else:
-                out.append(f'<circle cx="{x + 34}" cy="{cy - 6}" r="5" fill="{colour}"/>')
-            text(x + 58, cy, head, 17, bold=True)
-            text(x + 58, cy + 22, rest, 15, t['muted'])
-    items(30, top + 88, [('Draw the process', 'places, transitions and guards'),
-                         ('Describe each service', 'its contract, in a catalogue'),
-                         ('Deploy it', "choose each place's host"),
-                         ('Build', 'its rules and a launcher')], t['design'], True)
-    items(810, top + 88, [('Every host records', 'what it did, on its own clock'),
-                          ('Monitor gathers it', 'after the run, outside the token path'),
-                          ('Measures and reasons', 'waits, times, failures, priority'),
-                          ('Replay on the model', 'each token at its recorded time')], t['analyse'], False)
+    # Three branches.
+    cx = {'design': 220, 'run': 600, 'analyse': 980}
+    tree(W / 2, 158, 182, list(cx.values()), 200)
+    heading(cx['design'], 222, 'PROCESS DESIGN', t['design'])
+    heading(cx['run'], 222, 'RUNTIME ORCHESTRATION', t['run'])
+    heading(cx['analyse'], 222, 'ANALYSIS & INSIGHTS', t['analyse'])
+    for key, colour, leaves in [('design', t['design'], [('Editor', 'draw · validate'), ('Deploy', "each place's host"), ('Build', 'rules + launcher')]),
+                                ('analyse', t['analyse'], [('Records', 'from every host'), ('Timings', 'waits · failures'), ('Replay', 'a recorded run')])]:
+        xs = [cx[key] - 130, cx[key], cx[key] + 130]
+        tree(cx[key], 232, 250, xs, 264)
+        for x, (title, sub) in zip(xs, leaves):
+            assert width_of(title, 15, True) < 116 and width_of(sub, 13) < 118, (title, sub)
+            leaf(x, 264, title, sub, colour, w=124)
 
-    # Run: three hosts, each a Node, passing tokens directly; Monitor below.
-    def host(x, y, name):
-        rect(x, y, 150, 74, t['host'], t['run'], rx=8, width=1.8)
-        text(x + 10, y + 18, f'Host {name}', 13, t['muted'], bold=True)
-        bx = x + 18
-        out.append(f'<rect x="{bx}" y="{y + 30}" width="9" height="32" fill="{t["run"]}"/>')
-        out.append(f'<circle cx="{bx + 57}" cy="{y + 46}" r="17" fill="{t["card"]}" stroke="{t["ink"]}" stroke-width="1.6"/>')
-        text(bx + 57, y + 51, name, 13, bold=True, anchor='middle')
-        out.append(f'<rect x="{bx + 105}" y="{y + 30}" width="9" height="32" fill="{t["run"]}"/>')
-        out.append(f'<path d="M {bx + 9} {y + 46} L {bx + 38} {y + 46}" stroke="{t["ink"]}" stroke-width="1.4"/>')
-        out.append(f'<path d="M {bx + 74} {y + 46} L {bx + 105} {y + 46}" stroke="{t["ink"]}" stroke-width="1.4"/>')
-    hx = 420
-    host(hx + 20, top + 70, 'P1'); host(hx + 190, top + 70, 'P2'); host(hx + 190, top + 172, 'P3')
-    def token_arrow(d):
-        out.append(f'<path d="{d}" fill="none" stroke="{t["run"]}" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#g-run)"/>')
-    token_arrow(f'M {hx + 170} {top + 107} L {hx + 188} {top + 107}')                                  # P1 -> P2
-    token_arrow(f'M {hx + 95} {top + 144} L {hx + 95} {top + 209} L {hx + 188} {top + 209}')            # P1 -> P3
-    out.append(f'<circle cx="{hx + 179}" cy="{top + 107}" r="5" fill="{t["token"]}"/>')
-    text(hx + 22, top + 240, 'tokens travel', 13, t['run'], bold=True)
-    text(hx + 22, top + 256, 'host to host', 13, t['run'], bold=True)
-    text(hx + 22, top + 276, 'one Node per host:', 13, t['muted'], italic=True)
-    text(hx + 22, top + 292, 'T_in → Place → T_out', 13, t['muted'], italic=True)
-    rect(hx + 190, top + 288, 150, 40, t['host'], t['muted'], rx=8)
-    text(hx + 265, top + 313, 'Monitor', 15, bold=True, anchor='middle')
-    out.append(f'<path d="M {hx + 265} {top + 248} L {hx + 265} {top + 286}" fill="none" stroke="{t["muted"]}" stroke-width="1.5" stroke-dasharray="2 4" marker-end="url(#g-muted)"/>')
-    text(hx + 258, top + 262, "every host's", 12, t['muted'], anchor='end')
-    text(hx + 258, top + 277, 'records, afterwards', 12, t['muted'], anchor='end')
-    text(hx + 180, top + 355, 'Rules are installed on each host before any token moves.', 13, t['muted'], anchor='middle')
+    # Runtime: the Node, one per host, no central engine, and what it supports.
+    x0 = cx['run']
+    line(f'M {x0} 232 L {x0} 248')
+    rect(x0 - 175, 248, 350, 132, t['card'], t['run'], rx=14, width=2)
+    text(x0, 272, 'Node  (executed by an RPSO host)', 15, bold=True)
+    for bx, label in [(x0 - 140, 'T_in'), (x0 + 70, 'T_out')]:
+        rect(bx, 286, 70, 34, t['bg'], t['muted'], rx=6)
+        text(bx + 35, 308, label, 15, bold=True)
+    out.append(f'<circle cx="{x0}" cy="303" r="24" fill="{t["bg"]}" stroke="{t["run"]}" stroke-width="2"/>')
+    text(x0, 308, 'Place', 14, bold=True)
+    for xa, xb in [(x0 - 70, x0 - 26), (x0 + 26, x0 + 68)]:
+        out.append(f'<path d="M {xa} 303 L {xb} 303" stroke="{t["ink"]}" stroke-width="1.6" marker-end="url(#g-arrow)"/>')
+    text(x0, 350, 'one Node per host · no central engine', 13, t['run'], bold=True)
+    text(x0, 368, 'tokens travel directly from host to host', 13, t['run'], bold=True)
+    chips = ['BPMN-style control', 'Versions & priority', 'Changes on the fly', 'Everything a process']
+    chip_w = [width_of(c, 13) + 22 for c in chips]
+    total = sum(chip_w) + 8 * (len(chips) - 1)
+    x = x0 - total / 2
+    for c, w in zip(chips, chip_w):
+        rect(x, 392, w, 28, t['chip'], t['line'], rx=14, width=1)
+        text(x + w / 2, 411, c, 13)
+        x += w + 8
+    assert total < 640, total   # the row sits below the design and analysis leaves
 
-    # Bands of chips.
-    bands = [
-        ('SERVICES', 'bound to places, unchanged', t['services'], ['Java class, inside its host', 'REST, any language, anywhere', 'Existing services, unchanged']),
-        ('CONTROL', 'BPMN-style', t['run'], ["Gateways route on a service's answer", 'Forks and joins', 'Merges', 'Signals start compensation']),
-        ('BEYOND ONE PROCESS', '', t['analyse'], ['Several versions at once, with priority', 'Changes on the fly', 'Across machines and organisations', 'Everything is a process: no glue code']),
-        ('DEPLOY', '', t['design'], ['One computer', 'Host packages: JAR + launch script', 'Other machines, over the network']),
+    # Down the spine: services at the places, the data, deployment.
+    tiers = [
+        (440, 'SERVICE INTEGRATION (PLACES)', t['services'], [('Java class', 'inside its host'), ('REST', 'any language, anywhere'),
+                                                             ('Existing services', 'unchanged'), ('Business functions', 'payment, triage, …')]),
+        (612, 'DATA', t['run'], [('Process definitions', 'what you draw'), ('Catalogues', 'service contracts'),
+                                 ('Rules', 'installed on each host'), ('Execution records', 'gathered by Monitor')]),
+        (784, 'DEPLOYMENT', t['design'], [('Local run', 'every host on one computer'), ('Host packages', 'JAR + launch script'),
+                                          ('Remote hosts', 'other machines and organisations')]),
     ]
-    y = 506
-    for label, sub, colour, chips in bands:
-        rows, row, x = [], [], 250   # chips wrap onto a second row when the first is full
-        for chip in chips:
-            w = width_of(chip, 15) + 30
-            if row and x + w > 1160: rows.append(row); row, x = [], 250
-            row.append((x, w, chip)); x += w + 12
-        rows.append(row)
-        bh = 76 + (len(rows) - 1) * 46
-        rect(30, y, 1140, bh, t['card'], t['line'])
-        out.append(f'<rect x="30" y="{y}" width="6" height="{bh}" rx="3" fill="{colour}"/>')
-        text(54, y + 34, label, 15, colour, bold=True)
-        if sub: text(54, y + 56, sub, 13, t['muted'])
-        for r, row in enumerate(rows):
-            for x, w, chip in row:
-                assert x + w <= 1160, f'{label}: {chip} overflows'
-                rect(x, y + 20 + r * 46, w, 36, t['chip'], t['line'], rx=18, width=1)
-                text(x + w / 2, y + 43 + r * 46, chip, 15, anchor='middle')
-        y += bh + 14
-    assert y - 14 <= H - 10, y
-    text(W / 2, H - 14, 'github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration', 13, t['muted'], anchor='middle')
+    prev = 420
+    for y, label, colour, leaves in tiers:
+        line(f'M {x0} {prev} L {x0} {y}')
+        heading(x0, y + 22, label, colour)
+        n = len(leaves); w = 230 if n == 4 else 300; gap = 30
+        xs = [x0 + (i - (n - 1) / 2) * (w + gap) for i in range(n)]
+        tree(x0, y + 32, y + 52, xs, y + 66)
+        for x, (title, sub) in zip(xs, leaves):
+            assert width_of(sub, 13) < w - 16 and width_of(title, 15, True) < w - 16, (title, sub)
+            leaf(x, y + 66, title, sub, colour, w=w)
+        prev = y + 32
+    text(W / 2, H - 16, 'github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration', 13, t['muted'])
     (ROOT / name).write_text('\n'.join(out) + '\n</svg>\n')
 
 for name, theme in GLANCE_THEMES.items():
