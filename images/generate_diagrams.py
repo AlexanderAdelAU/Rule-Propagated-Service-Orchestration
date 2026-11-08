@@ -212,7 +212,7 @@ d.box(405,195,310,70,'Installed local RuleBase',kind='config')
 d.box(265,300,165,90,'T_in',['Buffer / synchronize'])
 d.box(475,300,175,90,'Place P',['Invoke bound operation'])
 d.box(695,300,160,90,'T_out',['Route / publish'])
-d.box(450,440,255,65,'Bound service JAR',['Domain or token operation'],'business')
+d.box(450,440,255,65,'Bound service',['Called by its canonical binding'],'business')
 d.box(20,300,175,90,'Incoming token',['Generator / prior host'],'endpoint')
 d.box(935,300,165,90,'Outcome',['Publish to next host','or terminate locally'],'endpoint')
 d.box(390,565,350,75,'Monitor',['Collection · reconstruction · diagrams'],'observe')
@@ -227,7 +227,7 @@ d.path('M 855 345 L 935 345')
 d.path('M 510 390 L 510 440')
 d.path('M 635 440 L 635 390')
 d.text(490,419,'named inputs',13,anchor='end')
-d.text(652,414,['result +','routing symbol'],13,anchor='start')
+d.text(652,414,['result +','routing value'],13,anchor='start')
 d.path('M 560 515 L 560 565','observe')
 d.text(577,545,'collector observations',14,anchor='start',colour=TEAL)
 d.text(560,673,'Solid: execution / token flow     Dashed: rule installation     Dotted: observation',15)
@@ -480,4 +480,130 @@ d.text(577,681,'collected host observations',14,anchor='start',colour=TEAL)
 d.text(560,798,'Circle: place · Bar: transition · AND: input join · Dot: illustrative token · Dashed blue: publication',14)
 d.text(560,820,'Every local triple is supported by the generic fabric; the bound operation gives its place meaning.',14)
 d.save('petrinet-double-join.svg')
-print('Generated nine editable SVG diagrams.')
+# RPSO at a glance: one page for the README's top, in light and dark versions.
+GLANCE_THEMES = {
+    'rpso-at-a-glance.svg': dict(bg='#ffffff', ink='#182238', muted='#5b6478', line='#d9d3c6', card='#faf8f4', chip='#f3efe7',
+                                 design='#2e7d4f', run='#7350a2', analyse='#c2521f', services='#24598e', token='#c2521f', host='#ffffff'),
+    'rpso-at-a-glance-dark.svg': dict(bg='#0f141c', ink='#e9edf3', muted='#a3adbd', line='#2c3646', card='#161d28', chip='#1d2633',
+                                      design='#4cc38a', run='#b28cf0', analyse='#f08a4b', services='#5aa9e6', token='#f08a4b', host='#0f141c'),
+}
+GLANCE_DESC = ('RPSO at a glance. Three columns. Design, in the editor: draw the process, describe each service in a '
+    'catalogue, deploy each place to a host, and build its rules and launcher. Run, with no central engine: each Node, '
+    'an input transition, a place and an output transition, runs on its own host, and tokens travel directly from host '
+    'to host while Monitor gathers records afterwards. Analyse, recorded not simulated: every host records what it did, '
+    'Monitor gathers the records, the analysis reports queue waits, service times and failures with reasons, checks '
+    'priority at shared services, and the run replays on the model. Below: services are Java classes inside their host '
+    'or REST services in any language, unchanged; control flow is BPMN-style, with gateways, forks and joins, merges, '
+    'and signals that start compensation; beyond one process, several versions run at once with priority, processes '
+    'change on the fly, and runs span machines and organisations, and everything is a process with no glue code; it '
+    'deploys on one computer, as host packages, or across machines.')
+
+def glance(name, t):
+    W, H = 1200, 940
+    out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" role="img" aria-labelledby="title desc">',
+           f'<title id="title">RPSO at a glance</title><desc id="desc">{escape(GLANCE_DESC)}</desc>',
+           '<defs>']
+    for key in ('run', 'muted', 'analyse'):
+        out.append(f'<marker id="g-{key}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="{t[key]}"/></marker>')
+    out.append(f'</defs><rect width="100%" height="100%" fill="{t["bg"]}"/>')
+    font = 'font-family="Arial, Helvetica, sans-serif"'
+    def text(x, y, s, size=16, colour=t['ink'], bold=False, anchor='start', italic=False):
+        out.append(f'<text x="{x:g}" y="{y:g}" {font} font-size="{size}" font-weight="{"600" if bold else "400"}"'
+                   f'{" font-style=\"italic\"" if italic else ""} text-anchor="{anchor}" fill="{colour}">{escape(s)}</text>')
+    def rect(x, y, w, h, fill, stroke, rx=10, width=1.5, dash=''):
+        out.append(f'<rect x="{x:g}" y="{y:g}" width="{w:g}" height="{h:g}" rx="{rx}" fill="{fill}" stroke="{stroke}" stroke-width="{width}"{dash}/>')
+    def width_of(s, size, bold=False):
+        return len(s) * size * (0.56 if bold else 0.52)
+
+    text(W / 2, 48, 'RPSO at a glance', 32, bold=True, anchor='middle')
+    text(W / 2, 78, 'Executable Petri nets for live, distributed service orchestration', 18, t['muted'], anchor='middle')
+
+    # Three columns: design, run, analyse.
+    cols = [(30, 'DESIGN', 'in the editor', t['design']), (420, 'RUN', 'no central engine', t['run']), (810, 'ANALYSE', 'recorded, not simulated', t['analyse'])]
+    top, ch = 104, 372
+    for x, label, sub, colour in cols:
+        rect(x, top, 360, ch, t['card'], t['line'])
+        out.append(f'<rect x="{x}" y="{top}" width="360" height="6" rx="3" fill="{colour}"/>')
+        text(x + 22, top + 40, label, 20, colour, bold=True)
+        text(x + 22 + len(label) * 20 * 0.70 + 10, top + 40, sub, 15, t['muted'])   # capitals run wider
+    def items(x, y, lines, colour, numbered):
+        for i, (head, rest) in enumerate(lines):
+            cy = y + i * 64
+            if numbered:
+                out.append(f'<circle cx="{x + 34}" cy="{cy - 6}" r="13" fill="{colour}"/>')
+                text(x + 34, cy - 1, str(i + 1), 14, t['bg'], bold=True, anchor='middle')
+            else:
+                out.append(f'<circle cx="{x + 34}" cy="{cy - 6}" r="5" fill="{colour}"/>')
+            text(x + 58, cy, head, 17, bold=True)
+            text(x + 58, cy + 22, rest, 15, t['muted'])
+    items(30, top + 88, [('Draw the process', 'places, transitions and guards'),
+                         ('Describe each service', 'its contract, in a catalogue'),
+                         ('Deploy it', "choose each place's host"),
+                         ('Build', 'its rules and a launcher')], t['design'], True)
+    items(810, top + 88, [('Every host records', 'what it did, on its own clock'),
+                          ('Monitor gathers it', 'after the run, outside the token path'),
+                          ('Measures and reasons', 'waits, times, failures, priority'),
+                          ('Replay on the model', 'each token at its recorded time')], t['analyse'], False)
+
+    # Run: three hosts, each a Node, passing tokens directly; Monitor below.
+    def host(x, y, name):
+        rect(x, y, 150, 74, t['host'], t['run'], rx=8, width=1.8)
+        text(x + 10, y + 18, f'Host {name}', 13, t['muted'], bold=True)
+        bx = x + 18
+        out.append(f'<rect x="{bx}" y="{y + 30}" width="9" height="32" fill="{t["run"]}"/>')
+        out.append(f'<circle cx="{bx + 57}" cy="{y + 46}" r="17" fill="{t["card"]}" stroke="{t["ink"]}" stroke-width="1.6"/>')
+        text(bx + 57, y + 51, name, 13, bold=True, anchor='middle')
+        out.append(f'<rect x="{bx + 105}" y="{y + 30}" width="9" height="32" fill="{t["run"]}"/>')
+        out.append(f'<path d="M {bx + 9} {y + 46} L {bx + 38} {y + 46}" stroke="{t["ink"]}" stroke-width="1.4"/>')
+        out.append(f'<path d="M {bx + 74} {y + 46} L {bx + 105} {y + 46}" stroke="{t["ink"]}" stroke-width="1.4"/>')
+    hx = 420
+    host(hx + 20, top + 70, 'P1'); host(hx + 190, top + 70, 'P2'); host(hx + 190, top + 172, 'P3')
+    def token_arrow(d):
+        out.append(f'<path d="{d}" fill="none" stroke="{t["run"]}" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#g-run)"/>')
+    token_arrow(f'M {hx + 170} {top + 107} L {hx + 188} {top + 107}')                                  # P1 -> P2
+    token_arrow(f'M {hx + 95} {top + 144} L {hx + 95} {top + 209} L {hx + 188} {top + 209}')            # P1 -> P3
+    out.append(f'<circle cx="{hx + 179}" cy="{top + 107}" r="5" fill="{t["token"]}"/>')
+    text(hx + 22, top + 240, 'tokens travel', 13, t['run'], bold=True)
+    text(hx + 22, top + 256, 'host to host', 13, t['run'], bold=True)
+    text(hx + 22, top + 276, 'one Node per host:', 13, t['muted'], italic=True)
+    text(hx + 22, top + 292, 'T_in → Place → T_out', 13, t['muted'], italic=True)
+    rect(hx + 190, top + 288, 150, 40, t['host'], t['muted'], rx=8)
+    text(hx + 265, top + 313, 'Monitor', 15, bold=True, anchor='middle')
+    out.append(f'<path d="M {hx + 265} {top + 248} L {hx + 265} {top + 286}" fill="none" stroke="{t["muted"]}" stroke-width="1.5" stroke-dasharray="2 4" marker-end="url(#g-muted)"/>')
+    text(hx + 258, top + 262, "every host's", 12, t['muted'], anchor='end')
+    text(hx + 258, top + 277, 'records, afterwards', 12, t['muted'], anchor='end')
+    text(hx + 180, top + 355, 'Rules are installed on each host before any token moves.', 13, t['muted'], anchor='middle')
+
+    # Bands of chips.
+    bands = [
+        ('SERVICES', 'bound to places, unchanged', t['services'], ['Java class, inside its host', 'REST, any language, anywhere', 'Existing services, unchanged']),
+        ('CONTROL', 'BPMN-style', t['run'], ["Gateways route on a service's answer", 'Forks and joins', 'Merges', 'Signals start compensation']),
+        ('BEYOND ONE PROCESS', '', t['analyse'], ['Several versions at once, with priority', 'Changes on the fly', 'Across machines and organisations', 'Everything is a process: no glue code']),
+        ('DEPLOY', '', t['design'], ['One computer', 'Host packages: JAR + launch script', 'Other machines, over the network']),
+    ]
+    y = 506
+    for label, sub, colour, chips in bands:
+        rows, row, x = [], [], 250   # chips wrap onto a second row when the first is full
+        for chip in chips:
+            w = width_of(chip, 15) + 30
+            if row and x + w > 1160: rows.append(row); row, x = [], 250
+            row.append((x, w, chip)); x += w + 12
+        rows.append(row)
+        bh = 76 + (len(rows) - 1) * 46
+        rect(30, y, 1140, bh, t['card'], t['line'])
+        out.append(f'<rect x="30" y="{y}" width="6" height="{bh}" rx="3" fill="{colour}"/>')
+        text(54, y + 34, label, 15, colour, bold=True)
+        if sub: text(54, y + 56, sub, 13, t['muted'])
+        for r, row in enumerate(rows):
+            for x, w, chip in row:
+                assert x + w <= 1160, f'{label}: {chip} overflows'
+                rect(x, y + 20 + r * 46, w, 36, t['chip'], t['line'], rx=18, width=1)
+                text(x + w / 2, y + 43 + r * 46, chip, 15, anchor='middle')
+        y += bh + 14
+    assert y - 14 <= H - 10, y
+    text(W / 2, H - 14, 'github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration', 13, t['muted'], anchor='middle')
+    (ROOT / name).write_text('\n'.join(out) + '\n</svg>\n')
+
+for name, theme in GLANCE_THEMES.items():
+    glance(name, theme)
+print('Generated eleven editable SVG diagrams.')

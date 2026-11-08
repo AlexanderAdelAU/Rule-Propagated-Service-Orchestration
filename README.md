@@ -2,6 +2,11 @@
 
 **RPSO uses Petri net concepts to transform ordinary callable services into a logically defined, distributed orchestration system.**
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="images/rpso-at-a-glance-dark.svg">
+  <img src="images/rpso-at-a-glance.svg" alt="RPSO at a glance. Design in the editor: draw the process, describe each service, deploy it, build. Run with no central engine: each Node (T_in, Place, T_out) runs on its own host and tokens travel host to host; Monitor gathers records afterwards. Analyse a recorded run, not a simulation: waits, service times, failures and priority, replayed on the model. Services: Java classes or REST, unchanged. Control: BPMN-style gateways, forks and joins, merges, signals and compensation. Beyond one process: several versions at once with priority, changes on the fly, across machines and organisations, everything a process. Deploy on one computer, as host packages, or across machines.">
+</picture>
+
 For example, say you have an online store that relies on a remote Payment Service. It works well under normal conditions, but what happens when order volumes rise, calls become slow, or the service fails? How do those problems affect the rest of the checkout process?
 
 With **RPSO**, you can leave the Payment Service where it is and bind its existing REST endpoint to a **Place** in a Petri-net model. Define the operation's inputs and result, connect the transitions that govern its execution, then generate test requests through the process. RPSO records the execution so you can measure, analyse and replay what actually happened.
