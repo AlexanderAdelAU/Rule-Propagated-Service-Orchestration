@@ -43,6 +43,108 @@ REST instead.
 | [`ServiceDeploymentFolder/credit/Credit_Check_Workflow.json`](btsn.common/ServiceDeploymentFolder/credit/Credit_Check_Workflow.json) | 5. Deploy (editor) |
 | [`Credit_Check_Workflow_BuildAndRun.xml`](btsn.petrinet.ProjectLoader/Credit_Check_Workflow_BuildAndRun.xml), its schedule and deployment profile | 6. Build (editor) |
 
+## Follow one payment: what a service receives and returns
+
+What does a service actually receive, and why is its input so often called `token`? This example follows one
+order through two services: a payment gateway called over REST, then a Java service that issues the receipt.
+Every JSON below is from a real run, shortened only where marked `…`.
+
+| What | File |
+|---|---|
+| The process: `PAYMENTS` → Payment (P1, REST) → paid: Receipt (P2, Java) → Receipt sent; declined: Declined | [`payments/Workflow/Payment_Receipt_Workflow.json`](btsn.common/ProcessDefinitionFolder/payments/Workflow/Payment_Receipt_Workflow.json) |
+| The orders: what each token carries | [`TokenFormats/PaymentService.json`](btsn.common.eventgenerators/TokenFormats/PaymentService.json) |
+| The two services' contracts | [`payments/Payments.json`](btsn.common/BusinessServiceDefinitions/payments/Payments.json) |
+| The receipt service | [`ReceiptService.java`](btsn.common/src/org/btsn/business/payments/ReceiptService.java) |
+| The launcher | [`Payment_Receipt_Workflow_BuildAndRun.xml`](btsn.petrinet.ProjectLoader/Payment_Receipt_Workflow_BuildAndRun.xml) |
+
+[▶ Watch a recorded run](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Payment_Receipt_Workflow.json&run=../../btsn.common/AnalysisFolder/Payments/Analysis_Payment_Receipt_Workflow.txt): ten orders, nine paid and receipted, one declined.
+
+**1. The event generator makes the token.** A token is a JSON object. Its `data` is the business content; the rest
+is the host's bookkeeping. Here the data comes from a *token format*, chosen in the launcher:
+
+```xml
+<property name="eg1.format.service" value="PaymentService"/>
+```
+
+The format gives every order an `orderId`, a `customer` and a `currency`, and a basket from its case mix, so order 1
+is groceries:
+
+```json
+{"tokenId": "1000000", "version": "v001",
+ "data": {"orderId": "ORD-1", "customer": "C-1", "currency": "AUD", "items": 6, "amount": 84.5, "card": "visa-4242"},
+ "notAfter": 1794115780099, "workflow_start_time": 1794115720099, "currentPlace": "P1_Place"}
+```
+
+The generator sends it **under the name `token`**. That is the whole reason a first place's input is called `token`:
+an input is named after what arrives.
+
+**2. Payment receives it.** Payment's catalogue entry has one input, `token`, so the host's REST call carries the
+token under that name:
+
+```json
+{"service": "PaymentService", "operation": "authorise", "sequenceId": "1000000", "version": "v001",
+ "inputs": {"token": {"tokenId": "1000000", "data": {"orderId": "ORD-1", "amount": 84.5, …}, …}}}
+```
+
+The service ([`payment.js`](examples/rest/payment.js)) reads the `amount` from the token's data.
+
+**3. Payment answers under its return attribute.** Payment's `returnAttribute` is `paymentResult`:
+
+```json
+{"paymentResult": {"payment": "PAY-1", "amount": 84.5, "status": "authorised", "reason": "",
+                   "latency_ms": 193, "served_by": "vercel", "routing_decision": {"routing_path": "paid"}}}
+```
+
+`routing_path` is what the guards on T_out_Payment test: `paid` goes on to Receipt, `declined` ends at Declined.
+
+**4. Receipt receives `paymentResult`.** What travels on from Payment is named `paymentResult`, so Receipt's input
+must be named `paymentResult` too. The editor's **Validate** reports a mismatch, which would otherwise stop the token.
+The Java method `issue(String paymentResult)` receives:
+
+```json
+{"paymentResult": {"payment": "PAY-1", "amount": 84.5, "status": "authorised", …,
+                   "routing_decision": {"routing_path": "paid"},
+                   "service_start_time": 1794115720466, "service_end_time": 1794115720777, "service_processing_time_ms": 311,
+                   "original_token": "{\"tokenId\":\"1000000\",\"data\":{\"orderId\":\"ORD-1\",\"customer\":\"C-1\",…},…}"}}
+```
+
+The host adds its timing fields and, as `original_token`, the token the generator sent, so any later service can
+still read the order.
+
+**5. Receipt answers.** It quotes the order from the original token and the payment from `paymentResult`:
+
+```java
+public String issue(String paymentResult) {
+    String order = originalToken(paymentResult);   // the order, as the event generator sent it
+    JSONObject receipt = new JSONObject();
+    receipt.put("orderId", textValue(order, "orderId", "unknown order"));
+    receipt.put("customer", textValue(order, "customer", ""));
+    receipt.put("payment", textValue(paymentResult, "payment", ""));
+    receipt.put("amount", numberValue(paymentResult, "amount", 0));
+    receipt.put("currency", textValue(order, "currency", ""));
+    receipt.put("routing_decision", routingDecision("issued"));
+    return businessResult("receipt", receipt);
+}
+```
+
+```json
+{"receipt": {"orderId": "ORD-1", "customer": "C-1", "payment": "PAY-1", "amount": 84.5, "currency": "AUD",
+             "routing_decision": {"routing_path": "issued"}}}
+```
+
+**The rules, in short**
+
+- **Name an input after what arrives:** `token` from an event generator, otherwise the `returnAttribute` of the place
+  before it. A join has one input per arc.
+- **Publish under your `returnAttribute`.** That name is what the next place takes. A service that passes the token on
+  for others can publish under `token` itself, as the claims services do.
+- **Put the route in `routing_decision.routing_path`.** The T_out guards test it.
+- **Read with `textValue` and `numberValue`.** They find a field anywhere in an input. `originalToken(input)` gives the
+  token the generator sent, for its data. A REST service finds each input under `inputs.<name>`.
+- **Give tokens data** with a token format (`egN.format.service`, a file in `btsn.common.eventgenerators/TokenFormats`;
+  `${n}` is the token's number), or with `egN.data` name=value pairs, the same for every token
+  ([7. Give it data](#7-give-it-data)).
+
 ## 1. Write the service
 
 Create `btsn.common/src/org/btsn/business/credit/CreditLimitService.java`:
@@ -124,7 +226,7 @@ Create `btsn.common/BusinessServiceDefinitions/credit/Credit.json`:
 |---|---|
 | `service`, `operation` | The names the editor offers and the process records |
 | `implementationClass` | The class the host calls |
-| `inputs` | The named inputs, in the order of the method's parameters |
+| `inputs` | The named inputs, in the order of the method's parameters. Each is named after what arrives: `token` from an event generator, otherwise the return attribute of the place before ([Follow one payment](#follow-one-payment-what-a-service-receives-and-returns)) |
 | `returnAttribute` | The name the result is published under; the next place takes it as input |
 | `description`, `returns` | Shown in the editor's **What it does** box. The editor checks require both. |
 
@@ -267,7 +369,8 @@ ant -f btsn.petrinet.ProjectLoader/Credit_Check_Workflow_BuildAndRun.xml -Dhost.
 
 Every application now asks for 4,500, so all ten are approved. `eg1.data` takes
 `name=value` pairs separated by commas; the service reads them with `numberValue`
-or `textValue`.
+or `textValue`. For data that differs from token to token, use a token format
+(`eg1.format.service`), as [Follow one payment](#follow-one-payment-what-a-service-receives-and-returns) does.
 
 ## 8. Call it over REST
 
@@ -500,5 +603,6 @@ shared imaging and pathology providers in the same way.
   [Add your own service](Reference.md#6-add-your-own-service) keeps a
   stock count in its host and sends orders between two hosts and back.
 - **A second place:** give the next place an input named after this one's
-  `returnAttribute` (here `creditDecision`), and it receives this result.
+  `returnAttribute` (here `creditDecision`), and it receives this result, as Receipt does in
+  [Follow one payment](#follow-one-payment-what-a-service-receives-and-returns).
 - **Several machines:** see [Run on several machines](Reference.md#7-run-on-several-machines).

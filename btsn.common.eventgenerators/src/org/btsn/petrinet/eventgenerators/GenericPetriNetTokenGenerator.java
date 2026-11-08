@@ -78,6 +78,7 @@ import org.json.simple.JSONObject;
  *   -tokens <n>          Number of tokens to generate (default: 10)
  *   -expire <ms>         Token expiry time in milliseconds (default: 120000)
  *   -data <json>         Custom token data
+ *   -format-service <s>  Token format (TokenFormats/<s>.json) that fills each token's data; see TokenFormatData
  *   -sequenceid <id>     Override starting sequence ID (normally auto-calculated)
  *   -skipdeploy          Skip rule deployment (use if rules already deployed)
  *   -noexit              Don't exit after completion (for embedded use)
@@ -182,6 +183,7 @@ public class GenericPetriNetTokenGenerator {
 	private static int numberOfTokens = 10;  // How many tokens to generate (default: 10, override with -tokens)
 	private static long timeToExpire = 120000;  // Token validity window in ms (default: 120000, override with -expire)
 	private static String tokenData = "";  // Optional custom data (use -data)
+	private static String formatService = null;  // Optional token format, TokenFormats/<name>.json (use -format-service)
 	private static String triggerFileOverride = null;  // Optional experiment-specific trigger schedule
 	private static String processName = null;  // REQUIRED: Workflow name (REQUIRED: -process)
 	private static String infrastructureDefinitionName = null;  // Optional deployment mapping
@@ -445,6 +447,13 @@ public class GenericPetriNetTokenGenerator {
 					if (i + 1 < args.length) {
 						tokenData = args[++i];
 						System.out.println("  Parsed -data: " + tokenData);
+					}
+					break;
+				case "-format-service":
+				case "--format-service":
+					if (i + 1 < args.length) {
+						formatService = args[++i];
+						System.out.println("  Parsed -format-service: " + formatService);
 					}
 					break;
 				case "-triggerfile":
@@ -920,19 +929,8 @@ public class GenericPetriNetTokenGenerator {
 		token.put("currentPlace", targetPlaceName);
 		token.put("workflow_start_time", currentTime);
 		
-		// Add custom data if provided
-		JSONObject data = new JSONObject();
-		if (tokenData != null && !tokenData.isEmpty()) {
-			// Parse key=value pairs
-			String[] pairs = tokenData.split(",");
-			for (String pair : pairs) {
-				String[] kv = pair.split("=");
-				if (kv.length == 2) {
-					data.put(kv[0].trim(), kv[1].trim());
-				}
-			}
-		}
-		token.put("data", data);
+		// The token's data: its token format's (egN.format.service), then any -data pairs.
+		token.put("data", TokenFormatData.build(formatService, seqID, tokenData));
 		
 		return token.toJSONString();
 	}

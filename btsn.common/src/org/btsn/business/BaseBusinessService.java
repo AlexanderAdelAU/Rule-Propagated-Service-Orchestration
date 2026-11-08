@@ -64,6 +64,15 @@ public abstract class BaseBusinessService {
         }
     }
 
+    /**
+     * The token the event generator sent, with its data. The host carries it along with every result as
+     * "original_token"; at the first place the input is that token itself.
+     */
+    protected final String originalToken(String input) {
+        String original = textValue(input, "original_token", null);
+        return original == null ? input : original;
+    }
+
     @SuppressWarnings("unchecked")
     protected final JSONObject routingDecision(String path) {
         JSONObject routing = new JSONObject();

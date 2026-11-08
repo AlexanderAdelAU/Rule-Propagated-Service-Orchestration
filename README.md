@@ -31,7 +31,7 @@ flowchart LR
 
 *The **Payment Place is logical**, not the Payment Service itself. A generic RPSO orchestration host executes the whole Node (**T_in → Place → T_out**): it calls the unchanged service over REST, hands the response to T_out and records the run for analysis and replay. The host can run on your machine or next to the service on another one ([Run on several machines](Reference.md#7-run-on-several-machines)).*
 
-1. **Bind the service.** Describe the existing REST operation and its inputs and result; no change to the service's business logic is required.
+1. **Bind the service.** Describe the existing REST operation and its inputs and result; no change to the service's business logic is required. [Follow one payment](ServiceTutorial.md#follow-one-payment-what-a-service-receives-and-returns) shows exactly what a service receives and returns.
 2. **Exercise it.** Generate tokens at a chosen rate and timing: steady traffic, bursts or a long soak. To see failures, point the Place at a test copy of the service that you can slow down or make fail, and set how long the Place waits for an answer.
 3. **Observe it.** Inspect service times, queue waits, routing and token flow; replay the recorded run against the same model.
 

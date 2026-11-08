@@ -83,6 +83,17 @@
       }
     },
     {
+      "id": "payment_receipt",
+      "category": "start",
+      "title": "Follow one payment: token to receipt",
+      "description": "Each order the generator sends carries its basket. Payment, a remote gateway called over REST, takes it as its input token and publishes paymentResult; a paid order goes on to Receipt, a Java service whose input is named paymentResult because that is what arrives. Ten orders: nine paid and receipted, one declined.",
+      "model": "btsn.common/ProcessDefinitionFolder/payments/Workflow/Payment_Receipt_Workflow.json",
+      "run": "btsn.common/AnalysisFolder/Payments/Analysis_Payment_Receipt_Workflow.txt",
+      "versions": {
+        "v001": "Orders from the online store"
+      }
+    },
+    {
       "id": "payment_priority",
       "category": "start",
       "title": "Priority at a shared service",
