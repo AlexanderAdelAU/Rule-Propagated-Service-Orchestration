@@ -274,8 +274,6 @@ your own. It first calls this project's mock payment service on Vercel; at the e
 
 Your computer needs internet access for this example.
 
-[▶ Watch a recorded run of the finished test](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json&run=../../btsn.common/AnalysisFolder/Payments/Analysis_Remote_Payment_Test.txt)
-
 ### Draw the process
 
 1. Choose **File → New → Process Definition**.
@@ -293,6 +291,10 @@ Your computer needs internet access for this example.
    - `Paid` and `Declined`: **Node Type** `TerminateNode`;
    - the arrow to `Paid`: **Guard Condition** `DECISION_EQUAL_TO`, **Decision Value** and **Label** `paid`;
    - the arrow to `Declined`: the same, with `declined`.
+
+Your design should now look like this. The red dot on `Payment` means it has no service yet; you describe one next.
+
+![The drawn process: PAYMENTS feeds T_in_Payment, the Payment place, and T_out_Payment, which routes paid to Paid and declined to Declined. Payment has no service yet.](images/ex4-drawn.png)
 
 ### Describe the service
 
@@ -363,6 +365,8 @@ the service receives under `token` and what it must send back under `paymentResu
 - [Follow one payment: what a service receives and returns](ServiceTutorial.md#follow-one-payment-what-a-service-receives-and-returns)
 - [Priority at a shared service](ServiceTutorial.md#priority-at-a-shared-service): two kinds of traffic, one service
 - The supplied copy: `btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json`
+
+[▶ Watch a recorded run of the finished test](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json&run=../../btsn.common/AnalysisFolder/Payments/Analysis_Remote_Payment_Test.txt)
 
 ## Author
 
