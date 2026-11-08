@@ -274,33 +274,45 @@ your own. It first calls this project's mock payment service on Vercel; at the e
 
 Your computer needs internet access for this example.
 
-[▶ Watch a recorded run of the finished test](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json&run=../../btsn.common/AnalysisFolder/Payments/Analysis_Remote_Payment_Test.txt)
-
-### Draw the process
+### Create the process
 
 1. Choose **File → New → Process Definition**.
-2. Add the elements (click the tool, click the canvas, type the **Label**):
+2. Choose **File → Save Process Definition As...** and save it as
+   `btsn.common/ProcessDefinitionFolder/mypayments/Workflow/My_Payment_Test.json`.
+   Use the dialog's **New Folder** button to make `mypayments` and, inside it, `Workflow`.
+
+   The folder under `ProcessDefinitionFolder` is the process's **domain**, here `mypayments`. It decides the process's
+   catalogue and where the editor puts every other file it makes ([Where your files go](#where-your-files-go)), so
+   this is the only location you choose.
+
+### Draw it
+
+3. Add the elements (click the tool, click the canvas, type the **Label**):
    - **Event Generator** `PAYMENTS`;
    - **Transition** `T_in_Payment`, **Place** `Payment`, **Transition** `T_out_Payment`, in a row;
    - **Transition** `Paid` and **Transition** `Declined`, to the right of `T_out_Payment`.
-3. Connect them with **Arrow (drag)**:
+4. Connect them with **Arrow (drag)**:
    - `PAYMENTS` → `T_in_Payment` → `Payment` → `T_out_Payment`
    - `T_out_Payment` → `Paid`
    - `T_out_Payment` → `Declined`
-4. Set the details:
+5. Set the details:
    - `T_in_Payment`: **Node Type** `EdgeNode`, **Buffer** `40` (room for payments to queue);
    - `T_out_Payment`: **Node Type** `GatewayNode`;
    - `Paid` and `Declined`: **Node Type** `TerminateNode`;
    - the arrow to `Paid`: **Guard Condition** `DECISION_EQUAL_TO`, **Decision Value** and **Label** `paid`;
    - the arrow to `Declined`: the same, with `declined`.
 
+Your design should now look like this. The red dot on `Payment` means it has no service yet; you describe one next.
+
+![The drawn process: PAYMENTS feeds T_in_Payment, the Payment place, and T_out_Payment, which routes paid to Paid and declined to Declined. Payment has no service yet.](images/ex4-drawn.png)
+
 ### Describe the service
 
 The process needs a catalogue to hold your service: one per domain, shared by its processes.
 
-5. Right-click `Payment` and choose **Choose/Create catalogue...**. Choose **Create a catalogue for a new domain**,
-   type `mypayments` and click **OK**.
-6. Right-click `Payment` again and choose **Create New Service in Mypayments.json...**. Fill in the form:
+6. Right-click `Payment` and choose **Choose/Create catalogue...**. Because the process is saved in the `mypayments`
+   folder, **Create a catalogue for a new domain** is already chosen, with `mypayments` filled in. Click **OK**.
+7. Right-click `Payment` again and choose **Create New Service in Mypayments.json...**. Fill in the form:
 
    | Field | Enter | Why |
    |---|---|---|
@@ -309,36 +321,58 @@ The process needs a catalogue to hold your service: one per domain, shared by it
    | **What it does** / **What it returns** | In words | Shown wherever the service is chosen |
    | **Inputs** | `token` (suggested) | The event generator sends each payment under the name `token`, and an input is named after what arrives |
    | **Return attribute** | `paymentResult` | The name the service's answer is published under |
-   | **Routes on** | `paid, declined` | The values its answer routes on: the guards you set in step 4 |
+   | **Routes on** | `paid, declined` | The values its answer routes on: the guards you set in step 5 |
    | **How it runs** | **A service called over REST, in any language** | There is no Java class: the service runs at its endpoint |
 
    Click **Add to Mypayments.json**.
-7. Click **Validate**. You should see **Validation passed!**
-8. Choose **File → Save Process Definition As...**. It opens in `ProcessDefinitionFolder/mypayments/Workflow`;
-   save the process there as `My_Payment_Test.json`.
+8. Click **Validate**. You should see **Validation passed!**
+9. Choose **File → Save Process Definition**.
 
-[Follow one payment](ServiceTutorial.md#follow-one-payment-what-a-service-receives-and-returns) shows exactly what
-the service receives under `token` and what it must send back under `paymentResult`.
+**You don't write any code here.** The payment service is already written and running on Vercel
+([`examples/rest/payment.js`](examples/rest/payment.js)); the form above only tells the editor how to call it. If you
+want to see what it receives and sends back, [Follow one payment](ServiceTutorial.md#follow-one-payment-what-a-service-receives-and-returns)
+shows it step by step.
 
 ### Deploy it
 
-9. Click **Deploy**. In Payment's row, choose **Host node** `P1` and set **Invocation Adapter** to `rest`.
-10. In the **Service endpoint** box below the table, enter
+10. Click **Deploy**. In Payment's row, choose **Host node** `P1` and set **Invocation Adapter** to `rest`.
+11. In the **Service endpoint** box below the table, enter
     `https://rule-propagated-service-orchestrati.vercel.app/api/payment/authorise`, and set **Wait up to** `2500` ms.
     A payment that takes longer fails at the place.
-11. Click **Save deployment...** and accept the name it suggests. Then choose **File → Save Process Definition**.
+12. Click **Save deployment...** and accept the name it suggests. Then choose **File → Save Process Definition**.
+
+![The Deploy panel, cut down to what this example sets: Payment's row with Host node P1, MyPaymentService.authorise, return attribute paymentResult and Invocation Adapter rest; below the table, the Service endpoint box with the Vercel address and Wait up to 2500 ms; and the Save deployment... button.](images/ex4-deploy.png)
+
+*The parts of the Deploy panel you set: the row's **Host node** and **Invocation Adapter**, the **Service endpoint** and
+**Wait up to** below it, then **Save deployment...***
 
 ### Run it
 
-12. Click **Build**. Set **Tokens per generator** to `30`, then click **Create**.
-13. Click **Run on hosts**, then **Run**. Before it starts, the editor checks that the payment service answers.
-14. Wait for **Run complete**. Expect `v001: 30 generated, 27 completed`. The mock service declines every 8th
+13. Click **Build**. Set **Tokens per generator** to `30`, then click **Create**.
+14. Click **Run on hosts**, then **Run**. Before it starts, the editor checks that the payment service answers.
+15. Wait for **Run complete**. Expect `v001: 30 generated, 27 completed`. The mock service declines every 8th
     payment, is unavailable for every 13th and too slow for every 17th, so the report lists:
     - 24 paid and 3 declined;
     - 3 failed at Payment, each with its reason: `answered HTTP 503` for payments 13 and 26, and
       `did not answer within 2500 ms (timeoutMs)` for payment 17.
-15. Click **▶ Replay the recorded run**, then **Elapsed time and queue wait chart**: how long each payment waited,
+16. Click **▶ Replay the recorded run**, then **Elapsed time and queue wait chart**: how long each payment waited,
     and how long the service took.
+
+### Where your files go
+
+You choose only the process's folder (step 2). The editor creates every other file in its place, named after the
+domain (`mypayments`) and the process (`My_Payment_Test`):
+
+| File | Created by | Where |
+|---|---|---|
+| The process | Step 2 | `btsn.common/ProcessDefinitionFolder/mypayments/Workflow/My_Payment_Test.json` |
+| The catalogue | Step 6 | `btsn.common/BusinessServiceDefinitions/mypayments/Mypayments.json`, and listed in `btsn.services/packaging.json` |
+| The deployment | Step 12 | `btsn.common/ServiceDeploymentFolder/mypayments/My_Payment_Test.json` |
+| The launcher, its schedule and its deployment profile | Step 13 | `btsn.petrinet.ProjectLoader/My_Payment_Test_BuildAndRun.xml`, `btsn.common.eventgenerators/EventTriggeringFile/My_Payment_Test_BuildAndRun.csv` and `btsn.services/deployments/mypayments/My_Payment_TestDeployment.json` |
+| The run's analysis | Step 15 | `btsn.common/AnalysisFolder/Mypayments/Analysis_My_Payment_Test.txt` |
+
+To start again, delete these files; the catalogue's line in `packaging.json` goes with it (the editor offers to remove it
+the next time you run).
 
 ### Now test your own service
 
@@ -363,6 +397,8 @@ the service receives under `token` and what it must send back under `paymentResu
 - [Follow one payment: what a service receives and returns](ServiceTutorial.md#follow-one-payment-what-a-service-receives-and-returns)
 - [Priority at a shared service](ServiceTutorial.md#priority-at-a-shared-service): two kinds of traffic, one service
 - The supplied copy: `btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json`
+
+[▶ Watch a recorded run of the finished test](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json&run=../../btsn.common/AnalysisFolder/Payments/Analysis_Remote_Payment_Test.txt)
 
 ## Author
 
