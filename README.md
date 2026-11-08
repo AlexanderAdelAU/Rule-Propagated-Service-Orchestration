@@ -6,7 +6,15 @@ For example, say you have an online store that relies on a remote Payment Servic
 
 With **RPSO**, you can leave the Payment Service where it is and bind its existing REST endpoint to a **Place** in a Petri-net model. Define the operation's inputs and result, connect the transitions that govern its execution, then generate test requests through the process. RPSO records the execution so you can measure, analyse and replay what actually happened.
 
-This example is deliberately simple, but the architectural pattern behind it goes much further. Each Place is one step of a process: add more, and RPSO handles the sequencing, forks, joins, priorities and compensation between them, with no central engine. The steps can run on different machines, or in different organisations that each run their own hosts, as in the [stroke code](StrokeCode.md), which spans an ambulance service, two hospitals and shared imaging and pathology providers. However large the process grows, every run can be measured and replayed against the same model. [Where RPSO fits](#where-rpso-fits) compares it with workflow engines, service meshes and load-testing tools.
+This example is deliberately simple, but the architectural pattern behind it goes much further. Each Place is one step of a process; add more, and RPSO coordinates them with no central engine:
+
+- **BPMN-style control flow.** Gateways route on a service's own answer, forks run branches in parallel and joins wait for all of them, merges take whichever path arrives, and a signal can start a compensation process that undoes earlier work.
+- **Several versions at once.** Different versions of a process run on the same hosts at the same time, each deployed and measured separately. Where they share a service, the higher-priority version is served first ([Priority at a shared service](ServiceTutorial.md#priority-at-a-shared-service)).
+- **Changes on the fly.** A new version of a process can be published to hosts that are already running. No host restarts, and tokens already in flight finish under the version they started with ([Change a running process](Reference.md#8-change-a-running-process)).
+- **Across machines and organisations.** The steps can run on different machines, or in different organisations that each run their own hosts, as in the [stroke code](StrokeCode.md), which spans an ambulance service, two hospitals and shared imaging and pathology providers.
+- **Measured and replayed.** However large the process grows, every run can be measured and replayed against the same model.
+
+[Where RPSO fits](#where-rpso-fits) compares it with workflow engines, service meshes and load-testing tools.
 
 ## Start with one service
 
