@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What If: Remote Payments</title>
+<meta name="description" content="A remote payment service tested in context with RPSO: step through the idea, watch a recorded run, and see what it told us.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+  :root {
+    --bg: #f5f2eb; --ink: #182238; --muted: #5b6478; --text: #3b4560; --accent: #c2521f; --accent-soft: #f3dccd;
+    --card: #ffffff; --line: #d9d3c6; --red: #d64a37; --blue: #2f86d6;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--ink); font: 16px/1.5 "IBM Plex Sans", system-ui, sans-serif; }
+  main { max-width: 1080px; margin: 0 auto; padding: 24px 16px 40px; }
+  a { color: inherit; }
+  .eyebrow { font: 600 12px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: .14em; color: var(--accent); text-transform: uppercase; }
+  .eyebrow a { color: inherit; }
+
+  .deck { margin-top: 16px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .slide { display: none; min-height: 560px; padding: 48px 56px; flex-direction: column; justify-content: center; gap: 22px; }
+  .slide.on { display: flex; }
+  .slide .kicker { font: 600 13px "IBM Plex Mono", monospace; letter-spacing: .14em; color: var(--accent); text-transform: uppercase; }
+  .slide h1 { font-size: 44px; line-height: 1.1; margin: 0; }
+  .slide p { font-size: 21px; line-height: 1.45; margin: 0; color: var(--text); max-width: 60ch; }
+  .slide ul { margin: 0; padding-left: 26px; font-size: 20px; line-height: 1.6; color: var(--text); }
+  .slide b { color: var(--ink); }
+  .flow { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 14px; font: 600 19px "IBM Plex Sans", sans-serif; }
+  .box { border: 2px solid var(--ink); border-radius: 12px; padding: 12px 18px; background: #fff; }
+  .arrow { font-size: 26px; color: var(--muted); }
+  .pill { display: inline-block; background: var(--ink); color: var(--bg); font: 600 14px "IBM Plex Mono", monospace; padding: 7px 13px; border-radius: 999px; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; max-width: 760px; }
+  .tile { border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; background: var(--bg); }
+  .tile .label { font: 600 13px "IBM Plex Sans", sans-serif; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  .tile .label i { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+  .tile .value { font: 600 40px/1.1 "IBM Plex Mono", monospace; margin-top: 6px; }
+  .tile .note { font-size: 14px; color: var(--muted); }
+  .slide.watch { padding: 20px 20px 16px; gap: 10px; justify-content: flex-start; }
+  .watch .top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; padding: 0 6px; }
+  .watch h1 { font-size: 26px; }
+  .watch p { font-size: 16px; }
+  .watch iframe { width: 100%; height: 1200px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); display: block; }
+  .watch .full { font-size: 14px; }
+  .links { display: grid; gap: 10px; max-width: 640px; }
+  .links a { display: block; text-decoration: none; border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; background: var(--bg); }
+  .links a:hover, .links a:focus-visible { border-color: var(--accent); outline: none; }
+  .links a b { display: block; font-size: 17px; }
+  .links a span { color: var(--muted); font-size: 15px; }
+
+  .controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-top: 1px solid var(--line); background: var(--bg); }
+  .controls button { font: 600 15px "IBM Plex Sans", sans-serif; padding: 10px 18px; border-radius: 8px; border: 1px solid var(--ink); cursor: pointer; }
+  #prev { background: #fff; color: var(--ink); }
+  #next { background: var(--ink); color: var(--bg); }
+  .controls button:disabled { opacity: .35; cursor: default; }
+  .controls button:focus-visible { outline: 3px solid var(--accent-soft); outline-offset: 2px; }
+  .dots { display: flex; align-items: center; gap: 8px; }
+  .controls > * { flex: 0 0 auto; }
+  .dots button { flex: 0 0 auto; width: 12px; height: 12px; padding: 0; border-radius: 50%; border: 1px solid var(--ink); background: transparent; }
+  .dots button.on { background: var(--accent); border-color: var(--accent); }
+  .count { font: 600 13px "IBM Plex Mono", monospace; color: var(--muted); min-width: 3.5em; text-align: center; }
+  .hint { margin-top: 10px; font-size: 13px; color: var(--muted); text-align: center; }
+
+  @media (max-width: 700px) {
+    .slide { padding: 28px 20px; min-height: 520px; }
+    .slide h1 { font-size: 30px; }
+    .slide p, .slide ul { font-size: 17px; }
+    .flow { font-size: 15px; } .box { padding: 9px 12px; }
+    .tile .value { font-size: 32px; }
+    .controls { padding: 10px 10px; gap: 8px; }
+    .controls button { padding: 9px 12px; }
+    .dots { gap: 6px; }
+    .dots button { width: 10px; height: 10px; padding: 0; }
+    .count { display: none; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <nav class="eyebrow" aria-label="Where you are"><a href="https://github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration#readme" title="Back to the RPSO project">RPSO</a> · <a href="../replay/examples.html">Examples</a> · What if?</nav>
+
+  <div class="deck" id="deck" aria-roledescription="carousel" aria-label="What if: a remote payment service">
+    <section class="slide" aria-roledescription="slide" aria-label="1 of 6">
+      <div class="kicker">What if?</div>
+      <h1>A remote payment service</h1>
+      <div class="flow"><span class="box">Online store</span><span class="arrow">→</span><span class="box">Internet</span><span class="arrow">→</span><span class="box">Payment service</span></div>
+      <p>Useful, but hard to test in context: how does it behave under real traffic, bursts, declines, errors and slow answers? And what does that do to the rest of the checkout?</p>
+    </section>
+
+    <section class="slide" aria-roledescription="slide" aria-label="2 of 6">
+      <div class="kicker">Drop it into RPSO</div>
+      <h1>One generator. One place.<br>Your service, unchanged.</h1>
+      <div class="flow"><span class="box">PAYMENTS</span><span class="arrow">→</span><span class="box">T_in</span><span class="arrow">→</span><span class="box">Payment (REST)</span><span class="arrow">→</span><span class="box">Paid / Declined</span></div>
+      <p>The place calls the payment service's own endpoint, here a mock on Vercel. RPSO supplies the traffic, records every call from the caller's side, and replays the run on the model.</p>
+    </section>
+
+    <section class="slide watch" aria-roledescription="slide" aria-label="3 of 6">
+      <div class="top">
+        <h1>Watch it run</h1>
+        <p>Press <b>Play</b>. Steady payments, then a burst of twelve: the queue builds at T_in, declines take their own route, failed calls stop at the place.
+          <a class="full" href="../replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json&amp;run=../../btsn.common/AnalysisFolder/Payments/Analysis_Remote_Payment_Test.txt">Open it on its own page</a></p>
+      </div>
+      <iframe id="replay" title="The recorded run, replayed on the model" loading="lazy"
+        data-src="../replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json&amp;run=../../btsn.common/AnalysisFolder/Payments/Analysis_Remote_Payment_Test.txt"></iframe>
+    </section>
+
+    <section class="slide" aria-roledescription="slide" aria-label="4 of 6">
+      <div class="kicker">What one run told us</div>
+      <h1>30 payments, measured from the caller's side</h1>
+      <ul>
+        <li><b>24 paid, 3 declined</b>, each routed on the service's own answer</li>
+        <li><b>3 failed at the place, with the reason:</b> two gateway errors (HTTP 503), one answer slower than 2.5 s</li>
+        <li><b>The burst queued for up to 10.8 s</b>; steady traffic hardly queued</li>
+      </ul>
+      <p>Recorded on an ordinary desktop calling the service across the internet. <span class="pill">A recorded run, not a simulation</span></p>
+    </section>
+
+    <section class="slide" aria-roledescription="slide" aria-label="5 of 6">
+      <div class="kicker">And when the service is shared?</div>
+      <h1>In-store payments go first</h1>
+      <p>In-store payments and online checkout call the same gateway. During the online burst, the place serves the lower version first, so the customer at the till is not stuck behind the queue.</p>
+      <div class="tiles">
+        <div class="tile"><div class="label"><i style="background:var(--red)"></i>In-store (v001), average wait</div><div class="value">0.6 s</div><div class="note">at most 2.1 s</div></div>
+        <div class="tile"><div class="label"><i style="background:var(--blue)"></i>Online (v002), average wait</div><div class="value">13.7 s</div><div class="note">up to 24.6 s</div></div>
+      </div>
+      <p>Priority respected at <b>135 of 135</b> moments both were queued. <a href="../replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Payment_Priority_Test.json&amp;run=../../btsn.common/AnalysisFolder/Payments/Analysis_Payment_Priority_Test.txt">Watch that run</a></p>
+    </section>
+
+    <section class="slide" aria-roledescription="slide" aria-label="6 of 6">
+      <div class="kicker">Try it yourself</div>
+      <h1>Test it in context, then grow the model</h1>
+      <div class="links">
+        <a href="https://github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration/blob/main/ServiceTutorial.md#test-a-remote-service-in-context"><b>Test your own service this way</b><span>Point the place at your endpoint, shape the traffic, run it from the editor.</span></a>
+        <a href="https://github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration/blob/main/ServiceTutorial.md#priority-at-a-shared-service"><b>Priority at a shared service</b><span>Two kinds of traffic, one service: who waits.</span></a>
+        <a href="../replay/examples.html"><b>All the examples</b><span>From one place to a stroke code across four organisations.</span></a>
+        <a href="https://github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration#readme"><b>The RPSO project</b><span>How a drawn Petri net becomes a running, measured system with no central engine.</span></a>
+      </div>
+    </section>
+
+    <div class="controls">
+      <button id="prev" type="button" aria-label="Previous slide">← Back</button>
+      <div class="dots" id="dots" role="tablist" aria-label="Slides"></div>
+      <span class="count" id="count" aria-live="polite"></span>
+      <button id="next" type="button" aria-label="Next slide">Next →</button>
+    </div>
+  </div>
+  <div class="hint">Use the buttons, the dots or the arrow keys. Nothing moves on its own.</div>
+</main>
+<script>
+(function () {
+  const slides = Array.from(document.querySelectorAll(".slide"));
+  const dots = document.getElementById("dots"), count = document.getElementById("count");
+  const prev = document.getElementById("prev"), next = document.getElementById("next");
+  let at = 0;
+  slides.forEach((s, i) => {
+    const d = document.createElement("button");
+    d.type = "button"; d.setAttribute("role", "tab"); d.setAttribute("aria-label", "Slide " + (i + 1));
+    d.addEventListener("click", () => show(i));
+    dots.appendChild(d);
+  });
+  function show(i) {
+    at = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach((s, k) => s.classList.toggle("on", k === at));
+    Array.from(dots.children).forEach((d, k) => { d.classList.toggle("on", k === at); d.setAttribute("aria-selected", k === at); });
+    count.textContent = (at + 1) + " / " + slides.length;
+    prev.disabled = at === 0;
+    next.disabled = at === slides.length - 1;
+    // The replay loads when its slide is first shown.
+    const frame = slides[at].querySelector("iframe[data-src]");
+    if (frame && !frame.getAttribute("src")) {
+      // Same site, so the frame can take the replay's full height: the page scrolls, not a box inside it.
+      frame.addEventListener("load", () => {
+        const fit = () => { try { const b = frame.contentDocument.body; frame.style.height = Math.ceil(b.getBoundingClientRect().height + 8) + "px"; } catch (e) {} };
+        fit(); setTimeout(fit, 800); setTimeout(fit, 2500);
+      });
+      frame.setAttribute("src", frame.dataset.src);
+    }
+    try { history.replaceState(null, "", "#" + (at + 1)); } catch (e) {}
+  }
+  prev.addEventListener("click", () => show(at - 1));
+  next.addEventListener("click", () => show(at + 1));
+  document.addEventListener("keydown", e => {
+    if (e.target.closest && e.target.closest("input, textarea, select")) return;
+    if (e.key === "ArrowRight" || e.key === "PageDown") { show(at + 1); e.preventDefault(); }
+    if (e.key === "ArrowLeft" || e.key === "PageUp") { show(at - 1); e.preventDefault(); }
+  });
+  const fromHash = () => { const n = parseInt((location.hash || "").slice(1), 10); return Number.isFinite(n) ? n - 1 : 0; };
+  window.addEventListener("hashchange", () => { if (fromHash() !== at) show(fromHash()); });
+  show(fromHash());
+})();
+</script>
+</body>
+</html>

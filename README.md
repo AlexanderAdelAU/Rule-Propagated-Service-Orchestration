@@ -39,7 +39,7 @@ flowchart LR
 
 ![The payment example replayed: an event generator sends steady payments, then a burst of twelve that queues at the Place's T_in. Paid, declined and failed calls are counted as the run replays, and a timeline shows each payment's wait and service time.](images/remote-payment-test.gif)
 
-[▶ Watch the recorded run](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json&run=../../btsn.common/AnalysisFolder/Payments/Analysis_Remote_Payment_Test.txt) · [Test your own service this way](ServiceTutorial.md#test-a-remote-service-in-context)
+[▶ Watch the recorded run](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json&run=../../btsn.common/AnalysisFolder/Payments/Analysis_Remote_Payment_Test.txt) · [Step through it at your own pace](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/whatif/) · [Test your own service this way](ServiceTutorial.md#test-a-remote-service-in-context)
 
 From one remote service, the model can grow into a complete checkout process with inventory, payment and order handling. Load, stress, soak and failure scenarios can then be studied *in the context of that workflow*. RPSO provides orchestration, token generation, execution records and analysis; realistic workloads and fault-injection conditions still need to be configured as part of the test.
 
