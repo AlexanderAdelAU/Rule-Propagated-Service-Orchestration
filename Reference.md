@@ -746,16 +746,27 @@ launcher. The collected data is in `btsn.common.Monitor/ServiceAnalysisDataBase`
 
 ### Analyse the run
 
-After stopping the run:
+- **From the editor.** **Run on hosts** analyses the run when it finishes and saves the report as
+  `btsn.common/AnalysisFolder/PetriNet/Analysis_My_P2_Workflow.txt`. Click **Open analysis report** to read it, or
+  **▶ Replay the recorded run**. There is nothing more to do.
+- **In Eclipse, after running the launcher yourself.** In the `btsn.common.Monitor` project, open
+  `src/org/btsn/derby/Analysis/PetriNetAnalyzer.java` and choose **Run As → Java Application**. It reads Monitor's
+  database, which holds the last run, and prints the report in the console. To replay it, copy the console into
+  `btsn.common/AnalysisFolder/PetriNet/Analysis_My_P2_Workflow.txt`.
+- **From the command line**, the launcher's `analyse` target does the same:
 
-```sh
-ant -emacs -f btsn.petrinet.ProjectLoader/My_P2_Workflow_BuildAndRun.xml analyse > btsn.common/AnalysisFolder/PetriNet/Analysis_My_P2_Workflow.txt
-```
+  ```sh
+  ant -emacs -f btsn.petrinet.ProjectLoader/My_P2_Workflow_BuildAndRun.xml analyse > btsn.common/AnalysisFolder/PetriNet/Analysis_My_P2_Workflow.txt
+  ```
 
-- **In Eclipse**: run the launcher's **analyse** target and copy the console
-  into that file.
-- **Ant's `[java]` prefixes**: they are fine. The editor's replay accepts them.
-- **Several analyses in one file**: if you append analyses to the same file, replay uses the last one.
+Use the launcher's `analyse` target (or the editor) in two cases:
+
+- **A run across several machines.** It tells the analysis which places share a machine, so it can line up their clocks.
+- **A launcher with checks of its own** after the report, such as the stroke code's suite-hold balance or the loan's
+  compensation balance.
+
+Ant's `[java]` prefixes and Eclipse's log lines in a copied report are fine: the replay accepts them. If you append
+several analyses to the same file, the replay uses the last one.
 
 Check the report's first section, **CANONICAL WORKFLOW RECONSTRUCTION**:
 
@@ -1141,7 +1152,8 @@ copy (`git checkout` the file to get the supplied one back).
 
 - right-click it, then choose **Run As → Ant Build** (default target `run-complete-workflow`);
 - add `-Dhost.address=127.0.0.1` to run on one computer;
-- afterwards, run its `analyse` target.
+- afterwards, run its `analyse` target, or run `PetriNetAnalyzer` in `btsn.common.Monitor` as a Java application
+  ([Analyse the run](#analyse-the-run) says when to prefer `analyse`).
 
 | Example | Ant entry point |
 |---|---|
