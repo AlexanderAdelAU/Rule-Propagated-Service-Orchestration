@@ -328,8 +328,10 @@ The process needs a catalogue to hold your service: one per domain, shared by it
 8. Click **Validate**. You should see **Validation passed!**
 9. Choose **File → Save Process Definition**.
 
-[Follow one payment](ServiceTutorial.md#follow-one-payment-what-a-service-receives-and-returns) shows exactly what
-the service receives under `token` and what it must send back under `paymentResult`.
+**You don't write any code here.** The payment service is already written and running on Vercel
+([`examples/rest/payment.js`](examples/rest/payment.js)); the form above only tells the editor how to call it. If you
+want to see what it receives and sends back, [Follow one payment](ServiceTutorial.md#follow-one-payment-what-a-service-receives-and-returns)
+shows it step by step.
 
 ### Deploy it
 
@@ -338,6 +340,11 @@ the service receives under `token` and what it must send back under `paymentResu
     `https://rule-propagated-service-orchestrati.vercel.app/api/payment/authorise`, and set **Wait up to** `2500` ms.
     A payment that takes longer fails at the place.
 12. Click **Save deployment...** and accept the name it suggests. Then choose **File → Save Process Definition**.
+
+![The Deploy panel, cut down to what this example sets: Payment's row with Host node P1, MyPaymentService.authorise, return attribute paymentResult and Invocation Adapter rest; below the table, the Service endpoint box with the Vercel address and Wait up to 2500 ms; and the Save deployment... button.](images/ex4-deploy.png)
+
+*The parts of the Deploy panel you set: the row's **Host node** and **Invocation Adapter**, the **Service endpoint** and
+**Wait up to** below it, then **Save deployment...***
 
 ### Run it
 
