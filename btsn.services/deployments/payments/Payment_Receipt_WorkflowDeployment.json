@@ -1,0 +1,9 @@
+{
+  "catalog": "BusinessServiceDefinitions/payments/Payments.json",
+  "infrastructure": "InfrastructureDefinitionFolder/SingleHost.json",
+  "deploymentRules": "RuleBase/Generated/InfrastructureDeployment.ruleml.xml",
+  "directServiceRules": [
+    "RuleBase/Generated/HostAdministration.ruleml.xml"
+  ],
+  "serviceDeployment": "ServiceDeploymentFolder/payments/Payment_Receipt_Workflow.json"
+}

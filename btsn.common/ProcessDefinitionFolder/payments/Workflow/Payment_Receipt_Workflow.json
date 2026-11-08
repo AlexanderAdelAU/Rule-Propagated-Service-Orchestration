@@ -1,0 +1,237 @@
+{
+  "serviceDeployment": "ServiceDeploymentFolder/payments/Payment_Receipt_Workflow.json",
+  "processType": "PetriNet",
+  "elements": [
+    {
+      "id": "PAYMENTS",
+      "type": "EVENT_GENERATOR",
+      "x": 60,
+      "y": 170,
+      "width": 24,
+      "height": 60,
+      "label": "PAYMENTS",
+      "rotation": 0.0,
+      "generator_rate": "1000",
+      "token_version": "v001"
+    },
+    {
+      "id": "T_in_Payment",
+      "type": "TRANSITION",
+      "x": 170,
+      "y": 170,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_Payment",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "20"
+    },
+    {
+      "id": "Payment",
+      "type": "PLACE",
+      "x": 255,
+      "y": 175,
+      "width": 50,
+      "height": 50,
+      "label": "Payment",
+      "service": "PaymentService",
+      "serviceInstance": "Payment",
+      "operations": [
+        {
+          "name": "authorise",
+          "returnAttribute": "paymentResult",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_Payment",
+      "type": "TRANSITION",
+      "x": 360,
+      "y": 170,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_Payment",
+      "rotation": 0.0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "T_in_Receipt",
+      "type": "TRANSITION",
+      "x": 500,
+      "y": 170,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_Receipt",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "20"
+    },
+    {
+      "id": "Receipt",
+      "type": "PLACE",
+      "x": 585,
+      "y": 175,
+      "width": 50,
+      "height": 50,
+      "label": "Receipt",
+      "service": "ReceiptService",
+      "serviceInstance": "Receipt",
+      "operations": [
+        {
+          "name": "issue",
+          "returnAttribute": "receipt",
+          "arguments": [
+            {
+              "name": "paymentResult",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_Receipt",
+      "type": "TRANSITION",
+      "x": 690,
+      "y": 170,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_Receipt",
+      "rotation": 0.0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "Receipt_Sent",
+      "type": "TRANSITION",
+      "x": 810,
+      "y": 170,
+      "width": 24,
+      "height": 60,
+      "label": "Receipt sent",
+      "rotation": 0.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    },
+    {
+      "id": "Declined",
+      "type": "TRANSITION",
+      "x": 500,
+      "y": 280,
+      "width": 24,
+      "height": 60,
+      "label": "Declined",
+      "rotation": 0.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "PAYMENTS",
+      "target": "T_in_Payment",
+      "connection_type": "NETWORK",
+      "availability": 1
+    },
+    {
+      "source": "T_in_Payment",
+      "target": "Payment"
+    },
+    {
+      "source": "Payment",
+      "target": "T_out_Payment"
+    },
+    {
+      "source": "T_out_Payment",
+      "target": "T_in_Receipt",
+      "label": "paid",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "paid",
+      "connection_type": "NETWORK",
+      "availability": 1
+    },
+    {
+      "source": "T_out_Payment",
+      "target": "Declined",
+      "label": "declined",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "declined"
+    },
+    {
+      "source": "T_in_Receipt",
+      "target": "Receipt"
+    },
+    {
+      "source": "Receipt",
+      "target": "T_out_Receipt"
+    },
+    {
+      "source": "T_out_Receipt",
+      "target": "Receipt_Sent",
+      "label": "issued",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "issued"
+    }
+  ],
+  "textElements": [
+    {
+      "x": 40,
+      "y": 40,
+      "text": "A payment's journey: from token to receipt",
+      "fontSize": 15,
+      "fontStyle": 1,
+      "color": -16777216
+    },
+    {
+      "x": 40,
+      "y": 62,
+      "text": "PAYMENTS sends each order as a token. Payment (REST) takes it as its input token and publishes paymentResult;",
+      "fontSize": 11,
+      "fontStyle": 2,
+      "color": -12566464
+    },
+    {
+      "x": 40,
+      "y": 78,
+      "text": "Receipt (Java) takes paymentResult and publishes receipt. Each input is named after what arrives.",
+      "fontSize": 11,
+      "fontStyle": 2,
+      "color": -12566464
+    },
+    {
+      "x": 228,
+      "y": 160,
+      "text": "Payment gateway (REST)",
+      "fontSize": 10,
+      "fontStyle": 2,
+      "color": -12566464
+    },
+    {
+      "x": 560,
+      "y": 160,
+      "text": "Receipt service (Java)",
+      "fontSize": 10,
+      "fontStyle": 2,
+      "color": -12566464
+    }
+  ]
+}

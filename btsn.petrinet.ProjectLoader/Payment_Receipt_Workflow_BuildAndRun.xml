@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A payment's journey, the example of ServiceTutorial.md ("Follow one payment"): each order the event generator sends
+     is a token whose data comes from a token format (btsn.common.eventgenerators/TokenFormats/PaymentService.json).
+     Payment (P1) takes it as its input "token" and calls the payment gateway over REST (examples/rest/payment.js on
+     this project's Vercel deployment), publishing "paymentResult". A paid order goes on to Receipt (P2), a Java service
+     (org.btsn.business.payments.ReceiptService) whose input is named "paymentResult" because that is what arrives;
+     it publishes "receipt". A declined order ends at Declined.
+     Traffic: ten orders, one a second. The hosts need outbound internet access.
+     Run:     ant -f Payment_Receipt_Workflow_BuildAndRun.xml        (add -Dhost.address=127.0.0.1 to run every host on this machine)
+     Analyse: ant -f Payment_Receipt_Workflow_BuildAndRun.xml analyse -->
+<project name="Payment_Receipt_Workflow_BuildAndRun" default="run-complete-workflow" basedir=".">
+    <property name="process.title" value="payments/Workflow/Payment_Receipt_Workflow"/>
+    <property name="launcher.profile.file" location="../btsn.services/deployments/payments/Payment_Receipt_WorkflowDeployment.json"/>
+    <property name="workflow.process.name" value="payments/Workflow/Payment_Receipt_Workflow"/>
+    <property name="rule.version" value="v001"/>
+    <property name="query.version" value="v001"/>
+
+    <property name="eg1.id" value="PAYMENTS"/>
+    <property name="eg1.version" value="v001"/>
+    <property name="eg1.place" value="P1_Place"/>
+    <property name="eg1.operation" value="authorise"/>
+    <property name="eg1.expire" value="60000"/>
+    <!-- Each token's data: an order, from TokenFormats/PaymentService.json. -->
+    <property name="eg1.format.service" value="PaymentService"/>
+    <property name="eg1.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/Payment_Receipt_Workflow_BuildAndRun.csv"/>
+    <property name="token.count" value="10"/>
+
+    <!-- Hosts used by the service deployment: nodes of the infrastructure, each running the host program -->
+    <property name="hosts" value="P1,P2"/>
+
+    <import file="../btsn.services/process-runtime.xml"/>
+</project>

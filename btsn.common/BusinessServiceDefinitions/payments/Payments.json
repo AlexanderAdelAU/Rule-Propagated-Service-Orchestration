@@ -1,6 +1,6 @@
 {
   "domain": "Payments",
-  "purpose": "A remote payment service tested in context: RPSO calls it over REST, as an online store would. Its implementation lives behind its endpoint (examples/rest/payment.js), so there is no Java class to package.",
+  "purpose": "The payment examples. PaymentService is a remote payment gateway called over REST (examples/rest/payment.js), so it has no Java class; ReceiptService is a Java service that issues the receipt for a paid order.",
   "services": [
     {
       "service": "PaymentService",
@@ -11,6 +11,21 @@
         "token"
       ],
       "returnAttribute": "paymentResult",
+      "status": "active"
+    },
+    {
+      "service": "ReceiptService",
+      "implementationClass": "org.btsn.business.payments.ReceiptService",
+      "operation": "issue",
+      "description": "Issues the receipt for a paid order, quoting the order (from the token's data) and the payment (from paymentResult).",
+      "returns": "The receipt: the order, customer, payment, amount and currency. Routes on \"issued\".",
+      "inputs": [
+        "paymentResult"
+      ],
+      "returnAttribute": "receipt",
+      "routes": [
+        "issued"
+      ],
       "status": "active"
     }
   ]

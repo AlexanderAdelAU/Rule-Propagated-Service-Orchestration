@@ -1,0 +1,21 @@
+{
+  "service": "PaymentService",
+  "operation": "authorise",
+  "description": "An online store's order, as the payment service is asked to authorise it. Order n is ORD-n; its basket comes from the case mix.",
+  "tokenStructure": {
+    "data": {
+      "orderId": "ORD-${n}",
+      "customer": "C-${n}",
+      "currency": "AUD"
+    }
+  },
+  "dataVariants": {
+    "groceries":  { "items": 6, "amount": 84.50,   "card": "visa-4242" },
+    "headphones": { "items": 1, "amount": 249.00,  "card": "mastercard-5100" },
+    "books":      { "items": 3, "amount": 42.00,   "card": "visa-1881" },
+    "coffee":     { "items": 2, "amount": 31.80,   "card": "visa-4242" },
+    "laptop":     { "items": 1, "amount": 1899.00, "card": "amex-0005" }
+  },
+  "caseMix": ["groceries", "headphones", "books", "coffee", "laptop"],
+  "notes": "Read by the Petri-net token generator when a launcher sets egN.format.service to PaymentService (TokenFormatData.java)."
+}
