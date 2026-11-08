@@ -159,14 +159,6 @@ Hosts record a token's arrival at a T_in when it joins the operation's queue, an
 
 Don't use **Build → Create** for this example: it would rewrite the launcher from the diagram.
 
-**From the command line**
-
-```sh
-cd btsn.healthcare.ProjectLoader
-ant -f Stroke_Code_With_Emergency_Department.xml -Dhost.address=127.0.0.1   # every host on this machine, and the booking system
-ant -f Stroke_Code_With_Emergency_Department.xml analyse                     # the report, then the suite-hold balance
-```
-
 The analysis ends with the balance:
 
 ```
@@ -178,16 +170,27 @@ The analysis ends with the balance:
    Balance:                          [OK] every suite hold opened was settled or undone, exactly once
 ```
 
-Either way, the run starts the stroke centre's booking system on port 8090 if nothing answers there, and stops it at the end.
+The run starts the stroke centre's booking system on port 8090 if nothing answers there, and stops it at the end.
 
-To run the stroke centre on a machine of its own (192.168.1.152 in [TwoHost_StrokeCentre.json](btsn.common/InfrastructureDefinitionFolder/TwoHost_StrokeCentre.json)), with tokens reaching its host P8 over UDP like any other host and its booking inside that host:
+**The stroke centre on a machine of its own** (192.168.1.152 in [TwoHost_StrokeCentre.json](btsn.common/InfrastructureDefinitionFolder/TwoHost_StrokeCentre.json)), with tokens reaching its host P8 over UDP like any other host and its booking inside that host:
+
+1. Open the combined model and choose **Machines: TwoHost_StrokeCentre** in the toolbar.
+2. Click **Build**, then **Build host packages**. Copy the P8 zip to that machine, unzip it and run `launch.bat`.
+3. Click **Run on hosts**, then **Run**.
+
+<details><summary>From the command line</summary>
 
 ```sh
+cd btsn.healthcare.ProjectLoader
+ant -f Stroke_Code_With_Emergency_Department.xml -Dhost.address=127.0.0.1   # every host on this machine, and the booking system
+ant -f Stroke_Code_With_Emergency_Department.xml analyse                     # the report, then the suite-hold balance
+
+# The stroke centre on its own machine:
 ant -f Stroke_Code_With_Emergency_Department.xml host-packages -Dstroke.centre=remote   # copy the P8 zip there and run launch.bat
 ant -f Stroke_Code_With_Emergency_Department.xml -Dstroke.centre=remote                 # then the run, here
 ```
 
-In the editor, open the combined model and choose **Machines: TwoHost_StrokeCentre** in the toolbar. **Build** then makes the P8 zip, and **Run on hosts** runs it the same way.
+</details>
 
 To replay your own run, open the replay page, choose **Replay another model and analysis**, and select the combined model below with your analysis file.
 

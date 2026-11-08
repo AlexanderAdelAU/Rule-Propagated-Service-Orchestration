@@ -360,12 +360,18 @@ referred. The replay shows each token leaving the Credit place by its route.
 
 ## 7. Give it data
 
-A token can carry data to the service. Set the launcher's `eg1.data` property, or
-pass it when running the launcher yourself:
+A token can carry data to the service. In the editor, select the event generator (`APPLICATIONS`) and set its
+**Token data** to `amount=4500`. Save the process, click **Build**, then **Create**, and **Run on hosts**.
+
+<details><summary>From the command line</summary>
+
+The generator's Token data is the launcher's `eg1.data` property, which you can also pass to the launcher:
 
 ```sh
 ant -f btsn.petrinet.ProjectLoader/Credit_Check_Workflow_BuildAndRun.xml -Dhost.address=127.0.0.1 -Deg1.data=amount=4500
 ```
+
+</details>
 
 Every application now asks for 4,500, so all ten are approved. `eg1.data` takes
 `name=value` pairs separated by commas; the service reads them with `numberValue`

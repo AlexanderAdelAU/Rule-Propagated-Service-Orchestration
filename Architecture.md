@@ -320,7 +320,7 @@ fork. A join waits for the children of one workflow in one version.
 | Phase 2: run | Deploy each generator's version behind the commitment barrier, then fire all generators together. A process started by a signal transition is deployed but fires nothing itself |
 | Drain | Wait until nothing has moved for a few seconds, or until every token's lifetime has run out |
 | Phase 3: collect | Each host's collection Place (`Pn_CollectorService`) sends its records to Monitor (again a v999 process). The run waits until Monitor has a receipt from every host for every version |
-| Analyse | `ant -f <launcher> analyse` runs `PetriNetAnalyzer`, which reconstructs each workflow from the records; the editor replays the same report |
+| Analyse | `PetriNetAnalyzer` reconstructs each workflow from the records. The editor's Run window runs it when a run finishes (through the launcher's `analyse` target) and replays the report |
 
 Initialisation and collection are processes like any other: they are drawn, deployed and
 run on the same hosts. Monitor sits outside the business process: no business token
