@@ -1,13 +1,13 @@
 # From an idea to a measured run
 
-We will walk you through three examples. All are built graphically in the editor.
+We will walk you through four examples. All are built graphically in the editor.
 
 - **Example 1** runs a standard service that returns true or false.
 - **Example 2** builds a simple claims process that calls a remote service over REST.
 - **Example 3** adds a seventh host target, P7, and moves Example 1 onto it.
+- **Example 4** tests a remote service of your own in context: you describe the service, point a place at it and run traffic through it.
 
-**Before you start:** you need a JDK (15 or later), Apache Ant (it comes with Eclipse), and
-the repository's projects imported into Eclipse.
+**Before you start:** you need a JDK (15 or later) and the repository's projects imported into Eclipse.
 
 ## Example 1: a standard service
 
@@ -264,6 +264,105 @@ The place keeps its label, P1; only the host target it runs on has changed.
 
 - [Add a host target](Reference.md#add-a-host): host target names (P1 to P99) and the ports kept for each one's initialisation and collection places
 - [Choose the machines](Reference.md#choose-the-machines)
+
+## Example 4: test your own remote service
+
+You have a remote service, say a payment gateway, and want to see how it behaves in context: under steady traffic,
+when it declines, fails or answers slowly. Here you build the one-place test from the README from nothing: an event
+generator, a place that calls the service over REST, and two outcomes. You describe the service yourself, as you would
+your own. It first calls this project's mock payment service on Vercel; at the end you point it at yours.
+
+Your computer needs internet access for this example.
+
+[▶ Watch a recorded run of the finished test](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json&run=../../btsn.common/AnalysisFolder/Payments/Analysis_Remote_Payment_Test.txt)
+
+### Draw the process
+
+1. Choose **File → New → Process Definition**.
+2. Add the elements (click the tool, click the canvas, type the **Label**):
+   - **Event Generator** `PAYMENTS`;
+   - **Transition** `T_in_Payment`, **Place** `Payment`, **Transition** `T_out_Payment`, in a row;
+   - **Transition** `Paid` and **Transition** `Declined`, to the right of `T_out_Payment`.
+3. Connect them with **Arrow (drag)**:
+   - `PAYMENTS` → `T_in_Payment` → `Payment` → `T_out_Payment`
+   - `T_out_Payment` → `Paid`
+   - `T_out_Payment` → `Declined`
+4. Set the details:
+   - `T_in_Payment`: **Node Type** `EdgeNode`, **Buffer** `40` (room for payments to queue);
+   - `T_out_Payment`: **Node Type** `GatewayNode`;
+   - `Paid` and `Declined`: **Node Type** `TerminateNode`;
+   - the arrow to `Paid`: **Guard Condition** `DECISION_EQUAL_TO`, **Decision Value** and **Label** `paid`;
+   - the arrow to `Declined`: the same, with `declined`.
+
+### Describe the service
+
+The process needs a catalogue to hold your service: one per domain, shared by its processes.
+
+5. Right-click `Payment` and choose **Choose/Create catalogue...**. Choose **Create a catalogue for a new domain**,
+   type `mypayments` and click **OK**.
+6. Right-click `Payment` again and choose **Create New Service in Mypayments.json...**. Fill in the form:
+
+   | Field | Enter | Why |
+   |---|---|---|
+   | **Service** | `MyPaymentService` | Your name for it. (The suggestion, `MypaymentsPaymentService`, avoids the supplied `PaymentService`.) |
+   | **Operation** | `authorise` | What the place asks the service to do |
+   | **What it does** / **What it returns** | In words | Shown wherever the service is chosen |
+   | **Inputs** | `token` (suggested) | The event generator sends each payment under the name `token`, and an input is named after what arrives |
+   | **Return attribute** | `paymentResult` | The name the service's answer is published under |
+   | **Routes on** | `paid, declined` | The values its answer routes on: the guards you set in step 4 |
+   | **How it runs** | **A service called over REST, in any language** | There is no Java class: the service runs at its endpoint |
+
+   Click **Add to Mypayments.json**.
+7. Click **Validate**. You should see **Validation passed!**
+8. Choose **File → Save Process Definition As...**. It opens in `ProcessDefinitionFolder/mypayments/Workflow`;
+   save the process there as `My_Payment_Test.json`.
+
+[Follow one payment](ServiceTutorial.md#follow-one-payment-what-a-service-receives-and-returns) shows exactly what
+the service receives under `token` and what it must send back under `paymentResult`.
+
+### Deploy it
+
+9. Click **Deploy**. In Payment's row, choose **Host node** `P1` and set **Invocation Adapter** to `rest`.
+10. In the **Service endpoint** box below the table, enter
+    `https://rule-propagated-service-orchestrati.vercel.app/api/payment/authorise`, and set **Wait up to** `2500` ms.
+    A payment that takes longer fails at the place.
+11. Click **Save deployment...** and accept the name it suggests. Then choose **File → Save Process Definition**.
+
+### Run it
+
+12. Click **Build**. Set **Tokens per generator** to `30`, then click **Create**.
+13. Click **Run on hosts**, then **Run**. Before it starts, the editor checks that the payment service answers.
+14. Wait for **Run complete**. Expect `v001: 30 generated, 27 completed`. The mock service declines every 8th
+    payment, is unavailable for every 13th and too slow for every 17th, so the report lists:
+    - 24 paid and 3 declined;
+    - 3 failed at Payment, each with its reason: `answered HTTP 503` for payments 13 and 26, and
+      `did not answer within 2500 ms (timeoutMs)` for payment 17.
+15. Click **▶ Replay the recorded run**, then **Elapsed time and queue wait chart**: how long each payment waited,
+    and how long the service took.
+
+### Now test your own service
+
+- **What your service must do.** Answer an HTTP POST. It receives
+  `{"service": "MyPaymentService", "operation": "authorise", "sequenceId": …, "version": "v001", "inputs": {"token": {…}}}`
+  and answers HTTP 200 with `{"paymentResult": {…, "routing_decision": {"routing_path": "paid"}}}`, or `declined`.
+  Any other status, or no answer within **Wait up to**, fails the payment at the place, with the reason in the report.
+- **A starting point.** [`examples/rest/payment.js`](examples/rest/payment.js) is the mock, in a few lines of
+  JavaScript. Run it on your machine with `node examples/rest/credit-service.js` (it answers at
+  `http://127.0.0.1:8080/payment/authorise`), or host your own copy:
+  [Serve it from the internet](ServiceTutorial.md#serve-it-from-the-internet).
+- **Point the place at it.** Click **Deploy**, put your address in **Service endpoint**, set **Wait up to**, save the
+  deployment, then **Run on hosts** again.
+- **Shape the traffic.** Select `PAYMENTS`: **Rate (ms)** sets how often payments arrive, and **Token data** what each
+  one carries, for example `amount=120`. Then **Build → Create** and run. For bursts, see
+  [Test a remote service in context](ServiceTutorial.md#test-a-remote-service-in-context).
+- **Grow it.** Add the places around the service, such as a receipt after **Paid**: each is another Node in the same
+  model ([Follow one payment](ServiceTutorial.md#follow-one-payment-what-a-service-receives-and-returns)).
+
+### Learn more
+
+- [Follow one payment: what a service receives and returns](ServiceTutorial.md#follow-one-payment-what-a-service-receives-and-returns)
+- [Priority at a shared service](ServiceTutorial.md#priority-at-a-shared-service): two kinds of traffic, one service
+- The supplied copy: `btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json`
 
 ## Author
 
