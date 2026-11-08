@@ -419,7 +419,7 @@ This is not a load test: tools such as k6 send far more traffic. What RPSO shows
 process: where work queues, which route each answer takes, and where a failure or a slow answer stops a token. As
 the model grows into the whole process, the same measurements cover every step around the service.
 
-![A remote payment service tested in context: steady payments, then a burst of twelve that queues at the T_in; paid, declined and failed calls are counted as the run replays.](images/remote-payment-test.gif)
+![A recorded run replayed on the model: steady payments, then a burst of twelve that queues at the T_in; each payment ends at Paid or Declined, or stops at the place if its call fails.](images/remote-payment-test.gif)
 
 The supplied example tests a mock payment gateway,
 [`payment.js`](examples/rest/payment.js), on this project's Vercel deployment at
