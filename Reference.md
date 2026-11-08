@@ -677,6 +677,10 @@ Below it, **Next steps** offers:
 
 ### Or run the launcher yourself
 
+The editor's Run window does all of this for you. To run the launcher outside the editor:
+
+<details><summary>Run the launcher in Eclipse or from a terminal</summary>
+
 - **In Eclipse**: refresh `btsn.petrinet.ProjectLoader`, right-click
   **My_P2_Workflow_BuildAndRun.xml**, then choose **Run As → Ant Build**.
 - **From a terminal**:
@@ -700,6 +704,8 @@ The default target `run-complete-workflow` does everything:
 | 1 — Database initialization | Reset P2 and Monitor (administrative version `v999`) | `common/Initializers/Hosts_Initialization`, generated for the run's hosts |
 | 2 — Workflow execution | Generate the rules for P2 and send them as `v001`. P2 commits to them (a confirmation per version), and only then are the tokens fired from EG11 | `petrinet/Workflow/My_P2_Workflow` |
 | 3 — Data collection | Request P2's observations and write them to Monitor | `common/Collectors/Hosts_Collector`, generated for the run's hosts |
+
+</details>
 
 ### Stop it when collection finishes
 
@@ -728,6 +734,11 @@ launcher. The collected data is in `btsn.common.Monitor/ServiceAnalysisDataBase`
 
 ### Change a run without regenerating
 
+Most of these are set in the editor (the generator's attributes, then **Build → Create**). When you run the launcher
+yourself, you can also override them for one run:
+
+<details><summary>Launcher properties</summary>
+
 | Override | Effect |
 |---|---|
 | `-Dtoken.count=5` | Fire only the first 5 tokens of the schedule. To fire more than it holds, recreate the launcher with a larger number. |
@@ -742,20 +753,37 @@ launcher. The collected data is in `btsn.common.Monitor/ServiceAnalysisDataBase`
 
 `ant -f <launcher> help` lists these.
 
+</details>
+
 ## 5. Show the results
 
 ### Analyse the run
 
-After stopping the run:
+- **From the editor.** **Run on hosts** analyses the run when it finishes and saves the report as
+  `btsn.common/AnalysisFolder/PetriNet/Analysis_My_P2_Workflow.txt`. Click **Open analysis report** to read it, or
+  **▶ Replay the recorded run**. There is nothing more to do.
+- **In Eclipse, after running the launcher yourself.** In the `btsn.common.Monitor` project, open
+  `src/org/btsn/derby/Analysis/PetriNetAnalyzer.java` and choose **Run As → Java Application**. It reads Monitor's
+  database, which holds the last run, and prints the report in the console. To replay it, copy the console into
+  `btsn.common/AnalysisFolder/PetriNet/Analysis_My_P2_Workflow.txt`.
+- **From the command line**, the launcher's `analyse` target does the same.
 
-```sh
-ant -emacs -f btsn.petrinet.ProjectLoader/My_P2_Workflow_BuildAndRun.xml analyse > btsn.common/AnalysisFolder/PetriNet/Analysis_My_P2_Workflow.txt
-```
+  <details><summary>The command</summary>
 
-- **In Eclipse**: run the launcher's **analyse** target and copy the console
-  into that file.
-- **Ant's `[java]` prefixes**: they are fine. The editor's replay accepts them.
-- **Several analyses in one file**: if you append analyses to the same file, replay uses the last one.
+  ```sh
+  ant -emacs -f btsn.petrinet.ProjectLoader/My_P2_Workflow_BuildAndRun.xml analyse > btsn.common/AnalysisFolder/PetriNet/Analysis_My_P2_Workflow.txt
+  ```
+
+  </details>
+
+Use the launcher's `analyse` target (or the editor) in two cases:
+
+- **A run across several machines.** It tells the analysis which places share a machine, so it can line up their clocks.
+- **A launcher with checks of its own** after the report, such as the stroke code's suite-hold balance or the loan's
+  compensation balance.
+
+Ant's `[java]` prefixes and Eclipse's log lines in a copied report are fine: the replay accepts them. If you append
+several analyses to the same file, the replay uses the last one.
 
 Check the report's first section, **CANONICAL WORKFLOW RECONSTRUCTION**:
 
@@ -801,19 +829,22 @@ Use the process that produced the run: the replay matches log entries to the pla
 
 ### Timing chart and spatial view
 
-After a run from the editor, open these from **Next steps**. Otherwise, run them from the launcher once its hosts have stopped:
+After a run from the editor, open these from **Next steps**. Otherwise, once the run's hosts have stopped, run them
+in Eclipse as Java applications from `btsn.common.Monitor` (**Run As → Java Application**):
+
+| Viewer | What it shows |
+|---|---|
+| `org.btsn.derby.Analysis.SwingGanttChart_WithLatency` | Elapsed time per workflow, with the longest queue wait observed on a service visit |
+| `org.btsn.derby.Analysis.WorkflowSpatialView` | Activity at each place over time, including repeat visits |
+
+<details><summary>From the command line</summary>
 
 ```sh
 ant -f btsn.petrinet.ProjectLoader/My_P2_Workflow_BuildAndRun.xml chart-timing
 ant -f btsn.petrinet.ProjectLoader/My_P2_Workflow_BuildAndRun.xml chart-spatial
 ```
 
-You can also run them as Java applications from `btsn.common.Monitor`, with that project as the working directory:
-
-| Viewer | What it shows |
-|---|---|
-| `org.btsn.derby.Analysis.SwingGanttChart_WithLatency` | Elapsed time per workflow, with the longest queue wait observed on a service visit |
-| `org.btsn.derby.Analysis.WorkflowSpatialView` | Activity at each place over time, including repeat visits |
+</details>
 
 ![Workflow elapsed-time chart for the captured ten-token P1 reference run.](docs/tutorials/p1/results/workflow-timing.png)
 
@@ -822,13 +853,17 @@ You can also run them as Java applications from `btsn.common.Monitor`, with that
 - *Bars run from generation to completion.*
 - *Black diamonds mark the longest queue wait on a single service visit, not the total across the loop.*
 
-That reference run has its own launcher and export target. It writes the
-analysis, per-workflow CSV and charts to `btsn.services/target/tutorial-results/P1`:
+That reference run has its own launcher, with an export that writes the analysis, per-workflow CSV and charts to
+`btsn.services/target/tutorial-results/P1`.
+
+<details><summary>Run it and export the results</summary>
 
 ```sh
 ant -f btsn.petrinet.ProjectLoader/P1_Tutorial_Local_BuildAndRun.xml
 ant -f btsn.petrinet.ProjectLoader/P1_Tutorial_Local_BuildAndRun.xml export-tutorial-results
 ```
+
+</details>
 
 ### If your results differ
 
@@ -950,12 +985,16 @@ Click **Build host packages**. It writes the launcher, builds one ZIP per listed
 
 Build the packages again whenever the process, its deployment or the machines change.
 
-From the command line, on the `ip0` machine:
+<details><summary>From the command line, on the <code>ip0</code> machine</summary>
 
 ```sh
 cd btsn.petrinet.ProjectLoader
 ant -f P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.xml host-packages -Dinfrastructure=ThreeHost
+# once the hosts are started on their machines, the run:
+ant -f P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.xml -Dinfrastructure=ThreeHost
 ```
+
+</details>
 
 ### Start the hosts, then run
 
@@ -966,11 +1005,7 @@ ant -f P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.xml host-packages -Dinfrastruc
    - `launch-Pn.bat` and `launch-to-file-Pn.bat` start a single host.
 
    Nothing stops a remote host on a timer: it runs until you press Ctrl+C. Keep the machine from sleeping.
-3. On the `ip0` machine, click **Run on hosts**, then **Run**. From the command line:
-
-   ```sh
-   ant -f P1_P2_P3_P4_Fork_Join_Workflow_BuildAndRun.xml -Dinfrastructure=ThreeHost
-   ```
+3. On the `ip0` machine, click **Run on hosts**, then **Run**.
 
    The launcher starts P1, P4 and Monitor, and skips P2 and P3 (`[p2] Skipping - running on remote host`). It prints `Master ruleset …`, which must match each package's README. It then:
    - deploys the rules to every host and waits for each one to commit;
@@ -1020,9 +1055,14 @@ The `[LIVE]` lines give the times the publish started, every host had committed,
 A standby host target's contract comes from the service deployment: the first build writes a canonical binding for every target the deployment lists, so P6's package carries its contract before `v002` exists.
 
 On `ThreeHost`:
-- **192.168.1.152**: unzip `…_LiveChange_P2.zip` and run `launch-to-file.bat` (P2).
-- **192.168.1.90**: unzip `…_LiveChange_P3P6.zip` and run `launch-to-file.bat` (P3 and P6).
-- **192.168.1.82**: run the launcher, and nothing else on this machine at the same time; then run its `analyse` target.
+1. **192.168.1.82**: open `P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.json` with **Machines: ThreeHost**, click **Build**, then **Build host packages**.
+2. **192.168.1.152**: unzip `…_LiveChange_P2.zip` and run `launch-to-file.bat` (P2).
+3. **192.168.1.90**: unzip `…_LiveChange_P3P6.zip` and run `launch-to-file.bat` (P3 and P6).
+4. **192.168.1.82**: click **Run on hosts**, then **Run**, with nothing else running on this machine. The Run window analyses the run.
+
+To run everything on one machine, choose **Machines: SingleHost** and keep **Run every host on this computer** ticked.
+
+<details><summary>From the command line</summary>
 
 ```sh
 cd btsn.petrinet.ProjectLoader
@@ -1031,7 +1071,9 @@ ant -f P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml                   # the
 ant -f P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml analyse
 ```
 
-To run everything on one machine, add `-Dinfrastructure=SingleHost -Dhost.address=127.0.0.1` to the run.
+On one machine, add `-Dinfrastructure=SingleHost -Dhost.address=127.0.0.1` to the run.
+
+</details>
 
 **What to look for:**
 - **Both versions:** the analysis has a section for `v001` (workflow base 1000000) and one for `v002` (2000000).
@@ -1044,16 +1086,13 @@ To run everything on one machine, add `-Dinfrastructure=SingleHost -Dhost.addres
 
 ## Quick start: run, observe and replay
 
-You need a JDK (15 or later; tested with 21) and Apache Ant 1.10.2 or later.
-Ant comes with Eclipse, which runs every launcher as an **Ant Build**, and the editor
-finds it there by itself; install Ant separately only to run launchers from a command
-line. Eclipse itself is optional: every launcher is an ordinary Ant build file. The repository supplies the runtime libraries,
-including OOjDREW and embedded Derby, so no Maven or Python is needed.
+You need a JDK (15 or later; tested with 21) and Eclipse. The editor runs each process through its launcher, an
+Ant build file, using the Ant inside Eclipse, so there is nothing else to install. The repository supplies the runtime
+libraries, including OOjDREW and embedded Derby, so no Maven or Python is needed.
 
 ### From the editor
 
-1. **Start the editor.** In Eclipse, run `com.editor.ProcessEditor` (`btsn.workflowEditor`) as a Java application, or run
-   `ant -f btsn.workflowEditor/build.xml clean jar run`.
+1. **Start the editor.** In Eclipse, run `com.editor.ProcessEditor` (`btsn.workflowEditor`) as a Java application.
 2. **Open a process** that has a launcher, for example:
    - `btsn.common/ProcessDefinitionFolder/claims/Workflow/Claims_Workflow.json`, the insurance-claims process of [Adding services while designing](#adding-services-while-designing), on two hosts;
    - `btsn.common/ProcessDefinitionFolder/inventory/Workflow/Inventory_Workflow.json`, an inventory and a supplier on two hosts;
@@ -1069,6 +1108,12 @@ including OOjDREW and embedded Derby, so no Maven or Python is needed.
 The editor finds Apache Ant by itself (`ANT_HOME`, the PATH, or the Ant inside Eclipse).
 
 ### From the command line
+
+Everything above also runs without the editor or Eclipse: the editor builds the same Ant launchers it runs.
+
+<details><summary>Run, analyse, chart, replay and spread across machines from a terminal</summary>
+
+**0. Start the editor** without Eclipse: `ant -f btsn.workflowEditor/build.xml clean jar run`.
 
 **1. Run a distributed workflow on one computer.** All launchers read host-target
 addresses from
@@ -1118,6 +1163,8 @@ Start each package on its machine, then run the launcher with the same
 their records into Monitor. See
 [Run on several machines](#7-run-on-several-machines).
 
+</details>
+
 The sections below explain what you have just run, starting from a single place
 ([Tutorial.md](Tutorial.md) walks through editing and running it).
 
@@ -1137,13 +1184,18 @@ replacing any schedule written by hand, such as a burst. The editor saves the an
 `btsn.common/AnalysisFolder/<Domain>/Analysis_<process>.txt`; where that is a supplied recording, your run replaces your
 copy (`git checkout` the file to get the supplied one back).
 
-**From the launcher**
+<details><summary>From the launcher, without the editor</summary>
 
 - right-click it, then choose **Run As → Ant Build** (default target `run-complete-workflow`);
 - add `-Dhost.address=127.0.0.1` to run on one computer;
-- afterwards, run its `analyse` target.
+- afterwards, run its `analyse` target, or run `PetriNetAnalyzer` in `btsn.common.Monitor` as a Java application
+  ([Analyse the run](#analyse-the-run) says when to prefer `analyse`).
 
-| Example | Ant entry point |
+</details>
+
+The table names each example's launcher; the editor finds it from the process.
+
+| Example | Launcher |
 |---|---|
 | From an idea: insurance claims ([Adding services while designing](#adding-services-while-designing)) | [Claims_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/Claims_Workflow_BuildAndRun.xml) |
 | Single place ([Each step in detail](#each-step-in-detail)) | [P2_Tutorial_Workflow_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P2_Tutorial_Workflow_BuildAndRun.xml) |
@@ -1228,10 +1280,9 @@ After **Run on hosts**, the editor
 ([ProcessEditor source](btsn.workflowEditor/src/com/editor/ProcessEditor.java)) loads
 the run's analysis itself and highlights **Play**. To replay an earlier run,
 open the matching workflow JSON, click **Load Analysis...** and choose the
-analyzer output: the files under `btsn.common/AnalysisFolder`, or one saved with
-`ant -emacs … analyse > analysis.txt`. Replaying shows recorded observations; it
-does not run the workflow again. Every launcher also opens the two charts with
-its `chart-timing` and `chart-spatial` targets. The editor saves each run's whole
+analyzer output: the files under `btsn.common/AnalysisFolder`, or one you saved
+from `PetriNetAnalyzer`. Replaying shows recorded observations; it
+does not run the workflow again. The Run window's **Next steps** open the two charts. The editor saves each run's whole
 console to `btsn.services/target/run-logs/Run_<launcher>.txt`.
 A process that never terminates (the traffic light's loop) is still running while
 its hosts are collected one after another, so their records end at different times;
@@ -1288,8 +1339,8 @@ The transitions supply the execution behavior around that function:
 Thus **T_in → P → T_out** maps to **receive/synchronize → invoke function →
 route/publish**. A generic orchestration host implements the whole unit. The
 place's function and the transitions' coordination responsibilities are separate.
-Run [P1_Tutorial_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_Tutorial_BuildAndRun.xml)
-as an Ant Build; [Tutorial.md](Tutorial.md) explains editing and running it.
+To run it, open [`P1_Tutorial_Workflow.json`](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_Tutorial_Workflow.json)
+in the editor and click **Run on hosts**; [Tutorial.md](Tutorial.md) explains editing and running it.
 
 ### Four places: Boolean functionality with a fork and join
 
@@ -1424,10 +1475,11 @@ P4 becomes eligible after both P2/P3 inputs are available, while P6 requires
 P4/P5. The topology constrains causal order; the running hosts determine when
 those steps actually execute.
 
-Run
-[P1_to_P6_Double_Join_Workflow.xml](btsn.petrinet.ProjectLoader/P1_to_P6_Double_Join_Workflow.xml)
-as an Ant Build with its default target. It builds the JARs, prepares the selected
-deployment, initializes, deploys, sends ten tokens and collects observations.
+To run it, open
+[`P1_to_P6_Double_Join_Workflow.json`](btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_to_P6_Double_Join_Workflow.json)
+in the editor and click **Run on hosts**; its launcher,
+[P1_to_P6_Double_Join_Workflow.xml](btsn.petrinet.ProjectLoader/P1_to_P6_Double_Join_Workflow.xml), builds the JARs,
+prepares the selected deployment, initializes, deploys, sends ten tokens and collects observations.
 The launcher's `eg1.data` value (`outcome=true`) is input data only; it does not force
 P1's result. A smaller two-place example is
 [P1_P2_BuildAndRun.xml](btsn.petrinet.ProjectLoader/P1_P2_BuildAndRun.xml).
@@ -1668,6 +1720,8 @@ separately by deployment metadata. Eclipse `bin` outputs are not inputs to the
 packaged workflow runtime. Runtime databases, installed rule copies, run metadata
 and chart exports are local outputs excluded from Git.
 
+<details><summary>For developers: packaging checks and a portable host, from the command line</summary>
+
 For packaging/checks without starting a workflow:
 
 ```sh
@@ -1679,6 +1733,8 @@ For a portable host JAR and ZIP (start it as a host target: `launch.bat P3`):
 ```sh
 ant -f btsn.rpso.host/build.xml
 ```
+
+</details>
 
 See [shared build support](btsn.services/README.md),
 [portable releases](btsn.services/docs/PLACE_RELEASES.md), and
