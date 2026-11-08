@@ -40,7 +40,7 @@ flowchart LR
 ![A recorded run replayed on the model: tokens leave the PAYMENTS event generator, queue at T_in during the burst, pass through the Payment place and end at Paid or Declined.](images/remote-payment-test.gif)
 
 30 payments: 24 paid and 3 declined, each routed on the service's own answer; 3 failed at the Place with the reason recorded (two HTTP 503s, one answer slower than 2.5 s). The burst queued for up to 10.8 s; steady traffic hardly queued.
-[▶ Watch the recorded run](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json&run=../../btsn.common/AnalysisFolder/Payments/Analysis_Remote_Payment_Test.txt) · [Build it yourself in the editor, then test your own service](Tutorial.md#example-4-test-your-own-remote-service)
+[▶ Watch the recorded run](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json&run=../../btsn.common/AnalysisFolder/Payments/Analysis_Remote_Payment_Test.txt) · [Build it yourself in the editor, then test your own service](#from-an-idea-to-a-measured-run)
 
 From one remote service, the model can grow into a complete checkout process with inventory, payment and order handling. Load, stress, soak and failure scenarios can then be studied *in the context of that workflow*. RPSO provides orchestration, token generation, execution records and analysis; realistic workloads and fault-injection conditions still need to be configured as part of the test.
 
@@ -110,10 +110,12 @@ RPSO already works with current practice:
 
 Start by drawing a process in the editor, binding services to its Places,
 running it on orchestration hosts and replaying the recorded execution on the
-same model. [Tutorial.md](Tutorial.md) walks through two examples:
+same model. [Tutorial.md](Tutorial.md) walks through four examples:
 
-1. **A standard service** that returns true or false: one Place, a loop and ten tokens.
-2. **A claims process** that calls a remote service over REST.
+1. [**A standard service**](Tutorial.md#example-1-a-standard-service) that returns true or false: one Place, a loop and ten tokens.
+2. [**A claims process**](Tutorial.md#example-2-a-claims-process-with-a-remote-service) that calls a remote service over REST.
+3. [**A new host target**](Tutorial.md#example-3-add-a-host-target): add P7 and move Example 1 onto it.
+4. [**Test your own remote service**](Tutorial.md#example-4-test-your-own-remote-service): build the payment test above in the editor, then point it at your own service.
 
 The business services do not have to exist before you start modelling. Name them
 as you draw: the editor can generate starting Java code, allowing you to run the
