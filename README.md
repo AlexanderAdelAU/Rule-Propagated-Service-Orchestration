@@ -21,22 +21,10 @@ This example is deliberately simple, but the architectural pattern behind it goe
 
 A minimal experiment needs only an event generator, a Place bound to the remote service, its incoming and outgoing transitions, and an outcome:
 
-```mermaid
-flowchart LR
-    subgraph RPSO["RPSO Test Workflow"]
-        direction LR
-        EG["Event Generator"]
-        subgraph NODE["Logical Node · executed by a generic RPSO orchestration host"]
-            direction LR
-            TI["T_in"] --> P(("Payment<br/>Place")) --> TO["T_out"]
-        end
-        EG --> TI
-        TO --> END["Terminate"]
-    end
-
-    P <-. "REST request / response" .-> REST["Existing Remote<br/>Payment Service"]
-    NODE -. "host records execution" .-> OBS["Monitor / Analysis<br/>timings, queue waits, replay"]
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="images/rpso-first-use-dark.svg">
+  <img src="images/rpso-first-use.svg" alt="Start with one service. Inside an RPSO test workflow, the PAYMENTS event generator sends tokens to a logical Node executed by a generic RPSO orchestration host: T_in, the Payment place and T_out, which routes each payment to Paid or Declined. The Payment place calls the existing remote Payment Service, unchanged, by REST request and response. The host records the execution, which Monitor gathers for analysis: timings, queue waits and replay.">
+</picture>
 
 *The **Payment Place is logical**, not the Payment Service itself. A generic RPSO orchestration host executes the whole Node (**T_in → Place → T_out**): it calls the unchanged service over REST, hands the response to T_out and records the run for analysis and replay. The host can run on your machine or next to the service on another one ([Run on several machines](Reference.md#7-run-on-several-machines)).*
 
@@ -54,6 +42,11 @@ flowchart LR
 From one remote service, the model can grow into a complete checkout process with inventory, payment and order handling. Load, stress, soak and failure scenarios can then be studied *in the context of that workflow*. RPSO provides orchestration, token generation, execution records and analysis; realistic workloads and fault-injection conditions still need to be configured as part of the test.
 
 ## How RPSO works
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="images/rpso-at-a-glance-dark.svg">
+  <img src="images/rpso-at-a-glance.svg" alt="RPSO at a glance, as a hierarchy. RPSO: executable Petri nets for live, distributed service orchestration. Process design: editor, deploy, build. Runtime orchestration: the Node (T_in, Place, T_out) executed by an RPSO host, one per host with no central engine, tokens travelling directly from host to host; BPMN-style control, versions and priority, changes on the fly, everything a process. Analysis and insights: records from every host, timings, replay of a recorded run. Service integration at the places: Java classes, REST, existing services unchanged, business functions. Data: process definitions, catalogues, rules installed on each host, execution records gathered by Monitor. Deployment: local run, host packages, remote hosts.">
+</picture>
 
 A service operation, whether a Java method or a REST endpoint, is bound to a **Place** within a logical **Node (T_in → Place → T_out)**. T_in collects the required inputs; the assigned orchestration host invokes the service bound to the Place; T_out propagates its result.
 

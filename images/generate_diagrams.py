@@ -212,7 +212,7 @@ d.box(405,195,310,70,'Installed local RuleBase',kind='config')
 d.box(265,300,165,90,'T_in',['Buffer / synchronize'])
 d.box(475,300,175,90,'Place P',['Invoke bound operation'])
 d.box(695,300,160,90,'T_out',['Route / publish'])
-d.box(450,440,255,65,'Bound service JAR',['Domain or token operation'],'business')
+d.box(450,440,255,65,'Bound service',['Called by its canonical binding'],'business')
 d.box(20,300,175,90,'Incoming token',['Generator / prior host'],'endpoint')
 d.box(935,300,165,90,'Outcome',['Publish to next host','or terminate locally'],'endpoint')
 d.box(390,565,350,75,'Monitor',['Collection · reconstruction · diagrams'],'observe')
@@ -227,7 +227,7 @@ d.path('M 855 345 L 935 345')
 d.path('M 510 390 L 510 440')
 d.path('M 635 440 L 635 390')
 d.text(490,419,'named inputs',13,anchor='end')
-d.text(652,414,['result +','routing symbol'],13,anchor='start')
+d.text(652,414,['result +','routing value'],13,anchor='start')
 d.path('M 560 515 L 560 565','observe')
 d.text(577,545,'collector observations',14,anchor='start',colour=TEAL)
 d.text(560,673,'Solid: execution / token flow     Dashed: rule installation     Dotted: observation',15)
@@ -480,4 +480,192 @@ d.text(577,681,'collected host observations',14,anchor='start',colour=TEAL)
 d.text(560,798,'Circle: place · Bar: transition · AND: input join · Dot: illustrative token · Dashed blue: publication',14)
 d.text(560,820,'Every local triple is supported by the generic fabric; the bound operation gives its place meaning.',14)
 d.save('petrinet-double-join.svg')
-print('Generated nine editable SVG diagrams.')
+# RPSO at a glance: one page for the README's top, in light and dark versions.
+GLANCE_THEMES = {
+    'rpso-at-a-glance.svg': dict(bg='#ffffff', ink='#182238', muted='#5b6478', line='#d9d3c6', card='#faf8f4', chip='#f3efe7',
+                                 design='#2e7d4f', run='#7350a2', analyse='#c2521f', services='#24598e', token='#c2521f', host='#ffffff', connector='#6b7486'),
+    'rpso-at-a-glance-dark.svg': dict(bg='#0f141c', ink='#e9edf3', muted='#a3adbd', line='#2c3646', card='#161d28', chip='#1d2633',
+                                      design='#4cc38a', run='#b28cf0', analyse='#f08a4b', services='#5aa9e6', token='#f08a4b', host='#0f141c', connector='#f2f4f8'),
+}
+GLANCE_DESC = ('RPSO at a glance, as a hierarchy. RPSO, Rule-Propagated Service Orchestration: executable Petri nets for '
+    'live, distributed service orchestration. Three branches. Process design: the process editor, deploy, which chooses each '
+    'place\'s host, and build, which makes the rules and a launcher. Runtime orchestration: the Node, an input transition, a '
+    'place and an output transition, executed by an RPSO host, one per host, with no central engine; with BPMN-style '
+    'control, several versions with priority, changes on the fly, and everything a process. Analysis and insights: '
+    'execution records, timings and queue waits, and replay of a recorded run, not a simulation. Below the runtime, '
+    'service integration at the places: Java classes inside their host, REST in any language, existing services '
+    'unchanged, and business functions such as payment or triage. Then the data: process definitions, catalogues, '
+    'rules installed on each host, and execution records gathered by Monitor. Then deployment: a local run on one '
+    'computer, host packages, and hosts on other machines or in other organisations.')
+
+def glance(name, t):
+    W, H = 1200, 970
+    out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" role="img" aria-labelledby="title desc">',
+           f'<title id="title">RPSO at a glance</title><desc id="desc">{escape(GLANCE_DESC)}</desc>',
+           '<defs>']
+    out.append(f'<marker id="g-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="{t["ink"]}"/></marker>')
+    out.append(f'<marker id="g-run" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="{t["run"]}"/></marker>')
+    out.append(f'</defs><rect width="100%" height="100%" fill="{t["bg"]}"/>')
+    font = 'font-family="Arial, Helvetica, sans-serif"'
+    def text(x, y, s, size=16, colour=t['ink'], bold=False, anchor='middle', italic=False):
+        out.append(f'<text x="{x:g}" y="{y:g}" {font} font-size="{size}" font-weight="{"600" if bold else "400"}"'
+                   f'{" font-style=\"italic\"" if italic else ""} text-anchor="{anchor}" fill="{colour}">{escape(s)}</text>')
+    def rect(x, y, w, h, fill, stroke, rx=10, width=1.5):
+        out.append(f'<rect x="{x:g}" y="{y:g}" width="{w:g}" height="{h:g}" rx="{rx}" fill="{fill}" stroke="{stroke}" stroke-width="{width}"/>')
+    def line(d, colour=t['connector'], width=2):   # the tree's connecting lines stand out in both themes
+        out.append(f'<path d="{d}" fill="none" stroke="{colour}" stroke-width="{width}"/>')
+    def tree(x0, y_from, y_bar, xs, y_to):
+        """A parent at (x0, y_from) branching to children at xs, whose tops are at y_to."""
+        line(f'M {x0} {y_from} L {x0} {y_bar}')
+        line(f'M {min(xs)} {y_bar} L {max(xs)} {y_bar}')
+        for x in xs: line(f'M {x} {y_bar} L {x} {y_to}')
+    def heading(x, y, label, colour):
+        text(x, y, label, 19, colour, bold=True)
+    def leaf(x, y, title, sub, colour, w=200):
+        rect(x - w / 2, y, w, 58, t['card'], t['line'])
+        out.append(f'<rect x="{x - w / 2:g}" y="{y}" width="{w}" height="4" rx="2" fill="{colour}"/>')
+        text(x, y + 26, title, 15, bold=True)
+        text(x, y + 45, sub, 13, t['muted'])
+    def width_of(s, size, bold=False):
+        return len(s) * size * (0.56 if bold else 0.52)
+
+    # The root.
+    text(W / 2, 46, 'RPSO', 36, bold=True)
+    text(W / 2, 74, 'RULE-PROPAGATED SERVICE ORCHESTRATION', 15, t['muted'], bold=True)
+    line(f'M {W / 2} 84 L {W / 2} 100')
+    rect(W / 2 - 250, 100, 500, 58, t['card'], t['services'], rx=12, width=2)
+    text(W / 2, 125, 'Executable Petri nets for', 17)
+    text(W / 2, 147, 'live, distributed service orchestration', 17)
+
+    # Three branches.
+    cx = {'design': 220, 'run': 600, 'analyse': 980}
+    tree(W / 2, 158, 182, list(cx.values()), 200)
+    heading(cx['design'], 222, 'PROCESS DESIGN', t['design'])
+    heading(cx['run'], 222, 'RUNTIME ORCHESTRATION', t['run'])
+    heading(cx['analyse'], 222, 'ANALYSIS & INSIGHTS', t['analyse'])
+    for key, colour, leaves in [('design', t['design'], [('Editor', 'draw · validate'), ('Deploy', "each place's host"), ('Build', 'rules + launcher')]),
+                                ('analyse', t['analyse'], [('Records', 'from every host'), ('Timings', 'waits · failures'), ('Replay', 'a recorded run')])]:
+        xs = [cx[key] - 130, cx[key], cx[key] + 130]
+        tree(cx[key], 232, 250, xs, 264)
+        for x, (title, sub) in zip(xs, leaves):
+            assert width_of(title, 15, True) < 116 and width_of(sub, 13) < 118, (title, sub)
+            leaf(x, 264, title, sub, colour, w=124)
+
+    # Runtime: the Node, one per host, no central engine, and what it supports.
+    x0 = cx['run']
+    line(f'M {x0} 232 L {x0} 248')
+    rect(x0 - 175, 248, 350, 132, t['card'], t['run'], rx=14, width=2)
+    text(x0, 272, 'Node  (executed by an RPSO host)', 15, bold=True)
+    for bx, label in [(x0 - 140, 'T_in'), (x0 + 70, 'T_out')]:
+        rect(bx, 286, 70, 34, t['bg'], t['muted'], rx=6)
+        text(bx + 35, 308, label, 15, bold=True)
+    out.append(f'<circle cx="{x0}" cy="303" r="24" fill="{t["bg"]}" stroke="{t["run"]}" stroke-width="2"/>')
+    text(x0, 308, 'Place', 14, bold=True)
+    for xa, xb in [(x0 - 70, x0 - 26), (x0 + 26, x0 + 68)]:
+        out.append(f'<path d="M {xa} 303 L {xb} 303" stroke="{t["ink"]}" stroke-width="1.6" marker-end="url(#g-arrow)"/>')
+    text(x0, 350, 'one Node per host · no central engine', 13, t['run'], bold=True)
+    text(x0, 368, 'tokens travel directly from host to host', 13, t['run'], bold=True)
+    chips = ['BPMN-style control', 'Versions & priority', 'Changes on the fly', 'Everything a process']
+    chip_w = [width_of(c, 13) + 22 for c in chips]
+    total = sum(chip_w) + 8 * (len(chips) - 1)
+    x = x0 - total / 2
+    for c, w in zip(chips, chip_w):
+        rect(x, 392, w, 28, t['chip'], t['line'], rx=14, width=1)
+        text(x + w / 2, 411, c, 13)
+        x += w + 8
+    assert total < 640, total   # the row sits below the design and analysis leaves
+
+    # Down the spine: services at the places, the data, deployment.
+    tiers = [
+        (440, 'SERVICE INTEGRATION (PLACES)', t['services'], [('Java class', 'inside its host'), ('REST', 'any language, anywhere'),
+                                                             ('Existing services', 'unchanged'), ('Business functions', 'payment, triage, …')]),
+        (612, 'DATA', t['run'], [('Process definitions', 'what you draw'), ('Catalogues', 'service contracts'),
+                                 ('Rules', 'installed on each host'), ('Execution records', 'gathered by Monitor')]),
+        (784, 'DEPLOYMENT', t['design'], [('Local run', 'every host on one computer'), ('Host packages', 'JAR + launch script'),
+                                          ('Remote hosts', 'other machines and organisations')]),
+    ]
+    prev = 420
+    for y, label, colour, leaves in tiers:
+        line(f'M {x0} {prev} L {x0} {y}')
+        heading(x0, y + 22, label, colour)
+        n = len(leaves); w = 230 if n == 4 else 300; gap = 30
+        xs = [x0 + (i - (n - 1) / 2) * (w + gap) for i in range(n)]
+        tree(x0, y + 32, y + 52, xs, y + 66)
+        for x, (title, sub) in zip(xs, leaves):
+            assert width_of(sub, 13) < w - 16 and width_of(title, 15, True) < w - 16, (title, sub)
+            leaf(x, y + 66, title, sub, colour, w=w)
+        prev = y + 32
+    text(W / 2, H - 16, 'github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration', 13, t['muted'])
+    (ROOT / name).write_text('\n'.join(out) + '\n</svg>\n')
+
+FIRST_USE_DESC = ('Start with one service. Inside an RPSO test workflow, the PAYMENTS event generator sends tokens to a '
+    'logical Node, executed by a generic RPSO orchestration host: T_in, the Payment place and T_out. T_out routes each '
+    'payment to Paid or Declined. The Payment place calls the existing remote Payment Service, unchanged, by REST request '
+    'and response. The host records the execution, which Monitor gathers for analysis: timings, queue waits and replay.')
+
+def first_use(name, t):
+    W, H = 1200, 440
+    out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" role="img" aria-labelledby="title desc">',
+           f'<title id="title">Start with one service</title><desc id="desc">{escape(FIRST_USE_DESC)}</desc><defs>']
+    for key in ('ink', 'services', 'muted'):
+        out.append(f'<marker id="f-{key}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="{t[key]}"/></marker>')
+    out.append(f'</defs><rect width="100%" height="100%" fill="{t["bg"]}"/>')
+    font = 'font-family="Arial, Helvetica, sans-serif"'
+    def text(x, y, s, size=15, colour=t['ink'], bold=False, anchor='middle', italic=False):
+        out.append(f'<text x="{x:g}" y="{y:g}" {font} font-size="{size}" font-weight="{"600" if bold else "400"}"'
+                   f'{" font-style=\"italic\"" if italic else ""} text-anchor="{anchor}" fill="{colour}">{escape(s)}</text>')
+    def rect(x, y, w, h, fill, stroke, rx=10, width=1.5, dash=''):
+        out.append(f'<rect x="{x:g}" y="{y:g}" width="{w:g}" height="{h:g}" rx="{rx}" fill="{fill}" stroke="{stroke}" stroke-width="{width}"{dash}/>')
+    def arrow(d, colour, marker, dash='', both=False, width=2):
+        start = f' marker-start="url(#f-{marker})"' if both else ''
+        out.append(f'<path d="{d}" fill="none" stroke="{colour}" stroke-width="{width}"{dash}{start} marker-end="url(#f-{marker})"/>')
+
+    # The test workflow.
+    rect(30, 30, 820, 262, t['card'], t['line'], rx=14)
+    text(52, 58, 'RPSO TEST WORKFLOW', 14, t['muted'], bold=True, anchor='start')
+    # Event generator.
+    rect(56, 141, 104, 70, t['bg'], t['design'], rx=8, width=2)
+    text(108, 171, 'PAYMENTS', 14, bold=True)
+    text(108, 191, 'event generator', 12, t['muted'])
+    # The logical Node: T_in -> Place -> T_out, run by one host.
+    rect(200, 84, 410, 182, t['bg'], t['run'], rx=14, width=2)
+    text(222, 110, 'Logical Node', 15, t['run'], bold=True, anchor='start')
+    text(405, 252, 'executed by a generic RPSO orchestration host', 12, t['muted'])
+    for bx, label in [(222, 'T_in'), (518, 'T_out')]:
+        rect(bx, 158, 70, 36, t['card'], t['muted'], rx=6)
+        text(bx + 35, 181, label, 15, bold=True)
+    out.append(f'<circle cx="405" cy="176" r="40" fill="{t["card"]}" stroke="{t["run"]}" stroke-width="2"/>')
+    text(405, 172, 'Payment', 14, bold=True)
+    text(405, 190, 'Place', 13, t['muted'])
+    arrow('M 160 176 L 220 176', t['ink'], 'ink')
+    arrow('M 292 176 L 363 176', t['ink'], 'ink')
+    arrow('M 447 176 L 516 176', t['ink'], 'ink')
+    # Outcomes, routed on the service's answer.
+    for y, label in [(106, 'Paid'), (216, 'Declined')]:
+        rect(712, y, 112, 40, t['bg'], t['muted'], rx=8)
+        text(768, y + 25, label, 14, bold=True)
+    arrow('M 588 166 L 612 166 L 642 126 L 710 126', t['ink'], 'ink')
+    arrow('M 588 186 L 612 186 L 642 236 L 710 236', t['ink'], 'ink')
+    text(648, 118, 'paid', 12, t['muted'], anchor='start')
+    text(648, 228, 'declined', 12, t['muted'], anchor='start')
+
+    # The existing service, outside RPSO: the Place calls it over REST.
+    rect(900, 132, 270, 88, t['card'], t['services'], rx=12, width=2)
+    text(1035, 166, 'Existing remote', 15, bold=True)
+    text(1035, 186, 'Payment Service', 15, bold=True)
+    text(1035, 206, 'unchanged', 12, t['muted'])
+    arrow('M 405 134 L 405 72 L 874 72 L 874 176 L 898 176', t['services'], 'services', ' stroke-dasharray="7 5"', both=True)
+    text(636, 64, 'REST request / response', 13, t['services'], bold=True)
+
+    # Monitor, outside the token path.
+    rect(240, 350, 330, 64, t['card'], t['analyse'], rx=12, width=2)
+    text(405, 376, 'Monitor / Analysis', 15, bold=True)
+    text(405, 398, 'timings · queue waits · replay', 13, t['muted'])
+    arrow('M 405 266 L 405 348', t['muted'], 'muted', ' stroke-dasharray="2 5"')
+    text(418, 318, 'the host records the execution', 12, t['muted'], anchor='start')
+    (ROOT / name).write_text('\n'.join(out) + '\n</svg>\n')
+
+for name, theme in GLANCE_THEMES.items():
+    glance(name, theme)
+    first_use(name.replace('rpso-at-a-glance', 'rpso-first-use'), theme)
+print('Generated thirteen editable SVG diagrams.')
