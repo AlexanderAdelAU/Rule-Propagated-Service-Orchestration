@@ -2,11 +2,6 @@
 
 **RPSO uses Petri net concepts to transform ordinary callable services into a logically defined, distributed orchestration system.**
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="images/rpso-at-a-glance-dark.svg">
-  <img src="images/rpso-at-a-glance.svg" alt="RPSO at a glance, as a hierarchy. RPSO: executable Petri nets for live, distributed service orchestration. Process design: editor, deploy, build. Runtime orchestration: the Node (T_in, Place, T_out) executed by an RPSO host, one per host with no central engine, tokens travelling directly from host to host; BPMN-style control, versions and priority, changes on the fly, everything a process. Analysis and insights: records from every host, timings, replay of a recorded run. Service integration at the places: Java classes, REST, existing services unchanged, business functions. Data: process definitions, catalogues, rules installed on each host, execution records gathered by Monitor. Deployment: local run, host packages, remote hosts.">
-</picture>
-
 For example, say you have an online store that relies on a remote Payment Service. It works well under normal conditions, but what happens when order volumes rise, calls become slow, or the service fails? How do those problems affect the rest of the checkout process?
 
 With **RPSO**, you can leave the Payment Service where it is and bind its existing REST endpoint to a **Place** in a Petri-net model. Define the operation's inputs and result, connect the transitions that govern its execution, then generate test requests through the process. RPSO records the execution so you can measure, analyse and replay what actually happened.
@@ -59,6 +54,11 @@ flowchart LR
 From one remote service, the model can grow into a complete checkout process with inventory, payment and order handling. Load, stress, soak and failure scenarios can then be studied *in the context of that workflow*. RPSO provides orchestration, token generation, execution records and analysis; realistic workloads and fault-injection conditions still need to be configured as part of the test.
 
 ## How RPSO works
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="images/rpso-at-a-glance-dark.svg">
+  <img src="images/rpso-at-a-glance.svg" alt="RPSO at a glance, as a hierarchy. RPSO: executable Petri nets for live, distributed service orchestration. Process design: editor, deploy, build. Runtime orchestration: the Node (T_in, Place, T_out) executed by an RPSO host, one per host with no central engine, tokens travelling directly from host to host; BPMN-style control, versions and priority, changes on the fly, everything a process. Analysis and insights: records from every host, timings, replay of a recorded run. Service integration at the places: Java classes, REST, existing services unchanged, business functions. Data: process definitions, catalogues, rules installed on each host, execution records gathered by Monitor. Deployment: local run, host packages, remote hosts.">
+</picture>
 
 A service operation, whether a Java method or a REST endpoint, is bound to a **Place** within a logical **Node (T_in → Place → T_out)**. T_in collects the required inputs; the assigned orchestration host invokes the service bound to the Place; T_out propagates its result.
 
