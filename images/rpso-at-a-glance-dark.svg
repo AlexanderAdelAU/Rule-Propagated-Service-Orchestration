@@ -1,144 +1,141 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="970" viewBox="0 0 1200 970" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="1060" viewBox="0 0 1100 1060" role="img" aria-labelledby="title desc">
 <title id="title">RPSO at a glance</title><desc id="desc">RPSO at a glance, as a hierarchy. RPSO, Rule-Propagated Service Orchestration: Petri-net process models, executed across distributed hosts with no central engine. Three branches. Process design: the process editor, deploy, which chooses each place&#x27;s host, and build, which makes the rules and a launcher. Runtime orchestration: the Node, an input transition, a place and an output transition, executed by an RPSO host, one per host, with no central engine; with BPMN-style control, several versions with priority, changes on the fly, and everything a process. Analysis and insights: execution records, timings and queue waits, and replay of a recorded run, not a simulation. Below the runtime, service integration at the places: Java classes inside their host, REST in any language, existing services unchanged, and business functions such as payment or triage. Then the data: process definitions, catalogues, rules installed on each host, and execution records gathered by Monitor. Then deployment: a local run on one computer, host packages, and hosts on other machines or in other organisations.</desc>
 <defs>
 <marker id="g-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#e9edf3"/></marker>
-<marker id="g-run" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#b28cf0"/></marker>
 </defs><rect width="100%" height="100%" fill="#0f141c"/>
-<text x="600" y="46" font-family="Arial, Helvetica, sans-serif" font-size="36" font-weight="600" text-anchor="middle" fill="#e9edf3">RPSO</text>
-<text x="600" y="74" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#a3adbd">RULE-PROPAGATED SERVICE ORCHESTRATION</text>
-<path d="M 600.0 84 L 600.0 100" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<rect x="350" y="100" width="500" height="58" rx="12" fill="#161d28" stroke="#5aa9e6" stroke-width="2"/>
-<text x="600" y="125" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="400" text-anchor="middle" fill="#e9edf3">Petri-net process models, executed</text>
-<text x="600" y="147" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="400" text-anchor="middle" fill="#e9edf3">across distributed hosts with no central engine</text>
-<path d="M 600.0 158 L 600.0 182" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<path d="M 220 182 L 980 182" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<path d="M 220 182 L 220 200" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<path d="M 600 182 L 600 200" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<path d="M 980 182 L 980 200" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<text x="220" y="222" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#4cc38a">PROCESS DESIGN</text>
-<text x="600" y="222" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#b28cf0">RUNTIME ORCHESTRATION</text>
-<text x="980" y="222" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#f08a4b">ANALYSIS &amp; INSIGHTS</text>
-<path d="M 220 232 L 220 250" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<path d="M 90 250 L 350 250" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<path d="M 90 250 L 90 264" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<path d="M 220 250 L 220 264" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<path d="M 350 250 L 350 264" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<rect x="28" y="264" width="124" height="58" rx="10" fill="#161d28" stroke="#2c3646" stroke-width="1.5"/>
-<rect x="28" y="264" width="124" height="4" rx="2" fill="#4cc38a"/>
-<text x="90" y="290" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#e9edf3">Editor</text>
-<text x="90" y="309" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#a3adbd">draw · validate</text>
-<rect x="158" y="264" width="124" height="58" rx="10" fill="#161d28" stroke="#2c3646" stroke-width="1.5"/>
-<rect x="158" y="264" width="124" height="4" rx="2" fill="#4cc38a"/>
-<text x="220" y="290" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#e9edf3">Deploy</text>
-<text x="220" y="309" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#a3adbd">each place&#x27;s host</text>
-<rect x="288" y="264" width="124" height="58" rx="10" fill="#161d28" stroke="#2c3646" stroke-width="1.5"/>
-<rect x="288" y="264" width="124" height="4" rx="2" fill="#4cc38a"/>
-<text x="350" y="290" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#e9edf3">Build</text>
-<text x="350" y="309" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#a3adbd">rules + launcher</text>
-<path d="M 980 232 L 980 250" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<path d="M 850 250 L 1110 250" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<path d="M 850 250 L 850 264" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<path d="M 980 250 L 980 264" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<path d="M 1110 250 L 1110 264" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<rect x="788" y="264" width="124" height="58" rx="10" fill="#161d28" stroke="#2c3646" stroke-width="1.5"/>
-<rect x="788" y="264" width="124" height="4" rx="2" fill="#f08a4b"/>
-<text x="850" y="290" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#e9edf3">Records</text>
-<text x="850" y="309" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#a3adbd">from every host</text>
-<rect x="918" y="264" width="124" height="58" rx="10" fill="#161d28" stroke="#2c3646" stroke-width="1.5"/>
-<rect x="918" y="264" width="124" height="4" rx="2" fill="#f08a4b"/>
-<text x="980" y="290" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#e9edf3">Timings</text>
-<text x="980" y="309" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#a3adbd">waits · failures</text>
-<rect x="1048" y="264" width="124" height="58" rx="10" fill="#161d28" stroke="#2c3646" stroke-width="1.5"/>
-<rect x="1048" y="264" width="124" height="4" rx="2" fill="#f08a4b"/>
-<text x="1110" y="290" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#e9edf3">Replay</text>
-<text x="1110" y="309" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#a3adbd">a recorded run</text>
-<path d="M 600 232 L 600 248" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<rect x="425" y="248" width="350" height="132" rx="14" fill="#161d28" stroke="#b28cf0" stroke-width="2"/>
-<text x="600" y="272" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#e9edf3">Node  (executed by an RPSO host)</text>
-<rect x="460" y="286" width="70" height="34" rx="6" fill="#0f141c" stroke="#a3adbd" stroke-width="1.5"/>
-<text x="495" y="308" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#e9edf3">T_in</text>
-<rect x="670" y="286" width="70" height="34" rx="6" fill="#0f141c" stroke="#a3adbd" stroke-width="1.5"/>
-<text x="705" y="308" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#e9edf3">T_out</text>
-<circle cx="600" cy="303" r="24" fill="#0f141c" stroke="#b28cf0" stroke-width="2"/>
-<text x="600" y="308" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#e9edf3">Place</text>
-<path d="M 530 303 L 574 303" stroke="#e9edf3" stroke-width="1.6" marker-end="url(#g-arrow)"/>
-<path d="M 626 303 L 668 303" stroke="#e9edf3" stroke-width="1.6" marker-end="url(#g-arrow)"/>
-<text x="600" y="350" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="600" text-anchor="middle" fill="#b28cf0">one Node per host · no central engine</text>
-<text x="600" y="368" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="600" text-anchor="middle" fill="#b28cf0">tokens travel directly from host to host</text>
-<rect x="290.5" y="392" width="143.68" height="28" rx="14" fill="#1d2633" stroke="#2c3646" stroke-width="1"/>
-<text x="362.34" y="411" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#e9edf3">BPMN-style control</text>
-<rect x="442.18" y="392" width="150.44" height="28" rx="14" fill="#1d2633" stroke="#2c3646" stroke-width="1"/>
-<text x="517.4" y="411" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#e9edf3">Versions &amp; priority</text>
-<rect x="600.62" y="392" width="143.68" height="28" rx="14" fill="#1d2633" stroke="#2c3646" stroke-width="1"/>
-<text x="672.46" y="411" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#e9edf3">Changes on the fly</text>
-<rect x="752.3" y="392" width="157.2" height="28" rx="14" fill="#1d2633" stroke="#2c3646" stroke-width="1"/>
-<text x="830.9" y="411" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#e9edf3">Everything a process</text>
-<path d="M 600 420 L 600 440" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<text x="600" y="462" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#5aa9e6">SERVICE INTEGRATION (PLACES)</text>
-<path d="M 600 472 L 600 492" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<path d="M 210.0 492 L 990.0 492" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<path d="M 210.0 492 L 210.0 506" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<path d="M 470.0 492 L 470.0 506" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<path d="M 730.0 492 L 730.0 506" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<path d="M 990.0 492 L 990.0 506" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<rect x="95" y="506" width="230" height="58" rx="10" fill="#161d28" stroke="#2c3646" stroke-width="1.5"/>
-<rect x="95" y="506" width="230" height="4" rx="2" fill="#5aa9e6"/>
-<text x="210" y="532" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#e9edf3">Java class</text>
-<text x="210" y="551" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#a3adbd">inside its host</text>
-<rect x="355" y="506" width="230" height="58" rx="10" fill="#161d28" stroke="#2c3646" stroke-width="1.5"/>
-<rect x="355" y="506" width="230" height="4" rx="2" fill="#5aa9e6"/>
-<text x="470" y="532" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#e9edf3">REST</text>
-<text x="470" y="551" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#a3adbd">any language, anywhere</text>
-<rect x="615" y="506" width="230" height="58" rx="10" fill="#161d28" stroke="#2c3646" stroke-width="1.5"/>
-<rect x="615" y="506" width="230" height="4" rx="2" fill="#5aa9e6"/>
-<text x="730" y="532" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#e9edf3">Existing services</text>
-<text x="730" y="551" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#a3adbd">unchanged</text>
-<rect x="875" y="506" width="230" height="58" rx="10" fill="#161d28" stroke="#2c3646" stroke-width="1.5"/>
-<rect x="875" y="506" width="230" height="4" rx="2" fill="#5aa9e6"/>
-<text x="990" y="532" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#e9edf3">Business functions</text>
-<text x="990" y="551" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#a3adbd">payment, triage, …</text>
-<path d="M 600 472 L 600 612" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<text x="600" y="634" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#b28cf0">DATA</text>
-<path d="M 600 644 L 600 664" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<path d="M 210.0 664 L 990.0 664" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<path d="M 210.0 664 L 210.0 678" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<path d="M 470.0 664 L 470.0 678" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<path d="M 730.0 664 L 730.0 678" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<path d="M 990.0 664 L 990.0 678" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<rect x="95" y="678" width="230" height="58" rx="10" fill="#161d28" stroke="#2c3646" stroke-width="1.5"/>
-<rect x="95" y="678" width="230" height="4" rx="2" fill="#b28cf0"/>
-<text x="210" y="704" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#e9edf3">Process definitions</text>
-<text x="210" y="723" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#a3adbd">what you draw</text>
-<rect x="355" y="678" width="230" height="58" rx="10" fill="#161d28" stroke="#2c3646" stroke-width="1.5"/>
-<rect x="355" y="678" width="230" height="4" rx="2" fill="#b28cf0"/>
-<text x="470" y="704" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#e9edf3">Catalogues</text>
-<text x="470" y="723" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#a3adbd">service contracts</text>
-<rect x="615" y="678" width="230" height="58" rx="10" fill="#161d28" stroke="#2c3646" stroke-width="1.5"/>
-<rect x="615" y="678" width="230" height="4" rx="2" fill="#b28cf0"/>
-<text x="730" y="704" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#e9edf3">Rules</text>
-<text x="730" y="723" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#a3adbd">installed on each host</text>
-<rect x="875" y="678" width="230" height="58" rx="10" fill="#161d28" stroke="#2c3646" stroke-width="1.5"/>
-<rect x="875" y="678" width="230" height="4" rx="2" fill="#b28cf0"/>
-<text x="990" y="704" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#e9edf3">Execution records</text>
-<text x="990" y="723" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#a3adbd">gathered by Monitor</text>
-<path d="M 600 644 L 600 784" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<text x="600" y="806" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#4cc38a">DEPLOYMENT</text>
-<path d="M 600 816 L 600 836" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<path d="M 270.0 836 L 930.0 836" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<path d="M 270.0 836 L 270.0 850" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<path d="M 600.0 836 L 600.0 850" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<path d="M 930.0 836 L 930.0 850" fill="none" stroke="#f2f4f8" stroke-width="2"/>
-<rect x="120" y="850" width="300" height="58" rx="10" fill="#161d28" stroke="#2c3646" stroke-width="1.5"/>
-<rect x="120" y="850" width="300" height="4" rx="2" fill="#4cc38a"/>
-<text x="270" y="876" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#e9edf3">Local run</text>
-<text x="270" y="895" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#a3adbd">every host on one computer</text>
-<rect x="450" y="850" width="300" height="58" rx="10" fill="#161d28" stroke="#2c3646" stroke-width="1.5"/>
-<rect x="450" y="850" width="300" height="4" rx="2" fill="#4cc38a"/>
-<text x="600" y="876" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#e9edf3">Host packages</text>
-<text x="600" y="895" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#a3adbd">JAR + launch script</text>
-<rect x="780" y="850" width="300" height="58" rx="10" fill="#161d28" stroke="#2c3646" stroke-width="1.5"/>
-<rect x="780" y="850" width="300" height="4" rx="2" fill="#4cc38a"/>
-<text x="930" y="876" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#e9edf3">Remote hosts</text>
-<text x="930" y="895" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#a3adbd">other machines and organisations</text>
-<text x="600" y="954" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#a3adbd">github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration</text>
+<text x="550" y="48" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="600" text-anchor="middle" fill="#e9edf3">RPSO</text>
+<text x="550" y="78" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#c5cdd9">RULE-PROPAGATED SERVICE ORCHESTRATION</text>
+<path d="M 550.0 88 L 550.0 102" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<rect x="260" y="102" width="580" height="66" rx="12" fill="#161d28" stroke="#5aa9e6" stroke-width="2"/>
+<text x="550" y="130" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" text-anchor="middle" fill="#e9edf3">Petri-net process models, executed</text>
+<text x="550" y="156" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" text-anchor="middle" fill="#e9edf3">across distributed hosts with no central engine</text>
+<path d="M 550.0 168 L 550.0 192" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<path d="M 185 192 L 915 192" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<path d="M 185 192 L 185 210" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<path d="M 550 192 L 550 210" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<path d="M 915 192 L 915 210" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<text x="185" y="234" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="600" text-anchor="middle" fill="#4cc38a">PROCESS DESIGN</text>
+<text x="550" y="234" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="600" text-anchor="middle" fill="#b28cf0">RUNTIME ORCHESTRATION</text>
+<text x="915" y="234" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="600" text-anchor="middle" fill="#f08a4b">ANALYSIS &amp; INSIGHTS</text>
+<path d="M 185 244 L 185 252 L 34.0 252 L 34.0 447.0" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<path d="M 34.0 295.0 L 50.0 295.0" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<rect x="50" y="262" width="270" height="66" rx="10" fill="#161d28" stroke="#3a4558" stroke-width="1.5"/>
+<rect x="50" y="262" width="270" height="4" rx="2" fill="#4cc38a"/>
+<text x="185" y="291" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" text-anchor="middle" fill="#e9edf3">Editor</text>
+<text x="185" y="314" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="middle" fill="#c5cdd9">draw · validate</text>
+<path d="M 34.0 371.0 L 50.0 371.0" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<rect x="50" y="338" width="270" height="66" rx="10" fill="#161d28" stroke="#3a4558" stroke-width="1.5"/>
+<rect x="50" y="338" width="270" height="4" rx="2" fill="#4cc38a"/>
+<text x="185" y="367" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" text-anchor="middle" fill="#e9edf3">Deploy</text>
+<text x="185" y="390" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="middle" fill="#c5cdd9">each place&#x27;s host</text>
+<path d="M 34.0 447.0 L 50.0 447.0" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<rect x="50" y="414" width="270" height="66" rx="10" fill="#161d28" stroke="#3a4558" stroke-width="1.5"/>
+<rect x="50" y="414" width="270" height="4" rx="2" fill="#4cc38a"/>
+<text x="185" y="443" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" text-anchor="middle" fill="#e9edf3">Build</text>
+<text x="185" y="466" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="middle" fill="#c5cdd9">rules + launcher</text>
+<path d="M 915 244 L 915 252 L 764.0 252 L 764.0 447.0" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<path d="M 764.0 295.0 L 780.0 295.0" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<rect x="780" y="262" width="270" height="66" rx="10" fill="#161d28" stroke="#3a4558" stroke-width="1.5"/>
+<rect x="780" y="262" width="270" height="4" rx="2" fill="#f08a4b"/>
+<text x="915" y="291" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" text-anchor="middle" fill="#e9edf3">Records</text>
+<text x="915" y="314" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="middle" fill="#c5cdd9">from every host</text>
+<path d="M 764.0 371.0 L 780.0 371.0" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<rect x="780" y="338" width="270" height="66" rx="10" fill="#161d28" stroke="#3a4558" stroke-width="1.5"/>
+<rect x="780" y="338" width="270" height="4" rx="2" fill="#f08a4b"/>
+<text x="915" y="367" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" text-anchor="middle" fill="#e9edf3">Timings</text>
+<text x="915" y="390" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="middle" fill="#c5cdd9">waits · failures</text>
+<path d="M 764.0 447.0 L 780.0 447.0" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<rect x="780" y="414" width="270" height="66" rx="10" fill="#161d28" stroke="#3a4558" stroke-width="1.5"/>
+<rect x="780" y="414" width="270" height="4" rx="2" fill="#f08a4b"/>
+<text x="915" y="443" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" text-anchor="middle" fill="#e9edf3">Replay</text>
+<text x="915" y="466" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="middle" fill="#c5cdd9">a recorded run</text>
+<path d="M 550 244 L 550 258" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<rect x="360" y="258" width="380" height="146" rx="14" fill="#161d28" stroke="#b28cf0" stroke-width="2"/>
+<text x="550" y="285" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" text-anchor="middle" fill="#e9edf3">Node  (executed by an RPSO host)</text>
+<rect x="398" y="300" width="76" height="38" rx="6" fill="#0f141c" stroke="#c5cdd9" stroke-width="1.5"/>
+<text x="436" y="325" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#e9edf3">T_in</text>
+<rect x="626" y="300" width="76" height="38" rx="6" fill="#0f141c" stroke="#c5cdd9" stroke-width="1.5"/>
+<text x="664" y="325" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#e9edf3">T_out</text>
+<circle cx="550" cy="319" r="28" fill="#0f141c" stroke="#b28cf0" stroke-width="2"/>
+<text x="550" y="325" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="600" text-anchor="middle" fill="#e9edf3">Place</text>
+<path d="M 474 319 L 520 319" stroke="#e9edf3" stroke-width="1.6" marker-end="url(#g-arrow)"/>
+<path d="M 580 319 L 624 319" stroke="#e9edf3" stroke-width="1.6" marker-end="url(#g-arrow)"/>
+<text x="550" y="368" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="600" text-anchor="middle" fill="#b28cf0">one Node per host · no central engine</text>
+<text x="550" y="390" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="600" text-anchor="middle" fill="#b28cf0">tokens travel directly from host to host</text>
+<rect x="365.08" y="416" width="175.76" height="32" rx="16" fill="#1d2633" stroke="#3a4558" stroke-width="1"/>
+<text x="452.96" y="438" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="middle" fill="#e9edf3">BPMN-style control</text>
+<rect x="550.84" y="416" width="184.08" height="32" rx="16" fill="#1d2633" stroke="#3a4558" stroke-width="1"/>
+<text x="642.88" y="438" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="middle" fill="#e9edf3">Versions &amp; priority</text>
+<rect x="360.92" y="456" width="175.76" height="32" rx="16" fill="#1d2633" stroke="#3a4558" stroke-width="1"/>
+<text x="448.8" y="478" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="middle" fill="#e9edf3">Changes on the fly</text>
+<rect x="546.68" y="456" width="192.4" height="32" rx="16" fill="#1d2633" stroke="#3a4558" stroke-width="1"/>
+<text x="642.88" y="478" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="middle" fill="#e9edf3">Everything a process</text>
+<path d="M 550 488 L 550 520" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<text x="550" y="542" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="600" text-anchor="middle" fill="#5aa9e6">SERVICE INTEGRATION (PLACES)</text>
+<path d="M 550 552 L 550 570" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<path d="M 160.0 570 L 940.0 570" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<path d="M 160.0 570 L 160.0 584" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<path d="M 420.0 570 L 420.0 584" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<path d="M 680.0 570 L 680.0 584" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<path d="M 940.0 570 L 940.0 584" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<rect x="40" y="584" width="240" height="66" rx="10" fill="#161d28" stroke="#3a4558" stroke-width="1.5"/>
+<rect x="40" y="584" width="240" height="4" rx="2" fill="#5aa9e6"/>
+<text x="160" y="613" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" text-anchor="middle" fill="#e9edf3">Java class</text>
+<text x="160" y="636" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="middle" fill="#c5cdd9">inside its host</text>
+<rect x="300" y="584" width="240" height="66" rx="10" fill="#161d28" stroke="#3a4558" stroke-width="1.5"/>
+<rect x="300" y="584" width="240" height="4" rx="2" fill="#5aa9e6"/>
+<text x="420" y="613" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" text-anchor="middle" fill="#e9edf3">REST</text>
+<text x="420" y="636" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="middle" fill="#c5cdd9">any language, anywhere</text>
+<rect x="560" y="584" width="240" height="66" rx="10" fill="#161d28" stroke="#3a4558" stroke-width="1.5"/>
+<rect x="560" y="584" width="240" height="4" rx="2" fill="#5aa9e6"/>
+<text x="680" y="613" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" text-anchor="middle" fill="#e9edf3">Existing services</text>
+<text x="680" y="636" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="middle" fill="#c5cdd9">unchanged</text>
+<rect x="820" y="584" width="240" height="66" rx="10" fill="#161d28" stroke="#3a4558" stroke-width="1.5"/>
+<rect x="820" y="584" width="240" height="4" rx="2" fill="#5aa9e6"/>
+<text x="940" y="613" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" text-anchor="middle" fill="#e9edf3">Business functions</text>
+<text x="940" y="636" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="middle" fill="#c5cdd9">payment, triage, …</text>
+<path d="M 550 552 L 550 700" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<text x="550" y="722" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="600" text-anchor="middle" fill="#b28cf0">DATA</text>
+<path d="M 550 732 L 550 750" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<path d="M 160.0 750 L 940.0 750" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<path d="M 160.0 750 L 160.0 764" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<path d="M 420.0 750 L 420.0 764" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<path d="M 680.0 750 L 680.0 764" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<path d="M 940.0 750 L 940.0 764" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<rect x="40" y="764" width="240" height="66" rx="10" fill="#161d28" stroke="#3a4558" stroke-width="1.5"/>
+<rect x="40" y="764" width="240" height="4" rx="2" fill="#b28cf0"/>
+<text x="160" y="793" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" text-anchor="middle" fill="#e9edf3">Process definitions</text>
+<text x="160" y="816" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="middle" fill="#c5cdd9">what you draw</text>
+<rect x="300" y="764" width="240" height="66" rx="10" fill="#161d28" stroke="#3a4558" stroke-width="1.5"/>
+<rect x="300" y="764" width="240" height="4" rx="2" fill="#b28cf0"/>
+<text x="420" y="793" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" text-anchor="middle" fill="#e9edf3">Catalogues</text>
+<text x="420" y="816" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="middle" fill="#c5cdd9">service contracts</text>
+<rect x="560" y="764" width="240" height="66" rx="10" fill="#161d28" stroke="#3a4558" stroke-width="1.5"/>
+<rect x="560" y="764" width="240" height="4" rx="2" fill="#b28cf0"/>
+<text x="680" y="793" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" text-anchor="middle" fill="#e9edf3">Rules</text>
+<text x="680" y="816" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="middle" fill="#c5cdd9">installed on each host</text>
+<rect x="820" y="764" width="240" height="66" rx="10" fill="#161d28" stroke="#3a4558" stroke-width="1.5"/>
+<rect x="820" y="764" width="240" height="4" rx="2" fill="#b28cf0"/>
+<text x="940" y="793" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" text-anchor="middle" fill="#e9edf3">Execution records</text>
+<text x="940" y="816" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="middle" fill="#c5cdd9">gathered by Monitor</text>
+<path d="M 550 732 L 550 880" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<text x="550" y="902" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="600" text-anchor="middle" fill="#4cc38a">DEPLOYMENT</text>
+<path d="M 550 912 L 550 930" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<path d="M 210.0 930 L 890.0 930" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<path d="M 210.0 930 L 210.0 944" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<path d="M 550.0 930 L 550.0 944" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<path d="M 890.0 930 L 890.0 944" fill="none" stroke="#f2f4f8" stroke-width="2"/>
+<rect x="50" y="944" width="320" height="66" rx="10" fill="#161d28" stroke="#3a4558" stroke-width="1.5"/>
+<rect x="50" y="944" width="320" height="4" rx="2" fill="#4cc38a"/>
+<text x="210" y="973" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" text-anchor="middle" fill="#e9edf3">Local run</text>
+<text x="210" y="996" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="middle" fill="#c5cdd9">every host on one computer</text>
+<rect x="390" y="944" width="320" height="66" rx="10" fill="#161d28" stroke="#3a4558" stroke-width="1.5"/>
+<rect x="390" y="944" width="320" height="4" rx="2" fill="#4cc38a"/>
+<text x="550" y="973" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" text-anchor="middle" fill="#e9edf3">Host packages</text>
+<text x="550" y="996" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="middle" fill="#c5cdd9">JAR + launch script</text>
+<rect x="730" y="944" width="320" height="66" rx="10" fill="#161d28" stroke="#3a4558" stroke-width="1.5"/>
+<rect x="730" y="944" width="320" height="4" rx="2" fill="#4cc38a"/>
+<text x="890" y="973" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" text-anchor="middle" fill="#e9edf3">Remote hosts</text>
+<text x="890" y="996" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="400" text-anchor="middle" fill="#c5cdd9">other machines and organisations</text>
+<text x="550" y="1042" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="400" text-anchor="middle" fill="#c5cdd9">github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration</text>
 </svg>
