@@ -1,6 +1,6 @@
 # Rule-Propagated Service Orchestration (RPSO)
 
-**RPSO uses Petri net concepts to transform ordinary callable services into a logically defined, distributed orchestration system.**
+**RPSO uses Petri net concepts to transform ordinary callable services into a formally defined, distributed orchestration system.**
 
 For example, say you have an online store that relies on a remote Payment Service. It works well under normal conditions, but what happens when order volumes rise, calls become slow, or the service fails? How do those problems affect the rest of the checkout process?
 
