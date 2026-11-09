@@ -6,17 +6,6 @@ For example, say you have an online store that relies on a remote Payment Servic
 
 With **RPSO**, you can leave the Payment Service where it is and bind its existing REST endpoint to a **Place** in a Petri-net model. Define the operation's inputs and result, connect the transitions that govern its execution, then generate test requests through the process. RPSO records the execution so you can measure, analyse and replay what actually happened.
 
-This example is deliberately simple, but the architectural pattern behind it goes much further. Each Place is one step of a process; add more, and RPSO coordinates them with no central engine:
-
-- **BPMN-style control flow.** Gateways route on a service's own answer, forks run branches in parallel and joins wait for all of them, merges take whichever path arrives, and a signal can start a compensation process that undoes earlier work.
-- **Several versions at once.** Different versions of a process run on the same hosts at the same time, each deployed and measured separately. Where they share a service, the higher-priority version is served first ([Priority at a shared service](ServiceTutorial.md#priority-at-a-shared-service)).
-- **Changes on the fly.** A new version of a process can be published to hosts that are already running. No host restarts, and tokens already in flight finish under the version they started with ([Change a running process](Reference.md#8-change-a-running-process)).
-- **Process-driven infrastructure.** Everything RPSO does is a process, with no custom glue code. Resetting each host before a run and collecting its records afterwards are themselves processes (administrative version `v999`), deployed and run on the same hosts as your own, and undoing earlier work is a compensation process. Asking a service for its data is no different: you draw a process that does it ([A run, phase by phase](Architecture.md#a-run-phase-by-phase)).
-- **Across machines and organisations.** The steps can run on different machines, or in different organisations that each run their own hosts, as in the [stroke code](StrokeCode.md), which spans an ambulance service, two hospitals and shared imaging and pathology providers.
-- **Measured and replayed.** However large the process grows, every run can be measured and replayed against the same model.
-
-[Where RPSO fits](#where-rpso-fits) compares it with workflow engines, service meshes and load-testing tools.
-
 ## Start with one service
 
 A minimal experiment needs only an event generator, a Place bound to the remote service, its incoming and outgoing transitions, and an outcome:
@@ -39,7 +28,20 @@ A minimal experiment needs only an event generator, a Place bound to the remote 
 30 payments: 24 paid and 3 declined, each routed on the service's own answer; 3 failed at the Place with the reason recorded (two HTTP 503s, one answer slower than 2.5 s). The burst queued for up to 10.8 s; steady traffic hardly queued.
 [▶ Watch the recorded run](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json&run=../../btsn.common/AnalysisFolder/Payments/Analysis_Remote_Payment_Test.txt) · [Build it yourself in the editor, then test your own service](#from-an-idea-to-a-measured-run)
 
-From one remote service, the model can grow into a complete checkout process with inventory, payment and order handling. Load, stress, soak and failure scenarios can then be studied *in the context of that workflow*. RPSO provides orchestration, token generation, execution records and analysis; realistic workloads and fault-injection conditions still need to be configured as part of the test.
+This is a measured test of a running service, not a replacement for dedicated load or fault-injection tools. RPSO provides the executable workflow, token schedules, execution records and replay; realistic workloads and failure conditions still need to be configured for each experiment. The same approach can expand to a complete checkout process with inventory, payment and order handling.
+
+## From one service to distributed workflows
+
+The payment test is a starting point. Add more Places and RPSO can coordinate a larger workflow without a central engine:
+
+- **BPMN-style control flow.** Gateways route on a service's own answer, forks run branches in parallel and joins wait for all of them, merges take whichever path arrives, and a signal can start a compensation process that undoes earlier work.
+- **Several versions at once.** Different versions of a process run on the same hosts at the same time, each deployed and measured separately. Where they share a service, the lower-numbered version takes priority ([Priority at a shared service](ServiceTutorial.md#priority-at-a-shared-service)).
+- **Changes on the fly.** A new version of a process can be published to hosts that are already running. No host restarts, and tokens already in flight finish under the version they started with ([Change a running process](Reference.md#8-change-a-running-process)).
+- **Process-driven infrastructure.** Host initialisation and record collection are themselves Petri-net processes (administrative version `v999`) deployed on the same hosts as the business workflow. Compensation and service-data requests can also be expressed as processes ([A run, phase by phase](Architecture.md#a-run-phase-by-phase)).
+- **Across machines and organisations.** The steps can run on different machines, or in different organisations that each run their own hosts, as in the [stroke code](StrokeCode.md), which spans an ambulance service, two hospitals and shared imaging and pathology providers.
+- **Measured and replayed.** However large the process grows, every run can be measured and replayed against the same model.
+
+[Where RPSO fits](#where-rpso-fits) compares it with workflow engines, service meshes and load-testing tools.
 
 ## How RPSO works
 
@@ -48,15 +50,13 @@ From one remote service, the model can grow into a complete checkout process wit
   <img src="images/rpso-at-a-glance.svg" alt="RPSO at a glance, as a hierarchy. RPSO: Petri-net process models, executed across distributed hosts with no central engine. Process design: editor, deploy, build. Runtime orchestration: the Node (T_in, Place, T_out) executed by an RPSO host, one per host with no central engine, tokens travelling directly from host to host; BPMN-style control, versions and priority, changes on the fly, everything a process. Analysis and insights: records from every host, timings, replay of a recorded run. Service integration at the places: Java classes, REST, existing services unchanged, business functions. Data: process definitions, catalogues, rules installed on each host, execution records gathered by Monitor. Deployment: local run, host packages, remote hosts.">
 </picture>
 
-A service operation, whether a Java method or a REST endpoint, is bound to a **Place** within a logical **Node (T_in → Place → T_out)**. T_in collects the required inputs; the assigned orchestration host invokes the service bound to the Place; T_out propagates its result.
+The diagram above separates process design, runtime orchestration, service integration, observation and deployment. At its centre is a logical **Node (T_in → Place → T_out)**. T_in collects the required inputs, the Place is bound to a business service operation, and T_out propagates the result.
 
-The Petri-net representation provides a formal foundation for sequencing, conditional routing, concurrency, forks, joins and synchronisation, without requiring those behaviours to be implemented inside the business services.
+Each logical Node is assigned to a host target. A generic [orchestration host](Architecture.md#terms) uses installed rules and canonical bindings to execute the Node and invoke its bound Place Service. Tokens travel directly between hosts, so no central orchestration engine directs each step.
 
-**RPSO turns this logical representation into a live distributed system.** Each logical Node is assigned to a host target, where a generic [orchestration host](Architecture.md#terms) executes its behaviour. Using installed coordination rules and canonical bindings, the host determines when the required inputs are available, invokes the bound Place Service and propagates the result. Tokens carry information directly between hosts, so no central orchestration engine directs their execution.
+Petri-net transitions define sequencing, guarded routing, concurrency, forks, joins and synchronisation without requiring business services to implement that coordination. Java services can run in-process within their orchestration host; a REST service can run anywhere its endpoint is reachable, in any language.
 
-The process drawn in the editor is therefore more than a visual model: **it is the definition of the system that executes.** Its behaviour can be observed, measured, analysed and replayed against the original Petri-net representation.
-
-The same generic machinery supports very different processes: from a Boolean test or a remote payment check to a loan application or an emergency-department workflow. Bind different services to the Places to change the work performed; change the deployment to run the same process across different machines. A Java service can run in-process inside its orchestration host, while a REST service can run anywhere its endpoint is reachable, in any language.
+**The process drawn in the editor is the definition of the system that executes**, not merely a diagram or a simulation. Its live execution can be recorded, measured, analysed and replayed on the same Petri-net model. The same machinery applies to a single payment check, a loan application or a distributed emergency-department workflow.
 
 ![An emergency-department process in the editor: patient arrivals pass Triage, whose gateway sends them to Laboratory, Cardiology and Radiology, which join at Diagnosis before Treatment. A triage canary and federated radiology requests from another hospital also enter the process. Places are deployed to host targets P1 to P6; dashed lines show network connections.](images/emergency-department-concurrent.png)
 
@@ -166,8 +166,7 @@ service at a time.
 
 - A JDK, version 15 or later (tested with 21).
 - Apache Ant 1.10.2 or later. It comes with Eclipse, and the editor finds it there.
-- The repository's projects imported into Eclipse (**File → Import → Existing Projects into
-  Workspace**). The runtime libraries are supplied; no Maven or Python is needed.
+- The repository and its supplied runtime libraries; no Maven or Python is needed. To use the editor in Eclipse, import the projects (**File → Import → Existing Projects into Workspace**). Eclipse is optional: you can also start the editor with `ant -f btsn.workflowEditor/build.xml clean jar run` and run launchers from the command line.
 
 Then start with [Tutorial.md](Tutorial.md).
 
