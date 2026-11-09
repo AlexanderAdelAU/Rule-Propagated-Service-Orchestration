@@ -483,9 +483,9 @@ d.save('petrinet-double-join.svg')
 # RPSO at a glance: one page for the README's top, in light and dark versions.
 GLANCE_THEMES = {
     'rpso-at-a-glance.svg': dict(bg='#ffffff', ink='#182238', muted='#5b6478', line='#d9d3c6', card='#faf8f4', chip='#f3efe7',
-                                 design='#2e7d4f', run='#7350a2', analyse='#c2521f', services='#24598e', token='#c2521f', host='#ffffff'),
+                                 design='#2e7d4f', run='#7350a2', analyse='#c2521f', services='#24598e', token='#c2521f', host='#ffffff', connector='#6b7486'),
     'rpso-at-a-glance-dark.svg': dict(bg='#0f141c', ink='#e9edf3', muted='#a3adbd', line='#2c3646', card='#161d28', chip='#1d2633',
-                                      design='#4cc38a', run='#b28cf0', analyse='#f08a4b', services='#5aa9e6', token='#f08a4b', host='#0f141c'),
+                                      design='#4cc38a', run='#b28cf0', analyse='#f08a4b', services='#5aa9e6', token='#f08a4b', host='#0f141c', connector='#f2f4f8'),
 }
 GLANCE_DESC = ('RPSO at a glance, as a hierarchy. RPSO, Rule-Propagated Service Orchestration: executable Petri nets for '
     'live, distributed service orchestration. Three branches. Process design: the process editor, deploy, which chooses each '
@@ -512,7 +512,7 @@ def glance(name, t):
                    f'{" font-style=\"italic\"" if italic else ""} text-anchor="{anchor}" fill="{colour}">{escape(s)}</text>')
     def rect(x, y, w, h, fill, stroke, rx=10, width=1.5):
         out.append(f'<rect x="{x:g}" y="{y:g}" width="{w:g}" height="{h:g}" rx="{rx}" fill="{fill}" stroke="{stroke}" stroke-width="{width}"/>')
-    def line(d, colour=t['line'], width=2):
+    def line(d, colour=t['connector'], width=2):   # the tree's connecting lines stand out in both themes
         out.append(f'<path d="{d}" fill="none" stroke="{colour}" stroke-width="{width}"/>')
     def tree(x0, y_from, y_bar, xs, y_to):
         """A parent at (x0, y_from) branching to children at xs, whose tops are at y_to."""

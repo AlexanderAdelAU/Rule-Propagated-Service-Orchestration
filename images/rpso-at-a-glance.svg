@@ -6,23 +6,23 @@
 </defs><rect width="100%" height="100%" fill="#ffffff"/>
 <text x="600" y="46" font-family="Arial, Helvetica, sans-serif" font-size="36" font-weight="600" text-anchor="middle" fill="#182238">RPSO</text>
 <text x="600" y="74" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#5b6478">RULE-PROPAGATED SERVICE ORCHESTRATION</text>
-<path d="M 600.0 84 L 600.0 100" fill="none" stroke="#d9d3c6" stroke-width="2"/>
+<path d="M 600.0 84 L 600.0 100" fill="none" stroke="#6b7486" stroke-width="2"/>
 <rect x="350" y="100" width="500" height="58" rx="12" fill="#faf8f4" stroke="#24598e" stroke-width="2"/>
 <text x="600" y="125" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="400" text-anchor="middle" fill="#182238">Executable Petri nets for</text>
 <text x="600" y="147" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="400" text-anchor="middle" fill="#182238">live, distributed service orchestration</text>
-<path d="M 600.0 158 L 600.0 182" fill="none" stroke="#d9d3c6" stroke-width="2"/>
-<path d="M 220 182 L 980 182" fill="none" stroke="#d9d3c6" stroke-width="2"/>
-<path d="M 220 182 L 220 200" fill="none" stroke="#d9d3c6" stroke-width="2"/>
-<path d="M 600 182 L 600 200" fill="none" stroke="#d9d3c6" stroke-width="2"/>
-<path d="M 980 182 L 980 200" fill="none" stroke="#d9d3c6" stroke-width="2"/>
+<path d="M 600.0 158 L 600.0 182" fill="none" stroke="#6b7486" stroke-width="2"/>
+<path d="M 220 182 L 980 182" fill="none" stroke="#6b7486" stroke-width="2"/>
+<path d="M 220 182 L 220 200" fill="none" stroke="#6b7486" stroke-width="2"/>
+<path d="M 600 182 L 600 200" fill="none" stroke="#6b7486" stroke-width="2"/>
+<path d="M 980 182 L 980 200" fill="none" stroke="#6b7486" stroke-width="2"/>
 <text x="220" y="222" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#2e7d4f">PROCESS DESIGN</text>
 <text x="600" y="222" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#7350a2">RUNTIME ORCHESTRATION</text>
 <text x="980" y="222" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#c2521f">ANALYSIS &amp; INSIGHTS</text>
-<path d="M 220 232 L 220 250" fill="none" stroke="#d9d3c6" stroke-width="2"/>
-<path d="M 90 250 L 350 250" fill="none" stroke="#d9d3c6" stroke-width="2"/>
-<path d="M 90 250 L 90 264" fill="none" stroke="#d9d3c6" stroke-width="2"/>
-<path d="M 220 250 L 220 264" fill="none" stroke="#d9d3c6" stroke-width="2"/>
-<path d="M 350 250 L 350 264" fill="none" stroke="#d9d3c6" stroke-width="2"/>
+<path d="M 220 232 L 220 250" fill="none" stroke="#6b7486" stroke-width="2"/>
+<path d="M 90 250 L 350 250" fill="none" stroke="#6b7486" stroke-width="2"/>
+<path d="M 90 250 L 90 264" fill="none" stroke="#6b7486" stroke-width="2"/>
+<path d="M 220 250 L 220 264" fill="none" stroke="#6b7486" stroke-width="2"/>
+<path d="M 350 250 L 350 264" fill="none" stroke="#6b7486" stroke-width="2"/>
 <rect x="28" y="264" width="124" height="58" rx="10" fill="#faf8f4" stroke="#d9d3c6" stroke-width="1.5"/>
 <rect x="28" y="264" width="124" height="4" rx="2" fill="#2e7d4f"/>
 <text x="90" y="290" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#182238">Editor</text>
@@ -35,11 +35,11 @@
 <rect x="288" y="264" width="124" height="4" rx="2" fill="#2e7d4f"/>
 <text x="350" y="290" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#182238">Build</text>
 <text x="350" y="309" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#5b6478">rules + launcher</text>
-<path d="M 980 232 L 980 250" fill="none" stroke="#d9d3c6" stroke-width="2"/>
-<path d="M 850 250 L 1110 250" fill="none" stroke="#d9d3c6" stroke-width="2"/>
-<path d="M 850 250 L 850 264" fill="none" stroke="#d9d3c6" stroke-width="2"/>
-<path d="M 980 250 L 980 264" fill="none" stroke="#d9d3c6" stroke-width="2"/>
-<path d="M 1110 250 L 1110 264" fill="none" stroke="#d9d3c6" stroke-width="2"/>
+<path d="M 980 232 L 980 250" fill="none" stroke="#6b7486" stroke-width="2"/>
+<path d="M 850 250 L 1110 250" fill="none" stroke="#6b7486" stroke-width="2"/>
+<path d="M 850 250 L 850 264" fill="none" stroke="#6b7486" stroke-width="2"/>
+<path d="M 980 250 L 980 264" fill="none" stroke="#6b7486" stroke-width="2"/>
+<path d="M 1110 250 L 1110 264" fill="none" stroke="#6b7486" stroke-width="2"/>
 <rect x="788" y="264" width="124" height="58" rx="10" fill="#faf8f4" stroke="#d9d3c6" stroke-width="1.5"/>
 <rect x="788" y="264" width="124" height="4" rx="2" fill="#c2521f"/>
 <text x="850" y="290" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#182238">Records</text>
@@ -52,7 +52,7 @@
 <rect x="1048" y="264" width="124" height="4" rx="2" fill="#c2521f"/>
 <text x="1110" y="290" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#182238">Replay</text>
 <text x="1110" y="309" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#5b6478">a recorded run</text>
-<path d="M 600 232 L 600 248" fill="none" stroke="#d9d3c6" stroke-width="2"/>
+<path d="M 600 232 L 600 248" fill="none" stroke="#6b7486" stroke-width="2"/>
 <rect x="425" y="248" width="350" height="132" rx="14" fill="#faf8f4" stroke="#7350a2" stroke-width="2"/>
 <text x="600" y="272" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#182238">Node  (executed by an RPSO host)</text>
 <rect x="460" y="286" width="70" height="34" rx="6" fill="#ffffff" stroke="#5b6478" stroke-width="1.5"/>
@@ -73,14 +73,14 @@
 <text x="672.46" y="411" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#182238">Changes on the fly</text>
 <rect x="752.3" y="392" width="157.2" height="28" rx="14" fill="#f3efe7" stroke="#d9d3c6" stroke-width="1"/>
 <text x="830.9" y="411" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#182238">Everything a process</text>
-<path d="M 600 420 L 600 440" fill="none" stroke="#d9d3c6" stroke-width="2"/>
+<path d="M 600 420 L 600 440" fill="none" stroke="#6b7486" stroke-width="2"/>
 <text x="600" y="462" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#24598e">SERVICE INTEGRATION (PLACES)</text>
-<path d="M 600 472 L 600 492" fill="none" stroke="#d9d3c6" stroke-width="2"/>
-<path d="M 210.0 492 L 990.0 492" fill="none" stroke="#d9d3c6" stroke-width="2"/>
-<path d="M 210.0 492 L 210.0 506" fill="none" stroke="#d9d3c6" stroke-width="2"/>
-<path d="M 470.0 492 L 470.0 506" fill="none" stroke="#d9d3c6" stroke-width="2"/>
-<path d="M 730.0 492 L 730.0 506" fill="none" stroke="#d9d3c6" stroke-width="2"/>
-<path d="M 990.0 492 L 990.0 506" fill="none" stroke="#d9d3c6" stroke-width="2"/>
+<path d="M 600 472 L 600 492" fill="none" stroke="#6b7486" stroke-width="2"/>
+<path d="M 210.0 492 L 990.0 492" fill="none" stroke="#6b7486" stroke-width="2"/>
+<path d="M 210.0 492 L 210.0 506" fill="none" stroke="#6b7486" stroke-width="2"/>
+<path d="M 470.0 492 L 470.0 506" fill="none" stroke="#6b7486" stroke-width="2"/>
+<path d="M 730.0 492 L 730.0 506" fill="none" stroke="#6b7486" stroke-width="2"/>
+<path d="M 990.0 492 L 990.0 506" fill="none" stroke="#6b7486" stroke-width="2"/>
 <rect x="95" y="506" width="230" height="58" rx="10" fill="#faf8f4" stroke="#d9d3c6" stroke-width="1.5"/>
 <rect x="95" y="506" width="230" height="4" rx="2" fill="#24598e"/>
 <text x="210" y="532" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#182238">Java class</text>
@@ -97,14 +97,14 @@
 <rect x="875" y="506" width="230" height="4" rx="2" fill="#24598e"/>
 <text x="990" y="532" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#182238">Business functions</text>
 <text x="990" y="551" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#5b6478">payment, triage, …</text>
-<path d="M 600 472 L 600 612" fill="none" stroke="#d9d3c6" stroke-width="2"/>
+<path d="M 600 472 L 600 612" fill="none" stroke="#6b7486" stroke-width="2"/>
 <text x="600" y="634" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#7350a2">DATA</text>
-<path d="M 600 644 L 600 664" fill="none" stroke="#d9d3c6" stroke-width="2"/>
-<path d="M 210.0 664 L 990.0 664" fill="none" stroke="#d9d3c6" stroke-width="2"/>
-<path d="M 210.0 664 L 210.0 678" fill="none" stroke="#d9d3c6" stroke-width="2"/>
-<path d="M 470.0 664 L 470.0 678" fill="none" stroke="#d9d3c6" stroke-width="2"/>
-<path d="M 730.0 664 L 730.0 678" fill="none" stroke="#d9d3c6" stroke-width="2"/>
-<path d="M 990.0 664 L 990.0 678" fill="none" stroke="#d9d3c6" stroke-width="2"/>
+<path d="M 600 644 L 600 664" fill="none" stroke="#6b7486" stroke-width="2"/>
+<path d="M 210.0 664 L 990.0 664" fill="none" stroke="#6b7486" stroke-width="2"/>
+<path d="M 210.0 664 L 210.0 678" fill="none" stroke="#6b7486" stroke-width="2"/>
+<path d="M 470.0 664 L 470.0 678" fill="none" stroke="#6b7486" stroke-width="2"/>
+<path d="M 730.0 664 L 730.0 678" fill="none" stroke="#6b7486" stroke-width="2"/>
+<path d="M 990.0 664 L 990.0 678" fill="none" stroke="#6b7486" stroke-width="2"/>
 <rect x="95" y="678" width="230" height="58" rx="10" fill="#faf8f4" stroke="#d9d3c6" stroke-width="1.5"/>
 <rect x="95" y="678" width="230" height="4" rx="2" fill="#7350a2"/>
 <text x="210" y="704" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#182238">Process definitions</text>
@@ -121,13 +121,13 @@
 <rect x="875" y="678" width="230" height="4" rx="2" fill="#7350a2"/>
 <text x="990" y="704" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#182238">Execution records</text>
 <text x="990" y="723" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#5b6478">gathered by Monitor</text>
-<path d="M 600 644 L 600 784" fill="none" stroke="#d9d3c6" stroke-width="2"/>
+<path d="M 600 644 L 600 784" fill="none" stroke="#6b7486" stroke-width="2"/>
 <text x="600" y="806" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="600" text-anchor="middle" fill="#2e7d4f">DEPLOYMENT</text>
-<path d="M 600 816 L 600 836" fill="none" stroke="#d9d3c6" stroke-width="2"/>
-<path d="M 270.0 836 L 930.0 836" fill="none" stroke="#d9d3c6" stroke-width="2"/>
-<path d="M 270.0 836 L 270.0 850" fill="none" stroke="#d9d3c6" stroke-width="2"/>
-<path d="M 600.0 836 L 600.0 850" fill="none" stroke="#d9d3c6" stroke-width="2"/>
-<path d="M 930.0 836 L 930.0 850" fill="none" stroke="#d9d3c6" stroke-width="2"/>
+<path d="M 600 816 L 600 836" fill="none" stroke="#6b7486" stroke-width="2"/>
+<path d="M 270.0 836 L 930.0 836" fill="none" stroke="#6b7486" stroke-width="2"/>
+<path d="M 270.0 836 L 270.0 850" fill="none" stroke="#6b7486" stroke-width="2"/>
+<path d="M 600.0 836 L 600.0 850" fill="none" stroke="#6b7486" stroke-width="2"/>
+<path d="M 930.0 836 L 930.0 850" fill="none" stroke="#6b7486" stroke-width="2"/>
 <rect x="120" y="850" width="300" height="58" rx="10" fill="#faf8f4" stroke="#d9d3c6" stroke-width="1.5"/>
 <rect x="120" y="850" width="300" height="4" rx="2" fill="#2e7d4f"/>
 <text x="270" y="876" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#182238">Local run</text>
