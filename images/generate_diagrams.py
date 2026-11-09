@@ -487,8 +487,8 @@ GLANCE_THEMES = {
     'rpso-at-a-glance-dark.svg': dict(bg='#0f141c', ink='#e9edf3', muted='#a3adbd', line='#2c3646', card='#161d28', chip='#1d2633',
                                       design='#4cc38a', run='#b28cf0', analyse='#f08a4b', services='#5aa9e6', token='#f08a4b', host='#0f141c', connector='#f2f4f8'),
 }
-GLANCE_DESC = ('RPSO at a glance, as a hierarchy. RPSO, Rule-Propagated Service Orchestration: executable Petri nets for '
-    'live, distributed service orchestration. Three branches. Process design: the process editor, deploy, which chooses each '
+GLANCE_DESC = ('RPSO at a glance, as a hierarchy. RPSO, Rule-Propagated Service Orchestration: Petri-net process models, '
+    'executed across distributed hosts with no central engine. Three branches. Process design: the process editor, deploy, which chooses each '
     'place\'s host, and build, which makes the rules and a launcher. Runtime orchestration: the Node, an input transition, a '
     'place and an output transition, executed by an RPSO host, one per host, with no central engine; with BPMN-style '
     'control, several versions with priority, changes on the fly, and everything a process. Analysis and insights: '
@@ -534,8 +534,8 @@ def glance(name, t):
     text(W / 2, 74, 'RULE-PROPAGATED SERVICE ORCHESTRATION', 15, t['muted'], bold=True)
     line(f'M {W / 2} 84 L {W / 2} 100')
     rect(W / 2 - 250, 100, 500, 58, t['card'], t['services'], rx=12, width=2)
-    text(W / 2, 125, 'Executable Petri nets for', 17)
-    text(W / 2, 147, 'live, distributed service orchestration', 17)
+    text(W / 2, 125, 'Petri-net process models, executed', 17)
+    text(W / 2, 147, 'across distributed hosts with no central engine', 17)
 
     # Three branches.
     cx = {'design': 220, 'run': 600, 'analyse': 980}
