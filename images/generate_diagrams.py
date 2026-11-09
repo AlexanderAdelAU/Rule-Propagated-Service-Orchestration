@@ -482,9 +482,9 @@ d.text(560,820,'Every local triple is supported by the generic fabric; the bound
 d.save('petrinet-double-join.svg')
 # RPSO at a glance: one page for the README's top, in light and dark versions.
 GLANCE_THEMES = {
-    'rpso-at-a-glance.svg': dict(bg='#ffffff', ink='#182238', muted='#5b6478', line='#d9d3c6', card='#faf8f4', chip='#f3efe7',
+    'rpso-at-a-glance.svg': dict(bg='#ffffff', ink='#182238', muted='#3e4759', line='#cfc8ba', card='#faf8f4', chip='#f3efe7',
                                  design='#2e7d4f', run='#7350a2', analyse='#c2521f', services='#24598e', token='#c2521f', host='#ffffff', connector='#6b7486'),
-    'rpso-at-a-glance-dark.svg': dict(bg='#0f141c', ink='#e9edf3', muted='#a3adbd', line='#2c3646', card='#161d28', chip='#1d2633',
+    'rpso-at-a-glance-dark.svg': dict(bg='#0f141c', ink='#e9edf3', muted='#c5cdd9', line='#3a4558', card='#161d28', chip='#1d2633',
                                       design='#4cc38a', run='#b28cf0', analyse='#f08a4b', services='#5aa9e6', token='#f08a4b', host='#0f141c', connector='#f2f4f8'),
 }
 GLANCE_DESC = ('RPSO at a glance, as a hierarchy. RPSO, Rule-Propagated Service Orchestration: Petri-net process models, '
@@ -499,17 +499,17 @@ GLANCE_DESC = ('RPSO at a glance, as a hierarchy. RPSO, Rule-Propagated Service 
     'computer, host packages, and hosts on other machines or in other organisations.')
 
 def glance(name, t):
-    W, H = 1200, 970
+    # Sized for the README column (about 830 px wide), so the smallest text still reads at about 12 px.
+    W, H = 1100, 1060
     out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" role="img" aria-labelledby="title desc">',
            f'<title id="title">RPSO at a glance</title><desc id="desc">{escape(GLANCE_DESC)}</desc>',
            '<defs>']
     out.append(f'<marker id="g-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="{t["ink"]}"/></marker>')
-    out.append(f'<marker id="g-run" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="{t["run"]}"/></marker>')
     out.append(f'</defs><rect width="100%" height="100%" fill="{t["bg"]}"/>')
     font = 'font-family="Arial, Helvetica, sans-serif"'
-    def text(x, y, s, size=16, colour=t['ink'], bold=False, anchor='middle', italic=False):
+    def text(x, y, s, size=18, colour=t['ink'], bold=False, anchor='middle'):
         out.append(f'<text x="{x:g}" y="{y:g}" {font} font-size="{size}" font-weight="{"600" if bold else "400"}"'
-                   f'{" font-style=\"italic\"" if italic else ""} text-anchor="{anchor}" fill="{colour}">{escape(s)}</text>')
+                   f' text-anchor="{anchor}" fill="{colour}">{escape(s)}</text>')
     def rect(x, y, w, h, fill, stroke, rx=10, width=1.5):
         out.append(f'<rect x="{x:g}" y="{y:g}" width="{w:g}" height="{h:g}" rx="{rx}" fill="{fill}" stroke="{stroke}" stroke-width="{width}"/>')
     def line(d, colour=t['connector'], width=2):   # the tree's connecting lines stand out in both themes
@@ -520,82 +520,94 @@ def glance(name, t):
         line(f'M {min(xs)} {y_bar} L {max(xs)} {y_bar}')
         for x in xs: line(f'M {x} {y_bar} L {x} {y_to}')
     def heading(x, y, label, colour):
-        text(x, y, label, 19, colour, bold=True)
-    def leaf(x, y, title, sub, colour, w=200):
-        rect(x - w / 2, y, w, 58, t['card'], t['line'])
+        text(x, y, label, 21, colour, bold=True)
+    LEAF_H = 66
+    def leaf(x, y, title, sub, colour, w):
+        assert width_of(title, 18, True) < w - 16 and width_of(sub, 16) < w - 16, (title, sub)
+        rect(x - w / 2, y, w, LEAF_H, t['card'], t['line'])
         out.append(f'<rect x="{x - w / 2:g}" y="{y}" width="{w}" height="4" rx="2" fill="{colour}"/>')
-        text(x, y + 26, title, 15, bold=True)
-        text(x, y + 45, sub, 13, t['muted'])
+        text(x, y + 29, title, 18, bold=True)
+        text(x, y + 52, sub, 16, t['muted'])
     def width_of(s, size, bold=False):
         return len(s) * size * (0.56 if bold else 0.52)
 
     # The root.
-    text(W / 2, 46, 'RPSO', 36, bold=True)
-    text(W / 2, 74, 'RULE-PROPAGATED SERVICE ORCHESTRATION', 15, t['muted'], bold=True)
-    line(f'M {W / 2} 84 L {W / 2} 100')
-    rect(W / 2 - 250, 100, 500, 58, t['card'], t['services'], rx=12, width=2)
-    text(W / 2, 125, 'Petri-net process models, executed', 17)
-    text(W / 2, 147, 'across distributed hosts with no central engine', 17)
+    text(W / 2, 48, 'RPSO', 38, bold=True)
+    text(W / 2, 78, 'RULE-PROPAGATED SERVICE ORCHESTRATION', 17, t['muted'], bold=True)
+    line(f'M {W / 2} 88 L {W / 2} 102')
+    rect(W / 2 - 290, 102, 580, 66, t['card'], t['services'], rx=12, width=2)
+    text(W / 2, 130, 'Petri-net process models, executed', 20)
+    text(W / 2, 156, 'across distributed hosts with no central engine', 20)
 
-    # Three branches.
-    cx = {'design': 220, 'run': 600, 'analyse': 980}
-    tree(W / 2, 158, 182, list(cx.values()), 200)
-    heading(cx['design'], 222, 'PROCESS DESIGN', t['design'])
-    heading(cx['run'], 222, 'RUNTIME ORCHESTRATION', t['run'])
-    heading(cx['analyse'], 222, 'ANALYSIS & INSIGHTS', t['analyse'])
+    # Three branches. Design and analysis list their parts in a column, joined by a trunk on the left.
+    cx = {'design': 185, 'run': 550, 'analyse': 915}
+    tree(W / 2, 168, 192, list(cx.values()), 210)
+    heading(cx['design'], 234, 'PROCESS DESIGN', t['design'])
+    heading(cx['run'], 234, 'RUNTIME ORCHESTRATION', t['run'])
+    heading(cx['analyse'], 234, 'ANALYSIS & INSIGHTS', t['analyse'])
+    col_w = 270
     for key, colour, leaves in [('design', t['design'], [('Editor', 'draw · validate'), ('Deploy', "each place's host"), ('Build', 'rules + launcher')]),
                                 ('analyse', t['analyse'], [('Records', 'from every host'), ('Timings', 'waits · failures'), ('Replay', 'a recorded run')])]:
-        xs = [cx[key] - 130, cx[key], cx[key] + 130]
-        tree(cx[key], 232, 250, xs, 264)
-        for x, (title, sub) in zip(xs, leaves):
-            assert width_of(title, 15, True) < 116 and width_of(sub, 13) < 118, (title, sub)
-            leaf(x, 264, title, sub, colour, w=124)
+        x = cx[key]; trunk = x - col_w / 2 - 16
+        ys = [262 + i * (LEAF_H + 10) for i in range(len(leaves))]
+        line(f'M {x} 244 L {x} 252 L {trunk} 252 L {trunk} {ys[-1] + LEAF_H / 2}')
+        for y, (title, sub) in zip(ys, leaves):
+            line(f'M {trunk} {y + LEAF_H / 2} L {x - col_w / 2} {y + LEAF_H / 2}')
+            leaf(x, y, title, sub, colour, col_w)
+    col_bottom = 262 + 3 * (LEAF_H + 10) - 10
 
     # Runtime: the Node, one per host, no central engine, and what it supports.
     x0 = cx['run']
-    line(f'M {x0} 232 L {x0} 248')
-    rect(x0 - 175, 248, 350, 132, t['card'], t['run'], rx=14, width=2)
-    text(x0, 272, 'Node  (executed by an RPSO host)', 15, bold=True)
-    for bx, label in [(x0 - 140, 'T_in'), (x0 + 70, 'T_out')]:
-        rect(bx, 286, 70, 34, t['bg'], t['muted'], rx=6)
-        text(bx + 35, 308, label, 15, bold=True)
-    out.append(f'<circle cx="{x0}" cy="303" r="24" fill="{t["bg"]}" stroke="{t["run"]}" stroke-width="2"/>')
-    text(x0, 308, 'Place', 14, bold=True)
-    for xa, xb in [(x0 - 70, x0 - 26), (x0 + 26, x0 + 68)]:
-        out.append(f'<path d="M {xa} 303 L {xb} 303" stroke="{t["ink"]}" stroke-width="1.6" marker-end="url(#g-arrow)"/>')
-    text(x0, 350, 'one Node per host · no central engine', 13, t['run'], bold=True)
-    text(x0, 368, 'tokens travel directly from host to host', 13, t['run'], bold=True)
-    chips = ['BPMN-style control', 'Versions & priority', 'Changes on the fly', 'Everything a process']
-    chip_w = [width_of(c, 13) + 22 for c in chips]
-    total = sum(chip_w) + 8 * (len(chips) - 1)
-    x = x0 - total / 2
-    for c, w in zip(chips, chip_w):
-        rect(x, 392, w, 28, t['chip'], t['line'], rx=14, width=1)
-        text(x + w / 2, 411, c, 13)
-        x += w + 8
-    assert total < 640, total   # the row sits below the design and analysis leaves
+    line(f'M {x0} 244 L {x0} 258')
+    bw = 380
+    assert cx['design'] + col_w / 2 < x0 - bw / 2 - 10 and x0 + bw / 2 + 10 < cx['analyse'] - col_w / 2 - 16
+    rect(x0 - bw / 2, 258, bw, 146, t['card'], t['run'], rx=14, width=2)
+    text(x0, 285, 'Node  (executed by an RPSO host)', 18, bold=True)
+    for bx, label in [(x0 - 152, 'T_in'), (x0 + 76, 'T_out')]:
+        rect(bx, 300, 76, 38, t['bg'], t['muted'], rx=6)
+        text(bx + 38, 325, label, 17, bold=True)
+    out.append(f'<circle cx="{x0}" cy="319" r="28" fill="{t["bg"]}" stroke="{t["run"]}" stroke-width="2"/>')
+    text(x0, 325, 'Place', 16, bold=True)
+    for xa, xb in [(x0 - 76, x0 - 30), (x0 + 30, x0 + 74)]:
+        out.append(f'<path d="M {xa} 319 L {xb} 319" stroke="{t["ink"]}" stroke-width="1.6" marker-end="url(#g-arrow)"/>')
+    for i, s in enumerate(['one Node per host · no central engine', 'tokens travel directly from host to host']):
+        assert width_of(s, 16, True) < bw - 20, s
+        text(x0, 368 + i * 22, s, 16, t['run'], bold=True)
+    chips = [['BPMN-style control', 'Versions & priority'], ['Changes on the fly', 'Everything a process']]
+    for r, row in enumerate(chips):
+        ws = [width_of(c, 16) + 26 for c in row]
+        total = sum(ws) + 10
+        assert total < 2 * (cx['analyse'] - col_w / 2 - 16 - x0) - 20, total
+        x = x0 - total / 2; y = 416 + r * 40
+        for c, w in zip(row, ws):
+            rect(x, y, w, 32, t['chip'], t['line'], rx=16, width=1)
+            text(x + w / 2, y + 22, c, 16)
+            x += w + 10
+    chips_bottom = 416 + 40 + 32
 
     # Down the spine: services at the places, the data, deployment.
     tiers = [
-        (440, 'SERVICE INTEGRATION (PLACES)', t['services'], [('Java class', 'inside its host'), ('REST', 'any language, anywhere'),
+        (520, 'SERVICE INTEGRATION (PLACES)', t['services'], [('Java class', 'inside its host'), ('REST', 'any language, anywhere'),
                                                              ('Existing services', 'unchanged'), ('Business functions', 'payment, triage, …')]),
-        (612, 'DATA', t['run'], [('Process definitions', 'what you draw'), ('Catalogues', 'service contracts'),
+        (700, 'DATA', t['run'], [('Process definitions', 'what you draw'), ('Catalogues', 'service contracts'),
                                  ('Rules', 'installed on each host'), ('Execution records', 'gathered by Monitor')]),
-        (784, 'DEPLOYMENT', t['design'], [('Local run', 'every host on one computer'), ('Host packages', 'JAR + launch script'),
+        (880, 'DEPLOYMENT', t['design'], [('Local run', 'every host on one computer'), ('Host packages', 'JAR + launch script'),
                                           ('Remote hosts', 'other machines and organisations')]),
     ]
-    prev = 420
+    assert tiers[0][0] > max(col_bottom, chips_bottom) + 20
+    prev = chips_bottom
     for y, label, colour, leaves in tiers:
         line(f'M {x0} {prev} L {x0} {y}')
         heading(x0, y + 22, label, colour)
-        n = len(leaves); w = 230 if n == 4 else 300; gap = 30
+        n = len(leaves); w = 240 if n == 4 else 320; gap = 20
+        assert n * w + (n - 1) * gap < W - 20
         xs = [x0 + (i - (n - 1) / 2) * (w + gap) for i in range(n)]
-        tree(x0, y + 32, y + 52, xs, y + 66)
+        tree(x0, y + 32, y + 50, xs, y + 64)
         for x, (title, sub) in zip(xs, leaves):
-            assert width_of(sub, 13) < w - 16 and width_of(title, 15, True) < w - 16, (title, sub)
-            leaf(x, y + 66, title, sub, colour, w=w)
+            leaf(x, y + 64, title, sub, colour, w)
         prev = y + 32
-    text(W / 2, H - 16, 'github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration', 13, t['muted'])
+    assert 880 + 64 + LEAF_H < H - 40
+    text(W / 2, H - 18, 'github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration', 15, t['muted'])
     (ROOT / name).write_text('\n'.join(out) + '\n</svg>\n')
 
 FIRST_USE_DESC = ('Start with one service. Inside an RPSO test workflow, the PAYMENTS event generator sends tokens to a '

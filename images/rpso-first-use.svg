@@ -2,43 +2,43 @@
 <title id="title">Start with one service</title><desc id="desc">Start with one service. Inside an RPSO test workflow, the PAYMENTS event generator sends tokens to a logical Node, executed by a generic RPSO orchestration host: T_in, the Payment place and T_out. T_out routes each payment to Paid or Declined. The Payment place calls the existing remote Payment Service, unchanged, by REST request and response. The host records the execution, which Monitor gathers for analysis: timings, queue waits and replay.</desc><defs>
 <marker id="f-ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#182238"/></marker>
 <marker id="f-services" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#24598e"/></marker>
-<marker id="f-muted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#5b6478"/></marker>
+<marker id="f-muted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#3e4759"/></marker>
 </defs><rect width="100%" height="100%" fill="#ffffff"/>
-<rect x="30" y="30" width="820" height="262" rx="14" fill="#faf8f4" stroke="#d9d3c6" stroke-width="1.5"/>
-<text x="52" y="58" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="start" fill="#5b6478">RPSO TEST WORKFLOW</text>
+<rect x="30" y="30" width="820" height="262" rx="14" fill="#faf8f4" stroke="#cfc8ba" stroke-width="1.5"/>
+<text x="52" y="58" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="start" fill="#3e4759">RPSO TEST WORKFLOW</text>
 <rect x="56" y="141" width="104" height="70" rx="8" fill="#ffffff" stroke="#2e7d4f" stroke-width="2"/>
 <text x="108" y="171" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#182238">PAYMENTS</text>
-<text x="108" y="191" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle" fill="#5b6478">event generator</text>
+<text x="108" y="191" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle" fill="#3e4759">event generator</text>
 <rect x="200" y="84" width="410" height="182" rx="14" fill="#ffffff" stroke="#7350a2" stroke-width="2"/>
 <text x="222" y="110" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="start" fill="#7350a2">Logical Node</text>
-<text x="405" y="252" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle" fill="#5b6478">executed by a generic RPSO orchestration host</text>
-<rect x="222" y="158" width="70" height="36" rx="6" fill="#faf8f4" stroke="#5b6478" stroke-width="1.5"/>
+<text x="405" y="252" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle" fill="#3e4759">executed by a generic RPSO orchestration host</text>
+<rect x="222" y="158" width="70" height="36" rx="6" fill="#faf8f4" stroke="#3e4759" stroke-width="1.5"/>
 <text x="257" y="181" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#182238">T_in</text>
-<rect x="518" y="158" width="70" height="36" rx="6" fill="#faf8f4" stroke="#5b6478" stroke-width="1.5"/>
+<rect x="518" y="158" width="70" height="36" rx="6" fill="#faf8f4" stroke="#3e4759" stroke-width="1.5"/>
 <text x="553" y="181" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#182238">T_out</text>
 <circle cx="405" cy="176" r="40" fill="#faf8f4" stroke="#7350a2" stroke-width="2"/>
 <text x="405" y="172" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#182238">Payment</text>
-<text x="405" y="190" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#5b6478">Place</text>
+<text x="405" y="190" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#3e4759">Place</text>
 <path d="M 160 176 L 220 176" fill="none" stroke="#182238" stroke-width="2" marker-end="url(#f-ink)"/>
 <path d="M 292 176 L 363 176" fill="none" stroke="#182238" stroke-width="2" marker-end="url(#f-ink)"/>
 <path d="M 447 176 L 516 176" fill="none" stroke="#182238" stroke-width="2" marker-end="url(#f-ink)"/>
-<rect x="712" y="106" width="112" height="40" rx="8" fill="#ffffff" stroke="#5b6478" stroke-width="1.5"/>
+<rect x="712" y="106" width="112" height="40" rx="8" fill="#ffffff" stroke="#3e4759" stroke-width="1.5"/>
 <text x="768" y="131" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#182238">Paid</text>
-<rect x="712" y="216" width="112" height="40" rx="8" fill="#ffffff" stroke="#5b6478" stroke-width="1.5"/>
+<rect x="712" y="216" width="112" height="40" rx="8" fill="#ffffff" stroke="#3e4759" stroke-width="1.5"/>
 <text x="768" y="241" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#182238">Declined</text>
 <path d="M 588 166 L 612 166 L 642 126 L 710 126" fill="none" stroke="#182238" stroke-width="2" marker-end="url(#f-ink)"/>
 <path d="M 588 186 L 612 186 L 642 236 L 710 236" fill="none" stroke="#182238" stroke-width="2" marker-end="url(#f-ink)"/>
-<text x="648" y="118" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#5b6478">paid</text>
-<text x="648" y="228" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#5b6478">declined</text>
+<text x="648" y="118" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#3e4759">paid</text>
+<text x="648" y="228" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#3e4759">declined</text>
 <rect x="900" y="132" width="270" height="88" rx="12" fill="#faf8f4" stroke="#24598e" stroke-width="2"/>
 <text x="1035" y="166" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#182238">Existing remote</text>
 <text x="1035" y="186" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#182238">Payment Service</text>
-<text x="1035" y="206" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle" fill="#5b6478">unchanged</text>
+<text x="1035" y="206" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="middle" fill="#3e4759">unchanged</text>
 <path d="M 405 134 L 405 72 L 874 72 L 874 176 L 898 176" fill="none" stroke="#24598e" stroke-width="2" stroke-dasharray="7 5" marker-start="url(#f-services)" marker-end="url(#f-services)"/>
 <text x="636" y="64" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="600" text-anchor="middle" fill="#24598e">REST request / response</text>
 <rect x="240" y="350" width="330" height="64" rx="12" fill="#faf8f4" stroke="#c2521f" stroke-width="2"/>
 <text x="405" y="376" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" text-anchor="middle" fill="#182238">Monitor / Analysis</text>
-<text x="405" y="398" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#5b6478">timings · queue waits · replay</text>
-<path d="M 405 266 L 405 348" fill="none" stroke="#5b6478" stroke-width="2" stroke-dasharray="2 5" marker-end="url(#f-muted)"/>
-<text x="418" y="318" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#5b6478">the host records the execution</text>
+<text x="405" y="398" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#3e4759">timings · queue waits · replay</text>
+<path d="M 405 266 L 405 348" fill="none" stroke="#3e4759" stroke-width="2" stroke-dasharray="2 5" marker-end="url(#f-muted)"/>
+<text x="418" y="318" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" text-anchor="start" fill="#3e4759">the host records the execution</text>
 </svg>
