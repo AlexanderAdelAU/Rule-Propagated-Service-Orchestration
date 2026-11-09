@@ -108,6 +108,44 @@ RPSO already works with current practice:
 - **Regression suites** run in GitHub Actions on every change.
 - **Recorded runs replay in the browser**, on [the examples page](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/examples.html).
 
+## Questions people ask
+
+<details>
+<summary><b>Where is the engine?</b></summary>
+
+There isn't one. Deploying a process installs its rules on each host that runs one of its Nodes. When a token arrives, that host checks its own rules to decide what the token needs, which service to call and where to send the result, and then sends the token straight to the next host. Monitor collects each host's records after the run; it takes no part while the process runs ([A token through an orchestration host](Architecture.md#a-token-through-an-orchestration-host)).
+</details>
+
+<details>
+<summary><b>How does this relate to BPMN?</b></summary>
+
+RPSO borrows BPMN's control ideas and expresses them as Petri nets: an exclusive gateway becomes a **G** transition that routes on the service's answer, a parallel gateway becomes a fork with a **J** join, a merge that takes whichever path arrives becomes **M**, an end event becomes **T**, and a signal that starts a compensation process becomes ***S***. The Petri net gives each of these an exact meaning, which is what lets a recorded run be checked and replayed against the model. RPSO does not read or write BPMN files; processes are drawn in its own editor.
+</details>
+
+<details>
+<summary><b>How do several versions run side by side?</b></summary>
+
+Each version has its own event generator, its own rules and its own records, so you can deploy, run and measure each version separately on the same hosts. Where versions share a Place, the Place takes the lower version first from its queue. In the [priority test](ServiceTutorial.md#priority-at-a-shared-service), in-store payments (v001) waited 0.6 s on average while a burst of online payments (v002) waited 13.7 s. In-store went first all 135 times both were queued together. Publishing a new version doesn't disturb tokens already moving: they finish under the version they started with ([Change a running process](Reference.md#8-change-a-running-process)).
+</details>
+
+<details>
+<summary><b>What happens when a service or a host fails?</b></summary>
+
+A token stops at a Place when its service returns an error, can't be reached, or takes longer than the Place's **Wait up to** time, and the reason is recorded. The analysis counts these as failed calls, and the replay shows each token stopping there. A token that outlives its lifetime, for example while queued, is dropped and reported as expired. Messages between hosts are UDP with no retransmission, so if a host stops, the tokens sent to it are lost and the analysis reports those workflows as incomplete. RPSO records failures so you can study them. It does not retry, fail over or yet route a failed token to a compensation process.
+</details>
+
+<details>
+<summary><b>Can a step be a person or an AI agent?</b></summary>
+
+A Place calls a service, so a step can be anything that sits behind a service, including a model that makes the decision. Even then, the process model fixes where the token can go next: the agent picks one of the routes drawn from its gateway and can't add new ones. A person is harder. The Place waits for its service's answer, and the token must finish within its lifetime, so RPSO suits steps that answer within seconds or minutes, not approvals that take days. It has no task list or inbox for people.
+</details>
+
+<details>
+<summary><b>Is it ready for production?</b></summary>
+
+No. RPSO is for research and design: modelling a process, running it across real machines and services, and measuring what happens. Tokens are held in memory by the running hosts and sent without retransmission, which suits experiments but not work that must survive a restart. The point is to understand a process before, and beside, the engine that will run it in production ([Where RPSO fits](#where-rpso-fits)).
+</details>
+
 ## From an idea to a measured run
 
 Start by drawing a process in the editor, binding services to its Places,
