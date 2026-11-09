@@ -598,6 +598,74 @@ def glance(name, t):
     text(W / 2, H - 16, 'github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration', 13, t['muted'])
     (ROOT / name).write_text('\n'.join(out) + '\n</svg>\n')
 
+FIRST_USE_DESC = ('Start with one service. Inside an RPSO test workflow, the PAYMENTS event generator sends tokens to a '
+    'logical Node, executed by a generic RPSO orchestration host: T_in, the Payment place and T_out. T_out routes each '
+    'payment to Paid or Declined. The Payment place calls the existing remote Payment Service, unchanged, by REST request '
+    'and response. The host records the execution, which Monitor gathers for analysis: timings, queue waits and replay.')
+
+def first_use(name, t):
+    W, H = 1200, 440
+    out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" role="img" aria-labelledby="title desc">',
+           f'<title id="title">Start with one service</title><desc id="desc">{escape(FIRST_USE_DESC)}</desc><defs>']
+    for key in ('ink', 'services', 'muted'):
+        out.append(f'<marker id="f-{key}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="{t[key]}"/></marker>')
+    out.append(f'</defs><rect width="100%" height="100%" fill="{t["bg"]}"/>')
+    font = 'font-family="Arial, Helvetica, sans-serif"'
+    def text(x, y, s, size=15, colour=t['ink'], bold=False, anchor='middle', italic=False):
+        out.append(f'<text x="{x:g}" y="{y:g}" {font} font-size="{size}" font-weight="{"600" if bold else "400"}"'
+                   f'{" font-style=\"italic\"" if italic else ""} text-anchor="{anchor}" fill="{colour}">{escape(s)}</text>')
+    def rect(x, y, w, h, fill, stroke, rx=10, width=1.5, dash=''):
+        out.append(f'<rect x="{x:g}" y="{y:g}" width="{w:g}" height="{h:g}" rx="{rx}" fill="{fill}" stroke="{stroke}" stroke-width="{width}"{dash}/>')
+    def arrow(d, colour, marker, dash='', both=False, width=2):
+        start = f' marker-start="url(#f-{marker})"' if both else ''
+        out.append(f'<path d="{d}" fill="none" stroke="{colour}" stroke-width="{width}"{dash}{start} marker-end="url(#f-{marker})"/>')
+
+    # The test workflow.
+    rect(30, 30, 820, 262, t['card'], t['line'], rx=14)
+    text(52, 58, 'RPSO TEST WORKFLOW', 14, t['muted'], bold=True, anchor='start')
+    # Event generator.
+    rect(56, 141, 104, 70, t['bg'], t['design'], rx=8, width=2)
+    text(108, 171, 'PAYMENTS', 14, bold=True)
+    text(108, 191, 'event generator', 12, t['muted'])
+    # The logical Node: T_in -> Place -> T_out, run by one host.
+    rect(200, 84, 410, 182, t['bg'], t['run'], rx=14, width=2)
+    text(222, 110, 'Logical Node', 15, t['run'], bold=True, anchor='start')
+    text(405, 252, 'executed by a generic RPSO orchestration host', 12, t['muted'])
+    for bx, label in [(222, 'T_in'), (518, 'T_out')]:
+        rect(bx, 158, 70, 36, t['card'], t['muted'], rx=6)
+        text(bx + 35, 181, label, 15, bold=True)
+    out.append(f'<circle cx="405" cy="176" r="40" fill="{t["card"]}" stroke="{t["run"]}" stroke-width="2"/>')
+    text(405, 172, 'Payment', 14, bold=True)
+    text(405, 190, 'Place', 13, t['muted'])
+    arrow('M 160 176 L 220 176', t['ink'], 'ink')
+    arrow('M 292 176 L 363 176', t['ink'], 'ink')
+    arrow('M 447 176 L 516 176', t['ink'], 'ink')
+    # Outcomes, routed on the service's answer.
+    for y, label in [(106, 'Paid'), (216, 'Declined')]:
+        rect(712, y, 112, 40, t['bg'], t['muted'], rx=8)
+        text(768, y + 25, label, 14, bold=True)
+    arrow('M 588 166 L 612 166 L 642 126 L 710 126', t['ink'], 'ink')
+    arrow('M 588 186 L 612 186 L 642 236 L 710 236', t['ink'], 'ink')
+    text(648, 118, 'paid', 12, t['muted'], anchor='start')
+    text(648, 228, 'declined', 12, t['muted'], anchor='start')
+
+    # The existing service, outside RPSO: the Place calls it over REST.
+    rect(900, 132, 270, 88, t['card'], t['services'], rx=12, width=2)
+    text(1035, 166, 'Existing remote', 15, bold=True)
+    text(1035, 186, 'Payment Service', 15, bold=True)
+    text(1035, 206, 'unchanged', 12, t['muted'])
+    arrow('M 405 134 L 405 72 L 874 72 L 874 176 L 898 176', t['services'], 'services', ' stroke-dasharray="7 5"', both=True)
+    text(636, 64, 'REST request / response', 13, t['services'], bold=True)
+
+    # Monitor, outside the token path.
+    rect(240, 350, 330, 64, t['card'], t['analyse'], rx=12, width=2)
+    text(405, 376, 'Monitor / Analysis', 15, bold=True)
+    text(405, 398, 'timings · queue waits · replay', 13, t['muted'])
+    arrow('M 405 266 L 405 348', t['muted'], 'muted', ' stroke-dasharray="2 5"')
+    text(418, 318, 'the host records the execution', 12, t['muted'], anchor='start')
+    (ROOT / name).write_text('\n'.join(out) + '\n</svg>\n')
+
 for name, theme in GLANCE_THEMES.items():
     glance(name, theme)
-print('Generated eleven editable SVG diagrams.')
+    first_use(name.replace('rpso-at-a-glance', 'rpso-first-use'), theme)
+print('Generated thirteen editable SVG diagrams.')
