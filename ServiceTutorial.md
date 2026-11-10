@@ -643,8 +643,36 @@ place, with the API's own answer as the reason:
 1 failed at PaymentService (P1_Place): REST service PaymentService.authorise at … answered HTTP 503: {"error":{"type":"unavailable", …}}
 ```
 
-To run it, open `Plain_Payment_Test.json` in the editor and click **Run on hosts**. The Deploy panel shows the
-placement and keeps its call mapping when you save; for now the mapping itself is edited in the deployment file.
+To run it, open `Plain_Payment_Test.json` in the editor and click **Run on hosts**.
+
+**In the editor.** Click **Deploy** and select the place. Below its **Service endpoint**, the **Call mapping** box
+holds the mapping above; leave it empty for a service that answers in RPSO's own format. The note under the box says
+what is wrong with a mapping as you type, and a mapping is saved only once it is valid. **Start from an example**
+fills the box with a mapping for a typical payments API, to change into yours.
+
+**Try a call** sends one call to the endpoint now, exactly as a host would, before you run anything. It starts from a
+sample token (the service's [token format](#7-give-it-data) when it has one), which you can change, and shows the
+request that was sent, the result the host would publish and the route T_out would take:
+
+```
+REQUEST SENT
+POST https://rule-propagated-service-orchestrati.vercel.app/api/v1/payments
+Content-Type: application/json
+Authorization: Bearer demo_key_public
+Idempotency-Key: 1000000
+
+{"reference":"ORD-1","amount":84.5,"currency":"AUD","card":"visa-4242"}
+
+RESULT PUBLISHED
+{"paymentResult":{"id":"pay_1","status":"succeeded","amount":84.5, …,"http_status":201,"routing_decision":{"routing_path":"paid"}}}
+
+ROUTE
+paid
+```
+
+A call that fails says why, as the analysis of a run would. A key read from `${env:…}` is used but shown as
+`(hidden)`; it is read from the environment of the editor, so set the variable before starting the editor to try a
+call with it. Try a call makes a real call: use a test key, or a test copy of the service.
 
 ### Priority at a shared service
 

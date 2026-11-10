@@ -52,6 +52,13 @@
     <!-- Compile Java sources -->
     <target name="compile" depends="init" description="Compile Java sources">
         <echo message="Compiling Java sources..."/>
+        <!-- The Deploy panel's Try a call makes a REST call exactly as a host does: the same two classes. -->
+        <javac srcdir="../btsn.common/src" destdir="${build.dir}" includeantruntime="false" encoding="UTF-8"
+               source="11" target="11" debug="true"
+               includes="org/btsn/invocation/CallMapping.java,org/btsn/invocation/RestAdapter.java"
+               sourcepath="">
+            <classpath refid="compile.classpath"/>
+        </javac>
         <javac srcdir="${src.dir}" 
                destdir="${build.dir}"
                includeantruntime="false"

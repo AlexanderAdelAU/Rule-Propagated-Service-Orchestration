@@ -12,5 +12,6 @@
 	<classpathentry kind="lib" path="/btsn.common/lib/log4j-api-2.23.1.jar"/>
 	<classpathentry kind="lib" path="/btsn.common/lib/log4j-core-2.23.1.jar"/>
 	<classpathentry kind="lib" path="/btsn.common/lib/json-simple-1.1.1.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/btsn.common"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

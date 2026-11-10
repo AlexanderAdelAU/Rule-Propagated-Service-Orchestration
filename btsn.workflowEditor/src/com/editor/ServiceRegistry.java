@@ -398,9 +398,9 @@ public final class ServiceRegistry {
 
     /** Invocation adapters: boolean-token (a Boolean service as a token) and rest (the service is called over HTTP). */
     public static final String REST = "rest", BOOLEAN_TOKEN = "boolean-token";
-    /** True for an http or https URL with a host, as a rest placement's endpoint must be. */
+    /** True for an http or https URL with a host, as a rest placement's endpoint must be; ${...} values, filled in for each call, are allowed. */
     public static boolean validRestEndpoint(String endpoint) {
-        try { java.net.URI uri = new java.net.URI(endpoint); return ("http".equals(uri.getScheme()) || "https".equals(uri.getScheme())) && uri.getHost() != null; }
+        try { java.net.URI uri = new java.net.URI(endpoint.replaceAll("\\$\\{[^}]*\\}", "x")); return ("http".equals(uri.getScheme()) || "https".equals(uri.getScheme())) && uri.getHost() != null; }
         catch (Exception e) { return false; }
     }
     public List<String> validateEndpoint(String service, String op, String output, List<String> inputs, String adapter) {
