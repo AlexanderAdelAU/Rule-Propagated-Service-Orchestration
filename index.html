@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RPSO: Rule-Propagated Service Orchestration</title>
+<meta name="description" content="RPSO turns ordinary callable services into a formally defined, distributed orchestration system: Petri-net process models executed across hosts with no central engine, with every run recorded, measured and replayed.">
+<meta name="author" content="Alexander Cameron">
+<link rel="canonical" href="https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="RPSO: Rule-Propagated Service Orchestration">
+<meta property="og:description" content="Petri-net process models executed across distributed hosts with no central engine. Every run recorded, measured and replayed.">
+<meta property="og:url" content="https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/">
+<meta property="og:image" content="https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/images/emergency-department-concurrent.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  "name": "RPSO: Rule-Propagated Service Orchestration",
+  "description": "Petri-net process models executed across distributed hosts with no central engine. Services are bound to places; each host follows locally installed rules; every run is recorded, measured and replayed against the model.",
+  "codeRepository": "https://github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration",
+  "url": "https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/",
+  "programmingLanguage": "Java",
+  "author": { "@type": "Person", "name": "Alexander Cameron", "url": "https://github.com/AlexanderAdelAU" },
+  "keywords": "Petri nets, service orchestration, workflow, distributed systems, BPMN, decentralised orchestration"
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+  :root {
+    --bg: #f5f2eb; --ink: #182238; --muted: #3e4759; --accent: #c2521f; --card: #ffffff; --line: #d9d3c6; --btn-ink: #f5f2eb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f141c; --ink: #e9edf3; --muted: #c5cdd9; --accent: #f08a4b; --card: #161d28; --line: #2c3646; --btn-ink: #0f141c; }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--ink); font: 16px/1.6 "IBM Plex Sans", system-ui, sans-serif; }
+  main { max-width: 980px; margin: 0 auto; padding: 32px 16px 56px; }
+  a { color: inherit; }
+  .eyebrow { font: 600 12px/1 "IBM Plex Mono", ui-monospace, monospace; letter-spacing: .14em; color: var(--accent); text-transform: uppercase; margin: 0; }
+  h1 { font-size: 38px; line-height: 1.12; margin: 10px 0 12px; }
+  .lede { font-size: 19px; color: var(--muted); max-width: 64ch; margin: 0 0 22px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 30px; }
+  .actions a { text-decoration: none; font-weight: 600; font-size: 15px; padding: 10px 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); }
+  .actions a.primary { background: var(--ink); color: var(--btn-ink); border-color: var(--ink); }
+  .actions a:hover { border-color: var(--accent); }
+  figure { margin: 0 0 8px; }
+  figure img, figure picture img { width: 100%; height: auto; display: block; border-radius: 10px; border: 1px solid var(--line); }
+  figcaption { font-size: 14px; color: var(--muted); margin-top: 8px; }
+  h2 { font-size: 24px; margin: 40px 0 10px; }
+  p { margin: 0 0 12px; max-width: 72ch; }
+  ul.points { padding: 0; margin: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  ul.points li { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  ul.points b { display: block; margin-bottom: 2px; }
+  .stats { font: 14px/1.5 "IBM Plex Mono", ui-monospace, monospace; color: var(--muted); }
+  dl { margin: 0; }
+  dt { font-weight: 600; margin-top: 14px; }
+  dd { margin: 4px 0 0; color: var(--muted); max-width: 72ch; }
+  footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+  @media (max-width: 640px) { h1 { font-size: 28px; } .lede { font-size: 17px; } }
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">RPSO · Research and design platform</p>
+  <h1>Rule-Propagated Service Orchestration</h1>
+  <p class="lede">RPSO uses Petri net concepts to transform ordinary callable services into a formally defined, distributed orchestration system. The process you draw is the system that runs: across separate hosts, with no central engine, and every run recorded so it can be measured and replayed.</p>
+
+  <nav class="actions" aria-label="Get started">
+    <a class="primary" href="https://github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration">View the project on GitHub</a>
+    <a href="https://github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration/blob/main/Tutorial.md">Tutorial</a>
+    <a href="docs/replay/examples.html">Browse recorded runs</a>
+  </nav>
+
+  <figure>
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="images/rpso-at-a-glance-dark.svg">
+      <img src="images/rpso-at-a-glance.svg" width="1100" height="1060" alt="RPSO at a glance. Petri-net process models, executed across distributed hosts with no central engine. Process design: editor, deploy, build. Runtime orchestration: the Node (T_in, Place, T_out) executed by an RPSO host, one per host, tokens travelling directly from host to host. Analysis and insights: records from every host, timings, replay. Below: service integration at the places, the data, and deployment.">
+    </picture>
+  </figure>
+
+  <h2>What it does</h2>
+  <ul class="points">
+    <li><b>Binds services you already have</b>A Java class or any REST endpoint becomes a Place in a Petri-net model, with no change to its business logic.</li>
+    <li><b>Runs with no central engine</b>Each host follows rules installed from the model, and tokens travel directly from host to host.</li>
+    <li><b>BPMN-style control</b>Gateways route on a service's own answer; forks, joins, merges, and signals that start a compensation process.</li>
+    <li><b>Several versions at once</b>Versions share the same hosts, each measured separately; where they share a service, the lower version is served first.</li>
+    <li><b>Changes on the fly</b>A new version can be published to running hosts. Tokens already moving finish under the version they started with.</li>
+    <li><b>Across organisations</b>Steps can run on different machines, or in different organisations that each run their own hosts.</li>
+    <li><b>Measured and replayed</b>Every run's records are gathered and analysed for queue waits, service times and failures, then replayed on the model.</li>
+  </ul>
+
+  <h2>See it run</h2>
+  <p>A recorded run of a payment test: a mock payment service on Vercel receives steady payments, then a burst of twelve.</p>
+  <figure>
+    <img src="images/remote-payment-test.gif" alt="A recorded run replayed on the model: tokens leave the PAYMENTS event generator, queue during the burst, pass through the Payment place and end at Paid or Declined." loading="lazy">
+    <figcaption class="stats">30 payments: 24 paid, 3 declined, 3 failed with the reason recorded. The burst queued for up to 10.8 s.</figcaption>
+  </figure>
+  <p><a href="docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json&amp;run=../../btsn.common/AnalysisFolder/Payments/Analysis_Remote_Payment_Test.txt">Watch this run</a> ·
+     <a href="docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Emergency_Department_With_Federated_Radiology.json&amp;run=../../btsn.common/AnalysisFolder/Healthcare/Emergency_Department_With_Federated_Radiology.txt">An emergency department on six hosts</a> ·
+     <a href="docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Stroke_Code_With_Emergency_Department.json&amp;run=../../btsn.common/AnalysisFolder/Healthcare/Stroke_Code_With_Emergency_Department.txt">A stroke code across four organisations</a></p>
+
+  <h2>Questions people ask</h2>
+  <dl>
+    <dt>Where is the engine?</dt>
+    <dd>There isn't one. Deploying a process installs its rules on each host that runs one of its Nodes; each host decides locally and sends tokens straight to the next host.</dd>
+    <dt>How does this relate to BPMN?</dt>
+    <dd>RPSO borrows BPMN's control ideas (gateways, parallel forks and joins, merges, end events, signals) and expresses them as Petri nets, which gives each an exact meaning a recorded run can be checked against.</dd>
+    <dt>Is it ready for production?</dt>
+    <dd>No. RPSO is for research and design: modelling a process, running it across real machines and services, and measuring what happens, before and beside the engine that will run it in production.</dd>
+  </dl>
+  <p><a href="https://github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration#questions-people-ask">More questions and answers</a></p>
+
+  <footer>
+    RPSO by Alexander Cameron · <a href="https://github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration">github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration</a> · Free for non-commercial use; see the licence in the project.
+  </footer>
+</main>
+</body>
+</html>
