@@ -572,6 +572,80 @@ The supplied example tests a mock payment gateway,
 
 When the service behaves as you need, add the places around it. Each new place is another Node in the same model.
 
+### Call an API that was not written for RPSO
+
+The services above answer in RPSO's own format. A payment provider's API does not: it has its own address, its own
+request, its own answer, and usually an API key. A **call mapping** in the deployment tells the host how to call such
+an API as it is, so nothing is written or changed on the service's side.
+
+| What | File |
+|---|---|
+| The API: `POST /v1/payments`, knowing nothing about RPSO | [`examples/rest/card-payments.js`](examples/rest/card-payments.js) |
+| The process: `PAYMENTS` → Payment (P1) → Paid or Declined | [`payments/Workflow/Plain_Payment_Test.json`](btsn.common/ProcessDefinitionFolder/payments/Workflow/Plain_Payment_Test.json) |
+| The placement, with its call mapping | [`ServiceDeploymentFolder/payments/Plain_Payment_Test.json`](btsn.common/ServiceDeploymentFolder/payments/Plain_Payment_Test.json) |
+| The launcher | [`Plain_Payment_Test_BuildAndRun.xml`](btsn.petrinet.ProjectLoader/Plain_Payment_Test_BuildAndRun.xml) |
+
+The API expects, and answers:
+
+```
+POST /v1/payments      Authorization: Bearer <key>
+{"amount": 84.5, "currency": "AUD", "card": "visa-4242", "reference": "ORD-1"}
+
+201  {"id": "pay_1", "status": "succeeded", "amount": 84.5, …}
+402  {"id": "pay_8", "status": "declined", "decline_code": "insufficient_funds", …}
+```
+
+The placement is an ordinary `rest` placement with a `call` added:
+
+```json
+"invocationAdapter": "rest",
+"endpoint": "https://rule-propagated-service-orchestrati.vercel.app/api/v1/payments",
+"call": {
+  "method": "POST",
+  "headers": {"Authorization": "Bearer demo_key_public", "Idempotency-Key": "${sequenceId}"},
+  "body": {"amount": "${data.amount}", "currency": "${data.currency}", "card": "${data.card}", "reference": "${data.orderId}"},
+  "route": {"field": "status", "values": {"succeeded": "paid"}},
+  "statusRoutes": {"402": "declined"}
+}
+```
+
+| Setting | Meaning |
+|---|---|
+| `method` | `POST` (the default), `PUT`, `PATCH`, `GET` or `DELETE` |
+| `headers` | Sent with every call |
+| `body` | `"data"` (the default) sends the token's data as it is; a template, as here, builds the request the API expects; `"rpso"` sends RPSO's own request. `GET` and `DELETE` send none |
+| `result` | The part of the answer to publish, such as `"payment"`; left out, all of it |
+| `route` | Where the answer says what happened (`field`), which route each value takes (`values`), and the route for any other value (`otherwise`). Without `otherwise`, an unlisted value fails the call |
+| `statusRoutes` | An HTTP status that is an answer, not a failure. Card APIs commonly decline with 402 |
+
+**Values in `${…}`** may appear in the endpoint, a header or the body, and are filled in for each call:
+
+- `${data.amount}`: a field of the token's data. Design the [token format](#7-give-it-data) to carry what the API needs.
+- `${paymentResult.status}`: a field of a named input, for a place later in the process. `${paymentResult.original_token.data.orderId}` reads the order the generator sent.
+- `${sequenceId}` and `${version}`: the call's own.
+- `${env:PAYMENT_KEY}`: an environment variable on the machine running the host. **Use this for a real API key**, so the key is never written in a file; the demo key above is public on purpose. A call whose variable is not set fails, saying which.
+
+A value that is the whole of a text, such as `"${data.amount}"`, keeps its type, so the API receives the number `84.5`.
+In an address it is encoded: `https://api.example.com/orders/${data.orderId}`.
+
+**What is published.** The answer, with `http_status` and the route added, under the catalogue's return attribute, so
+T_out, the next place and the analysis see it as they see any other service's result:
+
+```json
+{"paymentResult": {"id": "pay_8", "status": "declined", "decline_code": "insufficient_funds", …,
+                   "http_status": 402, "routing_decision": {"routing_path": "declined"}}}
+```
+
+**What one run told us** (16 orders, one a second): 13 paid; 2 declined, routed by the API's 402; 1 failed at the
+place, with the API's own answer as the reason:
+
+```
+1 failed at PaymentService (P1_Place): REST service PaymentService.authorise at … answered HTTP 503: {"error":{"type":"unavailable", …}}
+```
+
+To run it, open `Plain_Payment_Test.json` in the editor and click **Run on hosts**. The Deploy panel shows the
+placement and keeps its call mapping when you save; for now the mapping itself is edited in the deployment file.
+
 ### Priority at a shared service
 
 A service is often shared: in-store payments and online checkout may call the same gateway. When it slows down or a

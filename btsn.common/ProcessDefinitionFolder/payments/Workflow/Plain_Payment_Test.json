@@ -1,0 +1,160 @@
+{
+  "serviceDeployment": "ServiceDeploymentFolder/payments/Plain_Payment_Test.json",
+  "processType": "PetriNet",
+  "elements": [
+    {
+      "id": "PAYMENTS",
+      "type": "EVENT_GENERATOR",
+      "x": 60,
+      "y": 170,
+      "width": 24,
+      "height": 60,
+      "label": "PAYMENTS",
+      "rotation": 0.0,
+      "generator_rate": "1000",
+      "token_version": "v001"
+    },
+    {
+      "id": "T_in_Payment",
+      "type": "TRANSITION",
+      "x": 170,
+      "y": 170,
+      "width": 24,
+      "height": 60,
+      "label": "T_in_Payment",
+      "rotation": 0.0,
+      "node_type": "EdgeNode",
+      "node_value": "EDGE_NODE",
+      "transition_type": "T_in",
+      "buffer": "40"
+    },
+    {
+      "id": "Payment",
+      "type": "PLACE",
+      "x": 255,
+      "y": 175,
+      "width": 50,
+      "height": 50,
+      "label": "Payment",
+      "service": "PaymentService",
+      "serviceInstance": "Payment",
+      "operations": [
+        {
+          "name": "authorise",
+          "returnAttribute": "paymentResult",
+          "arguments": [
+            {
+              "name": "token",
+              "type": "String",
+              "value": "String",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T_out_Payment",
+      "type": "TRANSITION",
+      "x": 360,
+      "y": 170,
+      "width": 24,
+      "height": 60,
+      "label": "T_out_Payment",
+      "rotation": 0.0,
+      "node_type": "GatewayNode",
+      "node_value": "GATEWAY_NODE",
+      "transition_type": "T_out"
+    },
+    {
+      "id": "Paid",
+      "type": "TRANSITION",
+      "x": 500,
+      "y": 100,
+      "width": 24,
+      "height": 60,
+      "label": "Paid",
+      "rotation": 0.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    },
+    {
+      "id": "Declined",
+      "type": "TRANSITION",
+      "x": 500,
+      "y": 240,
+      "width": 24,
+      "height": 60,
+      "label": "Declined",
+      "rotation": 0.0,
+      "node_type": "TerminateNode",
+      "node_value": "TERMINATE_NODE",
+      "transition_type": "Other"
+    }
+  ],
+  "arrows": [
+    {
+      "source": "PAYMENTS",
+      "target": "T_in_Payment",
+      "connection_type": "NETWORK",
+      "availability": 1
+    },
+    {
+      "source": "T_in_Payment",
+      "target": "Payment"
+    },
+    {
+      "source": "Payment",
+      "target": "T_out_Payment"
+    },
+    {
+      "source": "T_out_Payment",
+      "target": "Paid",
+      "label": "paid",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "paid"
+    },
+    {
+      "source": "T_out_Payment",
+      "target": "Declined",
+      "label": "declined",
+      "guardCondition": "DECISION_EQUAL_TO",
+      "decision_value": "declined"
+    }
+  ],
+  "textElements": [
+    {
+      "x": 40,
+      "y": 40,
+      "text": "Calling an ordinary payments API, as it is",
+      "fontSize": 15,
+      "fontStyle": 1,
+      "color": -16777216
+    },
+    {
+      "x": 40,
+      "y": 62,
+      "text": "The API knows nothing about RPSO: the deployment's call mapping sends its request and reads its answer.",
+      "fontSize": 11,
+      "fontStyle": 2,
+      "color": -12566464
+    },
+    {
+      "x": 40,
+      "y": 78,
+      "text": "PAYMENTS sends one order a second. A 402 answer routes Declined; a 503 fails the call at the place.",
+      "fontSize": 11,
+      "fontStyle": 2,
+      "color": -12566464
+    },
+    {
+      "x": 228,
+      "y": 160,
+      "text": "Card-payments API: POST /v1/payments",
+      "fontSize": 10,
+      "fontStyle": 2,
+      "color": -12566464
+    }
+  ]
+}

@@ -95,6 +95,7 @@ public final class BusinessCapabilityResolverTest {
         verifyConfiguredImplementation();
         verifyGenericHosts();
         verifyRestHosts();
+        verifyCallMappings();
         System.out.println("PASS: " + checks + " capability/invocation checks");
     }
 
@@ -268,6 +269,127 @@ public final class BusinessCapabilityResolverTest {
             BusinessCapabilityResolver resolver = new BusinessCapabilityResolver(down, Paths.get("").toAbsolutePath());
             rejects(() -> resolver.adaptedResult("1000000", "org.btsn.places.P1_Place", "echo",
                     Arrays.asList("{}"), "result", "v001"), "could not be reached");
+        } finally {
+            server.stop(0);
+            System.setProperty("btsn.common.dir", originalCommon);
+        }
+    }
+
+    /**
+     * A REST placement with a call mapping calls an API that was not written for RPSO: its own method, headers and
+     * body, filled in from the token; its answer (or an HTTP status such as 402) is turned into a routed result.
+     */
+    @SuppressWarnings("unchecked")
+    private static void verifyCallMappings() throws Exception {
+        String originalCommon = System.getProperty("btsn.common.dir");
+        final java.util.Map<String, String> last = new java.util.HashMap<>();
+        com.sun.net.httpserver.HttpServer server = com.sun.net.httpserver.HttpServer.create(new java.net.InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/", exchange -> {
+            try {
+                String body = new String(exchange.getRequestBody().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+                last.clear();
+                last.put("method", exchange.getRequestMethod());
+                last.put("path", exchange.getRequestURI().getRawPath());
+                last.put("body", body);
+                for (String h : Arrays.asList("Authorization", "Idempotency-Key", "X-Home", "Content-Type"))
+                    last.put(h, exchange.getRequestHeaders().getFirst(h));
+                int status = 201;
+                String answer;
+                if (exchange.getRequestURI().getRawPath().startsWith("/orders/")) {
+                    answer = "{\"order\":{\"id\":\"" + exchange.getRequestURI().getPath().substring(8) + "\",\"state\":\"shipped\"}}";
+                    status = 200;
+                } else {
+                    String reference = body.contains("ORD-8") ? "8" : body.contains("ORD-13") ? "13" : body.contains("ORD-5") ? "5" : "1";
+                    if (reference.equals("8")) { status = 402; answer = "{\"id\":\"pay_8\",\"status\":\"declined\",\"decline_code\":\"insufficient_funds\"}"; }
+                    else if (reference.equals("13")) { status = 503; answer = "unavailable"; }
+                    else answer = "{\"id\":\"pay_" + reference + "\",\"status\":\"" + (reference.equals("5") ? "pending" : "succeeded") + "\",\"amount\":84.5}";
+                }
+                byte[] bytes = answer.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                exchange.sendResponseHeaders(status, bytes.length);
+                exchange.getResponseBody().write(bytes);
+            } catch (Exception e) {
+                exchange.sendResponseHeaders(500, -1);
+            } finally {
+                exchange.close();
+            }
+        });
+        server.start();
+        String base = "http://127.0.0.1:" + server.getAddress().getPort();
+        java.util.function.Function<String, String> token = order ->
+                "{\"tokenId\":\"1000000\",\"data\":{\"orderId\":\"" + order + "\",\"amount\":84.5,\"currency\":\"AUD\",\"card\":\"visa-4242\"}}";
+        Path runtime = Paths.get("").toAbsolutePath();
+        try {
+            // POST to an ordinary payments API: a template body, an API key from the environment, routes from its answer.
+            String home = System.getenv("HOME") == null ? "" : ",\"X-Home\":\"${env:HOME}\"";
+            String payments = "\"invocationAdapter\":\"rest\",\"endpoint\":\"" + base + "/v1/payments\",\"call\":{"
+                    + "\"headers\":{\"Authorization\":\"Bearer demo_key_public\",\"Idempotency-Key\":\"${sequenceId}\"" + home + "},"
+                    + "\"body\":{\"amount\":\"${data.amount}\",\"currency\":\"${data.currency}\",\"reference\":\"order ${data.orderId}\"},"
+                    + "\"route\":{\"field\":\"status\",\"values\":{\"succeeded\":\"paid\"}},"
+                    + "\"statusRoutes\":{\"402\":\"declined\"}},";
+            BusinessCapabilityResolver resolver = new BusinessCapabilityResolver(
+                    hostFixture("P1_Place", "authorise", "paymentResult", "token", null, payments), runtime);
+            JSONObject paid = (JSONObject) parse(resolver.adaptedResult("1000000", "org.btsn.places.P1_Place", "authorise",
+                    Arrays.asList(token.apply("ORD-1")), "paymentResult", "v001")).get("paymentResult");
+            equal("POST", last.get("method"));
+            equal("Bearer demo_key_public", last.get("Authorization"));
+            equal("1000000", last.get("Idempotency-Key"));
+            if (System.getenv("HOME") != null) equal(System.getenv("HOME"), last.get("X-Home"));
+            equal("application/json", last.get("Content-Type"));
+            JSONObject sent = parse(last.get("body"));
+            equal(84.5, sent.get("amount"));                       // a whole ${...} keeps its JSON type
+            equal("order ORD-1", sent.get("reference"));           // inside text, it is filled in as text
+            equal("pay_1", paid.get("id"));
+            equal(201L, paid.get("http_status"));
+            equal("paid", ((JSONObject) paid.get("routing_decision")).get("routing_path"));
+            JSONObject declined = (JSONObject) parse(resolver.adaptedResult("1080000", "org.btsn.places.P1_Place", "authorise",
+                    Arrays.asList(token.apply("ORD-8")), "paymentResult", "v001")).get("paymentResult");
+            equal("declined", ((JSONObject) declined.get("routing_decision")).get("routing_path"));
+            equal(402L, declined.get("http_status"));
+            equal("insufficient_funds", declined.get("decline_code"));
+            rejects(() -> resolver.adaptedResult("1130000", "org.btsn.places.P1_Place", "authorise",
+                    Arrays.asList(token.apply("ORD-13")), "paymentResult", "v001"), "answered HTTP 503");
+            rejects(() -> resolver.adaptedResult("1050000", "org.btsn.places.P1_Place", "authorise",
+                    Arrays.asList(token.apply("ORD-5")), "paymentResult", "v001"), "which no route names");
+
+            // "data" sends the token's data as it is; "otherwise" catches any other answer; a missing key fails clearly.
+            String asIs = "\"invocationAdapter\":\"rest\",\"endpoint\":\"" + base + "/v1/payments\",\"call\":{"
+                    + "\"headers\":{\"Authorization\":\"Bearer ${env:RPSO_TEST_KEY_THAT_IS_NOT_SET}\"}},";
+            BusinessCapabilityResolver noKey = new BusinessCapabilityResolver(hostFixture("P1_Place", "authorise", "paymentResult", "token", null, asIs), runtime);
+            rejects(() -> noKey.adaptedResult("1000000", "org.btsn.places.P1_Place", "authorise",
+                    Arrays.asList(token.apply("ORD-1")), "paymentResult", "v001"), "RPSO_TEST_KEY_THAT_IS_NOT_SET is not set");
+            String data = "\"invocationAdapter\":\"rest\",\"endpoint\":\"" + base + "/v1/payments\",\"call\":{"
+                    + "\"body\":\"data\",\"result\":\"\",\"route\":{\"field\":\"status\",\"otherwise\":\"other\"}},";
+            BusinessCapabilityResolver dataBody = new BusinessCapabilityResolver(hostFixture("P1_Place", "authorise", "paymentResult", "token", null, data), runtime);
+            JSONObject other = (JSONObject) parse(dataBody.adaptedResult("1050000", "org.btsn.places.P1_Place", "authorise",
+                    Arrays.asList(token.apply("ORD-5")), "paymentResult", "v001")).get("paymentResult");
+            equal(parse(token.apply("ORD-5")).get("data"), parse(last.get("body")));
+            equal("other", ((JSONObject) other.get("routing_decision")).get("routing_path"));
+
+            // GET with a value in the address, read from a later place's input; "result" publishes part of the answer.
+            String lookup = "\"invocationAdapter\":\"rest\",\"endpoint\":\"" + base + "/orders/${paymentResult.original_token.data.orderId}\","
+                    + "\"call\":{\"method\":\"GET\",\"result\":\"order\",\"route\":{\"field\":\"order.state\",\"values\":{\"shipped\":\"done\"}}},";
+            BusinessCapabilityResolver get = new BusinessCapabilityResolver(hostFixture("P1_Place", "track", "order", "paymentResult", null, lookup), runtime);
+            String later = "{\"paymentResult\":{\"id\":\"pay_1\",\"original_token\":" + JSONObject.toString("x", token.apply("ORD 7/A")).substring(4) + "}}";
+            JSONObject order = (JSONObject) parse(get.adaptedResult("1000000", "org.btsn.places.P1_Place", "track",
+                    Arrays.asList(later), "order", "v001")).get("order");
+            equal("GET", last.get("method"));
+            equal("/orders/ORD%207%2FA", last.get("path"));
+            equal("", last.get("body"));
+            equal("ORD 7/A", order.get("id"));
+            equal("done", ((JSONObject) order.get("routing_decision")).get("routing_path"));
+
+            // Mappings that cannot work are refused when the deployment is read, not on the first call.
+            for (String[] bad : new String[][] {
+                    {"{\"method\":\"FETCH\"}", "call.method"},
+                    {"{\"method\":\"GET\",\"body\":\"data\"}", "sends no body"},
+                    {"{\"headers\":{\"Host\":\"x\"}}", "the host sets it"},
+                    {"{\"route\":{\"field\":\"status\"}}", "needs values, otherwise"},
+                    {"{\"statusRoutes\":{\"42\":\"x\"}}", "invalid HTTP status"},
+                    {"{\"retries\":3}", "unknown setting"}}) {
+                Path fixture = hostFixture("P1_Place", "authorise", "paymentResult", "token", null,
+                        "\"invocationAdapter\":\"rest\",\"endpoint\":\"" + base + "/v1/payments\",\"call\":" + bad[0] + ",");
+                rejects(() -> new BusinessCapabilityResolver(fixture, runtime), bad[1]);
+            }
         } finally {
             server.stop(0);
             System.setProperty("btsn.common.dir", originalCommon);

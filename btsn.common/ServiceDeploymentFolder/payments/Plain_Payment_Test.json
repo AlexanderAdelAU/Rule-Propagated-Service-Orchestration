@@ -1,0 +1,35 @@
+{
+  "definitionType": "ServiceDeployment",
+  "catalog": "BusinessServiceDefinitions/payments/Payments.json",
+  "capabilities": [
+    {
+      "node": "P1",
+      "service": "PaymentService",
+      "instance": "Payment",
+      "invocationAdapter": "rest",
+      "endpoint": "https://rule-propagated-service-orchestrati.vercel.app/api/v1/payments",
+      "timeoutMs": 2500,
+      "operation": "authorise",
+      "returnAttribute": "paymentResult",
+      "portSlot": 0,
+      "arguments": [
+        {"name": "token", "type": "String", "value": "String", "required": false}
+      ],
+      "call": {
+        "method": "POST",
+        "headers": {
+          "Authorization": "Bearer demo_key_public",
+          "Idempotency-Key": "${sequenceId}"
+        },
+        "body": {
+          "amount": "${data.amount}",
+          "currency": "${data.currency}",
+          "card": "${data.card}",
+          "reference": "${data.orderId}"
+        },
+        "route": {"field": "status", "values": {"succeeded": "paid"}},
+        "statusRoutes": {"402": "declined"}
+      }
+    }
+  ]
+}

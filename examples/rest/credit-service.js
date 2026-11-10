@@ -4,6 +4,7 @@
 //   node examples/rest/credit-service.js     -> http://127.0.0.1:8080/credit/assess
 //                                               http://127.0.0.1:8080/claims/assess
 //                                               http://127.0.0.1:8080/payment/authorise
+//                                               http://127.0.0.1:8080/v1/payments  (an API not written for RPSO)
 //
 // It listens on PORT (default 8080) on every interface, so the same file serves on a host such
 // as Render, which sets PORT itself. See ServiceTutorial.md, "Call it over REST".
@@ -15,12 +16,13 @@ const services = {
 };
 
 const payment = require('./payment');
+const cardPayments = require('./card-payments');
 const PORT = Number(process.env.PORT || 8080);
 
 http.createServer((request, response) => {
   if (request.method === 'GET' && request.url === '/') {
     response.writeHead(200, { 'Content-Type': 'text/plain' })
-      .end('Credit service: POST /credit/assess\nClaims service: POST /claims/assess\nPayment service: POST /payment/authorise\n');
+      .end('Credit service: POST /credit/assess\nClaims service: POST /claims/assess\nPayment service: POST /payment/authorise\nCard-payments API: POST /v1/payments\n');
     return;
   }
   if (request.method === 'POST' && request.url === '/payment/authorise') {
@@ -37,6 +39,25 @@ http.createServer((request, response) => {
         if (answer.status === 200) response.writeHead(200, { 'Content-Type': 'application/json' }).end(JSON.stringify(answer.body));
         else response.writeHead(answer.status, { 'Content-Type': 'text/plain' }).end(answer.body);
       }, p.delayMs);
+    });
+    return;
+  }
+  if (request.method === 'POST' && request.url === '/v1/payments') {
+    // The card-payments API in the ordinary REST style (card-payments.js): it knows nothing about RPSO.
+    let body = '';
+    request.on('data', chunk => body += chunk);
+    request.on('end', () => {
+      let given;
+      try { given = JSON.parse(body); } catch (error) {
+        response.writeHead(400, { 'Content-Type': 'application/json' })
+          .end(JSON.stringify({ error: { type: 'invalid_request', message: 'The body is not JSON' } }));
+        return;
+      }
+      setTimeout(() => {
+        const answer = cardPayments.create(request.headers, given, 'node');
+        console.log('/v1/payments', given.reference, answer.status, answer.body.status || answer.body.error.type);
+        response.writeHead(answer.status, { 'Content-Type': 'application/json' }).end(JSON.stringify(answer.body));
+      }, cardPayments.plan(given).delayMs);
     });
     return;
   }
@@ -57,4 +78,4 @@ http.createServer((request, response) => {
       response.writeHead(400, { 'Content-Type': 'text/plain' }).end(String(error));
     }
   });
-}).listen(PORT, () => console.log('Credit, claims and payment services on port ' + PORT + ': POST /credit/assess, POST /claims/assess, POST /payment/authorise'));
+}).listen(PORT, () => console.log('Credit, claims and payment services on port ' + PORT + ': POST /credit/assess, POST /claims/assess, POST /payment/authorise, POST /v1/payments'));

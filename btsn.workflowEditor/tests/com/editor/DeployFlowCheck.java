@@ -278,6 +278,25 @@ public final class DeployFlowCheck {
                     "Payment's inputs should show token, from the catalogue, read-only");
                 panel.dispose(); panel = null;
 
+                // A REST placement's call mapping (an API not written for RPSO) survives the Deploy panel: loading it,
+                // changing the wait and saving keep it as written, and its keys are not mistaken for the placement's.
+                File plain = new File(common, "ProcessDefinitionFolder/payments/Workflow/Plain_Payment_Test.json");
+                canvas = new Canvas(); canvas.setDefinitionLocation(plain); canvas.loadFromJSON(read(plain.toPath()));
+                panel = InfrastructureDefinitionFrame.openForProcess(null, canvas, plain);
+                table = (JTable)field(panel, "capabilityTable");
+                check(table.getRowCount() == 1 && "Payment".equals(table.getValueAt(0, 0)), "Plain payment deploy rows: " + table.getRowCount());
+                check("https://rule-propagated-service-orchestrati.vercel.app/api/v1/payments".equals(((JTextField)field(panel, "endpointField")).getText()),
+                    "Plain payment endpoint: " + ((JTextField)field(panel, "endpointField")).getText());
+                ((JTextField)field(panel, "timeoutField")).setText("4000");
+                String saved = (String)paymentJson.invoke(panel);
+                check(saved.contains("\"timeoutMs\": 4000") && saved.contains("\"call\": {") && saved.contains("\"amount\": \"${data.amount}\"")
+                    && saved.contains("\"statusRoutes\": {\"402\": \"declined\"}") && saved.contains("\"Idempotency-Key\": \"${sequenceId}\""),
+                    "Saving the deployment changes or drops the call mapping: " + saved);
+                Object savedCall = ((org.json.simple.JSONObject)((org.json.simple.JSONArray)((org.json.simple.JSONObject)
+                    new org.json.simple.parser.JSONParser().parse(saved)).get("capabilities")).get(0)).get("call");
+                check(savedCall instanceof org.json.simple.JSONObject && ((org.json.simple.JSONObject)savedCall).size() == 5, "The saved call mapping is not the one loaded: " + savedCall);
+                panel.dispose(); panel = null;
+
                 File triage = new File(common, "ProcessDefinitionFolder/healthcare/Workflow/Triage_Workflow.json");
                 File shared = new File(common, "ServiceDeploymentFolder/healthcare/Healthcare.json");
                 int sharedRows = read(shared.toPath()).split("\"node\"", -1).length - 1;

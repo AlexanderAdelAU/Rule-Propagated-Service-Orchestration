@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Calling an ordinary payments API as it is: one event generator and one place, whose service is a card-payments
+     API that knows nothing about RPSO (examples/rest/card-payments.js, on this project's Vercel deployment).
+     The deployment's call mapping (ServiceDeploymentFolder/payments/Plain_Payment_Test.json) says how to call it:
+     POST /v1/payments with an API key and a body built from each order's data, a "succeeded" answer routing Paid
+     and an HTTP 402 routing Declined. Every 8th payment is declined; every 13th finds the API unavailable (HTTP 503),
+     so that call fails at the place and the analysis says why.
+     Each token's data is an order, from TokenFormats/PaymentService.json. Traffic: 16 orders, one a second.
+     The hosts need outbound internet access.
+     Run:     ant -f Plain_Payment_Test_BuildAndRun.xml        (add -Dhost.address=127.0.0.1 to run every host on this machine)
+     Analyse: ant -f Plain_Payment_Test_BuildAndRun.xml analyse -->
+<project name="Plain_Payment_Test_BuildAndRun" default="run-complete-workflow" basedir=".">
+    <property name="process.title" value="payments/Workflow/Plain_Payment_Test"/>
+    <property name="launcher.profile.file" location="../btsn.services/deployments/payments/Plain_Payment_TestDeployment.json"/>
+    <property name="workflow.process.name" value="payments/Workflow/Plain_Payment_Test"/>
+    <property name="rule.version" value="v001"/>
+    <property name="query.version" value="v001"/>
+
+    <property name="eg1.id" value="PAYMENTS"/>
+    <property name="eg1.version" value="v001"/>
+    <property name="eg1.place" value="P1_Place"/>
+    <property name="eg1.operation" value="authorise"/>
+    <property name="eg1.expire" value="60000"/>
+    <!-- Each token's data: an order, from TokenFormats/PaymentService.json. -->
+    <property name="eg1.format.service" value="PaymentService"/>
+    <property name="eg1.trigger.file" location="../btsn.common.eventgenerators/EventTriggeringFile/Plain_Payment_Test_BuildAndRun.csv"/>
+    <property name="token.count" value="16"/>
+
+    <!-- Hosts used by the service deployment: nodes of the infrastructure, each running the host program -->
+    <property name="hosts" value="P1"/>
+
+    <import file="../btsn.services/process-runtime.xml"/>
+</project>
