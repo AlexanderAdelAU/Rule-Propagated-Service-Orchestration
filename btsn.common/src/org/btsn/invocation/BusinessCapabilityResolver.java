@@ -199,7 +199,7 @@ public final class BusinessCapabilityResolver {
         if (capability == null || capability.adapter == null) return null;
         String implementation = resolve(service, operation, outputAttribute, inputs.size(), version);
         if (RestAdapter.NAME.equals(capability.adapter))
-            return RestAdapter.invoke(capability.endpoint, capability.timeoutMs, capability.logicalService, operation,
+            return RestAdapter.invoke(capability.endpoint, capability.timeoutMs, capability.call, capability.logicalService, operation,
                     sequenceId, version, capability.inputs, inputs, outputAttribute);
 
         return BooleanTokenAdapter.invoke(implementation, operation, inputs, outputAttribute);
@@ -216,6 +216,7 @@ public final class BusinessCapabilityResolver {
         final String adapter;
         final String endpoint;   // REST placements only
         final int timeoutMs;
+        final CallMapping call;  // REST placements calling an API not written for RPSO; null otherwise
 
         Capability placement(JSONObject placement, String instance) {
             if (!placement.containsKey("invocationAdapter")) {
@@ -233,7 +234,10 @@ public final class BusinessCapabilityResolver {
                 Object timeout = placement.get("timeoutMs");
                 int ms = timeout == null ? RestAdapter.DEFAULT_TIMEOUT_MS : Integer.parseInt(timeout.toString().trim());
                 require(ms > 0, "Invalid REST timeout for " + logicalService + ": " + ms);
-                return new Capability(this, instance, adapter, inputs, returnAttribute, endpoint, ms);
+                CallMapping call;
+                try { call = CallMapping.parse(placement.get("call")); }
+                catch (IllegalArgumentException e) { throw new IllegalArgumentException(logicalService + ": " + e.getMessage(), e); }
+                return new Capability(this, instance, adapter, inputs, returnAttribute, endpoint, ms, call);
             }
             require("boolean-token".equals(adapter), "Unknown invocation adapter: " + adapter);
             require(inputs.equals(java.util.Collections.singletonList("data")) && "decision".equals(returnAttribute),
@@ -244,10 +248,11 @@ public final class BusinessCapabilityResolver {
             return new Capability(this, instance, adapter, names, text(placement, "returnAttribute"));
         }
         Capability(Capability source, String instance, String adapter, List<String> inputs, String output) {
-            this(source, instance, adapter, inputs, output, null, 0);
+            this(source, instance, adapter, inputs, output, null, 0, null);
         }
         Capability(Capability source, String instance, String adapter, List<String> inputs, String output,
-                   String endpoint, int timeoutMs) {
+                   String endpoint, int timeoutMs, CallMapping call) {
+            this.call = call;
             this.endpoint = endpoint;
             this.timeoutMs = timeoutMs;
             logicalService = source.logicalService;
@@ -266,6 +271,7 @@ public final class BusinessCapabilityResolver {
             adapter = null;
             endpoint = null;
             timeoutMs = 0;
+            call = null;
             operation = text(definition, "operation");
             // A service reached only over REST may have no Java class; its placement must then use the rest adapter.
             implementationClass = definition.get("implementationClass") == null ? null : text(definition, "implementationClass");

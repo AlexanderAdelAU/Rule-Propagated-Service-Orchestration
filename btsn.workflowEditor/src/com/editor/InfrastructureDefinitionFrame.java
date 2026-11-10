@@ -1041,7 +1041,10 @@ public class InfrastructureDefinitionFrame extends JFrame {
                  .append("\", \"required\": ").append(arg.required).append("}");
             }
             if (!c.arguments.isEmpty()) b.append("\n      ");
-            b.append("]\n    }");
+            b.append("]");
+            // A REST call mapping (an API not written for RPSO) is kept exactly as it was written.
+            if (ServiceRegistry.REST.equals(c.adapter) && !c.call.isEmpty()) b.append(",\n      \"call\": ").append(c.call);
+            b.append("\n    }");
             if (i < capabilities.size() - 1) b.append(",");
             b.append("\n");
         }
@@ -1075,6 +1078,8 @@ public class InfrastructureDefinitionFrame extends JFrame {
         String body = arrayBody(json, "capabilities");
         for (String block : objectBlocks(body)) {
             Capability c = new Capability();
+            c.call = objectValue(block, "call");
+            if (!c.call.isEmpty()) block = block.replace(c.call, "{}");   // its keys are not the placement's
             c.node = stringValue(block, "node");
             c.service = stringValue(block, "service");
             c.instance = stringValue(block, "instance");
@@ -1140,6 +1145,17 @@ public class InfrastructureDefinitionFrame extends JFrame {
             else if (ch == ']' && --depth == 0) return text.substring(start + 1, i);
         }
         return "";
+    }
+
+    /** The JSON object under key, as written ("{...}"), or "" when there is none. */
+    private String objectValue(String text, String key) {
+        int keyPos = text.indexOf("\"" + key + "\"");
+        if (keyPos < 0) return "";
+        int colon = text.indexOf(':', keyPos);
+        int start = colon < 0 ? -1 : text.indexOf('{', colon);
+        if (start < 0 || !text.substring(colon + 1, start).trim().isEmpty()) return "";
+        List<String> blocks = objectBlocks(text.substring(start));
+        return blocks.isEmpty() ? "" : blocks.get(0);
     }
 
     private List<String> objectBlocks(String text) {
@@ -1501,7 +1517,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
             else if (c == 6) {
                 if (s.equals(x.adapter)) return;
                 x.adapter = s;
-                if (!ServiceRegistry.REST.equals(s)) { x.endpoint = ""; x.timeoutMs = 0; }
+                if (!ServiceRegistry.REST.equals(s)) { x.endpoint = ""; x.timeoutMs = 0; x.call = ""; }
                 useCatalogueContract(x); fireTableRowsUpdated(r, r); return;
             }
             else if (c == 7) x.endpoint = s;
@@ -1563,6 +1579,8 @@ public class InfrastructureDefinitionFrame extends JFrame {
         String endpoint = "";
         /** How long the host waits for a rest call, in ms; 0 for the adapter's default. */
         int timeoutMs;
+        /** A rest placement's call mapping, as JSON text; empty for RPSO's own request and answer. */
+        String call = "";
         String operation = "";
         String returnAttribute = "";
         int portSlot;

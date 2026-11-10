@@ -74,11 +74,15 @@ public final class DeploymentConfiguration {
             String adapter = placement.containsKey("invocationAdapter") ? text(placement, "invocationAdapter") : "";
             java.util.List<String> inputs = inputNames(placement);
             if (adapter.isEmpty() || org.btsn.invocation.RestAdapter.NAME.equals(adapter)) {
+                require(adapter.isEmpty() ? !placement.containsKey("call") : true, "A call mapping needs the rest adapter: " + service + "." + operation);
                 if (adapter.isEmpty())
                     require(definition.get("implementationClass") != null, "No implementation class for " + service + "." + operation + "; deploy it with the rest adapter and an endpoint");
-                else
+                else {
                     require(org.btsn.invocation.RestAdapter.validEndpoint(placement.get("endpoint") == null ? "" : placement.get("endpoint").toString()),
                         "A rest placement needs an http(s) endpoint: " + service + "." + operation);
+                    try { org.btsn.invocation.CallMapping.parse(placement.get("call")); }
+                    catch (IllegalArgumentException e) { require(false, "Invalid call mapping for " + service + "." + operation + ": " + e.getMessage()); }
+                }
                 require(!"boolean".equals(definition.get("resultType")), "Boolean service requires an explicit boolean-token adapter: " + service);
                 require(array(definition, "inputs").equals(inputs), "Placement inputs differ from catalogue: " + service + "." + operation);
                 require(text(definition, "returnAttribute").equals(text(placement, "returnAttribute")), "Conflicting return attribute between placement and catalogue: " + service + "." + operation);
