@@ -37,7 +37,7 @@ The payment test is a starting point. Add more Places and RPSO can coordinate a 
 - **BPMN-style control flow.** Gateways route on a service's own answer, forks run branches in parallel and joins wait for all of them, merges take whichever path arrives, and a signal can start a compensation process that undoes earlier work.
 - **Several versions at once.** Different versions of a process run on the same hosts at the same time, each deployed and measured separately. Where they share a service, the lower-numbered version takes priority ([Priority at a shared service](ServiceTutorial.md#priority-at-a-shared-service)).
 - **Changes on the fly.** A new version of a process can be published to hosts that are already running. No host restarts, and tokens already in flight finish under the version they started with ([Change a running process](Reference.md#8-change-a-running-process)).
-- **Process-driven infrastructure.** Host initialisation and record collection are themselves Petri-net processes (administrative version `v999`) deployed on the same hosts as the business workflow. Compensation and service-data requests can also be expressed as processes ([A run, phase by phase](Architecture.md#a-run-phase-by-phase)).
+- **Process-driven infrastructure.** Everything RPSO does is a process, with no custom glue code. Host initialisation and record collection are themselves Petri-net processes (administrative version `v999`), deployed on the same hosts as the business workflow, and compensation and service-data requests are processes too ([A run, phase by phase](Architecture.md#a-run-phase-by-phase)).
 - **Across machines and organisations.** The steps can run on different machines, or in different organisations that each run their own hosts, as in the [stroke code](StrokeCode.md), which spans an ambulance service, two hospitals and shared imaging and pathology providers.
 - **Measured and replayed.** However large the process grows, every run can be measured and replayed against the same model.
 
@@ -50,11 +50,19 @@ The payment test is a starting point. Add more Places and RPSO can coordinate a 
   <img src="images/rpso-at-a-glance.svg" alt="RPSO at a glance, as a hierarchy. RPSO: Petri-net process models, executed across distributed hosts with no central engine. Process design: editor, deploy, build. Runtime orchestration: the Node (T_in, Place, T_out) executed by an RPSO host, one per host with no central engine, tokens travelling directly from host to host; BPMN-style control, versions and priority, changes on the fly, everything a process. Analysis and insights: records from every host, timings, replay of a recorded run. Service integration at the places: Java classes, REST, existing services unchanged, business functions. Data: process definitions, catalogues, rules installed on each host, execution records gathered by Monitor. Deployment: local run, host packages, remote hosts.">
 </picture>
 
-The diagram above separates process design, runtime orchestration, service integration, observation and deployment. At its centre is a logical **Node (T_in → Place → T_out)**. T_in collects the required inputs, the Place is bound to a business service operation, and T_out propagates the result.
+The diagram above separates process design, runtime orchestration and analysis, with service integration, data and deployment beneath. At its centre is a logical **Node (T_in → Place → T_out)**. T_in collects the required inputs, the Place is bound to a business service operation, and T_out propagates the result.
 
 Each logical Node is assigned to a host target. A generic [orchestration host](Architecture.md#terms) uses installed rules and canonical bindings to execute the Node and invoke its bound Place Service. Tokens travel directly between hosts, so no central orchestration engine directs each step.
 
 Petri-net transitions define sequencing, guarded routing, concurrency, forks, joins and synchronisation without requiring business services to implement that coordination. Java services can run in-process within their orchestration host; a REST service can run anywhere its endpoint is reachable, in any language.
+
+How does a drawing become a running system? In this four-Node example, each Node is deployed to its own host target, run by a separate orchestration host:
+
+![A four-place Petri-net model on the left, where P1 forks to P2 and P3 before joining at P4, is deployed as local rules to four separate hosts on the right. Each host carries out T_in, invokes the bound Place Service and handles T_out. Tokens travel directly between hosts; Monitor collects their records afterward for Petri-net analysis.](images/rpso-overview.svg)
+
+*Draw the net, deploy its rules and run it across hosts. A Place can be bound to anything from a Boolean function to a credit check or a clinical service.*
+
+[▶ Watch a recorded run of this process](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_P2_P3_P4_Fork_Join_Workflow.json&run=../../btsn.common/AnalysisFolder/PetriNet/Analysis_P1_P2_P3_P4_Fork_Join_Workflow.txt)
 
 **The process drawn in the editor is the definition of the system that executes**, not merely a diagram or a simulation. Its live execution can be recorded, measured, analysed and replayed on the same Petri-net model. The same machinery applies to a single payment check, a loan application or a distributed emergency-department workflow.
 
@@ -75,14 +83,6 @@ Petri-net transitions define sequencing, guarded routing, concurrency, forks, jo
 
 **A federated example.** [A stroke code across four organisations](StrokeCode.md): an ambulance, a receiving hospital, a stroke centre and shared imaging and pathology providers, on twelve hosts with no central engine. It was recorded across two machines, with the stroke centre's host on its own machine. A compensation process undoes the stroke centre's booking when it isn't needed, and stroke codes overtake routine patients at the shared providers.
 [▶ Watch it](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Stroke_Code_With_Emergency_Department.json&run=../../btsn.common/AnalysisFolder/Healthcare/Stroke_Code_With_Emergency_Department.txt)
-
-How does a drawing become a running system? In this four-Node example, each Node is deployed to its own host target, run by a separate orchestration host:
-
-![A four-place Petri-net model on the left, where P1 forks to P2 and P3 before joining at P4, is deployed as local rules to four separate hosts on the right. Each host carries out T_in, invokes the bound Place Service and handles T_out. Tokens travel directly between hosts; Monitor collects their records afterward for Petri-net analysis.](images/rpso-overview.svg)
-
-*Draw the net, deploy its rules and run it across hosts. A Place can be bound to anything from a Boolean function to a credit check or a clinical service.*
-
-[▶ Watch a recorded run of this process](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/petrinet/Workflow/P1_P2_P3_P4_Fork_Join_Workflow.json&run=../../btsn.common/AnalysisFolder/PetriNet/Analysis_P1_P2_P3_P4_Fork_Join_Workflow.txt)
 
 During execution, each host records events that can later be analysed for queue
 waits, service times, join waits and end-to-end workflow time. The recorded run
