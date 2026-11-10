@@ -61,6 +61,13 @@ public class InfrastructureDefinitionFrame extends JFrame {
     private final JTextField endpointField = new JTextField();
     private final JTextField timeoutField = new JTextField(6);
     private final JLabel endpointNote = new JLabel(" ");
+    // The selected rest row's call mapping: how to call an API that was not written for RPSO. Empty: RPSO's own call.
+    private final JTextArea callArea = new JTextArea(7, 60);
+    private final JLabel callNote = new JLabel(" ");
+    /** The selected row's last valid, non-empty mapping: what an invalid edit leaves in place. */
+    private String lastValidCall = "";
+    private final JButton callExample = new JButton("Start from an example");
+    private final JButton tryCall = new JButton("Try a call...");
     /** True while the endpoint box is filled from the selected row or writes to it, so neither echoes the other. */
     private boolean endpointSync;
     private File currentFile;
@@ -154,6 +161,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
         capButtons.add(chooseCatalogue);
         JPanel capabilitiesSouth = new JPanel(new BorderLayout(4, 2));
         capabilitiesSouth.add(endpointPanel(), BorderLayout.NORTH);
+        capabilitiesSouth.add(callPanel(), BorderLayout.CENTER);
         capabilitiesSouth.add(capButtons, BorderLayout.SOUTH);
         capabilitiesPanel.add(capabilitiesSouth, BorderLayout.SOUTH);
 
@@ -869,8 +877,13 @@ public class InfrastructureDefinitionFrame extends JFrame {
             if (!timeoutField.getText().trim().equals(timeout)) timeoutField.setText(timeout);
             endpointField.setEnabled(rest);
             timeoutField.setEnabled(rest);
+            String call = rest ? cap.call : "";
+            lastValidCall = call;
+            if (!sameJson(callArea.getText(), call)) { callArea.setText(prettyCall(call)); callArea.setCaretPosition(0); }
+            callArea.setEnabled(rest); callExample.setEnabled(rest); tryCall.setEnabled(rest);
         } finally { endpointSync = false; }
         updateEndpointNote(cap);
+        updateCallNote(cap);
     }
 
     private void endpointEdited() {
@@ -890,6 +903,178 @@ public class InfrastructureDefinitionFrame extends JFrame {
         rowChanged(cap);
     }
 
+    /** The Call mapping box: for a rest row, how to call an API that was not written for RPSO, and a trial call. */
+    private JPanel callPanel() {
+        JPanel p = new JPanel(new BorderLayout(4, 2));
+        p.setBorder(BorderFactory.createTitledBorder("Call mapping (only for an API that was not written for RPSO; leave empty otherwise)"));
+        callArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        callArea.setToolTipText("<html>How the host calls this API, as JSON: method, headers, body, result, route, statusRoutes.<br>"
+            + "${data.amount} is a field of the token's data; ${env:NAME} is an environment variable on the host, for API keys.</html>");
+        p.add(new JScrollPane(callArea), BorderLayout.CENTER);
+        JPanel south = new JPanel(new BorderLayout(6, 0));
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
+        buttons.add(callExample); buttons.add(tryCall);
+        south.add(callNote, BorderLayout.CENTER); south.add(buttons, BorderLayout.EAST);
+        p.add(south, BorderLayout.SOUTH);
+        callArea.getDocument().addDocumentListener(onChange(this::callEdited));
+        callExample.setToolTipText("Fill the box with a mapping for a typical payments API, to change into yours");
+        callExample.addActionListener(e -> {
+            if (!callArea.getText().trim().isEmpty() && JOptionPane.showConfirmDialog(this, "Replace the call mapping with the example?",
+                    "Call mapping", JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION) return;
+            callArea.setText(CALL_EXAMPLE); callArea.setCaretPosition(0);
+        });
+        tryCall.setToolTipText("Send one call to the endpoint now, exactly as a host would, and see the request, the answer and the route");
+        tryCall.addActionListener(e -> tryCallDialog());
+        return p;
+    }
+
+    static final String CALL_EXAMPLE = "{\n"
+        + "  \"method\": \"POST\",\n"
+        + "  \"headers\": {\"Authorization\": \"Bearer ${env:PAYMENT_KEY}\"},\n"
+        + "  \"body\": {\"amount\": \"${data.amount}\", \"currency\": \"${data.currency}\"},\n"
+        + "  \"route\": {\"field\": \"status\", \"values\": {\"succeeded\": \"paid\"}, \"otherwise\": \"declined\"},\n"
+        + "  \"statusRoutes\": {\"402\": \"declined\"}\n"
+        + "}";
+
+    /** The mapping as typed is kept on the row only while it is a valid mapping, so a half-typed one is never saved. */
+    private void callEdited() {
+        if (endpointSync) return;
+        Capability cap = selectedCapability();
+        if (cap == null || !ServiceRegistry.REST.equals(cap.adapter)) return;
+        String text = callArea.getText().trim();
+        // Replacing the text empties the box for a moment, so an invalid text falls back to the last valid mapping, not to none.
+        String next = callProblem(text) == null ? text : lastValidCall;
+        if (callProblem(text) == null && !text.isEmpty()) lastValidCall = text;
+        if (!sameJson(cap.call, next) || cap.call.isEmpty() != next.isEmpty()) { cap.call = next; rowChanged(cap); }
+        updateCallNote(cap);
+    }
+
+    /** Why the text is not a usable call mapping, or null when it is (or is empty). */
+    static String callProblem(String text) {
+        if (text == null || text.trim().isEmpty()) return null;
+        Object parsed;
+        try { parsed = new org.json.simple.parser.JSONParser().parse(text); }
+        catch (Exception | Error e) { return "Not valid JSON yet"; }
+        try { org.btsn.invocation.CallMapping.parse(parsed); return null; }
+        catch (IllegalArgumentException e) { return e.getMessage(); }
+    }
+
+    private static boolean sameJson(String a, String b) {
+        String x = a == null ? "" : a.trim(), y = b == null ? "" : b.trim();
+        if (x.equals(y)) return true;
+        try { return new org.json.simple.parser.JSONParser().parse(x).equals(new org.json.simple.parser.JSONParser().parse(y)); }
+        catch (Exception | Error e) { return false; }
+    }
+
+    /** A saved mapping, re-indented for the box: the deployment file indents it under its placement. */
+    private static String prettyCall(String call) {
+        if (call == null || call.trim().isEmpty()) return "";
+        StringBuilder out = new StringBuilder();
+        for (String line : call.trim().split("\\r?\\n")) {
+            String stripped = line.startsWith("      ") ? line.substring(6) : line.trim().equals("}") ? "}" : line;
+            out.append(stripped).append('\n');
+        }
+        return out.toString().trim();
+    }
+
+    private void updateCallNote(Capability cap) {
+        boolean rest = cap != null && ServiceRegistry.REST.equals(cap.adapter);
+        String problem = rest ? callProblem(callArea.getText()) : null;
+        String note;
+        if (!rest) note = "For a rest placement.";
+        else if (problem != null) note = problem + " (the mapping is saved once it is valid)";
+        else if (callArea.getText().trim().isEmpty()) note = "Empty: the host sends RPSO's own request and expects RPSO's own answer.";
+        else note = "The host calls the API as this says. Try a call to see the request, the answer and the route.";
+        callNote.setText(note);
+        callNote.setForeground(problem != null ? Color.RED : Color.DARK_GRAY);
+    }
+
+    /** One sample token for a place: the token format of its service when there is one, otherwise empty data. */
+    @SuppressWarnings("unchecked")
+    static String sampleToken(File commonDirectory, String service) {
+        org.json.simple.JSONObject data = new org.json.simple.JSONObject();
+        try {
+            if (commonDirectory == null) throw new IllegalStateException("no common directory");
+            File format = new File(commonDirectory.getParentFile(), "btsn.common.eventgenerators/TokenFormats/" + service + ".json");
+            if (format.isFile()) {
+                String text = new String(java.nio.file.Files.readAllBytes(format.toPath()), java.nio.charset.StandardCharsets.UTF_8)
+                    .replace("${n}", "1").replace("${sequenceId}", "1000000");
+                org.json.simple.JSONObject json = (org.json.simple.JSONObject) new org.json.simple.parser.JSONParser().parse(text);
+                Object structure = json.get("tokenStructure");
+                if (structure instanceof org.json.simple.JSONObject && ((org.json.simple.JSONObject) structure).get("data") instanceof org.json.simple.JSONObject)
+                    data.putAll((org.json.simple.JSONObject) ((org.json.simple.JSONObject) structure).get("data"));
+                Object variants = json.get("dataVariants"), mix = json.get("caseMix");
+                if (variants instanceof org.json.simple.JSONObject && mix instanceof org.json.simple.JSONArray && !((org.json.simple.JSONArray) mix).isEmpty()) {
+                    Object first = ((org.json.simple.JSONObject) variants).get(((org.json.simple.JSONArray) mix).get(0));
+                    if (first instanceof org.json.simple.JSONObject) data.putAll((org.json.simple.JSONObject) first);
+                }
+            }
+        } catch (Exception | Error ignored) { }
+        org.json.simple.JSONObject token = new org.json.simple.JSONObject();
+        token.put("tokenId", "1000000"); token.put("version", "v001"); token.put("data", data);
+        return token.toJSONString();
+    }
+
+    /** Makes one call for the selected row as a host would; the report is what the Try a call window shows. */
+    static org.btsn.invocation.RestAdapter.Trial trial(String endpoint, int timeoutMs, String call, String service, String operation,
+                                                         List<String> inputNames, String firstInput, String returnAttribute) {
+        Object mapping = null;
+        try { if (call != null && !call.trim().isEmpty()) mapping = new org.json.simple.parser.JSONParser().parse(call); }
+        catch (Exception | Error e) {
+            org.btsn.invocation.RestAdapter.Trial failed = new org.btsn.invocation.RestAdapter.Trial();
+            failed.failure = "The call mapping is not valid JSON"; return failed;
+        }
+        List<String> values = new ArrayList<>();
+        for (int i = 0; i < inputNames.size(); i++) values.add(i == 0 ? firstInput : "{}");
+        return org.btsn.invocation.RestAdapter.trial(endpoint, timeoutMs, mapping, service, operation, "1000000", "v001", inputNames, values, returnAttribute);
+    }
+
+    static String trialReport(org.btsn.invocation.RestAdapter.Trial t) {
+        StringBuilder out = new StringBuilder();
+        out.append("REQUEST SENT\n").append(t.request.isEmpty() ? "(none: the request could not be built)" : t.request).append("\n\n");
+        if (t.failure != null) out.append("THE CALL FAILED\n").append(t.failure).append("\n\nIn a run, this token would stop at the place with that reason.");
+        else out.append("RESULT PUBLISHED\n").append(t.published).append("\n\nROUTE\n")
+                .append(t.route == null ? "(none named: fine for a place whose T_out is not a gateway)" : t.route);
+        return out.toString();
+    }
+
+    private void tryCallDialog() {
+        Capability cap = selectedCapability();
+        if (cap == null || !ServiceRegistry.REST.equals(cap.adapter)) return;
+        String problem = callProblem(callArea.getText());
+        if (problem != null) { JOptionPane.showMessageDialog(this, "Fix the call mapping first: " + problem, "Try a call", JOptionPane.WARNING_MESSAGE); return; }
+        if (!ServiceRegistry.validRestEndpoint(cap.endpoint)) { JOptionPane.showMessageDialog(this, "Give the service endpoint first.", "Try a call", JOptionPane.WARNING_MESSAGE); return; }
+        List<String> names = new ArrayList<>(); for (Argument argument : cap.arguments) names.add(argument.name);
+        JTextArea input = new JTextArea(sampleToken(serviceRegistry.common() != null ? serviceRegistry.common() : ServiceRegistry.findCommon(currentFile), cap.service), 5, 70);
+        input.setLineWrap(true);
+        JTextArea report = new JTextArea(18, 70);
+        report.setEditable(false); report.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        report.setText("Press Send to make one call to\n" + cap.endpoint + "\nexactly as a host would. This is a real call: use a test key or a test copy of the service.");
+        JButton send = new JButton("Send");
+        JPanel top = new JPanel(new BorderLayout(4, 4));
+        top.add(new JLabel("The token that arrives" + (names.isEmpty() ? "" : " (input \"" + names.get(0) + "\")") + ":"), BorderLayout.NORTH);
+        top.add(new JScrollPane(input), BorderLayout.CENTER);
+        top.add(send, BorderLayout.EAST);
+        JPanel content = new JPanel(new BorderLayout(6, 6));
+        content.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        content.add(top, BorderLayout.NORTH); content.add(new JScrollPane(report), BorderLayout.CENTER);
+        JDialog dialog = new JDialog(this, "Try a call: " + cap.service + "." + cap.operation, true);
+        final String endpoint = cap.endpoint, call = callArea.getText().trim(), service = cap.service, operation = cap.operation, returns = cap.returnAttribute;
+        final int wait = cap.timeoutMs;
+        send.addActionListener(e -> {
+            send.setEnabled(false); report.setText("Calling...");
+            final String token = input.getText();
+            new SwingWorker<String, Void>() {
+                @Override protected String doInBackground() { return trialReport(trial(endpoint, wait, call, service, operation, names, token, returns)); }
+                @Override protected void done() {
+                    try { report.setText(get()); } catch (Exception ex) { report.setText("The call could not be made: " + ex); }
+                    report.setCaretPosition(0); send.setEnabled(true);
+                }
+            }.execute();
+        });
+        dialog.setContentPane(content); dialog.pack(); dialog.setLocationRelativeTo(this); dialog.setVisible(true);
+    }
+
     /** A row changed from the endpoint box: redraw it and mark the deployment changed, without refilling the box. */
     private void rowChanged(Capability cap) {
         int row = rows().indexOf(cap);
@@ -907,7 +1092,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
             List<String> names = new ArrayList<>(); for (Argument argument : cap.arguments) names.add(argument.name);
             List<String> errors = serviceRegistry.validateEndpoint(cap.service, cap.operation, cap.returnAttribute, names, cap.adapter, cap.endpoint);
             if (!errors.isEmpty()) { note = String.join("; ", errors); problem = true; }
-            else note = "The host POSTs each call here and waits up to " + (cap.timeoutMs > 0 ? cap.timeoutMs + " ms" : "10 seconds (leave the wait blank)")
+            else note = (cap.call.isEmpty() ? "The host POSTs each call here" : "The host calls this address as the call mapping says") + " and waits up to " + (cap.timeoutMs > 0 ? cap.timeoutMs + " ms" : "10 seconds (leave the wait blank)")
                 + "; a later answer fails the call.";
         }
         endpointNote.setText(note);
@@ -1043,7 +1228,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
             if (!c.arguments.isEmpty()) b.append("\n      ");
             b.append("]");
             // A REST call mapping (an API not written for RPSO) is kept exactly as it was written.
-            if (ServiceRegistry.REST.equals(c.adapter) && !c.call.isEmpty()) b.append(",\n      \"call\": ").append(c.call);
+            if (ServiceRegistry.REST.equals(c.adapter) && !c.call.isEmpty()) b.append(",\n      \"call\": ").append(c.call.trim().replace("\n", "\n      "));
             b.append("\n    }");
             if (i < capabilities.size() - 1) b.append(",");
             b.append("\n");
@@ -1080,6 +1265,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
             Capability c = new Capability();
             c.call = objectValue(block, "call");
             if (!c.call.isEmpty()) block = block.replace(c.call, "{}");   // its keys are not the placement's
+            c.call = prettyCall(c.call);
             c.node = stringValue(block, "node");
             c.service = stringValue(block, "service");
             c.instance = stringValue(block, "instance");

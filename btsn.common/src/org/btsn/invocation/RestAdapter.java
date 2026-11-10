@@ -125,4 +125,50 @@ public final class RestAdapter {
             throw new IllegalStateException(where + " must return {\"" + returnAttribute + "\": {...}}, but returned: " + response.body());
         return ((JSONObject)result).toJSONString();
     }
+
+    /** One call made for its author to look at: what was sent, and what came of it. */
+    public static final class Trial {
+        /** The request as sent: method and address, headers (keys from the environment hidden), then the body. */
+        public String request = "";
+        /** The result the host would publish, or null when the call failed. */
+        public String published;
+        /** The route T_out would take, or null when the result names none. */
+        public String route;
+        /** Why the call failed, or null when it did not. */
+        public String failure;
+    }
+
+    /** Makes one call as the host would and reports it, for the editor's Try a call. Never throws. */
+    public static Trial trial(String endpoint, int timeoutMs, Object call, String service, String operation,
+                              String sequenceId, String version, List<String> names, List<String> values,
+                              String returnAttribute) {
+        Trial trial = new Trial();
+        try {
+            CallMapping mapping = CallMapping.parse(call);
+            String rpso = request(service, operation, sequenceId, version, names, values);
+            StringBuilder sent = new StringBuilder();
+            if (mapping == null) {
+                sent.append("POST ").append(endpoint).append("\nContent-Type: application/json\n\n").append(rpso);
+            } else {
+                CallMapping.Values given = new CallMapping.Values(names, values, sequenceId, version);
+                String body = mapping.body(given, rpso);
+                sent.append(mapping.method).append(' ').append(mapping.url(endpoint, given)).append('\n');
+                if (body != null) sent.append("Content-Type: application/json\n");
+                java.util.Map<String, String> filled = mapping.headers(given);
+                for (java.util.Map.Entry<String, String> h : mapping.headers.entrySet())
+                    sent.append(h.getKey()).append(": ").append(h.getValue().contains("${env:")
+                            ? h.getValue().replaceAll("\\$\\{env:[^}]*\\}", "(hidden)") : filled.get(h.getKey())).append('\n');
+                if (body != null) sent.append('\n').append(body);
+            }
+            trial.request = sent.toString();
+            trial.published = invoke(endpoint, timeoutMs, mapping, service, operation, sequenceId, version, names, values, returnAttribute);
+            Object result = ((JSONObject) new JSONParser().parse(trial.published)).get(returnAttribute);
+            Object decision = result instanceof JSONObject ? ((JSONObject) result).get("routing_decision") : null;
+            Object path = decision instanceof JSONObject ? ((JSONObject) decision).get("routing_path") : null;
+            trial.route = path == null ? null : path.toString();
+        } catch (Exception e) {
+            trial.failure = e.getMessage() == null ? e.toString() : e.getMessage();
+        }
+        return trial;
+    }
 }

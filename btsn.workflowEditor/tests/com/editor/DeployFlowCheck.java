@@ -295,6 +295,55 @@ public final class DeployFlowCheck {
                 Object savedCall = ((org.json.simple.JSONObject)((org.json.simple.JSONArray)((org.json.simple.JSONObject)
                     new org.json.simple.parser.JSONParser().parse(saved)).get("capabilities")).get(0)).get("call");
                 check(savedCall instanceof org.json.simple.JSONObject && ((org.json.simple.JSONObject)savedCall).size() == 5, "The saved call mapping is not the one loaded: " + savedCall);
+                // The Call mapping box shows the placement's mapping. A half-typed or impossible mapping is reported and
+                // never saved; a valid change is; emptying the box removes the mapping. The example is itself valid.
+                JTextArea callBox = (JTextArea)field(panel, "callArea"); JLabel callNote = (JLabel)field(panel, "callNote");
+                check(callBox.isEnabled() && callBox.getText().contains("\"statusRoutes\"") && callBox.getText().startsWith("{\n  \"method\""), "Call mapping box shows: " + callBox.getText());
+                check(!java.awt.Color.RED.equals(callNote.getForeground()), "A valid mapping is reported as a problem: " + callNote.getText());
+                callBox.setText("{\"method\": \"POST\", ");
+                check(java.awt.Color.RED.equals(callNote.getForeground()) && ((String)paymentJson.invoke(panel)).contains("\"statusRoutes\": {\"402\": \"declined\"}"),
+                    "A half-typed mapping should be reported and the saved one kept: " + callNote.getText());
+                callBox.setText("{\"method\": \"GET\", \"body\": \"data\"}");
+                check(java.awt.Color.RED.equals(callNote.getForeground()) && callNote.getText().contains("sends no body"), "An impossible mapping should say why: " + callNote.getText());
+                callBox.setText("{\"method\": \"PUT\", \"route\": {\"field\": \"state\", \"otherwise\": \"paid\"}}");
+                saved = (String)paymentJson.invoke(panel);
+                check(!java.awt.Color.RED.equals(callNote.getForeground()) && saved.contains("\"method\": \"PUT\"") && !saved.contains("statusRoutes"), "A valid change to the mapping is not saved: " + saved);
+                callBox.setText("");
+                check(!((String)paymentJson.invoke(panel)).contains("\"call\""), "Emptying the box should remove the mapping");
+                check(InfrastructureDefinitionFrame.callProblem(InfrastructureDefinitionFrame.CALL_EXAMPLE) == null, "The example mapping is not valid");
+                // Try a call starts from the service's token format, and makes the call exactly as a host would.
+                String sample = InfrastructureDefinitionFrame.sampleToken(common, "PaymentService");
+                check(sample.contains("\"orderId\":\"ORD-1\"") && sample.contains("\"amount\":84.5"), "Sample token: " + sample);
+                com.sun.net.httpserver.HttpServer api = com.sun.net.httpserver.HttpServer.create(new java.net.InetSocketAddress("127.0.0.1", 0), 0);
+                api.createContext("/v1/payments", exchange -> {
+                    String sent = new String(exchange.getRequestBody().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+                    boolean keyed = "Bearer secret-1".equals(exchange.getRequestHeaders().getFirst("Authorization"));
+                    int status = !keyed ? 401 : sent.contains("\"amount\":84.5") ? 201 : 402;
+                    byte[] bytes = ("{\"id\":\"pay_1\",\"status\":\"" + (status == 201 ? "succeeded" : "declined") + "\"}").getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                    exchange.sendResponseHeaders(status, bytes.length); exchange.getResponseBody().write(bytes); exchange.close();
+                });
+                api.start();
+                try {
+                    String address = "http://127.0.0.1:" + api.getAddress().getPort() + "/v1/payments";
+                    String mapping = "{\"headers\": {\"Authorization\": \"Bearer secret-1\"}, \"body\": {\"amount\": \"${data.amount}\"},"
+                        + " \"route\": {\"field\": \"status\", \"values\": {\"succeeded\": \"paid\"}}, \"statusRoutes\": {\"402\": \"declined\"}}";
+                    org.btsn.invocation.RestAdapter.Trial paid = InfrastructureDefinitionFrame.trial(address, 3000, mapping, "PaymentService", "authorise",
+                        java.util.Arrays.asList("token"), sample, "paymentResult");
+                    String report = InfrastructureDefinitionFrame.trialReport(paid);
+                    check("paid".equals(paid.route) && paid.failure == null && report.contains("POST " + address) && report.contains("{\"amount\":84.5}")
+                        && report.contains("\"http_status\":201") && report.contains("ROUTE\npaid"), "Try a call report: " + report);
+                    org.btsn.invocation.RestAdapter.Trial declined = InfrastructureDefinitionFrame.trial(address, 3000, mapping, "PaymentService", "authorise",
+                        java.util.Arrays.asList("token"), "{\"data\":{\"amount\":5}}", "paymentResult");
+                    check("declined".equals(declined.route), "A 402 should route declined: " + InfrastructureDefinitionFrame.trialReport(declined));
+                    // A key from the environment is used but never shown; a refused call says why.
+                    String hidden = InfrastructureDefinitionFrame.trialReport(InfrastructureDefinitionFrame.trial(address, 3000,
+                        mapping.replace("Bearer secret-1", "Bearer ${env:PATH}"), "PaymentService", "authorise", java.util.Arrays.asList("token"), sample, "paymentResult"));
+                    check(hidden.contains("Authorization: Bearer (hidden)") && !hidden.contains(System.getenv("PATH")) && hidden.contains("THE CALL FAILED") && hidden.contains("answered HTTP 401"),
+                        "A key from the environment should be hidden and the refusal reported: " + hidden);
+                    String unset = InfrastructureDefinitionFrame.trialReport(InfrastructureDefinitionFrame.trial(address, 3000,
+                        mapping.replace("Bearer secret-1", "Bearer ${env:RPSO_KEY_THAT_IS_NOT_SET}"), "PaymentService", "authorise", java.util.Arrays.asList("token"), sample, "paymentResult"));
+                    check(unset.contains("RPSO_KEY_THAT_IS_NOT_SET is not set"), "An unset key should be named: " + unset);
+                } finally { api.stop(0); }
                 panel.dispose(); panel = null;
 
                 File triage = new File(common, "ProcessDefinitionFolder/healthcare/Workflow/Triage_Workflow.json");
