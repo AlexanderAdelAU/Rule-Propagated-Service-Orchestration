@@ -8,7 +8,7 @@ With **RPSO**, you can leave the Payment Service where it is and bind its existi
 
 ## Start with one service
 
-A minimal experiment needs an event generator, a Place bound to the remote service, its incoming and outgoing transitions, and an outcome. **You implement none of these: they are part of RPSO, drawn in the editor and run by its hosts.** The only thing you supply is the service's endpoint, which receives each call and answers it as JSON ([what the host sends and expects](ServiceTutorial.md#8-call-it-over-rest)).
+A minimal experiment needs an event generator, a Place bound to the remote service, its incoming and outgoing transitions, and an outcome. **You implement none of these: they are part of RPSO, drawn in the editor and run by its hosts.** The only thing you supply is the service's endpoint: a service written for RPSO's call format, or an existing API behind a small adapter that translates to it ([what the host sends and expects](ServiceTutorial.md#8-call-it-over-rest)).
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="images/rpso-first-use-dark.svg">
