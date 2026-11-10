@@ -1,0 +1,69 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Card payments (mock)",
+    "version": "1.0.0",
+    "description": "The mock card-payments API of examples/rest/card-payments.js, described as a payment provider would publish it. It knows nothing about RPSO. The editor's Deploy panel can import it to fill in a place's endpoint and call mapping."
+  },
+  "servers": [
+    {"url": "https://rule-propagated-service-orchestrati.vercel.app/api"}
+  ],
+  "security": [{"apiKey": []}],
+  "paths": {
+    "/v1/payments": {
+      "post": {
+        "operationId": "createPayment",
+        "summary": "Take a card payment",
+        "parameters": [
+          {"name": "Idempotency-Key", "in": "header", "required": false, "schema": {"type": "string"},
+           "description": "A value unique to this payment, so a repeated call is not charged twice."}
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {"application/json": {"schema": {"$ref": "#/components/schemas/PaymentRequest"}}}
+        },
+        "responses": {
+          "201": {"description": "The payment succeeded", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Payment"}}}},
+          "402": {"description": "The card was declined", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Payment"}}}},
+          "400": {"description": "A field is missing or invalid", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}},
+          "401": {"description": "No API key, or the wrong one", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}},
+          "503": {"description": "Payments are temporarily unavailable", "content": {"application/json": {"schema": {"$ref": "#/components/schemas/Error"}}}}
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKey": {"type": "http", "scheme": "bearer", "description": "The demo key is demo_key_public."}
+    },
+    "schemas": {
+      "PaymentRequest": {
+        "type": "object",
+        "required": ["amount", "currency", "card"],
+        "properties": {
+          "amount": {"type": "number", "description": "The amount to charge, greater than zero"},
+          "currency": {"type": "string", "description": "A 3-letter currency code, such as AUD"},
+          "card": {"type": "string", "description": "The card to charge"},
+          "reference": {"type": "string", "description": "Your own reference for the payment, such as an order number"}
+        }
+      },
+      "Payment": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "object": {"type": "string"},
+          "status": {"type": "string", "enum": ["succeeded", "declined"]},
+          "amount": {"type": "number"},
+          "currency": {"type": "string"},
+          "reference": {"type": "string", "nullable": true},
+          "idempotency_key": {"type": "string", "nullable": true},
+          "decline_code": {"type": "string"}
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {"error": {"type": "object", "properties": {"type": {"type": "string"}, "message": {"type": "string"}}}}
+      }
+    }
+  }
+}
