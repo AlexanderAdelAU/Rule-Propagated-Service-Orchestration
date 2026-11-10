@@ -323,7 +323,8 @@ public final class BusinessCapabilityResolverTest {
             String home = System.getenv("HOME") == null ? "" : ",\"X-Home\":\"${env:HOME}\"";
             String payments = "\"invocationAdapter\":\"rest\",\"endpoint\":\"" + base + "/v1/payments\",\"call\":{"
                     + "\"headers\":{\"Authorization\":\"Bearer demo_key_public\",\"Idempotency-Key\":\"${sequenceId}\"" + home + "},"
-                    + "\"body\":{\"amount\":\"${data.amount}\",\"currency\":\"${data.currency}\",\"reference\":\"order ${data.orderId}\"},"
+                    + "\"body\":{\"amount\":\"${data.amount}\",\"currency\":\"${data.currency}\",\"reference\":\"order ${data.orderId}\","
+                    + "\"note\":\"${data.note?}\",\"card\":\"${data.card?}\"},"
                     + "\"route\":{\"field\":\"status\",\"values\":{\"succeeded\":\"paid\"}},"
                     + "\"statusRoutes\":{\"402\":\"declined\"}},";
             BusinessCapabilityResolver resolver = new BusinessCapabilityResolver(
@@ -338,6 +339,8 @@ public final class BusinessCapabilityResolverTest {
             JSONObject sent = parse(last.get("body"));
             equal(84.5, sent.get("amount"));                       // a whole ${...} keeps its JSON type
             equal("order ORD-1", sent.get("reference"));           // inside text, it is filled in as text
+            equal(false, sent.containsKey("note"));                // an optional value the token lacks is left out
+            equal("visa-4242", sent.get("card"));                  // one it has is sent
             equal("pay_1", paid.get("id"));
             equal(201L, paid.get("http_status"));
             equal("paid", ((JSONObject) paid.get("routing_decision")).get("routing_path"));

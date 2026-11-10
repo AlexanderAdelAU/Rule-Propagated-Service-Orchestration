@@ -68,6 +68,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
     private String lastValidCall = "";
     private final JButton callExample = new JButton("Start from an example");
     private final JButton tryCall = new JButton("Try a call...");
+    private final JButton importOpenApi = new JButton("Import from OpenAPI...");
     /** True while the endpoint box is filled from the selected row or writes to it, so neither echoes the other. */
     private boolean endpointSync;
     private File currentFile;
@@ -880,7 +881,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
             String call = rest ? cap.call : "";
             lastValidCall = call;
             if (!sameJson(callArea.getText(), call)) { callArea.setText(prettyCall(call)); callArea.setCaretPosition(0); }
-            callArea.setEnabled(rest); callExample.setEnabled(rest); tryCall.setEnabled(rest);
+            callArea.setEnabled(rest); callExample.setEnabled(rest); tryCall.setEnabled(rest); importOpenApi.setEnabled(rest);
         } finally { endpointSync = false; }
         updateEndpointNote(cap);
         updateCallNote(cap);
@@ -913,7 +914,9 @@ public class InfrastructureDefinitionFrame extends JFrame {
         p.add(new JScrollPane(callArea), BorderLayout.CENTER);
         JPanel south = new JPanel(new BorderLayout(6, 0));
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
-        buttons.add(callExample); buttons.add(tryCall);
+        buttons.add(importOpenApi); buttons.add(callExample); buttons.add(tryCall);
+        importOpenApi.setToolTipText("Read the API's published definition (OpenAPI or Swagger, as JSON) and fill in the endpoint and call mapping for one of its operations");
+        importOpenApi.addActionListener(e -> importOpenApiDialog());
         south.add(callNote, BorderLayout.CENTER); south.add(buttons, BorderLayout.EAST);
         p.add(south, BorderLayout.SOUTH);
         callArea.getDocument().addDocumentListener(onChange(this::callEdited));
@@ -1036,6 +1039,40 @@ public class InfrastructureDefinitionFrame extends JFrame {
         else out.append("RESULT PUBLISHED\n").append(t.published).append("\n\nROUTE\n")
                 .append(t.route == null ? "(none named: fine for a place whose T_out is not a gateway)" : t.route);
         return out.toString();
+    }
+
+    /** Choose an OpenAPI definition and one of its operations; fill in the selected row's endpoint and call mapping. */
+    private void importOpenApiDialog() {
+        Capability cap = selectedCapability();
+        if (cap == null || !ServiceRegistry.REST.equals(cap.adapter)) return;
+        JFileChooser chooser = new JFileChooser(preferences.get("openApiDir", System.getProperty("user.dir")));
+        chooser.setDialogTitle("The API's OpenAPI definition (JSON)");
+        chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("OpenAPI or Swagger definition (*.json)", "json"));
+        if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return;
+        preferences.put("openApiDir", chooser.getSelectedFile().getParent());
+        OpenApiImport definition; List<OpenApiImport.Operation> operations;
+        try {
+            definition = new OpenApiImport(new String(Files.readAllBytes(chooser.getSelectedFile().toPath()), StandardCharsets.UTF_8));
+            operations = definition.operations();
+            if (operations.isEmpty()) throw new IllegalArgumentException("The definition lists no operations.");
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Import from OpenAPI", JOptionPane.ERROR_MESSAGE); return;
+        }
+        JList<OpenApiImport.Operation> list = new JList<>(operations.toArray(new OpenApiImport.Operation[0]));
+        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); list.setSelectedIndex(0); list.setVisibleRowCount(Math.min(14, operations.size()));
+        JPanel choice = new JPanel(new BorderLayout(4, 6));
+        choice.add(new JLabel("<html>Which operation of <b>" + (definition.title().isEmpty() ? chooser.getSelectedFile().getName() : definition.title())
+            + "</b> does " + (placeLabel(cap).isEmpty() ? cap.service : placeLabel(cap)) + " call?</html>"), BorderLayout.NORTH);
+        choice.add(new JScrollPane(list), BorderLayout.CENTER);
+        if (JOptionPane.showConfirmDialog(this, choice, "Import from OpenAPI", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) != JOptionPane.OK_OPTION
+                || list.getSelectedValue() == null) return;
+        OpenApiImport.Mapping mapping = definition.mapping(list.getSelectedValue());
+        if (!mapping.endpoint.isEmpty()) endpointField.setText(mapping.endpoint);
+        callArea.setText(mapping.call); callArea.setCaretPosition(0);
+        JTextArea notes = new JTextArea("The endpoint and call mapping are filled in for " + list.getSelectedValue().method + " " + list.getSelectedValue().path
+            + ".\n\nTo check:\n- " + String.join("\n- ", mapping.notes) + "\n\nThen use Try a call.", 12, 70);
+        notes.setEditable(false); notes.setLineWrap(true); notes.setWrapStyleWord(true); notes.setOpaque(false);
+        JOptionPane.showMessageDialog(this, new JScrollPane(notes), "Import from OpenAPI", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void tryCallDialog() {

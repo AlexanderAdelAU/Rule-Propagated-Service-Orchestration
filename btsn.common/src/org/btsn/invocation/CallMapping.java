@@ -39,6 +39,8 @@ import org.json.simple.parser.JSONParser;
  * <li>${sequenceId} and ${version}: the call's own;</li>
  * <li>${env:NAME}: the environment variable NAME on the host, for keys that must not be written down.</li>
  * </ul>
+ * A value the call does not have fails the call, saying which. Ending the name with a question mark, ${data.note?},
+ * marks it optional: its field is left out of the body, and in an address or header it is empty.
  * The published result is the answer (or its "result" part) with "http_status" and, when a route is set,
  * "routing_decision": {"routing_path": ...} added, under the catalogue's return attribute, so T_out and the
  * analysis see it exactly as they see any other service's result.
@@ -149,7 +151,12 @@ public final class CallMapping {
             if (first instanceof JSONObject && ((JSONObject) first).get("data") != null) return ((JSONObject) first).get("data");
             return first;
         }
+        /** The value named; OMIT for a value marked optional (a trailing ?) that this call does not have. */
         Object lookup(String expression) {
+            if (expression.endsWith("?")) {
+                try { return lookup(expression.substring(0, expression.length() - 1).trim()); }
+                catch (IllegalStateException missing) { return OMIT; }
+            }
             if (expression.startsWith("env:")) {
                 String name = expression.substring(4).trim();
                 String value = System.getenv(name);
@@ -227,18 +234,23 @@ public final class CallMapping {
     // --- helpers -------------------------------------------------------------------------------------------------
 
     private static final Object MISSING = new Object();
+    /** An optional value this call does not have: its field is left out of the body; in text it is empty. */
+    private static final Object OMIT = new Object();
 
     /** A copy of a template with each ${...} filled in: a whole-string value keeps its JSON type. */
     @SuppressWarnings("unchecked")
     private static Object fill(Object template, Values values) {
         if (template instanceof JSONObject) {
             JSONObject out = new JSONObject();
-            for (Object key : ((JSONObject) template).keySet()) out.put(key, fill(((JSONObject) template).get(key), values));
+            for (Object key : ((JSONObject) template).keySet()) {
+                Object filled = fill(((JSONObject) template).get(key), values);
+                if (filled != OMIT) out.put(key, filled);
+            }
             return out;
         }
         if (template instanceof JSONArray) {
             JSONArray out = new JSONArray();
-            for (Object item : (JSONArray) template) out.add(fill(item, values));
+            for (Object item : (JSONArray) template) { Object filled = fill(item, values); if (filled != OMIT) out.add(filled); }
             return out;
         }
         if (!(template instanceof String)) return template;
@@ -280,7 +292,7 @@ public final class CallMapping {
     }
 
     private static String text(Object value) {
-        return value == null ? "" : value instanceof JSONObject || value instanceof JSONArray ? jsonText(value) : value.toString();
+        return value == null || value == OMIT ? "" : value instanceof JSONObject || value instanceof JSONArray ? jsonText(value) : value.toString();
     }
 
     private static String jsonText(Object value) {

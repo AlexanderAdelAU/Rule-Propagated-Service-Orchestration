@@ -626,6 +626,8 @@ The placement is an ordinary `rest` placement with a `call` added:
 - `${env:PAYMENT_KEY}`: an environment variable on the machine running the host. **Use this for a real API key**, so the key is never written in a file; the demo key above is public on purpose. A call whose variable is not set fails, saying which.
 
 A value that is the whole of a text, such as `"${data.amount}"`, keeps its type, so the API receives the number `84.5`.
+A value the call does not have fails the call, saying which. End its name with a question mark, `"${data.reference?}"`,
+to mark it optional: its field is then left out of the body.
 In an address it is encoded: `https://api.example.com/orders/${data.orderId}`.
 
 **What is published.** The answer, with `http_status` and the route added, under the catalogue's return attribute, so
@@ -649,6 +651,33 @@ To run it, open `Plain_Payment_Test.json` in the editor and click **Run on hosts
 holds the mapping above; leave it empty for a service that answers in RPSO's own format. The note under the box says
 what is wrong with a mapping as you type, and a mapping is saved only once it is valid. **Start from an example**
 fills the box with a mapping for a typical payments API, to change into yours.
+
+**Import from OpenAPI** fills in the endpoint and the mapping from the API's published definition (OpenAPI 3 or
+Swagger 2, as a JSON file; a YAML definition must be converted to JSON first). Choose the file, then the operation the
+place calls. The mock API's definition is [`examples/rest/card-payments.openapi.json`](examples/rest/card-payments.openapi.json);
+importing its one operation gives:
+
+```json
+{
+  "method": "POST",
+  "headers": {"Authorization": "Bearer ${env:API_KEY}", "Idempotency-Key": "${sequenceId}"},
+  "body": {"amount": "${data.amount}", "currency": "${data.currency}", "card": "${data.card}", "reference": "${data.reference?}"},
+  "route": {
+    "field": "status",
+    "values": {"succeeded": "succeeded", "declined": "declined"}
+  },
+  "statusRoutes": {"402": "declined"}
+}
+```
+
+The definition says how the API is called, so the address, method, key and request fields are filled in, with fields
+the API does not require marked optional. It cannot say what an answer means to your process, so the route is a
+suggestion, and the import lists what is left to check:
+
+- which fields the token's data must carry (here `amount`, `currency`, `card`): name them so in the token format, or change the names in the mapping;
+- the environment variable that holds the key (`API_KEY`);
+- the route: change each path name to the guard on the place's arc (here `succeeded` to `paid`);
+- which HTTP statuses were made routes, and which will fail the call.
 
 **Try a call** sends one call to the endpoint now, exactly as a host would, before you run anything. It starts from a
 sample token (the service's [token format](#7-give-it-data) when it has one), which you can change, and shows the

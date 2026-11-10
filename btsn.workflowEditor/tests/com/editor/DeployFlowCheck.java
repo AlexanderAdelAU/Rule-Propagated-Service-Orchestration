@@ -311,6 +311,42 @@ public final class DeployFlowCheck {
                 callBox.setText("");
                 check(!((String)paymentJson.invoke(panel)).contains("\"call\""), "Emptying the box should remove the mapping");
                 check(InfrastructureDefinitionFrame.callProblem(InfrastructureDefinitionFrame.CALL_EXAMPLE) == null, "The example mapping is not valid");
+                // Import from OpenAPI reads the API's published definition: the address, method, key and request fields are
+                // filled in, the route is suggested from the answer's outcome field, and the designer is told what to check.
+                OpenApiImport api3 = new OpenApiImport(read(new File(common.getParentFile(), "examples/rest/card-payments.openapi.json").toPath()));
+                check(api3.operations().size() == 1 && api3.operations().get(0).toString().equals("POST /v1/payments  -  Take a card payment"), "OpenAPI operations: " + api3.operations());
+                OpenApiImport.Mapping imported = api3.mapping(api3.operations().get(0));
+                check("https://rule-propagated-service-orchestrati.vercel.app/api/v1/payments".equals(imported.endpoint), "Imported endpoint: " + imported.endpoint);
+                check(InfrastructureDefinitionFrame.callProblem(imported.call) == null, "The imported mapping is not valid: " + imported.call);
+                JSONObject importedCall = (JSONObject) new JSONParser().parse(imported.call);
+                check("POST".equals(importedCall.get("method"))
+                    && "Bearer ${env:API_KEY}".equals(((JSONObject)importedCall.get("headers")).get("Authorization"))
+                    && "${sequenceId}".equals(((JSONObject)importedCall.get("headers")).get("Idempotency-Key"))
+                    && "${data.amount}".equals(((JSONObject)importedCall.get("body")).get("amount")) && ((JSONObject)importedCall.get("body")).size() == 4
+                    && "status".equals(((JSONObject)importedCall.get("route")).get("field"))
+                    && "declined".equals(((JSONObject)importedCall.get("statusRoutes")).get("402")) && ((JSONObject)importedCall.get("statusRoutes")).size() == 1,
+                    "Imported mapping: " + imported.call);
+                check(imported.dataFields.equals(Arrays.asList("amount", "currency", "card")) && imported.optionalFields.equals(Arrays.asList("reference"))
+                    && "${data.reference?}".equals(((JSONObject)importedCall.get("body")).get("reference")), "Imported data fields: " + imported.dataFields + ", optional " + imported.optionalFields);
+                String importNotes = String.join(" | ", imported.notes);
+                check(importNotes.contains("must carry: amount, currency, card.") && importNotes.contains("Optional, sent only when the token's data has them: reference") && importNotes.contains("environment variable API_KEY")
+                    && importNotes.contains("Change the path names to the guards") && importNotes.contains("HTTP 400, 401, 503"), "Import notes: " + importNotes);
+                // Swagger 2, path and query values, a header key; and files that are not definitions say so.
+                OpenApiImport api2 = new OpenApiImport("{\"swagger\":\"2.0\",\"host\":\"api.example.com\",\"basePath\":\"/v2\",\"schemes\":[\"https\"],"
+                    + "\"securityDefinitions\":{\"k\":{\"type\":\"apiKey\",\"in\":\"header\",\"name\":\"X-Api-Key\"}},\"security\":[{\"k\":[]}],"
+                    + "\"paths\":{\"/orders/{orderId}\":{\"get\":{\"parameters\":[{\"name\":\"orderId\",\"in\":\"path\",\"required\":true,\"type\":\"string\"},"
+                    + "{\"name\":\"region\",\"in\":\"query\",\"required\":true,\"type\":\"string\"}],"
+                    + "\"responses\":{\"200\":{\"schema\":{\"type\":\"object\",\"properties\":{\"state\":{\"type\":\"string\"}}}}}}}}}");
+                OpenApiImport.Mapping swagger = api2.mapping(api2.operations().get(0));
+                JSONObject swaggerCall = (JSONObject) new JSONParser().parse(swagger.call);
+                check("https://api.example.com/v2/orders/${data.orderId}?region=${data.region}".equals(swagger.endpoint) && "GET".equals(swaggerCall.get("method"))
+                    && !swaggerCall.containsKey("body") && "${env:API_KEY}".equals(((JSONObject)swaggerCall.get("headers")).get("X-Api-Key"))
+                    && "done".equals(((JSONObject)swaggerCall.get("route")).get("otherwise")) && InfrastructureDefinitionFrame.callProblem(swagger.call) == null
+                    && ServiceRegistry.validRestEndpoint(swagger.endpoint), "Swagger 2 import: " + swagger.endpoint + " " + swagger.call);
+                for (String[] bad : new String[][] {{"openapi: 3.0.0", "YAML must be converted"}, {"{\"name\": \"x\"}", "not an OpenAPI definition"}}) {
+                    try { new OpenApiImport(bad[0]); check(false, "Accepted as a definition: " + bad[0]); }
+                    catch (IllegalArgumentException expected) { check(expected.getMessage().contains(bad[1]), "Refusal: " + expected.getMessage()); }
+                }
                 // Try a call starts from the service's token format, and makes the call exactly as a host would.
                 String sample = InfrastructureDefinitionFrame.sampleToken(common, "PaymentService");
                 check(sample.contains("\"orderId\":\"ORD-1\"") && sample.contains("\"amount\":84.5"), "Sample token: " + sample);
