@@ -3049,9 +3049,9 @@ public class Canvas extends JPanel {
             if ("GatewayNode".equals(element.getNodeType()) && BuildAndRunGenerator.combinedLauncher(definitionLocation) == null)
                 for (Arrow a : arrows)
                     if (a.getSource() == element && a.getTarget() != null && !GuardEditing.otherwise(a) && (a.getDecisionValue() == null || a.getDecisionValue().trim().isEmpty()))
-                        gaps.add("'" + element.getLabel() + "' is a GatewayNode: it follows only the arcs whose guard matches what its place returns, so its arc to "
-                            + a.getTarget().getLabel() + ", which has no guard, is never taken. Give that arc a guard, set its Guard Condition to OTHERWISE "
-                            + "(taken when no other guard matches), or set " + element.getLabel() + "'s Node Type to EdgeNode if every token goes there.");
+                        gaps.add("The arrow from " + element.getLabel() + " to " + a.getTarget().getLabel() + " needs a guard: " + element.getLabel()
+                            + " is a gateway, so it sends tokens only along arrows whose Decision Value matches the service's answer."
+                            + " (Or set its Guard Condition to OTHERWISE.)");
             int otherwise = 0;
             for (Arrow a : arrows) if (a.getSource() == element && GuardEditing.otherwise(a)) otherwise++;
             if (otherwise > 1) gaps.add("'" + element.getLabel() + "' has " + otherwise + " Otherwise arcs; a T_out can take only one when no other guard matches. Keep one.");

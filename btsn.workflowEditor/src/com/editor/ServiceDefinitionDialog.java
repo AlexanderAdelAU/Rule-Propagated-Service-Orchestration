@@ -231,7 +231,7 @@ public final class ServiceDefinitionDialog extends JDialog {
     private void save() {
         CatalogueWriter.Entry e = entry();
         List<String> errors = errors(e);
-        if (!errors.isEmpty()) { JOptionPane.showMessageDialog(this, String.join("\n", errors), getTitle(), JOptionPane.WARNING_MESSAGE); return; }
+        if (!errors.isEmpty()) { JOptionPane.showMessageDialog(this, WrappedMessage.of(String.join("\n", errors)), getTitle(), JOptionPane.WARNING_MESSAGE); return; }
         List<String> needed = stillNeeded(e);
         e.draft = !needed.isEmpty();
         File source = e.implementationClass.isEmpty() ? null : ServiceStub.sourceFile(common, e.implementationClass);

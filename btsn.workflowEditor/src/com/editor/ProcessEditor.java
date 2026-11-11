@@ -981,7 +981,7 @@ public class ProcessEditor extends JFrame {
         else {
             html.append("Validation found the following issues:<ul>");
             for (String error : errors) html.append("<li>").append(htmlText(error)).append("</li>");
-            html.append("</ul>Please fix these issues before saving.");
+            html.append("</ul>Fix these before deploying. You can save at any time.");
         }
         if (!notes.isEmpty()) {
             html.append("<br><br><font color='#C00000'><b>Still to do</b> (this does not stop you saving):<ul>");
@@ -1195,7 +1195,7 @@ public class ProcessEditor extends JFrame {
         }
         StringBuilder message = new StringBuilder("Saved. Your work is kept.\n\nStill to finish before it can be deployed:\n\n");
         for (String item : unfinished) message.append("- ").append(item).append("\n");
-        JOptionPane.showMessageDialog(this, message.toString(), "Saved", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, WrappedMessage.of(message.toString()), "Saved", JOptionPane.INFORMATION_MESSAGE);
     }
 
     // ==================== New / Open ====================
@@ -1243,7 +1243,7 @@ public class ProcessEditor extends JFrame {
             for (String blocker : canvas.serviceBlockers()) if (!outOfDate.contains(blocker)) problems.add(blocker);
         }
         if (!problems.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Before deploying:\n" + String.join("\n", problems), "Deploy", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, WrappedMessage.of("Before deploying:\n\n- " + String.join("\n- ", problems)), "Deploy", JOptionPane.WARNING_MESSAGE);
             return;
         }
         if (deployFrame != null && deployFrame.isDisplayable()) {
@@ -1266,7 +1266,7 @@ public class ProcessEditor extends JFrame {
         BuildAndRunGenerator.Plan plan = BuildAndRunGenerator.plan(canvas, currentFile);
         for (String problem : plan.problems) if (!problems.contains(problem)) problems.add(problem);
         if (!problems.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Before creating Build and Run:\n" + String.join("\n", problems), "Build and Run", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, WrappedMessage.of("Before creating Build and Run:\n\n- " + String.join("\n- ", problems)), "Build and Run", JOptionPane.WARNING_MESSAGE);
             return;
         }
         new BuildAndRunDialog(this, plan).setVisible(true);
