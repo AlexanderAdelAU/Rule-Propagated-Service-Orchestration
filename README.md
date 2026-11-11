@@ -2,26 +2,30 @@
 
 **RPSO uses Petri net concepts to transform ordinary callable services into a formally defined, distributed orchestration system.**
 
-RPSO is an orchestration infrastructure. You draw a process, and generic hosts carry it out across machines and organisations with no central engine, calling your existing services where they already run.
+In plain terms: you draw a process as a diagram, and RPSO runs it. Each step calls one of your existing services, wherever it already runs. There is no central engine in the middle: the steps can run on different machines, even in different organisations, and they pass the work directly to each other.
 
-The smallest proof is a process with one step. Say an online store relies on a remote Payment Service. Bind its existing REST endpoint to a **Place** in a Petri-net model and connect the transitions that govern it. RPSO then orchestrates every payment through that Place: it makes the call, routes on the service's own answer and records what happened, without changing any of your existing code. That one step is already enough to see what happens when order volumes rise, calls become slow or the service fails.
+The quickest way to see it is a process with a single step. Say your online store relies on a remote Payment Service. Draw one step, give it the service's address, and run it. RPSO sends each payment to the service, follows the service's own answer (paid or declined) and records what happened. Your service and your code stay exactly as they are.
 
-Nothing changes as the process grows. Add Places for inventory and order handling and the same hosts run the whole checkout; put those Places on other machines, or in other organisations, and they run it as a distributed process ([From one service to distributed workflows](#from-one-service-to-distributed-workflows)).
+Now you can ask real questions. What happens when orders surge, when calls slow down, or when the service fails? You watch the answer, replayed on your own diagram.
+
+The same thing scales up. Add steps for inventory and order handling and you have the whole checkout. Put those steps on other machines, or in other organisations, and you have a distributed process. Nothing else changes ([From one service to distributed workflows](#from-one-service-to-distributed-workflows)).
 
 ## Start with one service
 
-A minimal experiment needs an event generator, a Place bound to the remote service, its incoming and outgoing transitions, and an outcome. **You implement none of these: they are part of RPSO, drawn in the editor and run by its hosts.** All you provide is the address of your service (its endpoint) and, if the service has its own API, a short description of how to call it. The editor can fill in that description from the API's published definition, and lets you try one call before you run anything ([Call an API that was not written for RPSO](ServiceTutorial.md#call-an-api-that-was-not-written-for-rpso)).
+Here is that one-step process:
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="images/rpso-first-use-dark.svg">
   <img src="images/rpso-first-use.svg" alt="Start with one service. Inside an RPSO test workflow, the PAYMENTS event generator sends tokens to a logical Node executed by a generic RPSO orchestration host: T_in, the Payment place and T_out, which routes each payment to Paid or Declined. The Payment place calls the existing remote Payment Service, unchanged, by REST request and response. The host records the execution, which Monitor gathers for analysis: timings, queue waits and replay.">
 </picture>
 
-*The **Payment Place is logical**, not the Payment Service itself. A generic RPSO orchestration host executes the whole Node (**T_in → Place → T_out**): it calls the unchanged service over REST, hands the response to T_out and records the run for analysis and replay. The host can run on your machine or next to the service on another one ([Run on several machines](Reference.md#7-run-on-several-machines)).*
+**You build none of this.** The traffic generator, the step and its routing are part of RPSO: you draw them in the editor and RPSO runs them. All you provide is the address of your service and, if it has its own API, a short description of how to call it. The editor can fill in that description from the API's published definition, and lets you try one call before you run anything ([Call an API that was not written for RPSO](ServiceTutorial.md#call-an-api-that-was-not-written-for-rpso)).
 
-1. **Bind the service.** Describe the existing REST operation and its inputs and result; no change to the service's business logic is required. [Follow one payment](ServiceTutorial.md#follow-one-payment-what-a-service-receives-and-returns) shows exactly what a service receives and returns.
-2. **Exercise it.** Generate tokens at a chosen rate and timing: steady traffic, bursts or a long soak. To see failures, point the Place at a test copy of the service that you can slow down or make fail, and set how long the Place waits for an answer.
-3. **Observe it.** Inspect service times, queue waits, routing and token flow; replay the recorded run against the same model.
+*In RPSO's terms, the step is a **Place**. The bars either side of it are **transitions**: T_in receives each request and T_out sends the result on. Together they form a **Node**, which a generic RPSO host runs, on your machine or on one next to the service ([Run on several machines](Reference.md#7-run-on-several-machines)).*
+
+1. **Point it at your service.** Give the Place your service's address. The service itself is not changed. [Follow one payment](ServiceTutorial.md#follow-one-payment-what-a-service-receives-and-returns) shows exactly what it receives and returns.
+2. **Send it traffic.** Choose how many requests and when: steady, in bursts, or over a long period. To see failures, point the Place at a test copy of the service that you can slow down or break, and set how long to wait for an answer.
+3. **Watch what happened.** See how long each call took, how long requests queued and which route each one took. Then replay the run on your diagram.
 
 **See it run.** The animation replays a recorded run of the workflow in the diagram above: a mock payment service on Vercel receives steady payments, then a burst of twelve.
 
@@ -30,7 +34,7 @@ A minimal experiment needs an event generator, a Place bound to the remote servi
 30 payments: 24 paid and 3 declined, each routed on the service's own answer; 3 failed at the Place with the reason recorded (two HTTP 503s, one answer slower than 2.5 s). The burst queued for up to 10.8 s; steady traffic hardly queued.
 [▶ Watch the recorded run](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json&run=../../btsn.common/AnalysisFolder/Payments/Analysis_Remote_Payment_Test.txt) · [Build it yourself in the editor, then test your own service](#from-an-idea-to-a-measured-run)
 
-This is a measured test of a running service, not a replacement for dedicated load or fault-injection tools. RPSO provides the executable workflow, token schedules, execution records and replay; realistic workloads and failure conditions still need to be configured for each experiment. The same approach can expand to a complete checkout process with inventory, payment and order handling.
+A note on scope: RPSO measures a real, running service in the context of its process. It does not replace dedicated load-testing or fault-injection tools, and you still decide what traffic and which failures to try.
 
 ## From one service to distributed workflows
 
