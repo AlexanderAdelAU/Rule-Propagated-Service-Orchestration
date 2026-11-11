@@ -242,7 +242,7 @@ public class EditorFrame extends JPanel {
             formatCombo.setSelectedItem(formats.contains(current) || current.equals(element.getTokenFormat()) ? current + ".json" : noFormat);
             formatCombo.setToolTipText("<html>Save your token data in this file, in btsn.common.eventgenerators/TokenFormats.<br>"
                 + "The Event Generator uses it to populate each token's data.<br>"
-                + "To make your own, copy ExampleTokenDataFile.json in that folder to a new name and change its fields.</html>");
+                + "Open... shows or changes the chosen file; New... makes your own, started from ExampleTokenDataFile.json.</html>");
             addComboField("Token Data File Name:", formatCombo, (String) formatCombo.getSelectedItem());
             formatCombo.addActionListener(e -> {
                 Object chosen = formatCombo.getSelectedItem();
@@ -251,8 +251,35 @@ public class EditorFrame extends JPanel {
                 canvas.saveUndoState();
                 element.setTokenFormat(value);
             });
+            java.io.File formatFolder = canvas.tokenFormatFolder();
+            JButton openFormat = new JButton("Open...");
+            JButton newFormat = new JButton("New...");
+            openFormat.setToolTipText("Show the chosen token data file, change it and see the data the first tokens will carry");
+            newFormat.setToolTipText("Make a new token data file, started from ExampleTokenDataFile.json, and use it here");
+            openFormat.addActionListener(e -> {
+                Object chosen = formatCombo.getSelectedItem();
+                if (chosen == null || noFormat.equals(chosen) || formatFolder == null) {
+                    JOptionPane.showMessageDialog(this, "Choose a token data file first, or click New... to make one.", "Token data file", JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
+                TokenDataFileDialog.open(this, new java.io.File(formatFolder, chosen.toString()));
+            });
+            newFormat.addActionListener(e -> {
+                if (formatFolder == null) { JOptionPane.showMessageDialog(this, "Save the process under btsn.common first, so the editor can find TokenFormats.", "Token data file", JOptionPane.WARNING_MESSAGE); return; }
+                String created = TokenDataFileDialog.create(this, formatFolder);
+                if (created == null) return;
+                canvas.saveUndoState();
+                element.setTokenFormat(created);
+                SwingUtilities.invokeLater(() -> updateSelection(element));
+            });
+            JPanel formatButtons = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+            formatButtons.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
+            formatButtons.add(openFormat); formatButtons.add(newFormat);
+            attributesPanel.add(formatButtons);
 
-            // The business data every token carries, for services that read fields from it (an application's amount, ...).
+            // Fixed name=value fields: kept for processes that already have them, so they can be seen and cleared.
+            // New designs put every field in the token data file above.
+            if (!element.getTokenData().isEmpty()) {
             JTextField dataField = new JTextField(15);
             addField("Extra fields (name=value):", dataField, element.getTokenData());
             dataField.setToolTipText("<html>Fields added to every token this generator sends, on top of the token data file's, as name=value pairs<br>"
@@ -264,6 +291,7 @@ public class EditorFrame extends JPanel {
                 element.setTokenData(text);
                 canvas.saveUndoState();
             }));
+            }
 
             // What this generator does, from its one arc: arrivals, or the initial marking of a closed net (sent once).
             Canvas.GeneratorRole role = canvas.generatorRole(element);

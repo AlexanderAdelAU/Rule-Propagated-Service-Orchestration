@@ -360,12 +360,15 @@ referred. The replay shows each token leaving the Credit place by its route.
 
 ## 7. Give it data
 
-A token can carry data to the service. In the editor, select the event generator (`APPLICATIONS`) and set its
-**Extra fields (name=value)** to `amount=4500`. Save the process, click **Build**, then **Create**, and **Run on hosts**.
+A token can carry data to the service. In the editor, select the event generator (`APPLICATIONS`), click **New...**
+beside **Token Data File Name** and name the file `Credit4500`. It opens, started from `ExampleTokenDataFile.json`.
+Set `tokenStructure.data` to `{"amount": 4500}` and delete `dataVariants` and `caseMix`; the preview under the file
+shows every token carrying `"amount":4500`. Click **Save**, save the process, click **Build**, then **Create**, and
+**Run on hosts**. **Open...** shows the chosen file again.
 
 <details><summary>From the command line</summary>
 
-The generator's Extra fields are the launcher's `eg1.data` property, which you can also pass to the launcher:
+The launcher's `eg1.data` property adds fixed fields to every token, on top of the file's, which you can also pass to the launcher:
 
 ```sh
 ant -f btsn.petrinet.ProjectLoader/Credit_Check_Workflow_BuildAndRun.xml -Dhost.address=127.0.0.1 -Deg1.data=amount=4500
@@ -373,10 +376,9 @@ ant -f btsn.petrinet.ProjectLoader/Credit_Check_Workflow_BuildAndRun.xml -Dhost.
 
 </details>
 
-Every application now asks for 4,500, so all ten are approved. `eg1.data` takes
-`name=value` pairs separated by commas; the service reads them with `numberValue`
-or `textValue`. For data that differs from token to token, use a token format
-(`eg1.format.service`), as [Follow one payment](#follow-one-payment-what-a-service-receives-and-returns) does.
+Every application now asks for 4,500, so all ten are approved. The service reads the fields with `numberValue`
+or `textValue`. For data that differs from token to token, give the file `dataVariants` and a `caseMix`, as
+`PaymentService.json` does for [Follow one payment](#follow-one-payment-what-a-service-receives-and-returns).
 
 ## 8. Call it over REST
 

@@ -35,6 +35,14 @@ final class TokenDataExample {
 
     private TokenDataExample() {}
 
+    /** The example as the start of a new file of the designer's own: the same fields, with a read-me for a copy. */
+    static String copyText() {
+        int start = TEXT.indexOf("  \"_readMe\""), end = TEXT.indexOf("  ],\n", start) + 5;
+        return TEXT.substring(0, start)
+            + "  \"_readMe\": \"Your token data file, started from ExampleTokenDataFile.json. Every token gets tokenStructure.data; token n also gets the dataVariants entry at position n of caseMix. ${n} is the token's number. A service mapping reads the fields as ${data.name}.\",\n"
+            + TEXT.substring(end);
+    }
+
     /** Writes the example into the folder if it is missing, and makes it read-only. */
     static void ensure(File folder) {
         File file = new File(folder, NAME);

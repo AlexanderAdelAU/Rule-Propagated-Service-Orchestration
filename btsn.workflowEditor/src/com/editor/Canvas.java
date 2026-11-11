@@ -2918,12 +2918,18 @@ public class Canvas extends JPanel {
      * Things to finish before the process can be deployed, which do not stop it being saved: draft services,
      * guards that test values a service does not route on, and services still running the editor's starting code.
      */
+    /** btsn.common.eventgenerators/TokenFormats beside this process's btsn.common, or null when it cannot be found. */
+    public java.io.File tokenFormatFolder() {
+        java.io.File common = serviceRegistry.common() != null ? serviceRegistry.common() : ServiceRegistry.findCommon(definitionLocation);
+        java.io.File folder = common == null ? null : new java.io.File(common.getParentFile(), "btsn.common.eventgenerators/TokenFormats");
+        return folder != null && folder.isDirectory() ? folder : null;
+    }
+
     /** The token formats a generator can use: btsn.common.eventgenerators/TokenFormats/<name>.json, without Default. */
     public List<String> tokenFormats() {
         List<String> names = new ArrayList<>();
-        java.io.File common = serviceRegistry.common() != null ? serviceRegistry.common() : ServiceRegistry.findCommon(definitionLocation);
-        java.io.File folder = common == null ? null : new java.io.File(common.getParentFile(), "btsn.common.eventgenerators/TokenFormats");
-        if (folder != null && folder.isDirectory()) TokenDataExample.ensure(folder);
+        java.io.File folder = tokenFormatFolder();
+        if (folder != null) TokenDataExample.ensure(folder);
         java.io.File[] files = folder == null ? null : folder.listFiles();
         if (files != null) for (java.io.File f : files)
             if (f.getName().endsWith(".json") && !f.getName().equals("Default.json")) names.add(f.getName().substring(0, f.getName().length() - 5));

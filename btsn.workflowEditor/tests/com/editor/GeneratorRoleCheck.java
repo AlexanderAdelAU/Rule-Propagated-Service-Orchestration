@@ -74,10 +74,15 @@ public final class GeneratorRoleCheck {
                 check(open.generatorMarkings().isEmpty(), "Arrivals reported as a marking");
 
                 // Token data: typed in the generator's Attributes, saved with the process, written to the launcher as egN.data.
+                // New designs use a token data file: the name=value field is shown only for a generator that already has some.
                 EditorFrame egAttributes = new EditorFrame(open); egAttributes.updateSelection(arrivals);
+                for (JTextField f : fields(egAttributes))
+                    check(f.getToolTipText() == null || !f.getToolTipText().contains("name=value"), "Extra fields offered on a generator without any");
+                arrivals.setTokenData("x=1");
+                egAttributes.updateSelection(null); egAttributes.updateSelection(arrivals);
                 JTextField dataField = null;
                 for (JTextField f : fields(egAttributes)) if (f.getToolTipText() != null && f.getToolTipText().contains("name=value")) dataField = f;
-                check(dataField != null && dataField.getText().isEmpty(), "No Token data field on a generator");
+                check(dataField != null && "x=1".equals(dataField.getText()), "Extra fields not shown on a generator that has them");
                 dataField.setText("application_id = LOAN-1, annual_income=85000");
                 check("application_id = LOAN-1, annual_income=85000".equals(arrivals.getTokenData()), "Token data not set: " + arrivals.getTokenData());
                 Canvas reopened = new Canvas(); reopened.setDefinitionLocation(tutorial); reopened.loadFromJSON(open.saveToJSON());
