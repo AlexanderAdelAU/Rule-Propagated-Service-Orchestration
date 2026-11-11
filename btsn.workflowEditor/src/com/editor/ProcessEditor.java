@@ -1098,64 +1098,15 @@ public class ProcessEditor extends JFrame {
     
     private void saveToJSON() {
         if (currentFile != null) {
-            // Save to existing file without prompting
-            if (canvas.getElements().isEmpty()) {
-                JOptionPane.showMessageDialog(this,
-                    "Canvas is empty! Nothing to save.",
-                    "Nothing to Save",
-                    JOptionPane.INFORMATION_MESSAGE);
-                return;
-            }
-            
-            // VALIDATE BEFORE SAVING
-            java.util.List<String> contractErrors = canvas.validateServiceContracts();
-            if (!contractErrors.isEmpty()) {
-                JOptionPane.showMessageDialog(this, String.join("\n", contractErrors), "Unresolved service contracts — cannot save", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            java.util.List<String> errors = canvas.validatePetriNet();
-            errors.removeAll(canvas.deploymentGaps());   // placing places on nodes is what Deploy does, after saving
-            
-            // Check if processType is specified
-            String processType = canvas.getProcessType();
-            if (processType == null || processType.trim().isEmpty()) {
-                errors.add(0, "Process Type must be specified (PetriNet or SOA)");
-            }
-            
-            if (!errors.isEmpty()) {
-                StringBuilder message = new StringBuilder("Validation warnings found:\n\n");
-                for (String error : errors) {
-                    message.append("- ").append(error).append("\n");
-                }
-                message.append("\nYou can save now and fix these issues later, or cancel to fix them now.");
-                
-                Object[] options = {"Save Anyway", "Fix Now"};
-                int result = JOptionPane.showOptionDialog(this,
-                    message.toString(),
-                    "Validation Warnings",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.WARNING_MESSAGE,
-                    null,
-                    options,
-                    options[1]); // Default to "Fix Now"
-                
-                if (result == JOptionPane.NO_OPTION || result == JOptionPane.CLOSED_OPTION) {
-                    // User chose "Fix Now" or closed dialog - don't save
-                    return;
-                }
-                // User chose "Save Anyway" - continue with save
-            }
-            
+            // Saving is never refused: a design in progress is kept, and what is still to finish is listed after.
             canvas.adoptDomainCatalogue();   // a process saved under a domain uses its catalogue
+            java.util.List<String> unfinished = stillToFinish();
             try (FileWriter writer = new FileWriter(currentFile)) {
                 writer.write(canvas.saveToJSON());
                 canvas.markSaved();
                 setDirty(false); // Clear dirty flag after successful save
                 updateStatusBar(); // Update status bar
-                JOptionPane.showMessageDialog(this,
-                    "Saved successfully!",
-                    "Save Successful",
-                    JOptionPane.INFORMATION_MESSAGE);
+                showSaved(unfinished);
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(this,
                     "Error saving file: " + ex.getMessage(),
@@ -1169,53 +1120,6 @@ public class ProcessEditor extends JFrame {
     }
     
     private void saveAsToJSON() {
-        if (canvas.getElements().isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                "Canvas is empty! Nothing to save.",
-                "Nothing to Save",
-                JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
-        
-        // VALIDATE BEFORE SAVING
-        java.util.List<String> contractErrors = canvas.validateServiceContracts();
-            if (!contractErrors.isEmpty()) {
-                JOptionPane.showMessageDialog(this, String.join("\n", contractErrors), "Unresolved service contracts — cannot save", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            java.util.List<String> errors = canvas.validatePetriNet();
-            errors.removeAll(canvas.deploymentGaps());   // placing places on nodes is what Deploy does, after saving
-        
-        // Check if processType is specified
-        String processType = canvas.getProcessType();
-        if (processType == null || processType.trim().isEmpty()) {
-            errors.add(0, "Process Type must be specified (PetriNet or SOA)");
-        }
-        
-        if (!errors.isEmpty()) {
-            StringBuilder message = new StringBuilder("Validation warnings found:\n\n");
-            for (String error : errors) {
-                message.append("- ").append(error).append("\n");
-            }
-            message.append("\nYou can save now and fix these issues later, or cancel to fix them now.");
-            
-            Object[] options = {"Save Anyway", "Fix Now"};
-            int result = JOptionPane.showOptionDialog(this,
-                message.toString(),
-                "Validation Warnings",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.WARNING_MESSAGE,
-                null,
-                options,
-                options[1]); // Default to "Fix Now"
-            
-            if (result == JOptionPane.NO_OPTION || result == JOptionPane.CLOSED_OPTION) {
-                // User chose "Fix Now" or closed dialog - don't save
-                return;
-            }
-            // User chose "Save Anyway" - continue with save
-        }
-        
         JFileChooser fileChooser = new JFileChooser();
         if (lastDirectory != null) {
             fileChooser.setCurrentDirectory(lastDirectory);
@@ -1247,10 +1151,7 @@ public class ProcessEditor extends JFrame {
                 canvas.setDefinitionLocation(file);
                 setDirty(false); // Clear dirty flag after successful save
                 updateStatusBar(); // Update status bar to show new filename
-                JOptionPane.showMessageDialog(this,
-                    "Saved successfully!",
-                    "Save Successful",
-                    JOptionPane.INFORMATION_MESSAGE);
+                showSaved(stillToFinish());
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(this,
                     "Error saving file: " + ex.getMessage(),
@@ -1260,6 +1161,43 @@ public class ProcessEditor extends JFrame {
         }
     }
     
+    /**
+     * What the design still needs before it can be deployed: places without a service, Petri-net warnings and a
+     * missing process type. Saving never waits for these; an empty process has nothing to finish yet.
+     */
+    java.util.List<String> stillToFinish() {
+        java.util.List<String> unfinished = new java.util.ArrayList<>();
+        if (canvas.getElements().isEmpty()) return unfinished;
+        // A place with no service yet is one line, not its several contract and Petri-net messages.
+        java.util.Set<String> noService = new java.util.LinkedHashSet<>();
+        for (ProcessElement place : canvas.getPlaces())
+            if (place.getService() == null || place.getService().trim().isEmpty()) noService.add(place.getLabel());
+        for (String place : noService) unfinished.add(place + ": no service yet (right-click it to choose or create one)");
+        // validatePetriNet repeats the contract errors, so both lists go through the same filter.
+        java.util.List<String> found = new java.util.ArrayList<>(canvas.validateServiceContracts());
+        found.addAll(canvas.validatePetriNet());
+        found.removeAll(canvas.deploymentGaps());   // placing places on nodes is what Deploy does, after saving
+        for (String problem : found) {
+            boolean ofNoService = !noService.isEmpty() && problem.startsWith("Incomplete Place definitions");
+            for (String place : noService) if (problem.startsWith(place + ": ")) ofNoService = true;
+            if (!ofNoService && !unfinished.contains(problem)) unfinished.add(problem);
+        }
+        String processType = canvas.getProcessType();
+        if (processType == null || processType.trim().isEmpty()) unfinished.add(0, "Process Type must be specified (PetriNet or SOA)");
+        return unfinished;
+    }
+
+    /** Confirms a save, listing what is still to finish; Validate, Deploy, Build and Run report the same. */
+    private void showSaved(java.util.List<String> unfinished) {
+        if (unfinished.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Saved successfully!", "Save Successful", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        StringBuilder message = new StringBuilder("Saved. Your work is kept.\n\nStill to finish before it can be deployed:\n\n");
+        for (String item : unfinished) message.append("- ").append(item).append("\n");
+        JOptionPane.showMessageDialog(this, message.toString(), "Saved", JOptionPane.INFORMATION_MESSAGE);
+    }
+
     // ==================== New / Open ====================
     
     /** ProcessDefinitionFolder/<domain>/Workflow for the domain of the process's catalogue (made if new), or null. */
