@@ -66,7 +66,7 @@
 <main>
   <p class="eyebrow">RPSO · Research and design platform</p>
   <h1>Rule-Propagated Service Orchestration</h1>
-  <p class="lede">RPSO uses Petri net concepts to transform ordinary callable services into a formally defined, distributed orchestration system. The process you draw is the system that runs: across separate hosts, with no central engine, and every run recorded so it can be measured and replayed.</p>
+  <p class="lede">RPSO uses Petri net concepts to transform ordinary callable services into a formally defined, distributed orchestration system. It is an orchestration infrastructure: you draw a process, and generic hosts carry it out across machines and organisations with no central engine, calling your existing services where they already run.</p>
 
   <nav class="actions" aria-label="Get started">
     <a class="primary" href="https://github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration">View the project on GitHub</a>
@@ -83,7 +83,7 @@
 
   <h2>What it does</h2>
   <ul class="points">
-    <li><b>Binds services you already have</b>A Java class or any REST endpoint becomes a Place in a Petri-net model, with no change to its business logic.</li>
+    <li><b>Binds services you already have</b>A Java class or any REST endpoint becomes a Place in a Petri-net model. An existing API is called as it is, through a call mapping the editor can fill in from the API's published definition.</li>
     <li><b>Runs with no central engine</b>Each host follows rules installed from the model, and tokens travel directly from host to host.</li>
     <li><b>BPMN-style control</b>Gateways route on a service's own answer; forks, joins, merges, and signals that start a compensation process.</li>
     <li><b>Several versions at once</b>Versions share the same hosts, each measured separately; where they share a service, the lower version is served first.</li>
@@ -92,8 +92,8 @@
     <li><b>Measured and replayed</b>Every run's records are gathered and analysed for queue waits, service times and failures, then replayed on the model.</li>
   </ul>
 
-  <h2>See it run</h2>
-  <p>A recorded run of a payment test: a mock payment service on Vercel receives steady payments, then a burst of twelve.</p>
+  <h2>The smallest proof: a process with one step</h2>
+  <p>An online store relies on a remote Payment Service. Its existing REST endpoint is bound to a Place, and RPSO orchestrates every payment through it: it makes the call, routes on the service's own answer and records what happened, without changing any existing code. In this recorded run, a mock payment service on Vercel receives steady payments, then a burst of twelve.</p>
   <figure>
     <img src="images/remote-payment-test.gif" alt="A recorded run replayed on the model: tokens leave the PAYMENTS event generator, queue during the burst, pass through the Payment place and end at Paid or Declined." loading="lazy">
     <figcaption class="stats">30 payments: 24 paid, 3 declined, 3 failed with the reason recorded. The burst queued for up to 10.8 s.</figcaption>
@@ -101,6 +101,7 @@
   <p><a href="docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json&amp;run=../../btsn.common/AnalysisFolder/Payments/Analysis_Remote_Payment_Test.txt">Watch this run</a> ·
      <a href="docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Emergency_Department_With_Federated_Radiology.json&amp;run=../../btsn.common/AnalysisFolder/Healthcare/Emergency_Department_With_Federated_Radiology.txt">An emergency department on six hosts</a> ·
      <a href="docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/healthcare/Workflow/Stroke_Code_With_Emergency_Department.json&amp;run=../../btsn.common/AnalysisFolder/Healthcare/Stroke_Code_With_Emergency_Department.txt">A stroke code across four organisations</a></p>
+  <p>Nothing changes as the process grows. Add Places for inventory and order handling and the same hosts run the whole checkout; put those Places on other machines, or in other organisations, and they run it as a distributed process, as the two larger runs above show.</p>
 
   <h2>Questions people ask</h2>
   <dl>
