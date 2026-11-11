@@ -2918,6 +2918,19 @@ public class Canvas extends JPanel {
      * Things to finish before the process can be deployed, which do not stop it being saved: draft services,
      * guards that test values a service does not route on, and services still running the editor's starting code.
      */
+    /** The values the service of the place feeding this T_out routes on, for the guards on its arcs: empty when unknown. */
+    public List<String> answersBefore(ProcessElement tOut) {
+        List<String> answers = new ArrayList<>();
+        for (Arrow in : arrows) {
+            if (in.getTarget() != tOut || in.getSource() == null || in.getSource().getType() != ProcessElement.Type.PLACE) continue;
+            ProcessElement place = in.getSource();
+            for (String op : place.getOperations()) {
+                ServiceRegistry.Contract c = serviceRegistry.contract(place.getService(), op);
+                if (c != null) for (String r : c.routes) if (!answers.contains(r)) answers.add(r);
+            }
+        }
+        return answers;
+    }
     public List<String> serviceNotes() { return serviceNotes(true); }
     /** As serviceNotes, without the reminders (starting code, untested guards): what stops Deploy, Build and Run. */
     public List<String> serviceBlockers() { return serviceNotes(false); }
@@ -2938,12 +2951,19 @@ public class Canvas extends JPanel {
                 if (routesOn.isEmpty()) continue;
                 for (Arrow out : arrows) {
                     if (out.getSource() != place || out.getTarget() == null || out.getTarget().getType() != ProcessElement.Type.TRANSITION) continue;
+                    // Reported per T_out, so that one mistyped value is one message: what the arc tests and what to set instead.
+                    List<String> wrong = new ArrayList<>();
+                    List<Arrow> wrongArcs = new ArrayList<>();
                     for (Arrow route : arrows) {
                         String value = route.getDecisionValue();
                         if (route.getSource() == out.getTarget() && value != null && !value.trim().isEmpty() && !routesOn.contains(value.trim()))
-                            notes.add("Place '" + place.getLabel() + "': the arc from " + out.getTarget().getLabel() + " to " + (route.getTarget() == null ? "?" : route.getTarget().getLabel())
-                                + " tests \"" + value.trim() + "\", but " + c.service + (c.routes.isEmpty() ? " (starting code)" : "") + " routes on " + String.join(", ", routesOn)
-                                + (c.routes.isEmpty() ? ". Add the values it routes on with " + serviceRegistry.editServiceLabel() : ".") );
+                            wrongArcs.add(route);
+                    }
+                    for (Arrow route : wrongArcs) {
+                        String value = route.getDecisionValue();
+                        wrong.add("Place '" + place.getLabel() + "': the arc from " + out.getTarget().getLabel() + " to " + (route.getTarget() == null ? "?" : route.getTarget().getLabel())
+                            + " tests \"" + value.trim() + "\", but " + c.service + (c.routes.isEmpty() ? " (starting code)" : "") + " routes on " + String.join(", ", routesOn)
+                            + (c.routes.isEmpty() ? ". Add the values it routes on with " + serviceRegistry.editServiceLabel() : ".") );
                     }
                     // The other way round: a value the service routes on that no arc tests, with no unguarded arc to take it.
                     // The host drops such a token, so the design is fixed before it runs.
@@ -2956,9 +2976,17 @@ public class Canvas extends JPanel {
                         else if (value == null || value.trim().isEmpty()) unguarded = true; else tested.add(value.trim());
                     }
                     if (unguarded && "GatewayNode".equals(out.getTarget().getNodeType())) unguarded = false;   // a gateway never takes an unguarded arc
-                    if (otherwiseArc || unguarded || tested.isEmpty() || c.routes.isEmpty()) continue;   // Otherwise takes the values no arc tests
                     List<String> missing = new ArrayList<>();
-                    for (String r : c.routes) if (!tested.contains(r)) missing.add(r);
+                    if (!(otherwiseArc || unguarded || tested.isEmpty() || c.routes.isEmpty()))   // Otherwise takes the values no arc tests
+                        for (String r : c.routes) if (!tested.contains(r)) missing.add(r);
+                    if (wrongArcs.size() == 1 && missing.size() == 1) {
+                        Arrow route = wrongArcs.get(0);
+                        notes.add("The arrow from " + out.getTarget().getLabel() + " to " + (route.getTarget() == null ? "?" : route.getTarget().getLabel())
+                            + " tests \"" + route.getDecisionValue().trim() + "\", but " + c.service + " answers \"" + missing.get(0)
+                            + "\". Click the arrow and, under The service answers, click " + missing.get(0) + ".");
+                        continue;
+                    }
+                    notes.addAll(wrong);
                     if (!missing.isEmpty())
                         notes.add("Place '" + place.getLabel() + "': " + c.service + " routes on " + String.join(", ", missing) + ", but no arc from " + out.getTarget().getLabel()
                             + " tests " + (missing.size() == 1 ? "it" : "them") + ", so those tokens would be dropped. Draw an arc for " + String.join(", ", missing) + " (to a terminate node if the process ends there).");

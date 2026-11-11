@@ -584,9 +584,37 @@ public class EditorFrame extends JPanel {
         // Decision Value
         addField("Decision Value:", freshDecisionField, arrow.getDecisionValue());
         freshDecisionField.getDocument().addDocumentListener(new SimpleDocumentListener(() -> {
-            arrow.setDecisionValue(freshDecisionField.getText());
+            String before = arrow.getDecisionValue(), now = freshDecisionField.getText();
+            arrow.setDecisionValue(now);
+            // The label follows the value while it only repeated it, so the drawing shows what is tested.
+            String label = arrow.getLabel();
+            if ((label == null || label.trim().isEmpty() || label.equals(before)) && !now.equals(freshArrowLabelField.getText()))
+                SwingUtilities.invokeLater(() -> freshArrowLabelField.setText(now));
+            canvas.repaint();
         }));
         freshDecisionField.setEnabled(guardApplies && GuardEditing.takesValue(guardConditionCombo.getSelectedItem()));
+        // The values the service answers, one click each: the guard cannot be mistyped.
+        java.util.List<String> answers = guardApplies ? canvas.answersBefore(arrow.getSource()) : java.util.Collections.emptyList();
+        if (!answers.isEmpty() && !GuardEditing.otherwise(arrow)) {
+            JPanel picks = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+            picks.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+            picks.add(new JLabel("The service answers:"));
+            for (String answer : answers) {
+                JButton pick = new JButton(answer);
+                pick.setToolTipText("Test for " + answer + " on this arrow");
+                pick.addActionListener(e -> {
+                    canvas.saveUndoState();
+                    if (!GuardEditing.takesValue(arrow.getGuardCondition())) arrow.setGuardCondition("DECISION_EQUAL_TO");
+                    String before = arrow.getDecisionValue(), label = arrow.getLabel();
+                    arrow.setDecisionValue(answer);
+                    if (label == null || label.trim().isEmpty() || label.equals(before)) arrow.setLabel(answer);
+                    canvas.repaint();
+                    SwingUtilities.invokeLater(() -> showArrowAttributes(arrow));
+                });
+                picks.add(pick);
+            }
+            attributesPanel.add(picks);
+        }
         if (GuardEditing.otherwise(arrow)) freshDecisionField.setToolTipText("Otherwise takes no value: this arc is taken when no other guard on " + arrow.getSource().getLabel() + " matches.");
         if (!guardApplies) {
             guardConditionCombo.setEnabled(false);
