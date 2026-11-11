@@ -1160,6 +1160,10 @@ public class InfrastructureDefinitionFrame extends JFrame {
                         if (text.contains("has no value for ${data.")) text += "\n\nThe token's data lacks that field. Select the event generator"
                             + (generatorLabel.isEmpty() ? "" : " " + generatorLabel) + " and choose a Token Data File Name that has it (PaymentService.json gives each order an orderId, amount, "
                             + "currency and card), or type the field into the token above.";
+                        java.util.regex.Matcher env = java.util.regex.Pattern.compile("environment variable (\\w+) is not set").matcher(text);
+                        if (env.find()) text += "\n\nThe mapping takes the API key from ${env:" + env.group(1) + "}, an environment variable, so the key is never written in a file. "
+                            + "Set " + env.group(1) + " on this computer and restart the editor (and on each host's machine for a run), "
+                            + "or, for a public test key, write the key into the mapping itself. For the mock card-payments API, Start from an example does that.";
                         report.setText(text);
                     } catch (Exception ex) { report.setText("The call could not be made: " + ex); }
                     report.setCaretPosition(0); send.setEnabled(true);
