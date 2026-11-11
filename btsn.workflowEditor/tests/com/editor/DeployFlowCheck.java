@@ -330,7 +330,7 @@ public final class DeployFlowCheck {
                 check(imported.dataFields.equals(Arrays.asList("amount", "currency", "card")) && imported.optionalFields.equals(Arrays.asList("reference"))
                     && "${data.reference?}".equals(((JSONObject)importedCall.get("body")).get("reference")), "Imported data fields: " + imported.dataFields + ", optional " + imported.optionalFields);
                 String importNotes = String.join(" | ", imported.notes);
-                check(importNotes.contains("must carry: amount, currency, card.") && importNotes.contains("Optional, sent only when the token's data has them: reference") && importNotes.contains("environment variable API_KEY")
+                check(importNotes.contains("must carry: amount, currency, card.") && importNotes.contains("Optional, sent only when the token's data has them: reference") && importNotes.contains("API_KEY: enter it with API keys...") && importNotes.contains("The demo key is demo_key_public")
                     && importNotes.contains("Change the path names to the guards") && importNotes.contains("HTTP 400, 401, 503"), "Import notes: " + importNotes);
                 // Swagger 2, path and query values, a header key; and files that are not definitions say so.
                 OpenApiImport api2 = new OpenApiImport("{\"swagger\":\"2.0\",\"host\":\"api.example.com\",\"basePath\":\"/v2\",\"schemes\":[\"https\"],"
@@ -379,7 +379,16 @@ public final class DeployFlowCheck {
                         "A key from the environment should be hidden and the refusal reported: " + hidden);
                     String unset = InfrastructureDefinitionFrame.trialReport(InfrastructureDefinitionFrame.trial(address, 3000,
                         mapping.replace("Bearer secret-1", "Bearer ${env:RPSO_KEY_THAT_IS_NOT_SET}"), "PaymentService", "authorise", java.util.Arrays.asList("token"), sample, "paymentResult"));
-                    check(unset.contains("RPSO_KEY_THAT_IS_NOT_SET is not set"), "An unset key should be named: " + unset);
+                    check(unset.contains("RPSO_KEY_THAT_IS_NOT_SET is not set") && unset.contains("API keys..."), "An unset key should be named, with where to enter it: " + unset);
+                    // A key entered with API keys... is kept in this computer's key file and used, still hidden.
+                    System.setProperty("rpso.keys.file", scratch.resolve("api-keys.properties").toString());
+                    org.btsn.invocation.ApiKeys.store(java.util.Collections.singletonMap("RPSO_TEST_STORED", "secret-1"));
+                    String storedKey = mapping.replace("Bearer secret-1", "Bearer ${env:RPSO_TEST_STORED}");
+                    check(InfrastructureDefinitionFrame.keyNames(storedKey).equals(java.util.Arrays.asList("RPSO_TEST_STORED")), "Key names not found: " + InfrastructureDefinitionFrame.keyNames(storedKey));
+                    String fromFile = InfrastructureDefinitionFrame.trialReport(InfrastructureDefinitionFrame.trial(address, 3000,
+                        storedKey, "PaymentService", "authorise", java.util.Arrays.asList("token"), sample, "paymentResult"));
+                    check(fromFile.contains("Bearer (hidden)") && !fromFile.contains("secret-1") && !fromFile.contains("THE CALL FAILED"), "A stored key should be used and hidden: " + fromFile);
+                    check(!read(scratch.resolve("api-keys.properties")).isEmpty() && !read(processFile).contains("secret-1"), "The key should be in the key file only");
                 } finally { api.stop(0); }
                 panel.dispose(); panel = null;
 

@@ -625,7 +625,7 @@ The placement is an ordinary `rest` placement with a `call` added:
 - `${data.amount}`: a field of the token's data. Design the [token format](#7-give-it-data) to carry what the API needs.
 - `${paymentResult.status}`: a field of a named input, for a place later in the process. `${paymentResult.original_token.data.orderId}` reads the order the generator sent.
 - `${sequenceId}` and `${version}`: the call's own.
-- `${env:PAYMENT_KEY}`: an environment variable on the machine running the host. **Use this for a real API key**, so the key is never written in a file; the demo key above is public on purpose. A call whose variable is not set fails, saying which.
+- `${env:PAYMENT_KEY}`: an API key. **Use this for a real key**, so it is never written in the deployment; the demo key above is public on purpose. Enter the key with **API keys...** beside the call mapping: it is kept on that computer, in `~/.rpso/api-keys.properties`, and each computer that runs the place's host needs it too (enter it there, or set an environment variable of the same name, which takes precedence). A call whose key is missing fails, saying which.
 
 A value that is the whole of a text, such as `"${data.amount}"`, keeps its type, so the API receives the number `84.5`.
 A value the call does not have fails the call, saying which. End its name with a question mark, `"${data.reference?}"`,

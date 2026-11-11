@@ -68,6 +68,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
     private String lastValidCall = "";
     private final JButton callExample = new JButton("Start from an example");
     private final JButton tryCall = new JButton("Try a call...");
+    private final JButton apiKeys = new JButton("API keys...");
     private final JButton importOpenApi = new JButton("Fill in from OpenAPI...");
     /** One box for everything about how the selected place calls its service, titled with the place. */
     private final javax.swing.border.TitledBorder callBorder = BorderFactory.createTitledBorder("How the place calls its service");
@@ -896,7 +897,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
             String call = rest ? cap.call : "";
             lastValidCall = call;
             if (!sameJson(callArea.getText(), call)) { callArea.setText(prettyCall(call)); callArea.setCaretPosition(0); }
-            callArea.setEnabled(rest); callExample.setEnabled(rest); tryCall.setEnabled(rest); importOpenApi.setEnabled(rest);
+            callArea.setEnabled(rest); callExample.setEnabled(rest); tryCall.setEnabled(rest); importOpenApi.setEnabled(rest); apiKeys.setEnabled(rest);
         } finally { endpointSync = false; }
         updateEndpointNote(cap);
         updateCallNote(cap);
@@ -930,7 +931,9 @@ public class InfrastructureDefinitionFrame extends JFrame {
         p.add(new JScrollPane(callArea), BorderLayout.CENTER);
         JPanel south = new JPanel(new BorderLayout(6, 0));
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
-        buttons.add(callExample); buttons.add(tryCall);
+        buttons.add(apiKeys); buttons.add(callExample); buttons.add(tryCall);
+        apiKeys.setToolTipText("Enter the keys the call mapping names as ${env:NAME}. They are kept on this computer, never in the deployment.");
+        apiKeys.addActionListener(e -> apiKeysDialog(""));
         south.add(callNote, BorderLayout.CENTER); south.add(buttons, BorderLayout.EAST);
         p.add(south, BorderLayout.SOUTH);
         callArea.getDocument().addDocumentListener(onChange(this::callEdited));
@@ -1107,9 +1110,62 @@ public class InfrastructureDefinitionFrame extends JFrame {
             + ".\n\nTo check:\n- " + String.join("\n- ", mapping.notes) + "\n\nThen use Try a call.", 12, 70);
         notes.setEditable(false); notes.setLineWrap(true); notes.setWrapStyleWord(true); notes.setOpaque(false);
         JOptionPane.showMessageDialog(this, new JScrollPane(notes), "Fill in from OpenAPI", JOptionPane.INFORMATION_MESSAGE);
+        // The API needs a key this computer does not have: ask for it now, so Try a call works straight away.
+        for (String name : keyNames(mapping.call))
+            if (org.btsn.invocation.ApiKeys.get(name) == null) { apiKeysDialog(mapping.keyHint); break; }
     }
 
     private static String escapeHtml(String text) { return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"); }
+
+    /** The keys a call mapping names as ${env:NAME}, in order. */
+    static List<String> keyNames(String call) {
+        List<String> names = new ArrayList<>();
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("\\$\\{env:([A-Za-z_][A-Za-z0-9_]*)\\}").matcher(call == null ? "" : call);
+        while (m.find()) if (!names.contains(m.group(1))) names.add(m.group(1));
+        return names;
+    }
+
+    /** Enter or change the keys the mapping names; they go to this computer's key file (ApiKeys), never the deployment. */
+    private void apiKeysDialog(String hint) {
+        List<String> names = keyNames(callArea.getText());
+        java.util.Map<String, String> stored = org.btsn.invocation.ApiKeys.stored();
+        if (names.isEmpty()) {
+            JOptionPane.showMessageDialog(this, WrappedMessage.of("This call mapping names no API key. Where the key goes, write ${env:NAME} instead of the key itself, "
+                + "for example \"Authorization\": \"Bearer ${env:PAYMENT_KEY}\", then enter the key here."), "API keys", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        JPanel form = new JPanel(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.insets = new Insets(3, 4, 3, 4); c.anchor = GridBagConstraints.WEST;
+        c.gridx = 0; c.gridy = 0; c.gridwidth = 3; c.fill = GridBagConstraints.HORIZONTAL;
+        form.add(WrappedMessage.of("The call mapping names " + (names.size() == 1 ? "this key" : "these keys") + ". They are kept on this computer in "
+            + org.btsn.invocation.ApiKeys.file().getAbsolutePath() + ", never in the deployment or the repository. "
+            + "A computer that runs this place's host needs the same key: enter it there too, or set an environment variable of the same name."
+            + (hint == null || hint.isEmpty() ? "" : "\n\nThe API's definition says: " + hint)), c);
+        c.gridwidth = 1; c.fill = GridBagConstraints.NONE;
+        java.util.Map<String, JPasswordField> fields = new java.util.LinkedHashMap<>();
+        for (String name : names) {
+            c.gridy++; c.gridx = 0; c.weightx = 0;
+            form.add(new JLabel(name + ":"), c);
+            JPasswordField field = new JPasswordField(stored.getOrDefault(name, ""), 28);
+            c.gridx = 1; c.weightx = 1; c.fill = GridBagConstraints.HORIZONTAL; form.add(field, c);
+            JCheckBox show = new JCheckBox("Show");
+            char hidden = field.getEchoChar();
+            show.addActionListener(e -> field.setEchoChar(show.isSelected() ? (char) 0 : hidden));
+            c.gridx = 2; c.weightx = 0; c.fill = GridBagConstraints.NONE; form.add(show, c);
+            if (org.btsn.invocation.ApiKeys.fromEnvironment(name)) {
+                c.gridy++; c.gridx = 1; c.gridwidth = 2;
+                JLabel env = new JLabel("The environment variable " + name + " is set; it is used instead of this.");
+                env.setForeground(Color.DARK_GRAY); form.add(env, c); c.gridwidth = 1;
+            }
+            fields.put(name, field);
+        }
+        if (JOptionPane.showConfirmDialog(this, form, "API keys", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) != JOptionPane.OK_OPTION) return;
+        java.util.Map<String, String> changes = new java.util.LinkedHashMap<>();
+        for (java.util.Map.Entry<String, JPasswordField> e : fields.entrySet()) changes.put(e.getKey(), new String(e.getValue().getPassword()));
+        try { org.btsn.invocation.ApiKeys.store(changes); }
+        catch (Exception ex) { JOptionPane.showMessageDialog(this, "Could not save the keys: " + ex.getMessage(), "API keys", JOptionPane.ERROR_MESSAGE); }
+    }
 
     private void tryCallDialog() {
         Capability cap = selectedCapability();
@@ -1160,10 +1216,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
                         if (text.contains("has no value for ${data.")) text += "\n\nThe token's data lacks that field. Select the event generator"
                             + (generatorLabel.isEmpty() ? "" : " " + generatorLabel) + " and choose a Token Data File Name that has it (PaymentService.json gives each order an orderId, amount, "
                             + "currency and card), or type the field into the token above.";
-                        java.util.regex.Matcher env = java.util.regex.Pattern.compile("environment variable (\\w+) is not set").matcher(text);
-                        if (env.find()) text += "\n\nThe mapping takes the API key from ${env:" + env.group(1) + "}, an environment variable, so the key is never written in a file. "
-                            + "Set " + env.group(1) + " on this computer and restart the editor (and on each host's machine for a run), "
-                            + "or, for a public test key, write the key into the mapping itself. For the mock card-payments API, Start from an example does that.";
+                        if (text.contains("is not set on this computer")) text += "\n\nClick API keys... beside the call mapping and enter the key; then Send again.";
                         report.setText(text);
                     } catch (Exception ex) { report.setText("The call could not be made: " + ex); }
                     report.setCaretPosition(0); send.setEnabled(true);

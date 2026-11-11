@@ -55,7 +55,7 @@
         <!-- The Deploy panel's Try a call makes a REST call exactly as a host does: the same two classes. -->
         <javac srcdir="../btsn.common/src" destdir="${build.dir}" includeantruntime="false" encoding="UTF-8"
                source="11" target="11" debug="true"
-               includes="org/btsn/invocation/CallMapping.java,org/btsn/invocation/RestAdapter.java"
+               includes="org/btsn/invocation/CallMapping.java,org/btsn/invocation/RestAdapter.java,org/btsn/invocation/ApiKeys.java"
                sourcepath="">
             <classpath refid="compile.classpath"/>
         </javac>
