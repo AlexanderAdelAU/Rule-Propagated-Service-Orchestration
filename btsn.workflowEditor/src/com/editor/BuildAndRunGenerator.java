@@ -172,7 +172,9 @@ public final class BuildAndRunGenerator {
             if (place == null || place.getServiceOperations().isEmpty() || registry.nodeFor(place).isEmpty()) continue;
             plan.targets.put(element.getId(), registry.nodeFor(place) + "_Place");
             plan.operations.put(element.getId(), place.getServiceOperations().get(0).getName());
-            if (place.getService() != null && !place.getService().isEmpty()) plan.services.put(element.getId(), place.getService());
+            // The token format: the generator's choice, else the one named after the place's service.
+            String format = !element.getTokenFormat().isEmpty() ? element.getTokenFormat() : place.getService();
+            if (format != null && !format.isEmpty()) plan.services.put(element.getId(), format);
             plan.rates.put(element.getId(), parse(element.getGeneratorRate(), 1000));
             plan.versions.put(element.getId(), VERSIONS.contains(element.getTokenVersion()) ? element.getTokenVersion() : "v001");
             int inputs = joinInputs(canvas, element, place);
@@ -289,7 +291,8 @@ public final class BuildAndRunGenerator {
         String id = generator.getId();
         plan.targets.put(id, registry.nodeFor(first.place) + "_Place");
         plan.operations.put(id, first.place.getServiceOperations().get(0).getName());
-        if (first.place.getService() != null && !first.place.getService().isEmpty()) plan.services.put(id, first.place.getService());
+        String format = !generator.getTokenFormat().isEmpty() ? generator.getTokenFormat() : first.place.getService();
+        if (format != null && !format.isEmpty()) plan.services.put(id, format);
         plan.rates.put(id, parse(generator.getGeneratorRate(), 1000));
         plan.versions.put(id, VERSIONS.contains(generator.getTokenVersion()) ? generator.getTokenVersion() : "v001");
         boolean oneJoin = role.marks.size() == 1 && first.join != null && first.count == first.available.size();

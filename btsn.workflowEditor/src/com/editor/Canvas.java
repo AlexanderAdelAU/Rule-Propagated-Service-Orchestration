@@ -2918,6 +2918,38 @@ public class Canvas extends JPanel {
      * Things to finish before the process can be deployed, which do not stop it being saved: draft services,
      * guards that test values a service does not route on, and services still running the editor's starting code.
      */
+    /** The token formats a generator can use: btsn.common.eventgenerators/TokenFormats/<name>.json, without Default. */
+    public List<String> tokenFormats() {
+        List<String> names = new ArrayList<>();
+        java.io.File common = serviceRegistry.common() != null ? serviceRegistry.common() : ServiceRegistry.findCommon(definitionLocation);
+        java.io.File[] files = common == null ? null : new java.io.File(common.getParentFile(), "btsn.common.eventgenerators/TokenFormats").listFiles();
+        if (files != null) for (java.io.File f : files)
+            if (f.getName().endsWith(".json") && !f.getName().equals("Default.json")) names.add(f.getName().substring(0, f.getName().length() - 5));
+        java.util.Collections.sort(names);
+        return names;
+    }
+
+    /** The token format a generator's tokens take their data from: its own choice, else the first place's service, or "". */
+    public String tokenFormatOf(ProcessElement generator) {
+        if (!generator.getTokenFormat().isEmpty()) return generator.getTokenFormat();
+        for (Arrow a : arrows) {
+            if (a.getSource() != generator || a.getTarget() == null) continue;
+            for (Arrow b : arrows) if (b.getSource() == a.getTarget() && b.getTarget() != null && b.getTarget().getType() == ProcessElement.Type.PLACE)
+                return b.getTarget().getService() == null ? "" : b.getTarget().getService();
+        }
+        return "";
+    }
+
+    /** The generator whose tokens arrive at this place (through its T_in), or null. */
+    public ProcessElement generatorFeeding(ProcessElement place) {
+        for (Arrow b : arrows) {
+            if (b.getTarget() != place || b.getSource() == null) continue;
+            for (Arrow a : arrows) if (a.getTarget() == b.getSource() && a.getSource() != null && a.getSource().getType() == ProcessElement.Type.EVENT_GENERATOR)
+                return a.getSource();
+        }
+        return null;
+    }
+
     /** The values the service of the place feeding this T_out routes on, for the guards on its arcs: empty when unknown. */
     public List<String> answersBefore(ProcessElement tOut) {
         List<String> answers = new ArrayList<>();
@@ -3668,6 +3700,8 @@ public class Canvas extends JPanel {
                 json.append(",\n      \"token_version\": \"").append(escapeJSON(element.getTokenVersion())).append("\"");
                 if (!element.getTokenData().isEmpty())
                     json.append(",\n      \"token_data\": \"").append(escapeJSON(element.getTokenData())).append("\"");
+                if (!element.getTokenFormat().isEmpty())
+                    json.append(",\n      \"token_format\": \"").append(escapeJSON(element.getTokenFormat())).append("\"");
                 
                 // A generator feeds one place; forks are a place's T_out, so no fork_behavior is saved.
             } else {
@@ -3938,6 +3972,8 @@ public class Canvas extends JPanel {
                 }
                 String tokenData = extractValue(block, "token_data");
                 if (tokenData != null) element.setTokenData(tokenData);
+                String tokenFormat = extractValue(block, "token_format");
+                if (tokenFormat != null) element.setTokenFormat(tokenFormat);
                 
                 // Parse fork_behavior if present
                 if (block.contains("\"fork_behavior\"")) {

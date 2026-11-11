@@ -244,6 +244,26 @@ public class EditorFrame extends JPanel {
                 canvas.saveUndoState();
             }));
 
+            // Where each token's data comes from: a token format, so a service that reads fields (amount, card, ...) gets them.
+            java.util.List<String> formats = canvas.tokenFormats();
+            final String noFormat = "(none: Token data only)";
+            JComboBox<String> formatCombo = new JComboBox<>();
+            formatCombo.addItem(noFormat);
+            for (String f : formats) formatCombo.addItem(f);
+            String current = canvas.tokenFormatOf(element);
+            if (!element.getTokenFormat().isEmpty() && !formats.contains(element.getTokenFormat())) formatCombo.addItem(element.getTokenFormat());
+            formatCombo.setSelectedItem(formats.contains(current) || current.equals(element.getTokenFormat()) ? current : noFormat);
+            formatCombo.setToolTipText("<html>Each token's data comes from a token format in btsn.common.eventgenerators/TokenFormats:<br>"
+                + "PaymentService gives each order an orderId (ORD-n), amount, currency and card, for example.<br>Token data, below, is added to every token as well.</html>");
+            addComboField("Token format:", formatCombo, (String) formatCombo.getSelectedItem());
+            formatCombo.addActionListener(e -> {
+                Object chosen = formatCombo.getSelectedItem();
+                String value = chosen == null || noFormat.equals(chosen) ? "" : chosen.toString();
+                if (value.equals(element.getTokenFormat())) return;
+                canvas.saveUndoState();
+                element.setTokenFormat(value);
+            });
+
             // What this generator does, from its one arc: arrivals, or the initial marking of a closed net (sent once).
             Canvas.GeneratorRole role = canvas.generatorRole(element);
             if (role.marking()) {

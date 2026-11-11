@@ -40,6 +40,7 @@ public class ProcessElement {
     // Additional attributes for Event Generators
     private String generatorRate = "1000";  // Token generation rate in ms
     private String tokenVersion = "v001";   // Version prefix for generated tokens
+    private String tokenFormat = "";        // TokenFormats/<name>.json that fills each token's data; blank: the first place's service
     private String tokenData = "";          // name=value,... put in every token the generator sends (e.g. application_id=LOAN-1)
     private String launchProcess = "";      // a Signal node: the process it launches (e.g. financial/Workflow/Loan_Compensation_Workflow)
     
@@ -681,6 +682,8 @@ public class ProcessElement {
     }
 
     public String getTokenData() { return tokenData; }
+    public String getTokenFormat() { return tokenFormat; }
+    public void setTokenFormat(String format) { this.tokenFormat = format == null ? "" : format.trim(); }
     public String getLaunchProcess() { return launchProcess; }
     public void setLaunchProcess(String process) { this.launchProcess = process == null ? "" : process.trim(); }
     /** A Signal node: ends the token in this process, as a Terminate node does, and launches the process it names. */
