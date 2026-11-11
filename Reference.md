@@ -520,7 +520,7 @@ Below the box, **Inputs** lists the selected place's inputs. They come from the 
 
 The host targets you can choose come from
 [`SingleHost.json`](btsn.common/InfrastructureDefinitionFolder/SingleHost.json)
-(**Choose infrastructure...** picks another):
+(**Machines** on the editor's toolbar picks another):
 
 | Host target (the window's Node) | Channel | Address | Fixed Base Ports |
 |---|---|---|---|

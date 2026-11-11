@@ -248,7 +248,8 @@ public final class DeployFlowCheck {
                 check("192.168.1.82:4001".equals(table.getValueAt(0, 2)), "Credit host address: " + table.getValueAt(0, 2));
                 check(!((JTable)field(panel, "nodeNetworkTable")).isShowing(), "Hosts table still shown when deploying a process");
                 for (AbstractButton b : buttons(panel.getContentPane()))
-                    if (b.getText().endsWith("capability")) check(!b.isVisible(), b.getText() + " offered when deploying a process");
+                    if (b.getText().endsWith("capability") || b.getText().contains("catalogue") || b.getText().startsWith("Choose infrastructure"))
+                        check(!b.isShowing(), b.getText() + " offered when deploying a process");
                 panel.dispose(); panel = null;
 
                 // The selected place's endpoint and wait are edited in a full-width box below the table, and the wait

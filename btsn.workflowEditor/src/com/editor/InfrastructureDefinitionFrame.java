@@ -640,11 +640,11 @@ public class InfrastructureDefinitionFrame extends JFrame {
             + "its queue, rules and routing. With the rest adapter, the host calls the service at its Service endpoint, which may be anywhere. "
             + "Places come from the process diagram: add or remove them there.");
         capabilitiesPanel.setBorder(BorderFactory.createTitledBorder("Places in " + name));
+        // The process already decides these: its domain folder gives the catalogue, and Machines on the editor's
+        // toolbar gives the hosts. So the row buttons (add, remove, catalogue) are not offered here.
         addCapabilityButton.setVisible(false);
         removeCapabilityButton.setVisible(false);
-        JButton chooseInfrastructure = new JButton("Choose infrastructure...");
-        chooseInfrastructure.addActionListener(e -> { chooseInfrastructure(); capabilityModel.fireTableDataChanged(); });
-        capButtons.add(chooseInfrastructure, 0);
+        capButtons.setVisible(false);
         root.remove(split);
         split.setBottomComponent(null);
         root.add(lowerSplit, BorderLayout.CENTER);
