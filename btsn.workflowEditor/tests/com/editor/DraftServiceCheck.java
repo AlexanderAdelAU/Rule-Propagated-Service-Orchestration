@@ -40,7 +40,7 @@ public final class DraftServiceCheck {
         ServiceRegistry registry = new ServiceRegistry();
         registry.loadCatalogue(credit.toFile());
         check(registry.services().contains("FraudScreenService") && registry.isDraft("FraudScreenService") && !registry.isDraft("CreditLimitService"), "Draft not offered: " + registry.services());
-        check(registry.describe("FraudScreenService", "screen").contains("Draft: still needs a description"), "Draft not described as such");
+        check(registry.describe("FraudScreenService", "screen").contains("Draft: still needs a return attribute, its code"), "Draft not described as such");
         List<String> refused = registry.validateEndpoint("FraudScreenService", "screen", "", Arrays.asList("token"), "");
         Canvas canvas = new Canvas(); canvas.setDefinitionLocation(process.toFile()); canvas.loadFromJSON(Files.readString(process));
         check(canvas.validateServiceContracts().isEmpty(), "A draft should not stop the process being saved: " + canvas.validateServiceContracts());

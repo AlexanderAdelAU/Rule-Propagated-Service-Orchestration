@@ -201,8 +201,7 @@ public final class ServiceDefinitionDialog extends JDialog {
     /** What the service still needs before it can be deployed (empty: it becomes active). */
     private List<String> stillNeeded(CatalogueWriter.Entry e) {
         List<String> needed = new ArrayList<>();
-        if (e.description.isEmpty()) needed.add("a description");
-        if (e.returns.isEmpty()) needed.add("what it returns");
+        // What it does and what it returns are words for people: worth writing, but they never stop a service being deployed.
         if (e.inputs.isEmpty()) needed.add("its inputs");
         if (e.returnAttribute.isEmpty()) needed.add("a return attribute");
         if (undecided.isSelected()) needed.add("its code: a Java class, or a service called over REST");
