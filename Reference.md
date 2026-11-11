@@ -514,7 +514,7 @@ Use either route:
 | **Port Slot** | `0`, the host target's first fixed port | A host target has a second port (P4, P6) and you need it |
 | **Instance** | The place label (`P2`) | You want another name. The supplied file uses `StochasticInstance1`. |
 | **Invocation Adapter** | `boolean-token` for a Boolean service | Never for this tutorial |
-| **Service endpoint** | Blank | You set the adapter to `rest`, so the host calls the service over HTTP ([Call it over REST](ServiceTutorial.md#8-call-it-over-rest)). The place's host still runs on its host target; only the service runs at the endpoint. Enter the address in the **Service endpoint** box below the table, beside **Wait up to**: how long the host waits for an answer, in ms (blank for 10 s). |
+| **Service endpoint** | Blank | You set the adapter to `rest`, so the host calls the service over HTTP ([Call it over REST](ServiceTutorial.md#8-call-it-over-rest)). The place's host still runs on its host target; only the service runs at the endpoint. Enter the address in the **Service endpoint** box below the table, or use **Fill in from OpenAPI...** beside it. **Wait up to**, under it, is how long the host waits for an answer, in ms (blank for 10 s). |
 
 Below the box, **Inputs** lists the selected place's inputs. They come from the catalogue and arrive by name in the token, so they are shown, not edited; only a `boolean-token` placement names its own.
 

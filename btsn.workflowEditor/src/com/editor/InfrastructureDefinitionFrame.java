@@ -68,7 +68,10 @@ public class InfrastructureDefinitionFrame extends JFrame {
     private String lastValidCall = "";
     private final JButton callExample = new JButton("Start from an example");
     private final JButton tryCall = new JButton("Try a call...");
-    private final JButton importOpenApi = new JButton("Import from OpenAPI...");
+    private final JButton importOpenApi = new JButton("Fill in from OpenAPI...");
+    /** One box for everything about how the selected place calls its service, titled with the place. */
+    private final javax.swing.border.TitledBorder callBorder = BorderFactory.createTitledBorder("How the place calls its service");
+    private final JPanel callBox = new JPanel(new BorderLayout(4, 4));
     /** True while the endpoint box is filled from the selected row or writes to it, so neither echoes the other. */
     private boolean endpointSync;
     private File currentFile;
@@ -161,8 +164,11 @@ public class InfrastructureDefinitionFrame extends JFrame {
         });
         capButtons.add(chooseCatalogue);
         JPanel capabilitiesSouth = new JPanel(new BorderLayout(4, 2));
-        capabilitiesSouth.add(endpointPanel(), BorderLayout.NORTH);
-        capabilitiesSouth.add(callPanel(), BorderLayout.CENTER);
+        // Endpoint, wait, call mapping and Try a call in one box, in the order they are filled in.
+        callBox.setBorder(callBorder);
+        callBox.add(endpointPanel(), BorderLayout.NORTH);
+        callBox.add(callPanel(), BorderLayout.CENTER);
+        capabilitiesSouth.add(callBox, BorderLayout.CENTER);
         capabilitiesSouth.add(capButtons, BorderLayout.SOUTH);
         capabilitiesPanel.add(capabilitiesSouth, BorderLayout.SOUTH);
 
@@ -823,12 +829,17 @@ public class InfrastructureDefinitionFrame extends JFrame {
         JPanel p = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.insets = new Insets(2, 4, 2, 4); c.anchor = GridBagConstraints.WEST;
+        // The OpenAPI button sits beside the box it fills in.
         c.gridy = 0; c.gridx = 0; p.add(endpointLabel, c);
         c.gridx = 1; c.weightx = 1; c.fill = GridBagConstraints.HORIZONTAL; p.add(endpointField, c);
-        c.gridx = 2; c.weightx = 0; c.fill = GridBagConstraints.NONE; p.add(new JLabel("Wait up to"), c);
-        c.gridx = 3; p.add(timeoutField, c);
-        c.gridx = 4; p.add(new JLabel("ms"), c);
-        c.gridy = 1; c.gridx = 1; c.gridwidth = 4; c.fill = GridBagConstraints.HORIZONTAL; p.add(endpointNote, c);
+        c.gridx = 2; c.weightx = 0; c.fill = GridBagConstraints.NONE; p.add(importOpenApi, c);
+        c.gridy = 1; c.gridx = 1; c.gridwidth = 2; c.fill = GridBagConstraints.HORIZONTAL; p.add(endpointNote, c);
+        JPanel wait = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+        wait.add(timeoutField); wait.add(new JLabel("ms (blank: 10 seconds)"));
+        c.gridy = 2; c.gridx = 0; c.gridwidth = 1; c.fill = GridBagConstraints.NONE; p.add(new JLabel("Wait up to:"), c);
+        c.gridx = 1; c.gridwidth = 2; p.add(wait, c);
+        importOpenApi.setToolTipText("Read the API's published definition (OpenAPI or Swagger, as JSON) and fill in the endpoint and call mapping for one of its operations");
+        importOpenApi.addActionListener(e -> importOpenApiDialog());
         endpointField.setToolTipText("The http(s) address the host POSTs each call to, e.g. https://example.org/payment/authorise");
         timeoutField.setToolTipText("How long the host waits for an answer before the call fails (timeoutMs). Blank: 10 seconds.");
         endpointField.getDocument().addDocumentListener(onChange(this::endpointEdited));
@@ -871,7 +882,9 @@ public class InfrastructureDefinitionFrame extends JFrame {
         endpointSync = true;
         try {
             String name = cap == null ? "" : processCanvas != null && !placeLabel(cap).isEmpty() ? placeLabel(cap) : cap.service + "." + cap.operation;
-            endpointLabel.setText(name.isEmpty() ? "Service endpoint:" : "Service endpoint of " + name + ":");
+            endpointLabel.setText("Service endpoint:");
+            callBorder.setTitle(name.isEmpty() ? "How the place calls its service" : "How " + name + " calls its service");
+            callBox.repaint();
             String endpoint = rest ? cap.endpoint : "";
             if (!endpointField.getText().trim().equals(endpoint)) { endpointField.setText(endpoint); endpointField.setCaretPosition(0); }
             String timeout = rest && cap.timeoutMs > 0 ? String.valueOf(cap.timeoutMs) : "";
@@ -907,16 +920,15 @@ public class InfrastructureDefinitionFrame extends JFrame {
     /** The Call mapping box: for a rest row, how to call an API that was not written for RPSO, and a trial call. */
     private JPanel callPanel() {
         JPanel p = new JPanel(new BorderLayout(4, 2));
-        p.setBorder(BorderFactory.createTitledBorder("Call mapping (only for an API that was not written for RPSO; leave empty otherwise)"));
+        p.setBorder(BorderFactory.createEmptyBorder(6, 4, 0, 4));
+        p.add(new JLabel("Call mapping (only for an API that was not written for RPSO; leave empty otherwise):"), BorderLayout.NORTH);
         callArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
         callArea.setToolTipText("<html>How the host calls this API, as JSON: method, headers, body, result, route, statusRoutes.<br>"
             + "${data.amount} is a field of the token's data; ${env:NAME} is an environment variable on the host, for API keys.</html>");
         p.add(new JScrollPane(callArea), BorderLayout.CENTER);
         JPanel south = new JPanel(new BorderLayout(6, 0));
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
-        buttons.add(importOpenApi); buttons.add(callExample); buttons.add(tryCall);
-        importOpenApi.setToolTipText("Read the API's published definition (OpenAPI or Swagger, as JSON) and fill in the endpoint and call mapping for one of its operations");
-        importOpenApi.addActionListener(e -> importOpenApiDialog());
+        buttons.add(callExample); buttons.add(tryCall);
         south.add(callNote, BorderLayout.CENTER); south.add(buttons, BorderLayout.EAST);
         p.add(south, BorderLayout.SOUTH);
         callArea.getDocument().addDocumentListener(onChange(this::callEdited));
@@ -1056,7 +1068,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
             operations = definition.operations();
             if (operations.isEmpty()) throw new IllegalArgumentException("The definition lists no operations.");
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage(), "Import from OpenAPI", JOptionPane.ERROR_MESSAGE); return;
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Fill in from OpenAPI", JOptionPane.ERROR_MESSAGE); return;
         }
         JList<OpenApiImport.Operation> list = new JList<>(operations.toArray(new OpenApiImport.Operation[0]));
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); list.setSelectedIndex(0); list.setVisibleRowCount(Math.min(14, operations.size()));
@@ -1064,7 +1076,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
         choice.add(new JLabel("<html>Which operation of <b>" + (definition.title().isEmpty() ? chooser.getSelectedFile().getName() : definition.title())
             + "</b> does " + (placeLabel(cap).isEmpty() ? cap.service : placeLabel(cap)) + " call?</html>"), BorderLayout.NORTH);
         choice.add(new JScrollPane(list), BorderLayout.CENTER);
-        if (JOptionPane.showConfirmDialog(this, choice, "Import from OpenAPI", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) != JOptionPane.OK_OPTION
+        if (JOptionPane.showConfirmDialog(this, choice, "Fill in from OpenAPI", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) != JOptionPane.OK_OPTION
                 || list.getSelectedValue() == null) return;
         OpenApiImport.Mapping mapping = definition.mapping(list.getSelectedValue());
         if (!mapping.endpoint.isEmpty()) endpointField.setText(mapping.endpoint);
@@ -1072,7 +1084,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
         JTextArea notes = new JTextArea("The endpoint and call mapping are filled in for " + list.getSelectedValue().method + " " + list.getSelectedValue().path
             + ".\n\nTo check:\n- " + String.join("\n- ", mapping.notes) + "\n\nThen use Try a call.", 12, 70);
         notes.setEditable(false); notes.setLineWrap(true); notes.setWrapStyleWord(true); notes.setOpaque(false);
-        JOptionPane.showMessageDialog(this, new JScrollPane(notes), "Import from OpenAPI", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, new JScrollPane(notes), "Fill in from OpenAPI", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void tryCallDialog() {
@@ -1128,7 +1140,8 @@ public class InfrastructureDefinitionFrame extends JFrame {
         else {
             List<String> names = new ArrayList<>(); for (Argument argument : cap.arguments) names.add(argument.name);
             List<String> errors = serviceRegistry.validateEndpoint(cap.service, cap.operation, cap.returnAttribute, names, cap.adapter, cap.endpoint);
-            if (!errors.isEmpty()) { note = String.join("; ", errors); problem = true; }
+            if (cap.endpoint == null || cap.endpoint.trim().isEmpty()) { note = "Enter the service's web address, or use Fill in from OpenAPI."; problem = true; }
+            else if (!errors.isEmpty()) { note = String.join("; ", errors); problem = true; }
             else note = (cap.call.isEmpty() ? "The host POSTs each call here" : "The host calls this address as the call mapping says") + " and waits up to " + (cap.timeoutMs > 0 ? cap.timeoutMs + " ms" : "10 seconds (leave the wait blank)")
                 + "; a later answer fails the call.";
         }
