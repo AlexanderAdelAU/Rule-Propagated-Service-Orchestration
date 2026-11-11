@@ -2922,7 +2922,9 @@ public class Canvas extends JPanel {
     public List<String> tokenFormats() {
         List<String> names = new ArrayList<>();
         java.io.File common = serviceRegistry.common() != null ? serviceRegistry.common() : ServiceRegistry.findCommon(definitionLocation);
-        java.io.File[] files = common == null ? null : new java.io.File(common.getParentFile(), "btsn.common.eventgenerators/TokenFormats").listFiles();
+        java.io.File folder = common == null ? null : new java.io.File(common.getParentFile(), "btsn.common.eventgenerators/TokenFormats");
+        if (folder != null && folder.isDirectory()) TokenDataExample.ensure(folder);
+        java.io.File[] files = folder == null ? null : folder.listFiles();
         if (files != null) for (java.io.File f : files)
             if (f.getName().endsWith(".json") && !f.getName().equals("Default.json")) names.add(f.getName().substring(0, f.getName().length() - 5));
         java.util.Collections.sort(names);

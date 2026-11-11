@@ -1148,7 +1148,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
         report.setEditable(false); report.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
         report.setText("Press Send to make one call to\n" + cap.endpoint + "\nexactly as a host would. This is a real call: use a test key or a test copy of the service."
             + (noData && callArea.getText().contains("${data.") ? "\n\nThis token carries no data, so the mapping's ${data...} values have nothing to fill them. "
-                + "Select the event generator" + (generatorName.isEmpty() ? "" : " " + generatorName) + " and choose its Token format (PaymentService gives each order an "
+                + "Select the event generator" + (generatorName.isEmpty() ? "" : " " + generatorName) + " and choose its Token Data File Name (PaymentService.json gives each order an "
                 + "orderId, amount, currency and card), or type the data into the token above." : ""));
         JButton send = new JButton("Send");
         JPanel top = new JPanel(new BorderLayout(4, 4));
@@ -1171,7 +1171,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
                     try {
                         String text = get();
                         if (text.contains("has no value for ${data.")) text += "\n\nThe token's data lacks that field. Select the event generator"
-                            + (generatorLabel.isEmpty() ? "" : " " + generatorLabel) + " and choose a Token format that has it (PaymentService gives each order an orderId, amount, "
+                            + (generatorLabel.isEmpty() ? "" : " " + generatorLabel) + " and choose a Token Data File Name that has it (PaymentService.json gives each order an orderId, amount, "
                             + "currency and card), or type the field into the token above.";
                         report.setText(text);
                     } catch (Exception ex) { report.setText("The call could not be made: " + ex); }

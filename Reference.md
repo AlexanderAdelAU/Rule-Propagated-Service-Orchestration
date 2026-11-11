@@ -357,8 +357,8 @@ place has an arc into it.
   Here both are `P2`; business models use the label, for example `T_in_Validation`.
 - The generator's **Rate** and **Version** become the defaults in
   [Build and Run](#3-create-build-and-run).
-- The generator's **Token format** fills each token's data from a file in `btsn.common.eventgenerators/TokenFormats`, different for each token: `PaymentService` gives order n the orderId `ORD-n`, a customer, a currency and an amount and card from its case mix. Left at (none), a format named after the first place's service is used if there is one. Try a call in Deploy starts from the same data.
-- The generator's **Token data** is the business data every token it sends carries, as `name=value` pairs separated by commas, for example `application_id=LOAN-1, annual_income=85000, requested_amount=25000`.
+- The generator's **Token Data File Name** is the file in `btsn.common.eventgenerators/TokenFormats` that fills each token's data, different for each token: `PaymentService.json` gives order n the orderId `ORD-n`, a customer, a currency and an amount and card from its case mix. To make your own, copy `ExampleTokenDataFile.json` in that folder to a new name and change its fields; the example itself is read-only. Left at (none), a file named after the first place's service is used if there is one. Try a call in Deploy starts from the same data.
+- The generator's **Extra fields (name=value)** are added to every token it sends, on top of the file's, as `name=value` pairs separated by commas, for example `application_id=LOAN-1, annual_income=85000, requested_amount=25000`.
   - Services that read fields from their token need it. The financial ValidationService rejects an application with no `application_id`, income or amount, so without it every token takes the `invalid` arc.
   - Leave it blank for services that don't read fields: the Petri-net models, and services that fall back on values from the token's number, such as claims, credit and inventory.
   - Healthcare tokens are filled from the catalogue's token formats instead.

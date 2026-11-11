@@ -231,38 +231,39 @@ public class EditorFrame extends JPanel {
                 element.setTokenVersion(freshVersionField.getText().trim());
             }));
 
+            // Where each token's data comes from: a file in TokenFormats, so a service that reads fields (amount, card, ...) gets them.
+            java.util.List<String> formats = canvas.tokenFormats();
+            final String noFormat = "(none)";
+            JComboBox<String> formatCombo = new JComboBox<>();
+            formatCombo.addItem(noFormat);
+            for (String f : formats) formatCombo.addItem(f + ".json");
+            String current = canvas.tokenFormatOf(element);
+            if (!element.getTokenFormat().isEmpty() && !formats.contains(element.getTokenFormat())) formatCombo.addItem(element.getTokenFormat() + ".json");
+            formatCombo.setSelectedItem(formats.contains(current) || current.equals(element.getTokenFormat()) ? current + ".json" : noFormat);
+            formatCombo.setToolTipText("<html>Save your token data in this file, in btsn.common.eventgenerators/TokenFormats.<br>"
+                + "The Event Generator uses it to populate each token's data.<br>"
+                + "To make your own, copy ExampleTokenDataFile.json in that folder to a new name and change its fields.</html>");
+            addComboField("Token Data File Name:", formatCombo, (String) formatCombo.getSelectedItem());
+            formatCombo.addActionListener(e -> {
+                Object chosen = formatCombo.getSelectedItem();
+                String value = chosen == null || noFormat.equals(chosen) ? "" : chosen.toString().replaceFirst("\\.json$", "");
+                if (value.equals(element.getTokenFormat())) return;
+                canvas.saveUndoState();
+                element.setTokenFormat(value);
+            });
+
             // The business data every token carries, for services that read fields from it (an application's amount, ...).
             JTextField dataField = new JTextField(15);
-            addField("Token data:", dataField, element.getTokenData());
-            dataField.setToolTipText("<html>Fields put in every token this generator sends, as name=value pairs separated by commas,<br>"
-                + "e.g. application_id=LOAN-1, annual_income=85000, requested_amount=25000.<br>"
-                + "Services that read fields from their token need them; leave it blank for services that don't.</html>");
+            addField("Extra fields (name=value):", dataField, element.getTokenData());
+            dataField.setToolTipText("<html>Fields added to every token this generator sends, on top of the token data file's, as name=value pairs<br>"
+                + "separated by commas, e.g. application_id=LOAN-1, annual_income=85000. Not a file name: choose the file above.<br>"
+                + "Leave it blank when the file gives the token all it needs.</html>");
             dataField.getDocument().addDocumentListener(new SimpleDocumentListener(() -> {
                 String text = dataField.getText().trim();
                 if (text.equals(element.getTokenData())) return;
                 element.setTokenData(text);
                 canvas.saveUndoState();
             }));
-
-            // Where each token's data comes from: a token format, so a service that reads fields (amount, card, ...) gets them.
-            java.util.List<String> formats = canvas.tokenFormats();
-            final String noFormat = "(none: Token data only)";
-            JComboBox<String> formatCombo = new JComboBox<>();
-            formatCombo.addItem(noFormat);
-            for (String f : formats) formatCombo.addItem(f);
-            String current = canvas.tokenFormatOf(element);
-            if (!element.getTokenFormat().isEmpty() && !formats.contains(element.getTokenFormat())) formatCombo.addItem(element.getTokenFormat());
-            formatCombo.setSelectedItem(formats.contains(current) || current.equals(element.getTokenFormat()) ? current : noFormat);
-            formatCombo.setToolTipText("<html>Each token's data comes from a token format in btsn.common.eventgenerators/TokenFormats:<br>"
-                + "PaymentService gives each order an orderId (ORD-n), amount, currency and card, for example.<br>Token data, below, is added to every token as well.</html>");
-            addComboField("Token format:", formatCombo, (String) formatCombo.getSelectedItem());
-            formatCombo.addActionListener(e -> {
-                Object chosen = formatCombo.getSelectedItem();
-                String value = chosen == null || noFormat.equals(chosen) ? "" : chosen.toString();
-                if (value.equals(element.getTokenFormat())) return;
-                canvas.saveUndoState();
-                element.setTokenFormat(value);
-            });
 
             // What this generator does, from its one arc: arrivals, or the initial marking of a closed net (sent once).
             Canvas.GeneratorRole role = canvas.generatorRole(element);

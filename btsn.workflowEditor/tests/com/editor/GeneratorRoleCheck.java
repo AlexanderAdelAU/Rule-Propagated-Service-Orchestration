@@ -87,7 +87,7 @@ public final class GeneratorRoleCheck {
                 check(BuildAndRunGenerator.launcherXml(dplan, dplan.defaults).contains("name=\"eg1.data\" value=\"application_id=LOAN-1,annual_income=85000\""), "Launcher has no eg1.data");
                 check(BuildAndRunGenerator.summary(dplan, dplan.defaults).stream().anyMatch(l -> l.startsWith("Data     every token from " + arrivals.getId() + " carries application_id=LOAN-1")), "Summary has no data line");
                 arrivals.setTokenData("not pairs");
-                check(BuildAndRunGenerator.plan(open, tutorial).problems.stream().anyMatch(m -> m.contains("Token data is not name=value pairs")), "Bad token data not reported");
+                check(BuildAndRunGenerator.plan(open, tutorial).problems.stream().anyMatch(m -> m.contains("Extra fields are not name=value pairs")), "Bad token data not reported");
 
                 // The financial processes carry the application their services validate.
                 File preScreen = new File(common, "ProcessDefinitionFolder/financial/Workflow/FinancialSystem_Stage3_PreScreen_Workflow.json");

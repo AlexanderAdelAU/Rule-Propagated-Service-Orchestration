@@ -164,7 +164,7 @@ public final class BuildAndRunGenerator {
         for (ProcessElement element : canvas.getElements()) {
             if (element.getType() != ProcessElement.Type.EVENT_GENERATOR) continue;
             String data = tokenData(element.getTokenData());
-            if (data == null) plan.problems.add(element.getLabel() + "'s Token data is not name=value pairs separated by commas: " + element.getTokenData());
+            if (data == null) plan.problems.add(element.getLabel() + "'s Extra fields are not name=value pairs separated by commas (a token data file goes in Token Data File Name): " + element.getTokenData());
             else if (!data.isEmpty()) plan.data.put(element.getId(), data);
             Canvas.GeneratorRole role = canvas.generatorRole(element);
             if (role.marking()) { planMarking(plan, registry, element, role); continue; }
