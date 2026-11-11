@@ -2,9 +2,11 @@
 
 **RPSO uses Petri net concepts to transform ordinary callable services into a formally defined, distributed orchestration system.**
 
-For example, say you have an online store that relies on a remote Payment Service. It works well under normal conditions, but what happens when order volumes rise, calls become slow, or the service fails? How do those problems affect the rest of the checkout process, without changing any of your existing code?
+RPSO is an orchestration infrastructure. You draw a process, and generic hosts carry it out across machines and organisations with no central engine, calling your existing services where they already run.
 
-With **RPSO**, you can leave the Payment Service where it is and bind its existing REST endpoint to a **Place** in a Petri-net model. Define the operation's inputs and result, connect the transitions that govern its execution, then generate test requests through the process. RPSO records the execution so you can measure, analyse and replay what actually happened.
+The smallest proof is a process with one step. Say an online store relies on a remote Payment Service. Bind its existing REST endpoint to a **Place** in a Petri-net model and connect the transitions that govern it. RPSO then orchestrates every payment through that Place: it makes the call, routes on the service's own answer and records what happened, without changing any of your existing code. That one step is already enough to see what happens when order volumes rise, calls become slow or the service fails.
+
+Nothing changes as the process grows. Add Places for inventory and order handling and the same hosts run the whole checkout; put those Places on other machines, or in other organisations, and they run it as a distributed process ([From one service to distributed workflows](#from-one-service-to-distributed-workflows)).
 
 ## Start with one service
 
