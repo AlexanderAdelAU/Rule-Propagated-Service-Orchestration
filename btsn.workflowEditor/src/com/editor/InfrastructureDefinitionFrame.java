@@ -1106,6 +1106,15 @@ public class InfrastructureDefinitionFrame extends JFrame {
         OpenApiImport.Mapping mapping = definition.mapping(list.getSelectedValue());
         if (!mapping.endpoint.isEmpty()) endpointField.setText(mapping.endpoint);
         callArea.setText(mapping.call); callArea.setCaretPosition(0);
+        // The fields the token will carry, against the fields the mapping reads: a name that differs is said now, not at the first failed call.
+        List<String> tokenFields = tokenFields(cap);
+        if (!tokenFields.isEmpty()) {
+            List<String> absent = new ArrayList<>();
+            for (String f : mapping.dataFields) if (!tokenFields.contains(f)) absent.add(f);
+            for (String f : mapping.optionalFields) if (!tokenFields.contains(f)) absent.add(f + " (optional: left out of the call, so the API gets nothing for it)");
+            if (!absent.isEmpty()) mapping.notes.add(0, "This place's tokens carry: " + String.join(", ", tokenFields) + ". The mapping reads " + String.join(", ", absent)
+                + ", which they do not have: change each ${data...} to the token's name for it (for example ${data.reference?} to ${data.orderId}), or add the field to the token data file.");
+        }
         JTextArea notes = new JTextArea("The endpoint and call mapping are filled in for " + list.getSelectedValue().method + " " + list.getSelectedValue().path
             + ".\n\nTo check:\n- " + String.join("\n- ", mapping.notes) + "\n\nThen use Try a call.", 12, 70);
         notes.setEditable(false); notes.setLineWrap(true); notes.setWrapStyleWord(true); notes.setOpaque(false);
@@ -1116,6 +1125,21 @@ public class InfrastructureDefinitionFrame extends JFrame {
     }
 
     private static String escapeHtml(String text) { return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"); }
+
+    /** The names of the data fields the tokens arriving at this row's place carry (from its generator's token data file), or empty. */
+    private List<String> tokenFields(Capability cap) {
+        List<String> names = new ArrayList<>();
+        ProcessElement place = placeRows.get(cap);
+        ProcessElement generator = processCanvas != null && place != null ? processCanvas.generatorFeeding(place) : null;
+        String format = generator != null ? processCanvas.tokenFormatOf(generator) : cap.service;
+        try {
+            String sample = sampleToken(serviceRegistry.common() != null ? serviceRegistry.common() : ServiceRegistry.findCommon(currentFile), format);
+            org.json.simple.JSONObject json = (org.json.simple.JSONObject) new org.json.simple.parser.JSONParser().parse(sample);
+            for (Object k : ((org.json.simple.JSONObject) json.get("data")).keySet()) names.add(k.toString());
+        } catch (Exception | Error ignored) { }
+        java.util.Collections.sort(names);
+        return names;
+    }
 
     /** The keys a call mapping names as ${env:NAME}, in order. */
     static List<String> keyNames(String call) {
