@@ -66,7 +66,7 @@ public final class GuardEditingCheck {
         check(canvas.serviceBlockers().contains("'T_out_Credit' has 2 Otherwise arcs; a T_out can take only one when no other guard matches. Keep one."), "Two Otherwise arcs not reported: " + canvas.serviceBlockers());
         approved.setGuardCondition("DECISION_EQUAL_TO"); approved.setDecisionValue("approve");
         GuardEditing.clear(referred);
-        check(canvas.serviceBlockers().stream().anyMatch(n -> n.startsWith("'T_out_Credit' is a GatewayNode") && n.contains("set its Guard Condition to OTHERWISE")), "Unguarded gateway arc not reported with Otherwise: " + canvas.serviceBlockers());
+        check(canvas.serviceBlockers().stream().anyMatch(n -> n.startsWith("The arrow from T_out_Credit to Referred needs a guard") && n.contains("set its Guard Condition to OTHERWISE")), "Unguarded gateway arc not reported with Otherwise: " + canvas.serviceBlockers());
         System.out.println("PASS: guards only on arcs leaving a T_out; elsewhere greyed out with Clear guard; (none) removes condition, value and the label that repeated it; Otherwise takes no value, is accepted on a gateway, and only once");
     }
 
