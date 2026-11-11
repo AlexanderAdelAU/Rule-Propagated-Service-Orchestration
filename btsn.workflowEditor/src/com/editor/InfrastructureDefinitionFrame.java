@@ -1074,9 +1074,24 @@ public class InfrastructureDefinitionFrame extends JFrame {
         }
         JList<OpenApiImport.Operation> list = new JList<>(operations.toArray(new OpenApiImport.Operation[0]));
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); list.setSelectedIndex(0); list.setVisibleRowCount(Math.min(14, operations.size()));
+        // Each call in words, then the web address it is made to, so the choice says what will go in Service endpoint.
+        final OpenApiImport api = definition;
+        list.setCellRenderer(new DefaultListCellRenderer() {
+            @Override public Component getListCellRendererComponent(JList<?> l, Object value, int index, boolean selected, boolean focus) {
+                OpenApiImport.Operation op = (OpenApiImport.Operation) value;
+                String address = api.mapping(op).endpoint;
+                String text = "<html><b>" + escapeHtml(op.summary.isEmpty() ? op.method + " " + op.path : op.summary) + "</b><br>"
+                    + escapeHtml(op.method + " " + (address.isEmpty() ? op.path : address)) + "</html>";
+                JLabel label = (JLabel) super.getListCellRendererComponent(l, text, index, selected, focus);
+                label.setBorder(BorderFactory.createEmptyBorder(4, 6, 4, 6));
+                return label;
+            }
+        });
+        String place = placeLabel(cap).isEmpty() ? cap.service : placeLabel(cap);
         JPanel choice = new JPanel(new BorderLayout(4, 6));
-        choice.add(new JLabel("<html>Which operation of <b>" + (definition.title().isEmpty() ? chooser.getSelectedFile().getName() : definition.title())
-            + "</b> does " + (placeLabel(cap).isEmpty() ? cap.service : placeLabel(cap)) + " call?</html>"), BorderLayout.NORTH);
+        choice.add(new JLabel("<html><div style='width:460px'>The definition of <b>" + escapeHtml(definition.title().isEmpty() ? chooser.getSelectedFile().getName() : definition.title())
+            + "</b> lists " + (operations.size() == 1 ? "one call" : operations.size() + " calls") + " the API offers. Choose the one " + escapeHtml(place)
+            + " makes: its web address goes into Service endpoint, and how to call it into Call mapping.</div></html>"), BorderLayout.NORTH);
         choice.add(new JScrollPane(list), BorderLayout.CENTER);
         if (JOptionPane.showConfirmDialog(this, choice, "Fill in from OpenAPI", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) != JOptionPane.OK_OPTION
                 || list.getSelectedValue() == null) return;
@@ -1088,6 +1103,8 @@ public class InfrastructureDefinitionFrame extends JFrame {
         notes.setEditable(false); notes.setLineWrap(true); notes.setWrapStyleWord(true); notes.setOpaque(false);
         JOptionPane.showMessageDialog(this, new JScrollPane(notes), "Fill in from OpenAPI", JOptionPane.INFORMATION_MESSAGE);
     }
+
+    private static String escapeHtml(String text) { return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"); }
 
     private void tryCallDialog() {
         Capability cap = selectedCapability();
