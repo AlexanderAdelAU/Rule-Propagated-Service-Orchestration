@@ -510,7 +510,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
         stopTableEditing();
         List<String> errors = validateDefinition();
         if (!errors.isEmpty()) {
-            JOptionPane.showMessageDialog(this, String.join("\n", errors),
+            JOptionPane.showMessageDialog(this, WrappedMessage.of(String.join("\n", errors)),
                 "Invalid " + definitionTitle(), JOptionPane.ERROR_MESSAGE);
             return false;
         }
