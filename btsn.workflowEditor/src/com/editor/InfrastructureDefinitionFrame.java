@@ -934,7 +934,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
         south.add(callNote, BorderLayout.CENTER); south.add(buttons, BorderLayout.EAST);
         p.add(south, BorderLayout.SOUTH);
         callArea.getDocument().addDocumentListener(onChange(this::callEdited));
-        callExample.setToolTipText("Fill the box with a mapping for a typical payments API, to change into yours");
+        callExample.setToolTipText("Fill the box with the mapping for this project's mock card-payments API, to change into yours");
         callExample.addActionListener(e -> {
             if (!callArea.getText().trim().isEmpty() && JOptionPane.showConfirmDialog(this, "Replace the call mapping with the example?",
                     "Call mapping", JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION) return;
@@ -945,11 +945,16 @@ public class InfrastructureDefinitionFrame extends JFrame {
         return p;
     }
 
+    /**
+     * The mapping for this project's mock card-payments API (examples/rest/card-payments.js), which works as it stands
+     * with Try a call and a run, and shows each part to change for another API. Its key is public on purpose; a real
+     * key goes in ${env:NAME}.
+     */
     static final String CALL_EXAMPLE = "{\n"
         + "  \"method\": \"POST\",\n"
-        + "  \"headers\": {\"Authorization\": \"Bearer ${env:PAYMENT_KEY}\"},\n"
-        + "  \"body\": {\"amount\": \"${data.amount}\", \"currency\": \"${data.currency}\"},\n"
-        + "  \"route\": {\"field\": \"status\", \"values\": {\"succeeded\": \"paid\"}, \"otherwise\": \"declined\"},\n"
+        + "  \"headers\": {\"Authorization\": \"Bearer demo_key_public\"},\n"
+        + "  \"body\": {\"amount\": \"${data.amount}\", \"currency\": \"${data.currency}\", \"card\": \"${data.card}\", \"reference\": \"${data.orderId}\"},\n"
+        + "  \"route\": {\"field\": \"status\", \"values\": {\"succeeded\": \"paid\", \"declined\": \"declined\"}},\n"
         + "  \"statusRoutes\": {\"402\": \"declined\"}\n"
         + "}";
 
@@ -1159,7 +1164,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
         else {
             List<String> names = new ArrayList<>(); for (Argument argument : cap.arguments) names.add(argument.name);
             List<String> errors = serviceRegistry.validateEndpoint(cap.service, cap.operation, cap.returnAttribute, names, cap.adapter, cap.endpoint);
-            if (cap.endpoint == null || cap.endpoint.trim().isEmpty()) { note = "Enter the service's web address, or use Fill in from OpenAPI."; problem = true; }
+            if (cap.endpoint == null || cap.endpoint.trim().isEmpty()) { note = "Enter the service's web address (if its API publishes an OpenAPI file, Fill in from OpenAPI can do it for you)."; problem = true; }
             else if (!errors.isEmpty()) { note = String.join("; ", errors); problem = true; }
             else note = (cap.call.isEmpty() ? "The host POSTs each call here" : "The host calls this address as the call mapping says") + " and waits up to " + (cap.timeoutMs > 0 ? cap.timeoutMs + " ms" : "10 seconds (leave the wait blank)")
                 + "; a later answer fails the call.";

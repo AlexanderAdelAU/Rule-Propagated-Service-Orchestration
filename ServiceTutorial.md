@@ -650,7 +650,7 @@ To run it, open `Plain_Payment_Test.json` in the editor and click **Run on hosts
 **In the editor.** Click **Deploy** and select the place. The box **How <place> calls its service** holds everything
 about the call: the **Service endpoint**, **Wait up to**, and the **Call mapping**, which holds the mapping above; leave it empty for a service that answers in RPSO's own format. The note under the box says
 what is wrong with a mapping as you type, and a mapping is saved only once it is valid. **Start from an example**
-fills the box with a mapping for a typical payments API, to change into yours.
+fills the box with a mapping for the same mock card-payments API, which works as it stands; change it into yours.
 
 **Fill in from OpenAPI...**, beside the endpoint, fills in the endpoint and the mapping from the API's published definition (OpenAPI 3 or
 Swagger 2, as a JSON file; a YAML definition must be converted to JSON first). Choose the file, then the operation the
