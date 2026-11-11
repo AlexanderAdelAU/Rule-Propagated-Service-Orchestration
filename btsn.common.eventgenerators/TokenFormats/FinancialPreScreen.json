@@ -1,0 +1,12 @@
+{
+  "description": "A pre-screen application, as the pre-screen services check it. Every token carries the same application.",
+  "tokenStructure": {
+    "data": {
+      "application_id": "PRESCREEN-1",
+      "annual_income": 90000,
+      "requested_amount": 22000,
+      "credit_score": 680,
+      "fraud_risk": "low"
+    }
+  }
+}

@@ -3706,8 +3706,6 @@ public class Canvas extends JPanel {
                 json.append(",\n      \"rotation\": ").append(element.getRotationAngle());
                 json.append(",\n      \"generator_rate\": \"").append(escapeJSON(element.getGeneratorRate())).append("\"");
                 json.append(",\n      \"token_version\": \"").append(escapeJSON(element.getTokenVersion())).append("\"");
-                if (!element.getTokenData().isEmpty())
-                    json.append(",\n      \"token_data\": \"").append(escapeJSON(element.getTokenData())).append("\"");
                 if (!element.getTokenFormat().isEmpty())
                     json.append(",\n      \"token_format\": \"").append(escapeJSON(element.getTokenFormat())).append("\"");
                 
@@ -3978,8 +3976,7 @@ public class Canvas extends JPanel {
                 if (tokenVersion != null && !tokenVersion.isEmpty()) {
                     element.setTokenVersion(tokenVersion);
                 }
-                String tokenData = extractValue(block, "token_data");
-                if (tokenData != null) element.setTokenData(tokenData);
+                // token_data (fixed name=value fields) from older processes is not kept: a token's data comes from its token data file.
                 String tokenFormat = extractValue(block, "token_format");
                 if (tokenFormat != null) element.setTokenFormat(tokenFormat);
                 

@@ -277,22 +277,6 @@ public class EditorFrame extends JPanel {
             formatButtons.add(openFormat); formatButtons.add(newFormat);
             attributesPanel.add(formatButtons);
 
-            // Fixed name=value fields: kept for processes that already have them, so they can be seen and cleared.
-            // New designs put every field in the token data file above.
-            if (!element.getTokenData().isEmpty()) {
-            JTextField dataField = new JTextField(15);
-            addField("Extra fields (name=value):", dataField, element.getTokenData());
-            dataField.setToolTipText("<html>Fields added to every token this generator sends, on top of the token data file's, as name=value pairs<br>"
-                + "separated by commas, e.g. application_id=LOAN-1, annual_income=85000. Not a file name: choose the file above.<br>"
-                + "Leave it blank when the file gives the token all it needs.</html>");
-            dataField.getDocument().addDocumentListener(new SimpleDocumentListener(() -> {
-                String text = dataField.getText().trim();
-                if (text.equals(element.getTokenData())) return;
-                element.setTokenData(text);
-                canvas.saveUndoState();
-            }));
-            }
-
             // What this generator does, from its one arc: arrivals, or the initial marking of a closed net (sent once).
             Canvas.GeneratorRole role = canvas.generatorRole(element);
             if (role.marking()) {

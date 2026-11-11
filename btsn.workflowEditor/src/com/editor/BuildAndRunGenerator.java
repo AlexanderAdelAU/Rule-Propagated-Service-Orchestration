@@ -65,6 +65,17 @@ public final class BuildAndRunGenerator {
         public final Map<String, String> markings = new LinkedHashMap<>();   // generator id -> marking over several places (place.operation=input,...;...)
         public final Map<String, String> services = new LinkedHashMap<>();  // generator id -> service at its target place
         public String tokenGenerator = "";  // the profile's "tokenGenerator", when it names one (else the runtime's default)
+
+        /**
+         * The token data file a generator's tokens are filled from (egN.format.service): the one it names, when that file is
+         * in TokenFormats, or any for a generator the profile names; null when there is none.
+         */
+        public String tokenFormat(String generatorId) {
+            String name = services.get(generatorId);
+            if (name == null || name.isEmpty()) return null;
+            if (!tokenGenerator.isEmpty()) return name;
+            return root != null && new File(root, "btsn.common.eventgenerators/TokenFormats/" + name + ".json").isFile() ? name : null;
+        }
         public File profile; public boolean profileExists;
         public String serviceDeployment = "", catalogue = "";
         public final List<File> folders = new ArrayList<>();
@@ -163,9 +174,6 @@ public final class BuildAndRunGenerator {
 
         for (ProcessElement element : canvas.getElements()) {
             if (element.getType() != ProcessElement.Type.EVENT_GENERATOR) continue;
-            String data = tokenData(element.getTokenData());
-            if (data == null) plan.problems.add(element.getLabel() + "'s Extra fields are not name=value pairs separated by commas (a token data file goes in Token Data File Name): " + element.getTokenData());
-            else if (!data.isEmpty()) plan.data.put(element.getId(), data);
             Canvas.GeneratorRole role = canvas.generatorRole(element);
             if (role.marking()) { planMarking(plan, registry, element, role); continue; }
             ProcessElement place = firstPlaceAfter(canvas, element);
@@ -353,7 +361,7 @@ public final class BuildAndRunGenerator {
             else lines.add("Tokens   " + o.tokens + " from " + run.generatorId + " to " + plan.targets.get(run.generatorId) + "." + plan.operations.get(run.generatorId)
                 + ", one every " + run.intervalMs + " ms, version " + run.version);
         for (Run run : o.enabled())
-            if (plan.data.containsKey(run.generatorId)) lines.add("Data     every token from " + run.generatorId + " carries " + plan.data.get(run.generatorId));
+            if (plan.tokenFormat(run.generatorId) != null) lines.add("Data     every token from " + run.generatorId + " takes its data from " + plan.tokenFormat(run.generatorId) + ".json");
         if (o.enabled().size() > 1) lines.add("         The generators fire together; the analysis reports each version separately.");
         for (Map.Entry<Launched, String> l : launchedVersions(plan, o).entrySet())
             lines.add("Signal   " + l.getKey().signal + " launches " + l.getKey().process + ", version " + l.getValue() + ", at "
@@ -435,8 +443,8 @@ public final class BuildAndRunGenerator {
             x.append("    <property name=\"").append(slot).append(".place\" value=\"").append(plan.targets.get(run.generatorId)).append("\"/>\n");
             x.append("    <property name=\"").append(slot).append(".operation\" value=\"").append(xml(plan.operations.get(run.generatorId))).append("\"/>\n");
             x.append("    <property name=\"").append(slot).append(".trigger.file\" location=\"").append(xml(relative(dir, plan.schedule(o, run)))).append("\"/>\n");
-            if (!plan.tokenGenerator.isEmpty() && plan.services.containsKey(run.generatorId))
-                x.append("    <property name=\"").append(slot).append(".format.service\" value=\"").append(xml(plan.services.get(run.generatorId))).append("\"/>\n");
+            if (plan.tokenFormat(run.generatorId) != null)
+                x.append("    <property name=\"").append(slot).append(".format.service\" value=\"").append(xml(plan.tokenFormat(run.generatorId))).append("\"/>\n");
             if (plan.data.containsKey(run.generatorId))
                 x.append("    <property name=\"").append(slot).append(".data\" value=\"").append(xml(plan.data.get(run.generatorId))).append("\"/>\n");
             Integer join = plan.joins.get(run.generatorId);

@@ -1,0 +1,12 @@
+{
+  "description": "A loan application, as the financial services validate, check and underwrite it. Every token carries the same application.",
+  "tokenStructure": {
+    "data": {
+      "application_id": "APP001",
+      "annual_income": 85000,
+      "requested_amount": 25000,
+      "credit_score": 720,
+      "fraud_risk": "low"
+    }
+  }
+}

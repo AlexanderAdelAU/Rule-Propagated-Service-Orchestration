@@ -1037,18 +1037,6 @@ public class InfrastructureDefinitionFrame extends JFrame {
         return token.toJSONString();
     }
 
-    /** The token with the generator's Token data (name=value pairs) added to its data, as the generator adds them. */
-    static String withData(String token, String pairs) {
-        String data = BuildAndRunGenerator.tokenData(pairs);
-        if (data == null || data.isEmpty()) return token;
-        try {
-            org.json.simple.JSONObject json = (org.json.simple.JSONObject) new org.json.simple.parser.JSONParser().parse(token);
-            org.json.simple.JSONObject fields = (org.json.simple.JSONObject) json.get("data");
-            for (String pair : data.split(",")) { int eq = pair.indexOf('='); fields.put(pair.substring(0, eq), pair.substring(eq + 1)); }
-            return json.toJSONString();
-        } catch (Exception | Error e) { return token; }
-    }
-
     /** Makes one call for the selected row as a host would; the report is what the Try a call window shows. */
     static org.btsn.invocation.RestAdapter.Trial trial(String endpoint, int timeoutMs, String call, String service, String operation,
                                                          List<String> inputNames, String firstInput, String returnAttribute) {
@@ -1130,17 +1118,16 @@ public class InfrastructureDefinitionFrame extends JFrame {
         if (problem != null) { JOptionPane.showMessageDialog(this, "Fix the call mapping first: " + problem, "Try a call", JOptionPane.WARNING_MESSAGE); return; }
         if (!ServiceRegistry.validRestEndpoint(cap.endpoint)) { JOptionPane.showMessageDialog(this, "Give the service endpoint first.", "Try a call", JOptionPane.WARNING_MESSAGE); return; }
         List<String> names = new ArrayList<>(); for (Argument argument : cap.arguments) names.add(argument.name);
-        // The sample is the token the place would receive: its generator's token format and Token data, when there is one.
-        String format = cap.service, extra = "", generatorName = "";
+        // The sample is the token the place would receive: from its generator's token data file, when there is one.
+        String format = cap.service, generatorName = "";
         ProcessElement place = placeRows.get(cap);
         ProcessElement generator = processCanvas != null && place != null ? processCanvas.generatorFeeding(place) : null;
         if (generator != null) {
             String chosen = processCanvas.tokenFormatOf(generator);
             if (!chosen.isEmpty()) format = chosen;
-            extra = generator.getTokenData();
             generatorName = generator.getLabel();
         }
-        String sample = withData(sampleToken(serviceRegistry.common() != null ? serviceRegistry.common() : ServiceRegistry.findCommon(currentFile), format), extra);
+        String sample = sampleToken(serviceRegistry.common() != null ? serviceRegistry.common() : ServiceRegistry.findCommon(currentFile), format);
         boolean noData = sample.contains("\"data\":{}");
         JTextArea input = new JTextArea(sample, 5, 70);
         input.setLineWrap(true);

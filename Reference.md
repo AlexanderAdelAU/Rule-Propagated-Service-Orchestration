@@ -358,11 +358,9 @@ place has an arc into it.
 - The generator's **Rate** and **Version** become the defaults in
   [Build and Run](#3-create-build-and-run).
 - The generator's **Token Data File Name** is the file in `btsn.common.eventgenerators/TokenFormats` that fills each token's data, different for each token: `PaymentService.json` gives order n the orderId `ORD-n`, a customer, a currency and an amount and card from its case mix. **Open...** beside it shows the chosen file, lets you change it and previews the data of the first tokens; **New...** makes your own, started from `ExampleTokenDataFile.json`, which is read-only. Left at (none), a file named after the first place's service is used if there is one. Try a call in Deploy starts from the same data.
-- **Extra fields (name=value)** appear only on a generator that already has them (some financial examples): fields added to every token it sends, on top of the file's, as `name=value` pairs separated by commas, for example `application_id=LOAN-1, annual_income=85000, requested_amount=25000`.
-  - Services that read fields from their token need it. The financial ValidationService rejects an application with no `application_id`, income or amount, so without it every token takes the `invalid` arc.
-  - Leave it blank for services that don't read fields: the Petri-net models, and services that fall back on values from the token's number, such as claims, credit and inventory.
-  - Healthcare tokens are filled from the catalogue's token formats instead.
-  - Build and Run writes it to the launcher as `eg1.data`. To try other data without regenerating, add `-Deg1.data=...` to the run.
+  - Services that read fields from their token need one. The financial ValidationService rejects an application with no `application_id`, income or amount, so the financial processes use `FinancialApplication.json` and `FinancialPreScreen.json`.
+  - Leave it at (none) for services that don't read fields: the Petri-net models, and services that fall back on values from the token's number, such as claims, credit and inventory.
+  - Build and Run writes it to the launcher as `eg1.format.service`. A launcher can also add fixed fields to every token with `eg1.data` (`name=value` pairs); add `-Deg1.data=...` to a run to try other data without regenerating.
 - The supplied `P2_Tutorial_Workflow.json` stores `T_out_P2` as a `DecisionNode`. The runtime accepts it too, and both route on the guards below.
 
 ### Choose the service and operation
