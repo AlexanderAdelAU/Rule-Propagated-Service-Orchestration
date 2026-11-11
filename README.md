@@ -10,7 +10,7 @@ Nothing changes as the process grows. Add Places for inventory and order handlin
 
 ## Start with one service
 
-A minimal experiment needs an event generator, a Place bound to the remote service, its incoming and outgoing transitions, and an outcome. **You implement none of these: they are part of RPSO, drawn in the editor and run by its hosts.** The only thing you supply is the service's endpoint: a service written for RPSO's call format ([what the host sends and expects](ServiceTutorial.md#8-call-it-over-rest)), or an existing API called as it is, through a call mapping in the deployment ([Call an API that was not written for RPSO](ServiceTutorial.md#call-an-api-that-was-not-written-for-rpso)).
+A minimal experiment needs an event generator, a Place bound to the remote service, its incoming and outgoing transitions, and an outcome. **You implement none of these: they are part of RPSO, drawn in the editor and run by its hosts.** All you provide is the address of your service (its endpoint) and, if the service has its own API, a short description of how to call it. The editor can fill in that description from the API's published definition, and lets you try one call before you run anything ([Call an API that was not written for RPSO](ServiceTutorial.md#call-an-api-that-was-not-written-for-rpso)).
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="images/rpso-first-use-dark.svg">
