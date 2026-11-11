@@ -783,6 +783,8 @@ public class InfrastructureDefinitionFrame extends JFrame {
                         }
                         ServiceRegistry.Contract contract = serviceRegistry.contract(row.service, row.operation);
                         if (contract != null && "boolean".equals(contract.resultType)) row.adapter = "boolean-token";
+                        // A service the catalogue says is called over REST (no Java class) starts on the rest adapter.
+                        else if (contract != null && !contract.draft && !contract.standard && contract.implementationClass.isEmpty()) row.adapter = ServiceRegistry.REST;
                         row.node = blank(chosen) ? suggestNode(row.operation) : chosen;
                         NodeNetwork n = findNode(row.node);
                         row.portSlot = n == null ? 0 : Math.max(0, allocateSlot(n));
@@ -1136,7 +1138,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
     private void updateEndpointNote(Capability cap) {
         String note; boolean problem = false;
         if (cap == null) note = "Select a row to see or change its service endpoint.";
-        else if (!ServiceRegistry.REST.equals(cap.adapter)) note = "Set Invocation Adapter to rest to call this service at an endpoint.";
+        else if (!ServiceRegistry.REST.equals(cap.adapter)) note = "This service runs as a Java class on its host. To call it at a web address instead, set Invocation Adapter to rest in the table above.";
         else {
             List<String> names = new ArrayList<>(); for (Argument argument : cap.arguments) names.add(argument.name);
             List<String> errors = serviceRegistry.validateEndpoint(cap.service, cap.operation, cap.returnAttribute, names, cap.adapter, cap.endpoint);
