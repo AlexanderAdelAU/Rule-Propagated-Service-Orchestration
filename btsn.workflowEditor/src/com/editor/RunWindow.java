@@ -84,7 +84,10 @@ public final class RunWindow extends JFrame {
         c.gridy = 0; c.gridx = 0; form.add(new JLabel("Launcher:"), c); c.gridx = 1; c.weightx = 1; c.gridwidth = 2; form.add(launcher, c);
         c.gridy = 1; c.gridx = 0; c.weightx = 0; c.gridwidth = 1; form.add(new JLabel("Hosts:"), c); c.gridx = 1; c.gridwidth = 2; form.add(allHostsHere, c);
         c.gridy = 2; c.gridx = 0; c.gridwidth = 1; c.weightx = 0; form.add(new JLabel("Machines:"), c);
-        c.gridx = 1; c.weightx = 1; c.gridwidth = 2; form.add(new JLabel(describeMachines(machines, nodes)), c); c.gridwidth = 1;
+        // The hosts this launcher runs, on their machines; the other nodes of the machines file take no part.
+        JLabel machinesLabel = new JLabel(describeRun(machines, nodes, (File) launcher.getSelectedItem()));
+        launcher.addActionListener(e -> machinesLabel.setText(describeRun(machines, nodes, (File) launcher.getSelectedItem())));
+        c.gridx = 1; c.weightx = 1; c.gridwidth = 2; form.add(machinesLabel, c); c.gridwidth = 1;
         c.gridy = 3; c.gridx = 0; c.gridwidth = 1; form.add(new JLabel("Ant folder:"), c); c.gridx = 1; c.weightx = 1; form.add(ant, c); c.gridx = 2; c.weightx = 0; form.add(chooseAnt, c);
         c.gridy = 4; c.gridx = 0; form.add(new JLabel("Analysis:"), c);
         c.gridx = 1; c.gridwidth = 2;
@@ -168,6 +171,27 @@ public final class RunWindow extends JFrame {
         File selected = (File)launcher.getSelectedItem();
         File[] zips = selected == null ? null : LauncherRun.hostPackagesFolder(root, selected).listFiles((d, n) -> n.endsWith(".zip"));
         return zips != null && zips.length > 0;
+    }
+
+    /** "MultiHost: P1 on 192.168.1.82 (this run's host)": only the hosts the launcher names, or all of them when it names none. */
+    static String describeRun(String name, java.util.List<ServiceRegistry.Node> nodes, File launcher) {
+        java.util.List<String> hosts = launcherHosts(launcher);
+        if (hosts.isEmpty()) return describeMachines(name, nodes);
+        java.util.List<ServiceRegistry.Node> used = new java.util.ArrayList<>();
+        for (ServiceRegistry.Node node : nodes) if (hosts.contains(node.node)) used.add(node);
+        return describeMachines(name, used) + (used.size() == 1 ? " (this run's host)" : " (this run's hosts)");
+    }
+
+    /** The hosts a launcher names in its hosts property, in order; empty when it names none or cannot be read. */
+    static java.util.List<String> launcherHosts(File launcher) {
+        java.util.List<String> hosts = new java.util.ArrayList<>();
+        if (launcher == null || !launcher.isFile()) return hosts;
+        try {
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("<property\\s+name=\"hosts\"\\s+value=\"([^\"]*)\"")
+                .matcher(new String(java.nio.file.Files.readAllBytes(launcher.toPath()), java.nio.charset.StandardCharsets.UTF_8));
+            if (m.find()) for (String h : m.group(1).split(",")) if (!h.trim().isEmpty()) hosts.add(h.trim());
+        } catch (java.io.IOException ignored) { }
+        return hosts;
     }
 
     /** "TwoHost: P1, P3, P5 on 192.168.1.82; P2, P4, P6 on 192.168.1.152". */

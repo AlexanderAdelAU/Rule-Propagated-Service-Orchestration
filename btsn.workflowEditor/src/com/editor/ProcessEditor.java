@@ -1339,6 +1339,17 @@ public class ProcessEditor extends JFrame {
             JOptionPane.showMessageDialog(this, "No launcher runs " + processName + " yet. Use Build and Run to create one first.", "Run", JOptionPane.WARNING_MESSAGE);
             return;
         }
+        // The launcher and its deployment profile are copies made by Build: a process or deployment saved since would not be run.
+        java.io.File deployment = canvas.getServiceRegistry().deploymentFile();
+        long saved = Math.max(processPath.lastModified(), deployment == null ? 0 : deployment.lastModified());
+        long built = 0; for (java.io.File l : launchers) built = Math.max(built, l.lastModified());
+        if (saved > built && BuildAndRunGenerator.combinedLauncher(currentFile) == null) {
+            Object[] choices = {"Build first", "Run as it was built", "Cancel"};
+            int choice = JOptionPane.showOptionDialog(this, WrappedMessage.of("The process or its deployment was saved after Build last created the launcher, "
+                + "so a run now would use the earlier deployment. Build again first?"), "Run", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, choices, choices[0]);
+            if (choice == 0) { createBuildAndRun(); return; }
+            if (choice != 1) return;
+        }
         // Packaging reads every catalogue packaging.json lists: one deleted after it was listed would stop the build.
         java.util.List<String> missing = CatalogueWriter.missingFromPackaging(common);
         if (!missing.isEmpty()) {
