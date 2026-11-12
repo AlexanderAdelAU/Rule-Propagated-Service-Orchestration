@@ -1,47 +1,36 @@
 # Tutorial: write your own service
 
-This tutorial writes one service from scratch and runs it in a process: a credit
-check that approves an application up to a limit and refers the rest. It is
-deliberately small. The service keeps no state and runs on one host, so the
-steps show only what every service needs.
+This tutorial writes one service and runs it in a process: a credit check that approves an application up to a
+limit and refers the rest. It is deliberately small. The service keeps no state and runs on one host, so the steps
+show only what every service needs. **The only thing you write is the service's logic**, one Java method (or, in
+step 8, a small web service). The editor writes everything else.
 
 ![The credit check in the editor: APPLICATIONS feeds T_in_Credit, the Credit place on P1 runs CreditLimitService.assess, and T_out_Credit routes approve to Approved and refer to Referred. The Attributes panel shows the operation, what it does, and the contract assess(token) → creditDecision.](images/credit-design.png)
 
-*The finished process. The **What it does** box and the contract come from the catalogue you write in step 2.*
+*The finished process. The **What it does** box and the contract come from the service you describe in step 2.*
 
 [▶ Watch a recorded run of this process](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/credit/Workflow/Credit_Check_Workflow.json&run=../../btsn.common/AnalysisFolder/Credit/Analysis_Credit_Check_Workflow.txt)
 
-The finished files are supplied, so you can compare yours with them. To build
-your own alongside them, use another name throughout, for example `loan`
-instead of `credit`.
+The finished credit check is supplied, so you build yours alongside it in a domain of its own, `loan`, and can
+compare the two.
 
-**Before you start:** work through Example 1 of [Tutorial.md](Tutorial.md) once. This
-tutorial uses the same editor steps (design, Deploy, Build, Run on hosts) and does not repeat
-them in detail.
-
-Here you write the service first, catalogue entry and all, then draw the process. To start
-from the process instead, and let the editor write the catalogue entry and starting code as
-you go, see [Adding services while designing](Reference.md#adding-services-while-designing);
-its step 7 replaces the starting code with real logic the way section 1 here writes it.
+**Before you start:** work through Example 1 of [Tutorial.md](Tutorial.md) once. This tutorial uses the same editor
+steps (design, Deploy, Build, Run on hosts) and does not repeat them in detail.
 
 ## What RPSO needs from a service
 
-The fabric knows a service only through its **canonical binding**: the operation's
-name, its named inputs and the attribute it returns. The **routing value** in that
-result is what the transition guards test. Nothing else about the service matters
-to the transitions, the rules or the tokens. By default a service is a Java class,
-which the host finds through the catalogue and calls by reflection; steps 1 to 7
-write one. [Step 8](#8-call-it-over-rest) serves the same service from Node.js over
-REST instead.
+The hosts know a service only through its contract: the operation's name, its named inputs and the attribute it
+returns. The **routing value** in that result is what the transition guards test. Nothing else about the service
+matters to the transitions, the rules or the tokens. A service is a Java class, which the host calls in-process, or
+a web service it calls over REST ([step 8](#8-call-it-over-rest)).
 
-| File | Step |
-|---|---|
-| [`CreditLimitService.java`](btsn.common/src/org/btsn/business/credit/CreditLimitService.java) | 1. Write the service |
-| [`BusinessServiceDefinitions/credit/Credit.json`](btsn.common/BusinessServiceDefinitions/credit/Credit.json) | 2. Describe it in a catalogue |
-| [`btsn.services/packaging.json`](btsn.services/packaging.json) | 3. Package it |
-| [`ProcessDefinitionFolder/credit/Workflow/Credit_Check_Workflow.json`](btsn.common/ProcessDefinitionFolder/credit/Workflow/Credit_Check_Workflow.json) | 4. Draw the process (editor) |
-| [`ServiceDeploymentFolder/credit/Credit_Check_Workflow.json`](btsn.common/ServiceDeploymentFolder/credit/Credit_Check_Workflow.json) | 5. Deploy (editor) |
-| [`Credit_Check_Workflow_BuildAndRun.xml`](btsn.petrinet.ProjectLoader/Credit_Check_Workflow_BuildAndRun.xml), its schedule and deployment profile | 6. Build (editor) |
+| Step | You | The editor |
+|---|---|---|
+| [1. Draw the process](#1-draw-the-process) | Draw and save it | Saves it in its domain |
+| [2. Describe the service](#2-describe-the-service) | Fill in one form | Writes the catalogue entry, lists the catalogue for packaging, writes the starting code |
+| [3. Write its logic](#3-write-its-logic) | Replace one method | Checks the contract |
+| [4. Deploy](#4-deploy) | Choose a host | Writes the deployment |
+| [5. Build and run](#5-build-and-run) | Click Build, then Run | Writes the launcher, its schedule and profile; packages and runs |
 
 ## Follow one payment: what a service receives and returns
 
@@ -52,7 +41,7 @@ Every JSON below is from a real run, shortened only where marked `…`.
 | What | File |
 |---|---|
 | The process: `PAYMENTS` → Payment (P1, REST) → paid: Receipt (P2, Java) → Receipt sent; declined: Declined | [`payments/Workflow/Payment_Receipt_Workflow.json`](btsn.common/ProcessDefinitionFolder/payments/Workflow/Payment_Receipt_Workflow.json) |
-| The orders: what each token carries | [`TokenFormats/PaymentService.json`](btsn.common.eventgenerators/TokenFormats/PaymentService.json) |
+| The orders: what each token carries (the event generator's token data file) | [`TokenFormats/PaymentService.json`](btsn.common.eventgenerators/TokenFormats/PaymentService.json) |
 | The two services' contracts | [`payments/Payments.json`](btsn.common/BusinessServiceDefinitions/payments/Payments.json) |
 | The receipt service | [`ReceiptService.java`](btsn.common/src/org/btsn/business/payments/ReceiptService.java) |
 | The launcher | [`Payment_Receipt_Workflow_BuildAndRun.xml`](btsn.petrinet.ProjectLoader/Payment_Receipt_Workflow_BuildAndRun.xml) |
@@ -60,13 +49,10 @@ Every JSON below is from a real run, shortened only where marked `…`.
 [▶ Watch a recorded run](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Payment_Receipt_Workflow.json&run=../../btsn.common/AnalysisFolder/Payments/Analysis_Payment_Receipt_Workflow.txt): ten orders, nine paid and receipted, one declined.
 
 **1. The event generator makes the token.** A token is a JSON object. Its `data` is the business content; the rest
-is the host's bookkeeping. Here the data comes from a *token format*, chosen in the launcher:
+is the host's bookkeeping. Here the data comes from the event generator's token data file, `PaymentService.json`,
+chosen as its **Token Data File Name** (**Open...** beside it shows the file and the data of the first tokens).
 
-```xml
-<property name="eg1.format.service" value="PaymentService"/>
-```
-
-The format gives every order an `orderId`, a `customer` and a `currency`, and a basket from its case mix, so order 1
+The file gives every order an `orderId`, a `customer` and a `currency`, and a basket from its case mix, so order 1
 is groceries:
 
 ```json
@@ -141,226 +127,162 @@ public String issue(String paymentResult) {
 - **Put the route in `routing_decision.routing_path`.** The T_out guards test it.
 - **Read with `textValue` and `numberValue`.** They find a field anywhere in an input. `originalToken(input)` gives the
   token the generator sent, for its data. A REST service finds each input under `inputs.<name>`.
-- **Give tokens data** with a token format (`egN.format.service`, a file in `btsn.common.eventgenerators/TokenFormats`;
-  `${n}` is the token's number), or with `egN.data` name=value pairs, the same for every token
-  ([7. Give it data](#7-give-it-data)).
+- **Give tokens data** with the event generator's **Token Data File Name**: **New...** makes a file of your own,
+  and `${n}` in it is the token's number ([7. Give it data](#7-give-it-data)).
 
-## 1. Write the service
+## 1. Draw the process
 
-Create `btsn.common/src/org/btsn/business/credit/CreditLimitService.java`:
+Choose **File → New → Process Definition**, then **File → Save Process Definition As...** and save it as
+`btsn.common/ProcessDefinitionFolder/loan/Workflow/Loan_Check_Workflow.json`, making the `loan` and `Workflow`
+folders with **New Folder**. The folder under `ProcessDefinitionFolder`, here `loan`, is the process's domain: it
+names the catalogue the service goes into and where every other file is written.
 
-```java
-package org.btsn.business.credit;
-
-import org.btsn.business.BaseBusinessService;
-import org.json.simple.JSONObject;
-
-public class CreditLimitService extends BaseBusinessService {
-
-    static final double LIMIT = 5000;
-
-    private final String sequenceId;
-
-    public CreditLimitService() { this(""); }
-
-    /** The host passes the token's sequence id. */
-    public CreditLimitService(String sequenceId) { this.sequenceId = sequenceId == null ? "" : sequenceId; }
-
-    /** token -> creditDecision */
-    @SuppressWarnings("unchecked")
-    public String assess(String token) {
-        int application = applicationNumber(sequenceId);
-        double amount = numberValue(token, "amount", application * 1000.0);
-        boolean approve = amount <= LIMIT;
-
-        JSONObject result = new JSONObject();
-        result.put("application", "APP-" + application);
-        result.put("amount", amount);
-        result.put("limit", LIMIT);
-        result.put("routing_decision", routingDecision(approve ? "approve" : "refer"));
-        return businessResult("creditDecision", result);
-    }
-
-    /** 1 for the first token of a version, 2 for the second, ... (token ids are base + n x 10000). */
-    static int applicationNumber(String sequenceId) {
-        try {
-            return (int)((Long.parseLong(sequenceId.trim()) % 1_000_000L) / 10_000L) + 1;
-        } catch (NumberFormatException e) {
-            return 1;
-        }
-    }
-}
-```
-
-- **Package.** Put services in a package under `org.btsn.business`, one folder per domain.
-- **Constructor.** The host creates the service with the token's sequence id. Keep a no-argument constructor as well.
-- **One `String` parameter per input.** Each catalogue input arrives as a JSON string. `assess` has one input, `token`.
-- **Reading values.** `BaseBusinessService` provides `textValue` and `numberValue`. They find a field anywhere in the JSON, with a default when it is missing. Here the amount comes from the token's `amount` field if it has one; otherwise application *n* asks for *n* × 1,000.
-- **The result.** Return `businessResult(returnAttribute, result)`, which produces `{"creditDecision": {...}}`. The name must match the catalogue's `returnAttribute`.
-- **The routing value.** Put `routingDecision("approve")` or `routingDecision("refer")` in the result. Its `routing_path` is the value the T_out guards test. Any string works, not just `true` and `false`.
-
-## 2. Describe it in a catalogue
-
-Create `btsn.common/BusinessServiceDefinitions/credit/Credit.json`:
-
-```json
-{
-  "domain": "Credit",
-  "purpose": "The service written in ServiceTutorial.md: one stateless check, routed on a string result.",
-  "services": [
-    {
-      "service": "CreditLimitService",
-      "implementationClass": "org.btsn.business.credit.CreditLimitService",
-      "operation": "assess",
-      "description": "Approves a credit application up to a limit of 5,000 and refers the rest. Application n asks for n x 1,000 unless the token carries an amount.",
-      "returns": "A credit decision with the application, amount and limit. Routes on \"approve\" (within the limit) or \"refer\" (over it).",
-      "inputs": ["token"],
-      "returnAttribute": "creditDecision",
-      "status": "active"
-    }
-  ]
-}
-```
-
-| Field | Meaning |
-|---|---|
-| `service`, `operation` | The names the editor offers and the process records |
-| `implementationClass` | The class the host calls |
-| `inputs` | The named inputs, in the order of the method's parameters. Each is named after what arrives: `token` from an event generator, otherwise the return attribute of the place before ([Follow one payment](#follow-one-payment-what-a-service-receives-and-returns)) |
-| `returnAttribute` | The name the result is published under; the next place takes it as input |
-| `description`, `returns` | Shown in the editor's **What it does** box. The editor checks require both. |
-
-The folder name (`credit`) is the domain. Saving the process under
-`ProcessDefinitionFolder/credit` in step 4 makes the editor select this catalogue.
-
-Design the catalogue before the process: it is the list of contracts the process is
-drawn from. Every process can also use the **standard services** in
-[`petrinet/PetriNetModels.json`](btsn.common/BusinessServiceDefinitions/petrinet/PetriNetModels.json)
-without copying them into its own catalogue. They are `AlwaysTrueService`, a routing-only place
-that passes the token on unchanged, and `StochasticService`, a random `true`/`false`. The
-editor lists them after the domain's own services, marked *(standard)*. A domain catalogue
-may not reuse a standard service's name.
-
-The **Catalogue Status** panel in the upper-right of the workflow canvas identifies each place
-by its visible label and shows whether its selected service comes from the **Standard Service**
-catalogue or the process's own catalogue (for example, `P1 → Standard Service` and
-`P2 → Claims`). An incomplete or unknown service assignment reads **Unresolved**, while a
-service still being defined shows **(draft)**. Hover over a row to see its service name.
-The panel stays in the visible corner while the workflow scrolls, keeps a readable size at
-different zoom levels, scrolls when there are many places, and collapses when you click its heading.
-It is an indicator only: it does not modify the services or their catalogue membership.
-
-### Add a service while designing
-
-Designing the catalogue first is best, but a design often shows that a service is missing.
-You do not need to leave the editor ([Adding services while designing](Reference.md#adding-services-while-designing)
-works through it for a whole process):
-
-1. Draw the place, then right-click it and choose **Create New Service in** *your catalogue*
-   (the same button is under the place's Service). On a new process, choose
-   **Choose/Create catalogue...** first: the standard catalogue is never changed, so this waits
-   until the process has a catalogue of its own.
-2. Give the service and its operation a name. Everything else can follow: what it does, what it
-   returns, its inputs and return attribute (suggested to match the places around it), and the
-   values it routes on.
-3. Choose how it runs:
-   - **A Java class**, with starting code (the default). The editor writes
-     `btsn.common/src/org/btsn/business/<domain>/<Service>.java`. The code keeps the contract and returns
-     `true`, or each routing value in turn, so the process can be deployed and run straight away.
-     Validate reminds you that it is still starting code until you replace the body with the real logic.
-   - **A service called over REST**, written in any language; set its endpoint in Deploy
-     ([Call it over REST](#8-call-it-over-rest)).
-   - **Not decided yet**: the entry stays a **draft**.
-
-The entry goes into the domain catalogue at once. A draft can be designed with and saved with the
-process, but Validate, Deploy and Build and Run say exactly what it still needs, and it is never
-deployed or packaged. **Edit Service in** *your catalogue* on the place shows its service filled in, draft or
-finished, and saves your changes. While the class is still the editor's starting code, the code is rewritten
-to match, for example to return the routing values you add. Code you have written yourself is never changed.
-If other processes use the service, its name, operation, inputs, return attribute and how it runs are fixed
-in the form, and only its description and routes can change.
-
-Validate also checks that each place takes, as its input, the name the place before it publishes.
-If the names differ, the token would stop at that place when the process runs. It checks the routes too:
-a guard testing a value the service never returns, a value the service returns that no arc tests, and a
-transition that leads nowhere because it is not a terminate transition. Each of these stops Deploy, Build and Run on hosts.
-
-**An example.** [`Credit_Fraud_Rest_Workflow.json`](btsn.common/ProcessDefinitionFolder/credit/Workflow/Credit_Fraud_Rest_Workflow.json)
-puts a fraud screen in front of the credit check. `FraudService` was added this way and still runs its
-starting code, which routes `clear` and `review` in turn: `clear` goes on to Credit, called over REST
-([Call it over REST](#8-call-it-over-rest)), and `review` ends at Review. Its launcher is
-`Credit_Fraud_Rest_Workflow_BuildAndRun.xml`; a run completes all ten workflows, five ending at Review.
-
-## 3. Package it
-
-Add the catalogue to [`btsn.services/packaging.json`](btsn.services/packaging.json),
-in `catalogues` and in `catalogueDomains`:
-
-```json
-"catalogues": [
-  ...
-  "../btsn.common/BusinessServiceDefinitions/credit/Credit.json"
-],
-...
-"catalogueDomains": {
-  ...
-  "Credit.json": "credit"
-}
-```
-
-Every launcher builds the service packages before it starts the hosts, so the
-service becomes `btsn.services/target/deployment/services/credit/CreditLimitService.jar`
-on the next run. There is no separate build step.
-
-## 4. Draw the process
-
-Start (or restart) the editor so that it reads the new catalogue. Then choose **File → New → Process Definition**; **Type** stays **PetriNet**.
+Add the elements and connect them with **Arrow (drag)**:
 
 | Palette tool | Label | Attributes |
 |---|---|---|
 | Event Generator | `APPLICATIONS` | Rate (ms): `1000`; Version: `v001` |
-| Transition | `T_in_Credit` | Transition Type: `T_in`; Node Type: `EdgeNode`; Buffer: `10` |
-| Place | `Credit` | Service: `CreditLimitService`; Operation: `assess` |
-| Transition | `T_out_Credit` | Transition Type: `T_out`; Node Type: `GatewayNode` |
-| Transition | `Approved` | Transition Type: `Other`; Node Type: `TerminateNode` |
-| Transition | `Referred` | Transition Type: `Other`; Node Type: `TerminateNode` |
+| Transition | `T_in_Credit` | Node Type: `EdgeNode`; Buffer: `10` |
+| Place | `Credit` | (its service comes in step 2) |
+| Transition | `T_out_Credit` | Node Type: `GatewayNode` |
+| Transition | `Approved` | Node Type: `TerminateNode` |
+| Transition | `Referred` | Node Type: `TerminateNode` |
 
-If the **Service** list is empty, click **Choose/Create catalogue...** and select the
-credit catalogue, `Credit.json`. Selecting the place shows the
-description from your catalogue and the contract `assess(token) → creditDecision`.
+`APPLICATIONS` → `T_in_Credit` → `Credit` → `T_out_Credit`, then `T_out_Credit` → `Approved` and
+`T_out_Credit` → `Referred`. Save the process. The red dot on `Credit` means it has no service yet.
 
-| Source | Target | Guard Condition | Decision Value |
-|---|---|---|---|
-| `APPLICATIONS` | `T_in_Credit` | | |
-| `T_in_Credit` | `Credit` | | |
-| `Credit` | `T_out_Credit` | | |
-| `T_out_Credit` | `Approved` | `DECISION_EQUAL_TO` | `approve` |
-| `T_out_Credit` | `Referred` | `DECISION_EQUAL_TO` | `refer` |
+## 2. Describe the service
 
-Click **Validate**, then save to
-`btsn.common/ProcessDefinitionFolder/credit/Workflow/Credit_Check_Workflow.json`.
+1. Right-click `Credit` and choose **Choose/Create catalogue...**. **Create a catalogue for a new domain** is already
+   chosen, with `loan` filled in. Click **OK**.
+2. Right-click `Credit` again and choose **Create New Service in Loan.json...**. Fill in the form:
 
-## 5. Deploy
+   | Field | Enter | Why |
+   |---|---|---|
+   | **Service** | `LoanLimitService` | Your name for it (`CreditLimitService` is the supplied one; names are unique across catalogues) |
+   | **Operation** | `assess` | The method the host calls |
+   | **What it does** / **What it returns** | In words | Shown wherever the service is chosen |
+   | **Inputs** | `token` | The event generator sends each application under the name `token` |
+   | **Return attribute** | `creditDecision` | The name the answer is published under |
+   | **Routes on** | `approve, refer` | The values its answer routes on |
+   | **How it runs** | **A Java class**, with **Write starting code** ticked | The editor writes the class for you |
 
-Click **Deploy**, set `Credit`'s **Host node** (its host target) to `P1`, and click **Save deployment...**.
-Accept the suggested `btsn.common/ServiceDeploymentFolder/credit/Credit_Check_Workflow.json`, then save the
-process again. **Runs on** now reads `P1 — 192.168.1.82:4001`.
+   Click **Add to Loan.json**.
+3. Click the arrow to `Approved` and, under **The service answers**, click **approve**. Click the arrow to `Referred`
+   and click **refer**.
+4. Click **Validate**, then save the process.
 
-## 6. Build and run
+The editor has now written the service's catalogue entry, listed the catalogue for packaging, and written
+`btsn.common/src/org/btsn/business/loan/LoanLimitService.java`: starting code that compiles, keeps the contract and
+returns `approve` and `refer` in turn, so the process can already run. Selecting `Credit` shows the description and
+the contract `assess(token) → creditDecision`.
 
-1. Click **Build**. It writes three files:
-   - the launcher, `btsn.petrinet.ProjectLoader/Credit_Check_Workflow_BuildAndRun.xml` (a domain without its own loader folder uses the Petri-net one);
-   - the deployment profile, `btsn.services/deployments/credit/Credit_Check_WorkflowDeployment.json`;
-   - the token schedule, `btsn.common.eventgenerators/EventTriggeringFile/Credit_Check_Workflow_BuildAndRun.csv`, one application a second.
-2. Click **Run on hosts** and run the launcher. It starts P1 and Monitor, sends ten applications and collects the records.
+Every process can also use the **standard services** in
+[`petrinet/PetriNetModels.json`](btsn.common/BusinessServiceDefinitions/petrinet/PetriNetModels.json), listed after
+the domain's own and marked *(standard)*: `AlwaysTrueService`, a routing-only place that passes the token on, and
+`StochasticService`, a random `true`/`false`.
 
-Expect ten workflows generated and ten completed. Applications 1 to 5 ask for 1,000
-to 5,000 and are approved; applications 6 to 10 ask for 6,000 to 10,000 and are
-referred. The replay shows each token leaving the Credit place by its route.
+**Edit Service in Loan.json...** on the place changes the service later. While the class is still the editor's
+starting code, the code is rewritten to match, for example to return routing values you add. Code you have written
+yourself is never changed. **Not decided yet** under How it runs keeps the entry a draft: it can be designed with and
+saved, but Deploy, Build and Run say what it still needs.
+
+## 3. Write its logic
+
+This is the only code you write. Open `LoanLimitService.java` and replace the `assess` method with the real check,
+deleting the starting code and its marker comment:
+
+```java
+    /** token -> creditDecision: approve up to a limit of 5,000, refer the rest. */
+    @SuppressWarnings("unchecked")
+    public String assess(String token) {
+        int application;   // 1 for the first token of a run, 2 for the second, ... (token ids are 1000000 + (n - 1) x 10000)
+        try { application = (int) ((Long.parseLong(sequenceId.trim()) % 1_000_000L) / 10_000L) + 1; }
+        catch (NumberFormatException e) { application = 1; }
+        double amount = numberValue(token, "amount", application * 1000.0);
+        boolean approve = amount <= 5000;
+
+        JSONObject result = new JSONObject();
+        result.put("application", "APP-" + application);
+        result.put("amount", amount);
+        result.put("limit", 5000);
+        result.put("routing_decision", routingDecision(approve ? "approve" : "refer"));
+        return businessResult("creditDecision", result);
+    }
+```
+
+- **One `String` parameter per input.** Each input arrives as a JSON string; `assess` has one, `token`.
+- **Reading values.** `textValue` and `numberValue`, from `BaseBusinessService`, find a field anywhere in the JSON,
+  with a default when it is missing. Here the amount comes from the token's `amount` if it has one; otherwise
+  application *n* (from the token's sequence id, which the host passes to the constructor) asks for *n* × 1,000.
+- **The result.** `businessResult("creditDecision", result)` publishes it under the return attribute.
+- **The routing value.** `routingDecision("approve")` or `routingDecision("refer")` is what the guards on
+  `T_out_Credit` test. Any string works, not just `true` and `false`.
+
+The supplied [`CreditLimitService.java`](btsn.common/src/org/btsn/business/credit/CreditLimitService.java) is the
+same service, written as a class of its own. Click **Validate** again: once the marker comment is gone, it no longer
+reminds you that the class is starting code.
+
+## 4. Deploy
+
+Click **Deploy**, set `Credit`'s **Host node** to `P1`, and click **Save deployment...**, accepting the name it
+suggests. Then save the process. Selecting `Credit` now shows **Runs on** `P1 — 192.168.1.82:4001`.
+
+## 5. Build and run
+
+1. Click **Build**, then **Create**. It writes the launcher, its token schedule (one application a second) and its
+   deployment profile.
+2. Click **Run on hosts**, then **Run**. Every run packages the services first, so your class is compiled into
+   `btsn.services/target/deployment/services/loan/LoanLimitService.jar` with no separate build step. The run starts P1
+   and Monitor, sends ten applications and collects the records.
+
+Expect ten workflows generated and ten completed. Applications 1 to 5 ask for 1,000 to 5,000 and are approved;
+applications 6 to 10 ask for 6,000 to 10,000 and are referred. The replay shows each token leaving `Credit` by its
+route.
+
+## 6. What the editor wrote
+
+You never edit these files: the editor writes them from the steps above, and writes them again when you change the
+design. They are shown here so you know what each one is. The links are the supplied credit versions.
+
+| File | Written by | What it holds |
+|---|---|---|
+| [`BusinessServiceDefinitions/credit/Credit.json`](btsn.common/BusinessServiceDefinitions/credit/Credit.json) | Create New Service (step 2) | The catalogue: each service's contract |
+| [`btsn.services/packaging.json`](btsn.services/packaging.json) | Choose/Create catalogue (step 2) | The catalogues every run packages |
+| [`ProcessDefinitionFolder/credit/Workflow/Credit_Check_Workflow.json`](btsn.common/ProcessDefinitionFolder/credit/Workflow/Credit_Check_Workflow.json) | Saving the process (steps 1 and 2) | The process as drawn |
+| [`ServiceDeploymentFolder/credit/Credit_Check_Workflow.json`](btsn.common/ServiceDeploymentFolder/credit/Credit_Check_Workflow.json) | Deploy (step 4) | Which host runs each place, and how it calls its service |
+| [`Credit_Check_Workflow_BuildAndRun.xml`](btsn.petrinet.ProjectLoader/Credit_Check_Workflow_BuildAndRun.xml), its schedule and deployment profile | Build (step 5) | How a run starts the hosts and sends the tokens |
+
+The catalogue entry is the service's contract, the **canonical binding** the hosts know it by:
+
+```json
+{
+  "service": "CreditLimitService",
+  "implementationClass": "org.btsn.business.credit.CreditLimitService",
+  "operation": "assess",
+  "description": "Approves a credit application up to a limit of 5,000 and refers the rest. …",
+  "returns": "A credit decision with the application, amount and limit. Routes on \"approve\" or \"refer\".",
+  "inputs": ["token"],
+  "returnAttribute": "creditDecision",
+  "status": "active"
+}
+```
+
+`inputs` are the method's parameters, in order, each named after what arrives: `token` from an event generator,
+otherwise the return attribute of the place before
+([Follow one payment](#follow-one-payment-what-a-service-receives-and-returns)). Validate checks that each place takes
+what the place before it publishes, and that the guards test values the service returns; either mismatch stops
+Deploy, Build and Run on hosts.
+
+**An example of a bigger design.** [`Credit_Fraud_Rest_Workflow.json`](btsn.common/ProcessDefinitionFolder/credit/Workflow/Credit_Fraud_Rest_Workflow.json)
+puts a fraud screen in front of the credit check. `FraudService` was added with Create New Service and still runs
+its starting code, which routes `clear` and `review` in turn: `clear` goes on to Credit, called over REST
+([Call it over REST](#8-call-it-over-rest)), and `review` ends at Review. A run completes all ten workflows, five
+ending at Review.
 
 ## 7. Give it data
 
-A token can carry data to the service. In the editor, select the event generator (`APPLICATIONS`), click **New...**
+A token can carry data to the service. In your process, select the event generator (`APPLICATIONS`), click **New...**
 beside **Token Data File Name** and name the file `Credit4500`. It opens, started from `ExampleTokenDataFile.json`.
 Set `tokenStructure.data` to `{"amount": 4500}` and delete `dataVariants` and `caseMix`; the preview under the file
 shows every token carrying `"amount":4500`. Click **Save**, save the process, click **Build**, then **Create**, and
@@ -386,7 +308,7 @@ The host can call a service over HTTP instead of in-process. The service can the
 be written in any language and run anywhere the host can reach. The catalogue
 contract stays the same: only the placement changes, in the Deploy panel.
 
-The same credit check, in Node.js, is supplied in [`examples/rest`](examples/rest). It
+This step uses the supplied credit process, whose service is the check you wrote in step 3. The same credit check, in Node.js, is supplied in [`examples/rest`](examples/rest). It
 needs no packages. [`credit.js`](examples/rest/credit.js) holds the logic,
 [`credit-service.js`](examples/rest/credit-service.js) serves it, and
 [`api/credit/assess.js`](examples/rest/api/credit/assess.js) is the same service as a

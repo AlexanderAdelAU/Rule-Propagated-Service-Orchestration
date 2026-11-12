@@ -46,7 +46,7 @@ explains each step on a single place.
 | **7 · Results** | The editor analyses the run and replays the recorded tokens on the design; Monitor's charts show timing and activity. A token that fails at a place is reported with the reason | [Show the results](#5-show-the-results), [Observe a run](#observe-and-interpret-a-run) |
 | **8 · Replace the starting code** | Write each service's real logic, in its Java class or as a REST service in any language, and run again; Validate lists the services still on starting code | [Write the real logic](#step-7-write-the-real-triage-logic), [ServiceTutorial.md](ServiceTutorial.md) |
 
-[ServiceTutorial.md](ServiceTutorial.md) writes one complete service from the start, from the Java class to a run, and calls it over REST. The inventory example in [Add your own service](#6-add-your-own-service) then adds state and several hosts.
+[ServiceTutorial.md](ServiceTutorial.md) builds one complete service in the editor, from the drawn process to a run, writing only its logic, and calls it over REST. The inventory example in [Add your own service](#6-add-your-own-service) then adds state and several hosts.
 
 ## Adding services while designing
 
@@ -294,7 +294,7 @@ packages the new class.
   failed token at its place. **Run on hosts** checks that every REST service answers before it starts.
 - **Run on several machines**: [step 7](#7-run-on-several-machines).
 - **Change the process while it runs**: [step 8](#8-change-a-running-process).
-- **Write a service from the start**, with its catalogue entry by hand: [ServiceTutorial.md](ServiceTutorial.md).
+- **Write a service from the start**, with the editor writing everything but its logic: [ServiceTutorial.md](ServiceTutorial.md).
 
 ## Each step in detail
 
