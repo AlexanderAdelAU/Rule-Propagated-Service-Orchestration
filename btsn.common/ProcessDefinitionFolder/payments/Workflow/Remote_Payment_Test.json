@@ -11,7 +11,7 @@
       "height": 60,
       "label": "PAYMENTS",
       "rotation": 0.0,
-      "generator_rate": "1000",
+      "generator_rate": "1000 x10, 0 x12, 1000",
       "token_version": "v001"
     },
     {

@@ -27,9 +27,11 @@ public final class BuildAndRunGenerator {
     public static final class Run {
         public String generatorId = "";
         public String version = "v001";
-        public int intervalMs = 1000;
+        /** The generator's Rate (ms): an interval, or a pattern such as "1000 x10, 0 x12, 1000" (TrafficPattern). */
+        public String rate = "1000";
         public boolean enabled = true;
-        Run copy() { Run r = new Run(); r.generatorId = generatorId; r.version = version; r.intervalMs = intervalMs; r.enabled = enabled; return r; }
+        Run copy() { Run r = new Run(); r.generatorId = generatorId; r.version = version; r.rate = rate; r.enabled = enabled; return r; }
+        TrafficPattern pattern() { TrafficPattern p = TrafficPattern.parse(rate); return p != null ? p : TrafficPattern.parse("1000"); }
     }
 
     /** Choices the user makes; defaults come from the process. */
@@ -58,7 +60,7 @@ public final class BuildAndRunGenerator {
         public final List<String> nodes = new ArrayList<>();
         public final Map<String, String> targets = new LinkedHashMap<>();   // generator id -> runtime place
         public final Map<String, String> operations = new LinkedHashMap<>(); // generator id -> operation
-        public final Map<String, Integer> rates = new LinkedHashMap<>();
+        public final Map<String, String> rates = new LinkedHashMap<>();
         public final Map<String, String> versions = new LinkedHashMap<>();
         public final Map<String, String> data = new LinkedHashMap<>();       // generator id -> fields every token carries (name=value,...)
         public final Map<String, Integer> joins = new LinkedHashMap<>();     // generator id -> tokens of the initial marking it sets, once
@@ -183,7 +185,7 @@ public final class BuildAndRunGenerator {
             // The token format: the generator's choice, else the one named after the place's service.
             String format = !element.getTokenFormat().isEmpty() ? element.getTokenFormat() : place.getService();
             if (format != null && !format.isEmpty()) plan.services.put(element.getId(), format);
-            plan.rates.put(element.getId(), parse(element.getGeneratorRate(), 1000));
+            plan.rates.put(element.getId(), rate(plan, element));
             plan.versions.put(element.getId(), VERSIONS.contains(element.getTokenVersion()) ? element.getTokenVersion() : "v001");
             int inputs = joinInputs(canvas, element, place);
             if (inputs > 1) plan.joins.put(element.getId(), inputs);
@@ -196,9 +198,12 @@ public final class BuildAndRunGenerator {
         plan.nodes.clear(); plan.nodes.addAll(used);
         if (!plan.problems.isEmpty()) return plan;
 
-        // Deployment profile: reuse one that already selects this service deployment.
+        // Deployment profile: reuse one that already selects this service deployment, the one named after this process first.
         File deployments = new File(plan.root, "btsn.services/deployments");
-        for (File candidate : jsonFiles(deployments)) {
+        String base = processFile.getName().replaceFirst("(?i)\\.json$", "");
+        List<File> candidates = new ArrayList<>(jsonFiles(deployments));
+        candidates.sort((x, y) -> Boolean.compare(!x.getName().equals(base + "Deployment.json"), !y.getName().equals(base + "Deployment.json")));
+        for (File candidate : candidates) {
             try {
                 JSONObject profile = (JSONObject)new JSONParser().parse(read(candidate));
                 if (plan.serviceDeployment.equals(profile.get("serviceDeployment"))) {
@@ -209,7 +214,6 @@ public final class BuildAndRunGenerator {
                 }
             } catch (Exception ignored) { }
         }
-        String base = processFile.getName().replaceFirst("(?i)\\.json$", "");
         if (plan.profile == null) plan.profile = new File(deployments, ("petrinet".equals(plan.domain) || plan.domain.isEmpty() ? "models" : plan.domain) + "/" + base + "Deployment.json");
 
         File[] loaders = plan.root.listFiles(f -> f.isDirectory() && f.getName().matches("btsn\\..+\\.ProjectLoader"));
@@ -224,9 +228,15 @@ public final class BuildAndRunGenerator {
         // enough for every place to be visited several times (the dining philosophers eat three or four times each in 10 s).
         if (!plan.joins.isEmpty()) o.lifetimeSeconds = 20;
         for (String id : plan.targets.keySet()) {
-            Run run = new Run(); run.generatorId = id; run.intervalMs = plan.rates.get(id); run.version = plan.versions.get(id);
+            Run run = new Run(); run.generatorId = id; run.rate = plan.rates.get(id); run.version = plan.versions.get(id);
             o.runs.add(run);
         }
+        // Building again keeps the number of tokens the launcher already sends.
+        File existing = new File(o.folder, o.launcherName);
+        if (existing.isFile()) try {
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("<property name=\"token.count\" value=\"(\\d+)\"").matcher(read(existing));
+            if (m.find() && Integer.parseInt(m.group(1)) > 0) o.tokens = Integer.parseInt(m.group(1));
+        } catch (IOException | NumberFormatException ignored) { }
         return plan;
     }
 
@@ -301,7 +311,7 @@ public final class BuildAndRunGenerator {
         plan.operations.put(id, first.place.getServiceOperations().get(0).getName());
         String format = !generator.getTokenFormat().isEmpty() ? generator.getTokenFormat() : first.place.getService();
         if (format != null && !format.isEmpty()) plan.services.put(id, format);
-        plan.rates.put(id, parse(generator.getGeneratorRate(), 1000));
+        plan.rates.put(id, rate(plan, generator));
         plan.versions.put(id, VERSIONS.contains(generator.getTokenVersion()) ? generator.getTokenVersion() : "v001");
         boolean oneJoin = role.marks.size() == 1 && first.join != null && first.count == first.available.size();
         if (oneJoin && first.count < 2) {
@@ -359,7 +369,7 @@ public final class BuildAndRunGenerator {
                     + plan.targets.get(run.generatorId) + "." + plan.operations.get(run.generatorId) + ", version " + run.version
                     + " (a closed net needs all its join's inputs marked to start)");
             else lines.add("Tokens   " + o.tokens + " from " + run.generatorId + " to " + plan.targets.get(run.generatorId) + "." + plan.operations.get(run.generatorId)
-                + ", one every " + run.intervalMs + " ms, version " + run.version);
+                + ", " + run.pattern().describe() + ", version " + run.version);
         for (Run run : o.enabled())
             if (plan.tokenFormat(run.generatorId) != null) lines.add("Data     every token from " + run.generatorId + " takes its data from " + plan.tokenFormat(run.generatorId) + ".json");
         if (o.enabled().size() > 1) lines.add("         The generators fire together; the analysis reports each version separately.");
@@ -401,7 +411,7 @@ public final class BuildAndRunGenerator {
             StringBuilder csv = new StringBuilder();
             Integer join = plan.joins.get(run.generatorId);
             if (join != null) csv.append("0,0,").append(join).append("\n"); // the join's inputs arrive together
-            else for (int i = 0; i < o.tokens; i++) csv.append((long)i * run.intervalMs).append(",0,1\n");
+            else for (Map.Entry<Long, Integer> at : run.pattern().schedule(o.tokens).entrySet()) csv.append(at.getKey()).append(",0,").append(at.getValue()).append("\n");
             writeText(plan.schedule(o, run), csv.toString());
         }
         File launcher = plan.launcher(o);
@@ -531,6 +541,13 @@ public final class BuildAndRunGenerator {
     }
     static String relative(File from, File to) {
         return from.toPath().toAbsolutePath().normalize().relativize(to.toPath().toAbsolutePath().normalize()).toString().replace(File.separatorChar, '/');
+    }
+    /** The generator's Rate (ms) as written, or 1000 when blank; a Rate that is not a pattern is a problem Build reports. */
+    private static String rate(Plan plan, ProcessElement generator) {
+        String text = generator.getGeneratorRate() == null || generator.getGeneratorRate().trim().isEmpty() ? "1000" : generator.getGeneratorRate().trim();
+        String why = TrafficPattern.why(text);
+        if (why != null) { plan.problems.add(generator.getLabel() + "'s Rate (ms): " + why + "."); return "1000"; }
+        return text;
     }
     private static int parse(String value, int fallback) {
         try { int v = Integer.parseInt(value == null ? "" : value.trim()); return v > 0 ? v : fallback; } catch (NumberFormatException ex) { return fallback; }

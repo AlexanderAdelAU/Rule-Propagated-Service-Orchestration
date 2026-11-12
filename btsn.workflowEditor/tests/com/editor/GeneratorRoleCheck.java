@@ -99,6 +99,18 @@ public final class GeneratorRoleCheck {
                 BuildAndRunGenerator.Plan fplan = BuildAndRunGenerator.plan(fin, preScreen);
                 check(fplan.problems.isEmpty() && fplan.services.containsValue("FinancialPreScreen"), "Pre-screen data: " + fplan.problems + " " + fplan.services);
 
+                // Rate (ms) is an interval or a pattern: 0 is a burst, and "1000 x10, 0 x12, 1000" is steady, a burst, then steady.
+                check(TrafficPattern.parse("1000").schedule(3).toString().equals("{0=1, 1000=1, 2000=1}"), "Steady rate");
+                check(TrafficPattern.parse("0").schedule(5).toString().equals("{0=5}"), "A burst");
+                java.util.Map<Long, Integer> mixed = TrafficPattern.parse("1000 x10, 0 x12, 1000").schedule(30);
+                check(mixed.get(9000L) == 1 && mixed.get(10000L) == 12 && mixed.get(11000L) == 1 && mixed.get(18000L) == 1 && mixed.size() == 19, "Steady, burst, steady: " + mixed);
+                check(TrafficPattern.why("1000 x10, 0, 1000") != null && TrafficPattern.why("abc") != null && TrafficPattern.why("1000 x0") != null, "Bad patterns accepted");
+                File remote = new File(common, "ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json");
+                BuildAndRunGenerator.Plan payPlan = BuildAndRunGenerator.plan(load(remote), remote);
+                check(payPlan.problems.isEmpty() && payPlan.defaults.tokens == 30 && "1000 x10, 0 x12, 1000".equals(payPlan.defaults.runs.get(0).rate)
+                    && payPlan.profile.getName().equals("Remote_Payment_TestDeployment.json"), "The payment test burst, tokens and profile: " + payPlan.problems + " " + payPlan.defaults.tokens + " " + payPlan.profile);
+                check(BuildAndRunGenerator.summary(payPlan, payPlan.defaults).stream().anyMatch(l -> l.contains("10 one every 1000 ms, 12 at once, then one every 1000 ms for the rest")), "Summary does not describe the pattern");
+
                 // The runtime's own initialiser reaches every host from one generator and is never checked as a marking;
                 // the same net in a business process reads as a marking of one token per host place.
                 Canvas admin = load(initializer);
@@ -148,7 +160,7 @@ public final class GeneratorRoleCheck {
             } catch (Throwable t) { failure[0] = t; }
         });
         if (failure[0] != null) throw new AssertionError("Generator roles", failure[0]);
-        System.out.println("PASS: a generator into a JoinNode T_in sets the initial marking (traffic light: 2 tokens, once) and the author is told: badge on the diagram, Role box with Rate greyed out, Validate reminder, Build summary and row; two generators on one join reported; an arrival generator says so; initialisers exempt; a marking over several places (Rendezvous) is shown, planned and written as eg1.marking; each arc's count is set in its Attributes and bad counts are reported; saving keeps joinInputCount and arc counts; a generator's token data file is saved and written as egN.format.service, with no name=value field; older token_data dropped");
+        System.out.println("PASS: a generator into a JoinNode T_in sets the initial marking (traffic light: 2 tokens, once) and the author is told: badge on the diagram, Role box with Rate greyed out, Validate reminder, Build summary and row; two generators on one join reported; an arrival generator says so; initialisers exempt; a marking over several places (Rendezvous) is shown, planned and written as eg1.marking; each arc's count is set in its Attributes and bad counts are reported; saving keeps joinInputCount and arc counts; a generator's token data file is saved and written as egN.format.service, with no name=value field; older token_data dropped; Rate patterns (steady, burst, steady then burst) parsed and scheduled, and the payment test rebuilds as supplied");
     }
 
     private static Canvas load(File process) throws Exception {
