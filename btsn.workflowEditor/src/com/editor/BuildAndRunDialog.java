@@ -103,11 +103,11 @@ public final class BuildAndRunDialog extends JDialog {
 
     /** Run | Event generator | Feeds | Version | Interval (ms) */
     final class GeneratorModel extends AbstractTableModel {
-        private final String[] columns = {"Run", "Event generator", "Feeds", "Version", "Interval (ms)"};
+        private final String[] columns = {"Run", "Event generator", "Feeds", "Version", "Rate (ms)"};
         public int getRowCount() { return runs.size(); }
         public int getColumnCount() { return columns.length; }
         @Override public String getColumnName(int column) { return columns[column]; }
-        @Override public Class<?> getColumnClass(int column) { return column == 0 ? Boolean.class : column == 4 ? Integer.class : String.class; }
+        @Override public Class<?> getColumnClass(int column) { return column == 0 ? Boolean.class : String.class; }
         @Override public boolean isCellEditable(int row, int column) {
             // An initial marking is sent once, so it has no interval.
             return column == 0 || column == 3 || (column == 4 && !plan.joins.containsKey(runs.get(row).generatorId));
@@ -120,14 +120,14 @@ public final class BuildAndRunDialog extends JDialog {
                 case 2: return plan.targets.get(run.generatorId) + "." + plan.operations.get(run.generatorId)
                     + (plan.joins.containsKey(run.generatorId) ? " \u2014 initial marking: " + plan.joins.get(run.generatorId) + " tokens, once" : "");
                 case 3: return run.version;
-                default: return run.intervalMs;
+                default: return run.rate;
             }
         }
         @Override public void setValueAt(Object value, int row, int column) {
             BuildAndRunGenerator.Run run = runs.get(row);
             if (column == 0) run.enabled = Boolean.TRUE.equals(value);
             else if (column == 3 && value != null) run.version = value.toString();
-            else if (column == 4 && value instanceof Integer && (Integer)value > 0) run.intervalMs = (Integer)value;
+            else if (column == 4 && value != null && TrafficPattern.why(value.toString()) == null) run.rate = value.toString().trim();
             fireTableRowsUpdated(row, row);
             refresh();
         }

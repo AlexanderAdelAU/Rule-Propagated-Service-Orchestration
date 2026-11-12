@@ -356,7 +356,9 @@ place has an arc into it.
   its place's label or the host target the place is deployed to, the same on the T_in and the T_out.
   Here both are `P2`; business models use the label, for example `T_in_Validation`.
 - The generator's **Rate** and **Version** become the defaults in
-  [Build and Run](#3-create-build-and-run).
+  [Build and Run](#3-create-build-and-run). **Rate (ms)** is an interval (`1000`: one token a second), `0` (all at
+  once, a burst), or a pattern of parts, each with how many tokens it covers except the last: `1000 x10, 0 x12, 1000`
+  sends ten a second apart, a burst of twelve, then one a second for the rest.
 - The generator's **Token Data File Name** is the file in `btsn.common.eventgenerators/TokenFormats` that fills each token's data, different for each token: `PaymentService.json` gives order n the orderId `ORD-n`, a customer, a currency and an amount and card from its case mix. **Open...** beside it shows the chosen file, lets you change it and previews the data of the first tokens; **New...** makes your own, started from `ExampleTokenDataFile.json`, which is read-only. Left at (none), a file named after the first place's service is used if there is one. Try a call in Deploy starts from the same data.
   - Services that read fields from their token need one. The financial ValidationService rejects an application with no `application_id`, income or amount, so the financial processes use `FinancialApplication.json` and `FinancialPreScreen.json`.
   - Leave it at (none) for services that don't read fields: the Petri-net models, and services that fall back on values from the token's number, such as claims, credit and inventory.
