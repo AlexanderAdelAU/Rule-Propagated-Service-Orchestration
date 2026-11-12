@@ -1,11 +1,12 @@
 # From an idea to a measured run
 
-We will walk you through four examples. All are built graphically in the editor.
+We will walk you through five examples. All are built graphically in the editor.
 
 - **Example 1** runs a standard service that returns true or false.
 - **Example 2** builds a simple claims process that calls a remote service over REST.
 - **Example 3** adds a seventh host target, P7, and moves Example 1 onto it.
 - **Example 4** tests a remote service of your own in context: you describe the service, point a place at it and run traffic through it.
+- **Example 5** connects an existing REST API that was not written for RPSO, such as a card-payments API, without changing it.
 
 **Before you start:** you need a JDK (15 or later) and the repository's projects imported into Eclipse.
 
@@ -302,6 +303,11 @@ Your computer needs internet access for this example.
    - the arrow to `Paid`: **Guard Condition** `DECISION_EQUAL_TO`, **Decision Value** and **Label** `paid`;
    - the arrow to `Declined`: the same, with `declined`.
 
+   Once the service is described (step 7), an arrow leaving `T_out_Payment` lists the values the service answers as
+   buttons under **Decision Value**: clicking one sets the guard and the label, so a guard cannot be mistyped.
+
+   <img src="images/ex4-guard.png" width="300" alt="An arrow's Attributes: Guard Condition DECISION_EQUAL_TO, an empty Decision Value, and under it The service answers (click one) with the buttons paid and declined.">
+
 Your design should now look like this. The red dot on `Payment` means it has no service yet; you describe one next.
 
 ![The drawn process: PAYMENTS feeds T_in_Payment, the Payment place, and T_out_Payment, which routes paid to Paid and declined to Declined. Payment has no service yet.](images/ex4-drawn.png)
@@ -335,16 +341,18 @@ shows it step by step.
 
 ### Deploy it
 
-10. Click **Deploy**. In Payment's row, choose **Host node** `P1` and set **Invocation Adapter** to `rest`.
-11. In the **Service endpoint** box below the table, enter
+10. Click **Deploy**. Payment's row is already on the `rest` adapter, because the service is called over REST.
+    Choose **Host node** `P1`.
+11. In **How Payment calls its service**, enter the **Service endpoint**
     `https://rule-propagated-service-orchestrati.vercel.app/api/payment/authorise`, and set **Wait up to** `2500` ms.
-    A payment that takes longer fails at the place.
+    A payment that takes longer fails at the place. Leave **Call mapping** empty: this mock was written for RPSO, so it
+    takes RPSO's own request and answers in RPSO's format ([Example 5](#example-5-connect-an-existing-rest-api) calls one that was not).
 12. Click **Save deployment...** and accept the name it suggests. Then choose **File → Save Process Definition**.
 
-![The Deploy panel, cut down to what this example sets: Payment's row with Host node P1, MyPaymentService.authorise, return attribute paymentResult and Invocation Adapter rest; below the table, the Service endpoint box with the Vercel address and Wait up to 2500 ms; and the Save deployment... button.](images/ex4-deploy.png)
+![The Deploy panel: Payment's row with Host node P1, MyPaymentService.authorise, return attribute paymentResult and Invocation Adapter rest; below it, How Payment calls its service, with the Vercel address as Service endpoint, Wait up to 2500 ms and an empty Call mapping; and the Save deployment... button.](images/ex4-deploy.png)
 
-*The parts of the Deploy panel you set: the row's **Host node** and **Invocation Adapter**, the **Service endpoint** and
-**Wait up to** below it, then **Save deployment...***
+*The parts of the Deploy panel you set: the row's **Host node**, then in **How Payment calls its service** the
+**Service endpoint** and **Wait up to**, then **Save deployment...***
 
 ### Run it
 
@@ -376,6 +384,8 @@ the next time you run).
 
 ### Now test your own service
 
+- **Your service has its own API?** Most do: then see [Example 5](#example-5-connect-an-existing-rest-api), which
+  calls one as it is. The rest of this list is for a service you write for RPSO.
 - **What your service must do.** Answer an HTTP POST. It receives
   `{"service": "MyPaymentService", "operation": "authorise", "sequenceId": …, "version": "v001", "inputs": {"token": {…}}}`
   and answers HTTP 200 with `{"paymentResult": {…, "routing_decision": {"routing_path": "paid"}}}`, or `declined`.
@@ -399,6 +409,125 @@ the next time you run).
 - The supplied copy: `btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json`
 
 [▶ Watch a recorded run of the finished test](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json&run=../../btsn.common/AnalysisFolder/Payments/Analysis_Remote_Payment_Test.txt)
+
+## Example 5: connect an existing REST API
+
+The payment service in Example 4 was written for RPSO: it takes RPSO's request and answers in RPSO's format. Most
+services were not. A card-payments API, for example, expects its own fields and a key, answers with its own status, and
+declines with HTTP 402. Here the same `Payment` place calls such an API as it is: you tell the host how to call it, and
+nothing in the API changes. The API is this project's mock of a typical one, running on Vercel
+([`examples/rest/card-payments.js`](examples/rest/card-payments.js)). It declines every 8th payment and is unavailable
+for every 13th.
+
+Your computer needs internet access for this example.
+
+### Start from Example 4
+
+1. Open `My_Payment_Test.json` and choose **File → Save Process Definition As...**. Save it beside the original as
+   `My_Card_Test.json`.
+
+   The copy gets its own deployment, `ServiceDeploymentFolder/mypayments/My_Card_Test.json`, so what you change here
+   leaves Example 4 as it is. (If you have not done Example 4, follow its steps 1 to 9, saving the process as
+   `My_Card_Test.json`.)
+
+### Give the tokens their data
+
+The API needs each payment's amount, currency, card and order number. A token carries what its event generator's
+**token data file** gives it.
+
+2. Select `PAYMENTS`. Set **Token Data File Name** to `PaymentService.json`.
+3. Click **Open...** to see the file and, under it, the data the first tokens will carry: order 1 is
+   `{"orderId": "ORD-1", "amount": 84.5, "currency": "AUD", "card": "visa-4242", ...}`. Close it and save the process.
+
+<img src="images/ex5-token-data.png" width="300" alt="The event generator's Attributes: Label PAYMENTS, Rate 1000 ms, Version v001, Token Data File Name PaymentService.json with Open... and New... under it.">
+
+For your own service, **New...** makes a file of your own, started from `ExampleTokenDataFile.json`.
+
+### Tell the host how to call the API
+
+4. Click **Deploy** and select Payment's row. In **How Payment calls its service**, change the **Service endpoint** to
+   `https://rule-propagated-service-orchestrati.vercel.app/api/v1/payments`. Keep **Wait up to** `2500` ms.
+5. Click **Start from an example**. The **Call mapping** box fills with the mapping for this API:
+
+   ```json
+   {
+     "method": "POST",
+     "headers": {"Authorization": "Bearer demo_key_public"},
+     "body": {"amount": "${data.amount}", "currency": "${data.currency}", "card": "${data.card}", "reference": "${data.orderId}"},
+     "route": {"field": "status", "values": {"succeeded": "paid", "declined": "declined"}},
+     "statusRoutes": {"402": "declined"}
+   }
+   ```
+
+   | Part | What it tells the host |
+   |---|---|
+   | `headers` | Send the API's key. This mock's key is public on purpose; a real key is kept out of the deployment (see [Point it at your own API](#point-it-at-your-own-api)) |
+   | `body` | Build the request the API expects. On the left of each line is the **API's** name for a field; on the right, `${data.…}` names the **token's** field that fills it. The API calls the order number `reference`; the token calls it `orderId` |
+   | `route` | The answer's `status` picks the arrow: `succeeded` takes `paid`, `declined` takes `declined` (your guards) |
+   | `statusRoutes` | HTTP 402 is the API's answer for a declined card, not a failure, so it takes `declined` too |
+
+   If a `${data.…}` names a field the tokens do not carry, the note under the box turns red and lists the fields they do.
+
+![The Deploy panel for My_Card_Test: How Payment calls its service, with the card-payments address as Service endpoint, Wait up to 2500 ms, the call mapping in the box, and the API keys..., Start from an example and Try a call... buttons.](images/ex5-deploy.png)
+
+6. Click **Try a call...**, then **Send**. This is one real call, made exactly as the host will make it, before you run
+   anything. Expect the request with the order's amount, card and `"reference": "ORD-1"`, and **ROUTE paid**.
+7. In the token box, change `ORD-1` to `ORD-8` and **Send** again: HTTP 402, **ROUTE declined**. Try `ORD-13`: the
+   call fails with `answered HTTP 503`, and a run would stop that payment at the place with that reason.
+
+![Try a call for order ORD-1: the request sent (POST to the card-payments address with the key and the body built from the token), the result published under paymentResult, and ROUTE paid.](images/ex5-try.png)
+
+8. Click **Save deployment...**.
+
+### Run it
+
+9. Click **Build**. Set **Tokens per generator** to `16`, then click **Create**. (Build makes the launcher from the saved
+   deployment; Run on hosts says so if you save the deployment again later without building.)
+10. Click **Run on hosts**, then **Run**. Expect `v001: 16 generated, 15 completed`: 13 paid, 2 declined (orders 8 and
+    16), and 1 failed at Payment with `answered HTTP 503` (order 13).
+11. Click **▶ Replay the recorded run** to watch the payments take their routes.
+
+### Use the API's published definition instead
+
+Many APIs publish an OpenAPI (Swagger) file describing their calls. **Fill in from OpenAPI...**, beside the endpoint,
+reads one and fills in the endpoint and the mapping for the call you choose. Try it on this API's definition,
+[`examples/rest/card-payments.openapi.json`](examples/rest/card-payments.openapi.json):
+
+- Choose **Take a card payment**. The editor fills in the endpoint and the mapping, and asks for the API's key: the
+  definition says it is `demo_key_public`.
+- Its notes list what to check. Here two things: the route values are the API's (`succeeded`), so change
+  `"succeeded": "succeeded"` to `"succeeded": "paid"`; and the body reads `${data.reference?}`, which the tokens call
+  `orderId`, so change it to `${data.orderId}`.
+- Then **Try a call...** as above.
+
+### Point it at your own API
+
+- **The address.** Put your API's address in **Service endpoint**, and set **Wait up to** to how long a call may take.
+- **The key.** Write `${env:NAME}` where the key goes, for example `"Authorization": "Bearer ${env:PAYMENT_KEY}"`, then
+  click **API keys...** and enter it. The key is kept on this computer, in `~/.rpso/api-keys.properties`, never in the
+  deployment or the repository. Each computer that runs the place's host needs it too: enter it there, or set an
+  environment variable of the same name.
+- **The request.** In `body`, put your API's field names on the left and the token's fields on the right. Make the
+  tokens carry what the API needs with **New...** beside **Token Data File Name**.
+- **The answer.** In `route`, name the field of the answer that says what happened and map its values to your guards.
+  Add `statusRoutes` for any HTTP status that is an answer rather than a failure.
+- **Check it.** **Try a call...** before every run. The other settings (`result`, query parameters, optional fields)
+  are in [Call an API that was not written for RPSO](ServiceTutorial.md#call-an-api-that-was-not-written-for-rpso).
+
+### Where your files go
+
+| File | Where |
+|---|---|
+| The process | `btsn.common/ProcessDefinitionFolder/mypayments/Workflow/My_Card_Test.json` |
+| Its deployment, with the endpoint and call mapping | `btsn.common/ServiceDeploymentFolder/mypayments/My_Card_Test.json` |
+| A token data file you make with **New...** | `btsn.common.eventgenerators/TokenFormats/<name>.json` |
+| API keys | `~/.rpso/api-keys.properties` on each computer, never in the repository |
+| The launcher and the run's analysis | As in [Example 4](#where-your-files-go), named after `My_Card_Test` |
+
+### Learn more
+
+- [Call an API that was not written for RPSO](ServiceTutorial.md#call-an-api-that-was-not-written-for-rpso): every setting of a call mapping
+- The supplied copy: `btsn.common/ProcessDefinitionFolder/payments/Workflow/Plain_Payment_Test.json`
 
 ## Author
 

@@ -629,9 +629,12 @@ public class EditorFrame extends JPanel {
         // The values the service answers, one click each: the guard cannot be mistyped.
         java.util.List<String> answers = guardApplies ? canvas.answersBefore(arrow.getSource()) : java.util.Collections.emptyList();
         if (!answers.isEmpty() && !GuardEditing.otherwise(arrow)) {
-            JPanel picks = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
-            picks.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-            picks.add(new JLabel("The service answers:"));
+            // A label line, then the answers two to a row, so none is hidden however narrow the panel is.
+            JPanel pickButtons = new JPanel(new GridLayout(0, 2, 4, 4));
+            JPanel picks = new JPanel(new BorderLayout(0, 2));
+            picks.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
+            picks.add(new JLabel("The service answers (click one):"), BorderLayout.NORTH);
+            picks.add(pickButtons, BorderLayout.CENTER);
             for (String answer : answers) {
                 JButton pick = new JButton(answer);
                 pick.setToolTipText("Test for " + answer + " on this arrow");
@@ -644,8 +647,9 @@ public class EditorFrame extends JPanel {
                     canvas.repaint();
                     SwingUtilities.invokeLater(() -> showArrowAttributes(arrow));
                 });
-                picks.add(pick);
+                pickButtons.add(pick);
             }
+            picks.setMaximumSize(new Dimension(Integer.MAX_VALUE, picks.getPreferredSize().height));
             attributesPanel.add(picks);
         }
         if (GuardEditing.otherwise(arrow)) freshDecisionField.setToolTipText("Otherwise takes no value: this arc is taken when no other guard on " + arrow.getSource().getLabel() + " matches.");

@@ -1106,7 +1106,7 @@ public class ProcessEditor extends JFrame {
                 canvas.markSaved();
                 setDirty(false); // Clear dirty flag after successful save
                 updateStatusBar(); // Update status bar
-                showSaved(unfinished);
+                showSaved(unfinished, "");
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(this,
                     "Error saving file: " + ex.getMessage(),
@@ -1142,6 +1142,8 @@ public class ProcessEditor extends JFrame {
             saveLastDirectory(file.getParentFile());
             // A process saved under a domain uses its catalogue, as when it is opened from there.
             File previousLocation = canvas.getDefinitionLocation();
+            // A copy under a new name deploys on its own: deploying it must not change the original's deployment.
+            boolean ownDeployment = previousLocation != null && !file.getAbsoluteFile().equals(previousLocation.getAbsoluteFile()) && canvas.giveOwnDeployment(file);
             canvas.setDefinitionLocation(file);
             if (!canvas.adoptDomainCatalogue()) canvas.setDefinitionLocation(previousLocation);
             try (FileWriter writer = new FileWriter(file)) {
@@ -1151,7 +1153,8 @@ public class ProcessEditor extends JFrame {
                 canvas.setDefinitionLocation(file);
                 setDirty(false); // Clear dirty flag after successful save
                 updateStatusBar(); // Update status bar to show new filename
-                showSaved(stillToFinish());
+                showSaved(stillToFinish(), ownDeployment ? "It has its own deployment, " + canvas.getServiceRegistry().reference()
+                    + ", a copy of the original's: deploying this process leaves the original's as it is." : "");
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(this,
                     "Error saving file: " + ex.getMessage(),
@@ -1188,12 +1191,13 @@ public class ProcessEditor extends JFrame {
     }
 
     /** Confirms a save, listing what is still to finish; Validate, Deploy, Build and Run report the same. */
-    private void showSaved(java.util.List<String> unfinished) {
+    private void showSaved(java.util.List<String> unfinished, String note) {
+        String extra = note == null || note.isEmpty() ? "" : "\n\n" + note;
         if (unfinished.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Saved successfully!", "Save Successful", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, WrappedMessage.of("Saved successfully!" + extra), "Save Successful", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
-        StringBuilder message = new StringBuilder("Saved. Your work is kept.\n\nStill to finish before it can be deployed:\n\n");
+        StringBuilder message = new StringBuilder("Saved. Your work is kept." + extra + "\n\nStill to finish before it can be deployed:\n\n");
         for (String item : unfinished) message.append("- ").append(item).append("\n");
         JOptionPane.showMessageDialog(this, WrappedMessage.of(message.toString()), "Saved", JOptionPane.INFORMATION_MESSAGE);
     }

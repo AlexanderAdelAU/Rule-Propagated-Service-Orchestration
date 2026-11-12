@@ -3184,6 +3184,31 @@ public class Canvas extends JPanel {
         return names;
     }
 
+    /**
+     * A process saved under a new name gets its own deployment: a copy of the one it had, named after it
+     * (ServiceDeploymentFolder/<domain>/<name>.json), so deploying the copy never changes the original's deployment.
+     * True when the copy is now linked to its own deployment.
+     */
+    public boolean giveOwnDeployment(java.io.File newProcess) {
+        if (newProcess == null || !serviceRegistry.hasDeployment()) return false;
+        java.io.File old = serviceRegistry.deploymentFile();
+        java.io.File common = serviceRegistry.common() != null ? serviceRegistry.common() : ServiceRegistry.findCommon(newProcess);
+        if (common == null || old == null) return false;
+        String domain = CatalogueChoice.processDomain(common, newProcess);
+        String name = newProcess.getName().replaceFirst("(?i)\\.json$", "");
+        java.io.File target = new java.io.File(common, "ServiceDeploymentFolder/" + (domain.isEmpty() ? "" : domain + "/") + name + ".json");
+        try {
+            if (target.getCanonicalFile().equals(old.getCanonicalFile())) return false;
+            if (!target.exists()) {
+                java.nio.file.Files.createDirectories(target.getParentFile().toPath());
+                java.nio.file.Files.copy(old.toPath(), target.toPath());
+            }
+            serviceRegistry.loadDeployment(target);
+            serviceDeploymentReference = serviceRegistry.reference();
+            return true;
+        } catch (Exception ex) { return false; }
+    }
+
     public void setDefinitionLocation(java.io.File file) { definitionLocation = file; }
     public java.io.File getDefinitionLocation() { return definitionLocation; }
     public String getServiceDeploymentReference() { return serviceDeploymentReference; }

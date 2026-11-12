@@ -114,6 +114,13 @@ public final class DeployFlowCheck {
                     check(instanceByPlace.get(place.getLabel()).equals(place.getServiceInstance()), "Instance not recorded on " + place.getLabel());
                 }
                 check("P6".equals(canvas.nodeFor(places.get("NS_Yellow"))), "Saved node lost");
+                // Saved under a new name, a copy gets its own deployment (a copy of this one), so deploying it leaves this one alone.
+                Canvas copy = new Canvas(); copy.setDefinitionLocation(processFile.toFile()); copy.loadFromJSON(canvas.saveToJSON());
+                File copyFile = processFile.resolveSibling("TrafficLight_Copy.json").toFile();
+                check(copy.giveOwnDeployment(copyFile) && "ServiceDeploymentFolder/petrinet/TrafficLight_Copy.json".equals(copy.getServiceDeploymentReference())
+                    && read(scratchCommon.resolve("ServiceDeploymentFolder/petrinet/TrafficLight_Copy.json")).equals(read(deploymentFile))
+                    && "ServiceDeploymentFolder/petrinet/TrafficLight_Design.json".equals(canvas.getServiceDeploymentReference()), "A copy does not get its own deployment: " + copy.getServiceDeploymentReference());
+                check(!copy.giveOwnDeployment(copyFile), "A process saved under its own name again should keep its deployment");
                 check(canvas.validateServiceContracts().isEmpty() && canvas.deploymentGaps().isEmpty(), "Linked process invalid: " + canvas.validateServiceContracts() + canvas.deploymentGaps());
                 String linked = canvas.saveToJSON();
                 JSONObject linkedJson = (JSONObject)new JSONParser().parse(linked);
