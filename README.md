@@ -1,6 +1,6 @@
 # Rule-Propagated Service Orchestration (RPSO)
 
-**RPSO uses Petri net concepts to transform ordinary callable services into a formally defined, distributed orchestration system.**
+**RPSO uses Petri net concepts to orchestrate ordinary callable services, unchanged, as a formally defined, distributed system.**
 
 RPSO is an orchestration infrastructure. You draw a process, and generic hosts carry it out across machines and organisations with no central engine, calling new or your existing services where they already run.
 
