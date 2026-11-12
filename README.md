@@ -1,6 +1,6 @@
 # Rule-Propagated Service Orchestration (RPSO)
 
-**RPSO uses Petri net concepts to orchestrate ordinary callable services, as a formally defined, distributed system.  These services are orchestrated without the need to change existing service code and the logical RPSO nodes can reside on the same host or via network interfaces to remote services.**
+**RPSO uses Petri net concepts to orchestrate ordinary callable services as a formally defined, distributed system. The services keep their code unchanged, and RPSO's hosts can all run on one machine or be spread across a network, calling services that are local or remote.**
 
 RPSO is an orchestration infrastructure. You draw a process, and generic hosts carry it out across machines and organisations with no central engine. Inside RPSO the workflow moves as tokens: each token carries its data from host to host, and the hosts route it by the rules installed from your model. A Place reaches a service through an adapter, which turns the arriving token into the call and the service's answer back into a result and a route. So any service, new or existing, is called as it is, where it already runs: a REST endpoint or a method of a Java class.
 
