@@ -412,10 +412,15 @@ the next time you run).
 
 ## Example 5: connect an existing REST API
 
-The payment service in Example 4 was written for RPSO: it takes RPSO's request and answers in RPSO's format. Most
-services were not. A card-payments API, for example, expects its own fields and a key, answers with its own status, and
-declines with HTTP 402. Here the same `Payment` place calls such an API as it is: you tell the host how to call it, and
-nothing in the API changes. The API is this project's mock of a typical one, running on Vercel
+Inside RPSO, a workflow moves as tokens: each token carries its data from host to host, and the hosts route it by the
+rules installed from your model. A Place reaches a service outside through an adapter. With the `rest` adapter, the
+Place's host turns the arriving token into an HTTP call, and turns the service's answer back into a result and a route.
+
+The payment service in Example 4 was written for RPSO. It accepts the token as its request and names the route in its
+answer, so the adapter has nothing to translate. Most services were not written for RPSO. A card-payments API, for
+example, expects its own fields and a key, answers with its own status, and declines with HTTP 402. For such an API you
+give the adapter a **call mapping**: which of the token's fields go into the request, and which part of the answer picks
+the route. Nothing in the API changes. The API here is this project's mock of a typical one, running on Vercel
 ([`examples/rest/card-payments.js`](examples/rest/card-payments.js)). It declines every 8th payment and is unavailable
 for every 13th.
 

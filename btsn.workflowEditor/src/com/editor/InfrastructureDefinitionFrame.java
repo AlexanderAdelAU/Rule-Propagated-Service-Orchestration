@@ -924,7 +924,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
     private JPanel callPanel() {
         JPanel p = new JPanel(new BorderLayout(4, 2));
         p.setBorder(BorderFactory.createEmptyBorder(6, 4, 0, 4));
-        p.add(new JLabel("Call mapping (only for an API that was not written for RPSO; leave empty otherwise):"), BorderLayout.NORTH);
+        p.add(new JLabel("Call mapping: how the token becomes the API's request, and the answer a route (leave empty for a service written for RPSO):"), BorderLayout.NORTH);
         callArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
         callArea.setToolTipText("<html>How the host calls this API, as JSON: method, headers, body, result, route, statusRoutes.<br>"
             + "${data.amount} is a field of the token's data; ${env:NAME} is an environment variable on the host, for API keys.</html>");

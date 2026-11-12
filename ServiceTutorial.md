@@ -576,9 +576,13 @@ When the service behaves as you need, add the places around it. Each new place i
 
 ### Call an API that was not written for RPSO
 
-The services above answer in RPSO's own format. A payment provider's API does not: it has its own address, its own
-request, its own answer, and usually an API key. A **call mapping** in the deployment tells the host how to call such
-an API as it is, so nothing is written or changed on the service's side.
+Inside RPSO, a workflow moves as tokens, and a Place reaches a service through an adapter. With the `rest` adapter,
+the Place's host turns the arriving token into an HTTP call, and turns the answer back into a result and a route. The
+services above were written for RPSO: they accept the token as their request and name the route in their answer, so
+the adapter has nothing to translate. A payment provider's API was not: it has its own address, its own request, its
+own answer, and usually an API key. A **call mapping** in the deployment tells the adapter how to translate: which of
+the token's fields go into the request, and which part of the answer picks the route. Nothing is written or changed on
+the service's side.
 
 | What | File |
 |---|---|
