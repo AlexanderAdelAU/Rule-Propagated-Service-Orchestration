@@ -18,6 +18,14 @@ unavailable for every 13th.
 **Before you start:** you need a JDK (15 or later), the repository's projects imported into Eclipse, and internet
 access.
 
+> **Want to skip the drawing?** The finished process is supplied. Start the editor (step 1), choose
+> **File → Open → Process Definition...** and open `btsn.common/ProcessDefinitionFolder/payments/Workflow/Plain_Payment_Test.json`.
+> Its service is the supplied `PaymentService`, and its tokens already take their data from `PaymentService.json`
+> (select `PAYMENTS` to see it). Then go to [Tell the host how to call the API](#tell-the-host-how-to-call-the-api):
+> **Deploy** shows its endpoint and call mapping already filled in, so you can read them, **Try a call**, and run it.
+> Its launcher is supplied too, so **Run on hosts** works without **Build**; if it offers to build first, either
+> choice is fine.
+
 ## Create the process
 
 1. Start the editor: in Eclipse, run `com.editor.ProcessEditor` (project `btsn.workflowEditor`) as a Java application.
