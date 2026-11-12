@@ -1,5 +1,8 @@
 # From an idea to a measured run
 
+**New here?** [Run the payment test](guides/run-the-payment-test.md) first: open a supplied process, run it and watch
+the recorded run, without drawing or typing anything.
+
 We will walk you through three examples, each building on the one before. All are built graphically in the editor.
 
 - **Example 1** runs a standard service that returns true or false.

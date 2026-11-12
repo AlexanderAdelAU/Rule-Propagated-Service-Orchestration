@@ -10,7 +10,9 @@ Nothing changes as the process grows. Add Places for inventory and order handlin
 
 ## Start with one service
 
-A minimal experiment needs an event generator, a Place bound to the remote service, its incoming and outgoing transitions, and an outcome. **You implement none of these: they are part of RPSO, drawn in the editor and run by its hosts.** All you provide is the address of your service (its endpoint) and, if the service has its own API, a short description of how to call it. The editor can fill in that description from the API's published definition, and lets you try one call before you run anything ([Connect an existing REST API](guides/connect-an-existing-rest-api.md), step by step).
+A minimal experiment needs an event generator, a Place bound to the remote service, its incoming and outgoing transitions, and an outcome. **You implement none of these: they are part of RPSO, drawn in the editor and run by its hosts.** All you provide is the address of your service (its endpoint) and, if the service has its own API, a short description of how to call it. The editor can fill in that description from the API's published definition, and lets you try one call before you run anything.
+
+**[Quick step-through: run this small test yourself](guides/run-the-payment-test.md)**, without drawing or typing anything.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="images/rpso-first-use-dark.svg">
@@ -28,7 +30,7 @@ A minimal experiment needs an event generator, a Place bound to the remote servi
 ![A recorded run replayed on the model: tokens leave the PAYMENTS event generator, queue at T_in during the burst, pass through the Payment place and end at Paid or Declined.](images/remote-payment-test.gif)
 
 30 payments: 24 paid and 3 declined, each routed on the service's own answer; 3 failed at the Place with the reason recorded (two HTTP 503s, one answer slower than 2.5 s). The burst queued for up to 10.8 s; steady traffic hardly queued.
-[▶ Watch the recorded run](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json&run=../../btsn.common/AnalysisFolder/Payments/Analysis_Remote_Payment_Test.txt) · [Build it yourself in the editor, then test your own service](#from-an-idea-to-a-measured-run)
+[▶ Watch the recorded run](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json&run=../../btsn.common/AnalysisFolder/Payments/Analysis_Remote_Payment_Test.txt) · [Run it yourself](guides/run-the-payment-test.md)
 
 This is a measured test of a running service, not a replacement for dedicated load or fault-injection tools. RPSO provides the executable workflow, token schedules, execution records and replay; realistic workloads and failure conditions still need to be configured for each experiment. The same approach can expand to a complete checkout process with inventory, payment and order handling.
 
