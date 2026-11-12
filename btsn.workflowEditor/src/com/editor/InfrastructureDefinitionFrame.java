@@ -1009,9 +1009,19 @@ public class InfrastructureDefinitionFrame extends JFrame {
         if (!rest) note = "For a rest placement.";
         else if (problem != null) note = problem + " (the mapping is saved once it is valid)";
         else if (callArea.getText().trim().isEmpty()) note = "Empty: the host sends RPSO's own request and expects RPSO's own answer.";
-        else note = "The host calls the API as this says. Try a call to see the request, the answer and the route.";
+        else {
+            // Each ${data.x} names a field of the token: one the tokens do not carry is said here, as it is typed.
+            List<String> carried = tokenFields(cap), absent = new ArrayList<>();
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("\\$\\{data\\.([A-Za-z0-9_]+)[^}]*\\}").matcher(callArea.getText());
+            while (m.find()) if (!carried.isEmpty() && !carried.contains(m.group(1)) && !absent.contains(m.group(1))) absent.add(m.group(1));
+            if (!absent.isEmpty()) {
+                note = "<html><div style='width:430px'>The tokens carry no <b>" + String.join(", ", absent) + "</b>: in ${data.<i>name</i>}, use one of their fields: " + String.join(", ", carried)
+                    + ". (On the left of each body line is the API's name for the field; on the right, the token's.)</div></html>";
+                problem = note;
+            } else note = "The host calls the API as this says. Try a call to see the request, the answer and the route.";
+        }
         callNote.setText(note);
-        callNote.setForeground(problem != null ? Color.RED : Color.DARK_GRAY);
+        callNote.setForeground(problem != null ? (problem.startsWith("<html>") ? new Color(0xB00020) : Color.RED) : Color.DARK_GRAY);
     }
 
     /** One sample token for a place: the token format of its service when there is one, otherwise empty data. */
