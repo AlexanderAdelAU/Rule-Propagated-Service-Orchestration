@@ -231,18 +231,51 @@ public class EditorFrame extends JPanel {
                 element.setTokenVersion(freshVersionField.getText().trim());
             }));
 
-            // The business data every token carries, for services that read fields from it (an application's amount, ...).
-            JTextField dataField = new JTextField(15);
-            addField("Token data:", dataField, element.getTokenData());
-            dataField.setToolTipText("<html>Fields put in every token this generator sends, as name=value pairs separated by commas,<br>"
-                + "e.g. application_id=LOAN-1, annual_income=85000, requested_amount=25000.<br>"
-                + "Services that read fields from their token need them; leave it blank for services that don't.</html>");
-            dataField.getDocument().addDocumentListener(new SimpleDocumentListener(() -> {
-                String text = dataField.getText().trim();
-                if (text.equals(element.getTokenData())) return;
-                element.setTokenData(text);
+            // Where each token's data comes from: a file in TokenFormats, so a service that reads fields (amount, card, ...) gets them.
+            java.util.List<String> formats = canvas.tokenFormats();
+            final String noFormat = "(none)";
+            JComboBox<String> formatCombo = new JComboBox<>();
+            formatCombo.addItem(noFormat);
+            for (String f : formats) formatCombo.addItem(f + ".json");
+            String current = canvas.tokenFormatOf(element);
+            if (!element.getTokenFormat().isEmpty() && !formats.contains(element.getTokenFormat())) formatCombo.addItem(element.getTokenFormat() + ".json");
+            formatCombo.setSelectedItem(formats.contains(current) || current.equals(element.getTokenFormat()) ? current + ".json" : noFormat);
+            formatCombo.setToolTipText("<html>Save your token data in this file, in btsn.common.eventgenerators/TokenFormats.<br>"
+                + "The Event Generator uses it to populate each token's data.<br>"
+                + "Open... shows or changes the chosen file; New... makes your own, started from ExampleTokenDataFile.json.</html>");
+            addComboField("Token Data File Name:", formatCombo, (String) formatCombo.getSelectedItem());
+            formatCombo.addActionListener(e -> {
+                Object chosen = formatCombo.getSelectedItem();
+                String value = chosen == null || noFormat.equals(chosen) ? "" : chosen.toString().replaceFirst("\\.json$", "");
+                if (value.equals(element.getTokenFormat())) return;
                 canvas.saveUndoState();
-            }));
+                element.setTokenFormat(value);
+            });
+            java.io.File formatFolder = canvas.tokenFormatFolder();
+            JButton openFormat = new JButton("Open...");
+            JButton newFormat = new JButton("New...");
+            openFormat.setToolTipText("Show the chosen token data file, change it and see the data the first tokens will carry");
+            newFormat.setToolTipText("Make a new token data file, started from ExampleTokenDataFile.json, and use it here");
+            openFormat.addActionListener(e -> {
+                Object chosen = formatCombo.getSelectedItem();
+                if (chosen == null || noFormat.equals(chosen) || formatFolder == null) {
+                    JOptionPane.showMessageDialog(this, "Choose a token data file first, or click New... to make one.", "Token data file", JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
+                TokenDataFileDialog.open(this, new java.io.File(formatFolder, chosen.toString()));
+            });
+            newFormat.addActionListener(e -> {
+                if (formatFolder == null) { JOptionPane.showMessageDialog(this, "Save the process under btsn.common first, so the editor can find TokenFormats.", "Token data file", JOptionPane.WARNING_MESSAGE); return; }
+                String created = TokenDataFileDialog.create(this, formatFolder);
+                if (created == null) return;
+                canvas.saveUndoState();
+                element.setTokenFormat(created);
+                SwingUtilities.invokeLater(() -> updateSelection(element));
+            });
+            JPanel formatButtons = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+            formatButtons.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
+            formatButtons.add(openFormat); formatButtons.add(newFormat);
+            attributesPanel.add(formatButtons);
 
             // What this generator does, from its one arc: arrivals, or the initial marking of a closed net (sent once).
             Canvas.GeneratorRole role = canvas.generatorRole(element);
@@ -584,9 +617,37 @@ public class EditorFrame extends JPanel {
         // Decision Value
         addField("Decision Value:", freshDecisionField, arrow.getDecisionValue());
         freshDecisionField.getDocument().addDocumentListener(new SimpleDocumentListener(() -> {
-            arrow.setDecisionValue(freshDecisionField.getText());
+            String before = arrow.getDecisionValue(), now = freshDecisionField.getText();
+            arrow.setDecisionValue(now);
+            // The label follows the value while it only repeated it, so the drawing shows what is tested.
+            String label = arrow.getLabel();
+            if ((label == null || label.trim().isEmpty() || label.equals(before)) && !now.equals(freshArrowLabelField.getText()))
+                SwingUtilities.invokeLater(() -> freshArrowLabelField.setText(now));
+            canvas.repaint();
         }));
         freshDecisionField.setEnabled(guardApplies && GuardEditing.takesValue(guardConditionCombo.getSelectedItem()));
+        // The values the service answers, one click each: the guard cannot be mistyped.
+        java.util.List<String> answers = guardApplies ? canvas.answersBefore(arrow.getSource()) : java.util.Collections.emptyList();
+        if (!answers.isEmpty() && !GuardEditing.otherwise(arrow)) {
+            JPanel picks = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+            picks.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+            picks.add(new JLabel("The service answers:"));
+            for (String answer : answers) {
+                JButton pick = new JButton(answer);
+                pick.setToolTipText("Test for " + answer + " on this arrow");
+                pick.addActionListener(e -> {
+                    canvas.saveUndoState();
+                    if (!GuardEditing.takesValue(arrow.getGuardCondition())) arrow.setGuardCondition("DECISION_EQUAL_TO");
+                    String before = arrow.getDecisionValue(), label = arrow.getLabel();
+                    arrow.setDecisionValue(answer);
+                    if (label == null || label.trim().isEmpty() || label.equals(before)) arrow.setLabel(answer);
+                    canvas.repaint();
+                    SwingUtilities.invokeLater(() -> showArrowAttributes(arrow));
+                });
+                picks.add(pick);
+            }
+            attributesPanel.add(picks);
+        }
         if (GuardEditing.otherwise(arrow)) freshDecisionField.setToolTipText("Otherwise takes no value: this arc is taken when no other guard on " + arrow.getSource().getLabel() + " matches.");
         if (!guardApplies) {
             guardConditionCombo.setEnabled(false);

@@ -1,0 +1,22 @@
+{
+  "_readMe": [
+    "An example token data file. Do not change this one: copy it to a new name in this folder (for example MyService.json),",
+    "change the fields to the ones your service reads, and choose MyService.json as the event generator's Token Data File Name.",
+    "Every token gets tokenStructure.data. Token n then also gets the dataVariants entry named at position n of caseMix (wrapping round),",
+    "so each run sends the same mix. In text, ${n} becomes the token's number (1, 2, ...). Numbers and true/false stay as written.",
+    "A service mapping reads these fields as ${data.orderId}, ${data.amount}, and so on."
+  ],
+  "description": "An example: an order with a number, a customer, a currency, and an amount and card that vary by the kind of order.",
+  "tokenStructure": {
+    "data": {
+      "orderId": "ORD-${n}",
+      "customer": "C-${n}",
+      "currency": "AUD"
+    }
+  },
+  "dataVariants": {
+    "small": { "amount": 25.00,  "card": "visa-4242" },
+    "large": { "amount": 480.00, "card": "mastercard-5100" }
+  },
+  "caseMix": ["small", "small", "large"]
+}

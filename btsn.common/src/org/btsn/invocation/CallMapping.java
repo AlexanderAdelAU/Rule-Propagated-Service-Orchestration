@@ -37,7 +37,7 @@ import org.json.simple.parser.JSONParser;
  * <li>${data.x}: field x of the token's data (the first input's data);</li>
  * <li>${name.x}: field x of the input called name, e.g. ${paymentResult.status};</li>
  * <li>${sequenceId} and ${version}: the call's own;</li>
- * <li>${env:NAME}: the environment variable NAME on the host, for keys that must not be written down.</li>
+ * <li>${env:NAME}: an API key, from the environment variable NAME or this computer's key file (ApiKeys), so it is never written in the deployment.</li>
  * </ul>
  * A value the call does not have fails the call, saying which. Ending the name with a question mark, ${data.note?},
  * marks it optional: its field is left out of the body, and in an address or header it is empty.
@@ -159,8 +159,8 @@ public final class CallMapping {
             }
             if (expression.startsWith("env:")) {
                 String name = expression.substring(4).trim();
-                String value = System.getenv(name);
-                if (value == null) throw new IllegalStateException("environment variable " + name + " is not set on this host");
+                String value = ApiKeys.get(name);
+                if (value == null) throw new IllegalStateException(ApiKeys.missing(name));
                 return value;
             }
             if (expression.equals("sequenceId")) return sequenceId;

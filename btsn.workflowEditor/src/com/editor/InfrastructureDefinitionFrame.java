@@ -68,7 +68,11 @@ public class InfrastructureDefinitionFrame extends JFrame {
     private String lastValidCall = "";
     private final JButton callExample = new JButton("Start from an example");
     private final JButton tryCall = new JButton("Try a call...");
-    private final JButton importOpenApi = new JButton("Import from OpenAPI...");
+    private final JButton apiKeys = new JButton("API keys...");
+    private final JButton importOpenApi = new JButton("Fill in from OpenAPI...");
+    /** One box for everything about how the selected place calls its service, titled with the place. */
+    private final javax.swing.border.TitledBorder callBorder = BorderFactory.createTitledBorder("How the place calls its service");
+    private final JPanel callBox = new JPanel(new BorderLayout(4, 4));
     /** True while the endpoint box is filled from the selected row or writes to it, so neither echoes the other. */
     private boolean endpointSync;
     private File currentFile;
@@ -161,8 +165,11 @@ public class InfrastructureDefinitionFrame extends JFrame {
         });
         capButtons.add(chooseCatalogue);
         JPanel capabilitiesSouth = new JPanel(new BorderLayout(4, 2));
-        capabilitiesSouth.add(endpointPanel(), BorderLayout.NORTH);
-        capabilitiesSouth.add(callPanel(), BorderLayout.CENTER);
+        // Endpoint, wait, call mapping and Try a call in one box, in the order they are filled in.
+        callBox.setBorder(callBorder);
+        callBox.add(endpointPanel(), BorderLayout.NORTH);
+        callBox.add(callPanel(), BorderLayout.CENTER);
+        capabilitiesSouth.add(callBox, BorderLayout.CENTER);
         capabilitiesSouth.add(capButtons, BorderLayout.SOUTH);
         capabilitiesPanel.add(capabilitiesSouth, BorderLayout.SOUTH);
 
@@ -510,7 +517,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
         stopTableEditing();
         List<String> errors = validateDefinition();
         if (!errors.isEmpty()) {
-            JOptionPane.showMessageDialog(this, String.join("\n", errors),
+            JOptionPane.showMessageDialog(this, WrappedMessage.of(String.join("\n", errors)),
                 "Invalid " + definitionTitle(), JOptionPane.ERROR_MESSAGE);
             return false;
         }
@@ -634,11 +641,11 @@ public class InfrastructureDefinitionFrame extends JFrame {
             + "its queue, rules and routing. With the rest adapter, the host calls the service at its Service endpoint, which may be anywhere. "
             + "Places come from the process diagram: add or remove them there.");
         capabilitiesPanel.setBorder(BorderFactory.createTitledBorder("Places in " + name));
+        // The process already decides these: its domain folder gives the catalogue, and Machines on the editor's
+        // toolbar gives the hosts. So the row buttons (add, remove, catalogue) are not offered here.
         addCapabilityButton.setVisible(false);
         removeCapabilityButton.setVisible(false);
-        JButton chooseInfrastructure = new JButton("Choose infrastructure...");
-        chooseInfrastructure.addActionListener(e -> { chooseInfrastructure(); capabilityModel.fireTableDataChanged(); });
-        capButtons.add(chooseInfrastructure, 0);
+        capButtons.setVisible(false);
         root.remove(split);
         split.setBottomComponent(null);
         root.add(lowerSplit, BorderLayout.CENTER);
@@ -777,6 +784,8 @@ public class InfrastructureDefinitionFrame extends JFrame {
                         }
                         ServiceRegistry.Contract contract = serviceRegistry.contract(row.service, row.operation);
                         if (contract != null && "boolean".equals(contract.resultType)) row.adapter = "boolean-token";
+                        // A service the catalogue says is called over REST (no Java class) starts on the rest adapter.
+                        else if (contract != null && !contract.draft && !contract.standard && contract.implementationClass.isEmpty()) row.adapter = ServiceRegistry.REST;
                         row.node = blank(chosen) ? suggestNode(row.operation) : chosen;
                         NodeNetwork n = findNode(row.node);
                         row.portSlot = n == null ? 0 : Math.max(0, allocateSlot(n));
@@ -823,12 +832,17 @@ public class InfrastructureDefinitionFrame extends JFrame {
         JPanel p = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         c.insets = new Insets(2, 4, 2, 4); c.anchor = GridBagConstraints.WEST;
+        // The OpenAPI button sits beside the box it fills in.
         c.gridy = 0; c.gridx = 0; p.add(endpointLabel, c);
         c.gridx = 1; c.weightx = 1; c.fill = GridBagConstraints.HORIZONTAL; p.add(endpointField, c);
-        c.gridx = 2; c.weightx = 0; c.fill = GridBagConstraints.NONE; p.add(new JLabel("Wait up to"), c);
-        c.gridx = 3; p.add(timeoutField, c);
-        c.gridx = 4; p.add(new JLabel("ms"), c);
-        c.gridy = 1; c.gridx = 1; c.gridwidth = 4; c.fill = GridBagConstraints.HORIZONTAL; p.add(endpointNote, c);
+        c.gridx = 2; c.weightx = 0; c.fill = GridBagConstraints.NONE; p.add(importOpenApi, c);
+        c.gridy = 1; c.gridx = 1; c.gridwidth = 2; c.fill = GridBagConstraints.HORIZONTAL; p.add(endpointNote, c);
+        JPanel wait = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+        wait.add(timeoutField); wait.add(new JLabel("ms (blank: 10 seconds)"));
+        c.gridy = 2; c.gridx = 0; c.gridwidth = 1; c.fill = GridBagConstraints.NONE; p.add(new JLabel("Wait up to:"), c);
+        c.gridx = 1; c.gridwidth = 2; p.add(wait, c);
+        importOpenApi.setToolTipText("Read the API's published definition (OpenAPI or Swagger, as JSON) and fill in the endpoint and call mapping for one of its operations");
+        importOpenApi.addActionListener(e -> importOpenApiDialog());
         endpointField.setToolTipText("The http(s) address the host POSTs each call to, e.g. https://example.org/payment/authorise");
         timeoutField.setToolTipText("How long the host waits for an answer before the call fails (timeoutMs). Blank: 10 seconds.");
         endpointField.getDocument().addDocumentListener(onChange(this::endpointEdited));
@@ -871,7 +885,9 @@ public class InfrastructureDefinitionFrame extends JFrame {
         endpointSync = true;
         try {
             String name = cap == null ? "" : processCanvas != null && !placeLabel(cap).isEmpty() ? placeLabel(cap) : cap.service + "." + cap.operation;
-            endpointLabel.setText(name.isEmpty() ? "Service endpoint:" : "Service endpoint of " + name + ":");
+            endpointLabel.setText("Service endpoint:");
+            callBorder.setTitle(name.isEmpty() ? "How the place calls its service" : "How " + name + " calls its service");
+            callBox.repaint();
             String endpoint = rest ? cap.endpoint : "";
             if (!endpointField.getText().trim().equals(endpoint)) { endpointField.setText(endpoint); endpointField.setCaretPosition(0); }
             String timeout = rest && cap.timeoutMs > 0 ? String.valueOf(cap.timeoutMs) : "";
@@ -881,7 +897,7 @@ public class InfrastructureDefinitionFrame extends JFrame {
             String call = rest ? cap.call : "";
             lastValidCall = call;
             if (!sameJson(callArea.getText(), call)) { callArea.setText(prettyCall(call)); callArea.setCaretPosition(0); }
-            callArea.setEnabled(rest); callExample.setEnabled(rest); tryCall.setEnabled(rest); importOpenApi.setEnabled(rest);
+            callArea.setEnabled(rest); callExample.setEnabled(rest); tryCall.setEnabled(rest); importOpenApi.setEnabled(rest); apiKeys.setEnabled(rest);
         } finally { endpointSync = false; }
         updateEndpointNote(cap);
         updateCallNote(cap);
@@ -907,20 +923,21 @@ public class InfrastructureDefinitionFrame extends JFrame {
     /** The Call mapping box: for a rest row, how to call an API that was not written for RPSO, and a trial call. */
     private JPanel callPanel() {
         JPanel p = new JPanel(new BorderLayout(4, 2));
-        p.setBorder(BorderFactory.createTitledBorder("Call mapping (only for an API that was not written for RPSO; leave empty otherwise)"));
+        p.setBorder(BorderFactory.createEmptyBorder(6, 4, 0, 4));
+        p.add(new JLabel("Call mapping (only for an API that was not written for RPSO; leave empty otherwise):"), BorderLayout.NORTH);
         callArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
         callArea.setToolTipText("<html>How the host calls this API, as JSON: method, headers, body, result, route, statusRoutes.<br>"
             + "${data.amount} is a field of the token's data; ${env:NAME} is an environment variable on the host, for API keys.</html>");
         p.add(new JScrollPane(callArea), BorderLayout.CENTER);
         JPanel south = new JPanel(new BorderLayout(6, 0));
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
-        buttons.add(importOpenApi); buttons.add(callExample); buttons.add(tryCall);
-        importOpenApi.setToolTipText("Read the API's published definition (OpenAPI or Swagger, as JSON) and fill in the endpoint and call mapping for one of its operations");
-        importOpenApi.addActionListener(e -> importOpenApiDialog());
+        buttons.add(apiKeys); buttons.add(callExample); buttons.add(tryCall);
+        apiKeys.setToolTipText("Enter the keys the call mapping names as ${env:NAME}. They are kept on this computer, never in the deployment.");
+        apiKeys.addActionListener(e -> apiKeysDialog(""));
         south.add(callNote, BorderLayout.CENTER); south.add(buttons, BorderLayout.EAST);
         p.add(south, BorderLayout.SOUTH);
         callArea.getDocument().addDocumentListener(onChange(this::callEdited));
-        callExample.setToolTipText("Fill the box with a mapping for a typical payments API, to change into yours");
+        callExample.setToolTipText("Fill the box with the mapping for this project's mock card-payments API, to change into yours");
         callExample.addActionListener(e -> {
             if (!callArea.getText().trim().isEmpty() && JOptionPane.showConfirmDialog(this, "Replace the call mapping with the example?",
                     "Call mapping", JOptionPane.OK_CANCEL_OPTION) != JOptionPane.OK_OPTION) return;
@@ -931,11 +948,16 @@ public class InfrastructureDefinitionFrame extends JFrame {
         return p;
     }
 
+    /**
+     * The mapping for this project's mock card-payments API (examples/rest/card-payments.js), which works as it stands
+     * with Try a call and a run, and shows each part to change for another API. Its key is public on purpose; a real
+     * key goes in ${env:NAME}.
+     */
     static final String CALL_EXAMPLE = "{\n"
         + "  \"method\": \"POST\",\n"
-        + "  \"headers\": {\"Authorization\": \"Bearer ${env:PAYMENT_KEY}\"},\n"
-        + "  \"body\": {\"amount\": \"${data.amount}\", \"currency\": \"${data.currency}\"},\n"
-        + "  \"route\": {\"field\": \"status\", \"values\": {\"succeeded\": \"paid\"}, \"otherwise\": \"declined\"},\n"
+        + "  \"headers\": {\"Authorization\": \"Bearer demo_key_public\"},\n"
+        + "  \"body\": {\"amount\": \"${data.amount}\", \"currency\": \"${data.currency}\", \"card\": \"${data.card}\", \"reference\": \"${data.orderId}\"},\n"
+        + "  \"route\": {\"field\": \"status\", \"values\": {\"succeeded\": \"paid\", \"declined\": \"declined\"}},\n"
         + "  \"statusRoutes\": {\"402\": \"declined\"}\n"
         + "}";
 
@@ -987,9 +1009,19 @@ public class InfrastructureDefinitionFrame extends JFrame {
         if (!rest) note = "For a rest placement.";
         else if (problem != null) note = problem + " (the mapping is saved once it is valid)";
         else if (callArea.getText().trim().isEmpty()) note = "Empty: the host sends RPSO's own request and expects RPSO's own answer.";
-        else note = "The host calls the API as this says. Try a call to see the request, the answer and the route.";
+        else {
+            // Each ${data.x} names a field of the token: one the tokens do not carry is said here, as it is typed.
+            List<String> carried = tokenFields(cap), absent = new ArrayList<>();
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("\\$\\{data\\.([A-Za-z0-9_]+)[^}]*\\}").matcher(callArea.getText());
+            while (m.find()) if (!carried.isEmpty() && !carried.contains(m.group(1)) && !absent.contains(m.group(1))) absent.add(m.group(1));
+            if (!absent.isEmpty()) {
+                note = "<html><div style='width:430px'>The tokens carry no <b>" + String.join(", ", absent) + "</b>: in ${data.<i>name</i>}, use one of their fields: " + String.join(", ", carried)
+                    + ". (On the left of each body line is the API's name for the field; on the right, the token's.)</div></html>";
+                problem = note;
+            } else note = "The host calls the API as this says. Try a call to see the request, the answer and the route.";
+        }
         callNote.setText(note);
-        callNote.setForeground(problem != null ? Color.RED : Color.DARK_GRAY);
+        callNote.setForeground(problem != null ? (problem.startsWith("<html>") ? new Color(0xB00020) : Color.RED) : Color.DARK_GRAY);
     }
 
     /** One sample token for a place: the token format of its service when there is one, otherwise empty data. */
@@ -1056,23 +1088,117 @@ public class InfrastructureDefinitionFrame extends JFrame {
             operations = definition.operations();
             if (operations.isEmpty()) throw new IllegalArgumentException("The definition lists no operations.");
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage(), "Import from OpenAPI", JOptionPane.ERROR_MESSAGE); return;
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Fill in from OpenAPI", JOptionPane.ERROR_MESSAGE); return;
         }
         JList<OpenApiImport.Operation> list = new JList<>(operations.toArray(new OpenApiImport.Operation[0]));
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION); list.setSelectedIndex(0); list.setVisibleRowCount(Math.min(14, operations.size()));
+        // Each call in words, then the web address it is made to, so the choice says what will go in Service endpoint.
+        final OpenApiImport api = definition;
+        list.setCellRenderer(new DefaultListCellRenderer() {
+            @Override public Component getListCellRendererComponent(JList<?> l, Object value, int index, boolean selected, boolean focus) {
+                OpenApiImport.Operation op = (OpenApiImport.Operation) value;
+                String address = api.mapping(op).endpoint;
+                String text = "<html><b>" + escapeHtml(op.summary.isEmpty() ? op.method + " " + op.path : op.summary) + "</b><br>"
+                    + escapeHtml(op.method + " " + (address.isEmpty() ? op.path : address)) + "</html>";
+                JLabel label = (JLabel) super.getListCellRendererComponent(l, text, index, selected, focus);
+                label.setBorder(BorderFactory.createEmptyBorder(4, 6, 4, 6));
+                return label;
+            }
+        });
+        String place = placeLabel(cap).isEmpty() ? cap.service : placeLabel(cap);
         JPanel choice = new JPanel(new BorderLayout(4, 6));
-        choice.add(new JLabel("<html>Which operation of <b>" + (definition.title().isEmpty() ? chooser.getSelectedFile().getName() : definition.title())
-            + "</b> does " + (placeLabel(cap).isEmpty() ? cap.service : placeLabel(cap)) + " call?</html>"), BorderLayout.NORTH);
+        choice.add(new JLabel("<html><div style='width:460px'>The definition of <b>" + escapeHtml(definition.title().isEmpty() ? chooser.getSelectedFile().getName() : definition.title())
+            + "</b> lists " + (operations.size() == 1 ? "one call" : operations.size() + " calls") + " the API offers. Choose the one " + escapeHtml(place)
+            + " makes: its web address goes into Service endpoint, and how to call it into Call mapping.</div></html>"), BorderLayout.NORTH);
         choice.add(new JScrollPane(list), BorderLayout.CENTER);
-        if (JOptionPane.showConfirmDialog(this, choice, "Import from OpenAPI", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) != JOptionPane.OK_OPTION
+        if (JOptionPane.showConfirmDialog(this, choice, "Fill in from OpenAPI", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) != JOptionPane.OK_OPTION
                 || list.getSelectedValue() == null) return;
         OpenApiImport.Mapping mapping = definition.mapping(list.getSelectedValue());
         if (!mapping.endpoint.isEmpty()) endpointField.setText(mapping.endpoint);
         callArea.setText(mapping.call); callArea.setCaretPosition(0);
+        // The fields the token will carry, against the fields the mapping reads: a name that differs is said now, not at the first failed call.
+        List<String> tokenFields = tokenFields(cap);
+        if (!tokenFields.isEmpty()) {
+            List<String> absent = new ArrayList<>();
+            for (String f : mapping.dataFields) if (!tokenFields.contains(f)) absent.add(f);
+            for (String f : mapping.optionalFields) if (!tokenFields.contains(f)) absent.add(f + " (optional: left out of the call, so the API gets nothing for it)");
+            if (!absent.isEmpty()) mapping.notes.add(0, "This place's tokens carry: " + String.join(", ", tokenFields) + ". The mapping reads " + String.join(", ", absent)
+                + ", which they do not have: change each ${data...} to the token's name for it (for example ${data.reference?} to ${data.orderId}), or add the field to the token data file.");
+        }
         JTextArea notes = new JTextArea("The endpoint and call mapping are filled in for " + list.getSelectedValue().method + " " + list.getSelectedValue().path
             + ".\n\nTo check:\n- " + String.join("\n- ", mapping.notes) + "\n\nThen use Try a call.", 12, 70);
         notes.setEditable(false); notes.setLineWrap(true); notes.setWrapStyleWord(true); notes.setOpaque(false);
-        JOptionPane.showMessageDialog(this, new JScrollPane(notes), "Import from OpenAPI", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, new JScrollPane(notes), "Fill in from OpenAPI", JOptionPane.INFORMATION_MESSAGE);
+        // The API needs a key this computer does not have: ask for it now, so Try a call works straight away.
+        for (String name : keyNames(mapping.call))
+            if (org.btsn.invocation.ApiKeys.get(name) == null) { apiKeysDialog(mapping.keyHint); break; }
+    }
+
+    private static String escapeHtml(String text) { return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"); }
+
+    /** The names of the data fields the tokens arriving at this row's place carry (from its generator's token data file), or empty. */
+    private List<String> tokenFields(Capability cap) {
+        List<String> names = new ArrayList<>();
+        ProcessElement place = placeRows.get(cap);
+        ProcessElement generator = processCanvas != null && place != null ? processCanvas.generatorFeeding(place) : null;
+        String format = generator != null ? processCanvas.tokenFormatOf(generator) : cap.service;
+        try {
+            String sample = sampleToken(serviceRegistry.common() != null ? serviceRegistry.common() : ServiceRegistry.findCommon(currentFile), format);
+            org.json.simple.JSONObject json = (org.json.simple.JSONObject) new org.json.simple.parser.JSONParser().parse(sample);
+            for (Object k : ((org.json.simple.JSONObject) json.get("data")).keySet()) names.add(k.toString());
+        } catch (Exception | Error ignored) { }
+        java.util.Collections.sort(names);
+        return names;
+    }
+
+    /** The keys a call mapping names as ${env:NAME}, in order. */
+    static List<String> keyNames(String call) {
+        List<String> names = new ArrayList<>();
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("\\$\\{env:([A-Za-z_][A-Za-z0-9_]*)\\}").matcher(call == null ? "" : call);
+        while (m.find()) if (!names.contains(m.group(1))) names.add(m.group(1));
+        return names;
+    }
+
+    /** Enter or change the keys the mapping names; they go to this computer's key file (ApiKeys), never the deployment. */
+    private void apiKeysDialog(String hint) {
+        List<String> names = keyNames(callArea.getText());
+        java.util.Map<String, String> stored = org.btsn.invocation.ApiKeys.stored();
+        if (names.isEmpty()) {
+            JOptionPane.showMessageDialog(this, WrappedMessage.of("This call mapping names no API key. Where the key goes, write ${env:NAME} instead of the key itself, "
+                + "for example \"Authorization\": \"Bearer ${env:PAYMENT_KEY}\", then enter the key here."), "API keys", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        JPanel form = new JPanel(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.insets = new Insets(3, 4, 3, 4); c.anchor = GridBagConstraints.WEST;
+        c.gridx = 0; c.gridy = 0; c.gridwidth = 3; c.fill = GridBagConstraints.HORIZONTAL;
+        form.add(WrappedMessage.of("The call mapping names " + (names.size() == 1 ? "this key" : "these keys") + ". They are kept on this computer in "
+            + org.btsn.invocation.ApiKeys.file().getAbsolutePath() + ", never in the deployment or the repository. "
+            + "A computer that runs this place's host needs the same key: enter it there too, or set an environment variable of the same name."
+            + (hint == null || hint.isEmpty() ? "" : "\n\nThe API's definition says: " + hint)), c);
+        c.gridwidth = 1; c.fill = GridBagConstraints.NONE;
+        java.util.Map<String, JPasswordField> fields = new java.util.LinkedHashMap<>();
+        for (String name : names) {
+            c.gridy++; c.gridx = 0; c.weightx = 0;
+            form.add(new JLabel(name + ":"), c);
+            JPasswordField field = new JPasswordField(stored.getOrDefault(name, ""), 28);
+            c.gridx = 1; c.weightx = 1; c.fill = GridBagConstraints.HORIZONTAL; form.add(field, c);
+            JCheckBox show = new JCheckBox("Show");
+            char hidden = field.getEchoChar();
+            show.addActionListener(e -> field.setEchoChar(show.isSelected() ? (char) 0 : hidden));
+            c.gridx = 2; c.weightx = 0; c.fill = GridBagConstraints.NONE; form.add(show, c);
+            if (org.btsn.invocation.ApiKeys.fromEnvironment(name)) {
+                c.gridy++; c.gridx = 1; c.gridwidth = 2;
+                JLabel env = new JLabel("The environment variable " + name + " is set; it is used instead of this.");
+                env.setForeground(Color.DARK_GRAY); form.add(env, c); c.gridwidth = 1;
+            }
+            fields.put(name, field);
+        }
+        if (JOptionPane.showConfirmDialog(this, form, "API keys", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) != JOptionPane.OK_OPTION) return;
+        java.util.Map<String, String> changes = new java.util.LinkedHashMap<>();
+        for (java.util.Map.Entry<String, JPasswordField> e : fields.entrySet()) changes.put(e.getKey(), new String(e.getValue().getPassword()));
+        try { org.btsn.invocation.ApiKeys.store(changes); }
+        catch (Exception ex) { JOptionPane.showMessageDialog(this, "Could not save the keys: " + ex.getMessage(), "API keys", JOptionPane.ERROR_MESSAGE); }
     }
 
     private void tryCallDialog() {
@@ -1082,11 +1208,25 @@ public class InfrastructureDefinitionFrame extends JFrame {
         if (problem != null) { JOptionPane.showMessageDialog(this, "Fix the call mapping first: " + problem, "Try a call", JOptionPane.WARNING_MESSAGE); return; }
         if (!ServiceRegistry.validRestEndpoint(cap.endpoint)) { JOptionPane.showMessageDialog(this, "Give the service endpoint first.", "Try a call", JOptionPane.WARNING_MESSAGE); return; }
         List<String> names = new ArrayList<>(); for (Argument argument : cap.arguments) names.add(argument.name);
-        JTextArea input = new JTextArea(sampleToken(serviceRegistry.common() != null ? serviceRegistry.common() : ServiceRegistry.findCommon(currentFile), cap.service), 5, 70);
+        // The sample is the token the place would receive: from its generator's token data file, when there is one.
+        String format = cap.service, generatorName = "";
+        ProcessElement place = placeRows.get(cap);
+        ProcessElement generator = processCanvas != null && place != null ? processCanvas.generatorFeeding(place) : null;
+        if (generator != null) {
+            String chosen = processCanvas.tokenFormatOf(generator);
+            if (!chosen.isEmpty()) format = chosen;
+            generatorName = generator.getLabel();
+        }
+        String sample = sampleToken(serviceRegistry.common() != null ? serviceRegistry.common() : ServiceRegistry.findCommon(currentFile), format);
+        boolean noData = sample.contains("\"data\":{}");
+        JTextArea input = new JTextArea(sample, 5, 70);
         input.setLineWrap(true);
         JTextArea report = new JTextArea(18, 70);
         report.setEditable(false); report.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        report.setText("Press Send to make one call to\n" + cap.endpoint + "\nexactly as a host would. This is a real call: use a test key or a test copy of the service.");
+        report.setText("Press Send to make one call to\n" + cap.endpoint + "\nexactly as a host would. This is a real call: use a test key or a test copy of the service."
+            + (noData && callArea.getText().contains("${data.") ? "\n\nThis token carries no data, so the mapping's ${data...} values have nothing to fill them. "
+                + "Select the event generator" + (generatorName.isEmpty() ? "" : " " + generatorName) + " and choose its Token Data File Name (PaymentService.json gives each order an "
+                + "orderId, amount, currency and card), or type the data into the token above." : ""));
         JButton send = new JButton("Send");
         JPanel top = new JPanel(new BorderLayout(4, 4));
         top.add(new JLabel("The token that arrives" + (names.isEmpty() ? "" : " (input \"" + names.get(0) + "\")") + ":"), BorderLayout.NORTH);
@@ -1098,13 +1238,21 @@ public class InfrastructureDefinitionFrame extends JFrame {
         JDialog dialog = new JDialog(this, "Try a call: " + cap.service + "." + cap.operation, true);
         final String endpoint = cap.endpoint, call = callArea.getText().trim(), service = cap.service, operation = cap.operation, returns = cap.returnAttribute;
         final int wait = cap.timeoutMs;
+        final String generatorLabel = generatorName;
         send.addActionListener(e -> {
             send.setEnabled(false); report.setText("Calling...");
             final String token = input.getText();
             new SwingWorker<String, Void>() {
                 @Override protected String doInBackground() { return trialReport(trial(endpoint, wait, call, service, operation, names, token, returns)); }
                 @Override protected void done() {
-                    try { report.setText(get()); } catch (Exception ex) { report.setText("The call could not be made: " + ex); }
+                    try {
+                        String text = get();
+                        if (text.contains("has no value for ${data.")) text += "\n\nThe token's data lacks that field. Select the event generator"
+                            + (generatorLabel.isEmpty() ? "" : " " + generatorLabel) + " and choose a Token Data File Name that has it (PaymentService.json gives each order an orderId, amount, "
+                            + "currency and card), or type the field into the token above.";
+                        if (text.contains("is not set on this computer")) text += "\n\nClick API keys... beside the call mapping and enter the key; then Send again.";
+                        report.setText(text);
+                    } catch (Exception ex) { report.setText("The call could not be made: " + ex); }
                     report.setCaretPosition(0); send.setEnabled(true);
                 }
             }.execute();
@@ -1124,11 +1272,12 @@ public class InfrastructureDefinitionFrame extends JFrame {
     private void updateEndpointNote(Capability cap) {
         String note; boolean problem = false;
         if (cap == null) note = "Select a row to see or change its service endpoint.";
-        else if (!ServiceRegistry.REST.equals(cap.adapter)) note = "Set Invocation Adapter to rest to call this service at an endpoint.";
+        else if (!ServiceRegistry.REST.equals(cap.adapter)) note = "This service runs as a Java class on its host. To call it at a web address instead, set Invocation Adapter to rest in the table above.";
         else {
             List<String> names = new ArrayList<>(); for (Argument argument : cap.arguments) names.add(argument.name);
             List<String> errors = serviceRegistry.validateEndpoint(cap.service, cap.operation, cap.returnAttribute, names, cap.adapter, cap.endpoint);
-            if (!errors.isEmpty()) { note = String.join("; ", errors); problem = true; }
+            if (cap.endpoint == null || cap.endpoint.trim().isEmpty()) { note = "Enter the service's web address (if its API publishes an OpenAPI file, Fill in from OpenAPI can do it for you)."; problem = true; }
+            else if (!errors.isEmpty()) { note = String.join("; ", errors); problem = true; }
             else note = (cap.call.isEmpty() ? "The host POSTs each call here" : "The host calls this address as the call mapping says") + " and waits up to " + (cap.timeoutMs > 0 ? cap.timeoutMs + " ms" : "10 seconds (leave the wait blank)")
                 + "; a later answer fails the call.";
         }

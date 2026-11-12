@@ -247,8 +247,7 @@ public final class ServiceRegistry {
     /** What a draft still needs before it can become an active, deployable service. */
     public static List<String> stillNeeded(Contract c) {
         List<String> needed = new ArrayList<>();
-        if (c.description.isEmpty()) needed.add("a description");
-        if (c.returns.isEmpty()) needed.add("what it returns");
+        // What it does and what it returns are words for people: worth writing, but they never stop a service being deployed.
         if (c.inputs.isEmpty()) needed.add("its inputs");
         if (c.output.isEmpty()) needed.add("a return attribute");
         if (c.draft) needed.add("its code: a Java class, or a service called over REST");

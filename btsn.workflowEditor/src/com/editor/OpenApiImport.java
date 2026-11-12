@@ -36,6 +36,8 @@ public final class OpenApiImport {
 
     /** What importing an operation gives: the endpoint, the mapping, and what the designer still has to check. */
     public static final class Mapping {
+        /** What the definition says about its key (its security scheme's description), or "". */
+        public String keyHint = "";
         public String endpoint = "";
         /** The call mapping, as indented JSON. */
         public String call = "";
@@ -106,9 +108,12 @@ public final class OpenApiImport {
             else if ("apiKey".equals(type) && "query".equals(in) && !name.isEmpty()) query(endpoint, name, "${env:" + key + "}");
             else if ("oauth2".equals(type) || "openIdConnect".equals(type)) headers.put("Authorization", "Bearer ${env:" + key + "}");
             else continue;
-            m.notes.add("The API needs a key. Set the environment variable " + key + " on each host's machine (and before starting the editor, to Try a call)"
-                    + ("basic".equalsIgnoreCase(text(scheme.get("scheme"))) ? ", holding user:password encoded in Base64" : "")
-                    + ("oauth2".equals(type) || "openIdConnect".equals(type) ? ", holding an access token you have obtained" : "") + ".");
+            String said = text(scheme.get("description"));
+            m.notes.add("The API needs a key, " + key + ": enter it with API keys... beside the call mapping"
+                    + ("basic".equalsIgnoreCase(text(scheme.get("scheme"))) ? " (user:password encoded in Base64)" : "")
+                    + ("oauth2".equals(type) || "openIdConnect".equals(type) ? " (an access token you have obtained)" : "")
+                    + ". It is kept on this computer, never in the deployment." + (said.isEmpty() ? "" : " The definition says: " + said));
+            m.keyHint = said;
             break;
         }
         List<String> optionalHeaders = new ArrayList<>();

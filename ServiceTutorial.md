@@ -360,12 +360,15 @@ referred. The replay shows each token leaving the Credit place by its route.
 
 ## 7. Give it data
 
-A token can carry data to the service. In the editor, select the event generator (`APPLICATIONS`) and set its
-**Token data** to `amount=4500`. Save the process, click **Build**, then **Create**, and **Run on hosts**.
+A token can carry data to the service. In the editor, select the event generator (`APPLICATIONS`), click **New...**
+beside **Token Data File Name** and name the file `Credit4500`. It opens, started from `ExampleTokenDataFile.json`.
+Set `tokenStructure.data` to `{"amount": 4500}` and delete `dataVariants` and `caseMix`; the preview under the file
+shows every token carrying `"amount":4500`. Click **Save**, save the process, click **Build**, then **Create**, and
+**Run on hosts**. **Open...** shows the chosen file again.
 
 <details><summary>From the command line</summary>
 
-The generator's Token data is the launcher's `eg1.data` property, which you can also pass to the launcher:
+The launcher's `eg1.data` property adds fixed fields to every token, on top of the file's, which you can also pass to the launcher:
 
 ```sh
 ant -f btsn.petrinet.ProjectLoader/Credit_Check_Workflow_BuildAndRun.xml -Dhost.address=127.0.0.1 -Deg1.data=amount=4500
@@ -373,10 +376,9 @@ ant -f btsn.petrinet.ProjectLoader/Credit_Check_Workflow_BuildAndRun.xml -Dhost.
 
 </details>
 
-Every application now asks for 4,500, so all ten are approved. `eg1.data` takes
-`name=value` pairs separated by commas; the service reads them with `numberValue`
-or `textValue`. For data that differs from token to token, use a token format
-(`eg1.format.service`), as [Follow one payment](#follow-one-payment-what-a-service-receives-and-returns) does.
+Every application now asks for 4,500, so all ten are approved. The service reads the fields with `numberValue`
+or `textValue`. For data that differs from token to token, give the file `dataVariants` and a `caseMix`, as
+`PaymentService.json` does for [Follow one payment](#follow-one-payment-what-a-service-receives-and-returns).
 
 ## 8. Call it over REST
 
@@ -623,7 +625,7 @@ The placement is an ordinary `rest` placement with a `call` added:
 - `${data.amount}`: a field of the token's data. Design the [token format](#7-give-it-data) to carry what the API needs.
 - `${paymentResult.status}`: a field of a named input, for a place later in the process. `${paymentResult.original_token.data.orderId}` reads the order the generator sent.
 - `${sequenceId}` and `${version}`: the call's own.
-- `${env:PAYMENT_KEY}`: an environment variable on the machine running the host. **Use this for a real API key**, so the key is never written in a file; the demo key above is public on purpose. A call whose variable is not set fails, saying which.
+- `${env:PAYMENT_KEY}`: an API key. **Use this for a real key**, so it is never written in the deployment; the demo key above is public on purpose. Enter the key with **API keys...** beside the call mapping: it is kept on that computer, in `~/.rpso/api-keys.properties`, and each computer that runs the place's host needs it too (enter it there, or set an environment variable of the same name, which takes precedence). A call whose key is missing fails, saying which.
 
 A value that is the whole of a text, such as `"${data.amount}"`, keeps its type, so the API receives the number `84.5`.
 A value the call does not have fails the call, saying which. End its name with a question mark, `"${data.reference?}"`,
@@ -647,12 +649,12 @@ place, with the API's own answer as the reason:
 
 To run it, open `Plain_Payment_Test.json` in the editor and click **Run on hosts**.
 
-**In the editor.** Click **Deploy** and select the place. Below its **Service endpoint**, the **Call mapping** box
-holds the mapping above; leave it empty for a service that answers in RPSO's own format. The note under the box says
+**In the editor.** Click **Deploy** and select the place. The box **How <place> calls its service** holds everything
+about the call: the **Service endpoint**, **Wait up to**, and the **Call mapping**, which holds the mapping above; leave it empty for a service that answers in RPSO's own format. The note under the box says
 what is wrong with a mapping as you type, and a mapping is saved only once it is valid. **Start from an example**
-fills the box with a mapping for a typical payments API, to change into yours.
+fills the box with a mapping for the same mock card-payments API, which works as it stands; change it into yours.
 
-**Import from OpenAPI** fills in the endpoint and the mapping from the API's published definition (OpenAPI 3 or
+**Fill in from OpenAPI...**, beside the endpoint, fills in the endpoint and the mapping from the API's published definition (OpenAPI 3 or
 Swagger 2, as a JSON file; a YAML definition must be converted to JSON first). Choose the file, then the operation the
 place calls. The mock API's definition is [`examples/rest/card-payments.openapi.json`](examples/rest/card-payments.openapi.json);
 importing its one operation gives:

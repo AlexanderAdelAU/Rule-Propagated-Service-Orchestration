@@ -202,6 +202,7 @@
             <include name="org/btsn/invocation/BooleanTokenAdapter.java"/>
             <include name="org/btsn/invocation/RestAdapter.java"/>
             <include name="org/btsn/invocation/CallMapping.java"/>
+            <include name="org/btsn/invocation/ApiKeys.java"/>
             <include name="org/btsn/deployment/DeploymentConfiguration.java"/>
             <include name="org/btsn/invocation/BusinessCapabilityResolverTest.java"/>
             <include name="org/btsn/json/jsonLibrary.java"/>

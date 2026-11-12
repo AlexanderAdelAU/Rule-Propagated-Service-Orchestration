@@ -12,7 +12,7 @@
       "rotation": 0.0,
       "generator_rate": "1000",
       "token_version": "v001",
-      "token_data": "application_id=APP001,annual_income=85000,requested_amount=25000,credit_score=720,fraud_risk=low"
+      "token_format": "FinancialApplication"
     },
     {
       "id": "T2",

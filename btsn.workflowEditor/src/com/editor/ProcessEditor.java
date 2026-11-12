@@ -981,7 +981,7 @@ public class ProcessEditor extends JFrame {
         else {
             html.append("Validation found the following issues:<ul>");
             for (String error : errors) html.append("<li>").append(htmlText(error)).append("</li>");
-            html.append("</ul>Please fix these issues before saving.");
+            html.append("</ul>Fix these before deploying. You can save at any time.");
         }
         if (!notes.isEmpty()) {
             html.append("<br><br><font color='#C00000'><b>Still to do</b> (this does not stop you saving):<ul>");
@@ -1195,7 +1195,7 @@ public class ProcessEditor extends JFrame {
         }
         StringBuilder message = new StringBuilder("Saved. Your work is kept.\n\nStill to finish before it can be deployed:\n\n");
         for (String item : unfinished) message.append("- ").append(item).append("\n");
-        JOptionPane.showMessageDialog(this, message.toString(), "Saved", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, WrappedMessage.of(message.toString()), "Saved", JOptionPane.INFORMATION_MESSAGE);
     }
 
     // ==================== New / Open ====================
@@ -1243,7 +1243,7 @@ public class ProcessEditor extends JFrame {
             for (String blocker : canvas.serviceBlockers()) if (!outOfDate.contains(blocker)) problems.add(blocker);
         }
         if (!problems.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Before deploying:\n" + String.join("\n", problems), "Deploy", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, WrappedMessage.of("Before deploying:\n\n- " + String.join("\n- ", problems)), "Deploy", JOptionPane.WARNING_MESSAGE);
             return;
         }
         if (deployFrame != null && deployFrame.isDisplayable()) {
@@ -1266,7 +1266,7 @@ public class ProcessEditor extends JFrame {
         BuildAndRunGenerator.Plan plan = BuildAndRunGenerator.plan(canvas, currentFile);
         for (String problem : plan.problems) if (!problems.contains(problem)) problems.add(problem);
         if (!problems.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Before creating Build and Run:\n" + String.join("\n", problems), "Build and Run", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, WrappedMessage.of("Before creating Build and Run:\n\n- " + String.join("\n- ", problems)), "Build and Run", JOptionPane.WARNING_MESSAGE);
             return;
         }
         new BuildAndRunDialog(this, plan).setVisible(true);
@@ -1338,6 +1338,17 @@ public class ProcessEditor extends JFrame {
         if (launchers.isEmpty()) {
             JOptionPane.showMessageDialog(this, "No launcher runs " + processName + " yet. Use Build and Run to create one first.", "Run", JOptionPane.WARNING_MESSAGE);
             return;
+        }
+        // The launcher and its deployment profile are copies made by Build: a process or deployment saved since would not be run.
+        java.io.File deployment = canvas.getServiceRegistry().deploymentFile();
+        long saved = Math.max(processPath.lastModified(), deployment == null ? 0 : deployment.lastModified());
+        long built = 0; for (java.io.File l : launchers) built = Math.max(built, l.lastModified());
+        if (saved > built && BuildAndRunGenerator.combinedLauncher(currentFile) == null) {
+            Object[] choices = {"Build first", "Run as it was built", "Cancel"};
+            int choice = JOptionPane.showOptionDialog(this, WrappedMessage.of("The process or its deployment was saved after Build last created the launcher, "
+                + "so a run now would use the earlier deployment. Build again first?"), "Run", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, choices, choices[0]);
+            if (choice == 0) { createBuildAndRun(); return; }
+            if (choice != 1) return;
         }
         // Packaging reads every catalogue packaging.json lists: one deleted after it was listed would stop the build.
         java.util.List<String> missing = CatalogueWriter.missingFromPackaging(common);

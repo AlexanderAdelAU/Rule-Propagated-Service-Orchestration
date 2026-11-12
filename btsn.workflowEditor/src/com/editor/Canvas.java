@@ -2918,6 +2918,59 @@ public class Canvas extends JPanel {
      * Things to finish before the process can be deployed, which do not stop it being saved: draft services,
      * guards that test values a service does not route on, and services still running the editor's starting code.
      */
+    /** btsn.common.eventgenerators/TokenFormats beside this process's btsn.common, or null when it cannot be found. */
+    public java.io.File tokenFormatFolder() {
+        java.io.File common = serviceRegistry.common() != null ? serviceRegistry.common() : ServiceRegistry.findCommon(definitionLocation);
+        java.io.File folder = common == null ? null : new java.io.File(common.getParentFile(), "btsn.common.eventgenerators/TokenFormats");
+        return folder != null && folder.isDirectory() ? folder : null;
+    }
+
+    /** The token formats a generator can use: btsn.common.eventgenerators/TokenFormats/<name>.json, without Default. */
+    public List<String> tokenFormats() {
+        List<String> names = new ArrayList<>();
+        java.io.File folder = tokenFormatFolder();
+        if (folder != null) TokenDataExample.ensure(folder);
+        java.io.File[] files = folder == null ? null : folder.listFiles();
+        if (files != null) for (java.io.File f : files)
+            if (f.getName().endsWith(".json") && !f.getName().equals("Default.json")) names.add(f.getName().substring(0, f.getName().length() - 5));
+        java.util.Collections.sort(names);
+        return names;
+    }
+
+    /** The token format a generator's tokens take their data from: its own choice, else the first place's service, or "". */
+    public String tokenFormatOf(ProcessElement generator) {
+        if (!generator.getTokenFormat().isEmpty()) return generator.getTokenFormat();
+        for (Arrow a : arrows) {
+            if (a.getSource() != generator || a.getTarget() == null) continue;
+            for (Arrow b : arrows) if (b.getSource() == a.getTarget() && b.getTarget() != null && b.getTarget().getType() == ProcessElement.Type.PLACE)
+                return b.getTarget().getService() == null ? "" : b.getTarget().getService();
+        }
+        return "";
+    }
+
+    /** The generator whose tokens arrive at this place (through its T_in), or null. */
+    public ProcessElement generatorFeeding(ProcessElement place) {
+        for (Arrow b : arrows) {
+            if (b.getTarget() != place || b.getSource() == null) continue;
+            for (Arrow a : arrows) if (a.getTarget() == b.getSource() && a.getSource() != null && a.getSource().getType() == ProcessElement.Type.EVENT_GENERATOR)
+                return a.getSource();
+        }
+        return null;
+    }
+
+    /** The values the service of the place feeding this T_out routes on, for the guards on its arcs: empty when unknown. */
+    public List<String> answersBefore(ProcessElement tOut) {
+        List<String> answers = new ArrayList<>();
+        for (Arrow in : arrows) {
+            if (in.getTarget() != tOut || in.getSource() == null || in.getSource().getType() != ProcessElement.Type.PLACE) continue;
+            ProcessElement place = in.getSource();
+            for (String op : place.getOperations()) {
+                ServiceRegistry.Contract c = serviceRegistry.contract(place.getService(), op);
+                if (c != null) for (String r : c.routes) if (!answers.contains(r)) answers.add(r);
+            }
+        }
+        return answers;
+    }
     public List<String> serviceNotes() { return serviceNotes(true); }
     /** As serviceNotes, without the reminders (starting code, untested guards): what stops Deploy, Build and Run. */
     public List<String> serviceBlockers() { return serviceNotes(false); }
@@ -2938,12 +2991,19 @@ public class Canvas extends JPanel {
                 if (routesOn.isEmpty()) continue;
                 for (Arrow out : arrows) {
                     if (out.getSource() != place || out.getTarget() == null || out.getTarget().getType() != ProcessElement.Type.TRANSITION) continue;
+                    // Reported per T_out, so that one mistyped value is one message: what the arc tests and what to set instead.
+                    List<String> wrong = new ArrayList<>();
+                    List<Arrow> wrongArcs = new ArrayList<>();
                     for (Arrow route : arrows) {
                         String value = route.getDecisionValue();
                         if (route.getSource() == out.getTarget() && value != null && !value.trim().isEmpty() && !routesOn.contains(value.trim()))
-                            notes.add("Place '" + place.getLabel() + "': the arc from " + out.getTarget().getLabel() + " to " + (route.getTarget() == null ? "?" : route.getTarget().getLabel())
-                                + " tests \"" + value.trim() + "\", but " + c.service + (c.routes.isEmpty() ? " (starting code)" : "") + " routes on " + String.join(", ", routesOn)
-                                + (c.routes.isEmpty() ? ". Add the values it routes on with " + serviceRegistry.editServiceLabel() : ".") );
+                            wrongArcs.add(route);
+                    }
+                    for (Arrow route : wrongArcs) {
+                        String value = route.getDecisionValue();
+                        wrong.add("Place '" + place.getLabel() + "': the arc from " + out.getTarget().getLabel() + " to " + (route.getTarget() == null ? "?" : route.getTarget().getLabel())
+                            + " tests \"" + value.trim() + "\", but " + c.service + (c.routes.isEmpty() ? " (starting code)" : "") + " routes on " + String.join(", ", routesOn)
+                            + (c.routes.isEmpty() ? ". Add the values it routes on with " + serviceRegistry.editServiceLabel() : ".") );
                     }
                     // The other way round: a value the service routes on that no arc tests, with no unguarded arc to take it.
                     // The host drops such a token, so the design is fixed before it runs.
@@ -2956,9 +3016,17 @@ public class Canvas extends JPanel {
                         else if (value == null || value.trim().isEmpty()) unguarded = true; else tested.add(value.trim());
                     }
                     if (unguarded && "GatewayNode".equals(out.getTarget().getNodeType())) unguarded = false;   // a gateway never takes an unguarded arc
-                    if (otherwiseArc || unguarded || tested.isEmpty() || c.routes.isEmpty()) continue;   // Otherwise takes the values no arc tests
                     List<String> missing = new ArrayList<>();
-                    for (String r : c.routes) if (!tested.contains(r)) missing.add(r);
+                    if (!(otherwiseArc || unguarded || tested.isEmpty() || c.routes.isEmpty()))   // Otherwise takes the values no arc tests
+                        for (String r : c.routes) if (!tested.contains(r)) missing.add(r);
+                    if (wrongArcs.size() == 1 && missing.size() == 1) {
+                        Arrow route = wrongArcs.get(0);
+                        notes.add("The arrow from " + out.getTarget().getLabel() + " to " + (route.getTarget() == null ? "?" : route.getTarget().getLabel())
+                            + " tests \"" + route.getDecisionValue().trim() + "\", but " + c.service + " answers \"" + missing.get(0)
+                            + "\". Click the arrow and, under The service answers, click " + missing.get(0) + ".");
+                        continue;
+                    }
+                    notes.addAll(wrong);
                     if (!missing.isEmpty())
                         notes.add("Place '" + place.getLabel() + "': " + c.service + " routes on " + String.join(", ", missing) + ", but no arc from " + out.getTarget().getLabel()
                             + " tests " + (missing.size() == 1 ? "it" : "them") + ", so those tokens would be dropped. Draw an arc for " + String.join(", ", missing) + " (to a terminate node if the process ends there).");
@@ -3049,9 +3117,9 @@ public class Canvas extends JPanel {
             if ("GatewayNode".equals(element.getNodeType()) && BuildAndRunGenerator.combinedLauncher(definitionLocation) == null)
                 for (Arrow a : arrows)
                     if (a.getSource() == element && a.getTarget() != null && !GuardEditing.otherwise(a) && (a.getDecisionValue() == null || a.getDecisionValue().trim().isEmpty()))
-                        gaps.add("'" + element.getLabel() + "' is a GatewayNode: it follows only the arcs whose guard matches what its place returns, so its arc to "
-                            + a.getTarget().getLabel() + ", which has no guard, is never taken. Give that arc a guard, set its Guard Condition to OTHERWISE "
-                            + "(taken when no other guard matches), or set " + element.getLabel() + "'s Node Type to EdgeNode if every token goes there.");
+                        gaps.add("The arrow from " + element.getLabel() + " to " + a.getTarget().getLabel() + " needs a guard: " + element.getLabel()
+                            + " is a gateway, so it sends tokens only along arrows whose Decision Value matches the service's answer."
+                            + " (Or set its Guard Condition to OTHERWISE.)");
             int otherwise = 0;
             for (Arrow a : arrows) if (a.getSource() == element && GuardEditing.otherwise(a)) otherwise++;
             if (otherwise > 1) gaps.add("'" + element.getLabel() + "' has " + otherwise + " Otherwise arcs; a T_out can take only one when no other guard matches. Keep one.");
@@ -3638,8 +3706,8 @@ public class Canvas extends JPanel {
                 json.append(",\n      \"rotation\": ").append(element.getRotationAngle());
                 json.append(",\n      \"generator_rate\": \"").append(escapeJSON(element.getGeneratorRate())).append("\"");
                 json.append(",\n      \"token_version\": \"").append(escapeJSON(element.getTokenVersion())).append("\"");
-                if (!element.getTokenData().isEmpty())
-                    json.append(",\n      \"token_data\": \"").append(escapeJSON(element.getTokenData())).append("\"");
+                if (!element.getTokenFormat().isEmpty())
+                    json.append(",\n      \"token_format\": \"").append(escapeJSON(element.getTokenFormat())).append("\"");
                 
                 // A generator feeds one place; forks are a place's T_out, so no fork_behavior is saved.
             } else {
@@ -3908,8 +3976,9 @@ public class Canvas extends JPanel {
                 if (tokenVersion != null && !tokenVersion.isEmpty()) {
                     element.setTokenVersion(tokenVersion);
                 }
-                String tokenData = extractValue(block, "token_data");
-                if (tokenData != null) element.setTokenData(tokenData);
+                // token_data (fixed name=value fields) from older processes is not kept: a token's data comes from its token data file.
+                String tokenFormat = extractValue(block, "token_format");
+                if (tokenFormat != null) element.setTokenFormat(tokenFormat);
                 
                 // Parse fork_behavior if present
                 if (block.contains("\"fork_behavior\"")) {
