@@ -2,7 +2,7 @@
 
 Run the one-step payment test from the README yourself, in about ten minutes, without drawing or typing anything. The
 process, its deployment and its launcher are all supplied: you open them, look at each part, make one real call to the
-payment service, run the test on your machine and watch the recorded run.
+payment service, see what Build would make, run the test on your machine and watch the recorded run.
 
 **Before you start:** you need a JDK (15 or later), the repository's projects imported into Eclipse, and internet
 access. The payment service is a mock on Vercel: it declines every 8th payment, is unavailable for every 13th and too
@@ -40,27 +40,35 @@ Click each element and read its **Attributes** panel on the left. Nothing here n
    (the order, inside the token), the answer, and **ROUTE paid**.
 9. Close the Try a call window, then close Deploy without saving.
 
+## See what a run is made of
+
+10. Click **Build**. Its summary lists what a run uses: the launcher, the token schedule and the deployment profile,
+    the hosts it starts (`P1` and Monitor), and that every payment takes its data from `PaymentService.json`.
+    Then click **Cancel**. This test's launcher is supplied with a schedule that sends a burst of twelve payments, and
+    **Create** would replace it with steady traffic. When you build a process of your own, **Create** writes these
+    files for you.
+
 ## Run it
 
-10. Check that **Machines** on the toolbar is `SingleHost`. Click **Run on hosts**, leave **Run every host on this
-    computer** ticked, and click **Run**. If it offers to build first, either choice is fine: the launcher is supplied.
-11. Watch the steps across the top turn green, from **Build and start hosts** to **Replay**. The first run takes a
+11. Check that **Machines** on the toolbar is `SingleHost`. Click **Run on hosts**, leave **Run every host on this
+    computer** ticked, and click **Run**. If it offers to build first, choose **Run as it was built**: the launcher is supplied.
+12. Watch the steps across the top turn green, from **Build and start hosts** to **Replay**. The first run takes a
     few minutes, while the services are packaged; later runs are quicker. The test sends 30 payments: steady
     traffic, then a burst of twelve.
-12. Wait for **Run complete**. Expect `v001: 30 generated, 27 completed`:
+13. Wait for **Run complete**. Expect `v001: 30 generated, 27 completed`:
     - 24 paid and 3 declined, each routed on the service's own answer;
     - 3 failed at Payment, each with its reason: `answered HTTP 503` for payments 13 and 26, and
       `did not answer within 2500 ms (timeoutMs)` for payment 17.
 
 ## Watch the recorded run
 
-13. Click **▶ Replay the recorded run**. The editor comes to the front and replays the run on the diagram: payments
+14. Click **▶ Replay the recorded run**. The editor comes to the front and replays the run on the diagram: payments
     leave `PAYMENTS`, queue at `T_in_Payment` during the burst, pass through `Payment` and end at `Paid` or
     `Declined`.
 
 ![A recorded run replayed on the model: tokens leave the PAYMENTS event generator, queue at T_in during the burst, pass through the Payment place and end at Paid or Declined.](../images/remote-payment-test.gif)
 
-14. Back in the Run window, click **Elapsed time and queue wait chart**: how long each payment took, and how long the
+15. Back in the Run window, click **Elapsed time and queue wait chart**: how long each payment took, and how long the
     burst waited in the queue. **Open analysis report** has every measurement.
 
 ## Where next
