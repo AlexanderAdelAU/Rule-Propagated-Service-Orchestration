@@ -10,7 +10,7 @@ Nothing changes as the process grows. Add Places for inventory and order handlin
 
 ## Start with one service
 
-A minimal experiment needs an event generator, a Place bound to the remote service, its incoming and outgoing transitions, and an outcome. **You implement none of these: they are part of RPSO, drawn in the editor and run by its hosts.** All you provide is the address of your service (its endpoint) and, if the service has its own API, a short description of how to call it. The editor can fill in that description from the API's published definition, and lets you try one call before you run anything ([Connect an existing REST API](Tutorial.md#example-5-connect-an-existing-rest-api), step by step).
+A minimal experiment needs an event generator, a Place bound to the remote service, its incoming and outgoing transitions, and an outcome. **You implement none of these: they are part of RPSO, drawn in the editor and run by its hosts.** All you provide is the address of your service (its endpoint) and, if the service has its own API, a short description of how to call it. The editor can fill in that description from the API's published definition, and lets you try one call before you run anything ([Connect an existing REST API](guides/connect-an-existing-rest-api.md), step by step).
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="images/rpso-first-use-dark.svg">
@@ -152,12 +152,16 @@ No. RPSO is for research and design: modelling a process, running it across real
 
 Start by drawing a process in the editor, binding services to its Places,
 running it on orchestration hosts and replaying the recorded execution on the
-same model. [Tutorial.md](Tutorial.md) walks through four examples:
+same model. [Tutorial.md](Tutorial.md) walks through three examples, each building on the one before:
 
 1. [**A standard service**](Tutorial.md#example-1-a-standard-service) that returns true or false: one Place, a loop and ten tokens.
 2. [**A claims process**](Tutorial.md#example-2-a-claims-process-with-a-remote-service) that calls a remote service over REST.
 3. [**A new host target**](Tutorial.md#example-3-add-a-host-target): add P7 and move Example 1 onto it.
-4. [**Test your own remote service**](Tutorial.md#example-4-test-your-own-remote-service): build the payment test above in the editor, then point it at your own service.
+
+Two guides stand on their own, each complete from starting the editor:
+
+- [**Test your own remote service**](guides/test-your-remote-service.md): build the payment test above in the editor, then point it at your own service.
+- [**Connect an existing REST API**](guides/connect-an-existing-rest-api.md): call an API that was not written for RPSO, such as a card-payments API, as it is.
 
 The business services do not have to exist before you start modelling. Name them
 as you draw: the editor can generate starting Java code, allowing you to run the
