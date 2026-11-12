@@ -83,7 +83,7 @@
 
   <h2>What it does</h2>
   <ul class="points">
-    <li><b>Binds services you already have</b>A Java class or any REST endpoint becomes a Place in a Petri-net model. An existing API is called as it is, through a call mapping the editor can fill in from the API's published definition.</li>
+    <li><b>Binds services you already have</b>A Java class or any REST endpoint becomes a Place in a Petri-net model. The Place reaches it through an adapter, which turns the arriving token into the call and the answer back into a result and a route. An existing API is called as it is, through a call mapping the editor can fill in from the API's published definition.</li>
     <li><b>Runs with no central engine</b>Each host follows rules installed from the model, and tokens travel directly from host to host.</li>
     <li><b>BPMN-style control</b>Gateways route on a service's own answer; forks, joins, merges, and signals that start a compensation process.</li>
     <li><b>Several versions at once</b>Versions share the same hosts, each measured separately; where they share a service, the lower version is served first.</li>
