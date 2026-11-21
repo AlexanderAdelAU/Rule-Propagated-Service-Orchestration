@@ -91,6 +91,10 @@
     <!-- Create JAR file -->
     <target name="jar" depends="compile" description="Create runnable JAR file">
         <echo message="Creating JAR file..."/>
+
+        <tstamp>
+            <format property="build.date" pattern="yyyy-MM-dd"/>
+        </tstamp>
         
         <!-- Create manifest -->
         <manifest file="${build.dir}/MANIFEST.MF">
@@ -99,7 +103,7 @@
             <attribute name="Implementation-Title" value="Petri Net Editor"/>
             <attribute name="Implementation-Version" value="1.1"/>
             <attribute name="Built-By" value="${user.name}"/>
-            <attribute name="Built-Date" value="${TODAY}"/>
+            <attribute name="Built-Date" value="${build.date}"/>
         </manifest>
 
         <!-- Create JAR -->
@@ -270,7 +274,12 @@ if errorlevel 1 (
 ========================================
 
 REQUIREMENTS:
-- Java Runtime Environment (JRE) 8 or higher
+- Java Development Kit (JDK) 15 or higher (17 or 21 recommended)
+- Apache Ant 1.10.2+ for building and running hosts
+
+THIS IS THE EDITOR-ONLY DISTRIBUTION.
+For a complete RPSO package with runtime hosts, libraries and examples, use:
+  ant -f release/build.xml dist
 
 INSTALLATION:
 1. Ensure Java is installed on your system
@@ -283,7 +292,6 @@ FEATURES:
 - Place and Transition elements
 - Service and operation configuration
 - Documentation panel for workflow metadata
-- Export to Graphviz DOT format
 - Export to TikZ (LaTeX) format
 - Validation for duplicate labels and structural issues
 - Undo/Redo support

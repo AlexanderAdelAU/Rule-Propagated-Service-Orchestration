@@ -40,3 +40,6 @@ btsn.rpso.host/charts/
 # Workflow editor Ant outputs (rebuilt by: ant -f btsn.workflowEditor/build.xml clean jar)
 btsn.workflowEditor/build/
 btsn.workflowEditor/dist/
+
+# Versioned local release archives (CI publishes them as downloadable artifacts)
+release/dist/
