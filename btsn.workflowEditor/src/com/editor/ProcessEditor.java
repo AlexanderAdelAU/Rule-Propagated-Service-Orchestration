@@ -211,11 +211,13 @@ public class ProcessEditor extends JFrame {
      * Update status bar to show current filename
      */
     private void updateStatusBar() {
+        String machines = ServiceRegistry.selectedInfrastructure();
         if (currentFile != null) {
-            statusLabel.setText(" Ready - FileName: " + currentFile.getName());
+            statusLabel.setText(" Ready - FileName: " + currentFile.getName() + " | Machines: " + machines);
         } else {
-            statusLabel.setText(" Ready - No file loaded");
+            statusLabel.setText(" Ready - No file loaded | Machines: " + machines);
         }
+        statusLabel.setToolTipText("Active host addresses: " + describeMachines(machines));
     }
     
     /**
@@ -614,11 +616,10 @@ public class ProcessEditor extends JFrame {
         toolbar.add(machinesCombo);
         // However the machines are chosen (here, or by opening or saving an infrastructure definition), show them.
         ServiceRegistry.addInfrastructureListener(() -> SwingUtilities.invokeLater(() -> {
-            String name = ServiceRegistry.selectedInfrastructure();
             fillMachines();
             attributesFrame.refreshSelection();
             canvas.repaint();
-            statusLabel.setText(" Machines: " + name + " - places run on " + describeMachines(name));
+            updateStatusBar();
         }));
         
         toolbar.addSeparator(new Dimension(20, 32));
@@ -1458,6 +1459,7 @@ public class ProcessEditor extends JFrame {
                 undoRedoManager.clear();  // Clear undo/redo history after loading new file
                 currentFile = file; // Remember this file for future saves
                 setDirty(false); // Clear dirty flag after successful load
+                fillMachines(); // Refresh the available profiles for the opened workspace.
                 updateStatusBar(); // Update status bar to show loaded filename
                 
                 // Update process type dropdown to match loaded file

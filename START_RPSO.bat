@@ -40,7 +40,9 @@ if errorlevel 1 (
 
 :ant_ready
 echo Starting RPSO Process Editor...
-java -jar "%RPSO_EDITOR%"
+rem Give each extracted release its own settings. Fresh installs default to SingleHost.
+rem '.' resolves to the directory selected by cd above, including paths with spaces.
+java -Drpso.distribution.root=. -jar "%RPSO_EDITOR%"
 if errorlevel 1 (
     echo.
     echo ERROR: The Process Editor exited with an error.

@@ -22,10 +22,13 @@ Use test services and test data, not live financial or clinical workloads.
 1. Unzip the **entire** distribution into a normal, writable folder, for
    example `C:\RPSO`. Keep the `btsn.*` directories together; their relative
    paths are part of the runtime configuration.
-2. Double-click **`START_RPSO.bat`** in the extracted top-level folder.
+2. Double-click **`START_RPSO.bat`** in the extracted top-level folder. A newly
+   extracted location starts with `SingleHost`, even if another RPSO checkout
+   previously selected `MultiHost`. Later launches from this location remember
+   your choice.
 3. In the editor, choose **File → Open → Process Definition...** and open
    `btsn.common\ProcessDefinitionFolder\payments\Workflow\Remote_Payment_Test.json`.
-4. Set **Machines** to `SingleHost`, then click **Run on hosts**. The bundled
+4. Confirm **Machines** already reads `SingleHost`, then click **Run on hosts**. The bundled
    `SingleHost.json` uses `127.0.0.1` (this computer), so **you do not need to
    find or enter an IP address**. Leave **Run every host on this computer**
    selected and the **Ant folder** blank, then click **Run**. If asked
