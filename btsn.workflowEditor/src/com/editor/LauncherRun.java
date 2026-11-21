@@ -308,6 +308,9 @@ public final class LauncherRun {
             if (home == null) throw new IOException("No Ant found at " + chosen + ". Choose Ant's folder (it contains lib/ant-launcher.jar), or leave the box empty.");
             return home;
         }
+        // The public ZIP keeps Ant beside the editor: no Eclipse or machine-wide setup required.
+        File bundled = homeAround(new File("tools/ant"));
+        if (bundled != null && new File(bundled, "lib/ant.jar").isFile()) return bundled;
         List<File> candidates = new ArrayList<>();
         String env = System.getenv("ANT_HOME");
         if (env != null && !env.isEmpty()) candidates.add(new File(env));

@@ -54,10 +54,19 @@ jobs:
               btsn.common/target/host-runtime/btsn-infrastructure.jar \
               btsn.common.eventgenerators/target/jar-runtime/btsn-eventgenerators.jar \
               btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar \
+              tools/ant/lib/ant.jar \
+              tools/ant/lib/ant-launcher.jar \
+              tools/ant/LICENSE.txt \
+              tools/ant/NOTICE.txt \
+              btsn.common/InfrastructureDefinitionFolder/SingleHost.json \
               btsn.services/target/service-deployment.zip \
               btsn.petrinet.ProjectLoader/Remote_Payment_Test_BuildAndRun.xml; do
             unzip -Z1 "$archive" | grep -Fx "RPSO-v0.1.0/$required"
           done
+          if unzip -p "$archive" 'RPSO-v0.1.0/btsn.common/InfrastructureDefinitionFolder/SingleHost.json' | grep '192.168.1.82'; then
+            echo 'Release still contains the developer LAN address in SingleHost' >&2
+            exit 1
+          fi
           if unzip -Z1 "$archive" | grep -E '\.git/|release/dist/'; then
             echo 'Unexpected repository metadata or nested archives in release ZIP' >&2
             exit 1

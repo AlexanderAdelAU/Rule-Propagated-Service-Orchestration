@@ -3,7 +3,8 @@
     <description>
         Assemble a portable RPSO workspace with the compiled Process Editor,
         service libraries, orchestration hosts, launchers, examples and sources.
-        A JDK (15+) and Apache Ant (1.10.2+) are required to run or build workflows.
+        The ZIP includes Apache Ant so users only need a JDK (15+) to run workflows.
+        An Ant installation is needed to build the ZIP itself from source.
     </description>
 
     <property name="release.version" value="0.1.0"/>
@@ -32,7 +33,23 @@
         <fail unless="release.services.ready" message="Service deployment bundle not built"/>
     </target>
 
-    <target name="dist" depends="check" description="Produce the versioned Windows release ZIP">
+    <target name="prepare-ant" depends="check" description="Stage the build Ant runtime and its license notices">
+        <!-- The editor launches Ant directly from these two JARs. Reuse the Ant
+             that built the distribution to avoid a network dependency. -->
+        <available file="${ant.home}/lib/ant.jar" property="release.ant.core.ready"/>
+        <available file="${ant.home}/lib/ant-launcher.jar" property="release.ant.launcher.ready"/>
+        <fail unless="release.ant.core.ready" message="Distribution requires an Apache Ant installation with lib/ant.jar"/>
+        <fail unless="release.ant.launcher.ready" message="Distribution requires lib/ant-launcher.jar"/>
+        <mkdir dir="${release.output}/ant-notices"/>
+        <unzip src="${ant.home}/lib/ant.jar" dest="${release.output}/ant-notices">
+            <patternset>
+                <include name="META-INF/LICENSE.txt"/>
+                <include name="META-INF/NOTICE.txt"/>
+            </patternset>
+        </unzip>
+    </target>
+
+    <target name="dist" depends="prepare-ant" description="Produce the versioned Windows release ZIP">
         <mkdir dir="${release.output}"/>
         <!-- The complete workspace layout is required by the generated Ant launchers.
              In particular, do not reduce this to ProcessEditor.jar alone. -->
@@ -57,6 +74,12 @@
                 <exclude name="**/ServiceMonitorDatabase/**"/>
                 <exclude name="**/CollectionReceipts/**"/>
             </zipfileset>
+            <!-- Bundle just the core Ant runtime, not Eclipse or Ant's entire install.
+                 Include Apache's license and attribution extracted from ant.jar. -->
+            <zipfileset file="${ant.home}/lib/ant.jar" fullpath="${release.name}/tools/ant/lib/ant.jar"/>
+            <zipfileset file="${ant.home}/lib/ant-launcher.jar" fullpath="${release.name}/tools/ant/lib/ant-launcher.jar"/>
+            <zipfileset file="${release.output}/ant-notices/META-INF/LICENSE.txt" fullpath="${release.name}/tools/ant/LICENSE.txt"/>
+            <zipfileset file="${release.output}/ant-notices/META-INF/NOTICE.txt" fullpath="${release.name}/tools/ant/NOTICE.txt"/>
             <zipfileset file="release/README-FIRST.md" fullpath="${release.name}/README-FIRST.md"/>
         </zip>
         <echo message="Distribution ready: ${release.archive}"/>

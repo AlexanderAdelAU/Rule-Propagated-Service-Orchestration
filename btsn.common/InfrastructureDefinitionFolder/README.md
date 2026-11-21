@@ -41,12 +41,12 @@ open `SingleHost.json`. The **Fixed Base Ports** column lists the slots in order
 starting at zero. Editing an address updates all nodes on that channel. Save the
 physical definition once; every domain profile selects it.
 
-The default `ip0` address remains `192.168.1.82`. To run any supported launcher on
-one local computer, pass `-Dhost.address=127.0.0.1`. The P1 local tutorial wrapper
-supplies that setting automatically. Runtime preparation applies an explicit
-host override to its isolated copy of the shared definition and generates the
-matching RuleML; source configuration is preserved. Service choice does not
-select an address or allocate a port.
+The default `SingleHost.json` assigns `127.0.0.1` (the local computer) to every
+node. No network-address setup is needed to try the examples on one computer.
+The optional `-Dhost.address=127.0.0.1` override also works with older local
+configurations: runtime preparation applies it to an isolated copy of the
+physical definition and generates the matching RuleML; source configuration is
+preserved. Service choice does not select an address or allocate a port.
 
 The token generators use the infrastructure the run selects (`SingleHost` unless
 `-Dinfrastructure` names another). Each deployment profile selects this physical file and a [service deployment](../ServiceDeploymentFolder/README.md),

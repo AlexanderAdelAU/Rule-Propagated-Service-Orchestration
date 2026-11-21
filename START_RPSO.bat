@@ -24,12 +24,17 @@ if errorlevel 1 (
     goto :failed
 )
 
+if exist "%~dp0tools\ant\lib\ant-launcher.jar" if exist "%~dp0tools\ant\lib\ant.jar" (
+    set "ANT_HOME=%~dp0tools\ant"
+    goto :ant_ready
+)
 if defined ANT_HOME if exist "%ANT_HOME%\lib\ant-launcher.jar" goto :ant_ready
 where ant >nul 2>&1
 if errorlevel 1 (
     echo WARNING: Apache Ant was not found on PATH or in ANT_HOME.
     echo You can browse the editor, but Build and Run on hosts require Ant 1.10.2+.
-    echo Install Ant, or configure its folder in the editor's Run window.
+    echo This checkout has no bundled Ant. Install Ant, or configure its folder
+    echo in the editor's Run window. The release ZIP includes its own Ant.
     echo.
 )
 

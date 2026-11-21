@@ -89,9 +89,10 @@ public final class SharedInfrastructureCheck {
         System.out.println("PASS: a domain process places a standard service; a domain catalogue cannot redefine one");
 
         Path override = fixture(common, common.resolve("BusinessServiceDefinitions/Deployment.json"));
-        GenerateDeploymentRules.main(new String[]{override.toString(), "127.0.0.1"});
+        // Use a different loopback address: SingleHost now defaults to 127.0.0.1.
+        GenerateDeploymentRules.main(new String[]{override.toString(), "127.0.0.2"});
         DeploymentConfiguration config = new DeploymentConfiguration(override);
-        for (Object item : (JSONArray)config.infrastructure.get("nodes")) check("127.0.0.1".equals(((JSONObject)item).get("address")), "Host override not synchronized");
+        for (Object item : (JSONArray)config.infrastructure.get("nodes")) check("127.0.0.2".equals(((JSONObject)item).get("address")), "Host override not synchronized");
         new BusinessCapabilityResolver(override);
         JSONObject physical = config.infrastructure;
         ((JSONObject)((JSONArray)physical.get("nodes")).get(1)).put("address", "192.0.2.2");

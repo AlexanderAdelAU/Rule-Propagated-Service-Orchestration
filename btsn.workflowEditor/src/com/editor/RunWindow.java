@@ -74,7 +74,7 @@ public final class RunWindow extends JFrame {
             }
         });
         ant.setText(prefs.get(ANT_PREF, ""));
-        ant.setToolTipText("Ant's folder. Leave empty to use ANT_HOME, 'ant' on the PATH, or the Ant inside Eclipse (plugins/org.apache.ant_*).");
+        ant.setToolTipText("Normally leave blank: the release includes Ant. Also accepts ANT_HOME, Ant on PATH, or Eclipse's Ant.");
         JButton chooseAnt = new JButton("Choose...");
         chooseAnt.addActionListener(e -> chooseAnt());
 
