@@ -131,7 +131,7 @@ the next time you run).
   [Serve it from the internet](../ServiceTutorial.md#serve-it-from-the-internet).
 - **Point the place at it.** Click **Deploy**, put your address in **Service endpoint**, set **Wait up to**, save the
   deployment, then **Run on hosts** again.
-- **Shape the traffic.** Select `PAYMENTS`: **Rate (ms)** sets how often payments arrive, and **Token Data File Name** what
+- **Shape the traffic.** Select `PAYMENTS`: **Rate (ms)** sets how payments arrive (`1000` one a second, `0` all at once, or a pattern such as `1000 x10, 0 x12, 1000`), and **Token Data File Name** what
   each one carries (**Open...** shows it; **New...** starts your own). Then **Build → Create** and run. For bursts, see
   [Test a remote service in context](../ServiceTutorial.md#test-a-remote-service-in-context).
 - **Grow it.** Add the places around the service, such as a receipt after **Paid**: each is another Node in the same

@@ -2,7 +2,7 @@
 
 Run the one-step payment test from the README yourself, in about ten minutes, without drawing or typing anything. The
 process, its deployment and its launcher are all supplied: you open them, look at each part, make one real call to the
-payment service, see what Build would make, run the test on your machine and watch the recorded run.
+payment service, build it, run the test on your machine and watch the recorded run.
 
 **Before you start:** you need a JDK (15 or later), the repository's projects imported into Eclipse, and internet
 access. The payment service is a mock on Vercel: it declines every 8th payment, is unavailable for every 13th and too
@@ -21,7 +21,8 @@ slow for every 17th.
 
 Click each element and read its **Attributes** panel on the left. Nothing here needs changing.
 
-3. **`PAYMENTS`**, the event generator: it sends a payment every **1000 ms**. Its **Token Data File Name** is
+3. **`PAYMENTS`**, the event generator. Its **Rate (ms)** is `1000 x10, 0 x12, 1000`: ten payments a second apart,
+   then a burst of twelve at once, then one a second for the rest. Its **Token Data File Name** is
    `PaymentService.json`; click **Open...** to see the orders it sends (order 1 is groceries, 84.50 AUD, on a Visa
    card), then **Close**.
 4. **`T_in_Payment`**: an **EdgeNode** with a **Buffer** of 40, so payments can queue here when the service is slow.
@@ -43,15 +44,14 @@ Click each element and read its **Attributes** panel on the left. Nothing here n
 ## See what a run is made of
 
 10. Click **Build**. Its summary lists what a run uses: the launcher, the token schedule and the deployment profile,
-    the hosts it starts (`P1` and Monitor), and that every payment takes its data from `PaymentService.json`.
-    Then click **Cancel**. This test's launcher is supplied with a schedule that sends a burst of twelve payments, and
-    **Create** would replace it with steady traffic. When you build a process of your own, **Create** writes these
-    files for you.
+    the hosts it starts (`P1` and Monitor), the 30 payments (10 one every 1000 ms, 12 at once, then one every
+    1000 ms for the rest), and that every payment takes its data from `PaymentService.json`. Click **Create**: it
+    writes the launcher and its schedule from the process, the same as the ones supplied.
 
 ## Run it
 
 11. Check that **Machines** on the toolbar is `SingleHost`. Click **Run on hosts**, leave **Run every host on this
-    computer** ticked, and click **Run**. If it offers to build first, choose **Run as it was built**: the launcher is supplied.
+    computer** ticked, and click **Run**.
 12. Watch the steps across the top turn green, from **Build and start hosts** to **Replay**. The first run takes a
     few minutes, while the services are packaged; later runs are quicker. The test sends 30 payments: steady
     traffic, then a burst of twelve.

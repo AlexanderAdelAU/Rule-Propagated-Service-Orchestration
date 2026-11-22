@@ -208,20 +208,14 @@ public class EditorFrame extends JPanel {
             
             // Generator Rate (ms between tokens) - informational, used by external generator
             addField("Rate (ms):", freshRateField, element.getGeneratorRate());
+            freshRateField.setToolTipText(RATE_HELP);
             freshRateField.getDocument().addDocumentListener(new SimpleDocumentListener(() -> {
                 String rate = freshRateField.getText().trim();
-                // Validate it's a positive number
-                try {
-                    int rateVal = Integer.parseInt(rate);
-                    if (rateVal > 0) {
-                        freshRateField.setBackground(Color.WHITE);
-                        element.setGeneratorRate(rate);
-                    } else {
-                        freshRateField.setBackground(new Color(255, 200, 200));
-                    }
-                } catch (NumberFormatException e) {
-                    freshRateField.setBackground(new Color(255, 200, 200));
-                }
+                // An interval, or a pattern such as "1000 x10, 0 x12, 1000" (0 is a burst).
+                String why = TrafficPattern.why(rate);
+                freshRateField.setBackground(why == null ? Color.WHITE : new Color(255, 200, 200));
+                freshRateField.setToolTipText(why == null ? RATE_HELP : "<html>" + why + "<br><br>" + RATE_HELP.substring(6));
+                if (why == null) element.setGeneratorRate(rate);
                 freshRateField.repaint();
             }));
             
@@ -897,6 +891,12 @@ public class EditorFrame extends JPanel {
      */
     /** The button (and menu item) that keeps the standard catalogue or chooses or creates the domain's. */
     static final String CHOOSE_CREATE_CATALOGUE = "Choose/Create catalogue...";
+
+    /** How the generator's Rate (ms) is written. */
+    static final String RATE_HELP = "<html>How the tokens are spread in time:<br>"
+        + "<b>1000</b>: one every 1000 ms<br>"
+        + "<b>0</b>: all at once, a burst<br>"
+        + "<b>1000 x10, 0 x12, 1000</b>: 10 one a second, then 12 at once, then one a second for the rest</html>";
 
     private void addServiceSelection(ProcessElement element) {
         ServiceRegistry registry = canvas.getServiceRegistry();

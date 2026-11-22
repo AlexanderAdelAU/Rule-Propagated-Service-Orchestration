@@ -468,7 +468,7 @@ The supplied example tests a mock payment gateway,
 | The process: `PAYMENTS` → Payment (P1) → Paid or Declined | [`payments/Workflow/Remote_Payment_Test.json`](btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json) |
 | The placement: `rest` adapter, the endpoint, `"timeoutMs": 2500` | [`ServiceDeploymentFolder/payments/Remote_Payment_Test.json`](btsn.common/ServiceDeploymentFolder/payments/Remote_Payment_Test.json) |
 | The catalogue: `PaymentService.authorise`, with no Java class | [`payments/Payments.json`](btsn.common/BusinessServiceDefinitions/payments/Payments.json) |
-| The traffic: one a second for 10 s, a burst of 12 at once, then one a second again | [`Remote_Payment_Test_BuildAndRun.csv`](btsn.common.eventgenerators/EventTriggeringFile/Remote_Payment_Test_BuildAndRun.csv) |
+| The traffic: one a second for 10 s, a burst of 12 at once, then one a second again: the generator's **Rate (ms)**, `1000 x10, 0 x12, 1000` | The process; Build writes it into [`Remote_Payment_Test_BuildAndRun.csv`](btsn.common.eventgenerators/EventTriggeringFile/Remote_Payment_Test_BuildAndRun.csv) |
 | The launcher | [`Remote_Payment_Test_BuildAndRun.xml`](btsn.petrinet.ProjectLoader/Remote_Payment_Test_BuildAndRun.xml) |
 
 **What one run against Vercel told us** ([watch it](https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/docs/replay/?model=../../btsn.common/ProcessDefinitionFolder/payments/Workflow/Remote_Payment_Test.json&run=../../btsn.common/AnalysisFolder/Payments/Analysis_Remote_Payment_Test.txt)):
@@ -489,8 +489,9 @@ The supplied example tests a mock payment gateway,
 
 1. Put its address in the placement's `endpoint`, or in the editor's Deploy panel.
 2. Set **Wait up to** (`timeoutMs`) to the longest wait you will accept.
-3. Shape the traffic in the CSV: one row per payment, `time_ms,0,1`, where `time_ms` is when to send it.
-   Run the launcher itself (or **Run on hosts**), not **Build → Create**, which would replace the schedule with a steady one.
+3. Shape the traffic with the event generator's **Rate (ms)**: `1000` sends one a second, `0` sends them all at once,
+   and a pattern such as `1000 x10, 0 x12, 1000` sends ten a second apart, a burst of twelve, then one a second.
+   **Build → Create** writes the schedule from it.
 4. Run it: open the process in the editor and click **Run on hosts**, then **Run**; the Run window analyses the run and
    offers **▶ Replay the recorded run**. Or run the launcher, then its `analyse` target.
 
