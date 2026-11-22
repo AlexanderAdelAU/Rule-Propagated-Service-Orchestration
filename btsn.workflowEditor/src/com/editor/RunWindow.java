@@ -15,7 +15,7 @@ import javax.swing.*;
 public final class RunWindow extends JFrame {
     private static final String ANT_PREF = "antCommand";
     private static final int MAX_CONSOLE_CHARS = 400_000;
-    private final Preferences prefs = Preferences.userNodeForPackage(RunWindow.class);
+    private final Preferences prefs = ServiceRegistry.scopedPreferences(RunWindow.class);
     private final File root;
     private final String processName;
     private final Consumer<File> onAnalysis;
@@ -74,7 +74,7 @@ public final class RunWindow extends JFrame {
             }
         });
         ant.setText(prefs.get(ANT_PREF, ""));
-        ant.setToolTipText("Ant's folder. Leave empty to use ANT_HOME, 'ant' on the PATH, or the Ant inside Eclipse (plugins/org.apache.ant_*).");
+        ant.setToolTipText("Normally leave blank: the release includes Ant. Also accepts ANT_HOME, Ant on PATH, or Eclipse's Ant.");
         JButton chooseAnt = new JButton("Choose...");
         chooseAnt.addActionListener(e -> chooseAnt());
 
@@ -205,7 +205,7 @@ public final class RunWindow extends JFrame {
 
     /** The Ant folder chosen in this window (empty: ANT_HOME, the PATH or Eclipse's Ant); Build uses it too. */
     static String antCommand() {
-        return Preferences.userNodeForPackage(RunWindow.class).get(ANT_PREF, "");
+        return ServiceRegistry.scopedPreferences(RunWindow.class).get(ANT_PREF, "");
     }
 
     void startRun() {

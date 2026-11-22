@@ -522,6 +522,25 @@ public final class ServiceRegistry {
     private static final String INFRASTRUCTURE_PREF = "infrastructure";
 
     /**
+     * A release ZIP is an independent workspace. Use preferences specific to its
+     * extracted directory so a previous checkout's MultiHost choice (or Ant
+     * installation) cannot silently become a new user's first-run default.
+     * Source checkouts launched without the release flag retain their historic
+     * user preferences; restarting the same release remembers its choices.
+     */
+    static java.util.prefs.Preferences scopedPreferences(Class<?> owner) {
+        java.util.prefs.Preferences preferences = java.util.prefs.Preferences.userNodeForPackage(owner);
+        String releaseRoot = System.getProperty("rpso.distribution.root", "").trim();
+        if (releaseRoot.isEmpty()) return preferences;
+        File directory = new File(releaseRoot);
+        try { releaseRoot = directory.getCanonicalPath(); }
+        catch (IOException ex) { releaseRoot = directory.getAbsolutePath(); }
+        if (File.separatorChar == '\\') releaseRoot = releaseRoot.toLowerCase(Locale.ROOT);
+        String identity = UUID.nameUUIDFromBytes(releaseRoot.getBytes(StandardCharsets.UTF_8)).toString();
+        return preferences.node("release-installations").node(identity);
+    }
+
+    /**
      * The machines the editor shows places on and runs them on: the name of an infrastructure definition in
      * InfrastructureDefinitionFolder (SingleHost, TwoHost, ...). A process's deployment only names nodes; this
      * choice gives the nodes their addresses. -Drpso.infrastructure=Name overrides it (used by the checks).
@@ -529,7 +548,7 @@ public final class ServiceRegistry {
     public static String selectedInfrastructure() {
         String forced = System.getProperty("rpso.infrastructure");
         if (forced != null && !forced.trim().isEmpty()) return forced.trim();
-        return java.util.prefs.Preferences.userNodeForPackage(ServiceRegistry.class).get(INFRASTRUCTURE_PREF, DEFAULT_INFRASTRUCTURE);
+        return scopedPreferences(ServiceRegistry.class).get(INFRASTRUCTURE_PREF, DEFAULT_INFRASTRUCTURE);
     }
     private static final List<Runnable> INFRASTRUCTURE_LISTENERS = new java.util.concurrent.CopyOnWriteArrayList<>();
     /** Told when the chosen machines change, wherever they were chosen (toolbar, Open or Save of a definition). */
@@ -538,7 +557,7 @@ public final class ServiceRegistry {
     public static void selectInfrastructure(String name) {
         String chosen = name == null || name.trim().isEmpty() ? DEFAULT_INFRASTRUCTURE : name.trim();
         boolean changed = !chosen.equals(selectedInfrastructure());
-        java.util.prefs.Preferences.userNodeForPackage(ServiceRegistry.class).put(INFRASTRUCTURE_PREF, chosen);
+        scopedPreferences(ServiceRegistry.class).put(INFRASTRUCTURE_PREF, chosen);
         if (changed) for (Runnable listener : INFRASTRUCTURE_LISTENERS) listener.run();
     }
     /**

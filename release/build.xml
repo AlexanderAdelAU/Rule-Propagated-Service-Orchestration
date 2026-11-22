@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="RPSO-distribution" default="dist" basedir="..">
+    <description>
+        Assemble a portable RPSO workspace with the compiled Process Editor,
+        service libraries, orchestration hosts, launchers, examples and sources.
+        The ZIP includes Apache Ant so users only need a JDK (15+) to run workflows.
+        An Ant installation is needed to build the ZIP itself from source.
+    </description>
+
+    <property name="release.version" value="0.1.0"/>
+    <property name="release.name" value="RPSO-v${release.version}"/>
+    <property name="release.output" location="release/dist"/>
+    <property name="release.archive" location="${release.output}/${release.name}-Windows.zip"/>
+
+    <target name="build" description="Compile the editor and shared RPSO runtime">
+        <ant antfile="btsn.services/build.xml" target="build-workflow-runtime" inheritall="false"/>
+        <ant antfile="btsn.workflowEditor/build.xml" target="clean" inheritall="false"/>
+        <ant antfile="btsn.workflowEditor/build.xml" target="jar" inheritall="false"/>
+    </target>
+
+    <target name="check" depends="build" description="Verify all runtime artifacts before distribution">
+        <available file="btsn.workflowEditor/dist/ProcessEditor.jar" property="release.editor.ready"/>
+        <available file="btsn.rpso.host/target/btsn.rpso.host.jar" property="release.host.ready"/>
+        <available file="btsn.common/target/host-runtime/btsn-infrastructure.jar" property="release.infrastructure.ready"/>
+        <available file="btsn.common.eventgenerators/target/jar-runtime/btsn-eventgenerators.jar" property="release.generators.ready"/>
+        <available file="btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar" property="release.monitor.ready"/>
+        <available file="btsn.services/target/service-deployment.zip" property="release.services.ready"/>
+        <fail unless="release.editor.ready" message="Process Editor JAR not built"/>
+        <fail unless="release.host.ready" message="Orchestration host JAR not built"/>
+        <fail unless="release.infrastructure.ready" message="Infrastructure JAR not built"/>
+        <fail unless="release.generators.ready" message="Event generator JAR not built"/>
+        <fail unless="release.monitor.ready" message="Monitor JAR not built"/>
+        <fail unless="release.services.ready" message="Service deployment bundle not built"/>
+    </target>
+
+    <target name="prepare-ant" depends="check" description="Stage the build Ant runtime and its license notices">
+        <!-- The editor launches Ant directly from these two JARs. Reuse the Ant
+             that built the distribution to avoid a network dependency. -->
+        <available file="${ant.home}/lib/ant.jar" property="release.ant.core.ready"/>
+        <available file="${ant.home}/lib/ant-launcher.jar" property="release.ant.launcher.ready"/>
+        <fail unless="release.ant.core.ready" message="Distribution requires an Apache Ant installation with lib/ant.jar"/>
+        <fail unless="release.ant.launcher.ready" message="Distribution requires lib/ant-launcher.jar"/>
+        <mkdir dir="${release.output}/ant-notices"/>
+        <unzip src="${ant.home}/lib/ant.jar" dest="${release.output}/ant-notices">
+            <patternset>
+                <include name="META-INF/LICENSE.txt"/>
+                <include name="META-INF/NOTICE.txt"/>
+            </patternset>
+        </unzip>
+    </target>
+
+    <target name="dist" depends="prepare-ant" description="Produce the versioned Windows release ZIP">
+        <mkdir dir="${release.output}"/>
+        <!-- The complete workspace layout is required by the generated Ant launchers.
+             In particular, do not reduce this to ProcessEditor.jar alone. -->
+        <zip destfile="${release.archive}" level="6" encoding="UTF-8">
+            <zipfileset dir="${basedir}" prefix="${release.name}">
+                <exclude name=".git/**"/>
+                <exclude name=".github/**"/>
+                <exclude name=".gitignore"/>
+                <exclude name="release/dist/**"/>
+                <exclude name="release/README-FIRST.md"/>
+                <exclude name="btsn.workflowEditor/build/**"/>
+                <exclude name="btsn.services/target/tools/**"/>
+                <exclude name="btsn.services/target/inventory/**"/>
+                <exclude name="btsn.services/target/launchers/**"/>
+                <exclude name="btsn.services/target/tutorial-results/**"/>
+                <exclude name="**/*.running"/>
+                <exclude name="**/*.log"/>
+                <exclude name="**/*.log.*"/>
+                <exclude name="**/*.out"/>
+                <exclude name="**/*.out.*"/>
+                <exclude name="**/ServiceAnalysisDataBase/**"/>
+                <exclude name="**/ServiceMonitorDatabase/**"/>
+                <exclude name="**/CollectionReceipts/**"/>
+            </zipfileset>
+            <!-- Bundle just the core Ant runtime, not Eclipse or Ant's entire install.
+                 Include Apache's license and attribution extracted from ant.jar. -->
+            <zipfileset file="${ant.home}/lib/ant.jar" fullpath="${release.name}/tools/ant/lib/ant.jar"/>
+            <zipfileset file="${ant.home}/lib/ant-launcher.jar" fullpath="${release.name}/tools/ant/lib/ant-launcher.jar"/>
+            <zipfileset file="${release.output}/ant-notices/META-INF/LICENSE.txt" fullpath="${release.name}/tools/ant/LICENSE.txt"/>
+            <zipfileset file="${release.output}/ant-notices/META-INF/NOTICE.txt" fullpath="${release.name}/tools/ant/NOTICE.txt"/>
+            <zipfileset file="release/README-FIRST.md" fullpath="${release.name}/README-FIRST.md"/>
+        </zip>
+        <echo message="Distribution ready: ${release.archive}"/>
+    </target>
+</project>

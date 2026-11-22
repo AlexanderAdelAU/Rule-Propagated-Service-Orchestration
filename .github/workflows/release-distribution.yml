@@ -1,0 +1,81 @@
+name: Build experimental RPSO distribution
+
+on:
+  push:
+    branches:
+      - 'release/**'
+  pull_request:
+    paths:
+      - 'release/**'
+      - 'START_RPSO.bat'
+      - 'btsn.*/**'
+      - '.github/workflows/release-distribution.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-zip:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out release candidate
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install Ant
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes ant
+
+      - name: Compile and assemble distribution
+        run: ant -noinput -f release/build.xml dist
+
+      - name: Check package layout and archive integrity
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive=release/dist/RPSO-v0.1.0-Windows.zip
+          test -s "$archive"
+          unzip -tq "$archive"
+          for required in \
+              START_RPSO.bat \
+              README-FIRST.md \
+              btsn.workflowEditor/dist/ProcessEditor.jar \
+              btsn.rpso.host/target/btsn.rpso.host.jar \
+              btsn.common/target/host-runtime/btsn-infrastructure.jar \
+              btsn.common.eventgenerators/target/jar-runtime/btsn-eventgenerators.jar \
+              btsn.common.Monitor/target/jar-runtime/btsn-monitor.jar \
+              tools/ant/lib/ant.jar \
+              tools/ant/lib/ant-launcher.jar \
+              tools/ant/LICENSE.txt \
+              tools/ant/NOTICE.txt \
+              btsn.common/InfrastructureDefinitionFolder/SingleHost.json \
+              btsn.services/target/service-deployment.zip \
+              btsn.petrinet.ProjectLoader/Remote_Payment_Test_BuildAndRun.xml; do
+            unzip -Z1 "$archive" | grep -Fx "RPSO-v0.1.0/$required"
+          done
+          if unzip -p "$archive" 'RPSO-v0.1.0/btsn.common/InfrastructureDefinitionFolder/SingleHost.json' | grep '192.168.1.82'; then
+            echo 'Release still contains the developer LAN address in SingleHost' >&2
+            exit 1
+          fi
+          if unzip -Z1 "$archive" | grep -E '\.git/|release/dist/'; then
+            echo 'Unexpected repository metadata or nested archives in release ZIP' >&2
+            exit 1
+          fi
+
+      - name: Upload package for manual testing
+        uses: actions/upload-artifact@v7
+        with:
+          name: rpso-v0.1.0-windows-candidate
+          path: release/dist/RPSO-v0.1.0-Windows.zip
+          if-no-files-found: error
+          retention-days: 14
