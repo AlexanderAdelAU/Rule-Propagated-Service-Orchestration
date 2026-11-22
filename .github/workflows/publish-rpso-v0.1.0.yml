@@ -1,7 +1,7 @@
 name: Publish RPSO v0.1.0 Windows Release
 
 # The first merge of this workflow onto main publishes the initial release.
-# A manual rerun is safe: an existing v0.1.0 release is left untouched.
+# A manual rerun refreshes release notes without replacing the published ZIP.
 on:
   push:
     branches:
@@ -70,7 +70,10 @@ jobs:
         run: |
           set -euo pipefail
           if gh release view v0.1.0 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo 'Release v0.1.0 already exists; no change made.'
+            echo 'Release v0.1.0 exists; updating the public notes without replacing its ZIP.'
+            gh release edit v0.1.0 \
+              --repo "$GITHUB_REPOSITORY" \
+              --notes-file release/RELEASE-NOTES-v0.1.0.md
             exit 0
           fi
           gh release create v0.1.0 \
@@ -78,12 +81,4 @@ jobs:
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
             --title 'RPSO v0.1.0 — Windows Distribution' \
-            --notes 'First experimental Windows distribution of Rule-Propagated Service Orchestration (RPSO).
-
-          Includes Process Editor, orchestration hosts, Monitor, example workflows, launchers and bundled Apache Ant.
-
-          Orchestration hosts default to SingleHost (127.0.0.1); test business services hosted on Vercel remain remote. Multi-host orchestration is available by explicit configuration.
-
-          Requirements: Windows and JDK 17 or 21. Extract the entire ZIP, then double-click START_RPSO.bat. See README-FIRST.md in the archive for the illustrated payment-test walkthrough.
-
-          Research and design software, not a production workflow engine. Use test data only.'
+            --notes-file release/RELEASE-NOTES-v0.1.0.md
