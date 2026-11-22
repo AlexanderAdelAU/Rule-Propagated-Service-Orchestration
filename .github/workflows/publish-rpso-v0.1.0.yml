@@ -8,6 +8,7 @@ on:
       - main
     paths:
       - '.github/workflows/publish-rpso-v0.1.0.yml'
+      - 'release/RELEASE-NOTES-v0.1.0.md'
   workflow_dispatch:
 
 permissions:
