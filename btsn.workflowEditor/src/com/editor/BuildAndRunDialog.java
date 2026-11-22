@@ -211,7 +211,8 @@ public final class BuildAndRunDialog extends JDialog {
                 "Created " + launcher.getName() + " in " + o.folder.getName() + ".\n\n"
                 + "Run it from Eclipse (right-click > Run As > Ant Build) or with:\n"
                 + "    ant -f " + launcher.getName() + "\n"
-                + "Add -Dhost.address=127.0.0.1 to run every host on this machine.\n"
+                + "Default: SingleHost (all orchestration hosts on 127.0.0.1).\n"
+                + "For other machines, configure their infrastructure and pass -Dinfrastructure=Name.\n"
                 + "Afterwards:  ant -f " + launcher.getName() + " analyse\n\n"
                 + String.join("\n", lines),
                 "Build and Run created", JOptionPane.INFORMATION_MESSAGE);

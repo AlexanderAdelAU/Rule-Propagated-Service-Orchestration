@@ -10,11 +10,12 @@
      committed (about halfway through v001) the need for P6 is assumed and EG2 fires 30 v002 tokens while v001 is
      still firing. Nothing about v002 exists before its publication: it is compiled then, not at the start.
      The [LIVE] lines give the times v002's publish started, every host had committed it, and its first token.
-     On ThreeHost: P1, P4 on 192.168.1.82 (this launcher); P2 on 192.168.1.152; P3, P6 on 192.168.1.90.
+     Default: all hosts run locally on 127.0.0.1 (SingleHost).
      Run:      ant -f P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml
-     Packages: ant -f P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml host-packages   (…_P2.zip for .152, …_P3P6.zip for .90)
+     For ThreeHost: configure the actual IPs in ThreeHost.json, then pass -Dinfrastructure=ThreeHost.
+     Packages: ant -f P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml -Dinfrastructure=ThreeHost host-packages
      Analyse:  ant -f P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange.xml analyse
-     One machine: add -Dinfrastructure=SingleHost -Dhost.address=127.0.0.1 -->
+     Remote REST services remain at their deployment-configured endpoints. -->
 <project name="P1_P2_P3_P4_ForkRebalance_Workflow_LiveChange" default="run-complete-workflow" basedir=".">
     <property name="process.title" value="petrinet/LiveChange/P1_P2_P3_P4_ForkRebalance_Workflow (v001, then v002 published live)"/>
     <property name="launcher.profile.file" location="../btsn.services/deployments/models/P1_P2_P3_P4_ForkRebalance_WorkflowDeployment.json"/>
@@ -44,8 +45,8 @@
     <property name="token.count" value="90"/>
     <property name="workflow.completion.seconds" value="30"/>
 
-    <!-- The machines: InfrastructureDefinitionFolder/ThreeHost.json -->
-    <property name="infrastructure" value="ThreeHost"/>
+    <!-- Infrastructure defaults to SingleHost, like every other launcher.
+         Explicitly pass -Dinfrastructure=ThreeHost for a distributed run. -->
 
     <!-- Hosts used by either version; P6 is the standby -->
     <property name="hosts" value="P1,P2,P3,P4,P6"/>

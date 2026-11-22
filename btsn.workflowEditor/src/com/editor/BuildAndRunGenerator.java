@@ -418,9 +418,9 @@ public final class BuildAndRunGenerator {
         x.append("     The shared phases live in btsn.services/process-runtime.xml; regenerate this file rather than editing the phases here.\n");
         String machines = ServiceRegistry.selectedInfrastructure();
         boolean single = ServiceRegistry.DEFAULT_INFRASTRUCTURE.equals(machines);
-        if (single) x.append("     Run:     ant -f ").append(xml(plan.launcher(o).getName())).append("        (add -Dhost.address=127.0.0.1 to run every host on this machine)\n");
-        else x.append("     Hosts:   ant -f ").append(xml(plan.launcher(o).getName())).append(" host-packages   (start each package on its machine first)\n")
-              .append("     Run:     ant -f ").append(xml(plan.launcher(o).getName())).append("        (on ").append(xml(machines)).append("; -Dinfrastructure=SingleHost runs on one machine)\n");
+        if (single) x.append("     Run:     ant -f ").append(xml(plan.launcher(o).getName())).append("        (SingleHost / 127.0.0.1 by default)\n");
+        else x.append("     Hosts:   ant -f ").append(xml(plan.launcher(o).getName())).append(" -Dinfrastructure=").append(xml(machines)).append(" host-packages   (start each package on its machine first)\n")
+              .append("     Run:     ant -f ").append(xml(plan.launcher(o).getName())).append(" -Dinfrastructure=").append(xml(machines)).append("        (omit -Dinfrastructure for local SingleHost)\n");
         x.append("     Analyse: ant -f ").append(xml(plan.launcher(o).getName())).append(" analyse -->\n");
         x.append("<project name=\"").append(xml(name)).append("\" default=\"run-complete-workflow\" basedir=\".\">\n");
         x.append("    <property name=\"process.title\" value=\"").append(xml(plan.processName)).append("\"/>\n");
