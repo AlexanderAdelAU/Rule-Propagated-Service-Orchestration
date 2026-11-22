@@ -252,7 +252,7 @@ public final class DeployFlowCheck {
                 boolean endpointColumn = false;
                 for (int c = 0; c < table.getColumnCount(); c++) endpointColumn |= "Service endpoint".equals(table.getColumnName(c));
                 check(endpointColumn, "No Service endpoint column");
-                check("192.168.1.82:4001".equals(table.getValueAt(0, 2)), "Credit host address: " + table.getValueAt(0, 2));
+                check("127.0.0.1:4001".equals(table.getValueAt(0, 2)), "Credit host address: " + table.getValueAt(0, 2));
                 check(!((JTable)field(panel, "nodeNetworkTable")).isShowing(), "Hosts table still shown when deploying a process");
                 for (AbstractButton b : buttons(panel.getContentPane()))
                     if (b.getText().endsWith("capability") || b.getText().contains("catalogue") || b.getText().startsWith("Choose infrastructure"))

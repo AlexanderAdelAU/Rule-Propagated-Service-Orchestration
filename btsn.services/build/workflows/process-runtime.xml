@@ -360,7 +360,8 @@
         <echo message="-Dworkflow.completion.seconds=N  collect after N s at the latest, before the lifetimes run out"/>
         <echo message="-Drun.timeout.ms=MS      stop the hosts after this long in any case (default ${run.timeout.ms})"/>
         <echo message="-Dcollection.limit.seconds=N  how long Monitor may take to store every host's records (default ${collection.limit.seconds})"/>
-        <echo message="-Dhost.address=127.0.0.1 run every host on this machine"/>
+        <echo message="Default: SingleHost runs every orchestration host locally (127.0.0.1)"/>
+        <echo message="-Dhost.address=A.B.C.D  optional single-host override for a custom local address"/>
         <echo message="-Dp1.mode=local|remote   start or skip a host, e.g. -Dp7.mode=remote (default auto)"/>
         <echo message="-Dinfrastructure=MultiHost  use InfrastructureDefinitionFolder/MultiHost.json"/>
         <echo message="ant host-packages        package the hosts on other machines, one package per machine"/>

@@ -17,6 +17,13 @@ Use test services and test data, not live financial or clinical workloads.
   box empty in the editor; only select a folder if deliberately using your own Ant.
 - Network access to a test REST service for the supplied payment example.
 
+By default, **all RPSO orchestration hosts run on this computer** (`SingleHost`,
+`127.0.0.1`), across the example workflows and generated launchers. This does
+not relocate the business services they call: the payment, credit and claims
+examples still contact their configured remote REST endpoints on Vercel.
+To distribute the orchestration hosts themselves, explicitly select a
+multi-host infrastructure and configure that infrastructure's addresses.
+
 ## Run the included payment test
 
 1. Unzip the **entire** distribution into a normal, writable folder, for

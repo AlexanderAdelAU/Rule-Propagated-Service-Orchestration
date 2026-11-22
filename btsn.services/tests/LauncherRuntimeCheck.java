@@ -22,6 +22,15 @@ public final class LauncherRuntimeCheck {
         for(Path build:builds) {
             javax.xml.parsers.DocumentBuilderFactory factory=javax.xml.parsers.DocumentBuilderFactory.newInstance();
             org.w3c.dom.Document xml=factory.newDocumentBuilder().parse(build.toFile());
+            // Every checked-in launcher starts on SingleHost unless a caller explicitly
+            // opts into a network infrastructure with -Dinfrastructure=Name.
+            org.w3c.dom.NodeList properties=xml.getElementsByTagName("property");
+            for(int property=0;property<properties.getLength();property++) {
+                org.w3c.dom.Element setting=(org.w3c.dom.Element)properties.item(property);
+                if("infrastructure".equals(setting.getAttribute("name")))
+                    check("SingleHost".equals(setting.getAttribute("value")) || setting.getAttribute("value").isEmpty(),
+                        "Launcher defaults to a remote infrastructure: "+build);
+            }
             org.w3c.dom.NodeList tasks=xml.getElementsByTagName("java");
             for(int task=0;task<tasks.getLength();task++) {
                 org.w3c.dom.Element java=(org.w3c.dom.Element)tasks.item(task);
@@ -133,7 +142,7 @@ public final class LauncherRuntimeCheck {
             System.out.println("PASS: "+root.relativize(build));
         }
         check(before.equals(sourceConfiguration(root)),"Launcher preparation changed source deployment or workflow configuration");
-        System.out.println("PASS: "+builds.size()+" real Ant entry points, JAR-only classpaths, isolated domain profiles, process paths, unchanged source configuration and "+operations+" workflow capability contracts");
+        System.out.println("PASS: "+builds.size()+" local-first Ant entry points, JAR-only classpaths, isolated domain profiles, process paths, unchanged source configuration and "+operations+" workflow capability contracts");
     }
     private static JSONObject json(Path p) throws Exception { return (JSONObject)new JSONParser().parse(Files.readString(p)); }
     private static java.util.Map<Path,String> sourceConfiguration(Path root) throws Exception {
