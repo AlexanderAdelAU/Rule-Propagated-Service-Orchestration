@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use RPSO in your work, please cite it using this metadata."
+title: "Rule-Propagated Service Orchestration (RPSO)"
+type: software
+authors:
+  - family-names: Cameron
+    given-names: Alexander
+doi: 10.5281/zenodo.24463352
+repository-code: "https://github.com/AlexanderAdelAU/Rule-Propagated-Service-Orchestration"
+url: "https://alexanderadelau.github.io/Rule-Propagated-Service-Orchestration/"
+abstract: >-
+  RPSO uses Petri net concepts to orchestrate ordinary callable services as a
+  formally defined, distributed system, with no central engine.
+keywords:
+  - petri-nets
+  - service-orchestration
+  - workflow
+  - distributed-systems
